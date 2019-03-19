@@ -28,7 +28,7 @@ public class TokensService
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         nextSelection = null;
         loaded = false;
-        networkFilter = new ArrayList<>();
+        networkFilter = new ArrayList<>(10);
     }
 
     /**
@@ -263,7 +263,8 @@ public class TokensService
     private void setupFilter()
     {
         networkFilter.clear();
-        for (int id : ethereumNetworkRepository.getFilterNetworkList()) networkFilter.add(id);
+        int[] filterIds = ethereumNetworkRepository.getFilterNetworkList();
+        for (int id : filterIds) networkFilter.add(id);
     }
 
     public ContractType getInterfaceSpec(int chainId, String address)

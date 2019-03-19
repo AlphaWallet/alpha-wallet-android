@@ -97,6 +97,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        QrUrlResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
         myAddress = wallet.address;
 
         setupTokenContent();
@@ -108,6 +109,12 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         } else {
             //currently we don't evaluate ERC20 token value. TODO: Should we?
             amountInput = new AmountEntryItem(this, tokenRepository, symbol, false, token.tokenInfo.chainId);
+        }
+
+        if (result != null)
+        {
+            //restore payment request
+            validateEIP681Request(result);
         }
     }
 
@@ -266,8 +273,8 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         {
             //chain ID indicator
             Utils.setChainColour(chainName, result.chainId);
+            chainName.setText(viewModel.getChainName(result.chainId));
         }
-
         if (result.getFunction().length() == 0 && !sendingTokens)
         {
             //correct chain and asset type
@@ -276,6 +283,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             TextView sendText = findViewById(R.id.text_payment_request);
             sendText.setVisibility(View.VISIBLE);
             sendText.setText(R.string.transfer_request);
+            toAddressEditText.setText(result.getAddress());
         }
         else if (result.getFunction().length() > 0 && result.getAddress().equals(token.getAddress()))
         {
@@ -363,7 +371,11 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         tokenBalanceText.setText(value);
 
         tokenBalanceText.setVisibility(View.VISIBLE);
-        if (token != null) Utils.setChainColour(chainName, token.tokenInfo.chainId);
+        if (token != null)
+        {
+            Utils.setChainColour(chainName, token.tokenInfo.chainId);
+            chainName.setText(viewModel.getChainName(token.tokenInfo.chainId));
+        }
     }
 
     @Override

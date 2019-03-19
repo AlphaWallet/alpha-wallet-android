@@ -252,6 +252,8 @@ public class AmountEntryItem
         if (ticker != null && ticker.price_usd != null)
         {
             currentEthPrice = Double.valueOf(ticker.price_usd);
+            //now update UI
+            setAmount(amountEditText.getText().toString());
         }
     }
 

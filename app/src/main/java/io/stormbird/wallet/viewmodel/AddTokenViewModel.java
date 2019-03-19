@@ -4,13 +4,17 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
+import android.content.Intent;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
+import io.stormbird.wallet.ui.AddTokenActivity;
+import io.stormbird.wallet.ui.SendActivity;
 
 public class AddTokenViewModel extends BaseViewModel {
 
@@ -154,5 +158,19 @@ public class AddTokenViewModel extends BaseViewModel {
     public void prepare()
     {
         findDefaultNetwork();
+    }
+
+    public void showSend(Context ctx, QrUrlResult result)
+    {
+        Intent intent = new Intent(ctx, SendActivity.class);
+        intent.putExtra(C.EXTRA_SENDING_TOKENS, false);
+        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, wallet.getValue().address);
+        intent.putExtra(C.EXTRA_SYMBOL, findDefaultNetworkInteract.getNetworkInfo(result.chainId).symbol);
+        intent.putExtra(C.EXTRA_DECIMALS, 18);
+        intent.putExtra(C.Key.WALLET, wallet.getValue());
+        intent.putExtra(C.EXTRA_TOKEN_ID, tokensService.getToken(result.chainId, wallet.getValue().address));
+        intent.putExtra(C.EXTRA_AMOUNT, result);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        ctx.startActivity(intent);
     }
 }

@@ -21,6 +21,7 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
+import io.stormbird.wallet.entity.QrUrlResult;
 import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.util.QRURLParser;
@@ -161,7 +162,30 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                     }
 
                     QRURLParser parser = QRURLParser.getInstance();
-                    String extracted_address = parser.extractAddressFromQrString(barcode);
+                    QrUrlResult result = parser.parse(barcode);
+
+                    String extracted_address = null;
+
+                    if (result != null)
+                    {
+                        extracted_address = result.getAddress();
+                        switch (result.getProtocol())
+                        {
+                            case "address":
+                                break;
+                            case "ethereum":
+                                //EIP681 protocol
+                                if (result.chainId != 0 && extracted_address != null)
+                                {
+                                    //this is a payment request
+                                    finishAndLaunchSend(result);
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
                     if (extracted_address == null) {
                         Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
                         return;
@@ -176,6 +200,13 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void finishAndLaunchSend(QrUrlResult result)
+    {
+        //launch send payment screen
+        viewModel.showSend(this, result);
+        finish();
     }
 
     private void onSaved(boolean result)

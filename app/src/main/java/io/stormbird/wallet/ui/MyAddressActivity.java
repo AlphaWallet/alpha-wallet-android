@@ -159,15 +159,14 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         switch (item.getItemId())
         {
             case R.id.action_receive_payment: {
-                if (selectAddress.getVisibility() == View.VISIBLE)
+                switch (currentMode)
                 {
-                    showPointOfSaleMode();
-                    currentMode = MODE_POS;
-                }
-                else
-                {
-                    showAddress();
-                    currentMode = MODE_ADDRESS;
+                    case MODE_ADDRESS:
+                        showPointOfSaleMode();
+                        break;
+                    case MODE_POS:
+                        showAddress();
+                        break;
                 }
                 break;
             }
@@ -180,6 +179,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         //Generate QR link for receive payment.
         //Initially just generate simple payment.
         //need ticker so user can see how much $USD the value is
+        currentMode = MODE_POS;
         selectAddress.setVisibility(View.GONE);
         inputAmount.setVisibility(View.VISIBLE);
         amountInput = new AmountEntryItem(
@@ -193,6 +193,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     }
 
     private void showAddress() {
+        currentMode = MODE_ADDRESS;
         selectNetworkLayout.setVisibility(View.GONE);
         if (getCurrentFocus() != null) {
             KeyboardUtils.hideKeyboard(getCurrentFocus());
@@ -207,18 +208,17 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     }
 
     private void selectNetwork() {
-        SelectNetworkDialog dialog = new SelectNetworkDialog(this, viewModel.getNetworkList(), networkInfo.name);
+        SelectNetworkDialog dialog = new SelectNetworkDialog(this, viewModel.getNetworkList(), networkInfo.name, true);
         dialog.setOnClickListener(v1 -> {
             viewModel.setNetwork(dialog.getSelectedItem());
 
             // restart activity
             if (!networkInfo.name.equals(dialog.getSelectedItem())) {
                 Intent intent = getIntent();
-                intent.putExtra(KEY_MODE, currentMode);
+                intent.putExtra(KEY_MODE, MODE_POS);
                 finish();
                 startActivity(intent);
             }
-            sendBroadcast(new Intent(RESET_WALLET));
             dialog.dismiss();
         });
         dialog.show();

@@ -94,18 +94,13 @@ public class NewSettingsFragment extends Fragment {
 
         final LinearLayout layoutSwitchnetworks = view.findViewById(R.id.layout_switch_network);
         layoutSwitchnetworks.setOnClickListener(v -> {
-            String currentNetwork = viewModel.getDefaultNetworkInfo().name;
-            SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), viewModel.getNetworkList(), currentNetwork);
+            SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), viewModel.getNetworkList(), viewModel.getFilterNetworkList(), false);
             dialog.setOnClickListener(v1 -> {
-                viewModel.setNetwork(dialog.getSelectedItem());
-                networksSubtext.setText(dialog.getSelectedItem());
-                if (!currentNetwork.equals(dialog.getSelectedItem())) {
-                    viewModel.showHome(getContext(), true, true);
-                }
-                getActivity().sendBroadcast(new Intent(RESET_WALLET));
+                viewModel.setFilterNetworks(dialog.getSelectedItems());
                 dialog.dismiss();
             });
             dialog.show();
+            dialog.setTitle(R.string.select_network_filters);
         });
 
         final LinearLayout layoutSwitchLocale = view.findViewById(R.id.layout_locale_lang);

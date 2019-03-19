@@ -9,6 +9,8 @@ import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import io.stormbird.wallet.entity.LocaleItem;
@@ -27,6 +29,7 @@ import io.stormbird.wallet.router.ManageWalletsRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.util.LocaleUtils;
+import io.stormbird.wallet.util.Utils;
 
 public class NewSettingsViewModel extends BaseViewModel {
     private static final long GET_BALANCE_INTERVAL = 10 * DateUtils.SECOND_IN_MILLIS;
@@ -122,6 +125,37 @@ public class NewSettingsViewModel extends BaseViewModel {
             networkList[ii] = networks[ii].name;
         }
         return networkList;
+    }
+
+    public String getFilterNetworkList() {
+        int[] networkIds = ethereumNetworkRepository.getFilterNetworkList();
+        StringBuilder sb = new StringBuilder();
+        boolean firstValue = true;
+        for (int networkId : networkIds)
+        {
+            if (!firstValue) sb.append(",");
+            sb.append(ethereumNetworkRepository.getNameById(networkId));
+            firstValue = false;
+        }
+        return sb.toString();
+    }
+
+    public void setFilterNetworks(String[] selectedItems)
+    {
+        List<String> selectedNetworks = new ArrayList<>();
+        Collections.addAll(selectedNetworks, selectedItems);
+        int[] selectedIds = new int[selectedItems.length];
+        int index = 0;
+
+        for (NetworkInfo info : ethereumNetworkRepository.getAvailableNetworkList())
+        {
+            if (selectedNetworks.contains(info.name))
+            {
+                selectedIds[index++] = info.chainId;
+            }
+        }
+
+        ethereumNetworkRepository.setFilterNetworkList(selectedIds);
     }
 
     public NetworkInfo getDefaultNetworkInfo() {

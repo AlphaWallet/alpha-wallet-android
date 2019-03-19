@@ -130,7 +130,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:fontFamily="@font/font_light"
-                    android:text="Network"
+                    android:text="@string/network"
                     android:textColor="@color/black"
                     android:textSize="20sp" />
 
@@ -141,7 +141,8 @@
                     android:fontFamily="@font/font_light"
                     android:text="@string/unknown_balance_without_symbol"
                     android:textColor="@color/black"
-                    android:textSize="13sp" />
+                    android:textSize="13sp"
+                    android:visibility="gone"/>
             </LinearLayout>
         </LinearLayout>
 

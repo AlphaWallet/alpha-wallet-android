@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Network;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,9 +20,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.ui.widget.entity.NetworkItem;
+import io.stormbird.wallet.util.Utils;
 
 public class SelectNetworkDialog extends Dialog {
     public static final int NONE = 0;
@@ -40,12 +45,14 @@ public class SelectNetworkDialog extends Dialog {
     private CustomAdapter adapter;
     private String[] networkList;
     private String selectedItem;
+    private boolean singleItem;
 
-    public SelectNetworkDialog(@NonNull Activity activity, String[] networkList, String selectedItem) {
+    public SelectNetworkDialog(@NonNull Activity activity, String[] networkList, String selectedItem, boolean singleItem) {
         super(activity);
         this.context = activity;
         this.networkList = networkList;
         this.selectedItem = selectedItem;
+        this.singleItem = singleItem;
 
         setContentView(R.layout.dialog_awallet_list);
         getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -58,15 +65,39 @@ public class SelectNetworkDialog extends Dialog {
 
         ArrayList<NetworkItem> list = new ArrayList<>();
 
-        for (int i = 0; i < networkList.length; i++) {
-            if (networkList[i].equals(selectedItem)) {
-                list.add(new NetworkItem(networkList[i], true));
-            } else {
-                list.add(new NetworkItem(networkList[i], false));
+        if (singleItem)
+        {
+            for (int i = 0; i < networkList.length; i++)
+            {
+                if (networkList[i].equals(selectedItem))
+                {
+                    list.add(new NetworkItem(networkList[i], true));
+                }
+                else
+                {
+                    list.add(new NetworkItem(networkList[i], false));
+                }
+            }
+        }
+        else
+        {
+            List<String> strList = new ArrayList<>();
+            Collections.addAll(strList, Utils.stringListToArray(selectedItem));
+
+            for (int i = 0; i < networkList.length; i++)
+            {
+                if (strList.contains(networkList[i]))
+                {
+                    list.add(new NetworkItem(networkList[i], true));
+                }
+                else
+                {
+                    list.add(new NetworkItem(networkList[i], false));
+                }
             }
         }
 
-        adapter = new CustomAdapter(list, selectedItem);
+        adapter = new CustomAdapter(list, selectedItem, singleItem);
         listView.setAdapter(adapter);
     }
 
@@ -77,6 +108,10 @@ public class SelectNetworkDialog extends Dialog {
 
     public String getSelectedItem() {
         return adapter.getSelectedItem();
+    }
+
+    public String[] getSelectedItems() {
+        return adapter.getSelectedItems();
     }
 
     public void setOnClickListener(View.OnClickListener listener) {
@@ -101,6 +136,7 @@ public class SelectNetworkDialog extends Dialog {
     public class CustomAdapter extends ArrayAdapter<NetworkItem> {
         private ArrayList<NetworkItem> dataSet;
         private String selectedItem;
+        private boolean singleItem;
 
         private void setSelectedItem(String selectedItem) {
             this.selectedItem = selectedItem;
@@ -110,16 +146,40 @@ public class SelectNetworkDialog extends Dialog {
             return this.selectedItem;
         }
 
+        String[] getSelectedItems()
+        {
+            List<String> enabledNames = new ArrayList<>();
+            for (NetworkItem data : dataSet)
+            {
+                if (data.isSelected()) enabledNames.add(data.getName());
+            }
+
+            return enabledNames.toArray(new String[0]);
+        }
+
         private class ViewHolder {
             ImageView checkbox;
             TextView name;
             LinearLayout itemLayout;
         }
 
-        private CustomAdapter(ArrayList<NetworkItem> data, String selectedItem) {
+        private CustomAdapter(ArrayList<NetworkItem> data, String selectedItem, boolean singleItem) {
             super(context, R.layout.item_dialog_list, data);
             this.dataSet = data;
             this.selectedItem = selectedItem;
+            this.singleItem = singleItem;
+
+            if (!singleItem)
+            {
+                for (NetworkItem item : data)
+                {
+                    if (item.getName().equals(C.ETHEREUM_NETWORK_NAME))
+                    {
+                        item.setSelected(true);
+                        break;
+                    }
+                }
+            }
         }
 
         @NonNull
@@ -144,10 +204,25 @@ public class SelectNetworkDialog extends Dialog {
             if (item != null) {
                 viewHolder.name.setText(item.getName());
                 viewHolder.itemLayout.setOnClickListener(v -> {
-                    for (int i = 0; i < dataSet.size(); i++) {
-                        dataSet.get(i).setSelected(false);
+                    if (singleItem)
+                    {
+                        for (NetworkItem networkItem : dataSet)
+                        {
+                            networkItem.setSelected(false);
+                        }
+                        dataSet.get(position).setSelected(true);
                     }
-                    dataSet.get(position).setSelected(true);
+                    else if (!dataSet.get(position).getName().equals(C.ETHEREUM_NETWORK_NAME))
+                    {
+                        if (dataSet.get(position).isSelected())
+                        {
+                            dataSet.get(position).setSelected(false);
+                        }
+                        else
+                        {
+                            dataSet.get(position).setSelected(true);
+                        }
+                    }
                     setSelectedItem(dataSet.get(position).getName());
                     notifyDataSetChanged();
                 });

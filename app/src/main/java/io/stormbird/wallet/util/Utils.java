@@ -11,12 +11,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.widget.TextView;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 
 import static io.stormbird.token.entity.MagicLinkInfo.getNetworkNameById;
@@ -138,5 +142,54 @@ public class Utils {
         {
             return false;
         }
+    }
+
+    public static String intArrayToString(int[] values)
+    {
+        StringBuilder store = new StringBuilder();
+        boolean firstValue = true;
+        for (int network : values)
+        {
+            if (!firstValue) store.append(",");
+            store.append(network);
+            firstValue = false;
+        }
+
+        return store.toString();
+    }
+
+    public static int[] intListToArray(String list)
+    {
+        List<Integer> idList = new ArrayList<>();
+        //convert to array
+        String[] split = list.split(",");
+        for (String s : split)
+        {
+            Integer value;
+            try
+            {
+                value = Integer.valueOf(s);
+                idList.add(value);
+            }
+            catch (NumberFormatException e)
+            {
+                //empty
+                continue;
+            }
+        }
+
+        int[] idArray = new int[idList.size()];
+        for (int i = 0; i < idList.size(); i++)
+            idArray[i] = idList.get(i);
+        return idArray;
+    }
+
+    public static String[] stringListToArray(String list)
+    {
+        //convert to array
+        String[] split = list.split(",");
+        List<String> strList = new ArrayList<>();
+        Collections.addAll(strList, split);
+        return strList.toArray(new String[0]);
     }
 }

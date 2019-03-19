@@ -341,7 +341,7 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void selectNetwork() {
-        SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), viewModel.getNetworkList(), networkInfo.name);
+        SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), viewModel.getNetworkList(), networkInfo.name, true);
         dialog.setOnClickListener(v1 -> {
             if (!networkInfo.name.equals(dialog.getSelectedItem())) {
                 viewModel.setNetwork(dialog.getSelectedItem());

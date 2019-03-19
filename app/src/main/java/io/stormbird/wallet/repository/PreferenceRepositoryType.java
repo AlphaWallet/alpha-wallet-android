@@ -9,6 +9,9 @@ public interface PreferenceRepositoryType {
 
     void setDefaultNetwork(String netName);
 
+    void setNetworkFilterList(String filters);
+    String getNetworkFilterList();
+
     boolean getNotificationsState();
 
     void setNotificationState(boolean state);

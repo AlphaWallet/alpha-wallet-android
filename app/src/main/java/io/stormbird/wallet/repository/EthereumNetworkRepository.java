@@ -2,6 +2,7 @@ package io.stormbird.wallet.repository;
 
 import android.text.TextUtils;
 
+import io.stormbird.wallet.util.Utils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
@@ -11,9 +12,7 @@ import io.stormbird.wallet.entity.Ticker;
 import io.stormbird.wallet.service.TickerService;
 
 import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Single;
@@ -141,6 +140,35 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 					.send();
 			return ethGetTransactionCount.getTransactionCount();
 		});
+	}
+
+	@Override
+	public int[] getFilterNetworkList()
+	{
+		int[] idArray;
+		String filterList = preferences.getNetworkFilterList();
+		if (filterList.length() == 0)
+		{
+			//populate
+			idArray = new int[NETWORKS.length];
+			for (int i = 0; i < NETWORKS.length; i++)
+			{
+				idArray[i] = NETWORKS[i].chainId;
+			}
+		}
+		else
+		{
+			idArray = Utils.intListToArray(filterList);
+		}
+
+		return idArray;
+	}
+
+	@Override
+	public void setFilterNetworkList(int[] networkList)
+	{
+		String store = Utils.intArrayToString(networkList);
+		preferences.setNetworkFilterList(store.toString());
 	}
 
 	public void setDefaultNetworkInfo(NetworkInfo networkInfo) {

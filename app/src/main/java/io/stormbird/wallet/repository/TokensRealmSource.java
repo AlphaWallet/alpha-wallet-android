@@ -19,6 +19,7 @@ import io.reactivex.observers.DisposableCompletableObserver;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
+import io.realm.exceptions.RealmException;
 import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticket;
@@ -88,7 +89,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 realm.beginTransaction();
                 for (Token token : tokens)
                 {
-                    saveERC721Token(realm, wallet, token, now);
+                    saveERC721Token(realm, networkInfo, wallet, token, now);
                 }
                 realm.commitTransaction();
             }
@@ -97,15 +98,21 @@ public class TokensRealmSource implements TokenLocalSource {
         });
     }
 
-    private void deleteRealmToken(Realm realm, String address)
+    private void deleteRealmToken(NetworkInfo network, Wallet wallet, String address)
     {
-        RealmToken realmToken = realm.where(RealmToken.class)
-                .equalTo("address", address)
-                .findFirst();
-
-        if (realmToken != null)
+        try (Realm realm = realmManager.getRealmInstance(network, wallet))
         {
-            realmToken.deleteFromRealm();
+
+            RealmToken realmToken = realm.where(RealmToken.class)
+                    .equalTo("address", address)
+                    .findFirst();
+
+            if (realmToken != null)
+            {
+                realm.beginTransaction();
+                realmToken.deleteFromRealm();
+                realm.commitTransaction();
+            }
         }
     }
 
@@ -659,7 +666,7 @@ public class TokensRealmSource implements TokenLocalSource {
         try (Realm realm = realmManager.getERC721RealmInstance(network, wallet))
         {
             realm.beginTransaction();
-            saveERC721Token(realm, wallet, token, now);
+            saveERC721Token(realm, network, wallet, token, now);
             realm.commitTransaction();
         }
         catch (Exception e)
@@ -668,7 +675,8 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
-    private void saveERC721Token(Realm realm, Wallet wallet, Token token, Date currentTime) {
+    private void saveERC721Token(Realm realm, NetworkInfo network, Wallet wallet, Token token, Date currentTime) throws RealmException
+    {
         ERC721Token e;
         if (token instanceof ERC721Token)
         {
@@ -716,7 +724,7 @@ public class TokensRealmSource implements TokenLocalSource {
             schemaName = "ERC721";
         }
 
-        deleteRealmToken(realm, address); //in case it was recorded as normal token
+        deleteRealmToken(network, wallet, address); //in case it was recorded as normal token
 
         RealmERC721Token realmToken = realm.where(RealmERC721Token.class)
                 .equalTo("address", address)

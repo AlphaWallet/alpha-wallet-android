@@ -89,11 +89,11 @@ public abstract class C {
     public static final String DEFAULT_GAS_PRICE = "30000000000";
     public static final String DEFAULT_XDAI_GAS_PRICE = "1000000000";
     public static final String DEFAULT_GAS_LIMIT = "125000";
-    public static final String DEFAULT_GAS_LIMIT_FOR_TOKENS = "144000";
+    public static final String DEFAULT_GAS_LIMIT_FOR_TOKENS = "200000";
     public static final String DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS = "432000"; //NFT's typically require more gas
     public static final long GAS_PER_BYTE = 300; //from experimentation
     public static final long GAS_LIMIT_MIN = 21000L;
-    public static final long GAS_LIMIT_MAX = 300000L;
+    public static final long GAS_LIMIT_MAX = 900000L;
     public static final long GAS_PRICE_MIN = 1000000000L;
     public static final long NETWORK_FEE_MAX = 90000000000000000L;
     public static final int ETHER_DECIMALS = 18;
@@ -133,7 +133,7 @@ public abstract class C {
     }
 
     public static final String DAPP_LASTURL_KEY = "dappURL";
-    public static final String DAPP_BROWSER_HISTORY = "dappBrowserHistory";
+    public static final String DAPP_BROWSER_HISTORY = "DAPP_BROWSER_HISTORY";
     public static final String DAPP_BROWSER_BOOKMARKS = "dappBrowserBookmarks";
     public static final String DAPP_DEFAULT_URL = "https://www.stateofthedapps.com/";
 

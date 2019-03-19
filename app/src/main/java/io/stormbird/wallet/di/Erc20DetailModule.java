@@ -64,7 +64,8 @@ class Erc20DetailModule {
     }
 
     @Provides
-    FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepositoryType) {
-        return new FetchTransactionsInteract(transactionRepositoryType);
+    FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepositoryType,
+                                                               TokenRepositoryType tokenRepositoryType) {
+        return new FetchTransactionsInteract(transactionRepositoryType, tokenRepositoryType);
     }
 }

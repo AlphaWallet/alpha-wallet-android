@@ -36,6 +36,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static io.stormbird.wallet.C.BURN_ADDRESS;
+import static org.web3j.crypto.WalletUtils.isValidAddress;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TokenRepository implements TokenRepositoryType {
@@ -517,15 +518,8 @@ public class TokenRepository implements TokenRepositoryType {
                         break;
                     case ERC20:
                     case ETHEREUM:
-                        balance = wrappedCheckUintBalance(wallet, token.tokenInfo, token);
-                        break;
                     case OTHER:
-                        Log.d(TAG, "Name: " + token.tokenInfo.name);
-                        if (token.tokenInfo.name != null)
-                        {
-                            //re-check the contract signature:
-                            interfaceSpec = transactionRepository.queryInterfaceSpec(token.tokenInfo).blockingGet();
-                        }
+                        balance = wrappedCheckUintBalance(wallet, token.tokenInfo, token);
                         break;
                     default:
                         break;
@@ -760,12 +754,41 @@ public class TokenRepository implements TokenRepositoryType {
                 responseValue, function.getOutputParameters());
         if (response.size() == 1)
         {
+            if (type instanceof String)
+            {
+                String value = (String)response.get(0).getValue();
+                if (value.length() == 0 && responseValue.length() > 2)
+                {
+                    value = checkBytesString(responseValue);
+                    return (T) value;
+                }
+            }
             return (T) response.get(0).getValue();
         }
         else
         {
             return null;
         }
+    }
+
+    private String checkBytesString(String responseValue) throws Exception
+    {
+        String name = "";
+        if (responseValue.length() > 0)
+        {
+            //try raw bytes
+            byte[] data = Numeric.hexStringToByteArray(responseValue);
+            //truncate zeros
+            int index = data.length - 1;
+            while (data[index] == 0 && index > 0) index--;
+            if (index != (data.length - 1))
+            {
+                data = Arrays.copyOfRange(data, 0, index+1);
+            }
+            name = new String(data, "UTF-8");
+        }
+
+        return name;
     }
 
     private String getName(String address) throws Exception {
@@ -779,6 +802,10 @@ public class TokenRepository implements TokenRepositoryType {
                 responseValue, function.getOutputParameters());
         if (response.size() == 1) {
             String name = (String)response.get(0).getValue();
+            if (responseValue.length() > 2 && name.length() == 0)
+            {
+                name = checkBytesString(responseValue);
+            }
             if (assetDefinitionService.getChainId(address) > 0)
             {
                 //does name already contain the token type
@@ -860,6 +887,12 @@ public class TokenRepository implements TokenRepositoryType {
         return new Function("decimals",
                 Arrays.<Type>asList(),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {}));
+    }
+
+    private static org.web3j.abi.datatypes.Function addrParam(String param) {
+        return new Function(param,
+                            Arrays.<Type>asList(),
+                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
     }
 
     private org.web3j.abi.datatypes.Function addressFunction(String method, byte[] resultHash)
@@ -1132,6 +1165,28 @@ public class TokenRepository implements TokenRepositoryType {
                 e.printStackTrace();
                 return tokenList.toArray(new TokenInfo[tokenList.size()]);
             }
+        });
+    }
+
+    @Override
+    public Single<String> resolveProxyAddress(String address)
+    {
+        return Single.fromCallable(() -> {
+            String contractAddress = address;
+            try
+            {
+                String received = getContractData(address, addrParam("implementation"), "");
+                if (received != null && isValidAddress(received))
+                {
+                    contractAddress = received;
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return contractAddress;
         });
     }
 

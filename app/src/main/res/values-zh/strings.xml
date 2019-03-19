@@ -310,4 +310,25 @@
     <string name="delete_wallet">Delete Wallet</string>
     <string name="backup_keystore">Backup Keystore</string>
     <string name="wallet_name_template">Wallet %1$d</string>
+    <string name="welcome_to_the_decentralized_web">Welcome to the Decentralized web</string>
+    <string name="action_remove">Remove</string>
+    <string name="title_remove_dapp">Remove DApp</string>
+    <string name="remove_from_my_dapps">Remove %1s from My DApps?</string>
+    <string name="dialog_title_clear">Clear History</string>
+    <string name="action_clear">Clear</string>
+    <string name="dialog_message_clear">Are you sure you clear your browser history?</string>
+    <string name="your_browser_history_appears_here">Your browser history appears here.</string>
+    <string name="browser_history">Browser History</string>
+    <string name="you_have_no_dapps_displayed_yet_start_by_surfing_the_browser">You have no DApps displayed yet.\nStart by surfing the browser.</string>
+    <string name="my_dapps">My DApps</string>
+    <string name="add">Add</string>
+    <string name="edit">Edit</string>
+    <string name="history">History</string>
+    <string name="discover_dapps">Discover DApps</string>
+    <string name="action_add">Add</string>
+    <string name="add_to_my_dapps">Add to My DApps</string>
+    <string name="edit_dapp">Edit DApp</string>
+    <string name="dapp_title">Title</string>
+    <string name="dapp_address">Address</string>
+    <string name="search_or_type_web_address">Search or type web address</string>
 </resources>

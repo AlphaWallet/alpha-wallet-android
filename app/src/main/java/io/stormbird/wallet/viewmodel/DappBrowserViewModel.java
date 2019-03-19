@@ -210,11 +210,11 @@ public class DappBrowserViewModel extends BaseViewModel  {
         dAppFunction.DAppReturn(s.getBytes(), msg);
     }
 
-    public void openConfirmation(Context context, Web3Transaction transaction, String requesterURL)
+    public void openConfirmation(Context context, Web3Transaction transaction, String requesterURL, NetworkInfo networkInfo)
     {
-        String networkName = defaultNetwork.getValue().name;
-        boolean mainNet = defaultNetwork.getValue().isMainNetwork;
-        confirmationRouter.open(context, transaction, networkName, mainNet, requesterURL, defaultNetwork().getValue().chainId);
+        String networkName = networkInfo.name;
+        boolean mainNet = networkInfo.isMainNetwork;
+        confirmationRouter.open(context, transaction, networkName, mainNet, requesterURL, networkInfo.chainId);
     }
 
     private ArrayList<String> getBrowserBookmarksFromPrefs(Context context) {

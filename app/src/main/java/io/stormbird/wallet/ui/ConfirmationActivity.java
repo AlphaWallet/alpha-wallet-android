@@ -123,12 +123,13 @@ public class ConfirmationActivity extends BaseActivity {
 
         String amountString;
 
-        Utils.setChainColour(chainName, chainId);
-
         amount = new BigDecimal(getIntent().getStringExtra(C.EXTRA_AMOUNT));
 
         viewModel = ViewModelProviders.of(this, confirmationViewModelFactory)
                 .get(ConfirmationViewModel.class);
+
+        Utils.setChainColour(chainName, chainId);
+        chainName.setText(viewModel.getNetworkName(chainId));
 
         switch (confirmationType) {
             case ETH:
@@ -415,7 +416,7 @@ public class ConfirmationActivity extends BaseActivity {
 
             //convert to ETH
             ethValueBD = Convert.fromWei(ethValueBD, Convert.Unit.ETHER);
-            String valueUpdate = getEthString(ethValueBD.doubleValue()) + " " + ETH_SYMBOL;
+            String valueUpdate = getEthString(ethValueBD.doubleValue());
             valueText.setText(valueUpdate);
         }
     }

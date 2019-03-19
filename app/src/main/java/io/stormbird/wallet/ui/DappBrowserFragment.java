@@ -557,8 +557,8 @@ public class DappBrowserFragment extends Fragment implements
                 String signHex = Numeric.toHexString(data);
                 Log.d(TAG, "Initial Msg: " + message.value);
                 web3.onSignPersonalMessageSuccessful(message, signHex);
-                //Test Sig
-                testRecoverAddressFromSignature(Hex.hexToUtf8(message.value), signHex);
+                //Test Sig in debug build
+                if (BuildConfig.DEBUG) testRecoverAddressFromSignature(Hex.hexToUtf8(message.value), signHex);
                 dialog.dismiss();
             }
         };
@@ -598,7 +598,7 @@ public class DappBrowserFragment extends Fragment implements
         }
         else
         {
-            viewModel.openConfirmation(getContext(), transaction, url);
+            viewModel.openConfirmation(getContext(), transaction, url, networkInfo);
         }
     }
 

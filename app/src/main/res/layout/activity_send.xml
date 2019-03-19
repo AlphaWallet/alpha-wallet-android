@@ -51,6 +51,7 @@
                         android:fontFamily="@font/font_bold"
                         android:layout_marginEnd="10dp"
                         android:padding="2dp"
+                        android:text="@string/action_clear"
                         android:textColor="@color/white"
                         android:textSize="12sp"
                         android:visibility="visible" />

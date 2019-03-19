@@ -253,4 +253,9 @@ public class ConfirmationViewModel extends BaseViewModel {
         Token token = tokensService.getToken(chainId, contractAddress);
         return TokenRepository.createTicketTransferData(to, tokenIds, token);
     }
+
+    public String getNetworkName(int chainId)
+    {
+        return findDefaultNetworkInteract.getNetworkName(chainId);
+    }
 }

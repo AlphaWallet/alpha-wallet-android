@@ -84,7 +84,7 @@
                         android:fontFamily="@font/font_bold"
                         android:padding="2dp"
                         android:textColor="@color/white"
-                        android:text="xDAI"
+                        android:text="@string/action_clear"
                         android:textSize="12sp"
                         android:visibility="visible" />
 

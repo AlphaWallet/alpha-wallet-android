@@ -90,7 +90,7 @@
             android:fontFamily="@font/font_bold"
             android:layout_marginTop="2dp"
             android:padding="2dp"
-            android:text="xDAI"
+            android:text="@string/action_clear"
             android:textColor="@color/white"
             android:textSize="10sp"
             android:visibility="visible" />

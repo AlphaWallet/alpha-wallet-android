@@ -449,6 +449,8 @@
     <string name="delete_wallet">Delete Wallet</string>
     <string name="backup_keystore">Backup Keystore</string>
     <string name="wallet_name_template">Wallet %1$d</string>
+    <string name="no_token_found_title">Token Not Found</string>
+    <string name="no_token_found">No Token contract found at this address on %s. Try a different network.</string>
     <string name="welcome_to_the_decentralized_web">Welcome to the Decentralized web</string>
     <string name="action_remove">Remove</string>
     <string name="title_remove_dapp">Remove DApp</string>

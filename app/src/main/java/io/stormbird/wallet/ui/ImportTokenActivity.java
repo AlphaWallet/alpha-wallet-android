@@ -36,6 +36,7 @@ import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
 import static io.stormbird.token.tools.ParseMagicLink.spawnable;
 import static io.stormbird.wallet.C.IMPORT_STRING;
+import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
  * Created by James on 9/03/2018.
@@ -611,7 +612,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     CryptoFunctions cryptoFunctions = new CryptoFunctions();
                     ParseMagicLink parser = new ParseMagicLink(cryptoFunctions);
                     MagicLinkData order = parser.parseUniversalLink(text.toString());
-                    if (Address.isAddress(order.contractAddress) && order.tickets.length > 0)
+                    if (isValidAddress(order.contractAddress) && order.tickets.length > 0)
                     {
                         magicLink = text.toString();
                         //now clear the clipboard - we only ever do this if it's definitely a magicLink in the clipboard

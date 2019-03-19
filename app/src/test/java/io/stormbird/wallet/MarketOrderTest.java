@@ -109,35 +109,35 @@ public class MarketOrderTest
             }
 
             @Override
-            public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password) {
+            public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password, int chainId) {
                 return null;
             }
 
             @Override
-            public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password)
+            public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password)
+            public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password)
+            public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<byte[]> getSignature(Wallet wallet, byte[] message, String password) {
+            public Single<byte[]> getSignature(Wallet wallet, byte[] message, String password, int chainId) {
                 return null;
             }
 
             @Override
-            public Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String password) {
+            public Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String password, int chainId) {
                 return Single.fromCallable(() -> {
                     //sign using the local key
                     Sign.SignatureData sigData = Sign.signMessage(message, testKey);
@@ -207,7 +207,7 @@ public class MarketOrderTest
 
         //1. generate the tradeInstance block and signature array
         marketService.setCallback(testCallback);
-        marketService.getTradeInstances(wallet, price, tickets, contractAddress, firstTicketId)
+        marketService.getTradeInstances(wallet, price, tickets, contractAddress, firstTicketId, 1)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::processMarketTrades, this::onError, this::onAllTransactions);
     }

@@ -65,37 +65,37 @@ public class QRSelectionTest
             }
 
             @Override
-            public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password)
+            public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password)
+            public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password)
+            public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password)
+            public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<byte[]> getSignature(Wallet wallet, byte[] message, String password)
+            public Single<byte[]> getSignature(Wallet wallet, byte[] message, String password, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String pass)
+            public Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String pass, int chainId)
             {
                 return Single.fromCallable(() -> {
                     //sign using the local key
@@ -203,7 +203,7 @@ public class QRSelectionTest
                     .getMessage(qr.indices, CONTRACT_ADDR).blockingGet();
 
             byte[] sig = transactionRepository
-                    .getSignatureFast(null, messagePair.message.getBytes(), "hackintosh").blockingGet();
+                    .getSignatureFast(null, messagePair.message.getBytes(), "hackintosh", 1).blockingGet();
 
             qr.sigPair = new SignaturePair(messagePair.selection, sig, messagePair.message);
         }

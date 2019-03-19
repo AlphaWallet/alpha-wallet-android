@@ -87,7 +87,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
 
         viewModel.prepare();
     }
-    
+
     private void getPreviousMode() {
         Intent intent = getIntent();
         if (intent != null) {

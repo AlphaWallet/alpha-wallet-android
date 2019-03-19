@@ -97,6 +97,7 @@ public class NewSettingsFragment extends Fragment {
             SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), viewModel.getNetworkList(), viewModel.getFilterNetworkList(), false);
             dialog.setOnClickListener(v1 -> {
                 viewModel.setFilterNetworks(dialog.getSelectedItems());
+                getActivity().sendBroadcast(new Intent(RESET_WALLET));
                 dialog.dismiss();
             });
             dialog.show();

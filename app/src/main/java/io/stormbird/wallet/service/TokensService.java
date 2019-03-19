@@ -1,9 +1,6 @@
 package io.stormbird.wallet.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import android.util.SparseArray;
@@ -12,6 +9,7 @@ import io.reactivex.Observable;
 import io.stormbird.wallet.entity.ContractType;
 import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 
 import static io.stormbird.wallet.C.ETHER_DECIMALS;
 
@@ -23,10 +21,14 @@ public class TokensService
     private String currentAddress = null;
     private Token nextSelection;
     private boolean loaded;
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final List<Integer> networkFilter;
 
-    public TokensService() {
+    public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository) {
+        this.ethereumNetworkRepository = ethereumNetworkRepository;
         nextSelection = null;
         loaded = false;
+        networkFilter = new ArrayList<>();
     }
 
     /**
@@ -52,11 +54,20 @@ public class TokensService
     private void addToken(int chainId, Token t)
     {
         SparseArray<Token> tokenAddr = tokenMap.get(t.getAddress());
+
+        //conserve space; contracts with the same address are rare.
         if (tokenAddr == null)
         {
-            tokenAddr = new SparseArray<>();
-            tokenMap.put(t.getAddress(), tokenAddr);
+            tokenAddr = new SparseArray<>(1);
         }
+        else
+        {
+            SparseArray<Token> replacementArray = new SparseArray<>(tokenAddr.size() + 1);
+            for (int i = 0; i < tokenAddr.size(); i++) replacementArray.put(tokenAddr.keyAt(i), tokenAddr.valueAt(i));
+            tokenAddr = replacementArray;
+        }
+
+        tokenMap.put(t.getAddress(), tokenAddr);
         tokenAddr.put(chainId, t);
         setSpec(t);
     }
@@ -144,6 +155,8 @@ public class TokensService
 
     public List<Token> getAllTokens()
     {
+        setupFilter();
+
         List<Token> tokens = new ArrayList<>();
         for (String address : tokenMap.keySet())
         {
@@ -161,7 +174,7 @@ public class TokensService
         {
             for (int i = 0; i < locals.size(); i++)
             {
-                tokens.add(locals.valueAt(i));
+                if (networkFilter.contains(locals.keyAt(i))) tokens.add(locals.valueAt(i));
             }
         }
 
@@ -170,7 +183,13 @@ public class TokensService
 
     public List<Token> getAllLiveTokens()
     {
-        List<Token> tokens = new ArrayList<>(new ArrayList(currencies.values()));
+        setupFilter();
+
+        List<Token> tokens = new ArrayList<>();
+        for (Integer chainId : currencies.keySet())
+        {
+            if (networkFilter.contains(chainId)) tokens.add(currencies.get(chainId));
+        }
 
         for (String addr : tokenMap.keySet())
         {
@@ -241,8 +260,16 @@ public class TokensService
         }
     }
 
+    private void setupFilter()
+    {
+        networkFilter.clear();
+        for (int id : ethereumNetworkRepository.getFilterNetworkList()) networkFilter.add(id);
+    }
+
     public ContractType getInterfaceSpec(int chainId, String address)
     {
+        setupFilter();
+
         SparseArray<ContractType> types = interfaceSpecMap.get(address);
         ContractType result = types != null ? result = types.get(chainId) : ContractType.OTHER;
 

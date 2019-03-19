@@ -11,6 +11,7 @@ import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.viewmodel.SendViewModelFactory;
 
 @Module
@@ -20,12 +21,14 @@ class SendModule {
                                                      MyAddressRouter myAddressRouter,
                                                      ENSInteract ensInteract,
                                                      AssetDefinitionService assetDefinitionService,
-                                                     EthereumNetworkRepositoryType networkRepositoryType) {
+                                                     EthereumNetworkRepositoryType networkRepositoryType,
+                                                     TokensService tokensService) {
         return new SendViewModelFactory(confirmationRouter,
                 myAddressRouter,
                 ensInteract,
                 assetDefinitionService,
-                networkRepositoryType);
+                networkRepositoryType,
+                tokensService);
     }
 
     @Provides

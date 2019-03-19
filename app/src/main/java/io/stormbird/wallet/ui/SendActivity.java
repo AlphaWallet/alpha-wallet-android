@@ -268,31 +268,38 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         if (result.chainId == 0)
         {
             displayScanError();
+            return;
         }
         else
         {
             //chain ID indicator
             Utils.setChainColour(chainName, result.chainId);
             chainName.setText(viewModel.getChainName(result.chainId));
+            amountInput.onClear();
         }
-        if (result.getFunction().length() == 0 && !sendingTokens)
+
+        Token resultToken = viewModel.getToken(result.chainId, result.getAddress());
+
+        if (result.getFunction().length() == 0)
         {
             //correct chain and asset type
             String ethAmount = BalanceUtils.weiToEth(new BigDecimal(result.weiValue)).setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
-            amountInput.setAmount(ethAmount);
             TextView sendText = findViewById(R.id.text_payment_request);
             sendText.setVisibility(View.VISIBLE);
             sendText.setText(R.string.transfer_request);
             toAddressEditText.setText(result.getAddress());
+            amountInput = new AmountEntryItem(this, tokenRepository, viewModel.getChainName(result.chainId), true, result.chainId);
+            amountInput.setAmount(ethAmount);
         }
-        else if (result.getFunction().length() > 0 && result.getAddress().equals(token.getAddress()))
+        else if (result.getFunction().length() > 0 && resultToken != null && !resultToken.isEthereum())
         {
             //sending ERC20 and we're on the correct asset
-            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
+            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, resultToken.tokenInfo.decimals));
             BigDecimal sendAmount = new BigDecimal(result.weiValue);
-            BigDecimal erc20Amount = token.tokenInfo.decimals > 0
+            BigDecimal erc20Amount = resultToken.tokenInfo.decimals > 0
                     ? sendAmount.divide(decimalDivisor) : sendAmount;
             String erc20AmountStr = erc20Amount.setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
+            amountInput = new AmountEntryItem(this, tokenRepository, resultToken.tokenInfo.symbol, false, result.chainId);
             amountInput.setAmount(erc20AmountStr);
 
             //show function which will be called:

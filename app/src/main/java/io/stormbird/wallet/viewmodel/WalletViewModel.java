@@ -274,14 +274,17 @@ public class WalletViewModel extends BaseViewModel
 
     private void checkBalances()
     {
-        tokensService.updateTokenPressure();
-        checkTokenUpdates();
-        checkUnknownAddresses();
+        if (isVisible)
+        {
+            tokensService.updateTokenPressure();
+            checkTokenUpdates();
+            checkUnknownAddresses();
+        }
     }
 
     private void checkTokenUpdates()
     {
-        if (isVisible && balanceCheckDisposable == null)
+        if (balanceCheckDisposable == null)
         {
             Token t = tokensService.getNextSelection();
 
@@ -301,7 +304,7 @@ public class WalletViewModel extends BaseViewModel
     {
         balanceCheckDisposable = null;
         checkUIUpdates();
-        checkTokenUpdates();
+        checkTokenUpdates(); //keep checking the current queue until empty
     }
 
     private void checkUIUpdates()
@@ -318,7 +321,6 @@ public class WalletViewModel extends BaseViewModel
     {
         tokenUpdate.postValue(token);
         tokensService.addToken(token);
-        balanceCheckDisposable = null;
     }
 
     public AssetDefinitionService getAssetDefinitionService()

@@ -13,6 +13,7 @@ import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.TokensService;
 
 import java.math.BigInteger;
 
@@ -25,17 +26,20 @@ public class SendViewModel extends BaseViewModel {
     private final ENSInteract ensInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final EthereumNetworkRepositoryType networkRepository;
+    private final TokensService tokensService;
 
     public SendViewModel(ConfirmationRouter confirmationRouter,
                          MyAddressRouter myAddressRouter,
                          ENSInteract ensInteract,
                          AssetDefinitionService assetDefinitionService,
-                         EthereumNetworkRepositoryType ethereumNetworkRepositoryType) {
+                         EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
+                         TokensService tokensService) {
         this.confirmationRouter = confirmationRouter;
         this.myAddressRouter = myAddressRouter;
         this.ensInteract = ensInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.networkRepository = ethereumNetworkRepositoryType;
+        this.tokensService = tokensService;
     }
 
     public LiveData<String> ensResolve() { return ensResolve; }
@@ -58,6 +62,8 @@ public class SendViewModel extends BaseViewModel {
     {
         return networkRepository.getNameById(chainId);
     }
+
+    public Token getToken(int chainId, String tokenAddress) { return tokensService.getToken(chainId, tokenAddress); };
 
     public void checkENSAddress(String name)
     {

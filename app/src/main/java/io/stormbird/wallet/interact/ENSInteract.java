@@ -3,6 +3,7 @@ package io.stormbird.wallet.interact;
 import io.reactivex.Single;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.repository.TokenRepositoryType;
+import io.stormbird.wallet.ui.widget.entity.ENSHandler;
 import org.web3j.crypto.Hash;
 
 import java.math.BigInteger;
@@ -24,7 +25,7 @@ public class ENSInteract
 
     public Single<String> checkENSAddress(String name)
     {
-        if (name == null || name.length() < 1) return Single.fromCallable(() -> "");
+        if (!ENSHandler.canBeENSName(name)) return Single.fromCallable(() -> "0");
         return checkENSAddressFunc(name)
                 .flatMap(resultHash -> tokenRepository.callAddressMethod("owner", resultHash, ENSCONTRACT))
                 .map(this::checkAddress);

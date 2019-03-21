@@ -67,7 +67,6 @@ public class SendViewModel extends BaseViewModel {
 
     public void checkENSAddress(String name)
     {
-        if (name == null || name.length() < 1) return;
         disposable = ensInteract.checkENSAddress (name)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

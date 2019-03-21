@@ -209,15 +209,7 @@ public class ENSHandler
     {
         //address update delay check
         final String to = toAddressEditText.getText().toString();
-
-        if (canBeENSName(to))
-        {
-            ensCallback.ENSCheck(to);
-        }
-        else
-        {
-            waitingForENS = false;
-        }
+        ensCallback.ENSCheck(to);
     }
 
     public static boolean canBeENSName(String address)

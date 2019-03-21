@@ -34,7 +34,7 @@
 
         <item
             android:id="@+id/action_scan"
-            android:icon="@mipmap/qr_code_icon"
+            android:icon="@drawable/ic_camera"
             android:orderInCategory="25"
             android:title="@string/action_scan_dapp"
             app:showAsAction="withText" />

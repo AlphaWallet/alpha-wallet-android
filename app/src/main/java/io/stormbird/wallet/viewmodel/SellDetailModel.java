@@ -76,19 +76,14 @@ public class SellDetailModel extends BaseViewModel {
         return findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId).symbol;
     }
 
-    public NetworkInfo getNetwork() { return findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId); }
-
-    public void prepare(Token token) {
-        this.token = token;
-        disposable = findDefaultWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
+    public NetworkInfo getNetwork()
+    {
+        return findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId);
     }
 
-    private void onDefaultWallet(Wallet wallet)
-    {
-        defaultWallet.setValue(wallet);
-
+    public void prepare(Token token, Wallet wallet) {
+        this.token = token;
+        this.defaultWallet.setValue(wallet);
         //now get the ticker
         disposable = findDefaultNetworkInteract
                 .getTicker(token.tokenInfo.chainId)
@@ -103,11 +98,6 @@ public class SellDetailModel extends BaseViewModel {
     public void generateSalesOrders(String contractAddr, BigInteger price, int[] ticketIndicies, BigInteger firstTicketId)
     {
         marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId, processMessages, token.tokenInfo.chainId);
-    }
-
-    public void setWallet(Wallet wallet)
-    {
-        defaultWallet.setValue(wallet);
     }
 
     public void generateUniversalLink(int[] ticketSendIndexList, String contractAddress, BigInteger price, long expiry)

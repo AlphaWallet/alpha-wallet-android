@@ -68,6 +68,7 @@ public class QRURLParser {
     }
 
     public QrUrlResult parse(String url) {
+        if (url == null) return null;
         String[] parts = url.split(":");
 
         QrUrlResult result = null;

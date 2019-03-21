@@ -20,14 +20,14 @@ public class AddTokenModule {
     AddTokenViewModelFactory addTokenViewModelFactory(
             AddTokenInteract addTokenInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            HomeRouter homeRouter,
+            FetchTokensInteract fetchTokensInteract,
             SetupTokensInteract setupTokensInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService) {
         return new AddTokenViewModelFactory(
-                addTokenInteract, findDefaultWalletInteract, homeRouter, setupTokensInteract, findDefaultNetworkInteract, fetchTransactionsInteract, assetDefinitionService, tokensService);
+                addTokenInteract, findDefaultWalletInteract, fetchTokensInteract, setupTokensInteract, ethereumNetworkRepository, fetchTransactionsInteract, assetDefinitionService, tokensService);
     }
 
     @Provides
@@ -49,11 +49,6 @@ public class AddTokenModule {
     }
 
     @Provides
-    HomeRouter provideHomeRouter() {
-        return new HomeRouter();
-    }
-
-    @Provides
     SetupTokensInteract provideSetupTokensInteract(TokenRepositoryType tokenRepository) {
         return new SetupTokensInteract(tokenRepository);
     }
@@ -62,5 +57,10 @@ public class AddTokenModule {
     FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository,
                                                                TokenRepositoryType tokenRepositoryType) {
         return new FetchTransactionsInteract(transactionRepository, tokenRepositoryType);
+    }
+
+    @Provides
+    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
+        return new FetchTokensInteract(tokenRepository);
     }
 }

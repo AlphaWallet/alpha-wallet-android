@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import android.view.View;
 
 import io.stormbird.wallet.ui.AddTokenActivity;
+import io.stormbird.wallet.util.Utils;
 
 public class TokenInfo implements Parcelable {
     public final String address;
@@ -70,11 +71,18 @@ public class TokenInfo implements Parcelable {
         dest.writeInt(chainId);
     }
 
-    public void addTokenSetupPage(AddTokenActivity layout) {
+    public void addTokenSetupPage(AddTokenActivity layout, String chainName) {
         layout.inputAddressView.setAddress(address);
         layout.symbolInputView.setText(symbol);
         layout.decimalsInputView.setText(String.valueOf(decimals));
         layout.nameInputview.setText(name);
         layout.ticketLayout.setVisibility(View.GONE);
+
+        if (layout.chainName != null)
+        {
+            layout.chainName.setVisibility(View.VISIBLE);
+            layout.chainName.setText(chainName);
+            Utils.setChainColour(layout.chainName, chainId);
+        }
     }
 }

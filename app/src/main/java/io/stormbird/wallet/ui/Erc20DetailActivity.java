@@ -75,9 +75,15 @@ public class Erc20DetailActivity extends BaseActivity {
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.transactions().observe(this, this::onTransactions);
         viewModel.token().observe(this, this::onTokenData);
+        viewModel.transactionUpdate().observe(this, this::newTransactions);
 
         initViews();
         viewModel.setToken(token);
+    }
+
+    private void newTransactions(Transaction[] transactions)
+    {
+        recentTransactionsAdapter.addTransactions(transactions);
     }
 
     private void setUpRecentTransactionsView() {
@@ -117,8 +123,15 @@ public class Erc20DetailActivity extends BaseActivity {
         hasDefinition = getIntent().getBooleanExtra(C.EXTRA_HAS_DEFINITION, false);
     }
 
-    private void onTokenData(Token token) {
+    private void onTokenData(Token token)
+    {
         tokenViewAdapter.clear();
+        if (this.token.checkBalanceChange(token))
+        {
+            //trigger transaction fetch
+            viewModel.updateTransactions(token);
+            this.token = token; // update token
+        }
         if (token.addressMatches(myAddress)) {
             token.setInterfaceSpec(ContractType.ETHEREUM);
         }

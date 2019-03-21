@@ -62,8 +62,8 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Observable<Transaction[]> fetchNetworkTransaction(NetworkInfo network, Wallet wallet, long lastBlock, String userAddress) {
-		return fetchFromNetwork(network, wallet, lastBlock, userAddress)
+	public Observable<Transaction[]> fetchNetworkTransaction(NetworkInfo network, String tokenAddress, long lastBlock, String userAddress) {
+		return fetchFromNetwork(network, tokenAddress, lastBlock, userAddress)
 				.observeOn(Schedulers.newThread())
 				.toObservable();
 	}
@@ -198,8 +198,8 @@ public class TransactionRepository implements TransactionRepositoryType {
 	    return inDiskCache.fetchTransaction(wallet);
     }
 
-	private Single<Transaction[]> fetchFromNetwork(NetworkInfo networkInfo, Wallet wallet, long lastBlock, String userAddress) {
-		return Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, lastBlock, userAddress));
+	private Single<Transaction[]> fetchFromNetwork(NetworkInfo networkInfo, String tokenAddress, long lastBlock, String userAddress) {
+		return Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, tokenAddress, lastBlock, userAddress));
 	}
 
 	@Override

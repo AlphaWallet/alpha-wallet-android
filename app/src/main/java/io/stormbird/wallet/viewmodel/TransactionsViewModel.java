@@ -189,7 +189,7 @@ public class TransactionsViewModel extends BaseViewModel
                 NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(t.tokenInfo.chainId);
                 String userAddress = t.isEthereum() ? null : t.getAddress(); //only specify address if we're scanning token transactions - not all are relevant to us.
                 fetchTransactionDisposable =
-                        fetchTransactionsInteract.fetchNetworkTransactions(network, wallet.getValue(), t.lastBlockCheck, userAddress)
+                        fetchTransactionsInteract.fetchNetworkTransactions(network, t.getAddress(), t.lastBlockCheck, userAddress)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onError, this::checkTransactionQueue);

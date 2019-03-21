@@ -45,7 +45,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 	}
 
 	@Override
-	public Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, Wallet wallet, long lastBlock, String userAddress)
+	public Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, String tokenAddress, long lastBlock, String userAddress)
 	{
 		long lastBlockNumber = lastBlock + 1;
 		return Observable.fromCallable(() -> {
@@ -53,7 +53,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			try
 			{
 				int page = 1;
-				String response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber), true, page, PAGESIZE);
+				String response = readTransactions(networkInfo, tokenAddress, String.valueOf(lastBlockNumber), true, page, PAGESIZE);
 
 				while (response != null)
 				{
@@ -68,7 +68,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
                             result.add(tx);
                         }
 					}
-					response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber), true, page++, PAGESIZE);
+					response = readTransactions(networkInfo, tokenAddress, String.valueOf(lastBlockNumber), true, page++, PAGESIZE);
 				}
 			}
 			catch (JSONException e)

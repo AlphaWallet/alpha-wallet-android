@@ -33,6 +33,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Token> tokenTicker = new MutableLiveData<>();
+    private final MutableLiveData<Transaction[]> transactionUpdate = new MutableLiveData<>();
 
     private final MyAddressRouter myAddressRouter;
     private final FetchTokensInteract fetchTokensInteract;
@@ -124,6 +125,10 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return transactions;
     }
 
+    public LiveData<Transaction[]> transactionUpdate() {
+        return transactionUpdate;
+    }
+
     public void cleanUp() {
         if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed()) {
             fetchTransactionDisposable.dispose();
@@ -197,5 +202,22 @@ public class Erc20DetailViewModel extends BaseViewModel {
     {
         new SendTokenRouter().open(ctx, address, token.tokenInfo.symbol, token.tokenInfo.decimals,
                                    false, wallet.getValue(), token);
+    }
+
+    public void updateTransactions(Token token)
+    {
+        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId);
+        String userAddress = token.isEthereum() ? null : this.wallet.getValue().address;
+        fetchTransactionDisposable =
+                fetchTransactionsInteract.fetchNetworkTransactions(network, token.getAddress(), token.lastBlockCheck, userAddress)
+                        .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(wallet.getValue(), transactions).toObservable())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::newTransactions, this::onError);
+    }
+
+    private void newTransactions(Transaction[] transactions)
+    {
+        transactionUpdate.postValue(transactions);
     }
 }

@@ -174,6 +174,21 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         }
     }
 
+    public void addTransactions(Transaction[] transactions)
+    {
+        items.beginBatchedUpdates();
+        for (Transaction transaction : transactions)
+        {
+            //check this tx relates to the contract
+            TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp);
+            TransactionSortedItem sortedItem = new TransactionSortedItem(
+                    TransactionHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);
+                items.add(sortedItem);
+        }
+        items.endBatchedUpdates();
+        notifyDataSetChanged();
+    }
+
     public int updateRecentTransactions(Transaction[] transactions, String contractAddress, String walletAddress, int count)
     {
         int txCount = 0;

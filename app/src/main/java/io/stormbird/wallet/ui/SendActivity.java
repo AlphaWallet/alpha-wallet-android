@@ -20,6 +20,7 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
 import io.stormbird.wallet.ui.widget.entity.AmountEntryItem;
@@ -105,10 +106,10 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         setupAddressEditField();
 
         if (token.addressMatches(myAddress)) {
-            amountInput = new AmountEntryItem(this, tokenRepository, symbol, true, token.tokenInfo.chainId);
+            amountInput = new AmountEntryItem(this, tokenRepository, symbol, true, token.tokenInfo.chainId, token.hasRealValue());
         } else {
             //currently we don't evaluate ERC20 token value. TODO: Should we?
-            amountInput = new AmountEntryItem(this, tokenRepository, symbol, false, token.tokenInfo.chainId);
+            amountInput = new AmountEntryItem(this, tokenRepository, symbol, false, token.tokenInfo.chainId, token.hasRealValue());
         }
 
         if (result != null)
@@ -288,7 +289,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             sendText.setVisibility(View.VISIBLE);
             sendText.setText(R.string.transfer_request);
             toAddressEditText.setText(result.getAddress());
-            amountInput = new AmountEntryItem(this, tokenRepository, viewModel.getChainName(result.chainId), true, result.chainId);
+            amountInput = new AmountEntryItem(this, tokenRepository, viewModel.getNetworkInfo(result.chainId).symbol, true, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
             amountInput.setAmount(ethAmount);
         }
         else if (result.getFunction().length() > 0 && resultToken != null && !resultToken.isEthereum())
@@ -299,7 +300,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             BigDecimal erc20Amount = resultToken.tokenInfo.decimals > 0
                     ? sendAmount.divide(decimalDivisor) : sendAmount;
             String erc20AmountStr = erc20Amount.setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
-            amountInput = new AmountEntryItem(this, tokenRepository, resultToken.tokenInfo.symbol, false, result.chainId);
+            amountInput = new AmountEntryItem(this, tokenRepository, resultToken.tokenInfo.symbol, false, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
             amountInput.setAmount(erc20AmountStr);
 
             //show function which will be called:

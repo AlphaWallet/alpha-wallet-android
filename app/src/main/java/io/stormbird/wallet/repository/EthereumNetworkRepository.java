@@ -196,4 +196,19 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
         return Single.fromObservable(tickerService
                 .fetchTickerPrice(network.tickerId));
     }
+
+	public static boolean hasRealValue(int chainId)
+	{
+		switch (chainId)
+		{
+			case EthereumNetworkRepository.MAINNET_ID:
+			case EthereumNetworkRepository.POA_ID:
+			case EthereumNetworkRepository.CLASSIC_ID:
+			case EthereumNetworkRepository.XDAI_ID:
+				return true;
+
+			default:
+				return false;
+		}
+	}
 }

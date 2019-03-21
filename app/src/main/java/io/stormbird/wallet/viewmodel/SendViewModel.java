@@ -6,6 +6,7 @@ import android.content.Context;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.ENSInteract;
@@ -61,6 +62,11 @@ public class SendViewModel extends BaseViewModel {
     public String getChainName(int chainId)
     {
         return networkRepository.getNameById(chainId);
+    }
+
+    public NetworkInfo getNetworkInfo(int chainId)
+    {
+        return networkRepository.getNetworkByChain(chainId);
     }
 
     public Token getToken(int chainId, String tokenAddress) { return tokensService.getToken(chainId, tokenAddress); };

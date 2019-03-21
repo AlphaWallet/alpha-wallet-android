@@ -712,17 +712,7 @@ public class Token implements Parcelable
 
     public boolean hasRealValue()
     {
-        switch (tokenInfo.chainId)
-        {
-            case EthereumNetworkRepository.MAINNET_ID:
-            case EthereumNetworkRepository.POA_ID:
-            case EthereumNetworkRepository.CLASSIC_ID:
-            case EthereumNetworkRepository.XDAI_ID:
-                return true;
-
-            default:
-                return false;
-        }
+        return EthereumNetworkRepository.hasRealValue(tokenInfo.chainId);
     }
 
     private float calculateBalanceUpdateWeight()

@@ -201,7 +201,8 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
                 viewModel.getTokenRepository(),
                 networkInfo.symbol,
                 true,
-                networkInfo.chainId);
+                networkInfo.chainId,
+                EthereumNetworkRepository.hasRealValue(networkInfo.chainId));
         amountInput.getValue();
         selectNetworkLayout.setVisibility(View.VISIBLE);
     }

@@ -43,6 +43,7 @@ public class AmountEntryItem
     private TextView tokenSymbolLabel;
     private TextView usdValue;
     private boolean usdInput = false;
+    private final boolean hasRealValue;
     private final int chainId;
 
     private LinearLayout tokenEquivalentLayout;
@@ -62,13 +63,14 @@ public class AmountEntryItem
         if (disposable != null && !disposable.isDisposed()) disposable.dispose();
     }
 
-    public AmountEntryItem(Activity activity, TokenRepositoryType tokenRepository, String symbol, boolean isEth, int chainId)
+    public AmountEntryItem(Activity activity, TokenRepositoryType tokenRepository, String symbol, boolean isEth, int chainId, boolean hasRealValue)
     {
         currentEthPrice = 0.0;
         this.tokenRepository = tokenRepository;
         this.callback = (AmountUpdateCallback)activity;
         amountError = activity.findViewById(R.id.amount_error);
         this.chainId = chainId;
+        this.hasRealValue = hasRealValue;
 
         amountEditText = activity.findViewById(R.id.edit_amount);
         amountEditText.addTextChangedListener(new TextWatcher() {
@@ -186,6 +188,7 @@ public class AmountEntryItem
             if (isValidAmount(amount))
             {
                 String usdEquivStr = "US$ " + getUsdString(Double.valueOf(amount) * currentEthPrice);
+                if (!hasRealValue) usdEquivStr = "(TEST) " + usdEquivStr;
                 usdValue.setText(usdEquivStr);
             }
             callback.amountChanged(amount);
@@ -223,6 +226,7 @@ public class AmountEntryItem
             if (isValidAmount(value))
             {
                 String usdEquivStr = getUsdString(Double.valueOf(value) * currentEthPrice);
+                if (!hasRealValue) usdEquivStr = "(TEST) " + usdEquivStr;
                 amountEditText.setText(usdEquivStr);
             }
         }
@@ -232,6 +236,7 @@ public class AmountEntryItem
             if (isValidAmount(value))
             {
                 String usdEquivStr = "US$ " + getUsdString(Double.valueOf(value) * currentEthPrice);
+                if (!hasRealValue) usdEquivStr = "(TEST) " + usdEquivStr;
                 usdValue.setText(usdEquivStr);
             }
         }

@@ -70,9 +70,9 @@ public class QRExtractorTest {
         extractedString = parser.extractAddressFromQrString("OMG:0x0000000000000000000000000000000000000000");
         assertTrue("0x0000000000000000000000000000000000000000".equals(extractedString));
 
-        // Address longer than expected, parse out an address anyway
+        // Address longer than expected, don't accept it
         extractedString = parser.extractAddressFromQrString("0x0000000000000000000000000000000000000000123");
-        assertTrue("0x0000000000000000000000000000000000000000".equals(extractedString));
+        assertTrue(extractedString == null);
 
         // Two parameters
         extractedString = parser.extractAddressFromQrString("notethereum:0x0000000000000000000000000000000000000abc?value=0&symbol=USD");

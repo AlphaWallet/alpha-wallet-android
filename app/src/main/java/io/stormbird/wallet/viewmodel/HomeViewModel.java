@@ -246,8 +246,6 @@ public class HomeViewModel extends BaseViewModel {
             //erase file
             deleteRecursive(file);
         }
-
-        System.out.println("d");
     }
 
     private void deleteRecursive(File fileDir)
@@ -259,5 +257,24 @@ public class HomeViewModel extends BaseViewModel {
         }
 
         fileDir.delete();
+    }
+
+    public void cleanNewDatabases(Context ctx)
+    {
+        File[] files = ctx.getFilesDir().listFiles(new FilenameFilter()
+        {
+            @Override
+            public boolean accept(File file, String name)
+            {
+                return name.matches("^0x\\S{40}-db.real\\S+")
+                    || name.matches("^0x\\S{40}-721-db.real\\S+"); //match all deprecated databases
+            }
+        });
+
+        for (File file : files)
+        {
+            //erase file
+            deleteRecursive(file);
+        }
     }
 }

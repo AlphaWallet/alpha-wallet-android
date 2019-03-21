@@ -2,6 +2,7 @@ package io.stormbird.wallet.util;
 
 import io.stormbird.wallet.entity.EthereumProtocolParser;
 import io.stormbird.wallet.entity.QrUrlResult;
+import io.stormbird.wallet.ui.widget.entity.ENSHandler;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,7 +65,7 @@ public class QRURLParser {
             return null;
         }
 
-        return isValidAddress(address) ? address : null;
+        return (isValidAddress(address) || ENSHandler.canBeENSName(address)) ? address : null;
     }
 
     public QrUrlResult parse(String url) {

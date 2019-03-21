@@ -209,7 +209,8 @@ public class ENSHandler
     {
         //address update delay check
         final String to = toAddressEditText.getText().toString();
-        if (to.length() > 2 && !to.startsWith("0x"))
+
+        if (canBeENSName(to))
         {
             ensCallback.ENSCheck(to);
         }
@@ -217,5 +218,11 @@ public class ENSHandler
         {
             waitingForENS = false;
         }
+    }
+
+    public static boolean canBeENSName(String address)
+    {
+        //candidate ENS address needs to be greater than at least 5 characters, and contain a period
+        return address.length() > 5 && !address.startsWith("0x") && address.contains(".");
     }
 }

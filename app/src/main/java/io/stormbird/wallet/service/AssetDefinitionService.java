@@ -231,6 +231,10 @@ public class AssetDefinitionService
 
     private TokenDefinition loadTokenDefinition(String address)
     {
+        if (address.startsWith("0xd2a0"))
+        {
+            System.out.println("door");
+        }
         TokenDefinition definition = null;
         File xmlFile = getXMLFile(address.toLowerCase());
         try
@@ -444,6 +448,10 @@ public class AssetDefinitionService
                     {
                         try
                         {
+                            if (f.getName().contains("d2a0"))
+                            {
+                                System.out.println("door");
+                            }
                             FileInputStream stream = new FileInputStream(f);
                             TokenDefinition td = parseFile(stream);
                             if (external) addOverrideFile(td);

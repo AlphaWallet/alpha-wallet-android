@@ -213,40 +213,6 @@
                     android:textAppearance="?attr/textAppearanceListItem"
                     android:textSize="12sp"
                     android:visibility="gone"
-                    tools:text="TRST" />
-
-                <LinearLayout
-                    android:id="@+id/balance_container"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="13dp"
-                    android:gravity="end"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/balance_eth"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?attr/textAppearanceListItem"
-                        android:visibility="gone"
-                        tools:text="8888888" />
-
-                    <TextView
-                        android:id="@+id/balance_currency"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"
-                        tools:text="$8888888" />
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/balanceArray"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="13dp"
-                    android:maxWidth="80dp"
-                    android:textSize="10sp"
-                    android:visibility="gone"
                     tools:text="" />
             </LinearLayout>
 
@@ -274,10 +240,78 @@
             <ImageView
                 android:id="@+id/image_view"
                 android:background="@drawable/ic_action_star"
+                android:visibility="gone"
                 android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
         </LinearLayout>
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutButtons"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_gravity="center"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:visibility="gone"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button_func1"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/selector_button"
+            android:fontFamily="@font/font_regular"
+            android:gravity="center"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp"
+            android:text="Func 1"
+            android:textAllCaps="false"
+            android:visibility="invisible"
+            android:textColor="@color/button_text_color"
+            android:textSize="20sp" />
+
+        <include layout="@layout/button_divider" />
+
+        <Button
+            android:id="@+id/button_func2"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/selector_button"
+            android:fontFamily="@font/font_regular"
+            android:gravity="center"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp"
+            android:text="Func 2"
+            android:textAllCaps="false"
+            android:visibility="invisible"
+            android:textColor="@color/button_text_color"
+            android:textSize="20sp" />
+
+        <include layout="@layout/button_divider" />
+
+        <Button
+            android:id="@+id/button_func3"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/selector_button"
+            android:fontFamily="@font/font_regular"
+            android:gravity="center"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp"
+            android:text="Func 3"
+            android:textAllCaps="false"
+            android:visibility="invisible"
+            android:textColor="@color/button_text_color"
+            android:textSize="20sp" />
+    </LinearLayout>
+
 </LinearLayout>

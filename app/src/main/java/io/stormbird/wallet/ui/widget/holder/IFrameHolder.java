@@ -13,6 +13,8 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
 
+import java.math.BigInteger;
+
 /**
  * Created by James on 13/12/2018.
  * Stormbird in Singapore
@@ -49,7 +51,16 @@ public class IFrameHolder extends BinderViewHolder<TicketRange> implements View.
     {
         try
         {
-            String getContent = assetDefinition.getIntroductionCode(token.getAddress());
+            String getContent;
+            if (data.tokenIds.get(0).equals(BigInteger.ZERO))
+            {
+                getContent = assetDefinition.getIntroductionCode(token.getAddress());
+            }
+            else
+            {
+                getContent = assetDefinition.getInstructionCode(token.getAddress());
+            }
+
             iFrame.loadData(getContent, "text/html", "utf-8");
         }
         catch (Exception ex)

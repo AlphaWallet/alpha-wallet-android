@@ -158,7 +158,7 @@ public class Utils {
         return store.toString();
     }
 
-    public static int[] intListToArray(String list)
+    public static List<Integer> intListToArray(String list)
     {
         List<Integer> idList = new ArrayList<>();
         //convert to array
@@ -174,14 +174,10 @@ public class Utils {
             catch (NumberFormatException e)
             {
                 //empty
-                continue;
             }
         }
 
-        int[] idArray = new int[idList.size()];
-        for (int i = 0; i < idList.size(); i++)
-            idArray[i] = idList.get(i);
-        return idArray;
+        return idList;
     }
 
     public static String[] stringListToArray(String list)

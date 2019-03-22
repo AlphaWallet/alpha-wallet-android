@@ -143,25 +143,25 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	}
 
 	@Override
-	public int[] getFilterNetworkList()
+	public List<Integer> getFilterNetworkList()
 	{
-		int[] idArray;
+		List<Integer> networkIds;
 		String filterList = preferences.getNetworkFilterList();
 		if (filterList.length() == 0)
 		{
+			networkIds = new ArrayList<>();
 			//populate
-			idArray = new int[NETWORKS.length];
-			for (int i = 0; i < NETWORKS.length; i++)
+			for (NetworkInfo network : NETWORKS)
 			{
-				idArray[i] = NETWORKS[i].chainId;
+				networkIds.add(network.chainId);
 			}
 		}
 		else
 		{
-			idArray = Utils.intListToArray(filterList);
+			networkIds = Utils.intListToArray(filterList);
 		}
 
-		return idArray;
+		return networkIds;
 	}
 
 	@Override

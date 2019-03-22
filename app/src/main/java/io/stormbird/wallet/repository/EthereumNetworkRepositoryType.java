@@ -3,6 +3,7 @@ package io.stormbird.wallet.repository;
 import org.web3j.protocol.Web3j;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticker;
@@ -26,6 +27,6 @@ public interface EthereumNetworkRepositoryType {
 
 	String getNameById(int id);
 
-    int[] getFilterNetworkList();
+    List<Integer> getFilterNetworkList();
     void setFilterNetworkList(int[] networkList);
 }

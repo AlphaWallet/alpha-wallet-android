@@ -28,6 +28,7 @@ import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ManageWalletsRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 import io.reactivex.disposables.Disposable;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.util.LocaleUtils;
 import io.stormbird.wallet.util.Utils;
 
@@ -48,6 +49,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final HomeRouter homeRouter;
     private final PreferenceRepositoryType preferenceRepository;
     private final LocaleRepositoryType localeRepository;
+    private final TokensService tokensService;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -65,7 +67,8 @@ public class NewSettingsViewModel extends BaseViewModel {
             ManageWalletsRouter manageWalletsRouter,
             HomeRouter homeRouter,
             PreferenceRepositoryType preferenceRepository,
-            LocaleRepositoryType localeRepository) {
+            LocaleRepositoryType localeRepository,
+            TokensService tokensService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -76,6 +79,7 @@ public class NewSettingsViewModel extends BaseViewModel {
         this.homeRouter = homeRouter;
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
+        this.tokensService = tokensService;
     }
 
     public void showHome(Context context, boolean clearStack, boolean fromSettings) {
@@ -128,7 +132,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     }
 
     public String getFilterNetworkList() {
-        int[] networkIds = ethereumNetworkRepository.getFilterNetworkList();
+        List<Integer> networkIds = ethereumNetworkRepository.getFilterNetworkList();
         StringBuilder sb = new StringBuilder();
         boolean firstValue = true;
         for (int networkId : networkIds)
@@ -156,6 +160,7 @@ public class NewSettingsViewModel extends BaseViewModel {
         }
 
         ethereumNetworkRepository.setFilterNetworkList(selectedIds);
+        tokensService.setupFilter();
     }
 
     public NetworkInfo getDefaultNetworkInfo() {

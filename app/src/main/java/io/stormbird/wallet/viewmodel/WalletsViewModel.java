@@ -11,6 +11,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
 
@@ -126,6 +127,7 @@ public class WalletsViewModel extends BaseViewModel
 
     private void onDefaultNetwork(NetworkInfo networkInfo)
     {
+        networkInfo = findDefaultNetworkInteract.getNetworkInfo(EthereumNetworkRepository.MAINNET_ID); //always show mainnet eth in wallet page
         defaultNetwork.postValue(networkInfo);
         currentNetwork = networkInfo;
 

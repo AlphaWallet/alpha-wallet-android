@@ -15,6 +15,7 @@ import io.stormbird.wallet.router.HelpRouter;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ManageWalletsRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
+import io.stormbird.wallet.service.TokensService;
 
 public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
     private final MyAddressRouter myAddressRouter;
@@ -27,6 +28,7 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
     private final HomeRouter homeRouter;
     private final PreferenceRepositoryType preferenceRepository;
     private final LocaleRepositoryType localeRepository;
+    private final TokensService tokensService;
 
     public NewSettingsViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -38,7 +40,8 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
             ManageWalletsRouter manageWalletsRouter,
             HomeRouter homeRouter,
             PreferenceRepositoryType preferenceRepository,
-            LocaleRepositoryType localeRepository) {
+            LocaleRepositoryType localeRepository,
+            TokensService tokensService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
@@ -49,6 +52,7 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
         this.homeRouter = homeRouter;
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
+        this.tokensService = tokensService;
     }
 
     @NonNull
@@ -64,7 +68,8 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
                 manageWalletsRouter,
                 homeRouter,
                 preferenceRepository,
-                localeRepository
+                localeRepository,
+                tokensService
         );
     }
 }

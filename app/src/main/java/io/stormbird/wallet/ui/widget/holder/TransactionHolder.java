@@ -217,9 +217,15 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             String symbol,
             String valueStr,
             long decimals,
-            long timestamp) {
+            long timestamp)
+    {
         boolean isSent = from.toLowerCase().equals(defaultAddress);
         type.setText(isSent ? getString(R.string.sent) : getString(R.string.received));
+
+        if (transaction.hash.startsWith("0x6c7a"))
+        {
+            System.out.println("yoless");
+        }
 
         if (txSuccess)
         {

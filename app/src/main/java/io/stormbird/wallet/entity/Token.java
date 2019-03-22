@@ -658,7 +658,7 @@ public class Token implements Parcelable
             result = result + " " + tokenInfo.symbol;
         }
 
-        if (result.length() > 0 && !result.equals("0"))
+        if (result.length() > 0 && !result.equals("0") && !result.startsWith("~"))
         {
             result = addSuffix(result, transaction);
         }

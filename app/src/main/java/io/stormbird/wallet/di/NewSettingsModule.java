@@ -14,6 +14,7 @@ import io.stormbird.wallet.router.HelpRouter;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ManageWalletsRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModelFactory;
 
 @Module
@@ -29,7 +30,8 @@ class NewSettingsModule {
             ManageWalletsRouter manageWalletsRouter,
             HomeRouter homeRouter,
             PreferenceRepositoryType preferenceRepository,
-            LocaleRepositoryType localeRepository
+            LocaleRepositoryType localeRepository,
+            TokensService tokensService
     ) {
         return new NewSettingsViewModelFactory(
                 findDefaultNetworkInteract,
@@ -41,7 +43,8 @@ class NewSettingsModule {
                 manageWalletsRouter,
                 homeRouter,
                 preferenceRepository,
-                localeRepository);
+                localeRepository,
+                tokensService);
     }
 
     @Provides

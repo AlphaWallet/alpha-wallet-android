@@ -187,7 +187,7 @@ public class TransactionsViewModel extends BaseViewModel
             {
                 Log.d(TAG, "Checking Tx for: " + t.getFullName());
                 NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(t.tokenInfo.chainId);
-                String userAddress = t.isEthereum() ? null : t.getAddress(); //only specify address if we're scanning token transactions - not all are relevant to us.
+                String userAddress = t.isEthereum() ? null : wallet.getValue().address; //only specify address if we're scanning token transactions - not all are relevant to us.
                 fetchTransactionDisposable =
                         fetchTransactionsInteract.fetchNetworkTransactions(network, t.getAddress(), t.lastBlockCheck, userAddress)
                                 .subscribeOn(Schedulers.io())

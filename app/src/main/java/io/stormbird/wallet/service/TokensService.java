@@ -29,6 +29,7 @@ public class TokensService
         nextSelection = null;
         loaded = false;
         networkFilter = new ArrayList<>(10);
+        setupFilter();
     }
 
     /**
@@ -155,8 +156,6 @@ public class TokensService
 
     public List<Token> getAllTokens()
     {
-        setupFilter();
-
         List<Token> tokens = new ArrayList<>();
         for (String address : tokenMap.keySet())
         {
@@ -183,8 +182,6 @@ public class TokensService
 
     public List<Token> getAllLiveTokens()
     {
-        setupFilter();
-
         List<Token> tokens = new ArrayList<>();
         for (Integer chainId : currencies.keySet())
         {
@@ -260,17 +257,14 @@ public class TokensService
         }
     }
 
-    private void setupFilter()
+    public void setupFilter()
     {
         networkFilter.clear();
-        int[] filterIds = ethereumNetworkRepository.getFilterNetworkList();
-        for (int id : filterIds) networkFilter.add(id);
+        networkFilter.addAll(ethereumNetworkRepository.getFilterNetworkList());
     }
 
     public ContractType getInterfaceSpec(int chainId, String address)
     {
-        setupFilter();
-
         SparseArray<ContractType> types = interfaceSpecMap.get(address);
         ContractType result = types != null ? result = types.get(chainId) : ContractType.OTHER;
 

@@ -248,8 +248,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         switch (viewPager.getCurrentItem())
         {
-            default:
+            case WALLET:
                 getMenuInflater().inflate(R.menu.menu_add, menu);
+                break;
+            default:
                 break;
         }
         return super.onCreateOptionsMenu(menu);

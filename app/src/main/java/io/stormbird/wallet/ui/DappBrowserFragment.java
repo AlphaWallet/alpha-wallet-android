@@ -459,9 +459,15 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
+        int oldChain = this.networkInfo != null ? this.networkInfo.chainId : -1;
         this.networkInfo = networkInfo;
         currentNetwork.setText(networkInfo.name);
         Utils.setChainColour(currentNetworkIcon, networkInfo.chainId);
+        //reset the pane if required
+        if (oldChain > 0 && oldChain != this.networkInfo.chainId)
+        {
+            web3.reload();
+        }
     }
 
     private void setupWeb3() {

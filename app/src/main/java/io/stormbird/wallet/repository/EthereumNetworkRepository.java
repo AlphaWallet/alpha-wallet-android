@@ -153,7 +153,10 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 			//populate
 			for (NetworkInfo network : NETWORKS)
 			{
-				networkIds.add(network.chainId);
+				if (hasRealValue(network.chainId))
+				{
+					networkIds.add(network.chainId);
+				}
 			}
 		}
 		else

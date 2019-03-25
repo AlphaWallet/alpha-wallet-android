@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -39,12 +38,8 @@ public class WalletViewModel extends BaseViewModel
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<BigDecimal> total = new MutableLiveData<>();
     private final MutableLiveData<Token> tokenUpdate = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> checkTokens = new MutableLiveData<>();
-    private final MutableLiveData<List<String>> removeTokens = new MutableLiveData<>();
     private final MutableLiveData<Boolean> tokensReady = new MutableLiveData<>();
     private final MutableLiveData<Boolean> fetchKnownContracts = new MutableLiveData<>();
-
-    private final MutableLiveData<String> checkAddr = new MutableLiveData<>();
 
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
@@ -112,9 +107,6 @@ public class WalletViewModel extends BaseViewModel
         return total;
     }
     public LiveData<Token> tokenUpdate() { return tokenUpdate; }
-    public LiveData<Boolean> endUpdate() { return checkTokens; }
-    public LiveData<String> checkAddr() { return checkAddr; }
-    public LiveData<List<String>> removeTokens() { return removeTokens; }
     public LiveData<Boolean> tokensReady() { return tokensReady; }
     public LiveData<Boolean> fetchKnownContracts() { return fetchKnownContracts; }
 
@@ -126,12 +118,12 @@ public class WalletViewModel extends BaseViewModel
     //we changed wallets or network, ensure we clean up before displaying new data
     public void clearProcess()
     {
-        tokensService.clearTokens();
         if (updateTokens != null && !updateTokens.isDisposed())
         {
             updateTokens.dispose();
         }
         terminateBalanceUpdate();
+        tokensService.clearTokens();
     }
 
     private void terminateBalanceUpdate()
@@ -176,7 +168,7 @@ public class WalletViewModel extends BaseViewModel
     private void onTokens(Token[] cachedTokens)
     {
         tokensService.addTokens(cachedTokens);
-        tokens.postValue(cachedTokens);
+        tokens.postValue(tokensService.getAllLiveTokens().toArray(new Token[0]));
     }
 
     private void onTokenFetchError(Throwable throwable)
@@ -226,6 +218,8 @@ public class WalletViewModel extends BaseViewModel
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::storedTokens, this::onError);
         }
+
+        progress.postValue(false);
     }
 
     private void onOpenseaError(Throwable throwable)

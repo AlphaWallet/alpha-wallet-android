@@ -648,7 +648,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private Single<Token> attachEth(NetworkInfo network, Wallet wallet, Token oldToken) {
-        final boolean pending = oldToken.balance.equals(oldToken.pendingBalance);
+        final boolean pending = !oldToken.balance.equals(BigDecimal.ZERO) && oldToken.balance.equals(oldToken.pendingBalance);
 
         return getEthBalanceInternal(network, wallet, pending)
                 .map(balance -> {
@@ -672,6 +672,7 @@ public class TokenRepository implements TokenRepositoryType {
                         localSource.updateTokenBalance(network, wallet, eth);
                         eth.balanceChanged = true;
                         eth.transferPreviousData(oldToken);
+                        eth.pendingBalance = balance;
                         return eth;
                     }
                     else

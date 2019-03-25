@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 import com.google.gson.Gson;
 import io.reactivex.Single;
+import io.stormbird.wallet.entity.ContractType;
 import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
@@ -69,7 +70,7 @@ public class OpenseaService {
                 String tokenSymbol = asset.getAssetContract().getSymbol();
 
                 TokenInfo tInfo = new TokenInfo(asset.getAssetContract().getAddress(), tokenName, tokenSymbol, 0, true, networkId);
-                token = new ERC721Token(tInfo, null, System.currentTimeMillis(), networkName);
+                token = new ERC721Token(tInfo, null, System.currentTimeMillis(), networkName, ContractType.ERC721);
                 token.setTokenWallet(address);
                 foundTokens.put(asset.getAssetContract().getAddress(), token);
             }

@@ -87,8 +87,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
         viewModel.refreshTokens().observe(this, this::refreshTokens);
         viewModel.tokenUpdate().observe(this, this::onToken);
-        viewModel.endUpdate().observe(this, this::checkTokens);
-        viewModel.checkAddr().observe(this, this::updateTitle);
         viewModel.tokensReady().observe(this, this::tokensReady);
         viewModel.fetchKnownContracts().observe(this, this::fetchKnownContracts);
 
@@ -96,8 +94,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         adapter.setHasStableIds(true);
         list.setLayoutManager(new LinearLayoutManager(getContext()));
         list.setAdapter(adapter);
-
-        viewModel.removeTokens().observe(this, adapter::onRemoveTokens);
 
         refreshLayout.setOnRefreshListener(this::refreshList);
 
@@ -162,7 +158,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.currency));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.assets));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.collectibles));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -177,7 +173,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
                         viewModel.fetchTokens();
                         break;
                     case 2:
-                        adapter.setFilterType(TokensAdapter.FILTER_ASSETS);
+                        adapter.setFilterType(TokensAdapter.FILTER_COLLECTIBLES);
                         viewModel.fetchTokens();
                         break;
                     default:
@@ -341,6 +337,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         //first abort the current operation
         viewModel.clearProcess();
         adapter.clear();
+        //viewModel.prepare();
     }
 
     @Override

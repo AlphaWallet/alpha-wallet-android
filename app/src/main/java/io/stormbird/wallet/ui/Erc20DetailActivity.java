@@ -285,10 +285,6 @@ public class Erc20DetailActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         viewModel.prepare(token);
-
-        if (token.addressMatches(myAddress)) {
-            viewModel.startEthereumTicker(token.tokenInfo.chainId);
-            viewModel.ethPriceReading().observe(this, this::onNewEthPrice);
-        }
+        viewModel.startEthereumTicker(token);
     }
 }

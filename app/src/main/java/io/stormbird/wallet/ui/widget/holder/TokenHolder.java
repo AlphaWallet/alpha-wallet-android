@@ -218,19 +218,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         }
     }
 
-    public boolean needsUpdate()
-    {
-        return (token != null && token.needsUpdate());
-    }
-
-    public void updateHeading()
-    {
-        if (token != null)
-        {
-            token.checkUpdateTimeValid(getContext(), this);
-        }
-    }
-
     protected void fillEmpty() {
         balanceEth.setText(R.string.NA);
         balanceCurrency.setText(EMPTY_BALANCE);

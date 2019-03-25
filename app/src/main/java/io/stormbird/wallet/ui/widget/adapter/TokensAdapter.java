@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.ContractType;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -33,6 +34,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public static final int FILTER_ALL = 0;
     public static final int FILTER_CURRENCY = 1;
     public static final int FILTER_ASSETS = 2;
+    public static final int FILTER_COLLECTIBLES = 3;
 
     private int filterType;
     private Context context;
@@ -156,17 +158,18 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
      *
      * @param token
      */
-    public boolean updateToken(Token token, boolean internal)
+    public void updateToken(Token token, boolean internal)
     {
         checkLiveToken(token);
-        boolean updated = false;
-        boolean needsRefresh = false;
         if (canDisplayToken(token))
         {
             items.add(new TokenSortedItem(token, calculateWeight(token)));
+            if (!internal)
+                notifyDataSetChanged();
         }
         else
         {
+            //remove item
             for (int i = 0; i < items.size(); i++)
             {
                 Object si = items.get(i);
@@ -181,14 +184,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                         notifyItemRemoved(i);
                         if (!internal)
                             notifyDataSetChanged();
-                        needsRefresh = true;
                         break;
                     }
                 }
             }
         }
-
-        return needsRefresh;
     }
 
     private boolean canDisplayToken(Token token)
@@ -211,6 +211,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                     allowThroughFilter = false;
                 }
                 break;
+            case FILTER_COLLECTIBLES:
+                if (token.getInterfaceSpec() != ContractType.ERC721 && token.getInterfaceSpec() != ContractType.ERC721_LEGACY)
+                {
+                    allowThroughFilter = false;
+                }
+                break;
             default:
                 break;
         }
@@ -224,16 +230,15 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void populateTokens(Token[] tokens)
     {
-        boolean needsRefresh = false;
         items.beginBatchedUpdates();
         items.add(total);
 
         for (Token token : tokens)
         {
-            if (updateToken(token, true)) needsRefresh = true;
+            updateToken(token, true);
         }
         items.endBatchedUpdates();
-        if (needsRefresh) notifyDataSetChanged();
+        notifyDataSetChanged();
     }
 
     private int calculateWeight(Token token)

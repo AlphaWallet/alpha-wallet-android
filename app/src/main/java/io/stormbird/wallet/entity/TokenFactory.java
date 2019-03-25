@@ -25,8 +25,8 @@ public class TokenFactory
                 thisToken = new Ticket(tokenInfo, balances, updateBlancaTime, networkName, type);
                 break;
             case ERC721:
-                //TODO: Support Legacy 721
-                thisToken = new ERC721Token(tokenInfo, new ArrayList<Asset>(), updateBlancaTime, networkName);
+            case ERC721_LEGACY:
+                thisToken = new ERC721Token(tokenInfo, new ArrayList<Asset>(), updateBlancaTime, networkName, type);
                 break;
             case ERC20:
             case ETHEREUM:
@@ -103,7 +103,8 @@ public class TokenFactory
                 thisToken = new Ticket(tokenInfo, new ArrayList<BigInteger>(), currentTime, networkName, type);
                 break;
             case ERC721:
-                thisToken = new ERC721Token(tokenInfo, new ArrayList<Asset>(), currentTime, networkName);
+            case ERC721_LEGACY:
+                thisToken = new ERC721Token(tokenInfo, new ArrayList<Asset>(), currentTime, networkName, type);
                 break;
             case ETHEREUM:
                 String[] split = tokenInfo.address.split("-");
@@ -143,6 +144,7 @@ public class TokenFactory
     public Token createERC721Token(RealmERC721Token realmItem, List<Asset> assets, long updateTime, String networkName)
     {
         TokenInfo tf = new TokenInfo(realmItem.getAddress(), realmItem.getName(), realmItem.getSymbol(), 0, true, realmItem.getChainId());
-        return new ERC721Token(tf, assets, updateTime, networkName);
+        ContractType type = ContractType.values()[realmItem.getContractType()];
+        return new ERC721Token(tf, assets, updateTime, networkName, type);
     }
 }

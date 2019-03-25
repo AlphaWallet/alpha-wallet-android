@@ -6,18 +6,14 @@ import android.os.Parcelable;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
-
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
-
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -28,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.stormbird.wallet.C.ETH_SYMBOL;
 import static io.stormbird.wallet.interact.SetupTokensInteract.EXPIRED_CONTRACT;
 import static io.stormbird.wallet.interact.SetupTokensInteract.UNKNOWN_CONTRACT;
 
@@ -195,49 +190,6 @@ public class Token implements Parcelable
     public void clickReact(BaseViewModel viewModel, Context context)
     {
         viewModel.showErc20TokenDetail(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
-    }
-
-    public boolean needsUpdate()
-    {
-        long now = System.currentTimeMillis();
-        long diff = (now - updateBlancaTime) / 1000; //seconds
-
-        if (diff > 50) // value is stale
-        {
-            Log.d("TOKEN", tokenInfo.name + " DIFF: " + diff);
-            return balanceIsLive;
-        }
-        else
-        {
-            return !balanceIsLive;
-        }
-    }
-
-    /**
-     * This function should check if the balance of the token is stale or not
-     * However the recycler view is subject to its own rules and laws, which I haven't decoded.
-     * This is a TODO.
-     * @param ctx
-     * @param holder
-     */
-    public void checkUpdateTimeValid(Context ctx, TokenHolder holder)
-    {
-        long now = System.currentTimeMillis();
-        long diff = (now - updateBlancaTime) / 1000; //seconds
-
-        if (diff > 50) // value is stale
-        {
-            Log.d("TOKEN", tokenInfo.name + " DIFF: " + diff);
-            holder.balanceEth.setTextColor(ContextCompat.getColor(ctx, R.color.holo_blue));
-            holder.symbol.setTextColor(ContextCompat.getColor(ctx, R.color.holo_blue));
-            balanceIsLive = false;
-        }
-        else
-        {
-            holder.balanceEth.setTextColor(ContextCompat.getColor(ctx, R.color.black));
-            holder.symbol.setTextColor(ContextCompat.getColor(ctx, R.color.black));
-            balanceIsLive = true;
-        }
     }
 
     public void setupContent(TokenHolder holder, AssetDefinitionService definition)

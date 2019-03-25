@@ -632,6 +632,7 @@ public class TokensRealmSource implements TokenLocalSource {
             realmToken.setSchemaName(schemaName);
             realmToken.setTokenIdList(e.tokenBalance);
             realmToken.setChainId(token.tokenInfo.chainId);
+            realmToken.setContractType(token.getInterfaceSpec().ordinal());
         }
         else
         {
@@ -654,7 +655,7 @@ public class TokensRealmSource implements TokenLocalSource {
             if (needsUpdate)
             {
                 //balance changed, remove old assets
-                deleteAssets(realm, address);
+                deleteAssets(realm, dbKey);
 
                 //update balance
                 realmToken.setUpdatedTime(currentTime.getTime());
@@ -666,13 +667,13 @@ public class TokensRealmSource implements TokenLocalSource {
         for (Asset asset : e.tokenBalance)
         {
             RealmERC721Asset realmAsset = realm.where(RealmERC721Asset.class)
-                    .equalTo("tokenIdAddr", RealmERC721Asset.tokenIdAddrName(asset.getTokenId(), contract.getAddress()))
+                    .equalTo("tokenIdAddr", RealmERC721Asset.tokenIdAddrName(asset.getTokenId(), dbKey))
                     .findFirst();
 
             if (realmAsset == null)
             {
                 realmAsset = realm.createObject(RealmERC721Asset.class,
-                                                RealmERC721Asset.tokenIdAddrName(asset.getTokenId(), contract.getAddress()));
+                                                RealmERC721Asset.tokenIdAddrName(asset.getTokenId(), dbKey));
 
                 realmAsset.setName(asset.getName());
                 realmAsset.setDescription(asset.getDescription());
@@ -694,9 +695,9 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
-    private void deleteAssets(Realm realm, String address)
+    private void deleteAssets(Realm realm, String dbKey)
     {
-        String key = address + "-";
+        String key = dbKey + "-";
 
         try
         {

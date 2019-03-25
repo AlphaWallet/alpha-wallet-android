@@ -11,11 +11,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Ticker;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
@@ -83,18 +79,23 @@ public class Erc20DetailViewModel extends BaseViewModel {
         myAddressRouter.open(ctx, wallet.getValue(), token);
     }
 
-    public void startEthereumTicker(int chainId) {
-        disposable = Observable.interval(0, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> fetchTokensInteract
-                        .getEthereumTicker(chainId)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onTicker, this::onError)).subscribe();
+    public void startEthereumTicker(Token token)
+    {
+        if (token.isEthereum())
+        {
+            disposable = Observable.interval(0, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
+                    .doOnNext(l -> fetchTokensInteract
+                            .getEthereumTicker(token.tokenInfo.chainId)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(ticker -> onTicker(ticker, token), this::onError)).subscribe();
+        }
     }
 
-    private void onTicker(Ticker ticker) {
+    private void onTicker(Ticker ticker, Token token) {
         if (ticker != null && ticker.price_usd != null) {
-            ethPrice.postValue(Double.valueOf(ticker.price_usd));
+            token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), wallet.getValue().address, ticker.price_usd, ticker.percentChange24h, null);
+            this.tokenTicker.postValue(token);
         }
     }
 
@@ -206,23 +207,6 @@ public class Erc20DetailViewModel extends BaseViewModel {
     {
         new SendTokenRouter().open(ctx, address, token.tokenInfo.symbol, token.tokenInfo.decimals,
                                    false, wallet.getValue(), token);
-    }
-
-    public void updateTransactions(Token token)
-    {
-        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId);
-        String userAddress = token.isEthereum() ? null : this.wallet.getValue().address;
-        fetchTransactionDisposable =
-                fetchTransactionsInteract.fetchCached(wallet.getValue())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::newTransactions, this::onError);
-
-//                fetchTransactionsInteract.fetchNetworkTransactions(network, token.getAddress(), token.lastBlockCheck, userAddress)
-//                        .flatMap(transactions -> fetchTransactionsInteract.storeTransactions(wallet.getValue(), transactions).toObservable())
-//                        .subscribeOn(Schedulers.io())
-//                        .observeOn(AndroidSchedulers.mainThread())
-//                        .subscribe(this::newTransactions, this::onError);
     }
 
     private void newTransactions(Transaction[] transactions)

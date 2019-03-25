@@ -51,7 +51,7 @@ public class TokensService
         if (t.isEthereum())
         {
             currencies.put(t.tokenInfo.chainId, t);
-            if (t.tokenInfo.chainId == 1) addToken(1, t);
+            //if (t.tokenInfo.chainId == 1) addToken(1, t);
         }
         else if (t.checkTokenWallet(currentAddress))
         {
@@ -160,6 +160,7 @@ public class TokensService
     public void clearTokens()
     {
         currentAddress = "";
+        currencies.clear();
         tokenMap.clear();
     }
 

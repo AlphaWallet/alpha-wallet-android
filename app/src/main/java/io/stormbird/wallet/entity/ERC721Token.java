@@ -80,12 +80,6 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public boolean hasPositiveBalance()
-    {
-        return (tokenBalance.size() > 0);
-    }
-
-    @Override
     public boolean independentUpdate()
     {
         return true;
@@ -106,7 +100,6 @@ public class ERC721Token extends Token implements Parcelable
         holder.contractType.setText(R.string.erc721);
 
         holder.balanceEth.setVisibility(View.VISIBLE);
-        holder.arrayBalance.setVisibility(View.GONE);
     }
 
     @Override
@@ -189,5 +182,23 @@ public class ERC721Token extends Token implements Parcelable
     public boolean hasArrayBalance()
     {
         return true;
+    }
+
+    @Override
+    public boolean hasPositiveBalance()
+    {
+        return tokenBalance != null && tokenBalance.size() > 0;
+    }
+
+    @Override
+    protected float calculateBalanceUpdateWeight()
+    {
+        return 0.0f;
+    }
+
+    @Override
+    public void zeroiseBalance()
+    {
+        tokenBalance.clear();
     }
 }

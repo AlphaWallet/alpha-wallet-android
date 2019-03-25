@@ -19,7 +19,7 @@ public interface TransactionRepositoryType {
 	void unlockAccount(Wallet signer, String signerPassword) throws Exception;
 	void lockAccount(Wallet signer, String signerPassword) throws Exception;
 	Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList);
-	Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token);
+	Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token, int count);
 
     Single<ContractType> queryInterfaceSpec(String address, TokenInfo tokenInfo);
 

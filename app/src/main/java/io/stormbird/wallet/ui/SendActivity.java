@@ -40,12 +40,9 @@ import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 
 import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.wallet.C.Key.WALLET;
-import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
-import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
 public class SendActivity extends BaseActivity implements Runnable, ItemClickListener, AmountUpdateCallback {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
@@ -68,6 +65,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     private Handler handler;
     private AWalletAlertDialog dialog;
     private TextView chainName;
+    private int currentChain;
 
     private ImageButton scanQrImageView;
     private TextView tokenBalanceText;
@@ -100,16 +98,17 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
         QrUrlResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
         myAddress = wallet.address;
+        currentChain = token.tokenInfo.chainId;
 
         setupTokenContent();
         initViews();
         setupAddressEditField();
 
         if (token.addressMatches(myAddress)) {
-            amountInput = new AmountEntryItem(this, tokenRepository, symbol, true, token.tokenInfo.chainId, token.hasRealValue());
+            amountInput = new AmountEntryItem(this, tokenRepository, symbol, true, currentChain, token.hasRealValue());
         } else {
             //currently we don't evaluate ERC20 token value. TODO: Should we?
-            amountInput = new AmountEntryItem(this, tokenRepository, symbol, false, token.tokenInfo.chainId, token.hasRealValue());
+            amountInput = new AmountEntryItem(this, tokenRepository, symbol, false, currentChain, token.hasRealValue());
         }
 
         if (result != null)
@@ -179,7 +178,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
         if (isValid) {
             BigInteger amountInSubunits = BalanceUtils.baseToSubunit(currentAmount, decimals);
-            viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens, ensHandler.getEnsName(), token.tokenInfo.chainId);
+            viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens, ensHandler.getEnsName(), currentChain);
         }
     }
 
@@ -276,6 +275,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             //chain ID indicator
             Utils.setChainColour(chainName, result.chainId);
             chainName.setText(viewModel.getChainName(result.chainId));
+            currentChain = result.chainId;
             amountInput.onClear();
         }
 

@@ -58,6 +58,7 @@ public class TokenFactory
                 if (realmBalance == null || realmBalance.length() == 0) realmBalance = "0";
                 BigDecimal balance = new BigDecimal(realmBalance);
                 thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
+                thisToken.pendingBalance = balance;
                 break;
 
             case ERC875:
@@ -75,6 +76,7 @@ public class TokenFactory
                 if (realmBalance == null || realmBalance.length() == 0) realmBalance = "0";
                 balance = new BigDecimal(realmBalance);
                 thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, ContractType.ETHEREUM);
+                thisToken.pendingBalance = balance;
                 break;
 
             default:
@@ -113,6 +115,7 @@ public class TokenFactory
                                       true,
                                       tokenInfo.chainId),
                         BigDecimal.ZERO, currentTime, networkName, type);
+                thisToken.pendingBalance = BigDecimal.ZERO;
                 break;
             case ERC20:
             default:
@@ -124,6 +127,7 @@ public class TokenFactory
                                       true,
                                       tokenInfo.chainId),
                         BigDecimal.ZERO, currentTime, networkName, type);
+                thisToken.pendingBalance = BigDecimal.ZERO;
                 break;
         }
 

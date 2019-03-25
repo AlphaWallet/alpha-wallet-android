@@ -86,12 +86,13 @@ public class TokensRealmSource implements TokenLocalSource {
         });
     }
 
-    private void deleteRealmToken(Wallet wallet, String address)
+    private void deleteRealmToken(int chainId, Wallet wallet, String address)
     {
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
+            String dbKey = databaseKey(chainId, address);
             RealmToken realmToken = realm.where(RealmToken.class)
-                    .equalTo("address", address)
+                    .equalTo("address", dbKey)
                     .findFirst();
 
             if (realmToken != null)
@@ -612,17 +613,18 @@ public class TokensRealmSource implements TokenLocalSource {
             schemaName = "ERC721";
         }
 
-        deleteRealmToken(wallet, address); //in case it was recorded as normal token
+        deleteRealmToken(token.tokenInfo.chainId, wallet, address); //in case it was recorded as normal token
+        String dbKey = databaseKey(token);
 
         RealmERC721Token realmToken = realm.where(RealmERC721Token.class)
-                .equalTo("address", address)
+                .equalTo("address", dbKey)
                 .findFirst();
 
         if (realmToken == null)
         {
             //create new storage
             Log.d(TAG, "Save New ERC721 Token: " + token.tokenInfo.name + " :" + address);
-            realmToken = realm.createObject(RealmERC721Token.class, address);
+            realmToken = realm.createObject(RealmERC721Token.class, dbKey);
             realmToken.setName(contractName);
             realmToken.setSymbol(contractSymbol);
             realmToken.setAddedTime(currentTime.getTime());
@@ -827,7 +829,7 @@ public class TokensRealmSource implements TokenLocalSource {
 
     private void createBlankToken(Realm realm, Token token)
     {
-        RealmToken realmToken = realm.createObject(RealmToken.class, token.tokenInfo.address);
+        RealmToken realmToken = realm.createObject(RealmToken.class, databaseKey(token));
         realmToken.setName(token.tokenInfo.name);
         realmToken.setSymbol(token.tokenInfo.symbol);
         realmToken.setDecimals(0);

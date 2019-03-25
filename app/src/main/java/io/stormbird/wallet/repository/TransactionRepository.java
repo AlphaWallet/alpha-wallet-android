@@ -203,9 +203,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token)
+	public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token, int count)
 	{
-		return inDiskCache.fetchTransactions(wallet, token);
+		return inDiskCache.fetchTransactions(wallet, token, count);
 	}
 
 	@Override

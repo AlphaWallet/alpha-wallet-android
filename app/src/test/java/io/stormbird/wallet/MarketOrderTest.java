@@ -175,7 +175,7 @@ public class MarketOrderTest
             }
 
             @Override
-            public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token)
+            public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token, int count)
             {
                 return null;
             }

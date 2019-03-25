@@ -15,6 +15,8 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
+import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.Erc20DetailRouter;
@@ -31,13 +33,16 @@ import java.util.concurrent.TimeUnit;
 
 public class WalletViewModel extends BaseViewModel
 {
+    private static final int CHECK_OPENSEA_INTERVAL_TIME = 25; //Opensea refresh interval in seconds
+    private static final int OPENSEA_RINKEBY_CHECK = 6; //check Rinkeby opensea once per XX opensea checks (ie if interval time is 25 and rinkeby check is 1 in 6, rinkeby refresh time is once per 300 seconds).
+
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<BigDecimal> total = new MutableLiveData<>();
     private final MutableLiveData<Token> tokenUpdate = new MutableLiveData<>();
     private final MutableLiveData<Boolean> checkTokens = new MutableLiveData<>();
     private final MutableLiveData<List<String>> removeTokens = new MutableLiveData<>();
     private final MutableLiveData<Boolean> tokensReady = new MutableLiveData<>();
-    private final MutableLiveData<Integer> fetchKnownContracts = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> fetchKnownContracts = new MutableLiveData<>();
 
     private final MutableLiveData<String> checkAddr = new MutableLiveData<>();
 
@@ -48,23 +53,20 @@ public class WalletViewModel extends BaseViewModel
     private final AssetDisplayRouter assetDisplayRouter;
     private final AddTokenInteract addTokenInteract;
     private final SetupTokensInteract setupTokensInteract;
-
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
-    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final MutableLiveData<Map<String, String>> defaultWalletBalance = new MutableLiveData<>();
-
-    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
-    private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final AssetDefinitionService assetDefinitionService;
     private final OpenseaService openseaService;
     private final TokensService tokensService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
-    private Token[] tokenCache = null;
+    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
+    private final MutableLiveData<Map<String, String>> defaultWalletBalance = new MutableLiveData<>();
+
     private boolean isVisible = false;
+    private int openSeaCheckCounter;
 
-    private ConcurrentLinkedQueue<String> unknownAddresses;
+    private ConcurrentLinkedQueue<ContractResult> unknownAddresses;
 
     @Nullable
     private Disposable balanceTimerDisposable;
@@ -79,30 +81,28 @@ public class WalletViewModel extends BaseViewModel
             SendTokenRouter sendTokenRouter,
             Erc20DetailRouter erc20DetailRouter,
             AssetDisplayRouter assetDisplayRouter,
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            GetDefaultWalletBalance getDefaultWalletBalance,
             AddTokenInteract addTokenInteract,
             SetupTokensInteract setupTokensInteract,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
             OpenseaService openseaService,
-            FetchTransactionsInteract fetchTransactionsInteract)
+            FetchTransactionsInteract fetchTransactionsInteract,
+            EthereumNetworkRepositoryType ethereumNetworkRepository)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
         this.erc20DetailRouter = erc20DetailRouter;
         this.assetDisplayRouter = assetDisplayRouter;
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
-        this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.addTokenInteract = addTokenInteract;
         this.setupTokensInteract = setupTokensInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.openseaService = openseaService;
         this.tokensService = tokensService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
+        this.ethereumNetworkRepository = ethereumNetworkRepository;
     }
 
     public LiveData<Token[]> tokens() {
@@ -116,7 +116,7 @@ public class WalletViewModel extends BaseViewModel
     public LiveData<String> checkAddr() { return checkAddr; }
     public LiveData<List<String>> removeTokens() { return removeTokens; }
     public LiveData<Boolean> tokensReady() { return tokensReady; }
-    public LiveData<Integer> fetchKnownContracts() { return fetchKnownContracts; }
+    public LiveData<Boolean> fetchKnownContracts() { return fetchKnownContracts; }
 
     @Override
     protected void onCleared() {
@@ -157,14 +157,14 @@ public class WalletViewModel extends BaseViewModel
 
     public void fetchTokens()
     {
-        if (defaultNetwork.getValue() != null && defaultWallet.getValue() != null)
+        if (defaultWallet.getValue() != null)
         {
-            tokenCache = null;
+            openSeaCheckCounter = 0;
             tokensService.setCurrentAddress(defaultWallet.getValue().address);
             updateTokens = fetchTokensInteract.fetchStoredWithEth(defaultWallet.getValue())
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onTokens, this::onTokenFetchError, this::fetchFromOpensea);
+                    .subscribe(this::onTokens, this::onTokenFetchError, this::fetchAllKnownContracts);
         }
         else
         {
@@ -173,9 +173,10 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
-    private void onTokens(Token[] tokens)
+    private void onTokens(Token[] cachedTokens)
     {
-        tokensService.addTokens(tokens);
+        tokensService.addTokens(cachedTokens);
+        tokens.postValue(cachedTokens);
     }
 
     private void onTokenFetchError(Throwable throwable)
@@ -188,48 +189,43 @@ public class WalletViewModel extends BaseViewModel
         onError(throwable);
     }
 
+    private void fetchAllKnownContracts()
+    {
+        fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.MAINNET_ID));
+        fetchKnownContracts.postValue(true);
+        updateTokenBalances();
+    }
+
     /**
      * Stage 2: Fetch opensea tokens
      */
-    private void fetchFromOpensea()
+    private void fetchFromOpensea(NetworkInfo checkNetwork)
     {
-        List<Token> serviceList = tokensService.getAllLiveTokens();
-        tokenCache = serviceList.toArray(new Token[0]);
-
-        tokens.postValue(tokenCache);
-
-        String network = findDefaultNetworkInteract.getNetworkName(defaultNetwork.getValue().chainId);
-
-        updateTokens = openseaService.getTokens(defaultWallet.getValue().address, defaultNetwork.getValue().chainId, network)
+        Log.d("OPENSEA", "Fetch from opensea : " + checkNetwork.getShortName());
+        updateTokens = openseaService.getTokens(defaultWallet.getValue().address, checkNetwork.chainId, checkNetwork.getShortName())
                 //openseaService.getTokens("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::gotOpenseaTokens, this::onOpenseaError);
+                .subscribe(tokens -> gotOpenseaTokens(checkNetwork.chainId, tokens), this::onOpenseaError);
     }
 
-    private void gotOpenseaTokens(Token[] tokens)
+    private void gotOpenseaTokens(int chainId, Token[] openSeaTokens)
     {
-        //update the display list for token removals
-        List<String> removedTokens = tokensService.getRemovedTokensOfClass(tokens, ERC721Token.class);
+        //zero out balance of tokens
+        Token[] erc721Tokens = tokensService.zeroiseBalanceOfSpentTokens(chainId, openSeaTokens, ERC721Token.class);
 
-        if (!removedTokens.isEmpty())
+        if (erc721Tokens.length > 0)
         {
-            removeTokens.postValue(removedTokens); //remove from UI
+            tokensService.addTokens(erc721Tokens);
+
+            tokens.postValue(erc721Tokens);
+
+            //store these tokens
+            updateTokens = addTokenInteract.addERC721(defaultWallet.getValue(), erc721Tokens)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::storedTokens, this::onError);
         }
-
-        tokensService.clearBalanceOf(ERC721Token.class);
-        tokensService.addTokens(tokens);
-
-        //Update the tokenCache with ERC721 tokens ready for the display refresh
-        tokenCache = tokensService.getAllLiveTokens().toArray(new Token[0]);
-
-        fetchKnownContracts.postValue(defaultNetwork.getValue().chainId);
-
-        //store these tokens
-        updateTokens = addTokenInteract.addERC721(defaultWallet.getValue(), tokensService.getAllClass(ERC721Token.class).toArray(new Token[0]))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::storedTokens, this::onError);
     }
 
     private void onOpenseaError(Throwable throwable)
@@ -248,7 +244,7 @@ public class WalletViewModel extends BaseViewModel
     private void onFetchTokensCompletable()
     {
         progress.postValue(false);
-        tokens.postValue(tokenCache);
+
         tokensReady.postValue(true);
 
         if (updateTokens != null && !updateTokens.isDisposed())
@@ -256,8 +252,6 @@ public class WalletViewModel extends BaseViewModel
             updateTokens.dispose();
             updateTokens = null;
         }
-
-        updateTokenBalances();
     }
 
     /**
@@ -274,12 +268,10 @@ public class WalletViewModel extends BaseViewModel
 
     private void checkBalances()
     {
-        if (isVisible)
-        {
-            tokensService.updateTokenPressure();
-            checkTokenUpdates();
-            checkUnknownAddresses();
-        }
+        tokensService.updateTokenPressure(isVisible);
+        checkTokenUpdates();
+        checkUnknownAddresses();
+        checkOpenSeaUpdate();
     }
 
     private void checkTokenUpdates()
@@ -372,10 +364,6 @@ public class WalletViewModel extends BaseViewModel
         assetDisplayRouter.open(context, token);
     }
 
-    public LiveData<NetworkInfo> defaultNetwork() {
-        return defaultNetwork;
-    }
-
     public LiveData<Wallet> defaultWallet() {
         return defaultWallet;
     }
@@ -387,12 +375,12 @@ public class WalletViewModel extends BaseViewModel
     public void prepare()
     {
         if (unknownAddresses == null) unknownAddresses = new ConcurrentLinkedQueue<>();
-        if (defaultNetwork.getValue() == null || defaultWallet.getValue() == null)
+        if (defaultWallet.getValue() == null)
         {
             progress.postValue(true);
-            disposable = findDefaultNetworkInteract
+            disposable = findDefaultWalletInteract
                     .find()
-                    .subscribe(this::onDefaultNetwork, this::onError);
+                    .subscribe(this::onDefaultWallet, this::onError);
         }
         else if (tokensService.getAllTokens().size() == 0)
         {
@@ -405,62 +393,41 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        defaultNetwork.postValue(networkInfo);
-        disposable = findDefaultWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
-    }
-
     private void onDefaultWallet(Wallet wallet) {
         tokensService.setCurrentAddress(wallet.address);
         defaultWallet.setValue(wallet);
         fetchTokens();
     }
 
-    public Single<NetworkInfo> getNetwork()
-    {
-        if (defaultNetwork().getValue() != null)
-        {
-            return Single.fromCallable(() -> defaultNetwork().getValue());
-        }
-        else
-        {
-            return findDefaultNetworkInteract.find();
-        }
-    }
-
     public void setVisibility(boolean visibility) {
         isVisible = visibility;
-        if (isVisible)
-        {
-            //restart if required
-            prepare();
-        }
     }
 
-    public void checkKnownContracts(List<String> extraAddresses)
+    public void checkKnownContracts(List<ContractResult> knownContracts)
     {
         List<Token> tokens = tokensService.getAllTokens();
         //Add all unterminated contracts that have null names
-        for (Token t : tokens) if (t.tokenInfo.name == null && !t.isTerminated()) extraAddresses.add(t.getAddress());
+        for (Token t : tokens) if (t.tokenInfo.name == null && !t.isTerminated()) knownContracts.add(new ContractResult(t.getAddress(), t.tokenInfo.chainId));
 
-        List<String> contracts = assetDefinitionService.getAllContracts(defaultNetwork.getValue().chainId);
-        for (String addr : extraAddresses)
+        for (NetworkInfo network : ethereumNetworkRepository.getAvailableNetworkList())
         {
-            if (!contracts.contains(addr))
-                contracts.add(addr.toLowerCase());
+            List<String> contracts = assetDefinitionService.getAllContracts(network.chainId);
+            for (String contract : contracts)
+            {
+                ContractResult test = new ContractResult(contract, network.chainId);
+                ContractResult.addIfNotInList(knownContracts, test);
+            }
         }
 
-        unknownAddresses.addAll(tokensService.reduceToUnknown(contracts));
+        unknownAddresses.addAll(tokensService.reduceToUnknown(knownContracts));
     }
 
     private void checkUnknownAddresses()
     {
-        String address = unknownAddresses.poll();
-        if (address != null)
+        ContractResult contract = unknownAddresses.poll();
+        if (contract != null)
         {
-            disposable = setupTokensInteract.addToken(address, defaultNetwork.getValue().chainId)
+            disposable = setupTokensInteract.addToken(contract.name, contract.chainId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.computation())
                     .subscribe(this::resolvedToken, this::onTokenAddError);
@@ -488,31 +455,10 @@ public class WalletViewModel extends BaseViewModel
         Log.d("WVM", "Wait for internet");
     }
 
-    private Observable<List<String>> fetchAllContractAddresses(List<String> extraAddrs)
-    {
-        return Observable.fromCallable(() -> {
-            //populate contracts from service
-
-            List<String> contracts = assetDefinitionService.getAllContracts(defaultNetwork.getValue().chainId);
-            for (String addr: extraAddrs)
-            {
-                if (!contracts.contains(addr)) contracts.add(addr);
-            }
-
-            return contracts;
-        });
-    }
-
     public Token getTokenFromService(Token token)
     {
         Token serviceToken = tokensService.getToken(token.tokenInfo.chainId, token.getAddress());
         return (serviceToken != null) ? serviceToken : token;
-    }
-
-    private void onTokenBalanceUpdate(Token token)
-    {
-        tokenUpdate.postValue(token);
-        tokensService.addToken(token);
     }
 
     private void tkError(Throwable throwable)
@@ -524,34 +470,45 @@ public class WalletViewModel extends BaseViewModel
         fetchTokens();
     }
 
-//    private void onFetchTokensBalanceCompletable()
-//    {
-//        checkCounter++;
-//        progress.postValue(false);
-//        balanceCheckDisposable = null;
-//        if (tokenCache != null && tokenCache.length > 0)
-//        {
-//            checkTokens.postValue(true);
-//        }
-//        else
-//        {
-//            error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "tokens not found"));
-//        }
-//
-//        if (checkCounter % 4 == 0)
-//        {
-//            fetchFromOpensea();
-//        }
-//
-//        if (checkCounter == 1)
-//        {
-//            fetchKnownContracts.postValue(defaultNetwork.getValue().chainId);
-//        }
-//        checkUnknownAddresses();
-//    }
-
     public void resetAndFetchTokens()
     {
         fetchTokens();
+    }
+
+    /**
+     * Check if we need to update opensea: See params in class header
+     */
+    private void checkOpenSeaUpdate()
+    {
+        if (openSeaCheckCounter > 0)
+        {
+            if (isVisible)
+            {
+                if (openSeaCheckCounter%2 != 0) openSeaCheckCounter++; //correct for odd number
+                openSeaCheckCounter += 2;
+            }
+            else
+                openSeaCheckCounter += 1;
+
+            if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * 2) == 0)
+            {
+                NetworkInfo openSeaCheck = ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.MAINNET_ID);
+
+                if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * 2 * OPENSEA_RINKEBY_CHECK) == 0 && ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
+                {
+                    openSeaCheck = ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.RINKEBY_ID);
+                }
+
+                fetchFromOpensea(openSeaCheck);
+            }
+        }
+        else
+        {
+            //On user refresh and startup check rinkeby
+            openSeaCheckCounter += 2;
+            //check rinkeby opensea if not filtered out
+            if (ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
+                fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.RINKEBY_ID));
+        }
     }
 }

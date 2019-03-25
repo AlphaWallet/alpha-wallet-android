@@ -36,6 +36,7 @@ public class Token implements Parcelable
 {
     public final TokenInfo tokenInfo;
     public BigDecimal balance;
+    public BigDecimal pendingBalance;
     public long updateBlancaTime;
     public boolean balanceIsLive = false;
     private String tokenWallet;
@@ -63,6 +64,7 @@ public class Token implements Parcelable
         this.updateBlancaTime = updateBlancaTime;
         this.shortNetworkName = networkName;
         this.contractType = type;
+        this.pendingBalance = balance;
 
         balanceUpdateWeight = calculateBalanceUpdateWeight();
         balanceUpdatePressure = 0.0f;
@@ -75,6 +77,7 @@ public class Token implements Parcelable
         if (oldToken != null)
         {
             lastBlockCheck = oldToken.lastBlockCheck;
+            pendingBalance = oldToken.pendingBalance;
         }
     }
 
@@ -84,6 +87,7 @@ public class Token implements Parcelable
         updateBlancaTime = in.readLong();
         int readType = in.readInt();
         shortNetworkName = in.readString();
+        pendingBalance = new BigDecimal(in.readString());
         balanceChanged = false;
         if (readType <= ContractType.CREATION.ordinal())
         {
@@ -146,6 +150,7 @@ public class Token implements Parcelable
         dest.writeLong(updateBlancaTime);
         dest.writeInt(contractType.ordinal());
         dest.writeString(shortNetworkName);
+        dest.writeString(pendingBalance == null ? "0" : pendingBalance.toString());
         int size = (auxData == null ? 0 : auxData.size());
         dest.writeInt(size);
         if (size > 0)
@@ -290,7 +295,6 @@ public class Token implements Parcelable
         }
 
         holder.balanceEth.setVisibility(View.VISIBLE);
-        holder.arrayBalance.setVisibility(View.GONE);
     }
 
     public List<Integer> ticketIdStringToIndexList(String userList)
@@ -494,6 +498,23 @@ public class Token implements Parcelable
     public boolean checkBalanceChange(Token token)
     {
         return !getFullBalance().equals(token.getFullBalance());
+    }
+
+    public String getPendingDiff()
+    {
+        if (pendingBalance == null || balance.equals(pendingBalance)) return null;
+        else
+        {
+            String prefix = "";
+            BigDecimal diff = pendingBalance.subtract(balance);
+            if (diff.compareTo(BigDecimal.ZERO) > 0) prefix = "+";
+            return prefix + getScaledValue(diff, tokenInfo.decimals);
+        }
+    }
+
+    public boolean checkPendingChange(Token tokenUpdate)
+    {
+        return pendingBalance.equals(tokenUpdate.pendingBalance);
     }
 
     public void setRealmInterfaceSpec(RealmToken realmToken)
@@ -715,7 +736,7 @@ public class Token implements Parcelable
         return EthereumNetworkRepository.hasRealValue(tokenInfo.chainId);
     }
 
-    private float calculateBalanceUpdateWeight()
+    protected float calculateBalanceUpdateWeight()
     {
         float updateWeight = 0;
         //calculate balance update time
@@ -754,7 +775,7 @@ public class Token implements Parcelable
             }
         }
 
-        Log.d("TOKEN", tokenInfo.name + " Update weight " + updateWeight);
+        //Log.d("TOKEN", tokenInfo.name + " Update weight " + updateWeight);
 
         return updateWeight;
     }
@@ -776,11 +797,12 @@ public class Token implements Parcelable
         }
     }
 
-    public void updateBalanceCheckPressure()
+    public void updateBalanceCheckPressure(boolean isVisible)
     {
         if (!isTerminated())
         {
-            balanceUpdatePressure += balanceUpdateWeight;
+            float divisor = isVisible ? 1.0f : 0.5f;
+            balanceUpdatePressure += (balanceUpdateWeight * divisor);
         }
     }
 
@@ -812,5 +834,33 @@ public class Token implements Parcelable
     public String pruneIDList(String ticketIds, int quantity)
     {
         return "";
+    }
+
+    public void setFocus(boolean focus)
+    {
+        if (focus)
+        {
+            balanceUpdateWeight = 2.0f;
+        }
+        else
+        {
+            balanceUpdateWeight = calculateBalanceUpdateWeight();
+        }
+    }
+
+    public boolean balanceIncrease(Token token)
+    {
+        return balance != null && token.balance != null && balance.compareTo(token.balance) > 0;
+    }
+
+    public boolean equals(Token token)
+    {
+        return token != null && tokenInfo.chainId == token.tokenInfo.chainId && getAddress().equals(token.getAddress());
+    }
+
+    public void zeroiseBalance()
+    {
+        balance = BigDecimal.ZERO;
+        pendingBalance = BigDecimal.ZERO;
     }
 }

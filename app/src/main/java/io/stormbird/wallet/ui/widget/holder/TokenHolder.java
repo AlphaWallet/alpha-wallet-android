@@ -23,6 +23,7 @@ import io.stormbird.wallet.entity.TokenTicker;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
+import io.stormbird.wallet.util.Utils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -39,7 +40,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final TextView balanceEth;
     public final TextView balanceCurrency;
     public final ImageView icon;
-    public final TextView arrayBalance;
     public final TextView text24Hours;
     public final TextView textAppreciation;
     public final TextView issuer;
@@ -53,6 +53,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final LinearLayout layoutValueDetails;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
     private final TextView blockchain;
+    private final TextView pendingText;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
@@ -65,7 +66,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         symbol = findViewById(R.id.symbol);
         balanceEth = findViewById(R.id.balance_eth);
         balanceCurrency = findViewById(R.id.balance_currency);
-        arrayBalance = findViewById(R.id.balanceArray);
         text24Hours = findViewById(R.id.text_24_hrs);
         textAppreciation = findViewById(R.id.text_appreciation);
         issuer = findViewById(R.id.issuer);
@@ -78,6 +78,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         textIncomplete = findViewById(R.id.status_incomplete);
         blockchain = findViewById(R.id.text_chain);
         chainName = findViewById(R.id.text_chain_name);
+        pendingText = findViewById(R.id.balance_eth_pending);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
     }
@@ -96,7 +97,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         {
             blockchain.setText(getString(R.string.blockchain, token.getNetworkName()));
             chainName.setText(token.getNetworkName());
-            setChainColour(chainName, token.tokenInfo.chainId);
+            Utils.setChainColour(chainName, token.tokenInfo.chainId);
             String displayTxt = assetDefinition.getIssuerName(token.getAddress(), token.getNetworkName());
             issuer.setText(displayTxt);
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
@@ -105,49 +106,31 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
             animateTextWhileWaiting();
             token.setupContent(this, assetDefinition);
+            setPending();
         } catch (Exception ex) {
             fillEmpty();
         }
     }
 
-    private void setChainColour(TextView chainName, int chainId)
+    private void setPending()
     {
-        switch (chainId)
+        String pendingDiff = token.getPendingDiff();
+        if (pendingDiff != null)
         {
-            case EthereumNetworkRepository.MAINNET_ID:
-                chainName.setBackgroundResource(R.drawable.background_mainnet);
-                break;
-            case EthereumNetworkRepository.CLASSIC_ID:
-                chainName.setBackgroundResource(R.drawable.background_classic);
-                break;
-            case EthereumNetworkRepository.POA_ID:
-                chainName.setBackgroundResource(R.drawable.background_poa);
-                break;
-            case EthereumNetworkRepository.KOVAN_ID:
-                chainName.setBackgroundResource(R.drawable.background_kovan);
-                break;
-            case EthereumNetworkRepository.ROPSTEN_ID:
-                chainName.setBackgroundResource(R.drawable.background_ropsten);
-                break;
-            case EthereumNetworkRepository.SOKOL_ID:
-                chainName.setBackgroundResource(R.drawable.background_sokol);
-                break;
-            case EthereumNetworkRepository.RINKEBY_ID:
-                chainName.setBackgroundResource(R.drawable.background_rinkeby);
-                break;
-            case EthereumNetworkRepository.XDAI_ID:
-                chainName.setBackgroundResource(R.drawable.background_xdai);
-                break;
+            pendingText.setText(pendingDiff);
+            pendingText.setTextColor(ContextCompat.getColor(getContext(), (pendingDiff.startsWith("-")) ? R.color.red : R.color.green));
         }
-    }
+        else
+        {
+            pendingText.setText("");
+        }
 
-    private void setPending(int qty) {
-        textPending.setVisibility(View.VISIBLE);
-        if (qty > 0) {
-            textPending.setText(getContext().getString(R.string.status_pending_with_qty, String.valueOf(qty)));
-        } else {
-            textPending.setVisibility(View.GONE);
-        }
+//        textPending.setVisibility(View.VISIBLE);
+//        if (qty > 0) {
+//            textPending.setText(getContext().getString(R.string.status_pending_with_qty, String.valueOf(qty)));
+//        } else {
+//            textPending.setVisibility(View.GONE);
+//        }
     }
 
     private void setIncompleteData(int qty) {

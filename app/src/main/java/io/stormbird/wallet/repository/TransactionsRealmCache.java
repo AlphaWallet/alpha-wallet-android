@@ -11,6 +11,10 @@ import io.stormbird.wallet.repository.entity.RealmTransactionContract;
 import io.stormbird.wallet.repository.entity.RealmTransactionOperation;
 import io.stormbird.wallet.service.RealmManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE;
 import static io.stormbird.wallet.entity.TransactionOperation.ERC875_CONTRACT_TYPE;
 import static io.stormbird.wallet.entity.TransactionOperation.NORMAL_CONTRACT_TYPE;
 
@@ -41,36 +45,31 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 	}
 
     @Override
-    public Single<Transaction[]> fetchTransactions(Wallet wallet, Token token)
+    public Single<Transaction[]> fetchTransactions(Wallet wallet, Token token, int count)
     {
         return Single.fromCallable(() -> {
             try (Realm instance = realmManager.getRealmInstance(wallet))
             {
                 RealmResults<RealmTransaction> txs;
-                if (token.tokenInfo.address.equals(wallet.address))
-                {
-                    txs = instance.where(RealmTransaction.class)
-                            .beginGroup()
-                            .equalTo("chainId", token.tokenInfo.chainId)
-                            .endGroup()
-                            .and()
-                            .notEqualTo("value", "0")
-                            .sort("timeStamp", Sort.DESCENDING)
-                            .findAll();
-                }
-                else
-                {
-                    txs = instance.where(RealmTransaction.class)
-                            .beginGroup()
-                            .equalTo("chainId", token.tokenInfo.chainId)
-                            .endGroup()
-                            .and()
-                            .equalTo("to", token.tokenInfo.address)
-                            .sort("timeStamp", Sort.DESCENDING)
-                            .findAll();
-                }
+                txs = instance.where(RealmTransaction.class)
+                        .equalTo("chainId", token.tokenInfo.chainId)
+                        .sort("timeStamp", Sort.DESCENDING)
+                        .findAll();
 
-                return convert(txs);
+                int returnSize = (txs.size() >= count) ? count : txs.size();
+
+                List<Transaction> result = new ArrayList<>();
+
+                int txIndex = 0;
+                while (result.size() < returnSize && txIndex < txs.size())
+                {
+                    Transaction tx = convert(txs.get(txIndex++));
+                    if (tx.isRelated(token.getAddress(), wallet.address))
+                    {
+                        result.add(tx);
+                    }
+                }
+                return result.toArray(new Transaction[0]);
             }
             catch (Exception e)
             {

@@ -167,9 +167,7 @@ public class Ticket extends Token implements Parcelable
     @Override
     public void setupContent(TokenHolder tokenHolder, AssetDefinitionService asset)
     {
-        tokenHolder.balanceEth.setVisibility(View.GONE);
         tokenHolder.balanceCurrency.setText("--");
-        tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
         tokenHolder.textAppreciation.setText("--");
 
         tokenHolder.contractType.setVisibility(View.VISIBLE);
@@ -183,7 +181,7 @@ public class Ticket extends Token implements Parcelable
             tokenHolder.contractType.setText(R.string.erc875);
         }
 
-        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()));
+        tokenHolder.balanceEth.setText(String.valueOf(getTicketCount()));
         tokenHolder.layoutValueDetails.setVisibility(View.GONE);
     }
 

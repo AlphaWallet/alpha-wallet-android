@@ -40,9 +40,9 @@ public class FetchTransactionsInteract {
         return transactionRepository.storeTransactions(wallet, txList);
     }
 
-    public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token)
+    public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token, int count)
     {
-        return transactionRepository.fetchTransactionsFromStorage(wallet, token);
+        return transactionRepository.fetchTransactionsFromStorage(wallet, token, count);
     }
 
     public Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)

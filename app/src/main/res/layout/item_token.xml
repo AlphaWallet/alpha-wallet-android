@@ -76,43 +76,44 @@
         android:paddingRight="23dp"
         android:paddingTop="20dp">
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/layout_balance"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/balance_eth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
+                android:layout_marginRight="2dp"
                 android:fontFamily="@font/font_light"
                 android:text="8888888"
                 android:textColor="@color/text_black"
                 android:textSize="21sp" />
 
             <TextView
-                android:id="@+id/balanceArray"
+                android:id="@+id/balance_eth_pending"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
+                android:layout_toRightOf="@+id/balance_eth"
+                android:layout_alignParentTop="true"
                 android:fontFamily="@font/font_light"
                 android:text=""
-                android:textColor="@color/text_black"
-                android:textSize="21sp"
-                android:visibility="gone" />
+                android:textColor="@color/cancel_red"
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/symbol"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/balance_eth_pending"
+                android:layout_marginStart="3dp"
                 android:fontFamily="@font/font_light"
                 android:text="@string/ethereum"
                 android:textColor="@color/text_black"
                 android:textSize="21sp" />
 
-        </LinearLayout>
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/layout_info"

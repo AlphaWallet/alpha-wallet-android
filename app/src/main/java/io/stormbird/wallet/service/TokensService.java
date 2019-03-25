@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import android.util.SparseArray;
 import android.util.SparseLongArray;
 import io.reactivex.Observable;
+import io.stormbird.wallet.entity.ContractResult;
 import io.stormbird.wallet.entity.ContractType;
 import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.Token;
@@ -23,6 +24,7 @@ public class TokensService
     private boolean loaded;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final List<Integer> networkFilter;
+    private Token focusToken;
 
     public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
@@ -30,6 +32,7 @@ public class TokensService
         loaded = false;
         networkFilter = new ArrayList<>(10);
         setupFilter();
+        focusToken = null;
     }
 
     /**
@@ -39,6 +42,12 @@ public class TokensService
      */
     public Token addToken(Token t)
     {
+        if (t.equals(focusToken))
+        {
+            t.balanceUpdateWeight = focusToken.balanceUpdateWeight;
+            focusToken = t;
+        }
+
         if (t.isEthereum())
         {
             currencies.put(t.tokenInfo.chainId, t);
@@ -56,7 +65,7 @@ public class TokensService
     {
         SparseArray<Token> tokenAddr = tokenMap.get(t.getAddress());
 
-        //conserve space; contracts with the same address are rare.
+        //conserve space; contracts with the same address are rare (but may become more common with Plasma).
         if (tokenAddr == null)
         {
             tokenAddr = new SparseArray<>(1);
@@ -212,18 +221,22 @@ public class TokensService
         loaded = true;
     }
 
-    public List<String> reduceToUnknown(List<String> addrs)
+    public List<ContractResult> reduceToUnknown(List<ContractResult> contracts)
     {
         List<Token> allTokens = getAllTokens();
         for (Token t : allTokens)
         {
-            if (addrs.contains(t.getAddress()))
+            for (ContractResult r : contracts)
             {
-                addrs.remove(t.getAddress());
+                if (t.getAddress().equals(r.name) && t.tokenInfo.chainId == r.chainId)
+                {
+                    contracts.remove(r);
+                    break;
+                }
             }
         }
 
-        return addrs;
+        return contracts;
     }
 
     public void setCurrentAddress(String currentAddress)
@@ -284,12 +297,12 @@ public class TokensService
         return result;
     }
 
-    public List<Token> getAllClass(Class<?> tokenClass)
+    public List<Token> getAllClass(int chainId, Class<?> tokenClass)
     {
         List<Token> classTokens = new ArrayList<>();
         for (Token t : getAllTokens())
         {
-            if (tokenClass.isInstance(t))
+            if (tokenClass.isInstance(t) && t.tokenInfo.chainId == chainId)
             {
                 classTokens.add(t);
             }
@@ -310,25 +323,40 @@ public class TokensService
 
     /**
      * Fetch the inverse of the intersection between displayed tokens and the balance received from Opensea
-     * If a token was transferred out then it will no longer be displayed
+     * If a token was transferred out then it should no longer be displayed
+     * This is needed because if a token has been transferred out and the balance is now zero, it will not be
+     * in the list of tokens from opensea. The only way to determine zero balance is by comparing to previous token balance
+     *
+     * TODO: use balanceOf function to double check zeroised balance
      *
      * @param tokens array of tokens with active balance
      * @param tokenClass type of token to filter (eg erc721)
-     * @return
      */
-    public List<String> getRemovedTokensOfClass(Token[] tokens, Class<?> tokenClass)
+    public Token[] zeroiseBalanceOfSpentTokens(int chainId, Token[] tokens, Class<?> tokenClass)
     {
-        List<String> newTokens = getAddresses(tokens);
-        List<Token> oldTokens = getAllClass(tokenClass);
+        List<Token> existingTokens = getAllClass(chainId, tokenClass);
+        List<Token> openSeaRefreshTokens = new ArrayList<>(Arrays.asList(tokens));
 
-        List<String> removedTokens = new ArrayList<>();
-
-        for (Token s : oldTokens)
+        for (Token newToken : openSeaRefreshTokens)
         {
-            if (!newTokens.contains(s.getAddress())) removedTokens.add(s.getAddress());
+            for (Token existingToken : existingTokens)
+            {
+                if (newToken.getAddress().equals(existingToken.getAddress()))
+                {
+                    existingTokens.remove(existingToken);
+                    break;
+                }
+            }
         }
 
-        return removedTokens;
+        //should only be left with a list of tokens with now zero balance
+        for (Token existingToken : existingTokens)
+        {
+            existingToken.zeroiseBalance();
+            openSeaRefreshTokens.add(existingToken);
+        }
+
+        return openSeaRefreshTokens.toArray(new Token[0]);
     }
 
     private List<String> getAddresses(Token[] tokens)
@@ -342,7 +370,7 @@ public class TokensService
         return addresses;
     }
 
-    public void updateTokenPressure()
+    public void updateTokenPressure(boolean isVisible)
     {
         //get all tokens
         List<Token> allTokens = getAllLiveTokens();
@@ -357,7 +385,7 @@ public class TokensService
                 highestPressure = t.balanceUpdatePressure;
             }
 
-            t.updateBalanceCheckPressure();
+            t.updateBalanceCheckPressure(isVisible);
         }
 
         if (highestPressure > 10.0f)
@@ -376,6 +404,18 @@ public class TokensService
         if (next != null) next.balanceUpdatePressure = 0.0f;
         nextSelection = null;
         return next;
+    }
+
+    public void setFocusToken(Token token)
+    {
+        focusToken = token;
+        focusToken.setFocus(true);
+    }
+
+    public void clearFocusToken()
+    {
+        if (focusToken != null) focusToken.setFocus(false);
+        focusToken = null;
     }
 
     public boolean checkHasLoaded()

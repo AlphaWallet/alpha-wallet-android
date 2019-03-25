@@ -156,41 +156,39 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
      *
      * @param token
      */
-    public void updateToken(Token token)
+    public boolean updateToken(Token token, boolean internal)
     {
         checkLiveToken(token);
         boolean updated = false;
-        for (int i = 0; i < items.size(); i++)
+        boolean needsRefresh = false;
+        if (canDisplayToken(token))
         {
-            Object si = items.get(i);
-            if (si instanceof TokenSortedItem)
+            items.add(new TokenSortedItem(token, calculateWeight(token)));
+        }
+        else
+        {
+            for (int i = 0; i < items.size(); i++)
             {
-                TokenSortedItem tsi = (TokenSortedItem)si;
-                Token thisToken = tsi.value;
-                if (thisToken.getAddress().equals(token.getAddress()) && thisToken.tokenInfo.chainId == token.tokenInfo.chainId)
+                Object si = items.get(i);
+                if (si instanceof TokenSortedItem)
                 {
-                    if (canDisplayToken(token))
+                    TokenSortedItem tsi = (TokenSortedItem) si;
+                    Token thisToken = tsi.value;
+                    if (thisToken.getAddress().equals(token.getAddress()) && thisToken.tokenInfo.chainId == token.tokenInfo.chainId)
                     {
-                        items.add(new TokenSortedItem(token, calculateWeight(token)));
-                    }
-                    else
-                    {
+                        Log.d(TAG, "REMOVE: " + token.getFullName());
                         items.removeItemAt(i);
                         notifyItemRemoved(i);
-                        notifyDataSetChanged();
+                        if (!internal)
+                            notifyDataSetChanged();
+                        needsRefresh = true;
+                        break;
                     }
-                    updated = true;
-                    break;
                 }
             }
         }
 
-        if (!updated && canDisplayToken(token))
-        {
-            //new token
-            items.add(new TokenSortedItem(token, calculateWeight(token)));
-            notifyDataSetChanged();
-        }
+        return needsRefresh;
     }
 
     private boolean canDisplayToken(Token token)
@@ -226,21 +224,16 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void populateTokens(Token[] tokens)
     {
+        boolean needsRefresh = false;
         items.beginBatchedUpdates();
         items.add(total);
 
         for (Token token : tokens)
         {
-            if (canDisplayToken(token))
-            {
-                String nativeEth = "";
-                if (token.isEthereum()) nativeEth = " Native";
-                Log.d(TAG,"ADDING: " + token.getFullName() + nativeEth);
-                checkLiveToken(token);
-                items.add(new TokenSortedItem(token, calculateWeight(token)));
-            }
+            if (updateToken(token, true)) needsRefresh = true;
         }
         items.endBatchedUpdates();
+        if (needsRefresh) notifyDataSetChanged();
     }
 
     private int calculateWeight(Token token)
@@ -364,7 +357,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         items.beginBatchedUpdates();
         items.clear();
         items.endBatchedUpdates();
-        Log.d(TAG, "Cleared");
         notifyDataSetChanged();
         needsRefresh = true;
     }

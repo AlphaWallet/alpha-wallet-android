@@ -3,7 +3,7 @@ package io.stormbird.wallet.ui;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.arch.lifecycle.ViewModelProviders;
+import android.arch.lifecycle.*;
 import android.content.*;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -67,6 +67,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private final TransactionsFragment transactionsFragment;
     private final WalletFragment walletFragment;
     private String walletTitle;
+    private final LifecycleObserver lifeCycle;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -79,6 +80,30 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         transactionsFragment = new TransactionsFragment();
         settingsFragment = new NewSettingsFragment();
         walletFragment = new WalletFragment();
+        lifeCycle = new LifecycleObserver()
+        {
+            @OnLifecycleEvent(Lifecycle.Event.ON_START)
+            private void onMoveToForeground()
+            {
+                Log.d("LIFE", "AlphaWallet into foreground");
+                walletFragment.walletInFocus();
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+            private void onMoveToBackground()
+            {
+                Log.d("LIFE", "AlphaWallet into background");
+                walletFragment.walletOutOfFocus();
+            }
+
+            @Override
+            public int hashCode()
+            {
+                return super.hashCode();
+            }
+        };
+
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(lifeCycle);
     }
 
     @Override

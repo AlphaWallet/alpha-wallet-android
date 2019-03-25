@@ -179,7 +179,7 @@ public class TokenRepository implements TokenRepositoryType {
             {
                 if (!currencies.containsKey(info.chainId))
                 {
-                    addCurrencyToken(currencies, info, wallet);
+                    currencies.put(info.chainId, createCurrencyToken(info, wallet));
                 }
             }
 
@@ -187,7 +187,7 @@ public class TokenRepository implements TokenRepositoryType {
         });
     }
 
-    private void addCurrencyToken(Map<Integer, Token> currencies, NetworkInfo network, Wallet wallet)
+    private Token createCurrencyToken(NetworkInfo network, Wallet wallet)
     {
         TokenInfo tokenInfo = new TokenInfo(wallet.address, network.name, network.symbol, 18, true, network.chainId);
         BigDecimal balance = BigDecimal.ZERO;
@@ -195,7 +195,8 @@ public class TokenRepository implements TokenRepositoryType {
         eth.setTokenWallet(wallet.address);
         eth.setIsEthereum();
         eth.balanceUpdatePressure = 10.0f;
-        currencies.put(network.chainId, eth);
+        eth.pendingBalance = balance;
+        return eth;
     }
 
     @Override
@@ -640,24 +641,29 @@ public class TokenRepository implements TokenRepositoryType {
                 .fetchEnabledTokensWithBalance(wallet);
     }
 
-    private Single<Token> fetchCachedToken(NetworkInfo network, Wallet wallet, String address) {
+    private Single<Token> fetchCachedToken(NetworkInfo network, Wallet wallet, String address)
+    {
         return localSource
                 .fetchEnabledToken(network, wallet, address);
     }
 
     private Single<Token> attachEth(NetworkInfo network, Wallet wallet, Token oldToken) {
-        return getEthBalanceInternal(network, wallet) //use local balance fetch, uses less resources
-                .map(balance -> {
-                    BigDecimal oldBalance = oldToken != null ? oldToken.balance : BigDecimal.ZERO;
-                    if (balance.equals(BigDecimal.valueOf(-1)))
-                    {
-                        //network error - retrieve from cache
-                        balance = oldBalance;
-                    }
+        final boolean pending = oldToken.balance.equals(oldToken.pendingBalance);
 
-                    if (!balance.equals(oldBalance) || oldToken == null)
+        return getEthBalanceInternal(network, wallet, pending)
+                .map(balance -> {
+                    BigDecimal oldBalance = oldToken.balance;
+                    if (balance.equals(BigDecimal.valueOf(-1))) return oldToken;
+
+                    if (pending && !balance.equals(oldToken.pendingBalance))
                     {
                         Log.d(TAG, "ETH: " + balance.toPlainString() + " OLD: " + oldBalance.toPlainString());
+                        oldToken.pendingBalance = balance;
+                        return oldToken;
+                    }
+                    else if (!balance.equals(oldBalance))
+                    {
+                        Log.d(TAG, "Tx Update requested for: " + oldToken.getFullName());
                         TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true,
                                                        network.chainId);
                         Token eth = new Token(info, balance, System.currentTimeMillis(), network.getShortName(), ContractType.ETHEREUM);
@@ -690,7 +696,9 @@ public class TokenRepository implements TokenRepositoryType {
      */
     @Override
     public Single<Token> getEthBalance(NetworkInfo network, Wallet wallet) {
-        return attachEth(network, wallet, null);
+        Token currency = createCurrencyToken(network, wallet);
+        currency.pendingBalance = BigDecimal.ONE;
+        return attachEth(network, wallet, currency);
     }
 
     @Override
@@ -714,13 +722,22 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private Single<BigDecimal> getEthBalanceInternal(NetworkInfo network, Wallet wallet)
+    private Single<BigDecimal> getEthBalanceInternal(NetworkInfo network, Wallet wallet, boolean pending)
     {
         return Single.fromCallable(() -> {
             try {
-                return new BigDecimal(getService(network.chainId).ethGetBalance(wallet.address, DefaultBlockParameterName.PENDING)
-                        .send()
-                        .getBalance());
+                if (pending)
+                {
+                    return new BigDecimal(getService(network.chainId).ethGetBalance(wallet.address, DefaultBlockParameterName.PENDING)
+                                                  .send()
+                                                  .getBalance());
+                }
+                else
+                {
+                    return new BigDecimal(getService(network.chainId).ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
+                                                  .send()
+                                                  .getBalance());
+                }
             }
             catch (IOException e)
             {

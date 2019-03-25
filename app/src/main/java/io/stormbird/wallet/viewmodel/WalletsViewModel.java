@@ -206,10 +206,12 @@ public class WalletsViewModel extends BaseViewModel
      */
     private void getWalletsBalance(Wallet[] wallets)
     {
+        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(EthereumNetworkRepository.MAINNET_ID);
+
         disposable = fetchWalletList(wallets)
                 .flatMapIterable(wallet -> wallet) //iterate through each wallet
                 .map(this::addWalletToMap)
-                .flatMap(wallet -> fetchTokensInteract.fetchEth(currentNetwork, wallet)) //fetch wallet balance
+                .flatMap(wallet -> fetchTokensInteract.fetchEth(network, wallet)) //fetch wallet balance
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::updateWallet, this::onError, this::updateBalances);
@@ -273,7 +275,6 @@ public class WalletsViewModel extends BaseViewModel
     {
         Log.d(TAG, "Stored " + count + " Wallets");
     }
-
 
     private Observable<List<Wallet>> fetchWalletList(Wallet[] wallets)
     {

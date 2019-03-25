@@ -138,7 +138,7 @@ public class Transaction implements Parcelable {
 		dest.writeParcelableArray(operations, flags);
 	}
 
-	public static void sortTranactions(List<Transaction> txList)
+	public static void sortTransactions(List<Transaction> txList)
 	{
 		Collections.sort(txList, (e1, e2) -> {
 			long w1 = e1.timeStamp;

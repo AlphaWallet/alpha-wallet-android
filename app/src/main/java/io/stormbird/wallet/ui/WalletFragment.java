@@ -142,9 +142,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         isVisible = isVisibleToUser;
         if (isResumed()) { // fragment created
             viewModel.setVisibility(isVisible);
-            if (isVisible) {
-                viewModel.prepare();
-            }
+            if (isVisible) viewModel.prepare();
         }
     }
 
@@ -157,7 +155,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
     private void onToken(Token token)
     {
-        adapter.updateToken(token);
+        adapter.updateToken(token, false);
     }
 
     private void initTabLayout(View view) {
@@ -299,12 +297,11 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         if (homeMessager != null) homeMessager.TokensReady();
     }
 
-    private void fetchKnownContracts(Integer networkId)
+    private List<ContractResult> getAllKnownContractsOnNetwork(int chainId)
     {
-        //fetch list of contracts for this network from the XML contract directory
-        List<String> knownContracts = new ArrayList<>();
         int index = 0;
-        switch (networkId)
+        List<ContractResult> result = new ArrayList<>();
+        switch (chainId)
         {
             case EthereumNetworkRepository.XDAI_ID:
                 index = R.array.xDAI;
@@ -316,11 +313,24 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
                 break;
         }
 
-        if (index != 0)
+        if (index > 0)
         {
-            String[] strArray = getResources().getStringArray(index);
-            knownContracts.addAll(Arrays.asList(strArray));
+            String[] strArray = getResources().getStringArray(R.array.MainNet);
+            for (String addr : strArray)
+            {
+                result.add(new ContractResult(addr, EthereumNetworkRepository.MAINNET_ID));
+            }
         }
+
+        return result;
+    }
+
+    private void fetchKnownContracts(Boolean notUsed)
+    {
+        //fetch list of contracts for this network from the XML contract directory
+
+        List<ContractResult> knownContracts = new ArrayList<>(getAllKnownContractsOnNetwork(EthereumNetworkRepository.MAINNET_ID));
+        knownContracts.addAll(getAllKnownContractsOnNetwork(EthereumNetworkRepository.XDAI_ID));
 
         viewModel.checkKnownContracts(knownContracts);
     }
@@ -343,5 +353,15 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     public void changedLocale()
     {
 
+    }
+
+    public void walletOutOfFocus()
+    {
+        if (viewModel != null) viewModel.clearProcess();
+    }
+
+    public void walletInFocus()
+    {
+        if (viewModel != null) viewModel.reloadTokens();
     }
 }

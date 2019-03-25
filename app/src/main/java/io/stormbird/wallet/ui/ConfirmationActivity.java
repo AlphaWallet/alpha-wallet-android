@@ -119,7 +119,7 @@ public class ConfirmationActivity extends BaseActivity {
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         String tokenList = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-        chainId = getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
+        chainId = token != null ? token.tokenInfo.chainId : getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
 
         String amountString;
 
@@ -150,7 +150,7 @@ public class ConfirmationActivity extends BaseActivity {
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 contractAddrText.setText(contractAddress);
                 amountString = tokenList;
-                transactionBytes = viewModel.getERC875TransferBytes(toAddress, contractAddress, amountStr);
+                transactionBytes = viewModel.getERC875TransferBytes(toAddress, contractAddress, amountStr, chainId);
                 break;
             case MARKET:
                 amountString = tokenList;
@@ -199,7 +199,7 @@ public class ConfirmationActivity extends BaseActivity {
                 String contractTxt = contractAddress + " " + contractName;
                 contractAddrText.setText(contractTxt);
                 amountString = symbol;
-                transactionBytes = viewModel.getERC721TransferBytes(toAddress, contractAddress, amountStr);
+                transactionBytes = viewModel.getERC721TransferBytes(toAddress, contractAddress, amountStr, chainId);
                 break;
             default:
                 amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString();
@@ -240,7 +240,7 @@ public class ConfirmationActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings: {
-                viewModel.openGasSettings(ConfirmationActivity.this);
+                viewModel.openGasSettings(ConfirmationActivity.this, chainId);
             }
             break;
         }
@@ -250,7 +250,7 @@ public class ConfirmationActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(this, chainId);
+        viewModel.prepare(this);
     }
 
     private void onProgress(boolean shouldShowProgress) {
@@ -279,7 +279,7 @@ public class ConfirmationActivity extends BaseActivity {
 
     private void onSend()
     {
-        viewModel.getGasForSending(confirmationType, this);
+        viewModel.getGasForSending(confirmationType, this, chainId);
     }
 
     private void onSendGasSettings(GasSettings gasSettings)
@@ -291,7 +291,8 @@ public class ConfirmationActivity extends BaseActivity {
                         toAddress,
                         amount.toBigInteger(),
                         gasSettings.gasPrice,
-                        gasSettings.gasLimit);
+                        gasSettings.gasLimit,
+                        chainId);
                 break;
 
             case ERC20:
@@ -301,7 +302,8 @@ public class ConfirmationActivity extends BaseActivity {
                         contractAddress,
                         amount.toBigInteger(),
                         gasSettings.gasPrice,
-                        gasSettings.gasLimit);
+                        gasSettings.gasLimit,
+                        chainId);
                 break;
 
             case ERC875:
@@ -311,11 +313,12 @@ public class ConfirmationActivity extends BaseActivity {
                         contractAddress,
                         amountStr,
                         gasSettings.gasPrice,
-                        gasSettings.gasLimit);
+                        gasSettings.gasLimit,
+                        chainId);
                 break;
 
             case WEB3TRANSACTION:
-                viewModel.signWeb3DAppTransaction(transaction, gasSettings.gasPrice, gasSettings.gasLimit);
+                viewModel.signWeb3DAppTransaction(transaction, gasSettings.gasPrice, gasSettings.gasLimit, chainId);
                 break;
 
             case MARKET:
@@ -330,7 +333,8 @@ public class ConfirmationActivity extends BaseActivity {
                         contractAddress,
                         amountStr,
                         gasSettings.gasPrice,
-                        gasSettings.gasLimit);
+                        gasSettings.gasLimit,
+                        chainId);
                 break;
 
             default:

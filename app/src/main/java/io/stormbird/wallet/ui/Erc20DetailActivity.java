@@ -1,6 +1,9 @@
 package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -78,7 +81,6 @@ public class Erc20DetailActivity extends BaseActivity {
         viewModel.transactionUpdate().observe(this, this::newTransactions);
 
         initViews();
-        viewModel.setToken(token);
     }
 
     private void newTransactions(Transaction[] transactions)
@@ -123,21 +125,34 @@ public class Erc20DetailActivity extends BaseActivity {
         hasDefinition = getIntent().getBooleanExtra(C.EXTRA_HAS_DEFINITION, false);
     }
 
-    private void onTokenData(Token token)
+    private void onTokenData(Token tokenUpdate)
     {
         tokenViewAdapter.clear();
-        if (this.token.checkBalanceChange(token))
+        if (token.checkBalanceChange(tokenUpdate))
         {
             //trigger transaction fetch
-            viewModel.updateTransactions(token);
-            this.token = token; // update token
+            if (tokenUpdate.balanceIncrease(token)) playNotification();
+            viewModel.listenNewTransactions(HISTORY_LENGTH);
+            this.token = tokenUpdate; // update token
         }
-        if (token.addressMatches(myAddress)) {
-            token.setInterfaceSpec(ContractType.ETHEREUM);
-        }
+
         Token[] tokens = {token};
         tokenViewAdapter.setTokens(tokens);
         tokenViewAdapter.notifyDataSetChanged();
+    }
+
+    private void playNotification()
+    {
+        try
+        {
+            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+            r.play();
+        }
+        catch (Exception e)
+        {
+            //empty
+        }
     }
 
     private void onTransactionClick(View view, Transaction transaction) {
@@ -147,15 +162,20 @@ public class Erc20DetailActivity extends BaseActivity {
     private void onTransactions(Transaction[] transactions) {
         progressBar.setVisibility(View.GONE);
         recentTransactionsView.setVisibility(View.VISIBLE);
-        recentTransactionsAdapter.clear();
 
-        int txCount = recentTransactionsAdapter.updateRecentTransactions(transactions, contractAddress, myAddress, HISTORY_LENGTH);
-        
-        if (txCount < 1) {
-            noTransactionsLayout.setVisibility(View.VISIBLE);
-        } else {
+        if (transactions.length > 0)
+        {
+            int txCount = recentTransactionsAdapter.updateRecentTransactions(transactions, contractAddress, myAddress, HISTORY_LENGTH);
             noTransactionsLayout.setVisibility(View.GONE);
             recentTransactionsAdapter.notifyDataSetChanged();
+            if (txCount > 0)
+            {
+                viewModel.listenNewTransactions(0);
+            }
+        }
+        else
+        {
+            noTransactionsLayout.setVisibility(View.VISIBLE);
         }
     }
 
@@ -251,7 +271,7 @@ public class Erc20DetailActivity extends BaseActivity {
         setUpRecentTransactionsView();
         recentTransactionsAdapter.setDefaultWallet(wallet);
         viewModel.updateDefaultBalance(token);
-        viewModel.fetchTransactions(token);
+        viewModel.fetchTransactions(token, HISTORY_LENGTH);
     }
 
     @Override
@@ -264,7 +284,7 @@ public class Erc20DetailActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare();
+        viewModel.prepare(token);
 
         if (token.addressMatches(myAddress)) {
             viewModel.startEthereumTicker(token.tokenInfo.chainId);

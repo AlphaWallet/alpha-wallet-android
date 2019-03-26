@@ -515,7 +515,7 @@ public class TokenRepository implements TokenRepositoryType {
             try
             {
                 List<BigInteger> balanceArray = null;
-                BigDecimal balance = null;
+                BigDecimal balance = BigDecimal.ZERO;
                 TokenInfo tInfo = token.tokenInfo;
                 ContractType interfaceSpec = token.getInterfaceSpec();
                 boolean balanceChanged = false;
@@ -537,6 +537,7 @@ public class TokenRepository implements TokenRepositoryType {
                     case ETHEREUM:
                     case ERC20:
                         balance = wrappedCheckUintBalance(wallet, token.tokenInfo, token);
+                        if (balance.compareTo(BigDecimal.ZERO) < 0) balance = token.balance;
                         balanceChanged = token.checkBalanceChange(balance);
                         break;
                     case OTHER:
@@ -557,6 +558,7 @@ public class TokenRepository implements TokenRepositoryType {
                     updated.setTokenWallet(wallet.address);
                     updated.transferPreviousData(token);
                     updated.balanceChanged = true;
+                    updated.pendingBalance = balance;
                     return updated;
                 }
                 else

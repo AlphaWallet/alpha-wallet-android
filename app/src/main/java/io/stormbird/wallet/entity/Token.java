@@ -767,6 +767,10 @@ public class Token implements Parcelable
 
     public boolean requiresTransactionRefresh()
     {
+        if (balanceChanged == true && tokenInfo.address.equals("0xff5bdabb77d8ab688a38af0da5c394fbd5b808b2"))
+        {
+            System.out.println("yoless");
+        }
         boolean requiresTransactionRefresh = balanceChanged;
         balanceChanged = false;
         if ((hasPositiveBalance() || isEthereum()) && lastBlockCheck == 0) //check transactions for native currency plus tokens with balance

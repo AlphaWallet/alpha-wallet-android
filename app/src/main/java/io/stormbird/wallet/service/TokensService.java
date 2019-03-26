@@ -2,6 +2,7 @@ package io.stormbird.wallet.service;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import android.util.SparseArray;
 import android.util.SparseLongArray;
@@ -24,6 +25,7 @@ public class TokensService
     private boolean loaded;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final List<Integer> networkFilter;
+    private final ConcurrentLinkedQueue<Token> transactionUpdateQueue = new ConcurrentLinkedQueue<>();
     private Token focusToken;
 
     public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository) {
@@ -47,6 +49,8 @@ public class TokensService
             t.balanceUpdateWeight = focusToken.balanceUpdateWeight;
             focusToken = t;
         }
+
+        if (t.requiresTransactionRefresh()) transactionUpdateQueue.add(t);
 
         if (t.isEthereum())
         {
@@ -142,6 +146,11 @@ public class TokensService
         }
 
         return symbol;
+    }
+
+    public Token getRequiresTransactionUpdate()
+    {
+        return transactionUpdateQueue.poll();
     }
 
     public int getTokenDecimals(int chainId, String addr)

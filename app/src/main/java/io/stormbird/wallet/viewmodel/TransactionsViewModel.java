@@ -55,7 +55,6 @@ public class TransactionsViewModel extends BaseViewModel
     @Nullable
     private Disposable queryUnknownTokensDisposable;
 
-    private final ConcurrentLinkedQueue<Token> eventQueue;
     private final ConcurrentLinkedQueue<UnknownToken> unknownTokens;
 
     private Map<String, Transaction> txMap = new HashMap<>();
@@ -83,7 +82,6 @@ public class TransactionsViewModel extends BaseViewModel
         this.setupTokensInteract = setupTokensInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
-        this.eventQueue = new ConcurrentLinkedQueue<>();
         this.unknownTokens = new ConcurrentLinkedQueue<>();
         this.parseTransactions = false;
     }
@@ -132,13 +130,7 @@ public class TransactionsViewModel extends BaseViewModel
     private void checkEvents()
     {
         //see which tokens need checking
-        disposable = Observable.fromCallable(tokensService::getAllLiveTokens)
-                    .flatMapIterable(token -> token)
-                    .filter(Token::requiresTransactionRefresh)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(eventQueue::add, this::onError, this::checkTransactionQueue);
-
+        checkTransactionQueue();
         checkUnknownTokens();
     }
 
@@ -179,22 +171,24 @@ public class TransactionsViewModel extends BaseViewModel
 
     private void checkTransactionQueue()
     {
-        if (fetchTransactionDisposable == null)
-        {
-            Token t = eventQueue.poll();
+        Token t = tokensService.getRequiresTransactionUpdate();
 
-            if (t != null)
-            {
-                Log.d(TAG, "Checking Tx for: " + t.getFullName());
-                NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(t.tokenInfo.chainId);
-                String userAddress = t.isEthereum() ? null : wallet.getValue().address; //only specify address if we're scanning token transactions - not all are relevant to us.
-                fetchTransactionDisposable =
-                        fetchTransactionsInteract.fetchNetworkTransactions(network, t.getAddress(), t.lastBlockCheck, userAddress)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onError, this::checkTransactionQueue);
-            }
+        if (t != null)
+        {
+            Log.d(TAG, "Checking Tx for: " + t.getFullName());
+            NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(t.tokenInfo.chainId);
+            String userAddress = t.isEthereum() ? null : wallet.getValue().address; //only specify address if we're scanning token transactions - not all are relevant to us.
+            fetchTransactionDisposable =
+                    fetchTransactionsInteract.fetchNetworkTransactions(network, t.getAddress(), t.lastBlockCheck, userAddress)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
         }
+    }
+
+    private void onTxError(Throwable throwable)
+    {
+        fetchTransactionDisposable = null;
     }
 
     public LiveData<Wallet> defaultWallet() {

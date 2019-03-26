@@ -18,6 +18,7 @@ import io.stormbird.wallet.ui.widget.entity.SortedItem;
 import io.stormbird.wallet.ui.widget.entity.TokenBalanceSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TokenSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TotalBalanceSortedItem;
+import io.stormbird.wallet.ui.widget.holder.AssetInstanceScriptHolder;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.ui.widget.holder.TotalBalanceHolder;
@@ -109,6 +110,9 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 holder = tokenHolder;
             }
             break;
+            case AssetInstanceScriptHolder.VIEW_TYPE:
+                holder = new AssetInstanceScriptHolder(R.layout.item_iframe_token, parent, null, assetService);
+                break;
             default:
             // NB to save ppl a lot of effort this view doesn't show - item_total_balance has height coded to 1dp.
             case TotalBalanceHolder.VIEW_TYPE: {

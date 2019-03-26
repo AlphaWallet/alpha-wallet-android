@@ -56,3 +56,16 @@ window.web3.eth.getCoinbase = function(cb) {
     return cb(null, addressHex)
 }
 window.web3.eth.defaultAccount = addressHex
+
+window.web3.tokens.data.currentInstance = {
+    name: "Reserve Token",
+    symbol: "RSRV",
+    _count: 1,
+    category: 1,
+    venue: "Pallazo Versache",
+    countryA: "SG",
+    countryB: "MY",
+    match: "11",
+    locality: "Singapore",
+    time: { locale: new Date(), venue: new Date() }
+}

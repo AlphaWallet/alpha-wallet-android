@@ -53,6 +53,13 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         if (token instanceof ERC721Token) setERC721Tokens(token, ticketIds);
     }
 
+    public NonFungibleTokenAdapter(Token token, String displayIds, AssetDefinitionService service)
+    {
+        super(null, service);
+        this.token = token;
+        setTokenRange(token, displayIds);
+    }
+
     @Override
     public BinderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         BinderViewHolder holder = null;
@@ -113,10 +120,16 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     {
         items.beginBatchedUpdates();
         items.clear();
+        int holderType = TokenIdSortedItem.VIEW_TYPE;
+
+        if (assetService.hasTokenView(t.getAddress()))
+        {
+            holderType = AssetInstanceSortedItem.VIEW_TYPE;
+        }
 
         List<BigInteger> idList = t.stringHexToBigIntegerList(ticketIds);
         List<TicketRangeElement> sortedList = generateSortedList(assetService, token, idList); //generate sorted list
-        addSortedItems(sortedList, t, TokenIdSortedItem.VIEW_TYPE); //insert sorted items into view
+        addSortedItems(sortedList, t, holderType); //insert sorted items into view
 
         items.endBatchedUpdates();
     }
@@ -137,7 +150,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         //determine what kind of holder we need:
         int holderType = TokenIdSortedItem.VIEW_TYPE;
 
-        if (t.getAddress().equals("0xa66a3f08068174e8f005112a8b2c7a507a822335"))
+        if (assetService.hasTokenView(t.getAddress()))
         {
             holderType = AssetInstanceSortedItem.VIEW_TYPE;
         }

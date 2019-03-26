@@ -25,10 +25,10 @@ import io.stormbird.wallet.service.TokensService;
 public class Erc20DetailViewModel extends BaseViewModel {
     private static final long CHECK_ETHPRICE_INTERVAL = 5;
 
-    private final MutableLiveData<Double> ethPrice = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
-    private final MutableLiveData<Token> tokenTicker = new MutableLiveData<>();
+    private final MutableLiveData<Token> token = new MutableLiveData<>();
+    private final MutableLiveData<Ticker> tokenTicker = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactionUpdate = new MutableLiveData<>();
 
     private final MyAddressRouter myAddressRouter;
@@ -67,10 +67,6 @@ public class Erc20DetailViewModel extends BaseViewModel {
         transactionFetchCount = 0;
     }
 
-    public LiveData<Double> ethPriceReading() {
-        return ethPrice;
-    }
-
     public void showMyAddress(Context context, Wallet wallet, Token token) {
         myAddressRouter.open(context, wallet, token);
     }
@@ -88,14 +84,14 @@ public class Erc20DetailViewModel extends BaseViewModel {
                             .getEthereumTicker(token.tokenInfo.chainId)
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(ticker -> onTicker(ticker, token), this::onError)).subscribe();
+                            .subscribe(this::onTicker, this::onError)).subscribe();
         }
     }
 
-    private void onTicker(Ticker ticker, Token token) {
+    private void onTicker(Ticker ticker)
+    {
         if (ticker != null && ticker.price_usd != null) {
-            token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), wallet.getValue().address, ticker.price_usd, ticker.percentChange24h, null);
-            this.tokenTicker.postValue(token);
+            this.tokenTicker.postValue(ticker);
         }
     }
 
@@ -186,7 +182,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     }
 
     private void onToken(Token token) {
-        this.tokenTicker.postValue(token);
+        this.token.postValue(token);
         if (transactionFetchCount > 0)
         {
             fetchTransactions(token, transactionFetchCount);
@@ -194,6 +190,10 @@ public class Erc20DetailViewModel extends BaseViewModel {
     }
 
     public LiveData<Token> token() {
+        return token;
+    }
+
+    public LiveData<Ticker> tokenTicker() {
         return tokenTicker;
     }
 

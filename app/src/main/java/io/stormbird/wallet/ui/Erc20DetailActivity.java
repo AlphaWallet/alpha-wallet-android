@@ -22,11 +22,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ContractType;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.router.EthereumInfoRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
@@ -78,9 +74,21 @@ public class Erc20DetailActivity extends BaseActivity {
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.transactions().observe(this, this::onTransactions);
         viewModel.token().observe(this, this::onTokenData);
+        viewModel.tokenTicker().observe(this, this::onTokenTicker);
         viewModel.transactionUpdate().observe(this, this::newTransactions);
 
         initViews();
+    }
+
+    private void onTokenTicker(Ticker ticker)
+    {
+        if (token != null)
+        {
+            token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), token.getAddress(), ticker.price_usd, ticker.percentChange24h, null);
+            Token[] tokens = {token};
+            tokenViewAdapter.setTokens(tokens);
+            tokenViewAdapter.notifyDataSetChanged();
+        }
     }
 
     private void newTransactions(Transaction[] transactions)

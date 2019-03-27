@@ -283,11 +283,14 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     @Override
     public void amountChanged(String newAmount)
     {
-        //generate payment request link
-        //EIP681 format
-        BigDecimal weiAmount = Convert.toWei(newAmount, Convert.Unit.ETHER);
-        EIP681Request request = new EIP681Request(displayAddress, networkInfo.chainId, weiAmount);
-        String eip681String = request.generateRequest();
-        qrImageView.setImageBitmap(QRUtils.createQRImage(this, eip681String, qrImageView.getWidth()));
+        if (newAmount != null && newAmount.length() > 0 && Character.isDigit(newAmount.charAt(0)))
+        {
+            //generate payment request link
+            //EIP681 format
+            BigDecimal weiAmount = Convert.toWei(newAmount, Convert.Unit.ETHER);
+            EIP681Request request = new EIP681Request(displayAddress, networkInfo.chainId, weiAmount);
+            String eip681String = request.generateRequest();
+            qrImageView.setImageBitmap(QRUtils.createQRImage(this, eip681String, qrImageView.getWidth()));
+        }
     }
 }

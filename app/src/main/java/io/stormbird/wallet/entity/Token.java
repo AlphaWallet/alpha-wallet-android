@@ -450,7 +450,7 @@ public class Token implements Parcelable
 
     public boolean checkBalanceChange(Token token)
     {
-        return !getFullBalance().equals(token.getFullBalance());
+        return token != null && !getFullBalance().equals(token.getFullBalance());
     }
 
     public String getPendingDiff()

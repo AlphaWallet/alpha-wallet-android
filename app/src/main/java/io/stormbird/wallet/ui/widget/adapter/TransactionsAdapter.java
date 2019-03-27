@@ -189,15 +189,12 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         notifyDataSetChanged();
     }
 
-    public int updateRecentTransactions(Transaction[] transactions, String contractAddress, String walletAddress, int count)
+    public int updateRecentTransactions(Transaction[] transactions)
     {
-        List<Transaction> txSortList = new ArrayList<>();
-        Collections.addAll(txSortList, transactions);
-
         boolean found;
         int itemsChanged = 0;
         //see if any update required
-        for (Transaction txCheck : txSortList)
+        for (Transaction txCheck : transactions)
         {
             found = false;
             for (int i = 0; i < items.size(); i++) if (txCheck.hash.equals(((TransactionSortedItem)items.get(i)).value.hash)) { found = true; break; }
@@ -207,23 +204,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         if (itemsChanged > 0)
         {
             items.clear();
-            items.beginBatchedUpdates();
-
-            for (Transaction transaction : txSortList)
-            {
-                //check this tx relates to the contract
-                if (transaction.isRelated(contractAddress, walletAddress))
-                {
-                    TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp);
-                    TransactionSortedItem sortedItem = new TransactionSortedItem(
-                            TransactionHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);
-                    items.add(sortedItem);
-                    if (items.size() == count)
-                        break;
-                }
-            }
-
-            items.endBatchedUpdates();
+            addNewTransactions(transactions);
         }
 
         return itemsChanged;

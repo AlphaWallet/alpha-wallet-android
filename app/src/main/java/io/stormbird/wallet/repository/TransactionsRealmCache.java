@@ -56,17 +56,15 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                         .sort("timeStamp", Sort.DESCENDING)
                         .findAll();
 
-                int returnSize = (txs.size() >= count) ? count : txs.size();
-
                 List<Transaction> result = new ArrayList<>();
 
-                int txIndex = 0;
-                while (result.size() < returnSize && txIndex < txs.size())
+                for (RealmTransaction rtx : txs)
                 {
-                    Transaction tx = convert(txs.get(txIndex++));
+                    Transaction tx = convert(rtx);
                     if (tx.isRelated(token.getAddress(), wallet.address))
                     {
                         result.add(tx);
+                        if (result.size() >= 3) break;
                     }
                 }
                 return result.toArray(new Transaction[0]);

@@ -135,6 +135,7 @@ public class Erc20DetailActivity extends BaseActivity {
 
     private void onTokenData(Token tokenUpdate)
     {
+        if (token == null) return;
         tokenViewAdapter.clear();
         if (token.checkBalanceChange(tokenUpdate))
         {
@@ -174,7 +175,7 @@ public class Erc20DetailActivity extends BaseActivity {
 
         if (transactions.length > 0)
         {
-            int txCount = recentTransactionsAdapter.updateRecentTransactions(transactions, contractAddress, myAddress, HISTORY_LENGTH);
+            int txCount = recentTransactionsAdapter.updateRecentTransactions(transactions);
             noTransactionsLayout.setVisibility(View.GONE);
             recentTransactionsAdapter.notifyDataSetChanged();
             if (txCount > 0)

@@ -23,7 +23,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-class JsInjectorClient {
+public class JsInjectorClient {
 
     private static final String DEFAULT_CHARSET = "utf-8";
     private static final String DEFAULT_MIME_TYPE = "text/html";
@@ -39,7 +39,7 @@ class JsInjectorClient {
     //Note: this default RPC is overriden before injection
     private String rpcUrl = EthereumNetworkRepository.MAINNET_RPC_URL;
 
-    JsInjectorClient(Context context) {
+    public JsInjectorClient(Context context) {
         this.context = context;
         this.httpClient = createHttpClient();
     }
@@ -66,12 +66,6 @@ class JsInjectorClient {
 
     public void setRpcUrl(String rpcUrl) {
         this.rpcUrl = rpcUrl;
-    }
-
-    JsInjectorResponse loadUrl(final String url, String userAgent) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("User-Agent", userAgent);
-        return loadUrl(url, headers);
     }
 
     @Nullable
@@ -123,7 +117,7 @@ class JsInjectorClient {
         return injectJS(html, js);
     }
 
-    private String injectJS(String html, String js) {
+    public static String injectJS(String html, String js) {
         if (TextUtils.isEmpty(html)) {
             return html;
         }
@@ -136,7 +130,7 @@ class JsInjectorClient {
         return html;
     }
 
-    private int getInjectionPosition(String body) {
+    private static int getInjectionPosition(String body) {
         body = body.toLowerCase();
         int ieDetectTagIndex = body.indexOf("<!--[if");
         int scriptTagIndex = body.indexOf("<script");

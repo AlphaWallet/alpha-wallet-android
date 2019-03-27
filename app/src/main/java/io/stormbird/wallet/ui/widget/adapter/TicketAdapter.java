@@ -269,19 +269,7 @@ public class TicketAdapter extends TokensAdapter {
                     "\n" +
                     "          function startup() {\n" +
                     "          if (typeof web3 == \"undefined\") {\n" +
-                    "            const hardcodedCurrentTokenInstance = {\n" +
-                    "              name: \"Reserve Token\",\n" +
-                    "              symbol: \"RSRV\",\n" +
-                    "              _count: 1,\n" +
-                    "              category: 1,\n" +
-                    "              venue: \"VENUE\",\n" +
-                    "              countryA: \"SG\",\n" +
-                    "              countryB: \"MY\",\n" +
-                    "              match: \"11\",\n" +
-                    "              locality: \"Singapore\",\n" +
-                    "\t\t\t  time: { locale: new Date(), venue: new Date() },\n" +
-                    "            }\n" +
-                    "            const instance = new Token(hardcodedCurrentTokenInstance)\n" +
+                    "            const instance = new Token(web3.tokens.data.currentInstance)\n" +
                     "            const domHtml = instance.render()\n" +
                     "            document.getElementById('root').innerHTML = domHtml\n" +
                     "          } else {\n" +

@@ -790,6 +790,11 @@ public class Token implements Parcelable
         return transaction.from.equalsIgnoreCase(tokenWallet);
     }
 
+    public String getWallet()
+    {
+        return tokenWallet;
+    }
+
     public String pruneIDList(String ticketIds, int quantity)
     {
         return "";

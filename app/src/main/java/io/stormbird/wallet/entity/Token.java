@@ -33,7 +33,6 @@ public class Token implements Parcelable
     public BigDecimal balance;
     public BigDecimal pendingBalance;
     public long updateBlancaTime;
-    public boolean balanceIsLive = false;
     private String tokenWallet;
     private boolean requiresAuxRefresh = true;
     protected ContractType contractType;
@@ -83,6 +82,7 @@ public class Token implements Parcelable
         int readType = in.readInt();
         shortNetworkName = in.readString();
         pendingBalance = new BigDecimal(in.readString());
+        tokenWallet = in.readString();
         balanceChanged = false;
         if (readType <= ContractType.CREATION.ordinal())
         {
@@ -146,6 +146,7 @@ public class Token implements Parcelable
         dest.writeInt(contractType.ordinal());
         dest.writeString(shortNetworkName);
         dest.writeString(pendingBalance == null ? "0" : pendingBalance.toString());
+        dest.writeString(tokenWallet);
         int size = (auxData == null ? 0 : auxData.size());
         dest.writeInt(size);
         if (size > 0)
@@ -432,7 +433,7 @@ public class Token implements Parcelable
 
     public boolean checkTokenWallet(String address)
     {
-        return tokenWallet.equalsIgnoreCase(address);
+        return tokenWallet != null && tokenWallet.equalsIgnoreCase(address);
     }
 
     public void setTokenWallet(String address)
@@ -460,7 +461,9 @@ public class Token implements Parcelable
             String prefix = "";
             BigDecimal diff = pendingBalance.subtract(balance);
             if (diff.compareTo(BigDecimal.ZERO) > 0) prefix = "+";
-            return prefix + getScaledValue(diff, tokenInfo.decimals);
+            String diffStr = prefix + getScaledValue(diff, tokenInfo.decimals);
+            if (diffStr.startsWith("~")) diffStr = null;
+            return diffStr;
         }
     }
 
@@ -577,7 +580,7 @@ public class Token implements Parcelable
         {
             return "0";
         }
-        if (value.compareTo(BigDecimal.valueOf(0.0001)) < 0)
+        if (value.abs().compareTo(BigDecimal.valueOf(0.0001)) < 0)
         {
             return "~0.00"; // very small amount of eth
         }
@@ -767,10 +770,6 @@ public class Token implements Parcelable
 
     public boolean requiresTransactionRefresh()
     {
-        if (balanceChanged == true && tokenInfo.address.equals("0xff5bdabb77d8ab688a38af0da5c394fbd5b808b2"))
-        {
-            System.out.println("yoless");
-        }
         boolean requiresTransactionRefresh = balanceChanged;
         balanceChanged = false;
         if ((hasPositiveBalance() || isEthereum()) && lastBlockCheck == 0) //check transactions for native currency plus tokens with balance

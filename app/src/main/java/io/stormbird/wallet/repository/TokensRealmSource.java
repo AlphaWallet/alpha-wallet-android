@@ -462,6 +462,10 @@ public class TokensRealmSource implements TokenLocalSource {
                             realm.beginTransaction();
                             token.setRealmLastBlock(realmToken);
                         }
+                        else
+                        {
+                            saveToken(wallet, token, new Date());
+                        }
                     }
 
                     @Override
@@ -507,6 +511,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 token.setRealmBalance(realmToken);
                 token.setRealmInterfaceSpec(realmToken);
                 token.setRealmAuxData(realmToken);
+                token.setRealmLastBlock(realmToken);
                 realmToken.setEnabled(true);
                 realmToken.setChainId(token.tokenInfo.chainId);
                 realm.commitTransaction();

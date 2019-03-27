@@ -43,7 +43,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     private SystemView systemView;
     private TransactionsAdapter adapter;
     private Dialog dialog;
-    private FragmentMessenger homeMessager;
 
     private boolean isVisible = false;
     private boolean firstView = true;
@@ -202,9 +201,9 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     public void resetTokens()
     {
         //first abort the current operation
-        //viewModel.abortAndRestart(true);
         adapter.clear();
         list.setAdapter(adapter);
+        viewModel.clearProcesses();
     }
 
     @Override
@@ -219,23 +218,18 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         //need to refresh the transaction view
         adapter.clear();
         list.setAdapter(adapter);
-        viewModel.abortAndRestart(true);
+        viewModel.clearProcesses();
     }
 
     private void clearAdapter(Boolean aBoolean)
     {
         adapter.clear();
         list.setAdapter(adapter);
-        viewModel.abortAndRestart(false);
+        viewModel.clearProcesses();
     }
 
     private void refreshAdapter(Boolean aBoolean)
     {
         adapter.notifyDataSetChanged();
-    }
-
-    public void setInterface(FragmentMessenger messenger)
-    {
-        homeMessager = messenger;
     }
 }

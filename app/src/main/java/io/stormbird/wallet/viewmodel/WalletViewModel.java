@@ -55,11 +55,11 @@ public class WalletViewModel extends BaseViewModel
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
-    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final MutableLiveData<Map<String, String>> defaultWalletBalance = new MutableLiveData<>();
+    private final MutableLiveData<Map<String, String>> currentWalletBalance = new MutableLiveData<>();
 
     private boolean isVisible = false;
     private int openSeaCheckCounter;
+    private Wallet currentWallet;
 
     private ConcurrentLinkedQueue<ContractResult> unknownAddresses;
 
@@ -124,6 +124,7 @@ public class WalletViewModel extends BaseViewModel
         }
         terminateBalanceUpdate();
         tokensService.clearTokens();
+        currentWallet = null;
     }
 
     private void terminateBalanceUpdate()
@@ -149,11 +150,11 @@ public class WalletViewModel extends BaseViewModel
 
     public void fetchTokens()
     {
-        if (defaultWallet.getValue() != null)
+        if (currentWallet != null)
         {
             openSeaCheckCounter = 0;
-            tokensService.setCurrentAddress(defaultWallet.getValue().address);
-            updateTokens = fetchTokensInteract.fetchStoredWithEth(defaultWallet.getValue())
+            tokensService.setCurrentAddress(currentWallet.address);
+            updateTokens = fetchTokensInteract.fetchStoredWithEth(currentWallet)
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onTokens, this::onTokenFetchError, this::fetchAllKnownContracts);
@@ -167,6 +168,7 @@ public class WalletViewModel extends BaseViewModel
 
     private void onTokens(Token[] cachedTokens)
     {
+        tokensService.randomiseInitialPressure(cachedTokens);
         tokensService.addTokens(cachedTokens);
         tokens.postValue(tokensService.getAllLiveTokens().toArray(new Token[0]));
     }
@@ -194,7 +196,7 @@ public class WalletViewModel extends BaseViewModel
     private void fetchFromOpensea(NetworkInfo checkNetwork)
     {
         Log.d("OPENSEA", "Fetch from opensea : " + checkNetwork.getShortName());
-        updateTokens = openseaService.getTokens(defaultWallet.getValue().address, checkNetwork.chainId, checkNetwork.getShortName())
+        updateTokens = openseaService.getTokens(currentWallet.address, checkNetwork.chainId, checkNetwork.getShortName())
                 //openseaService.getTokens("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -213,7 +215,7 @@ public class WalletViewModel extends BaseViewModel
             tokens.postValue(erc721Tokens);
 
             //store these tokens
-            updateTokens = addTokenInteract.addERC721(defaultWallet.getValue(), erc721Tokens)
+            updateTokens = addTokenInteract.addERC721(currentWallet, erc721Tokens)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::storedTokens, this::onError);
@@ -255,13 +257,19 @@ public class WalletViewModel extends BaseViewModel
     {
         if (balanceTimerDisposable == null || balanceTimerDisposable.isDisposed())
         {
-            balanceTimerDisposable = Observable.interval(0, 1, TimeUnit.SECONDS)
+            balanceTimerDisposable = Observable.interval(0, 500, TimeUnit.MILLISECONDS)
                     .doOnNext(l -> checkBalances()).subscribe();
         }
     }
 
     private void checkBalances()
     {
+        if (!currentWallet.address.equals(tokensService.getCurrentAddress())
+                && balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed())
+        {
+            balanceTimerDisposable.dispose();
+            balanceTimerDisposable = null;
+        }
         tokensService.updateTokenPressure(isVisible);
         checkTokenUpdates();
         checkUnknownAddresses();
@@ -270,18 +278,18 @@ public class WalletViewModel extends BaseViewModel
 
     private void checkTokenUpdates()
     {
-        if (balanceCheckDisposable == null)
+        if (balanceCheckDisposable == null || balanceCheckDisposable.isDisposed())
         {
-            Token t = tokensService.getNextSelection();
+            Token t = tokensService.getNextInBalanceUpdateQueue();
 
             if (t != null)
             {
                 Log.d("TOKEN", "Updating: " + t.tokenInfo.name + " : " + t.getAddress() + " [" + t.balanceUpdateWeight + "]");
-                balanceCheckDisposable = fetchTokensInteract.updateDefaultBalance(t, defaultWallet.getValue())
-                    .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onTokenUpdate, this::tkError, this::checkComplete);
+                balanceCheckDisposable = fetchTokensInteract.updateDefaultBalance(t, currentWallet)
+                        .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onTokenUpdate, this::balanceUpdateError, this::checkComplete);
             }
         }
     }
@@ -290,7 +298,11 @@ public class WalletViewModel extends BaseViewModel
     {
         balanceCheckDisposable = null;
         checkUIUpdates();
-        checkTokenUpdates(); //keep checking the current queue until empty
+    }
+
+    private void balanceUpdateError(Throwable throwable)
+    {
+        balanceCheckDisposable = null;
     }
 
     private void checkUIUpdates()
@@ -305,8 +317,8 @@ public class WalletViewModel extends BaseViewModel
 
     private void onTokenUpdate(Token token)
     {
-        tokenUpdate.postValue(token);
-        tokensService.addToken(token);
+        Token update = tokensService.addToken(token);
+        if (update != null) tokenUpdate.postValue(update);
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -342,15 +354,15 @@ public class WalletViewModel extends BaseViewModel
     @Override
     public void showSendToken(Context context, String address, String symbol, int decimals, Token token) {
         boolean isToken = true;
-        if (address.equalsIgnoreCase(defaultWallet().getValue().address)) isToken = false;
-        sendTokenRouter.open(context, address, symbol, decimals, isToken, defaultWallet.getValue(), token);
+        if (address.equalsIgnoreCase(currentWallet.address)) isToken = false;
+        sendTokenRouter.open(context, address, symbol, decimals, isToken, currentWallet, token);
     }
 
     @Override
     public void showErc20TokenDetail(Context context, String address, String symbol, int decimals, Token token) {
-        boolean isToken = !address.equalsIgnoreCase(defaultWallet().getValue().address);
+        boolean isToken = !address.equalsIgnoreCase(currentWallet.address);
         boolean hasDefinition = assetDefinitionService.hasDefinition(address);
-        erc20DetailRouter.open(context, address, symbol, decimals, isToken, defaultWallet.getValue(), token, hasDefinition);
+        erc20DetailRouter.open(context, address, symbol, decimals, isToken, currentWallet, token, hasDefinition);
     }
 
     @Override
@@ -358,18 +370,14 @@ public class WalletViewModel extends BaseViewModel
         assetDisplayRouter.open(context, token);
     }
 
-    public LiveData<Wallet> defaultWallet() {
-        return defaultWallet;
-    }
-
-    public LiveData<Map<String, String>> defaultWalletBalance() {
-        return defaultWalletBalance;
+    public LiveData<Map<String, String>> currentWalletBalance() {
+        return currentWalletBalance;
     }
 
     public void prepare()
     {
         if (unknownAddresses == null) unknownAddresses = new ConcurrentLinkedQueue<>();
-        if (defaultWallet.getValue() == null)
+        if (currentWallet == null)
         {
             progress.postValue(true);
             disposable = findDefaultWalletInteract
@@ -389,7 +397,7 @@ public class WalletViewModel extends BaseViewModel
 
     private void onDefaultWallet(Wallet wallet) {
         tokensService.setCurrentAddress(wallet.address);
-        defaultWallet.setValue(wallet);
+        currentWallet = wallet;
         fetchTokens();
     }
 
@@ -431,7 +439,7 @@ public class WalletViewModel extends BaseViewModel
     private void resolvedToken(TokenInfo info)
     {
         disposable = fetchTransactionsInteract.queryInterfaceSpecForService(info)
-                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.chainId, tokenInfo.address), defaultWallet.getValue()))
+                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.chainId, tokenInfo.address), currentWallet))
                 .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

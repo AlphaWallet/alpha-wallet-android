@@ -850,10 +850,6 @@ public class TokenRepository implements TokenRepositoryType {
                 }
                 name = new String(data, "UTF-8");
             }
-            else
-            {
-                System.out.println("yoless");
-            }
         }
 
         return name;

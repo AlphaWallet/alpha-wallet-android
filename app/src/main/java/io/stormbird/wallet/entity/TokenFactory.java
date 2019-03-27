@@ -128,7 +128,6 @@ public class TokenFactory
                                       true,
                                       tokenInfo.chainId),
                         BigDecimal.ZERO, currentTime, networkName, type);
-                thisToken.pendingBalance = BigDecimal.ZERO;
                 break;
         }
 

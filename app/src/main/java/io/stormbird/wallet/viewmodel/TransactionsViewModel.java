@@ -58,7 +58,6 @@ public class TransactionsViewModel extends BaseViewModel
     private final ConcurrentLinkedQueue<UnknownToken> unknownTokens;
 
     private Map<String, Transaction> txMap = new HashMap<>();
-    private boolean hasNewTransactions;
     private boolean parseTransactions;
 
     TransactionsViewModel(
@@ -90,31 +89,28 @@ public class TransactionsViewModel extends BaseViewModel
     protected void onCleared()
     {
         super.onCleared();
-
-        if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
-        {
-            fetchTransactionDisposable.dispose();
-        }
-
-        if (eventTimer != null && !eventTimer.isDisposed())
-        {
-            eventTimer.dispose();
-        }
-
-        if (queryUnknownTokensDisposable != null && !queryUnknownTokensDisposable.isDisposed())
-        {
-            queryUnknownTokensDisposable.dispose();
-        }
+        clearProcesses();
     }
 
-    public void abortAndRestart(boolean refreshCache)
+    public void clearProcesses()
     {
         if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed())
         {
             fetchTransactionDisposable.dispose();
         }
-
         fetchTransactionDisposable = null;
+
+        if (eventTimer != null && !eventTimer.isDisposed())
+        {
+            eventTimer.dispose();
+        }
+        eventTimer = null;
+
+        if (queryUnknownTokensDisposable != null && !queryUnknownTokensDisposable.isDisposed())
+        {
+            queryUnknownTokensDisposable.dispose();
+        }
+        queryUnknownTokensDisposable = null;
     }
 
     private void startEventTimer()
@@ -218,7 +214,6 @@ public class TransactionsViewModel extends BaseViewModel
     private void fetchTransactions(Wallet wallet)
     {
         showEmpty.postValue(false);
-        hasNewTransactions = false;
         //first load transactions from storage, then start the event timer once loaded
         if (fetchTransactionDisposable == null)
         {
@@ -265,19 +260,24 @@ public class TransactionsViewModel extends BaseViewModel
     {
         Log.d("TRANSACTION", "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
         List<Transaction> newTxs = new ArrayList<>();
+        boolean blockNumberUpdate = false;
 
         for (Transaction tx : transactions)
         {
             if (!txMap.containsKey(tx.hash))
             {
                 newTxs.add(tx);
-                Long blockNumber = Long.valueOf(tx.blockNumber);
                 txMap.put(tx.hash, tx);
-                if (blockNumber > token.lastBlockCheck) token.lastBlockCheck = blockNumber;
+            }
+            Long blockNumber = Long.valueOf(tx.blockNumber);
+            if (blockNumber > token.lastBlockCheck)
+            {
+                token.lastBlockCheck = blockNumber;
+                blockNumberUpdate = true;
             }
         }
 
-        if (txMap.size() > 0)
+        if (newTxs.size() > 0)
         {
             Log.d(TAG, "Found " + transactions.length + " Network transactions");
             newTransactions.postValue(newTxs.toArray(new Transaction[0]));
@@ -286,6 +286,10 @@ public class TransactionsViewModel extends BaseViewModel
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(txs -> siftUnknownTransactions(txs, token), this::onError);
+        }
+
+        if (token.lastBlockCheck == 1 || blockNumberUpdate)
+        {
             addTokenInteract.updateBlockRead(token, defaultWallet().getValue());
         }
 

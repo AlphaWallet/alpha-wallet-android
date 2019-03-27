@@ -1,17 +1,18 @@
 package io.stormbird.wallet.service;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import android.util.SparseArray;
-import android.util.SparseLongArray;
-import io.reactivex.Observable;
 import io.stormbird.wallet.entity.ContractResult;
 import io.stormbird.wallet.entity.ContractType;
 import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static io.stormbird.wallet.C.ETHER_DECIMALS;
 
@@ -21,16 +22,15 @@ public class TokensService
     private static final Map<String, SparseArray<ContractType>> interfaceSpecMap = new ConcurrentHashMap<>();
     private final Map<Integer, Token> currencies = new ConcurrentHashMap<>();
     private String currentAddress = null;
-    private Token nextSelection;
     private boolean loaded;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final List<Integer> networkFilter;
     private final ConcurrentLinkedQueue<Token> transactionUpdateQueue = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<Token> balanceUpdateQueue = new ConcurrentLinkedQueue<>();
     private Token focusToken;
 
     public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
-        nextSelection = null;
         loaded = false;
         networkFilter = new ArrayList<>(10);
         setupFilter();
@@ -44,25 +44,34 @@ public class TokensService
      */
     public Token addToken(Token t)
     {
-        if (t.equals(focusToken))
+        if (t.checkTokenWallet(currentAddress))
         {
-            t.balanceUpdateWeight = focusToken.balanceUpdateWeight;
-            focusToken = t;
+            if (t.equals(focusToken))
+            {
+                t.balanceUpdateWeight = focusToken.balanceUpdateWeight;
+                focusToken = t;
+            }
+
+            if (t.requiresTransactionRefresh())
+            {
+                transactionUpdateQueue.add(t);
+            }
+
+            if (t.isEthereum())
+            {
+                currencies.put(t.tokenInfo.chainId, t);
+                //if (t.tokenInfo.chainId == 1) addToken(1, t);
+            }
+            else
+            {
+                addToken(t.tokenInfo.chainId, t);
+            }
+            return t;
         }
-
-        if (t.requiresTransactionRefresh()) transactionUpdateQueue.add(t);
-
-        if (t.isEthereum())
+        else
         {
-            currencies.put(t.tokenInfo.chainId, t);
-            //if (t.tokenInfo.chainId == 1) addToken(1, t);
+            return null;
         }
-        else if (t.checkTokenWallet(currentAddress))
-        {
-            addToken(t.tokenInfo.chainId, t);
-        }
-
-        return t;
     }
 
     private void addToken(int chainId, Token t)
@@ -171,6 +180,8 @@ public class TokensService
         currentAddress = "";
         currencies.clear();
         tokenMap.clear();
+        transactionUpdateQueue.clear();
+        balanceUpdateQueue.clear();
     }
 
     public List<Token> getAllTokens()
@@ -398,28 +409,34 @@ public class TokensService
             t.updateBalanceCheckPressure(isVisible);
         }
 
-        if (highestPressure > 10.0f)
+        if (highestPressure > 20.0f)
         {
-            nextSelection = highestPressureToken;
-        }
-        else
-        {
-            nextSelection = null;
+            if (!balanceUpdateQueue.contains(highestPressureToken))
+            {
+                balanceUpdateQueue.add(highestPressureToken);
+            }
+            highestPressureToken.balanceUpdatePressure = 0.0f;
         }
     }
 
-    public Token getNextSelection()
+    public Token getNextInBalanceUpdateQueue()
     {
-        Token next = nextSelection;
-        if (next != null) next.balanceUpdatePressure = 0.0f;
-        nextSelection = null;
-        return next;
+        Token queueToken = balanceUpdateQueue.poll();
+        if (queueToken != null)
+        {
+            return getToken(queueToken.tokenInfo.chainId, queueToken.getAddress());
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public void setFocusToken(Token token)
     {
         focusToken = token;
         focusToken.setFocus(true);
+        addToken(focusToken);
     }
 
     public void clearFocusToken()
@@ -431,6 +448,14 @@ public class TokensService
     public boolean checkHasLoaded()
     {
         return loaded;
+    }
+
+    public void randomiseInitialPressure(Token[] cachedTokens)
+    {
+        for (Token t : cachedTokens)
+        {
+            t.balanceUpdatePressure += (float)(Math.random()*15.0f);
+        }
     }
 
     //    public long getLastTransactionFetch(int chainId, String address)

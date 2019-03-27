@@ -174,18 +174,15 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     public void updateDefaultBalance(Token token) {
         getBalanceDisposable = Observable.interval(CHECK_ETHPRICE_INTERVAL, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> fetchTokensInteract
-                        .fetchStoredToken(findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId), wallet.getValue(), token.getAddress())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onToken, this::onError)).subscribe();
+                .doOnNext(l -> updateToken(token)).subscribe();
     }
 
-    private void onToken(Token token) {
-        this.token.postValue(token);
+    private void updateToken(Token t) {
+        Token update = tokensService.getToken(t.tokenInfo.chainId, t.getAddress());
+        this.token.postValue(update);
         if (transactionFetchCount > 0)
         {
-            fetchTransactions(token, transactionFetchCount);
+            fetchTransactions(update, transactionFetchCount);
         }
     }
 

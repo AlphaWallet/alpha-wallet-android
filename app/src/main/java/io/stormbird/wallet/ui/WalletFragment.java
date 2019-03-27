@@ -84,7 +84,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         viewModel.tokens().observe(this, this::onTokens);
         viewModel.total().observe(this, this::onTotal);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
-        viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
+        viewModel.currentWalletBalance().observe(this, this::onBalanceChanged);
         viewModel.refreshTokens().observe(this, this::refreshTokens);
         viewModel.tokenUpdate().observe(this, this::onToken);
         viewModel.tokensReady().observe(this, this::tokensReady);

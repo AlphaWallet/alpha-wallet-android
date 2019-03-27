@@ -144,6 +144,7 @@ public class Erc20DetailActivity extends BaseActivity {
             this.token = tokenUpdate; // update token
         }
 
+        token = tokenUpdate;
         Token[] tokens = {token};
         tokenViewAdapter.setTokens(tokens);
         tokenViewAdapter.notifyDataSetChanged();

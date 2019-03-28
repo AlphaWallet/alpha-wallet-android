@@ -34,7 +34,7 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.ui.widget.adapter.TicketAdapter;
+import io.stormbird.wallet.ui.widget.adapter.NonFungibleTokenAdapter;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.viewmodel.SellDetailModel;
 import io.stormbird.wallet.viewmodel.SellDetailModelFactory;
@@ -69,7 +69,7 @@ public class SellDetailActivity extends BaseActivity {
     private Token token;
     private Wallet wallet;
     private TicketRange ticketRange;
-    private TicketAdapter adapter;
+    private NonFungibleTokenAdapter adapter;
     private String ticketIds;
     private String prunedIds;
     private double ethToUsd;
@@ -123,7 +123,7 @@ public class SellDetailActivity extends BaseActivity {
 
         //we should import a token and a list of chosen ids
         list = findViewById(R.id.listTickets);
-        adapter = new TicketAdapter(this::onTokenClick, token, ticketIds, viewModel.getAssetDefinitionService(), null);
+        adapter = new NonFungibleTokenAdapter(this::onTokenClick, token, ticketIds, viewModel.getAssetDefinitionService(), null);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 

@@ -31,12 +31,12 @@ import io.stormbird.wallet.ui.widget.holder.*;
  * Created by James on 9/02/2018.
  */
 
-public class TicketAdapter extends TokensAdapter {
+public class NonFungibleTokenAdapter extends TokensAdapter {
     TicketRange currentRange = null;
     final Token token;
     protected OpenseaService openseaService;
 
-    public TicketAdapter(OnTokenClickListener tokenClickListener, Token t, AssetDefinitionService service, OpenseaService opensea) {
+    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, AssetDefinitionService service, OpenseaService opensea) {
         super(tokenClickListener, service);
         token = t;
         openseaService = opensea;
@@ -44,7 +44,7 @@ public class TicketAdapter extends TokensAdapter {
         if (t instanceof ERC721Token) setERC721Tokens(t, null);
     }
 
-    public TicketAdapter(OnTokenClickListener tokenClickListener, Token token, String ticketIds, AssetDefinitionService service, OpenseaService opensea)
+    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token token, String ticketIds, AssetDefinitionService service, OpenseaService opensea)
     {
         super(tokenClickListener, service);
         this.token = token;

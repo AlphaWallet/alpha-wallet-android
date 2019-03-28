@@ -20,7 +20,7 @@ import io.stormbird.wallet.entity.FinishReceiver;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenInfo;
-import io.stormbird.wallet.ui.widget.adapter.TicketAdapter;
+import io.stormbird.wallet.ui.widget.adapter.NonFungibleTokenAdapter;
 import io.stormbird.wallet.viewmodel.AssetDisplayViewModel;
 import io.stormbird.wallet.viewmodel.AssetDisplayViewModelFactory;
 import io.stormbird.wallet.widget.ProgressView;
@@ -47,7 +47,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
     private RecyclerView list;
     private FinishReceiver finishReceiver;
     private Token token;
-    private TicketAdapter adapter;
+    private NonFungibleTokenAdapter adapter;
     private String balance = null;
 
     @Override
@@ -82,7 +82,7 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.ticket().observe(this, this::onTokenUpdate);
 
-        adapter = new TicketAdapter(this::onTokenClick, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
+        adapter = new NonFungibleTokenAdapter(this::onTokenClick, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
         if (token instanceof ERC721Token)
         {
             findViewById(R.id.button_use).setVisibility(View.GONE);

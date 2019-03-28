@@ -13,28 +13,25 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
-
+import dagger.android.AndroidInjection;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.entity.FinishReceiver;
+import io.stormbird.wallet.entity.SignaturePair;
+import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.adapter.TicketAdapter;
 import io.stormbird.wallet.ui.widget.entity.TicketRangeParcel;
 import io.stormbird.wallet.viewmodel.RedeemSignatureDisplayModel;
 import io.stormbird.wallet.viewmodel.RedeemSignatureDisplayModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
-import io.stormbird.wallet.widget.SystemView;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjection;
-
-import static io.stormbird.wallet.C.Key.TICKET;
-import static io.stormbird.wallet.C.Key.TICKET_RANGE;
-import static io.stormbird.wallet.C.Key.WALLET;
+import static io.stormbird.wallet.C.Key.*;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
 
 /**
@@ -49,7 +46,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     @Inject
     protected RedeemSignatureDisplayModelFactory redeemSignatureDisplayModelFactory;
     private RedeemSignatureDisplayModel viewModel;
-    private SystemView systemView;
 
     private FinishReceiver finishReceiver;
 

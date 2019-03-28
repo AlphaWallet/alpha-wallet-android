@@ -154,9 +154,9 @@ public class Transaction implements Parcelable {
 		TransactionOperation operation = operations == null
 				|| operations.length == 0 ? null : operations[0];
 
-		if (walletAddress.equals(contractAddress)) //transactions sent from the main currency account
+		if (walletAddress.equals(contractAddress)) //transactions sent from or sent to the main currency account
 		{
-			if (from.equals(walletAddress)) return true;
+			return from.equals(walletAddress) || to.equals(walletAddress);
 		}
 		else
 		{

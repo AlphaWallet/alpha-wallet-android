@@ -179,7 +179,6 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         items.beginBatchedUpdates();
         for (Transaction transaction : transactions)
         {
-            //check this tx relates to the contract
             TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp);
             TransactionSortedItem sortedItem = new TransactionSortedItem(
                     TransactionHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);
@@ -197,14 +196,19 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         for (Transaction txCheck : transactions)
         {
             found = false;
-            for (int i = 0; i < items.size(); i++) if (txCheck.hash.equals(((TransactionSortedItem)items.get(i)).value.hash)) { found = true; break; }
+            for (int i = 0; i < items.size(); i++)
+            {
+                if (items.get(i).viewType == TransactionHolder.VIEW_TYPE
+                    && txCheck.hash.equals(((TransactionSortedItem)items.get(i)).value.hash))
+                { found = true; break; }
+            }
             if (!found) itemsChanged++;
         }
 
         if (itemsChanged > 0)
         {
             items.clear();
-            addNewTransactions(transactions);
+            addTransactions(transactions);
         }
 
         return itemsChanged;

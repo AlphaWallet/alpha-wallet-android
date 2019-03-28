@@ -84,6 +84,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         initViewModel();
         getInfo();
         getPreviousMode();
+        setupContractData();
 
         viewModel.prepare();
     }
@@ -250,7 +251,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
             {
                 getInfo();
                 qrImageView.setImageBitmap(QRUtils.createQRImage(this, displayAddress, qrImageView.getWidth()));
-                qrImageView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
+                //qrImageView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in)); //<-- check if this is causing the load delay
             }
             else
             {
@@ -268,6 +269,29 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         titleView.setText(R.string.my_wallet_address);
         copyButton.setText(R.string.copy_wallet_address);
         address.setText(displayAddress);
+    }
+
+    private void setupContractData()
+    {
+        if (token != null && !token.isEthereum())
+        {
+            findViewById(R.id.text_contract_address).setVisibility(View.VISIBLE);
+            findViewById(R.id.layout_contract).setVisibility(View.VISIBLE);
+            TextView contractAddress = findViewById(R.id.contract_address);
+            Button contractCopy = findViewById(R.id.copy_contract_action);
+            contractAddress.setText(token.getAddress());
+            contractCopy.setOnClickListener(v -> copyContract());
+        }
+    }
+
+    private void copyContract()
+    {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, token.getAddress());
+        if (clipboard != null) {
+            clipboard.setPrimaryClip(clip);
+        }
+        Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
     }
 
     @Override

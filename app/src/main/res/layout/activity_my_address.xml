@@ -117,5 +117,56 @@
             android:layout_marginTop="@dimen/big_margin"
             android:src="@drawable/ic_autorenew_black_24dp" />
 
+        <TextView
+            android:id="@+id/text_contract_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/contract_address"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="5dp"
+            android:fontFamily="@font/font_regular"
+            android:textAllCaps="true"
+            android:textColor="@color/light_gray"
+            android:visibility="gone"
+            android:textSize="10sp"/>
+
+        <LinearLayout
+            android:id="@+id/layout_contract"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/background_quantity"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/contract_address"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/background_round_grey"
+                android:fontFamily="@font/font_semibold"
+                android:gravity="center"
+                android:padding="5dp"
+                android:text=""
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/copy_contract_action"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/background_round_primary"
+                android:fontFamily="@font/font_regular"
+                android:text="Copy"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
     </LinearLayout>
 </LinearLayout>

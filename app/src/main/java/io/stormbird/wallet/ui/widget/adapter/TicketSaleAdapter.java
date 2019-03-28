@@ -38,7 +38,7 @@ import io.stormbird.wallet.ui.widget.holder.TransferHeaderHolder;
  * Created by James on 12/02/2018.
  */
 
-public class TicketSaleAdapter extends TicketAdapter {
+public class TicketSaleAdapter extends NonFungibleTokenAdapter {
 
     private OnTokenCheckListener onTokenCheckListener;
     private TicketRange selectedTicketRange;

@@ -26,7 +26,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
-import io.stormbird.wallet.ui.widget.adapter.TicketAdapter;
+import io.stormbird.wallet.ui.widget.adapter.NonFungibleTokenAdapter;
 import io.stormbird.wallet.ui.widget.entity.ENSHandler;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
@@ -77,7 +77,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private FinishReceiver finishReceiver;
 
     private Token token;
-    private TicketAdapter adapter;
+    private NonFungibleTokenAdapter adapter;
 
     private TextView titleText;
     private TextView toAddressError;
@@ -147,7 +147,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new TicketAdapter(this::onTokenClick, token, ticketIds, viewModel.getAssetDefinitionService(), null);
+        adapter = new NonFungibleTokenAdapter(this::onTokenClick, token, ticketIds, viewModel.getAssetDefinitionService(), null);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 

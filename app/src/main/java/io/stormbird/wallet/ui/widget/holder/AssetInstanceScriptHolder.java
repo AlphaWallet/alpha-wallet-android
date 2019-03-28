@@ -122,11 +122,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
 
         if (name.equals("time"))
         {
-            //DateFormat date = android.text.format.DateFormat.getMediumDateFormat(ctx);
-            //DateFormat time = android.text.format.DateFormat.getTimeFormat(ctx);
             DateTime dt = DateTimeFactory.getDateTime(value);
-            //SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyy-mm-dd hh:mm");
-            //String dateStr = dateFormat.parse(dt);
             value = "{ venue: new Date(" + dt.toEpoch() + ") }";// ((DateTime) dt).toString();
             attrs.append(value);
         }
@@ -171,6 +167,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     }
 
 
+    //TODO: Get this from XML
     static final String tokenDisplay = "<html>\n" +
             "<head>\n" +
             "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1,  maximum-scale=1, shrink-to-fit=no\">\n" +

@@ -43,4 +43,16 @@ public class TicketRange
             tokenIds = tokenIds.subList(0, count);
         }
     }
+
+    public boolean equals(TicketRange compare)
+    {
+        if (compare == null || compare.tokenIds.size() != tokenIds.size()) return false;
+        for (int i = 0; i < tokenIds.size(); i++)
+        {
+            BigInteger id = tokenIds.get(i);
+            if (!id.equals(compare.tokenIds.get(i))) return false;
+        }
+
+        return true;
+    }
 }

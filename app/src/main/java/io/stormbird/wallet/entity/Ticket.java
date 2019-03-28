@@ -638,7 +638,8 @@ public class Ticket extends Token implements Parcelable
         return isDynamic;
     }
 
-    private String getTokenTitle(NonFungibleToken nonFungibleToken)
+    @Override
+    public String getTokenTitle(NonFungibleToken nonFungibleToken)
     {
         String tokenTitle = getFullName();
         if (nonFungibleToken != null && nonFungibleToken.getAttribute("category") != null)

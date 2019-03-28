@@ -1,16 +1,17 @@
 package io.stormbird.wallet.ui.widget.entity;
 
+import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.ui.widget.holder.AssetInstanceScriptHolder;
 
 /**
  * Created by James on 26/03/2019.
  * Stormbird in Singapore
  */
-public class AssetInstanceSortedItem extends SortedItem<String>
+public class AssetInstanceSortedItem extends SortedItem<TicketRange>
 {
     public static final int VIEW_TYPE = AssetInstanceScriptHolder.VIEW_TYPE;
 
-    public AssetInstanceSortedItem(String data, int weight) {
+    public AssetInstanceSortedItem(TicketRange data, int weight) {
         super(VIEW_TYPE, data, weight);
     }
 
@@ -30,6 +31,6 @@ public class AssetInstanceSortedItem extends SortedItem<String>
     public boolean areItemsTheSame(SortedItem other)
     {
         return other.viewType == AssetInstanceScriptHolder.VIEW_TYPE && this.viewType == AssetInstanceScriptHolder.VIEW_TYPE
-                && ( ((AssetInstanceSortedItem) other).value.hashCode() == value.hashCode());
+                && ( value.equals(other.value));
     }
 }

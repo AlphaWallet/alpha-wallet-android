@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
@@ -826,5 +827,10 @@ public class Token implements Parcelable
     {
         balance = BigDecimal.ZERO;
         pendingBalance = BigDecimal.ZERO;
+    }
+
+    public String getTokenTitle(NonFungibleToken nonFungibleToken)
+    {
+        return tokenInfo.name;
     }
 }

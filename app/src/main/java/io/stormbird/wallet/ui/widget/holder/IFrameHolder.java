@@ -51,15 +51,16 @@ public class IFrameHolder extends BinderViewHolder<TicketRange> implements View.
     {
         try
         {
-            String getContent;
-            if (data.tokenIds.get(0).equals(BigInteger.ZERO))
-            {
-                getContent = assetDefinition.getIntroductionCode(token.getAddress());
-            }
-            else
-            {
-                getContent = assetDefinition.getInstructionCode(token.getAddress());
-            }
+            String getContent = assetDefinition.getIntroductionCode(token.getAddress());
+
+//            if (data.tokenIds.get(0).equals(BigInteger.ZERO))
+//            {
+//                getContent = assetDefinition.getIntroductionCode(token.getAddress());
+//            }
+//            else
+//            {
+//                getContent = assetDefinition.getInstructionCode(token.getAddress());
+//            }
 
             iFrame.loadData(getContent, "text/html", "utf-8");
         }

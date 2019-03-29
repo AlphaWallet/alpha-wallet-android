@@ -781,6 +781,5 @@ public class DappBrowserFragment extends Fragment implements
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(CURRENT_FRAGMENT, currentFragment);
-        detachFragments(true);
     }
 }

@@ -31,7 +31,6 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
-import io.stormbird.token.tools.Convert;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
@@ -58,7 +57,6 @@ import io.stormbird.wallet.ui.widget.OnDappHomeNavClickListener;
 import io.stormbird.wallet.ui.widget.adapter.DappBrowserSuggestionsAdapter;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
-import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.util.DappBrowserUtils;
 import io.stormbird.wallet.util.Hex;
 import io.stormbird.wallet.util.KeyboardUtils;
@@ -117,12 +115,9 @@ public class DappBrowserFragment extends Fragment implements
     private Fragment browserHistoryFragment;
 
     private Toolbar toolbar;
-    private ImageView home;
     private ImageView back;
     private ImageView next;
     private ImageView clear;
-    private RelativeLayout selectNetworkLayout;
-    private View currentNetworkIcon;
     private TextView currentNetwork;
     private TextView balance;
     private TextView symbol;
@@ -318,9 +313,6 @@ public class DappBrowserFragment extends Fragment implements
         RelativeLayout layout = view.findViewById(R.id.address_bar_layout);
         layout.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
 
-        home = view.findViewById(R.id.home);
-        home.setOnClickListener(v -> homePressed());
-
         back = view.findViewById(R.id.back);
         back.setOnClickListener(v -> goToPreviousPage());
 
@@ -332,10 +324,8 @@ public class DappBrowserFragment extends Fragment implements
             clearAddressBar();
         });
 
-        selectNetworkLayout = view.findViewById(R.id.select_network_layout);
-        selectNetworkLayout.setOnClickListener(v -> selectNetwork());
-        currentNetworkIcon = view.findViewById(R.id.network_icon);
         currentNetwork = view.findViewById(R.id.current_network);
+        currentNetwork.setOnClickListener(v -> selectNetwork());
         balance = view.findViewById(R.id.balance);
         symbol = view.findViewById(R.id.symbol);
     }
@@ -410,7 +400,7 @@ public class DappBrowserFragment extends Fragment implements
         });
         attachFragment(f, SEARCH);
         toolbar.getMenu().setGroupVisible(R.id.dapp_browser_menu, false);
-        home.setVisibility(View.GONE);
+        currentNetwork.setVisibility(View.GONE);
         next.setVisibility(View.GONE);
         back.setVisibility(View.GONE);
         clear.setVisibility(View.VISIBLE);
@@ -420,7 +410,7 @@ public class DappBrowserFragment extends Fragment implements
     private void cancelSearchSession() {
         detachFragment(SEARCH);
         toolbar.getMenu().setGroupVisible(R.id.dapp_browser_menu, true);
-        home.setVisibility(View.VISIBLE);
+        currentNetwork.setVisibility(View.VISIBLE);
         next.setVisibility(View.VISIBLE);
         back.setVisibility(View.VISIBLE);
         clear.setVisibility(View.GONE);
@@ -462,7 +452,6 @@ public class DappBrowserFragment extends Fragment implements
         int oldChain = this.networkInfo != null ? this.networkInfo.chainId : -1;
         this.networkInfo = networkInfo;
         currentNetwork.setText(networkInfo.name);
-        Utils.setChainColour(currentNetworkIcon, networkInfo.chainId);
         //reset the pane if required
         if (oldChain > 0 && oldChain != this.networkInfo.chainId)
         {

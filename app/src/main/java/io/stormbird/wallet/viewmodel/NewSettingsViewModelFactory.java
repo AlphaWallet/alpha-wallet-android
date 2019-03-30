@@ -19,7 +19,6 @@ import io.stormbird.wallet.service.TokensService;
 
 public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
     private final MyAddressRouter myAddressRouter;
-    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final HelpRouter helpRouter;
@@ -31,7 +30,6 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
     private final TokensService tokensService;
 
     public NewSettingsViewModelFactory(
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             MyAddressRouter myAddressRouter,
@@ -42,7 +40,6 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             TokensService tokensService) {
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.myAddressRouter = myAddressRouter;
@@ -59,7 +56,6 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new NewSettingsViewModel(
-                findDefaultNetworkInteract,
                 findDefaultWalletInteract,
                 getDefaultWalletBalance,
                 myAddressRouter,

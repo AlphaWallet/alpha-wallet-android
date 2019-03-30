@@ -134,15 +134,7 @@
                     android:textColor="@color/black"
                     android:textSize="20sp" />
 
-                <TextView
-                    android:id="@+id/networks_subtext"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_light"
-                    android:text="@string/unknown_balance_without_symbol"
-                    android:textColor="@color/black"
-                    android:textSize="13sp"
-                    android:visibility="gone"/>
+
             </LinearLayout>
         </LinearLayout>
 

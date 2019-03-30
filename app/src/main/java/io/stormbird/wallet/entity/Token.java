@@ -756,8 +756,10 @@ public class Token implements Parcelable
     {
         if (!isTerminated())
         {
-            float divisor = isVisible ? 1.0f : 0.5f;
-            balanceUpdatePressure += (balanceUpdateWeight * divisor);
+            float update = (isVisible ? 1.0f : 0.5f) * balanceUpdateWeight;
+            if (isEthereum() && !pendingBalance.equals(balance) && update < 1.0f) update = 1.0f; //if there's a pending balance check more frequently
+
+            balanceUpdatePressure += update;
         }
     }
 

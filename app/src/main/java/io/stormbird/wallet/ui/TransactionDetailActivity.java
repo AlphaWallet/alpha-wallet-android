@@ -155,6 +155,6 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
 
     @Override
     public void onClick(View v) {
-        viewModel.showMoreDetails(v.getContext(), transaction);
+        viewModel.showMoreDetails(this, transaction);
     }
 }

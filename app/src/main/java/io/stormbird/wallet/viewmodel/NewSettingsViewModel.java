@@ -35,11 +35,9 @@ import io.stormbird.wallet.util.Utils;
 public class NewSettingsViewModel extends BaseViewModel {
     private static final long GET_BALANCE_INTERVAL = 10 * DateUtils.SECOND_IN_MILLIS;
 
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Map<String, String>> defaultWalletBalance = new MutableLiveData<>();
-    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final MyAddressRouter myAddressRouter;
@@ -58,7 +56,6 @@ public class NewSettingsViewModel extends BaseViewModel {
     private Handler handler = new Handler();
 
     NewSettingsViewModel(
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             MyAddressRouter myAddressRouter,
@@ -69,7 +66,6 @@ public class NewSettingsViewModel extends BaseViewModel {
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             TokensService tokensService) {
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.myAddressRouter = myAddressRouter;
@@ -80,10 +76,6 @@ public class NewSettingsViewModel extends BaseViewModel {
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.tokensService = tokensService;
-    }
-
-    public void showHome(Context context, boolean clearStack, boolean fromSettings) {
-        homeRouter.open(context, clearStack, true);
     }
 
     public void showHome(Context context, boolean clearStack) {
@@ -163,19 +155,11 @@ public class NewSettingsViewModel extends BaseViewModel {
         tokensService.setupFilter();
     }
 
-    public NetworkInfo getDefaultNetworkInfo() {
-        return ethereumNetworkRepository.getDefaultNetwork();
-    }
-
     @Override
     protected void onCleared() {
         super.onCleared();
 
         handler.removeCallbacks(startGetBalanceTask);
-    }
-
-    public LiveData<NetworkInfo> defaultNetwork() {
-        return defaultNetwork;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -188,9 +172,9 @@ public class NewSettingsViewModel extends BaseViewModel {
 
     public void prepare() {
         progress.postValue(true);
-        disposable = findDefaultNetworkInteract
+        disposable = findDefaultWalletInteract
                 .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
+                .subscribe(this::onDefaultWallet, this::onError);
     }
 
     public void getBalance() {
@@ -202,13 +186,6 @@ public class NewSettingsViewModel extends BaseViewModel {
                     handler.postDelayed(startGetBalanceTask, GET_BALANCE_INTERVAL);
                 }, t -> {
                 });
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        defaultNetwork.postValue(networkInfo);
-        disposable = findDefaultWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
     }
 
     private void onDefaultWallet(Wallet wallet) {

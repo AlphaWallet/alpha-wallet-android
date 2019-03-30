@@ -89,7 +89,7 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
         try
         {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            Ringtone r = RingtoneManager.getRingtone(getActivity().getApplicationContext(), notification);
+            Ringtone r = RingtoneManager.getRingtone(getActivity(), notification);
             r.play();
         } catch (Exception e) {}
 

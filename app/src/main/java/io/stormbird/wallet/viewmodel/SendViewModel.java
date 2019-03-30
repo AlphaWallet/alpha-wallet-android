@@ -50,10 +50,6 @@ public class SendViewModel extends BaseViewModel {
         confirmationRouter.open(context, to, amount, contractAddress, decimals, symbol, sendingTokens, ensDetails, chainId);
     }
 
-    public void showMyAddress(Context context, Wallet wallet) {
-        myAddressRouter.open(context, wallet);
-    }
-
     public void showContractInfo(Context ctx, Wallet wallet, Token token)
     {
         myAddressRouter.open(ctx, wallet, token);

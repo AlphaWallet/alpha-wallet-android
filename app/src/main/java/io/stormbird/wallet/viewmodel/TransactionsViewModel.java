@@ -3,7 +3,6 @@ package io.stormbird.wallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import io.reactivex.Observable;
@@ -12,8 +11,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
-import io.stormbird.wallet.router.ExternalBrowserRouter;
-import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.TransactionDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
@@ -45,8 +42,6 @@ public class TransactionsViewModel extends BaseViewModel
     private final TokensService tokensService;
 
     private final TransactionDetailRouter transactionDetailRouter;
-    private final ExternalBrowserRouter externalBrowserRouter;
-    private final HomeRouter homeRouter;
 
     @Nullable
     private Disposable fetchTransactionDisposable;
@@ -67,16 +62,12 @@ public class TransactionsViewModel extends BaseViewModel
             SetupTokensInteract setupTokensInteract,
             AddTokenInteract addTokenInteract,
             TransactionDetailRouter transactionDetailRouter,
-            ExternalBrowserRouter externalBrowserRouter,
-            HomeRouter homeRouter,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.transactionDetailRouter = transactionDetailRouter;
-        this.externalBrowserRouter = externalBrowserRouter;
-        this.homeRouter = homeRouter;
         this.addTokenInteract = addTokenInteract;
         this.setupTokensInteract = setupTokensInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -334,14 +325,6 @@ public class TransactionsViewModel extends BaseViewModel
 
     public void showDetails(Context context, Transaction transaction) {
         transactionDetailRouter.open(context, transaction);
-    }
-
-    public void showHome(Context context) {
-        homeRouter.open(context, true);
-    }
-
-    public void openDeposit(Context context, Uri uri) {
-        externalBrowserRouter.open(context, uri);
     }
 
     /**

@@ -12,17 +12,6 @@ import io.stormbird.wallet.ui.Erc20DetailActivity;
 import static io.stormbird.wallet.C.Key.WALLET;
 
 public class Erc20DetailRouter {
-    public void open(Context context, String address, String symbol, int decimals, boolean isToken) {
-        Intent intent = new Intent(context, Erc20DetailActivity.class);
-        intent.putExtra(C.EXTRA_SENDING_TOKENS, isToken);
-        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
-        intent.putExtra(C.EXTRA_SYMBOL, symbol);
-        intent.putExtra(C.EXTRA_DECIMALS, decimals);
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        intent.putExtra(C.EXTRA_HAS_DEFINITION, false);
-        context.startActivity(intent);
-    }
-
     public void open(Context context, String address, String symbol, int decimals, boolean isToken, Wallet wallet, Token token, boolean hasDefinition) {
         Intent intent = new Intent(context, Erc20DetailActivity.class);
         intent.putExtra(C.EXTRA_SENDING_TOKENS, isToken);

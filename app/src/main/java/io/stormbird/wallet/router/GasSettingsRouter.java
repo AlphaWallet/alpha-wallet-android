@@ -15,6 +15,7 @@ public class GasSettingsRouter {
         intent.putExtra(C.EXTRA_GAS_PRICE, gasSettings.gasPrice.toString());
         intent.putExtra(C.EXTRA_GAS_LIMIT, gasSettings.gasLimit.toString());
         intent.putExtra(C.EXTRA_NETWORKID, chainId);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         context.startActivityForResult(intent, GasSettingsViewModel.SET_GAS_SETTINGS);
     }
 }

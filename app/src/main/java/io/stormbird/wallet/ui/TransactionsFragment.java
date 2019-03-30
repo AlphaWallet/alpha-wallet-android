@@ -3,11 +3,9 @@ package io.stormbird.wallet.ui;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,20 +13,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
-
+import dagger.android.support.AndroidSupportInjection;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.ui.widget.adapter.TransactionsAdapter;
 import io.stormbird.wallet.viewmodel.TransactionsViewModel;
 import io.stormbird.wallet.viewmodel.TransactionsViewModelFactory;
-import io.stormbird.wallet.widget.DepositView;
 import io.stormbird.wallet.widget.EmptyTransactionsView;
 import io.stormbird.wallet.widget.SystemView;
 
 import javax.inject.Inject;
-
-import dagger.android.support.AndroidSupportInjection;
 
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
 
@@ -42,7 +36,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
     private SystemView systemView;
     private TransactionsAdapter adapter;
-    private Dialog dialog;
 
     private boolean isVisible = false;
     private boolean firstView = true;
@@ -96,9 +89,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
                 viewModel.prepare();
             }
             break;
-            case R.id.action_buy: {
-                openExchangeDialog();
-            }
         }
     }
 
@@ -131,10 +121,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     @Override
     public void onPause() {
         super.onPause();
-        //stop transaction refresh
-        if (dialog != null && dialog.isShowing()) {
-            dialog.dismiss();
-        }
     }
 
     private void onTransactions(Transaction[] transaction) {
@@ -176,25 +162,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         {
             systemView.hide();
         }
-    }
-
-    private void openExchangeDialog() {
-        Wallet wallet = viewModel.defaultWallet().getValue();
-        if (wallet == null) {
-            Toast.makeText(getContext(), getString(R.string.error_wallet_not_selected), Toast.LENGTH_SHORT)
-                    .show();
-        } else if (getContext() != null) {
-            BottomSheetDialog dialog = new BottomSheetDialog(getContext());
-            DepositView view = new DepositView(getContext(), wallet);
-            view.setOnDepositClickListener(this::onDepositClick);
-            dialog.setContentView(view);
-            dialog.show();
-            this.dialog = dialog;
-        }
-    }
-
-    private void onDepositClick(View view, Uri uri) {
-        viewModel.openDeposit(view.getContext(), uri);
     }
 
     @Override

@@ -2,14 +2,9 @@ package io.stormbird.wallet.di;
 
 import dagger.Module;
 import dagger.Provides;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.interact.GetDefaultWalletBalance;
-import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-import io.stormbird.wallet.repository.LocaleRepository;
-import io.stormbird.wallet.repository.LocaleRepositoryType;
-import io.stormbird.wallet.repository.PreferenceRepositoryType;
-import io.stormbird.wallet.repository.WalletRepositoryType;
+import io.stormbird.wallet.repository.*;
 import io.stormbird.wallet.router.HelpRouter;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ManageWalletsRouter;
@@ -21,7 +16,6 @@ import io.stormbird.wallet.viewmodel.NewSettingsViewModelFactory;
 class NewSettingsModule {
     @Provides
     NewSettingsViewModelFactory provideNewSettingsViewModelFactory(
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             MyAddressRouter myAddressRouter,
@@ -34,7 +28,6 @@ class NewSettingsModule {
             TokensService tokensService
     ) {
         return new NewSettingsViewModelFactory(
-                findDefaultNetworkInteract,
                 findDefaultWalletInteract,
                 getDefaultWalletBalance,
                 myAddressRouter,
@@ -45,12 +38,6 @@ class NewSettingsModule {
                 preferenceRepository,
                 localeRepository,
                 tokensService);
-    }
-
-    @Provides
-    FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
-            EthereumNetworkRepositoryType ethereumNetworkRepositoryType) {
-        return new FindDefaultNetworkInteract(ethereumNetworkRepositoryType);
     }
 
     @Provides

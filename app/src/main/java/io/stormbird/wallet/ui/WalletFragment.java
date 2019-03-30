@@ -90,7 +90,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         viewModel.tokensReady().observe(this, this::tokensReady);
         viewModel.fetchKnownContracts().observe(this, this::fetchKnownContracts);
 
-        adapter = new TokensAdapter(getContext(), this::onTokenClick, viewModel.getAssetDefinitionService());
+        adapter = new TokensAdapter(getActivity(), this::onTokenClick, viewModel.getAssetDefinitionService());
         adapter.setHasStableIds(true);
         list.setLayoutManager(new LinearLayoutManager(getContext()));
         list.setAdapter(adapter);
@@ -204,7 +204,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add: {
-                viewModel.showAddToken(getContext());
+                viewModel.showAddToken(getActivity());
             }
             break;
             case android.R.id.home: {
@@ -216,9 +216,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     }
 
     private void onTokenClick(View view, Token token, BigInteger id) {
-        Context context = view.getContext();
         token = viewModel.getTokenFromService(token);
-        token.clickReact(viewModel, context);
+        token.clickReact(viewModel, getActivity());
     }
 
     @Override
@@ -258,7 +257,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     public void onDestroy()
     {
         super.onDestroy();
-        getContext().unregisterReceiver(tokenReceiver);
+        getActivity().unregisterReceiver(tokenReceiver);
         viewModel.clearProcess();
     }
 

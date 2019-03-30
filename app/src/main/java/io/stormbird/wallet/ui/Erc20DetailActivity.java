@@ -152,7 +152,7 @@ public class Erc20DetailActivity extends BaseActivity {
         try
         {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+            Ringtone r = RingtoneManager.getRingtone(this, notification);
             r.play();
         }
         catch (Exception e)
@@ -162,7 +162,7 @@ public class Erc20DetailActivity extends BaseActivity {
     }
 
     private void onTransactionClick(View view, Transaction transaction) {
-        viewModel.showDetails(view.getContext(), transaction);
+        viewModel.showDetails(this, transaction);
     }
 
     private void onTransactions(Transaction[] transactions) {

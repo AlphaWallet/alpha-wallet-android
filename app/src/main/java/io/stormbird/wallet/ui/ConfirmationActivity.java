@@ -240,7 +240,7 @@ public class ConfirmationActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings: {
-                viewModel.openGasSettings(ConfirmationActivity.this, chainId);
+                viewModel.openGasSettings(this, chainId);
             }
             break;
         }

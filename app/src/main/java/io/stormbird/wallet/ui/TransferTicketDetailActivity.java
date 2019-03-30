@@ -603,7 +603,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
         if (token instanceof ERC721Token)
         {
-            viewModel.openConfirm(getApplicationContext(), to, token, ticketIds, ensHandler.getEnsName());
+            viewModel.openConfirm(this, to, token, ticketIds, ensHandler.getEnsName());
         }
         else
         {

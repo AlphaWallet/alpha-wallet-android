@@ -354,7 +354,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     boolean isBalanceEnough(String eth) {
         try {
             BigDecimal amount = new BigDecimal(BalanceUtils.EthToWei(eth));
-            BigDecimal balance = new BigDecimal(BalanceUtils.EthToWei(tokenBalanceText.getText().toString()));
+            BigDecimal balance = new BigDecimal(BalanceUtils.EthToWei(token.getFullBalance()));
             return (balance.subtract(amount).compareTo(BigDecimal.ZERO) == 0 || balance.subtract(amount).compareTo(BigDecimal.ZERO) > 0);
         } catch (Exception e) {
             return false;

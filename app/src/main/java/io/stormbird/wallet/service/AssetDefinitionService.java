@@ -109,7 +109,7 @@ public class AssetDefinitionService
             directory.mkdir(); //does this throw if we haven't given permission?
         }
 
-        loadExternalContracts();
+        loadExternalContracts(directory);
     }
 
     public boolean hasDefinition(String contractAddress)
@@ -417,13 +417,8 @@ public class AssetDefinitionService
         return null;
     }
 
-    public void loadExternalContracts()
+    private void loadExternalContracts(File directory)
     {
-        //TODO: Check if external contracts override the internal ones - this is the expected behaviour
-        File directory = new File(
-                Environment.getExternalStorageDirectory()
-                        + File.separator + ALPHAWALLET_DIR);
-
         try
         {
             loadContracts(directory, true);
@@ -448,7 +443,7 @@ public class AssetDefinitionService
                     {
                         try
                         {
-                            if (f.getName().contains("d2a0"))
+                            if (f.getName().contains("entry"))
                             {
                                 System.out.println("door");
                             }
@@ -625,6 +620,12 @@ public class AssetDefinitionService
         return hasIframe;
     }
 
+    public boolean hasTokenView(String contractAddr)
+    {
+        TokenDefinition td = assetDefinitions.get(contractAddr);
+        return (td != null && td.attributeSets.containsKey("cards"));
+    }
+
     public String getIntroductionCode(String contractAddr)
     {
         String appearance = "";
@@ -647,5 +648,17 @@ public class AssetDefinitionService
         }
 
         return appearance;
+    }
+
+    public String getTokenView(String contractAddr, String type)
+    {
+        String viewHTML = "";
+        TokenDefinition td = assetDefinitions.get(contractAddr);
+        if (td != null && td.attributeSets.containsKey("cards"))
+        {
+            viewHTML = td.getCardData(type);
+        }
+
+        return viewHTML;
     }
 }

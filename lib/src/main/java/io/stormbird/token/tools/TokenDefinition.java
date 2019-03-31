@@ -28,7 +28,10 @@ public class TokenDefinition {
     public Map<String, FunctionDefinition> functions = new ConcurrentHashMap<>();
     public Map<String, Map<String, String>> attributeSets = new ConcurrentHashMap<>(); //TODO: add language, in case user changes language during operation - see Weiwu's comment further down
 
+    private String nameSpace;
+
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";
+    private static final String TOKENSCRIPT = "http://tokenscript.org/ns/tokenscript";
 
     /* the following are incorrect, waiting to be further improved
      with suitable XML, because none of these String typed class variables
@@ -52,7 +55,9 @@ public class TokenDefinition {
     protected String marketQueueAPI = null;
     protected String feemasterAPI = null;
     protected String tokenName = null;
+    protected String tokenNameCollective = null;
     protected String keyName = null;
+    protected String contractType = null;
     protected int networkId = 1; //default to main net unless otherwise specified
 
     public enum Syntax {
@@ -167,7 +172,7 @@ public class TokenDefinition {
 
         private void populate(Element mapping) {
             Element option;
-            NodeList nList = mapping.getElementsByTagNameNS(ATTESTATION, "option");
+            NodeList nList = mapping.getElementsByTagNameNS(nameSpace, "option");
             for (int i = 0; i < nList.getLength(); i++) {
                 option = (Element) nList.item(i);
                 members.put(new BigInteger(option.getAttribute("key")), getLocalisedString(option, "value"));
@@ -269,7 +274,7 @@ public class TokenDefinition {
     /* for many occurance of the same tag, return the text content of the one in user's current language */
     // FIXME: this function will break if there are nested <tagName> in the nameContainer
     String getLocalisedString(Element nameContainer, String tagName) {
-        NodeList nList = nameContainer.getElementsByTagNameNS(ATTESTATION, tagName);
+        NodeList nList = nameContainer.getElementsByTagNameNS(nameSpace, tagName);
         Element name;
         for (int i = 0; i < nList.getLength(); i++) {
             name = (Element) nList.item(i);
@@ -283,6 +288,35 @@ public class TokenDefinition {
         // TODO: catch the indice out of bound exception and throw it again suggesting dev to check schema
         if (name != null) return name.getTextContent();
         else return null;
+    }
+
+    Node getLocalisedNode(Element nameContainer, String tagName) {
+        NodeList nList = nameContainer.getElementsByTagNameNS(nameSpace, tagName);
+        Element name;
+        for (int i = 0; i < nList.getLength(); i++) {
+            name = (Element) nList.item(i);
+            String langAttr = getLocalisationLang(name);
+            if (langAttr.equals(locale.getLanguage())) {
+                return name;
+            }
+        }
+
+        return null;
+    }
+
+    String getLocalisedString(Element nameContainer, String tagName, String typeAttr) {
+        NodeList nList = nameContainer.getElementsByTagNameNS(nameSpace, tagName);
+        Element name;
+        for (int i = 0; i < nList.getLength(); i++) {
+            name = (Element) nList.item(i);
+            String langAttr = getLocalisationLang(name);
+            String type = name.getAttribute("type");
+            if (langAttr.equals(locale.getLanguage()) && type != null && type.equals(typeAttr)) {
+                return name.getTextContent();
+            }
+        }
+
+        return null;
     }
 
     private String getLocalisationLang(Element name)
@@ -371,9 +405,17 @@ public class TokenDefinition {
             return;
         }
         Document xml = dBuilder.parse(xmlAsset);
-        xml.getDocumentElement().normalize(); // good for parcel, bad for signature verification. JB likes it that way. -weiwu
-        NodeList nList;
-        nList = xml.getElementsByTagNameNS(ATTESTATION, "token");
+        xml.getDocumentElement().normalize();
+        nameSpace = ATTESTATION;
+
+        NodeList nList = xml.getElementsByTagNameNS(ATTESTATION, "token");
+        NodeList nListTS = xml.getElementsByTagNameNS(TOKENSCRIPT, "token");
+
+        if (nList.getLength() == 0 && nListTS.getLength() > 0)
+        {
+            nameSpace = TOKENSCRIPT;
+            nList = nListTS;
+        }
 
         if (nList.getLength() == 0)
         {
@@ -386,11 +428,40 @@ public class TokenDefinition {
 
         extractFeatureTag(xml);
         extractContractTag(xml);
+        extractNameTag(xml);
         extractSignedInfo(xml);
+        extractCards(xml);
 
         //TODO: 'appearance' in XML needs to have an HTML attribute
         extractTags(xml, "appearance", true);
         extractTags(xml, "features", false);
+    }
+
+    private void extractCards(Document xml)
+    {
+        NodeList nList = xml.getElementsByTagNameNS(nameSpace, "cards");
+        if (nList.getLength() == 0) return;
+        Element cards = (Element) nList.item(0);
+        nList = cards.getElementsByTagNameNS(nameSpace, "token-card");
+        if (nList.getLength() == 0) return;
+        Map<String, String> attributeSet = new ConcurrentHashMap<>();
+        addToHTMLSet(attributeSet, cards,"view-iconified");
+        addToHTMLSet(attributeSet, cards,"view");
+
+        if (attributeSet.size() > 0)
+        {
+            attributeSets.put("cards", attributeSet);
+        }
+    }
+
+    private void addToHTMLSet(Map<String, String> attributeSet, Element root, String tagName)
+    {
+        Node iconified = getLocalisedNode(root, tagName);
+        if (iconified != null)
+        {
+            String iconifiedContent = getHTMLContent(iconified);
+            attributeSet.put(tagName, iconifiedContent);
+        }
     }
 
     private void CrawlAttrs(NodeList nList)
@@ -447,6 +518,8 @@ public class TokenDefinition {
     }
 
     public String getTokenName() { return tokenName; }
+    public String getTokenNameCollective() { return tokenNameCollective; }
+    public String getContractType() { return contractType; }
 
     public int getNetworkFromContract(String contractAddress)
     {
@@ -475,17 +548,17 @@ public class TokenDefinition {
     private void extractFeatureTag(Document xml)
     {
         NodeList l;
-        NodeList nList = xml.getElementsByTagNameNS(ATTESTATION, "feature");
+        NodeList nList = xml.getElementsByTagNameNS(nameSpace, "feature");
         for (int i = 0; i < nList.getLength(); i++) {
             Element feature = (Element) nList.item(i);
             switch (feature.getAttribute("type")) {
                 case "feemaster":
-                    l = feature.getElementsByTagNameNS(ATTESTATION, "feemaster");
+                    l = feature.getElementsByTagNameNS(nameSpace, "feemaster");
                     for (int j = 0; j < l.getLength(); j++)
                         feemasterAPI = l.item(j).getTextContent();
                     break;
                 case "market-queue":
-                    l = feature.getElementsByTagNameNS(ATTESTATION, "gateway");
+                    l = feature.getElementsByTagNameNS(nameSpace, "gateway");
                     for (int j = 0; j < l.getLength(); j++)
                         marketQueueAPI = l.item(j).getTextContent();
                     break;
@@ -495,23 +568,31 @@ public class TokenDefinition {
         }
     }
 
+    private void extractNameTag(Document xml)
+    {
+        NodeList nList = xml.getElementsByTagNameNS(nameSpace, "token");
+        if (nList.getLength() == 0) return;
+
+        Element contract = (Element) nList.item(0);
+
+        tokenName = getLocalisedString(contract, "name");
+        tokenNameCollective = getLocalisedString(contract, "name", "collective");
+    }
+
     private void extractContractTag(Document xml)
     {
-        String nameDefault = null;
-        String nameEnglish = null;
-        NodeList nList = xml.getElementsByTagNameNS(ATTESTATION, "contract");
+        NodeList nList = xml.getElementsByTagNameNS(nameSpace, "contract");
         /* we allow multiple contracts, e.g. for issuing asset and for
          * proxy usage. but for now we only deal with the first */
         Element contract = (Element) nList.item(0);
 
-        /* if there is no token name in <contract> this breaks;
-         * token name shouldn't be in <contract> anyway, re-design pending */
         tokenName = getLocalisedString(contract, "name");
 
         /*if hit NullPointerException in the next statement, then XML file
          * must be missing <contract> elements */
         /* TODO: select the contract of type "holding_contract" */
-        nList = contract.getElementsByTagNameNS(ATTESTATION, "address");
+        nList = contract.getElementsByTagNameNS(nameSpace, "address");
+        contractType = contract.getAttribute("id");
         for (int addrIndex = 0; addrIndex < nList.getLength(); addrIndex++)
         {
             Node node = nList.item(addrIndex);
@@ -538,7 +619,7 @@ public class TokenDefinition {
 
     private void extractTags(Document xml, String localName, boolean isHTML)
     {
-        NodeList nList = xml.getElementsByTagNameNS(ATTESTATION, localName);
+        NodeList nList = xml.getElementsByTagNameNS(nameSpace, localName);
         Element element = (Element) nList.item(0);
 
         if (element != null)
@@ -703,6 +784,24 @@ public class TokenDefinition {
     public String getAppearance(String tag)
     {
         Map<String, String> appearanceSet = attributeSets.get("appearance");
+        if (appearanceSet != null)
+        {
+            return appearanceSet.get(tag);
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    /**
+     * Check for 'cards' attribute set
+     * @param tag
+     * @return
+     */
+    public String getCardData(String tag)
+    {
+        Map<String, String> appearanceSet = attributeSets.get("cards");
         if (appearanceSet != null)
         {
             return appearanceSet.get(tag);

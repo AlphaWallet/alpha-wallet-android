@@ -393,10 +393,12 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     private void onFeemasterAvailable(Boolean available)
     {
+        priceETH.setVisibility(View.VISIBLE);
         usingFeeMaster = available;
         if (available)
         {
             priceETH.setText(R.string.free_import);
+            displayImportAction();
         }
         else
         {
@@ -408,11 +410,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     importTxt.setVisibility(View.GONE);
                     findViewById(R.id.text_total_cost).setVisibility(View.GONE);
                     priceETH.setText(R.string.feemaster_service_not_available);
-                    priceETH.setVisibility(View.VISIBLE);
                     break;
                 default:
                     priceETH.setText(R.string.free_import_with_gas);
-                    priceETH.setVisibility(View.VISIBLE);
                     priceUSD.setVisibility(View.GONE);
                     priceUSDLabel.setVisibility(View.GONE);
                     displayImportAction();

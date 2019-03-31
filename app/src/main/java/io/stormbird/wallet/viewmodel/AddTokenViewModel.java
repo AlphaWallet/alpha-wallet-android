@@ -173,25 +173,22 @@ public class AddTokenViewModel extends BaseViewModel {
         ctx.startActivity(intent);
     }
 
-    public String[] getNetworkList() {
-        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
-        String[] networkList = new String[networks.length];
-        for (int ii = 0; ii < networks.length; ii++) {
-            networkList[ii] = networks[ii].name;
-        }
-        return networkList;
+    public NetworkInfo[] getNetworkList() {
+        return ethereumNetworkRepository.getAvailableNetworkList();
     }
 
-    public NetworkInfo getNetwork(String selectedRpcServer) {
-        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
-        for (NetworkInfo networkInfo : networks) {
-            if (networkInfo.name.equals(selectedRpcServer)) {
-                ethereumNetworkRepository.setDefaultNetworkInfo(networkInfo);
-                return networkInfo;
-            }
+    public NetworkInfo getNetwork(int chainId)
+    {
+        NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(chainId);
+        if (networkInfo != null)
+        {
+            ethereumNetworkRepository.setDefaultNetworkInfo(networkInfo);
+            return networkInfo;
         }
-
-        return null;
+        else
+        {
+            return null;
+        }
     }
 
     private List<Integer> getNetworkIds()

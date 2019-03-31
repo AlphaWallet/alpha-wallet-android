@@ -114,13 +114,8 @@ public class NewSettingsViewModel extends BaseViewModel {
         showHome(context, true); //Refresh activity to reflect changes
     }
 
-    public String[] getNetworkList() {
-        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
-        String[] networkList = new String[networks.length];
-        for (int ii = 0; ii < networks.length; ii++) {
-            networkList[ii] = networks[ii].name;
-        }
-        return networkList;
+    public NetworkInfo[] getNetworkList() {
+        return ethereumNetworkRepository.getAvailableNetworkList();
     }
 
     public String getFilterNetworkList() {
@@ -130,27 +125,20 @@ public class NewSettingsViewModel extends BaseViewModel {
         for (int networkId : networkIds)
         {
             if (!firstValue) sb.append(",");
-            sb.append(ethereumNetworkRepository.getNameById(networkId));
+            sb.append(networkId);
             firstValue = false;
         }
         return sb.toString();
     }
 
-    public void setFilterNetworks(String[] selectedItems)
+    public void setFilterNetworks(Integer[] selectedItems)
     {
-        List<String> selectedNetworks = new ArrayList<>();
-        Collections.addAll(selectedNetworks, selectedItems);
         int[] selectedIds = new int[selectedItems.length];
         int index = 0;
-
-        for (NetworkInfo info : ethereumNetworkRepository.getAvailableNetworkList())
+        for (Integer selectedId : selectedItems)
         {
-            if (selectedNetworks.contains(info.name))
-            {
-                selectedIds[index++] = info.chainId;
-            }
+            selectedIds[index++] = selectedId;
         }
-
         ethereumNetworkRepository.setFilterNetworkList(selectedIds);
         tokensService.setupFilter();
     }

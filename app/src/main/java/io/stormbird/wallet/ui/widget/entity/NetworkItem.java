@@ -3,9 +3,11 @@ package io.stormbird.wallet.ui.widget.entity;
 public class NetworkItem {
     private String name;
     private boolean isSelected;
+    private int chainId;
 
-    public NetworkItem(String name, boolean isSelected) {
+    public NetworkItem(String name, int chainId, boolean isSelected) {
         this.name = name;
+        this.chainId = chainId;
         this.isSelected = isSelected;
     }
 
@@ -13,8 +15,11 @@ public class NetworkItem {
         return name;
     }
 
-    public void setName(String name) {
+    public int getChainId() { return chainId; }
+
+    public void setName(String name, int chainId) {
         this.name = name;
+        this.chainId = chainId;
     }
 
     public boolean isSelected() {

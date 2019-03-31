@@ -224,12 +224,12 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     }
 
     private void selectNetwork() {
-        SelectNetworkDialog dialog = new SelectNetworkDialog(this, viewModel.getNetworkList(), networkInfo.name, true);
+        SelectNetworkDialog dialog = new SelectNetworkDialog(this, viewModel.getNetworkList(), String.valueOf(networkInfo.chainId), true);
         dialog.setOnClickListener(v1 -> {
-            NetworkInfo info = viewModel.setNetwork(dialog.getSelectedItem());
+            NetworkInfo info = viewModel.setNetwork(dialog.getSelectedChainId());
 
             // restart activity
-            if (info != null && !networkInfo.name.equals(dialog.getSelectedItem())) {
+            if (info != null && networkInfo.chainId != dialog.getSelectedChainId()) {
                 Intent intent = getIntent();
                 intent.putExtra(KEY_MODE, MODE_POS);
                 intent.putExtra(OVERRIDE_DEFAULT, info.chainId);
@@ -251,7 +251,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
             {
                 getInfo();
                 qrImageView.setImageBitmap(QRUtils.createQRImage(this, displayAddress, qrImageView.getWidth()));
-                //qrImageView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in)); //<-- check if this is causing the load delay
+                //qrImageView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in)); //<-- check if this is causing the load delay (it was)
             }
             else
             {

@@ -331,10 +331,10 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void selectNetwork() {
-        SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), viewModel.getNetworkList(), networkInfo.name, true);
+        SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), viewModel.getNetworkList(), String.valueOf(networkInfo.chainId), true);
         dialog.setOnClickListener(v1 -> {
-            if (!networkInfo.name.equals(dialog.getSelectedItem())) {
-                viewModel.setNetwork(dialog.getSelectedItem());
+            if (networkInfo.chainId != dialog.getSelectedChainId()) {
+                viewModel.setNetwork(dialog.getSelectedChainId());
                 getActivity().sendBroadcast(new Intent(RESET_WALLET));
                 balance.setVisibility(View.GONE);
                 symbol.setVisibility(View.GONE);
@@ -451,7 +451,7 @@ public class DappBrowserFragment extends Fragment implements
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         int oldChain = this.networkInfo != null ? this.networkInfo.chainId : -1;
         this.networkInfo = networkInfo;
-        currentNetwork.setText(networkInfo.name);
+        currentNetwork.setText(networkInfo.getShortName());
         //reset the pane if required
         if (oldChain > 0 && oldChain != this.networkInfo.chainId)
         {

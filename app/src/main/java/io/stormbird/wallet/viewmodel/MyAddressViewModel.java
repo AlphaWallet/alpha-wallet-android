@@ -49,23 +49,18 @@ public class MyAddressViewModel extends BaseViewModel {
         return defaultNetwork;
     }
 
-    public String[] getNetworkList() {
-        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
-        String[] networkList = new String[networks.length];
-        for (int ii = 0; ii < networks.length; ii++) {
-            networkList[ii] = networks[ii].name;
-        }
-        return networkList;
+    public NetworkInfo[] getNetworkList() {
+        return ethereumNetworkRepository.getAvailableNetworkList();
     }
 
-    public NetworkInfo setNetwork(String selectedRpcServer) {
-        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
-        for (NetworkInfo networkInfo : networks) {
-            if (networkInfo.name.equals(selectedRpcServer)) {
-                ethereumNetworkRepository.setDefaultNetworkInfo(networkInfo);
-                defaultNetwork.postValue(networkInfo);
-                return networkInfo;
-            }
+    public NetworkInfo setNetwork(int chainId)
+    {
+        NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        if (info != null)
+        {
+            ethereumNetworkRepository.setDefaultNetworkInfo(info);
+            defaultNetwork.postValue(info);
+            return info;
         }
 
         return null;

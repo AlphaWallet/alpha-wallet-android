@@ -30,6 +30,7 @@ import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -268,23 +269,17 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return DappBrowserUtils.getDappsList(context);
     }
 
-    public String[] getNetworkList() {
-        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
-        String[] networkList = new String[networks.length];
-        for (int ii = 0; ii < networks.length; ii++) {
-            networkList[ii] = networks[ii].name;
-        }
-        return networkList;
+    public NetworkInfo[] getNetworkList() {
+        return ethereumNetworkRepository.getAvailableNetworkList();
     }
 
-    public void setNetwork(String selectedRpcServer) {
-        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
-        for (NetworkInfo networkInfo : networks) {
-            if (networkInfo.name.equals(selectedRpcServer)) {
-                ethereumNetworkRepository.setDefaultNetworkInfo(networkInfo);
-                onDefaultNetwork(networkInfo);
-                return;
-            }
+    public void setNetwork(int chainId)
+    {
+        NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        if (info != null)
+        {
+            ethereumNetworkRepository.setDefaultNetworkInfo(info);
+            onDefaultNetwork(info);
         }
     }
 }

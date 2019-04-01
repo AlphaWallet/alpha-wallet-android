@@ -83,6 +83,7 @@ public class Token implements Parcelable
         shortNetworkName = in.readString();
         pendingBalance = new BigDecimal(in.readString());
         tokenWallet = in.readString();
+        lastBlockCheck = in.readLong();
         balanceChanged = false;
         if (readType <= ContractType.CREATION.ordinal())
         {
@@ -147,6 +148,7 @@ public class Token implements Parcelable
         dest.writeString(shortNetworkName);
         dest.writeString(pendingBalance == null ? "0" : pendingBalance.toString());
         dest.writeString(tokenWallet);
+        dest.writeLong(lastBlockCheck);
         int size = (auxData == null ? 0 : auxData.size());
         dest.writeInt(size);
         if (size > 0)

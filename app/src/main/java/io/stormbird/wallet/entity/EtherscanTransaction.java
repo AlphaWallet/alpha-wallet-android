@@ -359,4 +359,6 @@ public class EtherscanTransaction
 
         return foundWallet;
     }
+
+    public String getHash() { return hash; }
 }

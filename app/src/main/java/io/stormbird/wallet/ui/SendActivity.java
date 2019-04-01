@@ -351,11 +351,12 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         amountInput.onClear();
     }
 
-    boolean isBalanceEnough(String eth) {
+    private boolean isBalanceEnough(String eth) {
         try {
-            BigDecimal amount = new BigDecimal(BalanceUtils.EthToWei(eth));
-            BigDecimal balance = new BigDecimal(BalanceUtils.EthToWei(token.getFullBalance()));
-            return (balance.subtract(amount).compareTo(BigDecimal.ZERO) == 0 || balance.subtract(amount).compareTo(BigDecimal.ZERO) > 0);
+            //Needs to take into account decimal of token
+            int decimals = (token != null && token.tokenInfo != null) ? token.tokenInfo.decimals : 18;
+            BigDecimal amount = new BigDecimal(BalanceUtils.baseToSubunit(eth, decimals));
+            return (token.balance.subtract(amount).compareTo(BigDecimal.ZERO) >= 0);
         } catch (Exception e) {
             return false;
         }

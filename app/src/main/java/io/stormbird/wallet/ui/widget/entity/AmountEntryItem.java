@@ -86,7 +86,14 @@ public class AmountEntryItem
 
             @Override
             public void afterTextChanged(Editable s) {
-                updateEquivalentValue();
+                try
+                {
+                    updateEquivalentValue();
+                }
+                catch (NumberFormatException e)
+                {
+                    //
+                }
             }
         });
 
@@ -124,7 +131,15 @@ public class AmountEntryItem
                 tokenSymbolLabel.setVisibility(View.GONE);
                 tokenEquivalentLayout.setVisibility(View.VISIBLE);
             }
-            updateEquivalentValue();
+
+            try
+            {
+                updateEquivalentValue();
+            }
+            catch (NumberFormatException e)
+            {
+                //
+            }
         });
 
         quantityUpBtn = activity.findViewById(R.id.img_quantity_up);
@@ -166,19 +181,20 @@ public class AmountEntryItem
         }
     }
 
-    private void updateEquivalentValue() {
+    private void updateEquivalentValue() throws NumberFormatException
+    {
         if (usdInput) {
             String amountStr = amountEditText.getText().toString();
+            String tokenAmountEquivalent = ethEquivalent(amountStr);
+            tokenEquivalent.setText(tokenAmountEquivalent);
+
             double equivalent = 0.0;
 
-            if (amountStr.length() == 0) {
-                amountStr = "0";
-                tokenEquivalent.setText(amountStr);
-            } else {
+            if (amountStr.length() > 0) {
                 double amount = Double.parseDouble(amountStr);
                 equivalent = amount / currentEthPrice;
-                tokenEquivalent.setText(getEthString(equivalent));
             }
+
             callback.amountChanged(String.valueOf(equivalent));
         } else
         {
@@ -216,23 +232,28 @@ public class AmountEntryItem
         callback.amountChanged(getEthValue());
     }
 
+    private String ethEquivalent(String amountStr)
+    {
+        String result = "0";
+
+        if (amountStr.length() > 0) {
+            double equivalent = 0.0;
+            double amount = Double.parseDouble(amountStr);
+            equivalent = amount / currentEthPrice;
+            result = getEthString(equivalent);
+        }
+
+        return result;
+    }
+
     public void setAmount(String value)
     {
         if (usdInput)
         {
-            tokenEquivalent.setText(value);
-            if (value.length() == 0)
-                value = "0.00";
-            if (isValidAmount(value))
-            {
-                String usdEquivStr = getUsdString(Double.valueOf(value) * currentEthPrice);
-                if (!hasRealValue) usdEquivStr = "(TEST) " + usdEquivStr;
-                amountEditText.setText(usdEquivStr);
-            }
+            tokenEquivalent.setText(ethEquivalent(value));
         }
         else
         {
-            amountEditText.setText(value);
             if (isValidAmount(value))
             {
                 String usdEquivStr = "US$ " + getUsdString(Double.valueOf(value) * currentEthPrice);

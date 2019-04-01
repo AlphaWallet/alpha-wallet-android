@@ -163,24 +163,15 @@ public class TransactionsViewModel extends BaseViewModel
 
         if (t != null)
         {
-            //first find the latest block
-            fetchTransactionDisposable = addTokenInteract.getLatestBlockNumber(t.tokenInfo.chainId)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(Schedulers.computation())
-                    .subscribe(blockNumber -> getTransactions(t, blockNumber), this::onTxError);
+            Log.d(TAG, "Checking Tx for: " + t.getFullName());
+            NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(t.tokenInfo.chainId);
+            String userAddress = t.isEthereum() ? null : wallet.getValue().address; //only specify address if we're scanning token transactions - not all are relevant to us.
+            fetchTransactionDisposable =
+                    fetchTransactionsInteract.fetchNetworkTransactions(network, t.getAddress(), t.lastBlockCheck, userAddress)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
         }
-    }
-
-    private void getTransactions(Token t, BigInteger blockNumber)
-    {
-        Log.d(TAG, "Checking Tx for: " + t.getFullName());
-        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(t.tokenInfo.chainId);
-        String userAddress = t.isEthereum() ? null : wallet.getValue().address; //only specify address if we're scanning token transactions - not all are relevant to us.
-        fetchTransactionDisposable =
-                fetchTransactionsInteract.fetchNetworkTransactions(network, t.getAddress(), t.lastBlockCheck, userAddress)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(transactions -> onUpdateTransactions(transactions, t, blockNumber), this::onTxError);
     }
 
     private void onTxError(Throwable throwable)
@@ -257,13 +248,16 @@ public class TransactionsViewModel extends BaseViewModel
         fetchTransactionDisposable = null;
     }
 
-    private void onUpdateTransactions(Transaction[] transactions, Token token, BigInteger blockNumber)
+    private void onUpdateTransactions(Transaction[] transactions, Token token)
     {
         Log.d("TRANSACTION", "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
+
         List<Transaction> newTxs = new ArrayList<>();
 
-        for (Transaction tx : transactions)
+        //NB: final transaction is block marker transaction, it's not used. If it is relevant, then it's a duplicate.
+        for (int i = 0; i < transactions.length - 1; i++)
         {
+            Transaction tx = transactions[i];
             if (!txMap.containsKey(tx.hash))
             {
                 newTxs.add(tx);
@@ -282,7 +276,15 @@ public class TransactionsViewModel extends BaseViewModel
                     .subscribe(txs -> siftUnknownTransactions(txs, token), this::onError);
         }
 
-        token.lastBlockCheck = blockNumber.longValue();
+        if (transactions.length == 0)
+        {
+            if (token.lastBlockCheck == 0) token.lastBlockCheck = 1; //no need to keep checking.
+        }
+        else
+        {
+            token.lastBlockCheck = Long.parseLong(transactions[transactions.length - 1].blockNumber);
+        }
+
         addTokenInteract.updateBlockRead(token, defaultWallet().getValue());
 
         fetchTransactionDisposable = null;

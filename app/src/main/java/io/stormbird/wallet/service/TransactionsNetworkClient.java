@@ -50,6 +50,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 		long lastBlockNumber = lastBlock + 1;
 		return Observable.fromCallable(() -> {
 			List<Transaction> result = new ArrayList<>();
+			EtherscanTransaction lastTransaction = null;
 			try
 			{
 				int page = 1;
@@ -68,7 +69,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
                             result.add(tx);
                         }
 					}
-					response = readTransactions(networkInfo, tokenAddress, String.valueOf(lastBlockNumber), true, page++, PAGESIZE);
+					if (myTxs.length > 0)
+					{
+                        lastTransaction = myTxs[myTxs.length-1];
+					}
+                   response = readTransactions(networkInfo, tokenAddress, String.valueOf(lastBlockNumber), true, page++, PAGESIZE);
 				}
 			}
 			catch (JSONException e)
@@ -79,6 +84,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			{
 				e.printStackTrace();
 			}
+
+			//Add last transaction as the final result to update block scan
+			if (lastTransaction != null)
+            {
+                result.add(lastTransaction.createTransaction(null, context, networkInfo.chainId));
+            }
 
 			return result.toArray(new Transaction[result.size()]);
 		}).subscribeOn(Schedulers.io());

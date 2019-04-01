@@ -288,9 +288,12 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             TextView sendText = findViewById(R.id.text_payment_request);
             sendText.setVisibility(View.VISIBLE);
             sendText.setText(R.string.transfer_request);
+            token = viewModel.getToken(result.chainId, wallet.address);
             toAddressEditText.setText(result.getAddress());
             amountInput = new AmountEntryItem(this, tokenRepository, viewModel.getNetworkInfo(result.chainId).symbol, true, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
+            amountInput.setAmountText(ethAmount);
             amountInput.setAmount(ethAmount);
+            setupTokenContent();
         }
         else if (result.getFunction().length() > 0 && resultToken != null && !resultToken.isEthereum())
         {

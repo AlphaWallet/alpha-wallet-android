@@ -232,7 +232,7 @@ public class AmountEntryItem
         callback.amountChanged(getEthValue());
     }
 
-    private String ethEquivalent(String amountStr)
+    private String ethEquivalent(String amountStr) throws NumberFormatException
     {
         String result = "0";
 
@@ -248,18 +248,26 @@ public class AmountEntryItem
 
     public void setAmount(String value)
     {
-        if (usdInput)
+        try
         {
-            tokenEquivalent.setText(ethEquivalent(value));
-        }
-        else
-        {
-            if (isValidAmount(value))
+            if (usdInput)
             {
-                String usdEquivStr = "US$ " + getUsdString(Double.valueOf(value) * currentEthPrice);
-                if (!hasRealValue) usdEquivStr = "(TEST) " + usdEquivStr;
-                usdValue.setText(usdEquivStr);
+                tokenEquivalent.setText(ethEquivalent(value));
             }
+            else
+            {
+                if (isValidAmount(value))
+                {
+                    String usdEquivStr = "US$ " + getUsdString(Double.valueOf(value) * currentEthPrice);
+                    if (!hasRealValue)
+                        usdEquivStr = "(TEST) " + usdEquivStr;
+                    usdValue.setText(usdEquivStr);
+                }
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            //
         }
     }
 
@@ -316,5 +324,10 @@ public class AmountEntryItem
     {
         amountError.setVisibility(View.VISIBLE);
         amountError.setText(errorMessage);
+    }
+
+    public void setAmountText(String ethAmount)
+    {
+        amountEditText.setText(ethAmount);
     }
 }

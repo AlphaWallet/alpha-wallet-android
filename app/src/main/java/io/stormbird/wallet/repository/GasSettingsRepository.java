@@ -123,7 +123,7 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
     private BigInteger estimateGasLimit(byte[] data)
     {
         BigInteger roundingFactor = BigInteger.valueOf(10000);
-        BigInteger txMin = BigInteger.valueOf(GAS_LIMIT_MIN);
+        BigInteger txMin = BigInteger.valueOf(GAS_LIMIT_MIN).multiply(BigInteger.valueOf(5));
         BigInteger bytePrice = BigInteger.valueOf(GAS_PER_BYTE);
         BigInteger dataLength = BigInteger.valueOf(data.length);
         BigInteger estimate = bytePrice.multiply(dataLength).add(txMin);

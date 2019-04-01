@@ -122,9 +122,16 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<BigInteger> fetchLatestBlockNumber(int chainId)
     {
         return Single.fromCallable(() -> {
-            EthBlockNumber blk = getService(chainId).ethBlockNumber()
-                    .send();
-            return blk.getBlockNumber();
+            try
+            {
+                EthBlockNumber blk = getService(chainId).ethBlockNumber()
+                        .send();
+                return blk.getBlockNumber();
+            }
+            catch (Exception e)
+            {
+                return BigInteger.ZERO;
+            }
         });
     }
 

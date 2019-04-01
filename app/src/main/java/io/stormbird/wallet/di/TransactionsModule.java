@@ -59,9 +59,8 @@ class TransactionsModule {
 
     @Provides
     AddTokenInteract provideAddTokenInteract(
-            TokenRepositoryType tokenRepository,
-            WalletRepositoryType walletRepository) {
-        return new AddTokenInteract(walletRepository, tokenRepository);
+            TokenRepositoryType tokenRepository) {
+        return new AddTokenInteract(tokenRepository);
     }
 
     @Provides

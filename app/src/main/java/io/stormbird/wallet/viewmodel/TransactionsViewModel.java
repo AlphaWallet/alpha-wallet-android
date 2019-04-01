@@ -15,6 +15,7 @@ import io.stormbird.wallet.router.TransactionDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -162,15 +163,24 @@ public class TransactionsViewModel extends BaseViewModel
 
         if (t != null)
         {
-            Log.d(TAG, "Checking Tx for: " + t.getFullName());
-            NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(t.tokenInfo.chainId);
-            String userAddress = t.isEthereum() ? null : wallet.getValue().address; //only specify address if we're scanning token transactions - not all are relevant to us.
-            fetchTransactionDisposable =
-                    fetchTransactionsInteract.fetchNetworkTransactions(network, t.getAddress(), t.lastBlockCheck, userAddress)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
+            //first find the latest block
+            fetchTransactionDisposable = addTokenInteract.getLatestBlockNumber(t.tokenInfo.chainId)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.computation())
+                    .subscribe(blockNumber -> getTransactions(t, blockNumber), this::onTxError);
         }
+    }
+
+    private void getTransactions(Token t, BigInteger blockNumber)
+    {
+        Log.d(TAG, "Checking Tx for: " + t.getFullName());
+        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(t.tokenInfo.chainId);
+        String userAddress = t.isEthereum() ? null : wallet.getValue().address; //only specify address if we're scanning token transactions - not all are relevant to us.
+        fetchTransactionDisposable =
+                fetchTransactionsInteract.fetchNetworkTransactions(network, t.getAddress(), t.lastBlockCheck, userAddress)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(transactions -> onUpdateTransactions(transactions, t, blockNumber), this::onTxError);
     }
 
     private void onTxError(Throwable throwable)
@@ -247,11 +257,10 @@ public class TransactionsViewModel extends BaseViewModel
         fetchTransactionDisposable = null;
     }
 
-    private void onUpdateTransactions(Transaction[] transactions, Token token)
+    private void onUpdateTransactions(Transaction[] transactions, Token token, BigInteger blockNumber)
     {
         Log.d("TRANSACTION", "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
         List<Transaction> newTxs = new ArrayList<>();
-        boolean blockNumberUpdate = false;
 
         for (Transaction tx : transactions)
         {
@@ -259,12 +268,6 @@ public class TransactionsViewModel extends BaseViewModel
             {
                 newTxs.add(tx);
                 txMap.put(tx.hash, tx);
-            }
-            Long blockNumber = Long.valueOf(tx.blockNumber);
-            if (blockNumber > token.lastBlockCheck)
-            {
-                token.lastBlockCheck = blockNumber;
-                blockNumberUpdate = true;
             }
         }
 
@@ -279,10 +282,8 @@ public class TransactionsViewModel extends BaseViewModel
                     .subscribe(txs -> siftUnknownTransactions(txs, token), this::onError);
         }
 
-        if (token.lastBlockCheck == 1 || blockNumberUpdate)
-        {
-            addTokenInteract.updateBlockRead(token, defaultWallet().getValue());
-        }
+        token.lastBlockCheck = blockNumber.longValue();
+        addTokenInteract.updateBlockRead(token, defaultWallet().getValue());
 
         fetchTransactionDisposable = null;
     }

@@ -111,13 +111,13 @@ public class TokensService
     {
         if (addr != null)
         {
-            if (addr.equals(currentAddress))
+            if (addr.equalsIgnoreCase(currentAddress))
             {
                 return currencies.get(chainId);
             }
-            else if (tokenMap.containsKey(addr))
+            else if (tokenMap.containsKey(addr.toLowerCase()))
             {
-                return tokenMap.get(addr).get(chainId, null);
+                return tokenMap.get(addr.toLowerCase()).get(chainId, null);
             }
         }
 
@@ -244,20 +244,18 @@ public class TokensService
 
     public List<ContractResult> reduceToUnknown(List<ContractResult> contracts)
     {
-        List<Token> allTokens = getAllTokens();
-        for (Token t : allTokens)
+        List<ContractResult> unknowns = new ArrayList<>();
+
+        for (ContractResult r : contracts)
         {
-            for (ContractResult r : contracts)
+            Token check = getToken(r.chainId, r.name.toLowerCase());
+            if (check == null)
             {
-                if (t.getAddress().equals(r.name) && t.tokenInfo.chainId == r.chainId)
-                {
-                    contracts.remove(r);
-                    break;
-                }
+                unknowns.add(r);
             }
         }
 
-        return contracts;
+        return unknowns;
     }
 
     public void setCurrentAddress(String currentAddress)

@@ -32,7 +32,8 @@ import java.util.concurrent.TimeUnit;
 
 public class WalletViewModel extends BaseViewModel
 {
-    private static final int CHECK_OPENSEA_INTERVAL_TIME = 25; //Opensea refresh interval in seconds
+    private static final int BALANCE_CHECK_INTERVAL_MILLIS = 500; //Balance check interval in milliseconds - should be integer divisible with 1000 (1 second)
+    private static final int CHECK_OPENSEA_INTERVAL_TIME = 40; //Opensea refresh interval in seconds
     private static final int OPENSEA_RINKEBY_CHECK = 6; //check Rinkeby opensea once per XX opensea checks (ie if interval time is 25 and rinkeby check is 1 in 6, rinkeby refresh time is once per 300 seconds).
 
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
@@ -157,7 +158,7 @@ public class WalletViewModel extends BaseViewModel
             updateTokens = fetchTokensInteract.fetchStoredWithEth(currentWallet)
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onTokens, this::onTokenFetchError, this::fetchAllKnownContracts);
+                    .subscribe(this::onTokens, this::onTokenFetchError, this::startBalanceUpdate);
         }
         else
         {
@@ -171,6 +172,7 @@ public class WalletViewModel extends BaseViewModel
         tokensService.randomiseInitialPressure(cachedTokens);
         tokensService.addTokens(cachedTokens);
         tokens.postValue(tokensService.getAllLiveTokens().toArray(new Token[0]));
+        fetchKnownContracts.postValue(true);
     }
 
     private void onTokenFetchError(Throwable throwable)
@@ -183,10 +185,9 @@ public class WalletViewModel extends BaseViewModel
         onError(throwable);
     }
 
-    private void fetchAllKnownContracts()
+    private void startBalanceUpdate()
     {
         fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.MAINNET_ID));
-        fetchKnownContracts.postValue(true);
         updateTokenBalances();
     }
 
@@ -257,7 +258,7 @@ public class WalletViewModel extends BaseViewModel
     {
         if (balanceTimerDisposable == null || balanceTimerDisposable.isDisposed())
         {
-            balanceTimerDisposable = Observable.interval(0, 500, TimeUnit.MILLISECONDS)
+            balanceTimerDisposable = Observable.interval(0, BALANCE_CHECK_INTERVAL_MILLIS, TimeUnit.MILLISECONDS)
                     .doOnNext(l -> checkBalances()).subscribe();
         }
     }
@@ -409,7 +410,7 @@ public class WalletViewModel extends BaseViewModel
     {
         List<Token> tokens = tokensService.getAllTokens();
         //Add all unterminated contracts that have null names
-        for (Token t : tokens) if (t.tokenInfo.name == null && !t.isTerminated()) knownContracts.add(new ContractResult(t.getAddress(), t.tokenInfo.chainId));
+        for (Token t : tokens) if (t.tokenInfo.name == null && !t.isTerminated()) ContractResult.addIfNotInList(knownContracts, new ContractResult(t.getAddress(), t.tokenInfo.chainId));
 
         for (NetworkInfo network : ethereumNetworkRepository.getAvailableNetworkList())
         {
@@ -486,17 +487,16 @@ public class WalletViewModel extends BaseViewModel
         {
             if (isVisible)
             {
-                if (openSeaCheckCounter%2 != 0) openSeaCheckCounter++; //correct for odd number
-                openSeaCheckCounter += 2;
-            }
-            else
                 openSeaCheckCounter += 1;
+            }
 
-            if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * 2) == 0)
+            int updateCorrection = 1000 / BALANCE_CHECK_INTERVAL_MILLIS;
+
+            if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * updateCorrection) == 0)
             {
                 NetworkInfo openSeaCheck = ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.MAINNET_ID);
 
-                if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * 2 * OPENSEA_RINKEBY_CHECK) == 0 && ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
+                if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * updateCorrection * OPENSEA_RINKEBY_CHECK) == 0 && ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
                 {
                     openSeaCheck = ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.RINKEBY_ID);
                 }
@@ -507,7 +507,7 @@ public class WalletViewModel extends BaseViewModel
         else
         {
             //On user refresh and startup check rinkeby
-            openSeaCheckCounter += 2;
+            openSeaCheckCounter += 1;
             //check rinkeby opensea if not filtered out
             if (ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
                 fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.RINKEBY_ID));

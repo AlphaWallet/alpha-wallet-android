@@ -8,13 +8,13 @@ import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.service.AssetDefinitionService;
 
+import java.math.BigInteger;
+
 public class AddTokenInteract {
     private final TokenRepositoryType tokenRepository;
-    private final WalletRepositoryType walletRepository;
 
     public AddTokenInteract(
-            WalletRepositoryType walletRepository, TokenRepositoryType tokenRepository) {
-        this.walletRepository = walletRepository;
+            TokenRepositoryType tokenRepository) {
         this.tokenRepository = tokenRepository;
     }
 
@@ -37,5 +37,10 @@ public class AddTokenInteract {
     public Disposable updateBlockRead(Token token, Wallet wallet)
     {
         return tokenRepository.updateBlockRead(token, wallet);
+    }
+
+    public Single<BigInteger> getLatestBlockNumber(int chainId)
+    {
+        return tokenRepository.fetchLatestBlockNumber(chainId);
     }
 }

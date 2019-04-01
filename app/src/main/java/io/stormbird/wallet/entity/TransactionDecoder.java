@@ -136,7 +136,7 @@ public class TransactionDecoder
                             char c = (char)v;
                             sb.append(c);
                         }
-                        thisData.miscData.add(sb.toString());
+                        thisData.miscData.add(Numeric.cleanHexPrefix(sb.toString()));
                         break;
                     case "address":
                         if (argData.length() >= 64 - ADDRESS_LENGTH_IN_HEX)
@@ -196,7 +196,7 @@ public class TransactionDecoder
         switch (state)
         {
             case ARGS:
-                thisData.miscData.add(input);
+                thisData.miscData.add(Numeric.cleanHexPrefix(input));
                 break;
             case SIGNATURE:
                 thisData.sigData.add(input);

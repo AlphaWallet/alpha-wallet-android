@@ -103,22 +103,15 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 TokenHolder tokenHolder = new TokenHolder(R.layout.item_token, parent, assetService, network);
                 tokenHolder.setOnTokenClickListener(onTokenClickListener);
                 holder = tokenHolder;
-                setAnimation(holder.itemView);
             }
             break;
             default:
             // NB to save ppl a lot of effort this view doesn't show - item_total_balance has height coded to 1dp.
             case TotalBalanceHolder.VIEW_TYPE: {
                 holder = new TotalBalanceHolder(R.layout.item_total_balance, parent);
-                setAnimation(holder.itemView);
             }
         }
         return holder;
-    }
-
-    private void setAnimation(View viewToAnimate) {
-            Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in);
-            viewToAnimate.startAnimation(animation);
     }
 
     @Override

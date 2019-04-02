@@ -37,6 +37,7 @@ public class QrUrlResult implements Parcelable
         functionDetail = "";
         gasLimit = BigInteger.ZERO;
         gasPrice = BigInteger.ZERO;
+        weiValue = BigInteger.ZERO;
     }
 
     protected QrUrlResult(Parcel in)

@@ -2,10 +2,8 @@ package io.stormbird.token.tools;
 
 import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.NonFungibleToken;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import io.stormbird.token.entity.TSAction;
+import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -27,6 +25,7 @@ public class TokenDefinition {
     public Map<String, Integer> addresses = new HashMap<>();
     public Map<String, FunctionDefinition> functions = new ConcurrentHashMap<>();
     public Map<String, Map<String, String>> attributeSets = new ConcurrentHashMap<>(); //TODO: add language, in case user changes language during operation - see Weiwu's comment further down
+    public Map<String, TSAction> actions = new ConcurrentHashMap<>();
 
     private String nameSpace;
 
@@ -304,6 +303,20 @@ public class TokenDefinition {
         return null;
     }
 
+    Node getNode(Element nameContainer, String tagName) {
+        NodeList nList = nameContainer.getElementsByTagNameNS(nameSpace, tagName);
+        Element name;
+        for (int i = 0; i < nList.getLength(); i++) {
+            name = (Element) nList.item(i);
+            String langAttr = getLocalisationLang(name);
+            if (langAttr.equals(locale.getLanguage())) {
+                return name;
+            }
+        }
+
+        return null;
+    }
+
     String getLocalisedString(Element nameContainer, String tagName, String typeAttr) {
         NodeList nList = nameContainer.getElementsByTagNameNS(nameSpace, tagName);
         Element name;
@@ -437,6 +450,7 @@ public class TokenDefinition {
         extractTags(xml, "features", false);
     }
 
+    //TODO: switch from hard-code to token parser
     private void extractCards(Document xml)
     {
         NodeList nList = xml.getElementsByTagNameNS(nameSpace, "cards");
@@ -452,6 +466,31 @@ public class TokenDefinition {
         {
             attributeSets.put("cards", attributeSet);
         }
+
+        nList = cards.getElementsByTagNameNS(nameSpace, "action");
+        if (nList.getLength() == 0) return;
+        Element action = (Element) nList.item(0);
+        TSAction tsAction = new TSAction();
+        //name (localised)
+        String name = getLocalisedString(action, "name");
+        tsAction.type = action.getAttribute("type");
+        //exclude
+        tsAction.exclude = "";
+        tsAction.view = "none";
+        nList = action.getElementsByTagNameNS(nameSpace, "exclude");
+        if (nList.getLength() > 0)
+        {
+            Element excludeNode = (Element) nList.item(0);
+            tsAction.exclude = excludeNode.getAttribute("selection");
+        }
+        Node viewNode = getLocalisedNode(action, "view");
+        if (viewNode != null)
+        {
+            tsAction.view = getHTMLContent(viewNode);
+        }
+        System.out.println("type");
+
+        actions.put(name, tsAction);
     }
 
     private void addToHTMLSet(Map<String, String> attributeSet, Element root, String tagName)
@@ -810,5 +849,10 @@ public class TokenDefinition {
         {
             return "";
         }
+    }
+
+    public Map<String, TSAction> getActions()
+    {
+        return actions;
     }
 }

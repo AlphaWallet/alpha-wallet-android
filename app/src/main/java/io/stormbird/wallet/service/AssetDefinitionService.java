@@ -12,6 +12,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.NonFungibleToken;
+import io.stormbird.token.entity.TSAction;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import okhttp3.OkHttpClient;
@@ -660,5 +661,18 @@ public class AssetDefinitionService
         }
 
         return viewHTML;
+    }
+
+    public Map<String, TSAction> getTokenFunctionMap(String contractAddr)
+    {
+        TokenDefinition td = assetDefinitions.get(contractAddr);
+        if (td != null)
+        {
+            return td.getActions();
+        }
+        else
+        {
+            return null;
+        }
     }
 }

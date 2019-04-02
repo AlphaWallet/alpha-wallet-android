@@ -276,15 +276,13 @@ public class TransactionsViewModel extends BaseViewModel
                     .subscribe(txs -> siftUnknownTransactions(txs, token), this::onError);
         }
 
-        if (transactions.length == 0)
-        {
-            if (token.lastBlockCheck == 0) token.lastBlockCheck = 1; //no need to keep checking.
-        }
-        else
+        //The final transaction is the last transaction read, and will have the highest block number we read
+        if (transactions.length > 0)
         {
             token.lastBlockCheck = Long.parseLong(transactions[transactions.length - 1].blockNumber);
         }
 
+        //Need to log that we scanned transactions for this token, even if there weren't any transactions.
         addTokenInteract.updateBlockRead(token, defaultWallet().getValue());
 
         fetchTransactionDisposable = null;

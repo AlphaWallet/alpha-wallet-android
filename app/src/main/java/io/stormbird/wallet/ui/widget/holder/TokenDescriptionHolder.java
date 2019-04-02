@@ -46,7 +46,9 @@ public class TokenDescriptionHolder extends BinderViewHolder<Token>
         String tokenName = token.tokenInfo.name;
         if (assetService.getAssetDefinition(token.getAddress()) != null)
         {
-            String nameCandidate = assetService.getAssetDefinition(token.getAddress()).getTokenName();
+            String nameCandidate = null;
+            if (token.getTicketCount() > 1) nameCandidate = assetService.getAssetDefinition(token.getAddress()).getTokenNameCollective();
+            if (nameCandidate == null) nameCandidate = assetService.getAssetDefinition(token.getAddress()).getTokenName();
             if (nameCandidate != null && nameCandidate.length() > 0) tokenName = nameCandidate;
         }
         title.setText(tokenName);

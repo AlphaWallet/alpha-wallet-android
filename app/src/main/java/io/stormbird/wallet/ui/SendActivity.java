@@ -215,9 +215,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         if (requestCode == BARCODE_READER_REQUEST_CODE) {
             if (resultCode == FullScannerFragment.SUCCESS) {
                 if (data != null) {
-                    String barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
-                    if (barcode == null)
-                        barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+                    String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
 
                     //if barcode is still null, ensure we don't GPF
                     if (barcode == null) {
@@ -281,7 +279,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
         Token resultToken = viewModel.getToken(result.chainId, result.getAddress());
 
-        if (result.getFunction().length() == 0)
+        if (result.getFunction().length() == 0 && result.weiValue.compareTo(BigInteger.ZERO) > 0)
         {
             //correct chain and asset type
             String ethAmount = BalanceUtils.weiToEth(new BigDecimal(result.weiValue)).setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
@@ -314,12 +312,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             TextView contractText = findViewById(R.id.text_contract_call);
             contractText.setVisibility(View.VISIBLE);
             contractText.setText(result.functionDetail);
-        }
-        else
-        {
-            //TODO: fetch Token name
-            String message = getString(R.string.wrong_token, result.getAddress());
-            displayScanError(R.string.wrong_token_title, message);
         }
     }
 

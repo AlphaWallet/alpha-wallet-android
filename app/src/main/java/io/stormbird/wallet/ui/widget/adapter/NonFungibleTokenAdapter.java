@@ -26,6 +26,7 @@ import io.stormbird.wallet.service.OpenseaService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.entity.*;
 import io.stormbird.wallet.ui.widget.holder.*;
+import io.stormbird.wallet.web3.entity.ScriptFunction;
 
 /**
  * Created by James on 9/02/2018.
@@ -35,6 +36,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     TicketRange currentRange = null;
     final Token token;
     protected OpenseaService openseaService;
+    private ScriptFunction tokenScriptHolderCallback;
 
     public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, AssetDefinitionService service, OpenseaService opensea) {
         super(tokenClickListener, service);
@@ -83,6 +85,10 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
                 break;
             case AssetInstanceScriptHolder.VIEW_TYPE:
                 holder = new AssetInstanceScriptHolder(R.layout.item_iframe_token, parent, token, assetService);
+                break;
+            case TokenFunctionViewHolder.VIEW_TYPE:
+                holder = new TokenFunctionViewHolder(R.layout.item_function_layout, parent, token);
+                tokenScriptHolderCallback = (ScriptFunction)holder;
                 break;
         }
 
@@ -268,5 +274,18 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     private void cleared(Boolean aBoolean)
     {
         this.notifyDataSetChanged();
+    }
+
+    public void addFunctionView(Token token, String view)
+    {
+        TokenFunctionSortedItem item = new TokenFunctionSortedItem(view, 200);
+        items.add(item);
+        notifyDataSetChanged();
+    }
+
+    public void passFunction(String function)
+    {
+        //pass into the view
+        tokenScriptHolderCallback.callFunction(function);
     }
 }

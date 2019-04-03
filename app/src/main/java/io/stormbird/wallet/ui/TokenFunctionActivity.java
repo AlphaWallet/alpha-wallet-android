@@ -44,16 +44,15 @@ public class TokenFunctionActivity extends BaseActivity
     private NonFungibleTokenAdapter adapter;
 
     private void initViews() {
-        //findViewById(R.id.scroll_details).setVisibility(View.GONE);
-        //findViewById(R.id.layout_function).setVisibility(View.VISIBLE);
-
         token = getIntent().getParcelableExtra(TICKET);
         String displayIds = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
         list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(token, displayIds, viewModel.getAssetDefinitionService());
+        List<BigInteger> idList = token.stringHexToBigIntegerList(displayIds);
+        adapter = new NonFungibleTokenAdapter(token, token.intArrayToString(idList, false), viewModel.getAssetDefinitionService());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
         list.setHapticFeedbackEnabled(true);
+        adapter.addFunctionView(token, viewModel.getAssetDefinitionService().getTokenFunctionView(token.getAddress()));
     }
 
     @Override
@@ -78,9 +77,9 @@ public class TokenFunctionActivity extends BaseActivity
     private void setupFunctions()
     {
         Button[] buttons = new Button[3];
-        buttons[0] = findViewById(R.id.button_use);//.setVisibility(View.GONE);
-        buttons[1] = findViewById(R.id.button_sell);//.setVisibility(View.GONE);
-        buttons[2] = findViewById(R.id.button_transfer);//.setVisibility(View.GONE);
+        buttons[0] = findViewById(R.id.button_use);
+        buttons[1] = findViewById(R.id.button_sell);
+        buttons[2] = findViewById(R.id.button_transfer);
 
         for (Button b : buttons) b.setVisibility(View.GONE);
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.getAddress());
@@ -91,7 +90,15 @@ public class TokenFunctionActivity extends BaseActivity
             {
                 TSAction action = functions.get(name);
                 buttons[index].setText(name);
-                buttons[index++].setVisibility(View.VISIBLE);
+                buttons[index].setVisibility(View.VISIBLE);
+                buttons[index++].setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View view)
+                    {
+                        adapter.passFunction(name);
+                    }
+                });
             }
         }
     }

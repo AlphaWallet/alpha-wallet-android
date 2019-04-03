@@ -71,7 +71,7 @@ public class BrowserHistoryAdapter extends RecyclerView.Adapter<BrowserHistoryAd
             e.printStackTrace();
         }
         viewHolder.name.setText(dApp.getName());
-        viewHolder.url.setText(visibleUrl);
+        viewHolder.url.setText(dApp.getUrl());
 
         String favicon;
         if (visibleUrl != null) {

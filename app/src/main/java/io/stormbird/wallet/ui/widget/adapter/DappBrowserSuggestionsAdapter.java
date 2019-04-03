@@ -67,6 +67,15 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
         notifyDataSetChanged();
     }
 
+    public void removeSuggestion(DApp dapp) {
+        for (DApp d : suggestions) {
+            if (d.getName().equals(dapp.getName()) && d.getUrl().equals(dapp.getUrl())) {
+                suggestions.remove(d);
+                break;
+            }
+        }
+    }
+
     @Override
     public int getCount() {
         return filteredSuggestions.size();

@@ -54,6 +54,7 @@ import io.stormbird.wallet.entity.URLLoadReceiver;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.OnDappClickListener;
 import io.stormbird.wallet.ui.widget.OnDappHomeNavClickListener;
+import io.stormbird.wallet.ui.widget.OnHistoryItemRemovedListener;
 import io.stormbird.wallet.ui.widget.adapter.DappBrowserSuggestionsAdapter;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
@@ -82,7 +83,8 @@ import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 public class DappBrowserFragment extends Fragment implements
         OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
-        URLLoadInterface, ItemClickListener, SignTransactionInterface, OnDappClickListener, OnDappHomeNavClickListener
+        URLLoadInterface, ItemClickListener, SignTransactionInterface, OnDappClickListener, OnDappHomeNavClickListener,
+        OnHistoryItemRemovedListener
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
     private static final String DAPP_BROWSER = "DAPP_BROWSER";
@@ -189,7 +191,7 @@ public class DappBrowserFragment extends Fragment implements
                 showFragment(f, tag);
             } else if (tag.equals(HISTORY)) {
                 BrowserHistoryFragment f = (BrowserHistoryFragment) fragment;
-                f.setCallbacks(this);
+                f.setCallbacks(this, this);
                 showFragment(f, tag);
             } else {
                 showFragment(fragment, tag);
@@ -213,7 +215,7 @@ public class DappBrowserFragment extends Fragment implements
                 showFragment(f, tag);
             } else if (tag.equals(HISTORY)) {
                 BrowserHistoryFragment f = new BrowserHistoryFragment();
-                f.setCallbacks(this);
+                f.setCallbacks(this, this);
                 showFragment(f, tag);
             }
         }
@@ -269,6 +271,11 @@ public class DappBrowserFragment extends Fragment implements
     @Override
     public void onDappClick(DApp dapp) {
         loadUrl(dapp.getUrl());
+    }
+
+    @Override
+    public void onHistoryItemRemoved(DApp dApp) {
+        adapter.removeSuggestion(dApp);
     }
 
     @Override

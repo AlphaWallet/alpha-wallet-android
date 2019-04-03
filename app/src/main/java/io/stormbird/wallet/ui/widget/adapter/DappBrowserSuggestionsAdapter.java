@@ -46,6 +46,25 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
         this.listener = listener;
         this.filteredSuggestions = new ArrayList<>();
         this.text = "";
+
+        // Append browser history to known DApps list during initialisation
+        addSuggestions(DappBrowserUtils.getBrowserHistory(context));
+    }
+
+    public void addSuggestion(DApp dapp) {
+        if (!suggestions.contains(dapp)) {
+            suggestions.add(dapp);
+            notifyDataSetChanged();
+        }
+    }
+
+    public void addSuggestions(List<DApp> dapps) {
+        for (DApp d : dapps) {
+            if (!suggestions.contains(d)) {
+                suggestions.add(d);
+            }
+        }
+        notifyDataSetChanged();
     }
 
     @Override
@@ -101,7 +120,11 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
         TextView url = convertView.findViewById(R.id.url);
 
         name.setText(dapp.getName());
-        description.setText(dapp.getDescription());
+        if (dapp.getDescription() != null && !dapp.getDescription().isEmpty()) {
+            description.setText(dapp.getDescription());
+        } else {
+            description.setText(dapp.getUrl());
+        }
         url.setText(dapp.getUrl());
 
         highlightSearch(text, dapp.getName());

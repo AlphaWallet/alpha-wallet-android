@@ -638,6 +638,7 @@ public class DappBrowserFragment extends Fragment implements
     {
         DApp dapp = new DApp(title, url);
         DappBrowserUtils.addToHistory(getContext(), dapp);
+        adapter.addSuggestion(dapp);
         sessionHistory = web3.copyBackForwardList();
         setBackForwardButtons();
     }

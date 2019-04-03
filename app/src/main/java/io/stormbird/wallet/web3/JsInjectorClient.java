@@ -87,7 +87,6 @@ public class JsInjectorClient {
         }
         String initJs = loadInitJs(context);
         return String.format(template, jsLibrary, initJs);
-
     }
 
     @Nullable

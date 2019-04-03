@@ -16,9 +16,14 @@ import io.stormbird.token.util.DateTimeFactory;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.TokenFunctionActivity;
 import io.stormbird.wallet.web3.JsInjectorClient;
+import io.stormbird.wallet.web3.Web3TokenView;
+import io.stormbird.wallet.web3.Web3View;
+import io.stormbird.wallet.web3.entity.Address;
+import io.stormbird.wallet.web3.entity.PageReadyCallback;
 
 import java.math.BigInteger;
 import java.text.ParseException;
@@ -29,15 +34,14 @@ import static io.stormbird.wallet.C.Key.TICKET;
  * Created by James on 26/03/2019.
  * Stormbird in Singapore
  */
-public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener
+public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener, PageReadyCallback
 {
     public static final int VIEW_TYPE = 1011;
 
     private final WebView iFrame;
+    private final Web3TokenView tokenView;
     private final Token token;
-    private final LinearLayout detailLayout;
     private final LinearLayout iFrameLayout;
-    private final WebView detailFrame;
 
     private final AssetDefinitionService assetDefinitionService; //need to cache this locally, unless we cache every string we need in the constructor
 
@@ -45,15 +49,17 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     {
         super(resId, parent);
         iFrame = findViewById(R.id.iframe);
-        detailLayout = findViewById(R.id.layout_usage_details);
         iFrameLayout = findViewById(R.id.layout_select_ticket);
-        detailFrame = findViewById(R.id.usage_details);
-        iFrame.getSettings().setBuiltInZoomControls(false);
-        iFrame.getSettings().setJavaScriptEnabled(true);
-        iFrame.getSettings().setDisplayZoomControls(false);
+        tokenView = findViewById(R.id.token_frame);
+        iFrame.setVisibility(View.GONE);
+        tokenView.setVisibility(View.VISIBLE);
         itemView.setOnClickListener(this);
         assetDefinitionService = assetService;
         token = t;
+        tokenView.setChainId(token.tokenInfo.chainId);
+        tokenView.setWalletAddress(new Address(token.getWallet()));
+        tokenView.setRpcUrl(token.tokenInfo.chainId);
+        tokenView.setOnReadyCallback(this);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -99,14 +105,20 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
                     "          this.token = tokenDef;\n" +
                     "        }\n" +
                     "      }\n\n" +
-                    "      const web3 = new TokenScriptDef(" + token.getWallet() + ", currentTokenInstance)\n" +
+                    "      const web3 = new TokenScriptDef(" + token.getWallet() + ", currentTokenInstance)\n\n" +
+                    "function goGetIt() {\n" +
+                    "   refresh()\n" +
+                    "}\n" +
                     "</script>";
 
             String view = assetDefinitionService.getTokenView(token.getAddress(), "view");
 
             String viewData = JsInjectorClient.injectJS(view, buildToken);
 
-            iFrame.loadData(viewData, "text/html", "utf-8");
+            tokenView.loadData(viewData, "text/html", "utf-8");
+
+            //need to wait for the view to finish loading before we can call token render
+            //see onPageLoaded
 
             iFrameLayout.setOnClickListener(v -> {
                 Intent intent = new Intent(getContext(), TokenFunctionActivity.class);
@@ -151,5 +163,11 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     @Override
     public void onClick(View v) {
 
+    }
+
+    @Override
+    public void onPageLoaded()
+    {
+        tokenView.callToJS("refresh()");
     }
 }

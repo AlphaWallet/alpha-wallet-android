@@ -12,6 +12,7 @@
         android:id="@+id/layout_iframeholder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         android:padding="15dp">
 
         <WebView
@@ -22,6 +23,15 @@
             android:visibility="visible">
 
         </WebView>
+
+        <io.stormbird.wallet.web3.Web3TokenView
+            android:id="@+id/token_frame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:visibility="gone">
+
+        </io.stormbird.wallet.web3.Web3TokenView>
 
     </LinearLayout>
 

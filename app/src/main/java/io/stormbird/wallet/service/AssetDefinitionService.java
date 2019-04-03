@@ -675,4 +675,21 @@ public class AssetDefinitionService
             return null;
         }
     }
+
+    public String getTokenFunctionView(String contractAddr)
+    {
+        TokenDefinition td = assetDefinitions.get(contractAddr);
+        if (td != null && td.getActions().size() > 0)
+        {
+            for (TSAction a : td.getActions().values())
+            {
+                return a.view;
+            }
+            return null;
+        }
+        else
+        {
+            return null;
+        }
+    }
 }

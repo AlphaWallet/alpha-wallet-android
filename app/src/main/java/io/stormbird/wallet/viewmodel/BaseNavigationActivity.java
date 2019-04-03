@@ -21,4 +21,8 @@ public class BaseNavigationActivity extends BaseActivity implements AWalletBotto
         nav.setSelectedItem(index);
         return false;
     }
+
+    protected int getSelectedItem() {
+        return nav.getSelectedItem();
+    }
 }

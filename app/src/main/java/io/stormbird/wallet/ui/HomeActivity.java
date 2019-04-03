@@ -289,7 +289,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 return true;
             }
             case DAPP_BROWSER: {
-                showPage(DAPP_BROWSER);
+                if (getSelectedItem() == DAPP_BROWSER) {
+                    dappBrowserFragment.homePressed();
+                } else {
+                    showPage(DAPP_BROWSER);
+                }
                 return true;
             }
             case WALLET: {
@@ -350,16 +354,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private void showPage(int page) {
         switch (page) {
             case DAPP_BROWSER: {
-                if (viewPager.getCurrentItem() == DAPP_BROWSER) {
-                    dappBrowserFragment.homePressed();
-                } else {
-                    hideToolbar();
-                    viewPager.setCurrentItem(DAPP_BROWSER);
-                    setTitle(getString(R.string.toolbar_header_browser));
-                    selectNavigationItem(DAPP_BROWSER);
-                    enableDisplayHomeAsHome(true);
-                    invalidateOptionsMenu();
-                }
+                hideToolbar();
+                viewPager.setCurrentItem(DAPP_BROWSER);
+                setTitle(getString(R.string.toolbar_header_browser));
+                selectNavigationItem(DAPP_BROWSER);
+                enableDisplayHomeAsHome(true);
+                invalidateOptionsMenu();
                 break;
             }
             case WALLET: {

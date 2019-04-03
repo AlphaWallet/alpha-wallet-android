@@ -9,6 +9,8 @@ import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import io.stormbird.wallet.entity.LocaleItem;
@@ -26,16 +28,16 @@ import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ManageWalletsRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 import io.reactivex.disposables.Disposable;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.util.LocaleUtils;
+import io.stormbird.wallet.util.Utils;
 
 public class NewSettingsViewModel extends BaseViewModel {
     private static final long GET_BALANCE_INTERVAL = 10 * DateUtils.SECOND_IN_MILLIS;
 
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Map<String, String>> defaultWalletBalance = new MutableLiveData<>();
-    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final MyAddressRouter myAddressRouter;
@@ -45,6 +47,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final HomeRouter homeRouter;
     private final PreferenceRepositoryType preferenceRepository;
     private final LocaleRepositoryType localeRepository;
+    private final TokensService tokensService;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -53,7 +56,6 @@ public class NewSettingsViewModel extends BaseViewModel {
     private Handler handler = new Handler();
 
     NewSettingsViewModel(
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             MyAddressRouter myAddressRouter,
@@ -62,8 +64,8 @@ public class NewSettingsViewModel extends BaseViewModel {
             ManageWalletsRouter manageWalletsRouter,
             HomeRouter homeRouter,
             PreferenceRepositoryType preferenceRepository,
-            LocaleRepositoryType localeRepository) {
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+            LocaleRepositoryType localeRepository,
+            TokensService tokensService) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.myAddressRouter = myAddressRouter;
@@ -73,10 +75,7 @@ public class NewSettingsViewModel extends BaseViewModel {
         this.homeRouter = homeRouter;
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
-    }
-
-    public void showHome(Context context, boolean clearStack, boolean fromSettings) {
-        homeRouter.open(context, clearStack, true);
+        this.tokensService = tokensService;
     }
 
     public void showHome(Context context, boolean clearStack) {
@@ -115,17 +114,33 @@ public class NewSettingsViewModel extends BaseViewModel {
         showHome(context, true); //Refresh activity to reflect changes
     }
 
-    public String[] getNetworkList() {
-        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
-        String[] networkList = new String[networks.length];
-        for (int ii = 0; ii < networks.length; ii++) {
-            networkList[ii] = networks[ii].name;
-        }
-        return networkList;
+    public NetworkInfo[] getNetworkList() {
+        return ethereumNetworkRepository.getAvailableNetworkList();
     }
 
-    public NetworkInfo getDefaultNetworkInfo() {
-        return ethereumNetworkRepository.getDefaultNetwork();
+    public String getFilterNetworkList() {
+        List<Integer> networkIds = ethereumNetworkRepository.getFilterNetworkList();
+        StringBuilder sb = new StringBuilder();
+        boolean firstValue = true;
+        for (int networkId : networkIds)
+        {
+            if (!firstValue) sb.append(",");
+            sb.append(networkId);
+            firstValue = false;
+        }
+        return sb.toString();
+    }
+
+    public void setFilterNetworks(Integer[] selectedItems)
+    {
+        int[] selectedIds = new int[selectedItems.length];
+        int index = 0;
+        for (Integer selectedId : selectedItems)
+        {
+            selectedIds[index++] = selectedId;
+        }
+        ethereumNetworkRepository.setFilterNetworkList(selectedIds);
+        tokensService.setupFilter();
     }
 
     @Override
@@ -133,10 +148,6 @@ public class NewSettingsViewModel extends BaseViewModel {
         super.onCleared();
 
         handler.removeCallbacks(startGetBalanceTask);
-    }
-
-    public LiveData<NetworkInfo> defaultNetwork() {
-        return defaultNetwork;
     }
 
     public LiveData<Wallet> defaultWallet() {
@@ -149,9 +160,9 @@ public class NewSettingsViewModel extends BaseViewModel {
 
     public void prepare() {
         progress.postValue(true);
-        disposable = findDefaultNetworkInteract
+        disposable = findDefaultWalletInteract
                 .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
+                .subscribe(this::onDefaultWallet, this::onError);
     }
 
     public void getBalance() {
@@ -163,13 +174,6 @@ public class NewSettingsViewModel extends BaseViewModel {
                     handler.postDelayed(startGetBalanceTask, GET_BALANCE_INTERVAL);
                 }, t -> {
                 });
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        defaultNetwork.postValue(networkInfo);
-        disposable = findDefaultWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
     }
 
     private void onDefaultWallet(Wallet wallet) {

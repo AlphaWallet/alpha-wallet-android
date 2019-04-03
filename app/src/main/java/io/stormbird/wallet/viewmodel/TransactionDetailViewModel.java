@@ -24,8 +24,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     private final ExternalBrowserRouter externalBrowserRouter;
     private final TokensService tokenService;
+    private final FindDefaultNetworkInteract networkInteract;
 
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
 
     TransactionDetailViewModel(
@@ -33,22 +33,14 @@ public class TransactionDetailViewModel extends BaseViewModel {
             FindDefaultWalletInteract findDefaultWalletInteract,
             ExternalBrowserRouter externalBrowserRouter,
             TokensService service) {
+        this.networkInteract = findDefaultNetworkInteract;
         this.externalBrowserRouter = externalBrowserRouter;
         this.tokenService = service;
 
-        findDefaultNetworkInteract
-                .find()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(defaultNetwork::postValue, t -> {});
         disposable = findDefaultWalletInteract
                 .find()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(defaultWallet::postValue,  t -> {});
-    }
-
-
-    public LiveData<NetworkInfo> defaultNetwork() {
-        return defaultNetwork;
     }
 
     public void showMoreDetails(Context context, Transaction transaction) {
@@ -69,14 +61,14 @@ public class TransactionDetailViewModel extends BaseViewModel {
         }
     }
 
-    public Token getToken(String address)
+    public Token getToken(int chainId, String address)
     {
-        return tokenService.getToken(address);
+        return tokenService.getToken(chainId, address);
     }
 
     @Nullable
     private Uri buildEtherscanUri(Transaction transaction) {
-        NetworkInfo networkInfo = defaultNetwork.getValue();
+        NetworkInfo networkInfo = networkInteract.getNetworkInfo(transaction.chainId);
         if (networkInfo != null && !TextUtils.isEmpty(networkInfo.etherscanUrl)) {
             return Uri.parse(networkInfo.etherscanUrl)
                     .buildUpon()
@@ -84,6 +76,16 @@ public class TransactionDetailViewModel extends BaseViewModel {
                     .build();
         }
         return null;
+    }
+
+    public String getNetworkName(int chainId)
+    {
+        return networkInteract.getNetworkName(chainId);
+    }
+
+    public String getNetworkSymbol(int chainId)
+    {
+        return networkInteract.getNetworkInfo(chainId).symbol;
     }
 
     public LiveData<Wallet> defaultWallet() {

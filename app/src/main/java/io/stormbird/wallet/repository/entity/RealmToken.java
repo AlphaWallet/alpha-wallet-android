@@ -14,12 +14,10 @@ public class RealmToken extends RealmObject {
     private String balance;
     private boolean isEnabled;
     private int tokenId;
-    private boolean isStormbird;
-    private String burnList;
-    private int nullCheckCount = 0;
     private int interfaceSpec;
     private String auxData;
     private long lastBlockRead;
+    private int chainId;
 
     public int getDecimals() {
         return decimals;
@@ -77,15 +75,6 @@ public class RealmToken extends RealmObject {
         this.balance = balance;
     }
 
-    public String getBurnList()
-    {
-        return burnList;
-    }
-    public void setBurnList(String burnList)
-    {
-        this.burnList = burnList;
-    }
-
     public boolean getEnabled() {
         return isEnabled;
     }
@@ -104,24 +93,6 @@ public class RealmToken extends RealmObject {
     public void setTokenId(int tokenId)
     {
         this.tokenId = tokenId;
-    }
-
-    public boolean isStormbird()
-    {
-        return isStormbird;
-    }
-
-    public void setStormbird(boolean stormbird)
-    {
-        isStormbird = stormbird;
-    }
-
-    public int updateNullCheckCount() { return nullCheckCount++; }
-    public void setNullCheckCount(int count) { nullCheckCount = count; }
-
-    public int getNullCheckCount()
-    {
-        return nullCheckCount;
     }
 
     public int getInterfaceSpec()
@@ -149,4 +120,7 @@ public class RealmToken extends RealmObject {
         this.lastBlockRead = lastBlockCheck;
     }
     public long getLastBlock() { return lastBlockRead; }
+
+    public int getChainId() { return chainId; }
+    public void setChainId(int chainId) { this.chainId = chainId; }
 }

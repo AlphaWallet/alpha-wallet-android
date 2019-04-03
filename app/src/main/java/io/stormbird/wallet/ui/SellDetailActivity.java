@@ -66,7 +66,8 @@ public class SellDetailActivity extends BaseActivity {
 
     private FinishReceiver finishReceiver;
 
-    private Ticket ticket;
+    private Token token;
+    private Wallet wallet;
     private TicketRange ticketRange;
     private TicketAdapter adapter;
     private String ticketIds;
@@ -105,8 +106,8 @@ public class SellDetailActivity extends BaseActivity {
         toolbar();
         setTitle(getString(R.string.empty));
 
-        ticket = getIntent().getParcelableExtra(TICKET);
-        Wallet wallet = getIntent().getParcelableExtra(WALLET);
+        token = getIntent().getParcelableExtra(TICKET);
+        wallet = getIntent().getParcelableExtra(WALLET);
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
         saleStatus = getIntent().getIntExtra(EXTRA_STATE, 0);
         sellPriceValue = getIntent().getDoubleExtra(EXTRA_PRICE, 0.0);
@@ -114,15 +115,15 @@ public class SellDetailActivity extends BaseActivity {
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(SellDetailModel.class);
-        viewModel.setWallet(wallet);
+        viewModel.prepare(token, wallet);
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.ethereumPrice().observe(this, this::onEthereumPrice);
         viewModel.universalLinkReady().observe(this, this::linkReady);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
+        viewModel.defaultWallet().observe(this, this::setupPage);
 
         //we should import a token and a list of chosen ids
         list = findViewById(R.id.listTickets);
-        adapter = new TicketAdapter(this::onTokenClick, ticket, ticketIds, viewModel.getAssetDefinitionService(), null);
+        adapter = new TicketAdapter(this::onTokenClick, token, ticketIds, viewModel.getAssetDefinitionService(), null);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -149,12 +150,6 @@ public class SellDetailActivity extends BaseActivity {
         finishReceiver = new FinishReceiver(this);
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo)
-    {
-        adapter.setDefaultNetwork(networkInfo);
-        setupPage();
-    }
-
     @Override
     protected void onDestroy()
     {
@@ -162,7 +157,7 @@ public class SellDetailActivity extends BaseActivity {
         unregisterReceiver(finishReceiver);
     }
 
-    private void setupPage()
+    private void setupPage(Wallet wallet)
     {
         switch (saleStatus)
         {
@@ -208,7 +203,7 @@ public class SellDetailActivity extends BaseActivity {
 
         String currencySymbol = viewModel.getNetwork().symbol;
 
-        int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
+        int quantity = token.ticketIdStringToIndexList(prunedIds).size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         String totalCostStr = getString(R.string.total_cost, getEthString(quantity * sellPriceValue), currencySymbol);
         confirmQuantityText.setText(getString(R.string.tickets_selected, String.valueOf(quantity), unit));
@@ -333,7 +328,7 @@ public class SellDetailActivity extends BaseActivity {
                 quantity++;
                 textQuantity.setText(String.valueOf(quantity));
                 updateSellPrice(quantity);
-                prunedIds = ticket.pruneIDList(ticketIds, quantity);
+                prunedIds = token.pruneIDList(ticketIds, quantity);
             }
         });
 
@@ -344,12 +339,12 @@ public class SellDetailActivity extends BaseActivity {
                 quantity--;
                 textQuantity.setText(String.valueOf(quantity));
                 updateSellPrice(quantity);
-                prunedIds = ticket.pruneIDList(ticketIds, quantity);
+                prunedIds = token.pruneIDList(ticketIds, quantity);
             }
         });
 
         textQuantity.setText("1");
-        prunedIds = ticket.pruneIDList(ticketIds, 1);
+        prunedIds = token.pruneIDList(ticketIds, 1);
     }
 
     private void initDatePicker() {
@@ -406,7 +401,7 @@ public class SellDetailActivity extends BaseActivity {
         if (!sellPrice.getText().toString().isEmpty()) {
             try {
                 sellPriceValue = Double.parseDouble(sellPrice.getText().toString());
-                totalCostText.setText(getString(R.string.total_cost, getEthString(quantity * sellPriceValue), viewModel.getSymbol(getString(R.string.eth))));
+                totalCostText.setText(getString(R.string.total_cost, getEthString(quantity * sellPriceValue), viewModel.getSymbol()));
                 updateUSDBalance();
             } catch (NumberFormatException|MissingFormatArgumentException e) {
                 //silent fail, just don't update
@@ -434,13 +429,13 @@ public class SellDetailActivity extends BaseActivity {
         //1. validate price
         BigInteger price = getPriceInWei();
         //2. get quantity
-        int quantity = ticket.getTicketIndices(prunedIds).length;
+        int quantity = token.getTicketIndices(prunedIds).length;
 
         if (price.doubleValue() > 0.0 && prunedIds != null && quantity > 0) {
             //get the specific ID's, pick from the start of the run
-            int[] prunedIndices = ticket.getTicketIndices(prunedIds);
+            int[] prunedIndices = token.getTicketIndices(prunedIds);
             BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity)); //in wei
-            viewModel.generateUniversalLink(prunedIndices, ticket.getAddress(), totalValue, UTCTimeStamp);
+            viewModel.generateUniversalLink(prunedIndices, token.getAddress(), totalValue, UTCTimeStamp);
         }
 
         KeyboardUtils.hideKeyboard(getCurrentFocus());
@@ -452,14 +447,14 @@ public class SellDetailActivity extends BaseActivity {
         //1. validate price
         BigInteger price = getPriceInWei();
         //2. get indicies
-        int[] prunedIndices = ticket.getTicketIndices(prunedIds);
+        int[] prunedIndices = token.getTicketIndices(prunedIds);
         int quantity = Integer.parseInt(textQuantity.getText().toString());
 
         if (price.doubleValue() > 0.0 && prunedIndices != null && quantity > 0) {
             //get the specific ID's, pick from the start of the run
-            List<BigInteger> ticketIdList = ticket.stringHexToBigIntegerList(ticketIds);
+            List<BigInteger> ticketIdList = token.stringHexToBigIntegerList(ticketIds);
             BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity)); //in wei
-            viewModel.generateSalesOrders(ticket.getAddress(), totalValue, prunedIndices, ticketIdList.get(0));
+            viewModel.generateSalesOrders(token.getAddress(), totalValue, prunedIndices, ticketIdList.get(0));
             finish();
         }
 
@@ -488,7 +483,7 @@ public class SellDetailActivity extends BaseActivity {
     private void linkReady(String universalLink) {
         //how many tickets are we selling?
         String currencySymbol = viewModel.getNetwork().symbol;
-        int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
+        int quantity = token.ticketIdStringToIndexList(prunedIds).size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         String totalCostStr = getString(R.string.total_cost, getEthString(quantity * sellPriceValue), currencySymbol);
 
@@ -512,7 +507,7 @@ public class SellDetailActivity extends BaseActivity {
     private void confirmPlaceMarketOrderDialog()
     {
         //how many tickets are we selling?
-        int quantity = ticket.ticketIdStringToIndexList(prunedIds).size();
+        int quantity = token.ticketIdStringToIndexList(prunedIds).size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         String qty = String.valueOf(quantity) + " " + unit + " @" + getEthString(sellPriceValue) + getString(R.string.eth_per_ticket);
 
@@ -542,7 +537,6 @@ public class SellDetailActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(ticket);
     }
 
     private void onTokenClick(View view, Token token, BigInteger id) {

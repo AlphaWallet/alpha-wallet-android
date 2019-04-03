@@ -22,6 +22,8 @@ public class AWalletBottomNavigationView extends LinearLayout {
 
     private OnBottomNavigationItemSelectedListener listener;
 
+    private int selectedItem;
+
     public AWalletBottomNavigationView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         inflate(context, R.layout.layout_bottom_navigation, this);
@@ -46,6 +48,7 @@ public class AWalletBottomNavigationView extends LinearLayout {
 
     public void setSelectedItem(int index) {
         deselectAll();
+        selectedItem = index;
         switch (index) {
             case TRANSACTIONS:
                 transactions.setImageResource(R.drawable.ic_transactions_active);
@@ -60,6 +63,10 @@ public class AWalletBottomNavigationView extends LinearLayout {
                 settings.setImageResource(R.drawable.ic_settings_active);
                 break;
         }
+    }
+
+    public int getSelectedItem() {
+        return selectedItem;
     }
 
     private void deselectAll() {

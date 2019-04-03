@@ -12,6 +12,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,14 +22,18 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
+import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.QrUrlResult;
 import io.stormbird.wallet.entity.TokenInfo;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.util.QRURLParser;
+import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.AddTokenViewModel;
 import io.stormbird.wallet.viewmodel.AddTokenViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.InputAddressView;
 import io.stormbird.wallet.widget.InputView;
+import io.stormbird.wallet.widget.SelectNetworkDialog;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,13 +61,16 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
     LinearLayout progressLayout;
 
-    public boolean isStormbird = false;
-
     public InputAddressView inputAddressView;
     public InputView symbolInputView;
     public InputView decimalsInputView;
     public InputView nameInputview;
     private String contractAddress;
+    private View networkIcon;
+    private NetworkInfo networkInfo;
+    private TextView currentNetwork;
+    private RelativeLayout selectNetworkLayout;
+    public TextView chainName;
 
     private AWalletAlertDialog aDialog;
 
@@ -79,8 +87,15 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         symbolInputView = findViewById(R.id.input_symbol);
         decimalsInputView = findViewById(R.id.input_decimal);
         nameInputview = findViewById(R.id.input_name);
+        chainName = symbolInputView.findViewById(R.id.text_chain_name);
 
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
+        currentNetwork = findViewById(R.id.current_network);
+        networkIcon = findViewById(R.id.network_icon);
+        selectNetworkLayout = findViewById(R.id.select_network_layout);
+        selectNetworkLayout.setOnClickListener(v -> selectNetwork());
+
+        selectNetworkLayout.setVisibility(View.VISIBLE);
 
         progressLayout = findViewById(R.id.layout_progress);
 
@@ -94,10 +109,10 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
         viewModel = ViewModelProviders.of(this, addTokenViewModelFactory)
                 .get(AddTokenViewModel.class);
-        viewModel.progress().observe(this, this::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.result().observe(this, this::onSaved);
         viewModel.update().observe(this, this::onChecked);
+        viewModel.switchNetwork().observe(this, this::setupNetwork);
         lastCheck = "";
 
         inputAddressView = findViewById(R.id.input_address_view);
@@ -125,6 +140,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
         setTitle(R.string.empty);
 
+        setupNetwork(1);
         viewModel.prepare();
     }
 
@@ -152,18 +168,33 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         if (requestCode == InputAddressView.BARCODE_READER_REQUEST_CODE) {
             if (resultCode == FullScannerFragment.SUCCESS) {
                 if (data != null) {
-                    String barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
-                    if (barcode == null) barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
-
-                    //if barcode is still null, ensure we don't GPF
-                    if (barcode == null)
-                    {
-                        Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+                    String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
 
                     QRURLParser parser = QRURLParser.getInstance();
-                    String extracted_address = parser.extractAddressFromQrString(barcode);
+                    QrUrlResult result = parser.parse(barcode);
+
+                    String extracted_address = null;
+
+                    if (result != null)
+                    {
+                        extracted_address = result.getAddress();
+                        switch (result.getProtocol())
+                        {
+                            case "address":
+                                break;
+                            case "ethereum":
+                                //EIP681 protocol
+                                if (result.chainId != 0 && extracted_address != null)
+                                {
+                                    //this is a payment request
+                                    finishAndLaunchSend(result);
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
                     if (extracted_address == null) {
                         Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
                         return;
@@ -180,6 +211,13 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
+    private void finishAndLaunchSend(QrUrlResult result)
+    {
+        //launch send payment screen
+        viewModel.showSend(this, result);
+        finish();
+    }
+
     private void onSaved(boolean result)
     {
         if (result)
@@ -189,11 +227,18 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onChecked(boolean result) {
-        if (result) {
+    private void onChecked(boolean found)
+    {
+        showProgress(false);
+        if (found)
+        {
             TokenInfo token = viewModel.tokenInfo().getValue();
-            token.addTokenSetupPage(this);
-            if (token.name == null && token.symbol == null) onNoContractFound();
+            token.addTokenSetupPage(this, viewModel.getNetworkInfo(token.chainId).getShortName());
+        }
+        else
+        {
+            chainName.setVisibility(View.GONE);
+            onNoContractFound();
         }
     }
 
@@ -229,9 +274,10 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
         if (isValidAddress(address) && !address.equals(lastCheck))
         {
-            //let's check the address here - see if we have an eth token
             lastCheck = address;
-            viewModel.setupTokens(address);
+            chainName.setVisibility(View.GONE);
+            showProgress(true);
+            viewModel.testNetworks(address);
         }
     }
 
@@ -241,10 +287,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         String symbol = symbolInputView.getText().toString().toLowerCase();
         String rawDecimals = decimalsInputView.getText().toString();
         String name = nameInputview.getText().toString();
-//        String venue = this.venue.getText().toString();
-//        String date = this.date.getText().toString();
-//        String rawPrice = this.price.getText().toString();
-//        double priceDb = 0;
+
         int decimals = 0;
 
         if (TextUtils.isEmpty(address)) {
@@ -269,20 +312,14 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
             isValid = false;
         }
 
-//        try {
-//            priceDb = Double.valueOf(rawPrice);
-//        } catch (NumberFormatException ex) {
-//            price.setError(getString(R.string.error_must_numeric));
-//        }
-
         if (!isValidAddress(address)) {
             inputAddressView.setError(getString(R.string.error_invalid_address));
             isValid = false;
         }
 
         if (isValid) {
+            viewModel.save(address, symbol, decimals, name, networkInfo.chainId);
             showProgress(true);
-            viewModel.save(address, symbol, decimals, name, isStormbird);
         }
     }
 
@@ -291,9 +328,27 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         aDialog = new AWalletAlertDialog(this);
         aDialog.setTitle(R.string.no_token_found_title);
         aDialog.setIcon(AWalletAlertDialog.NONE);
-        aDialog.setMessage(getString(R.string.no_token_found, viewModel.getNetwork().getShortName()));
+        aDialog.setMessage(R.string.no_token_found);
         aDialog.setButtonText(R.string.dialog_ok);
         aDialog.setButtonListener(v -> aDialog.dismiss());
         aDialog.show();
+    }
+
+    private void setupNetwork(int chainId)
+    {
+        networkInfo = viewModel.getNetworkInfo(chainId);
+        currentNetwork.setText(networkInfo.name);
+        Utils.setChainColour(networkIcon, networkInfo.chainId);
+        viewModel.setPrimaryChain(chainId);
+    }
+
+    private void selectNetwork() {
+        SelectNetworkDialog dialog = new SelectNetworkDialog(this, viewModel.getNetworkList(), String.valueOf(networkInfo.chainId), true);
+        dialog.setOnClickListener(v1 -> {
+            networkInfo = viewModel.getNetwork(dialog.getSelectedChainId());
+            setupNetwork(networkInfo.chainId);
+            dialog.dismiss();
+        });
+        dialog.show();
     }
 }

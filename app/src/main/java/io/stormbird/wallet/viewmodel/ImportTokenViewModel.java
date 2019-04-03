@@ -217,14 +217,14 @@ public class ImportTokenViewModel extends BaseViewModel
                 break;
         }
 
-        getEthereumTicker(); //simultaneously fetch the current eth price
+        getEthereumTicker(network.getValue().chainId); //simultaneously fetch the current eth price
     }
 
     //2. Fetch all cached tokens and get eth price
     private void fetchTokens() {
         importToken = null;
         disposable = fetchTokensInteract
-                .fetchStoredToken(wallet.getValue(), importOrder.contractAddress)
+                .fetchStoredToken(network.getValue(), wallet.getValue(), importOrder.contractAddress)
                 .subscribe(this::onToken, this::onFetchError, this::fetchTokensComplete);
     }
 
@@ -257,7 +257,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private void setupTokenAddr(String contractAddress)
     {
         disposable = setupTokensInteract
-                .update(contractAddress)
+                .update(contractAddress, network().getValue().chainId)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::getTokenSpec, this::onError);
@@ -277,7 +277,8 @@ public class ImportTokenViewModel extends BaseViewModel
         if (tokenInfo != null && tokenInfo.name != null)
         {
             TokenFactory tf = new TokenFactory();
-            importToken = tf.createToken(tokenInfo, spec);
+            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
+            importToken = tf.createToken(tokenInfo, spec, network.getShortName());
             regularBalanceCheck();
         }
         else
@@ -470,7 +471,7 @@ public class ImportTokenViewModel extends BaseViewModel
             //now push the transaction
             disposable = createTransactionInteract
                     .create(wallet.getValue(), order.contractAddress, order.priceWei,
-                            settings.gasPrice, settings.gasLimit, tradeData)
+                            settings.gasPrice, settings.gasLimit, tradeData, order.chainId)
                     .subscribe(this::onCreateTransaction, this::onTransactionError);
 
             addTokenWatchToWallet();
@@ -532,9 +533,9 @@ public class ImportTokenViewModel extends BaseViewModel
         return !(newBalance.containsAll(availableBalance) && availableBalance.containsAll(newBalance));
     }
 
-    private void getEthereumTicker()
+    private void getEthereumTicker(int chainId)
     {
-        getTickerDisposable = fetchTokensInteract.getEthereumTicker()
+        getTickerDisposable = fetchTokensInteract.getEthereumTicker(chainId)
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::onTicker, this::onError);
     }

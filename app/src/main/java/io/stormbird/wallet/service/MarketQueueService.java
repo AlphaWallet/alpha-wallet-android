@@ -214,24 +214,24 @@ public class MarketQueueService {
     }
 
     //sign a trade transaction
-    public Single<byte[]> sign(Wallet wallet, String password, TradeInstance t, byte[] data) {
-        return transactionRepository.getSignature(wallet, data, password);
+    public Single<byte[]> sign(Wallet wallet, String password, TradeInstance t, byte[] data, int chainId) {
+        return transactionRepository.getSignature(wallet, data, password, chainId);
     }
 
-    private Single<TradeInstance> tradesInnerLoop(Wallet wallet, String password, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId) {
+    private Single<TradeInstance> tradesInnerLoop(Wallet wallet, String password, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId, int chainId) {
         return Single.fromCallable(() ->
         {
             long initialExpiry = (System.currentTimeMillis() / 1000L) + MARKET_INTERVAL;
             transactionRepository.unlockAccount(wallet, password);
             //Recover public key
-            BigInteger recoveredKey = ecRecoverPublicKey(wallet, password);
+            BigInteger recoveredKey = ecRecoverPublicKey(wallet, password, chainId);
 
             TradeInstance trade = new TradeInstance(price, BigInteger.valueOf(initialExpiry), tickets, contractAddr, recoveredKey, firstTicketId);
 
             for (int i = 0; i < TRADE_AMOUNT; i++)
             {
                 trade.expiry =  BigInteger.valueOf(initialExpiry + (i * MARKET_INTERVAL));
-                trade.addSignature(getTradeSignature(wallet, password, trade).blockingGet());
+                trade.addSignature(getTradeSignature(wallet, password, trade, chainId).blockingGet());
                 float upd = ((float)i/TRADE_AMOUNT)*100.0f;
                 messageCallback.queueUpdate((int)upd);
             }
@@ -241,36 +241,36 @@ public class MarketQueueService {
         });
     }
 
-    private Single<TradeInstance> getTradeMessages(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId) {
+    private Single<TradeInstance> getTradeMessages(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId, int chainId) {
         return passwordStore.getPassword(wallet)
-                .flatMap(password -> tradesInnerLoop(wallet, password, price, tickets, contractAddr, firstTicketId));
+                .flatMap(password -> tradesInnerLoop(wallet, password, price, tickets, contractAddr, firstTicketId, chainId));
     }
 
-    private Single<byte[]> getTradeSignature(Wallet wallet, String password, TradeInstance trade) {
+    private Single<byte[]> getTradeSignature(Wallet wallet, String password, TradeInstance trade, int chainId) {
         return encodeMessageForTrade(trade)
-                .flatMap(tradeBytes -> transactionRepository.getSignatureFast(wallet, tradeBytes, password));
+                .flatMap(tradeBytes -> transactionRepository.getSignatureFast(wallet, tradeBytes, password, chainId));
     }
 
     private Single<byte[]> encodeMessageForTrade(TradeInstance trade) {
         return Single.fromCallable(trade::getTradeBytes);
     }
 
-    public Observable<TradeInstance> getTradeInstances(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId) {
-        return getTradeMessages(wallet, price, tickets, contractAddr, firstTicketId).toObservable()
+    public Observable<TradeInstance> getTradeInstances(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId, int chainId) {
+        return getTradeMessages(wallet, price, tickets, contractAddr, firstTicketId, chainId).toObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data) {
+    public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId) {
         return passwordStore.getPassword(from)
                 .flatMap(password ->
-                        transactionRepository.createTransaction(from, to, subunitAmount, gasPrice, gasLimit, data, password)
+                        transactionRepository.createTransaction(from, to, subunitAmount, gasPrice, gasLimit, data, password, chainId)
                                 .observeOn(AndroidSchedulers.mainThread()));
     }
 
-    public void createSalesOrders(Wallet wallet, BigInteger price, int[] ticketIDs, String contractAddr, BigInteger firstTicketId, BaseViewCallback callback) {
+    public void createSalesOrders(Wallet wallet, BigInteger price, int[] ticketIDs, String contractAddr, BigInteger firstTicketId, BaseViewCallback callback, int chainId) {
         messageCallback = callback;
-        marketQueueProcessing = getTradeInstances(wallet, price, ticketIDs, contractAddr, firstTicketId)
+        marketQueueProcessing = getTradeInstances(wallet, price, ticketIDs, contractAddr, firstTicketId, chainId)
                 .subscribe(this::processMarketTrades, this::onError, this::onAllTransactions);
     }
 
@@ -377,10 +377,10 @@ public class MarketQueueService {
         return sb.toString();
     }
 
-    private BigInteger ecRecoverPublicKey(Wallet wallet, String password) throws Exception
+    private BigInteger ecRecoverPublicKey(Wallet wallet, String password, int chainId) throws Exception
     {
         String testSigMsg = "obtain public key";
-        byte[] testSigBytes = transactionRepository.getSignatureFast(wallet, testSigMsg.getBytes(), password).blockingGet();
+        byte[] testSigBytes = transactionRepository.getSignatureFast(wallet, testSigMsg.getBytes(), password, chainId).blockingGet();
         Sign.SignatureData testSig = sigFromByteArray(testSigBytes);
         BigInteger recoveredKey = Sign.signedMessageToKey(testSigMsg.getBytes(), testSig);
         String publicKeyString = Keys.getAddress(recoveredKey); //TODO: Remove - this is here for debug/testing

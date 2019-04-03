@@ -11,11 +11,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Ticker;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
@@ -27,13 +23,13 @@ import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
 
 public class Erc20DetailViewModel extends BaseViewModel {
-    private static final long CHECK_ETHPRICE_INTERVAL = 10;
+    private static final long CHECK_ETHPRICE_INTERVAL = 5;
 
-    private final MutableLiveData<Double> ethPrice = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
-    private final MutableLiveData<NetworkInfo> network = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Token> token = new MutableLiveData<>();
+    private final MutableLiveData<Ticker> tokenTicker = new MutableLiveData<>();
+    private final MutableLiveData<Transaction[]> transactionUpdate = new MutableLiveData<>();
 
     private final MyAddressRouter myAddressRouter;
     private final FetchTokensInteract fetchTokensInteract;
@@ -43,6 +39,8 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final TransactionDetailRouter transactionDetailRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
+
+    private int transactionFetchCount;
 
     @Nullable
     private Disposable fetchTransactionDisposable;
@@ -66,10 +64,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
         this.transactionDetailRouter = transactionDetailRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
-    }
-
-    public LiveData<Double> ethPriceReading() {
-        return ethPrice;
+        transactionFetchCount = 0;
     }
 
     public void showMyAddress(Context context, Wallet wallet, Token token) {
@@ -80,18 +75,23 @@ public class Erc20DetailViewModel extends BaseViewModel {
         myAddressRouter.open(ctx, wallet.getValue(), token);
     }
 
-    public void startEthereumTicker() {
-        disposable = Observable.interval(0, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> fetchTokensInteract
-                        .getEthereumTicker()
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onTicker, this::onError)).subscribe();
+    public void startEthereumTicker(Token token)
+    {
+        if (token.isEthereum())
+        {
+            disposable = Observable.interval(0, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
+                    .doOnNext(l -> fetchTokensInteract
+                            .getEthereumTicker(token.tokenInfo.chainId)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(this::onTicker, this::onError)).subscribe();
+        }
     }
 
-    private void onTicker(Ticker ticker) {
+    private void onTicker(Ticker ticker)
+    {
         if (ticker != null && ticker.price_usd != null) {
-            ethPrice.postValue(Double.valueOf(ticker.price_usd));
+            this.tokenTicker.postValue(ticker);
         }
     }
 
@@ -103,9 +103,9 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return assetDefinitionService.getIntroductionCode(address);
     }
 
-    public void fetchTransactions(Wallet wallet) {
+    public void fetchTransactions(Token token, int historyCount) {
         fetchTransactionDisposable =
-                fetchTransactionsInteract.fetchCached(network.getValue(), wallet)
+                fetchTransactionsInteract.fetchTransactionsFromStorage(wallet.getValue(), token, historyCount)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onUpdateTransactions, this::onError);
@@ -117,6 +117,10 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     public LiveData<Transaction[]> transactions() {
         return transactions;
+    }
+
+    public LiveData<Transaction[]> transactionUpdate() {
+        return transactionUpdate;
     }
 
     public void cleanUp() {
@@ -131,6 +135,8 @@ public class Erc20DetailViewModel extends BaseViewModel {
         if (getBalanceDisposable != null && !getBalanceDisposable.isDisposed()) {
             getBalanceDisposable.dispose();
         }
+
+        tokensService.clearFocusToken();
     }
 
     public FetchTransactionsInteract getTransactionsInteract() {
@@ -141,36 +147,21 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return tokensService;
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        network.setValue(networkInfo);
-        disposable = findDefaultWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
-    }
-
     private void onDefaultWallet(Wallet wallet) {
         this.wallet.postValue(wallet);
-    }
-
-    public LiveData<NetworkInfo> defaultNetwork() {
-        return network;
-    }
-
-    public NetworkInfo getNetwork()
-    {
-        return network.getValue();
     }
 
     public LiveData<Wallet> defaultWallet() {
         return wallet;
     }
 
-    public void prepare()
+    public void prepare(Token token)
     {
+        tokensService.setFocusToken(token);
         progress.postValue(true);
-        disposable = findDefaultNetworkInteract
+        disposable = findDefaultWalletInteract
                 .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
+                .subscribe(this::onDefaultWallet, this::onError);
     }
 
     public void showDetails(Context context, Transaction transaction) {
@@ -183,30 +174,45 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     public void updateDefaultBalance(Token token) {
         getBalanceDisposable = Observable.interval(CHECK_ETHPRICE_INTERVAL, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> fetchTokensInteract
-                        .updateDefaultBalance(token, network.getValue(), wallet.getValue())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onToken, this::onError)).subscribe();
+                .doOnNext(l -> updateToken(token)).subscribe();
     }
 
-    private void onToken(Token token) {
-        this.token.postValue(token);
+    private void updateToken(Token t) {
+        Token update = tokensService.getToken(t.tokenInfo.chainId, t.getAddress());
+        this.token.postValue(update);
+        if (transactionFetchCount > 0)
+        {
+            fetchTransactions(update, transactionFetchCount);
+        }
     }
 
     public LiveData<Token> token() {
         return token;
     }
 
+    public LiveData<Ticker> tokenTicker() {
+        return tokenTicker;
+    }
+
     public void showSendToken(Context ctx, Token token)
     {
         new SendTokenRouter().open(ctx, token.getAddress(), token.tokenInfo.symbol, token.tokenInfo.decimals,
-                                   true, wallet.getValue(), token, network.getValue().chainId);
+                                   true, wallet.getValue(), token);
     }
 
     public void showSendToken(Context ctx, String address, Token token)
     {
         new SendTokenRouter().open(ctx, address, token.tokenInfo.symbol, token.tokenInfo.decimals,
-                                   false, wallet.getValue(), token, network.getValue().chainId);
+                                   false, wallet.getValue(), token);
+    }
+
+    private void newTransactions(Transaction[] transactions)
+    {
+        transactionUpdate.postValue(transactions);
+    }
+
+    public void listenNewTransactions(int historyLength)
+    {
+        transactionFetchCount = historyLength;
     }
 }

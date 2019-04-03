@@ -5,6 +5,7 @@ package io.stormbird.wallet.interact;
  */
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,11 +13,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenInfo;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.service.TokensService;
 
@@ -26,14 +23,13 @@ public class SetupTokensInteract {
     private final TokenRepositoryType tokenRepository;
     public static final String UNKNOWN_CONTRACT = "[Unknown Contract]";
     public static final String EXPIRED_CONTRACT = "[Expired Contract]";
-    private List<String> badSpecTokens = new ArrayList<>();
 
     public SetupTokensInteract(TokenRepositoryType tokenRepository) {
         this.tokenRepository = tokenRepository;
     }
 
-    public Observable<TokenInfo> update(String address) {
-        return tokenRepository.update(address)
+    public Observable<TokenInfo> update(String address, int chainId) {
+        return tokenRepository.update(address, chainId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -42,51 +38,44 @@ public class SetupTokensInteract {
      * Parse all transactions not associated with known tokens and pick up unknown contracts
      * @param transactions
      * @param tokensService
-     * @param txMap
      * @return
      */
-    public Single<List<String>> getUnknownTokens(Transaction[] transactions, TokensService tokensService, Map<String, Transaction> txMap)
+    public Single<List<UnknownToken>> getUnknownTokens(Transaction[] transactions, TokensService tokensService)
     {
         return Single.fromCallable(() -> {
-            List<String> unknownTokens = new ArrayList<>(badSpecTokens);
-            badSpecTokens.clear();
+            Map<String, UnknownToken> unknownTokenMap = new HashMap<>();
+            //List<UnknownToken> unknownTokens = new ArrayList<>();
 
             //process the remaining transactions
             for (Transaction t : transactions)
             {
-                Token localToken = tokensService.getToken(t.to);
+                Token localToken = tokensService.getToken(t.chainId, t.to);
 
-                if (t.input != null && t.input.length() > 2 && localToken == null && !unknownTokens.contains(t.to))
+                if (localToken != null && localToken.tokenInfo.chainId != t.chainId)
                 {
-                    if (t.error.equals("0") && !unknownTokens.contains(t.to)) unknownTokens.add(t.to); //only add token to scan if it wasn't an error transaction
+                    System.out.println("Collision!");
+                    if (localToken.isBad()) localToken = null;
                 }
-                if (localToken != null)
+
+                if (t.input != null && t.input.length() > 2 && localToken == null
+                        && t.to != null && t.to.length() > 0 && !unknownTokenMap.containsKey(t.to) && t.error.equals("0"))
                 {
-                    txMap.remove(t.hash);
-                    if (!localToken.checkIntrinsicType() && !unknownTokens.contains(localToken.getAddress()))
-                    {
-                        unknownTokens.add(localToken.getAddress());
-                    }
+                    unknownTokenMap.put(t.to, new UnknownToken(t.chainId, t.to));//only add token to scan if it wasn't an error transaction
                 }
             }
 
-            return unknownTokens;
+            return new ArrayList<>(unknownTokenMap.values());
         });
     }
 
-    public Observable<TokenInfo> addToken(String address)
+    public Observable<TokenInfo> addToken(String address, int chainId)
     {
-        return tokenRepository.update(address);
+        return tokenRepository.update(address, chainId);
     }
 
     public Token terminateToken(Token token, Wallet wallet, NetworkInfo network)
     {
         tokenRepository.terminateToken(token, wallet, network);
         return token;
-    }
-
-    public void tokenHasBadSpec(String address)
-    {
-        badSpecTokens.add(address);
     }
 }

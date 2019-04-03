@@ -15,10 +15,10 @@ import io.stormbird.wallet.router.HelpRouter;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ManageWalletsRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
+import io.stormbird.wallet.service.TokensService;
 
 public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
     private final MyAddressRouter myAddressRouter;
-    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final HelpRouter helpRouter;
@@ -27,9 +27,9 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
     private final HomeRouter homeRouter;
     private final PreferenceRepositoryType preferenceRepository;
     private final LocaleRepositoryType localeRepository;
+    private final TokensService tokensService;
 
     public NewSettingsViewModelFactory(
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             MyAddressRouter myAddressRouter,
@@ -38,8 +38,8 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
             ManageWalletsRouter manageWalletsRouter,
             HomeRouter homeRouter,
             PreferenceRepositoryType preferenceRepository,
-            LocaleRepositoryType localeRepository) {
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+            LocaleRepositoryType localeRepository,
+            TokensService tokensService) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.myAddressRouter = myAddressRouter;
@@ -49,13 +49,13 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
         this.homeRouter = homeRouter;
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
+        this.tokensService = tokensService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new NewSettingsViewModel(
-                findDefaultNetworkInteract,
                 findDefaultWalletInteract,
                 getDefaultWalletBalance,
                 myAddressRouter,
@@ -64,7 +64,8 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
                 manageWalletsRouter,
                 homeRouter,
                 preferenceRepository,
-                localeRepository
+                localeRepository,
+                tokensService
         );
     }
 }

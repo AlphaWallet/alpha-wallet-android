@@ -45,31 +45,35 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 	}
 
 	@Override
-	public Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, Wallet wallet, long lastBlock, String userAddress)
+	public Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, String tokenAddress, long lastBlock, String userAddress)
 	{
 		long lastBlockNumber = lastBlock + 1;
 		return Observable.fromCallable(() -> {
 			List<Transaction> result = new ArrayList<>();
+			EtherscanTransaction lastTransaction = null;
 			try
 			{
 				int page = 1;
-				String response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber), true, page, PAGESIZE);
+				String response = readTransactions(networkInfo, tokenAddress, String.valueOf(lastBlockNumber), true, page, PAGESIZE);
 
 				while (response != null)
 				{
 					JSONObject stateData = new JSONObject(response);
 					JSONArray orders = stateData.getJSONArray("result");
 					EtherscanTransaction[] myTxs = gson.fromJson(orders.toString(), EtherscanTransaction[].class);
-					int chainId = networkInfo.chainId;
 					for (EtherscanTransaction etx : myTxs)
 					{
-					    Transaction tx = etx.createTransaction(userAddress, context);
+					    Transaction tx = etx.createTransaction(userAddress, context, networkInfo.chainId);
 					    if (tx != null)
                         {
                             result.add(tx);
                         }
 					}
-					response = readTransactions(networkInfo, wallet.address, String.valueOf(lastBlockNumber), true, page++, PAGESIZE);
+					if (myTxs.length > 0)
+					{
+                        lastTransaction = myTxs[myTxs.length-1];
+					}
+                   response = readTransactions(networkInfo, tokenAddress, String.valueOf(lastBlockNumber), true, page++, PAGESIZE);
 				}
 			}
 			catch (JSONException e)
@@ -80,6 +84,12 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 			{
 				e.printStackTrace();
 			}
+
+			//Add last transaction as the final result to update block scan
+			if (lastTransaction != null)
+            {
+                result.add(lastTransaction.createTransaction(null, context, networkInfo.chainId));
+            }
 
 			return result.toArray(new Transaction[result.size()]);
 		}).subscribeOn(Schedulers.io());
@@ -223,10 +233,9 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 					JSONObject stateData = new JSONObject(response);
 					JSONArray orders = stateData.getJSONArray("result");
 					EtherscanTransaction[] myTxs = gson.fromJson(orders.toString(), EtherscanTransaction[].class);
-					int chainId = networkInfo.chainId;
 					for (EtherscanTransaction etx : myTxs)
 					{
-						Transaction tx = etx.createTransaction(null, context);
+						Transaction tx = etx.createTransaction(null, context, networkInfo.chainId);
 						if (tx.isConstructor && tx.operations.length > 0)
 						{
 							TransactionContract ct = tx.operations[0].contract;
@@ -280,8 +289,9 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
                     JSONObject stateData = new JSONObject(result);
                     //{"status":"1","message":"OK","result":"92653503768584227777966602"}
                     String value = stateData.getString("result");
-                    if (value.length() > 0)
+                    if (value.length() > 0 && Character.isDigit(value.charAt(0)))
                     {
+                    	System.out.println("ERC20: " + value);
                         BigInteger supply = new BigInteger(value, 10);
                         if (supply.compareTo(BigInteger.ZERO) > 0)
                         {

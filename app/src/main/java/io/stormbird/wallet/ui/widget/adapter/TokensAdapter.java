@@ -9,11 +9,13 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.ContractType;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.entity.SortedItem;
+import io.stormbird.wallet.ui.widget.entity.TokenBalanceSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TokenSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TotalBalanceSortedItem;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
@@ -25,17 +27,19 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
+
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private static final String TAG = "TKNADAPTER";
     public static final int FILTER_ALL = 0;
     public static final int FILTER_CURRENCY = 1;
     public static final int FILTER_ASSETS = 2;
+    public static final int FILTER_COLLECTIBLES = 3;
 
     private int filterType;
     private Context context;
     private boolean needsRefresh;
     protected final AssetDefinitionService assetService;
-    protected NetworkInfo network;
 
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -100,7 +104,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         BinderViewHolder holder = null;
         switch (viewType) {
             case TokenHolder.VIEW_TYPE: {
-                TokenHolder tokenHolder = new TokenHolder(R.layout.item_token, parent, assetService, network);
+                TokenHolder tokenHolder = new TokenHolder(R.layout.item_token, parent, assetService);
                 tokenHolder.setOnTokenClickListener(onTokenClickListener);
                 holder = tokenHolder;
             }
@@ -147,39 +151,36 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
      *
      * @param token
      */
-    public void updateToken(Token token)
+    public void updateToken(Token token, boolean internal)
     {
         checkLiveToken(token);
-        boolean updated = false;
-        for (int i = 0; i < items.size(); i++)
+        if (canDisplayToken(token))
         {
-            Object si = items.get(i);
-            if (si instanceof TokenSortedItem)
+            items.add(new TokenSortedItem(token, calculateWeight(token)));
+            if (!internal)
+                notifyDataSetChanged();
+        }
+        else
+        {
+            //remove item
+            for (int i = 0; i < items.size(); i++)
             {
-                TokenSortedItem tsi = (TokenSortedItem)si;
-                Token thisToken = tsi.value;
-                if (thisToken.getAddress().equals(token.getAddress()))
+                Object si = items.get(i);
+                if (si instanceof TokenSortedItem)
                 {
-                    if (canDisplayToken(token))
+                    TokenSortedItem tsi = (TokenSortedItem) si;
+                    Token thisToken = tsi.value;
+                    if (thisToken.getAddress().equals(token.getAddress()) && thisToken.tokenInfo.chainId == token.tokenInfo.chainId)
                     {
-                        items.add(new TokenSortedItem(token, calculateWeight(token)));
-                    }
-                    else
-                    {
+                        Log.d(TAG, "REMOVE: " + token.getFullName());
                         items.removeItemAt(i);
                         notifyItemRemoved(i);
-                        notifyDataSetChanged();
+                        if (!internal)
+                            notifyDataSetChanged();
+                        break;
                     }
-                    updated = true;
-                    break;
                 }
             }
-        }
-
-        if (!updated && canDisplayToken(token))
-        {
-            //new token
-            items.add(new TokenSortedItem(token, calculateWeight(token)));
         }
     }
 
@@ -203,41 +204,46 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                     allowThroughFilter = false;
                 }
                 break;
+            case FILTER_COLLECTIBLES:
+                if (token.getInterfaceSpec() != ContractType.ERC721 && token.getInterfaceSpec() != ContractType.ERC721_LEGACY)
+                {
+                    allowThroughFilter = false;
+                }
+                break;
             default:
                 break;
         }
 
-        return allowThroughFilter &&
-                (token.isEthereum() ||
+        //Add token to display list if it's the base currency, or if it has balance
+        return allowThroughFilter &&  //Add token to display list if it's the base currency, or if it has balance
+                ((token.isEthereum() && token.tokenInfo.chainId == MAINNET_ID) ||
                         (!token.isTerminated() && !token.isBad() &&
                                 (token.hasPositiveBalance() || assetService.hasDefinition(token.getAddress()))));
     }
 
     private void populateTokens(Token[] tokens)
     {
-        int itemCount = items.size();
         items.beginBatchedUpdates();
-
         items.add(total);
 
         for (Token token : tokens)
         {
-            if (canDisplayToken(token))
-            {
-                Log.d(TAG,"ADDING: " + token.getFullName());
-                checkLiveToken(token);
-                items.add(new TokenSortedItem(token, calculateWeight(token)));
-            }
+            updateToken(token, true);
         }
         items.endBatchedUpdates();
+        notifyDataSetChanged();
     }
 
     private int calculateWeight(Token token)
     {
-        int weight = 0;
+        int weight = 1000; //ensure base eth types are always displayed first
         String tokenName = token.getFullName();
-        if(token.isEthereum()) return 1;
-        if(token.isBad()) return Integer.MAX_VALUE;
+        if(token.isEthereum()) return token.tokenInfo.chainId;
+        if(token.isBad()) return 99999999;
+        if(token.tokenInfo.name.length() < 2)
+        {
+            return Integer.MAX_VALUE;
+        }
 
         int i = 4;
         int pos = 0;
@@ -349,7 +355,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         items.beginBatchedUpdates();
         items.clear();
         items.endBatchedUpdates();
-        Log.d(TAG, "Cleared");
         notifyDataSetChanged();
         needsRefresh = true;
     }
@@ -395,10 +400,5 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             }
         }
         items.endBatchedUpdates();
-    }
-
-    public void setDefaultNetwork(NetworkInfo networkInfo)
-    {
-        network = networkInfo;
     }
 }

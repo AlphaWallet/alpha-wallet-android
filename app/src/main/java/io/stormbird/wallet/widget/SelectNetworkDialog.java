@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Network;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,33 +20,27 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.ui.widget.entity.NetworkItem;
+import io.stormbird.wallet.util.Utils;
 
 public class SelectNetworkDialog extends Dialog {
     public static final int NONE = 0;
-    public static final int SUCCESS = R.drawable.ic_redeemed;
     public static final int ERROR = R.drawable.ic_error;
-    public static final int NO_SCREENSHOT = R.drawable.ic_no_screenshot;
-
-    private static SelectNetworkDialog dialog = null;
-    private ImageView icon;
     private TextView titleText;
-    private TextView messageText;
     private Button button;
     private Context context;
-    private ProgressBar progressBar;
     private ListView listView;
     private CustomAdapter adapter;
-    private String[] networkList;
-    private String selectedItem;
 
-    public SelectNetworkDialog(@NonNull Activity activity, String[] networkList, String selectedItem) {
+    public SelectNetworkDialog(@NonNull Activity activity, NetworkInfo[] networkList, String selectedChainId, boolean singleItem) {
         super(activity);
         this.context = activity;
-        this.networkList = networkList;
-        this.selectedItem = selectedItem;
 
         setContentView(R.layout.dialog_awallet_list);
         getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -57,16 +52,14 @@ public class SelectNetworkDialog extends Dialog {
         titleText = findViewById(R.id.dialog_main_text);
 
         ArrayList<NetworkItem> list = new ArrayList<>();
+        List<Integer> intList = Utils.intListToArray(selectedChainId);
 
-        for (int i = 0; i < networkList.length; i++) {
-            if (networkList[i].equals(selectedItem)) {
-                list.add(new NetworkItem(networkList[i], true));
-            } else {
-                list.add(new NetworkItem(networkList[i], false));
-            }
+        for (NetworkInfo info : networkList)
+        {
+            list.add(new NetworkItem(info.name, info.chainId, intList.contains(info.chainId)));
         }
 
-        adapter = new CustomAdapter(list, selectedItem);
+        adapter = new CustomAdapter(list, selectedChainId, singleItem);
         listView.setAdapter(adapter);
     }
 
@@ -75,8 +68,12 @@ public class SelectNetworkDialog extends Dialog {
         super.show();
     }
 
-    public String getSelectedItem() {
-        return adapter.getSelectedItem();
+    public int getSelectedChainId() {
+        return adapter.getSelectedChainId();
+    }
+
+    public Integer[] getSelectedItems() {
+        return adapter.getSelectedItems();
     }
 
     public void setOnClickListener(View.OnClickListener listener) {
@@ -101,13 +98,27 @@ public class SelectNetworkDialog extends Dialog {
     public class CustomAdapter extends ArrayAdapter<NetworkItem> {
         private ArrayList<NetworkItem> dataSet;
         private String selectedItem;
+        private int chainId;
+        private boolean singleItem;
 
-        private void setSelectedItem(String selectedItem) {
+        private void setSelectedItem(String selectedItem, int chainId) {
             this.selectedItem = selectedItem;
+            this.chainId = chainId;
         }
 
-        private String getSelectedItem() {
-            return this.selectedItem;
+        private int getSelectedChainId() {
+            return this.chainId;
+        }
+
+        Integer[] getSelectedItems()
+        {
+            List<Integer> enabledIds = new ArrayList<>();
+            for (NetworkItem data : dataSet)
+            {
+                if (data.isSelected()) enabledIds.add(data.getChainId());
+            }
+
+            return enabledIds.toArray(new Integer[0]);
         }
 
         private class ViewHolder {
@@ -116,10 +127,23 @@ public class SelectNetworkDialog extends Dialog {
             LinearLayout itemLayout;
         }
 
-        private CustomAdapter(ArrayList<NetworkItem> data, String selectedItem) {
+        private CustomAdapter(ArrayList<NetworkItem> data, String selectedItem, boolean singleItem) {
             super(context, R.layout.item_dialog_list, data);
             this.dataSet = data;
             this.selectedItem = selectedItem;
+            this.singleItem = singleItem;
+
+            if (!singleItem)
+            {
+                for (NetworkItem item : data)
+                {
+                    if (item.getName().equals(C.ETHEREUM_NETWORK_NAME))
+                    {
+                        item.setSelected(true);
+                        break;
+                    }
+                }
+            }
         }
 
         @NonNull
@@ -144,11 +168,26 @@ public class SelectNetworkDialog extends Dialog {
             if (item != null) {
                 viewHolder.name.setText(item.getName());
                 viewHolder.itemLayout.setOnClickListener(v -> {
-                    for (int i = 0; i < dataSet.size(); i++) {
-                        dataSet.get(i).setSelected(false);
+                    if (singleItem)
+                    {
+                        for (NetworkItem networkItem : dataSet)
+                        {
+                            networkItem.setSelected(false);
+                        }
+                        dataSet.get(position).setSelected(true);
                     }
-                    dataSet.get(position).setSelected(true);
-                    setSelectedItem(dataSet.get(position).getName());
+                    else if (!dataSet.get(position).getName().equals(C.ETHEREUM_NETWORK_NAME))
+                    {
+                        if (dataSet.get(position).isSelected())
+                        {
+                            dataSet.get(position).setSelected(false);
+                        }
+                        else
+                        {
+                            dataSet.get(position).setSelected(true);
+                        }
+                    }
+                    setSelectedItem(dataSet.get(position).getName(), dataSet.get(position).getChainId());
                     notifyDataSetChanged();
                 });
 

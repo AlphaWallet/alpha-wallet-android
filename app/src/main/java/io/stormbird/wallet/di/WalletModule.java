@@ -27,30 +27,28 @@ public class WalletModule {
             SendTokenRouter sendTokenRouter,
             Erc20DetailRouter erc20DetailRouter,
             AssetDisplayRouter assetDisplayRouter,
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            GetDefaultWalletBalance getDefaultWalletBalance,
             AddTokenInteract addTokenInteract,
             SetupTokensInteract setupTokensInteract,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService,
             OpenseaService openseaService,
-            FetchTransactionsInteract fetchTransactionsInteract) {
+            FetchTransactionsInteract fetchTransactionsInteract,
+            EthereumNetworkRepositoryType ethereumNetworkRepository) {
         return new WalletViewModelFactory(
                 fetchTokensInteract,
                 addTokenRouter,
                 sendTokenRouter,
                 erc20DetailRouter,
                 assetDisplayRouter,
-                findDefaultNetworkInteract,
                 findDefaultWalletInteract,
-                getDefaultWalletBalance,
                 addTokenInteract,
                 setupTokensInteract,
                 assetDefinitionService,
                 tokensService,
                 openseaService,
-                fetchTransactionsInteract);
+                fetchTransactionsInteract,
+                ethereumNetworkRepository);
     }
 
     @Provides
@@ -79,27 +77,14 @@ public class WalletModule {
     }
 
     @Provides
-    FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
-            EthereumNetworkRepositoryType ethereumNetworkRepositoryType) {
-        return new FindDefaultNetworkInteract(ethereumNetworkRepositoryType);
-    }
-
-    @Provides
     AddTokenInteract provideAddTokenInteract(
-            TokenRepositoryType tokenRepository,
-            WalletRepositoryType walletRepository) {
-        return new AddTokenInteract(walletRepository, tokenRepository);
+            TokenRepositoryType tokenRepository) {
+        return new AddTokenInteract(tokenRepository);
     }
 
     @Provides
     FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
         return new FindDefaultWalletInteract(walletRepository);
-    }
-
-    @Provides
-    GetDefaultWalletBalance provideGetDefaultWalletBalance(
-            WalletRepositoryType walletRepository, EthereumNetworkRepositoryType ethereumNetworkRepository) {
-        return new GetDefaultWalletBalance(walletRepository, ethereumNetworkRepository);
     }
 
     @Provides

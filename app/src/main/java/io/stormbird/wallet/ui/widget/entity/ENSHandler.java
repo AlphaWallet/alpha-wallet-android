@@ -209,13 +209,12 @@ public class ENSHandler
     {
         //address update delay check
         final String to = toAddressEditText.getText().toString();
-        if (to.length() > 2 && !to.startsWith("0x"))
-        {
-            ensCallback.ENSCheck(to);
-        }
-        else
-        {
-            waitingForENS = false;
-        }
+        ensCallback.ENSCheck(to);
+    }
+
+    public static boolean canBeENSName(String address)
+    {
+        //candidate ENS address needs to be greater than at least 5 characters, and contain a period
+        return address.length() > 5 && !address.startsWith("0x") && address.contains(".");
     }
 }

@@ -84,22 +84,16 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         viewModel.tokens().observe(this, this::onTokens);
         viewModel.total().observe(this, this::onTotal);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
-        viewModel.defaultWalletBalance().observe(this, this::onBalanceChanged);
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.currentWalletBalance().observe(this, this::onBalanceChanged);
         viewModel.refreshTokens().observe(this, this::refreshTokens);
         viewModel.tokenUpdate().observe(this, this::onToken);
-        viewModel.endUpdate().observe(this, this::checkTokens);
-        viewModel.checkAddr().observe(this, this::updateTitle);
         viewModel.tokensReady().observe(this, this::tokensReady);
         viewModel.fetchKnownContracts().observe(this, this::fetchKnownContracts);
 
-        adapter = new TokensAdapter(getContext(), this::onTokenClick, viewModel.getAssetDefinitionService());
+        adapter = new TokensAdapter(getActivity(), this::onTokenClick, viewModel.getAssetDefinitionService());
         adapter.setHasStableIds(true);
         list.setLayoutManager(new LinearLayoutManager(getContext()));
         list.setAdapter(adapter);
-
-        viewModel.removeTokens().observe(this, adapter::onRemoveTokens);
 
         refreshLayout.setOnRefreshListener(this::refreshList);
 
@@ -144,9 +138,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         isVisible = isVisibleToUser;
         if (isResumed()) { // fragment created
             viewModel.setVisibility(isVisible);
-            if (isVisible) {
-                viewModel.prepare();
-            }
+            if (isVisible) viewModel.prepare();
         }
     }
 
@@ -159,14 +151,14 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
 
     private void onToken(Token token)
     {
-        adapter.updateToken(token);
+        adapter.updateToken(token, false);
     }
 
     private void initTabLayout(View view) {
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.currency));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.assets));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.collectibles));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -174,13 +166,14 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
                 switch(tab.getPosition()) {
                     case 0:
                         adapter.setFilterType(TokensAdapter.FILTER_ALL);
+                        viewModel.fetchTokens();
                         break;
                     case 1:
                         adapter.setFilterType(TokensAdapter.FILTER_CURRENCY);
                         viewModel.fetchTokens();
                         break;
                     case 2:
-                        adapter.setFilterType(TokensAdapter.FILTER_ASSETS);
+                        adapter.setFilterType(TokensAdapter.FILTER_COLLECTIBLES);
                         viewModel.fetchTokens();
                         break;
                     default:
@@ -211,7 +204,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add: {
-                viewModel.showAddToken(getContext());
+                viewModel.showAddToken(getActivity());
             }
             break;
             case android.R.id.home: {
@@ -223,15 +216,15 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     }
 
     private void onTokenClick(View view, Token token, BigInteger id) {
-        Context context = view.getContext();
         token = viewModel.getTokenFromService(token);
-        token.clickReact(viewModel, context);
+        token.clickReact(viewModel, getActivity());
     }
 
     @Override
     public void onResume() {
         super.onResume();
         viewModel.setVisibility(isVisible);
+        viewModel.prepare();
     }
 
     private void onTokens(Token[] tokens)
@@ -264,18 +257,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     public void onDestroy()
     {
         super.onDestroy();
-        getContext().unregisterReceiver(tokenReceiver);
-    }
-
-    private void onDefaultWallet(Wallet wallet)
-    {
-        viewModel.fetchTokens();
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo)
-    {
-        adapter.setDefaultNetwork(networkInfo);
-//        setBottomMenu(R.menu.menu_main_network);
+        getActivity().unregisterReceiver(tokenReceiver);
+        viewModel.clearProcess();
     }
 
     private void onBalanceChanged(Map<String, String> balance) {
@@ -309,12 +292,11 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         if (homeMessager != null) homeMessager.TokensReady();
     }
 
-    private void fetchKnownContracts(Integer networkId)
+    private List<ContractResult> getAllKnownContractsOnNetwork(int chainId)
     {
-        //fetch list of contracts for this network from the XML contract directory
-        List<String> knownContracts = new ArrayList<>();
         int index = 0;
-        switch (networkId)
+        List<ContractResult> result = new ArrayList<>();
+        switch (chainId)
         {
             case EthereumNetworkRepository.XDAI_ID:
                 index = R.array.xDAI;
@@ -326,17 +308,24 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
                 break;
         }
 
-        if (index != 0)
+        if (index > 0)
         {
-            String[] strArray = getResources().getStringArray(index);
-            knownContracts.addAll(Arrays.asList(strArray));
-            //initially assume all contracts added from XML have ERC20 interface
-            //TODO: Handle querying delegate contracts
+            String[] strArray = getResources().getStringArray(R.array.MainNet);
             for (String addr : strArray)
             {
-                TokensService.setInterfaceSpec(addr, ContractType.ERC20);
+                result.add(new ContractResult(addr, EthereumNetworkRepository.MAINNET_ID));
             }
         }
+
+        return result;
+    }
+
+    private void fetchKnownContracts(Boolean notUsed)
+    {
+        //fetch list of contracts for this network from the XML contract directory
+
+        List<ContractResult> knownContracts = new ArrayList<>(getAllKnownContractsOnNetwork(EthereumNetworkRepository.MAINNET_ID));
+        knownContracts.addAll(getAllKnownContractsOnNetwork(EthereumNetworkRepository.XDAI_ID));
 
         viewModel.checkKnownContracts(knownContracts);
     }
@@ -347,17 +336,28 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         //first abort the current operation
         viewModel.clearProcess();
         adapter.clear();
+        //viewModel.prepare();
     }
 
     @Override
     public void addedToken()
     {
-        viewModel.refreshAssetDefinedTokens(); //we loaded a new token, make balance query check the contract tokens
+
     }
 
     @Override
     public void changedLocale()
     {
 
+    }
+
+    public void walletOutOfFocus()
+    {
+        if (viewModel != null) viewModel.clearProcess();
+    }
+
+    public void walletInFocus()
+    {
+        if (viewModel != null) viewModel.reloadTokens();
     }
 }

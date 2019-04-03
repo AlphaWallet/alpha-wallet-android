@@ -79,9 +79,9 @@ public class PurchaseTicketsViewModel extends BaseViewModel
         defaultWallet.setValue(wallet);
     }
 
-    public void buyRange(MagicLinkParcel marketInstance)
+    public void buyRange(MagicLinkParcel marketInstance, int chainId)
     {
-        Token token = tokensService.getToken(marketInstance.magicLink.contractAddress);
+        Token token = tokensService.getToken(1, marketInstance.magicLink.contractAddress);
         //ok let's try to drive this guy through
         final byte[] tradeData = generateReverseTradeData(marketInstance.magicLink, token, null);
         //quick sanity check, dump price
@@ -92,7 +92,7 @@ public class PurchaseTicketsViewModel extends BaseViewModel
         progress.postValue(true);
         disposable = createTransactionInteract
                 .create(new Wallet(defaultWallet().getValue().address), marketInstance.magicLink.contractAddress, marketInstance.magicLink.priceWei,
-                        Contract.GAS_PRICE, Contract.GAS_LIMIT, tradeData)
+                        Contract.GAS_PRICE, Contract.GAS_LIMIT, tradeData, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 

@@ -27,16 +27,36 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
                     android:layout_marginBottom="5dp"
-                    android:layout_marginTop="20dp"
-                    android:fontFamily="@font/font_semibold"
-                    android:text="@string/title_send_activity"
-                    android:textColor="@color/text_dark_gray"
-                    android:textSize="18sp" />
+                    android:layout_marginTop="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:fontFamily="@font/font_semibold"
+                        android:text="@string/title_send_activity"
+                        android:textColor="@color/text_dark_gray"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/text_chain_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:background="@drawable/background_status_pending"
+                        android:fontFamily="@font/font_bold"
+                        android:layout_marginEnd="10dp"
+                        android:padding="2dp"
+                        android:text="@string/action_clear"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:visibility="visible" />
+
+                </RelativeLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"

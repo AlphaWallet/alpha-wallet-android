@@ -16,13 +16,13 @@ import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.OnTransactionClickListener;
+import io.stormbird.wallet.util.Utils;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import static io.stormbird.wallet.C.ETHER_DECIMALS;
-import static io.stormbird.wallet.C.ETH_SYMBOL;
+import static io.stormbird.wallet.C.*;
 
 public class TransactionHolder extends BinderViewHolder<TransactionMeta> implements View.OnClickListener {
 
@@ -37,6 +37,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     private final TextView type;
     private final TextView address;
     private final TextView value;
+    private final TextView chainName;
     private final ImageView typeIcon;
     private final TextView supplimental;
     private final TokensService tokensService;
@@ -58,6 +59,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         address = findViewById(R.id.address);
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
+        chainName = findViewById(R.id.text_chain_name);
         supplimental = findViewById(R.id.supplimental);
         tokensService = service;
         transactionsInteract = interact;
@@ -82,7 +84,24 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             return;
         }
 
-        String networkSymbol = addition.getString(DEFAULT_SYMBOL_ADDITIONAL);
+        value.setVisibility(View.VISIBLE);
+        Token token = tokensService.getToken(transaction.chainId, defaultAddress);
+        String tokenSymbol = "";
+        if (token != null)
+        {
+            tokenSymbol = token.tokenInfo.symbol;
+            if (chainName != null)
+            {
+                Utils.setChainColour(chainName, token.tokenInfo.chainId);
+                chainName.setText(token.getNetworkName());
+                chainName.setVisibility(View.VISIBLE);
+            }
+        }
+        else if (chainName != null)
+        {
+            chainName.setVisibility(View.GONE);
+        }
+
         boolean txSuccess = (transaction.error != null && transaction.error.equals("0"));
         // If operations include token transfer, display token transfer instead
         TransactionOperation operation = transaction.operations == null
@@ -90,7 +109,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
 
         if (operation == null || operation.contract == null) {
             // default to ether transaction
-            fill(txSuccess, transaction.from, transaction.to, networkSymbol, transaction.value,
+            fill(txSuccess, transaction.from, transaction.to, tokenSymbol, transaction.value,
                     ETHER_DECIMALS, transaction.timeStamp);
         }
         else if (operation.contract instanceof ERC875ContractTransaction)
@@ -99,7 +118,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         }
         else if (operation.from == null)
         {
-            fill(txSuccess, transaction.from, transaction.to, networkSymbol, transaction.value,
+            fill(txSuccess, transaction.from, transaction.to, tokenSymbol, transaction.value,
                  ETHER_DECIMALS, transaction.timeStamp);
         }
         else
@@ -119,8 +138,8 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     {
         int colourResource;
         supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
-        String name = tokensService.getTokenName(ct.address);
-        Token token = tokensService.getToken(ct.address);
+        String name = tokensService.getTokenName(trans.chainId, ct.address);
+        Token token = tokensService.getToken(trans.chainId, ct.address);
 
         address.setText(name);
         supplimental.setTextSize(12.0f);
@@ -167,6 +186,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
                 //Contract creation
                 typeIcon.setImageResource(R.drawable.token_icon);
                 colourResource = R.color.black;
+                value.setVisibility(View.GONE);
                 break;
             default:
                 typeIcon.setImageResource(R.drawable.ic_error_outline_black_24dp);
@@ -177,8 +197,15 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         String operationName = getString(TransactionLookup.typeToName(ct.operation));
 
         type.setText(operationName);
-        value.setTextColor(ContextCompat.getColor(getContext(), colourResource));
-        value.setText(ticketMove);
+        if (!transaction.error.equals("0"))
+        {
+            value.setVisibility(View.GONE);
+        }
+        else
+        {
+            value.setTextColor(ContextCompat.getColor(getContext(), colourResource));
+            value.setText(ticketMove);
+        }
 
         setSuccessIndicator(txSuccess, supplimentalTxt);
     }
@@ -190,7 +217,8 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             String symbol,
             String valueStr,
             long decimals,
-            long timestamp) {
+            long timestamp)
+    {
         boolean isSent = from.toLowerCase().equals(defaultAddress);
         type.setText(isSent ? getString(R.string.sent) : getString(R.string.received));
 
@@ -214,7 +242,12 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         if (valueStr.equals("0")) {
             valueStr = "0 " + symbol;
         } else {
-            valueStr = (isSent ? "-" : "+") + Token.getScaledValue(valueStr, decimals) + " " + symbol;
+            valueStr = Token.getScaledValue(valueStr, decimals);
+            if (!valueStr.startsWith("~"))
+            {
+                valueStr = (isSent ? "-" : "+") + valueStr;
+            }
+            valueStr = valueStr + " " + symbol;
         }
 
         this.value.setText(valueStr);
@@ -225,10 +258,10 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     {
         TransactionOperation operation = transaction.operations[0];
 
-        String name = tokensService.getTokenName(operation.contract.address);
-        String symbol = tokensService.getTokenSymbol(operation.contract.address);
-        int decimals = tokensService.getTokenDecimals(operation.contract.address);
-        Token token = tokensService.getToken(operation.contract.address);
+        String name = tokensService.getTokenName(transaction.chainId, operation.contract.address);
+        String symbol = tokensService.getTokenSymbol(transaction.chainId, operation.contract.address);
+        int decimals = tokensService.getTokenDecimals(transaction.chainId, operation.contract.address);
+        Token token = tokensService.getToken(transaction.chainId, operation.contract.address);
 
         String from = operation.from;
 

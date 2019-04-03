@@ -94,17 +94,6 @@ public class TransactionOperation implements Parcelable {
 
     public String getValue(int decimals)
     {
-        if (decimals > 1 && value != null && value.length() > 0 && Character.isDigit(value.charAt(0)))
-        {
-            return Token.getScaledValue(value, decimals); //represent balance transfers according to 'decimals' contract indicator property
-        }
-        else if (value != null)
-        {
-            return value;
-        }
-        else
-        {
-            return "0";
-        }
+        return Token.getScaledValue(value, decimals);
     }
 }

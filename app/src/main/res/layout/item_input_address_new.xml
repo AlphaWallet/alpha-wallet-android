@@ -65,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:background="@color/transparent"
                 android:contentDescription="@string/scan_qr"
-                android:src="@mipmap/qr_code_icon" />
+                android:src="@drawable/ic_camera" />
         </LinearLayout>
 
     </RelativeLayout>

@@ -11,6 +11,7 @@ import android.widget.TextView;
 import io.stormbird.token.util.DateTime;
 import io.stormbird.token.util.DateTimeFactory;
 
+import io.stormbird.wallet.util.Utils;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
@@ -36,6 +37,8 @@ import io.stormbird.wallet.ui.BaseActivity;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
 
+import static io.stormbird.wallet.util.Utils.isAlNum;
+
 /**
  * Created by James on 27/01/2018.  It might seem counter intuitive
  * but here Ticket refers to a container of an asset class here, not
@@ -49,27 +52,22 @@ import io.stormbird.wallet.viewmodel.BaseViewModel;
 public class Ticket extends Token implements Parcelable
 {
     private final List<BigInteger> balanceArray;
-    private List<Integer> burnIndices;
     private boolean isMatchedInXML = false;
 
-    public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, List<Integer> burned, long blancaTime) {
-        super(tokenInfo, BigDecimal.ZERO, blancaTime);
+    public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName, ContractType type) {
+        super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = balances;
-        burnIndices = burned;
     }
 
-    public Ticket(TokenInfo tokenInfo, String balances, String burnList, long blancaTime) {
-        super(tokenInfo, BigDecimal.ZERO, blancaTime);
+    public Ticket(TokenInfo tokenInfo, String balances, long blancaTime, String networkName, ContractType type) {
+        super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = stringHexToBigIntegerList(balances);
-        burnIndices = stringIntsToIntegerList(burnList);
     }
 
     private Ticket(Parcel in) {
         super(in);
         balanceArray = new ArrayList<>();
-        burnIndices = new ArrayList<Integer>();
         int objSize = in.readInt();
-        int burnSize = in.readInt();
         int interfaceOrdinal = in.readInt();
         contractType = ContractType.values()[interfaceOrdinal];
         if (objSize > 0)
@@ -79,17 +77,6 @@ public class Ticket extends Token implements Parcelable
             {
                 BigInteger val = (BigInteger)o;
                 balanceArray.add(val);
-            }
-        }
-
-        if (burnSize > 0)
-        {
-            Object[] readBurnArray = in.readArray(Object.class.getClassLoader());
-            //check to see if burn notice is needed
-            for (Object o : readBurnArray)
-            {
-                Integer val = (Integer)o;
-                burnIndices.add(val);
             }
         }
     }
@@ -126,10 +113,8 @@ public class Ticket extends Token implements Parcelable
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(balanceArray.size());
-        dest.writeInt(burnIndices.size());
         dest.writeInt(contractType.ordinal());
         if (balanceArray.size() > 0) dest.writeArray(balanceArray.toArray());
-        if (burnIndices.size() > 0) dest.writeArray(burnIndices.toArray());
     }
 
     /**
@@ -153,24 +138,6 @@ public class Ticket extends Token implements Parcelable
         return intArrayToString(idList, true);
     }
 
-    //Burn handling
-    @Override
-    public void addToBurnList(List<Uint16> burnUpdate)
-    {
-        for (Uint16 b : burnUpdate) {
-            Integer index = b.getValue().intValue();
-
-            //lookup index
-            if (balanceArray.size() > index)
-            {
-                BigInteger value = balanceArray.get(index);
-                if (value.compareTo(BigInteger.ZERO) != 0 && !burnIndices.contains(index)) {
-                    burnIndices.add(index);
-                }
-            }
-        }
-    }
-
     @Override
     public int getTicketCount()
     {
@@ -192,12 +159,6 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public void setRealmBurn(RealmToken realmToken, List<Integer> burnList)
-    {
-        realmToken.setBurnList(integerListToString(burnList, false));
-    }
-
-    @Override
     public void clickReact(BaseViewModel viewModel, Context context)
     {
         viewModel.showRedeemToken(context, this);
@@ -206,9 +167,7 @@ public class Ticket extends Token implements Parcelable
     @Override
     public void setupContent(TokenHolder tokenHolder, AssetDefinitionService asset)
     {
-        tokenHolder.balanceEth.setVisibility(View.GONE);
         tokenHolder.balanceCurrency.setText("--");
-        tokenHolder.arrayBalance.setVisibility(View.VISIBLE);
         tokenHolder.textAppreciation.setText("--");
 
         tokenHolder.contractType.setVisibility(View.VISIBLE);
@@ -222,10 +181,7 @@ public class Ticket extends Token implements Parcelable
             tokenHolder.contractType.setText(R.string.erc875);
         }
 
-        //tokenHolder.text24HoursSub.setText(R.string.burned);
-        //tokenHolder.text24Hours.setText(String.valueOf(burnIndices.size()));
-        //tokenHolder.textAppreciationSub.setText(R.string.marketplace);
-        tokenHolder.arrayBalance.setText(String.valueOf(getTicketCount()));
+        tokenHolder.balanceEth.setText(String.valueOf(getTicketCount()));
         tokenHolder.layoutValueDetails.setVisibility(View.GONE);
     }
 
@@ -245,33 +201,6 @@ public class Ticket extends Token implements Parcelable
         }
         return indicies;
     }
-
-    @Override
-    public List<Integer> getBurnList()
-    {
-        return burnIndices;
-    }
-
-    @Override
-    public String getBurnListStr() {
-        return integerListToString(burnIndices, false);
-    }
-
-    public String getTicketInfo(NonFungibleToken nonFungibleToken)
-    {
-        String teamA = nonFungibleToken.getAttribute("countryA").text;
-        String teamB = nonFungibleToken.getAttribute("countryB").text;
-        String time = nonFungibleToken.getAttribute("time").text;
-        String locality = nonFungibleToken.getAttribute("locality").text;
-        try {
-            DateTime datetime = DateTimeFactory.getDateTime(time);
-            time = datetime.format(new SimpleDateFormat("hh:mm", Locale.ENGLISH));
-        } catch (ParseException e) {
-            // time is returned as un-parsed, original string
-        }
-        return time + locality + "\n\n" + teamA + " vs " + teamB;
-    }
-
 
     /*************************************
      *
@@ -709,26 +638,6 @@ public class Ticket extends Token implements Parcelable
         return isDynamic;
     }
 
-    private boolean isAlNum(String testStr)
-    {
-        boolean result = false;
-        if (testStr != null && testStr.length() > 0)
-        {
-            result = true;
-            for (int i = 0; i < testStr.length(); i++)
-            {
-                char c = testStr.charAt(i);
-                if (!Character.isLetterOrDigit(c) && !Character.isWhitespace(c) && !(c == '+') && !(c == ',') && !(c == ';'))
-                {
-                    result = false;
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
     private String getTokenTitle(NonFungibleToken nonFungibleToken)
     {
         String tokenTitle = getFullName();
@@ -796,12 +705,6 @@ public class Ticket extends Token implements Parcelable
                                     getDynArray(indices)
                                 ),
                 Collections.emptyList());
-    }
-
-    @Override
-    public boolean isOldSpec()
-    {
-        return (contractType == ContractType.ERC875LEGACY);
     }
 
     @Override
@@ -880,4 +783,35 @@ public class Ticket extends Token implements Parcelable
 
     @Override
     public List<BigInteger> getArrayBalance() { return balanceArray; }
+
+    /**
+     * Detect a change of balance for ERC875 balance
+     * @param balanceArray
+     * @return
+     */
+    @Override
+    public boolean checkBalanceChange(List<BigInteger> balanceArray)
+    {
+        if (balanceArray.size() != this.balanceArray.size()) return true; //quick check for new tokens
+        for (int index = 0; index < balanceArray.size(); index++) //see if spawnable token ID has changed
+        {
+            if (!balanceArray.get(index).equals(this.balanceArray.get(index))) return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean getIsSent(Transaction transaction)
+    {
+        boolean isSent = true;
+        TransactionOperation operation = transaction.operations == null
+                || transaction.operations.length == 0 ? null : transaction.operations[0];
+
+        if (operation != null)
+        {
+            ERC875ContractTransaction ct = (ERC875ContractTransaction) operation.contract;
+            if (ct.type > 0) isSent = false;
+        }
+        return isSent;
+    }
 }

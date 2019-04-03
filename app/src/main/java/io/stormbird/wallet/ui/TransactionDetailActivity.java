@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.util.BalanceUtils;
@@ -26,6 +27,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 import static io.stormbird.wallet.C.Key.TRANSACTION;
+import static io.stormbird.wallet.util.Utils.setChainColour;
 
 public class TransactionDetailActivity extends BaseActivity implements View.OnClickListener {
 
@@ -36,6 +38,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
     private Transaction transaction;
     private TextView amount;
     private Token token;
+    private String chainName;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,10 +68,15 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
 
         viewModel = ViewModelProviders.of(this, transactionDetailViewModelFactory)
                 .get(TransactionDetailViewModel.class);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
-        token = viewModel.getToken(transaction.to);
+        chainName = viewModel.getNetworkName(transaction.chainId);
+
+        token = viewModel.getToken(transaction.chainId, transaction.to);
+        TextView chainLabel = findViewById(R.id.text_chain_name);
+
+        setChainColour(chainLabel, transaction.chainId);
+        chainLabel.setText(chainName);
 
         String operationName = null;
         if (token != null)
@@ -97,28 +105,25 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         String rawValue;
         String symbol;
         String prefix = "";
-        long decimals = 18;
-        NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
+
         if (token == null && (transaction.input == null || transaction.input.equals("0x")))
         {
-            token = viewModel.getToken(wallet.address);
-            prefix = (isSent ? "-" : "+");
+            token = viewModel.getToken(transaction.chainId, wallet.address);
         }
 
         if (token != null)
         {
             rawValue = token.getTransactionValue(transaction, getApplicationContext());
-            symbol = "";
+            isSent = token.getIsSent(transaction);
         }
         else
         {
-            rawValue = Token.getScaledValue(transaction.value, decimals);
-            symbol = networkInfo.symbol;
+            rawValue = Token.getScaledValue(transaction.value, 18);
             prefix = (isSent ? "-" : "+");
         }
 
         amount.setTextColor(ContextCompat.getColor(this, isSent ? R.color.red : R.color.green));
-        rawValue =  prefix + rawValue + " " + symbol;
+        rawValue =  prefix + rawValue;
 
         amount.setText(rawValue);
     }
@@ -150,6 +155,6 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
 
     @Override
     public void onClick(View v) {
-        viewModel.showMoreDetails(v.getContext(), transaction);
+        viewModel.showMoreDetails(this, transaction);
     }
 }

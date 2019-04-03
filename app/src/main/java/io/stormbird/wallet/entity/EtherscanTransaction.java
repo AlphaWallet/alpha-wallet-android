@@ -2,6 +2,7 @@ package io.stormbird.wallet.entity;
 
 
 import android.content.Context;
+import io.stormbird.token.tools.Numeric;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.service.TokensService;
 import org.web3j.crypto.Keys;
@@ -11,6 +12,7 @@ import java.math.BigInteger;
 import java.util.Map;
 
 import static io.stormbird.wallet.C.BURN_ADDRESS;
+import static io.stormbird.wallet.C.ETHER_DECIMALS;
 
 /**
  * Created by James on 26/03/2018.
@@ -43,7 +45,7 @@ public class EtherscanTransaction
     private static TransactionDecoder ensDecoder = null;
     private static ParseMagicLink parser = null;
 
-    public Transaction createTransaction(String walletAddress, Context ctx)
+    public Transaction createTransaction(String walletAddress, Context ctx, int chainId)
     {
         boolean isConstructor = false;
         TransactionOperation[] o;
@@ -67,7 +69,7 @@ public class EtherscanTransaction
 
             if (type != ContractType.OTHER)
             {
-                TokensService.setInterfaceSpec(contractAddress, type);
+                TokensService.setInterfaceSpec(chainId, contractAddress, type);
             }
 
             input = "Constructor"; //Placeholder - don't consume storage for the constructor
@@ -210,7 +212,7 @@ public class EtherscanTransaction
         }
 
         Transaction tx = new Transaction(hash, isError, blockNumber, timeStamp, nonce, from, to, value, gas, gasPrice, input,
-            gasUsed, o);
+            gasUsed, chainId, o);
 
         if (o.length > 0)
         {
@@ -314,13 +316,10 @@ public class EtherscanTransaction
     private boolean walletInvolvedInTransaction(Transaction trans, TransactionInput data, String walletAddr)
     {
         boolean involved = false;
-        if (data == null || data.functionData == null)
-        {
-            return (trans.from.equalsIgnoreCase(walletAddr) || trans.to.equalsIgnoreCase(walletAddr)); //early return
-        }
-        if (data.containsAddress(walletAddr)) return true;
+        if ((data != null && data.functionData != null) && data.containsAddress(walletAddr)) return true;
         if (trans.from.equalsIgnoreCase(walletAddr)) return true;
         if (trans.to.equalsIgnoreCase(walletAddr)) return true;
+        if (input != null && input.length() > 40 && input.contains(Numeric.cleanHexPrefix(walletAddr))) return true;
         if (trans.operations != null && trans.operations.length > 0 && trans.operations[0].walletInvolvedWithTransaction(walletAddr))
             involved = true;
         return involved;
@@ -360,4 +359,6 @@ public class EtherscanTransaction
 
         return foundWallet;
     }
+
+    public String getHash() { return hash; }
 }

@@ -1,6 +1,7 @@
 package io.stormbird.wallet.ui.widget.holder;
 
 import android.graphics.Color;
+import android.graphics.drawable.shapes.Shape;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,11 +18,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenTicker;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
+import io.stormbird.wallet.util.Utils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -38,26 +40,25 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final TextView balanceEth;
     public final TextView balanceCurrency;
     public final ImageView icon;
-    public final TextView arrayBalance;
     public final TextView text24Hours;
     public final TextView textAppreciation;
     public final TextView issuer;
     public final TextView text24HoursSub;
     public final TextView textAppreciationSub;
     public final TextView contractType;
-    public final LinearLayout layoutStatus;
+    public final TextView chainName;
     public final TextView textPending;
     public final TextView textIncomplete;
     public final View contractSeparator;
     public final LinearLayout layoutValueDetails;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
     private final TextView blockchain;
-    private final NetworkInfo networkInfo;
+    private final TextView pendingText;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
 
-    public TokenHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, NetworkInfo network)
+    public TokenHolder(int resId, ViewGroup parent, AssetDefinitionService assetService)
     {
         super(resId, parent);
 
@@ -65,7 +66,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         symbol = findViewById(R.id.symbol);
         balanceEth = findViewById(R.id.balance_eth);
         balanceCurrency = findViewById(R.id.balance_currency);
-        arrayBalance = findViewById(R.id.balanceArray);
         text24Hours = findViewById(R.id.text_24_hrs);
         textAppreciation = findViewById(R.id.text_appreciation);
         issuer = findViewById(R.id.issuer);
@@ -74,13 +74,13 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         contractType = findViewById(R.id.contract_type);
         contractSeparator = findViewById(R.id.contract_seperator);
         layoutValueDetails = findViewById(R.id.layout_value_details);
-        layoutStatus = findViewById(R.id.layout_status);
         textPending = findViewById(R.id.status_pending);
         textIncomplete = findViewById(R.id.status_incomplete);
         blockchain = findViewById(R.id.text_chain);
+        chainName = findViewById(R.id.text_chain_name);
+        pendingText = findViewById(R.id.balance_eth_pending);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
-        networkInfo = network;
     }
 
     @Override
@@ -92,11 +92,13 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             contractType.setVisibility(View.GONE);
             contractSeparator.setVisibility(View.GONE);
         }
+
         try
         {
-            String networkName = networkInfo != null ? networkInfo.getShortName() : getString(R.string.ethereum);
-            blockchain.setText(getString(R.string.blockchain, networkName));
-            String displayTxt = assetDefinition.getIssuerName(token.getAddress(), networkName);
+            blockchain.setText(getString(R.string.blockchain, token.getNetworkName()));
+            chainName.setText(token.getNetworkName());
+            Utils.setChainColour(chainName, token.tokenInfo.chainId);
+            String displayTxt = assetDefinition.getIssuerName(token.getAddress(), token.getNetworkName());
             issuer.setText(displayTxt);
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
                         ? token.tokenInfo.symbol.toUpperCase()
@@ -104,23 +106,34 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
             animateTextWhileWaiting();
             token.setupContent(this, assetDefinition);
+            setPending();
         } catch (Exception ex) {
             fillEmpty();
         }
     }
 
-    private void setPending(int qty) {
-        layoutStatus.setVisibility(View.VISIBLE);
-        textPending.setVisibility(View.VISIBLE);
-        if (qty > 0) {
-            textPending.setText(getContext().getString(R.string.status_pending_with_qty, String.valueOf(qty)));
-        } else {
-            textPending.setVisibility(View.GONE);
+    private void setPending()
+    {
+        String pendingDiff = token.getPendingDiff();
+        if (pendingDiff != null)
+        {
+            pendingText.setText(pendingDiff);
+            pendingText.setTextColor(ContextCompat.getColor(getContext(), (pendingDiff.startsWith("-")) ? R.color.red : R.color.green));
         }
+        else
+        {
+            pendingText.setText("");
+        }
+
+//        textPending.setVisibility(View.VISIBLE);
+//        if (qty > 0) {
+//            textPending.setText(getContext().getString(R.string.status_pending_with_qty, String.valueOf(qty)));
+//        } else {
+//            textPending.setVisibility(View.GONE);
+//        }
     }
 
     private void setIncompleteData(int qty) {
-        layoutStatus.setVisibility(View.VISIBLE);
         textIncomplete.setVisibility(View.VISIBLE);
         if (qty > 0) {
             textIncomplete.setText(getContext().getString(R.string.status_incomplete_data_with_qty, String.valueOf(qty)));
@@ -130,7 +143,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     }
 
     private void hideStatusBlocks() {
-        layoutStatus.setVisibility(View.GONE);
+        textIncomplete.setVisibility(View.GONE);
+        textPending.setVisibility(View.GONE);
     }
 
     public void fillCurrency(BigDecimal ethBalance, TokenTicker ticker) {
@@ -201,19 +215,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         else
         {
             this.textAppreciation.setText(EMPTY_BALANCE);
-        }
-    }
-
-    public boolean needsUpdate()
-    {
-        return (token != null && token.needsUpdate());
-    }
-
-    public void updateHeading()
-    {
-        if (token != null)
-        {
-            token.checkUpdateTimeValid(getContext(), this);
         }
     }
 

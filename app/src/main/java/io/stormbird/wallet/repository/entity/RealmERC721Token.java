@@ -22,6 +22,8 @@ public class RealmERC721Token extends RealmObject
     private long updatedTime;
     private String tokenIdList;
     private String schemaName;
+    private int chainId;
+    private int contractType;
 
     public String getSymbol() {
         return symbol;
@@ -41,6 +43,19 @@ public class RealmERC721Token extends RealmObject
 
     public String getAddress() {
         return address;
+    }
+
+    public int getAddressChain() {
+        if (address.contains("-"))
+        {
+            String chain = address.split("-")[1];
+            if (chain.length() > 0 && Character.isDigit(chain.charAt(0)))
+            {
+                return Integer.parseInt(chain);
+            }
+        }
+
+        return 0;
     }
 
     public void setAddress(String address) {
@@ -92,5 +107,25 @@ public class RealmERC721Token extends RealmObject
     public void setSchemaName(String schemaName)
     {
         this.schemaName = schemaName;
+    }
+
+    public int getChainId()
+    {
+        return chainId;
+    }
+
+    public void setChainId(int chainId)
+    {
+        this.chainId = chainId;
+    }
+
+    public int getContractType()
+    {
+        return contractType;
+    }
+
+    public void setContractType(int contractType)
+    {
+        this.contractType = contractType;
     }
 }

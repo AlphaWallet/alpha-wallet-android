@@ -53,6 +53,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 addTokenRouter,
                 assetDefinitionService,
                 findDefaultWalletInteract,
-                fetchWalletsInteract);
+                fetchWalletsInteract
+                );
     }
 }

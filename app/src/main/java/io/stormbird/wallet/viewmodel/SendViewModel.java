@@ -3,8 +3,10 @@ package io.stormbird.wallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.ENSInteract;
@@ -12,6 +14,7 @@ import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.TokensService;
 
 import java.math.BigInteger;
 
@@ -24,28 +27,27 @@ public class SendViewModel extends BaseViewModel {
     private final ENSInteract ensInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final EthereumNetworkRepositoryType networkRepository;
+    private final TokensService tokensService;
 
     public SendViewModel(ConfirmationRouter confirmationRouter,
                          MyAddressRouter myAddressRouter,
                          ENSInteract ensInteract,
                          AssetDefinitionService assetDefinitionService,
-                         EthereumNetworkRepositoryType ethereumNetworkRepositoryType) {
+                         EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
+                         TokensService tokensService) {
         this.confirmationRouter = confirmationRouter;
         this.myAddressRouter = myAddressRouter;
         this.ensInteract = ensInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.networkRepository = ethereumNetworkRepositoryType;
+        this.tokensService = tokensService;
     }
 
     public LiveData<String> ensResolve() { return ensResolve; }
     public LiveData<String> ensFail() { return ensFail; }
 
-    public void openConfirmation(Context context, String to, BigInteger amount, String contractAddress, int decimals, String symbol, boolean sendingTokens, String ensDetails) {
-        confirmationRouter.open(context, to, amount, contractAddress, decimals, symbol, sendingTokens, ensDetails);
-    }
-
-    public void showMyAddress(Context context, Wallet wallet) {
-        myAddressRouter.open(context, wallet);
+    public void openConfirmation(Context context, String to, BigInteger amount, String contractAddress, int decimals, String symbol, boolean sendingTokens, String ensDetails, int chainId) {
+        confirmationRouter.open(context, to, amount, contractAddress, decimals, symbol, sendingTokens, ensDetails, chainId);
     }
 
     public void showContractInfo(Context ctx, Wallet wallet, Token token)
@@ -58,9 +60,15 @@ public class SendViewModel extends BaseViewModel {
         return networkRepository.getNameById(chainId);
     }
 
+    public NetworkInfo getNetworkInfo(int chainId)
+    {
+        return networkRepository.getNetworkByChain(chainId);
+    }
+
+    public Token getToken(int chainId, String tokenAddress) { return tokensService.getToken(chainId, tokenAddress); };
+
     public void checkENSAddress(String name)
     {
-        if (name == null || name.length() < 1) return;
         disposable = ensInteract.checkENSAddress (name)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

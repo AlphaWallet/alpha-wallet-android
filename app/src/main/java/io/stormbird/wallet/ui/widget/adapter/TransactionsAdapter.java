@@ -66,7 +66,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
     private final OnTransactionClickListener onTransactionClickListener;
 
     private Wallet wallet;
-    private NetworkInfo network;
+    //private NetworkInfo network;
     private Map<String, TransactionSortedItem> checkMap = new HashMap<>();
     private final TokensService tokensService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
@@ -115,7 +115,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
     public void onBindViewHolder(BinderViewHolder holder, int position) {
         Bundle addition = new Bundle();
         addition.putString(TransactionHolder.DEFAULT_ADDRESS_ADDITIONAL, wallet.address);
-        addition.putString(TransactionHolder.DEFAULT_SYMBOL_ADDITIONAL, network.symbol);
+        //addition.putString(TransactionHolder.DEFAULT_SYMBOL_ADDITIONAL, network.symbol);
         holder.bind(items.get(position).value, addition);
     }
 
@@ -131,11 +131,6 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
 
     public void setDefaultWallet(Wallet wallet) {
         this.wallet = wallet;
-        notifyDataSetChanged();
-    }
-
-    public void setDefaultNetwork(NetworkInfo network) {
-        this.network = network;
         notifyDataSetChanged();
     }
 
@@ -179,33 +174,44 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         }
     }
 
-    public int updateRecentTransactions(Transaction[] transactions, String contractAddress, String walletAddress, int count)
+    public void addTransactions(Transaction[] transactions)
     {
-        int txCount = 0;
-
-        List<Transaction> txSortList = new ArrayList<>();
-        Collections.addAll(txSortList, transactions);
-        Transaction.sortTranactions(txSortList);
-
         items.beginBatchedUpdates();
-
-        for (Transaction transaction : txSortList)
+        for (Transaction transaction : transactions)
         {
-            //check this tx relates to the contract
-            if (transaction.isRelated(contractAddress, walletAddress))
-            {
-                TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp);
-                TransactionSortedItem sortedItem = new TransactionSortedItem(
-                        TransactionHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);
+            TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp);
+            TransactionSortedItem sortedItem = new TransactionSortedItem(
+                    TransactionHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);
                 items.add(sortedItem);
-                if (items.size() == count) break;
-                txCount++;
+        }
+        items.endBatchedUpdates();
+        notifyDataSetChanged();
+    }
+
+    public int updateRecentTransactions(Transaction[] transactions)
+    {
+        boolean found;
+        int itemsChanged = 0;
+        //see if any update required
+        for (Transaction txCheck : transactions)
+        {
+            found = false;
+            for (int i = 0; i < items.size(); i++)
+            {
+                if (items.get(i).viewType == TransactionHolder.VIEW_TYPE
+                    && txCheck.hash.equals(((TransactionSortedItem)items.get(i)).value.hash))
+                { found = true; break; }
             }
+            if (!found) itemsChanged++;
         }
 
-        items.endBatchedUpdates();
+        if (itemsChanged > 0)
+        {
+            items.clear();
+            addTransactions(transactions);
+        }
 
-        return txCount;
+        return itemsChanged;
     }
 
     public void clear() {

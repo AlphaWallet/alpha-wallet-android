@@ -22,9 +22,6 @@ public class RealmERC721Asset extends RealmObject
     private String backgroundColor;
     private String traits;
 
-    public String getTokenIdAddr() {
-        return tokenIdAddr;
-    }
     public String getTokenId()
     {
         String[] str = tokenIdAddr.split("-");
@@ -116,11 +113,6 @@ public class RealmERC721Asset extends RealmObject
         }
 
         this.traits = sb.toString();
-    }
-
-    public void setTokenIdAddr(String tokenId, String addr)
-    {
-        this.tokenIdAddr = tokenIdAddrName(tokenId, addr);
     }
 
     public static String tokenIdAddrName(String tokenId, String addr)

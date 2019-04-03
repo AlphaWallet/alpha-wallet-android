@@ -47,9 +47,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Observable<Transaction[]> fetchCachedTransactions(NetworkInfo network, Wallet wallet) {
-		Log.d(TAG, "Fetching Cached TX: " + network.name + " : " + wallet.address);
-		return fetchFromCache(network, wallet)
+	public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet) {
+		Log.d(TAG, "Fetching Cached TX: " + wallet.address);
+		return fetchFromCache(wallet)
 				.observeOn(Schedulers.newThread())
 				.toObservable();
 	}
@@ -57,25 +57,23 @@ public class TransactionRepository implements TransactionRepositoryType {
 	@Override
 	public Transaction fetchCachedTransaction(String walletAddr, String hash)
 	{
-		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
 		Wallet wallet = new Wallet(walletAddr);
-		return inDiskCache.fetchTransaction(networkInfo, wallet, hash);
+		return inDiskCache.fetchTransaction(wallet, hash);
 	}
 
 	@Override
-	public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock, String userAddress) {
-		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		return fetchFromNetwork(networkInfo, wallet, lastBlock, userAddress)
+	public Observable<Transaction[]> fetchNetworkTransaction(NetworkInfo network, String tokenAddress, long lastBlock, String userAddress) {
+		return fetchFromNetwork(network, tokenAddress, lastBlock, userAddress)
 				.observeOn(Schedulers.newThread())
 				.toObservable();
 	}
 
 	@Override
-	public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password) {
-		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
+	public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password, int chainId) {
+		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
-		.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, networkRepository.getDefaultNetwork().chainId))
+		.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, chainId))
 		.flatMap(signedMessage -> Single.fromCallable( () -> {
 			EthSendTransaction raw = web3j
 					.ethSendRawTransaction(Numeric.toHexString(signedMessage))
@@ -88,13 +86,13 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password) {
-		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
+	public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password, int chainId) {
+		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
 
 		TransactionData txData = new TransactionData();
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
-				.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, networkRepository.getDefaultNetwork().chainId))
+				.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, chainId))
 				.flatMap(signedMessage -> Single.fromCallable( () -> {
 					txData.signature = Numeric.toHexString(signedMessage);
 					EthSendTransaction raw = web3j
@@ -109,12 +107,12 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password) {
-		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
+	public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password, int chainId) {
+		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
 				.flatMap(nonce -> getRawTransaction(nonce, gasPrice, gasLimit, BigInteger.ZERO, data))
-				.flatMap(rawTx -> signEncodeRawTransaction(rawTx, password, from, networkRepository.getDefaultNetwork().chainId))
+				.flatMap(rawTx -> signEncodeRawTransaction(rawTx, password, from, chainId))
 				.flatMap(signedMessage -> Single.fromCallable( () -> {
 					EthSendTransaction raw = web3j
 							.ethSendRawTransaction(Numeric.toHexString(signedMessage))
@@ -127,14 +125,14 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password) {
-		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
+	public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password, int chainId) {
+		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
 
 		TransactionData txData = new TransactionData();
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
 				.flatMap(nonce -> getRawTransaction(nonce, gasPrice, gasLimit, BigInteger.ZERO, data))
-				.flatMap(rawTx -> signEncodeRawTransaction(rawTx, password, from, networkRepository.getDefaultNetwork().chainId))
+				.flatMap(rawTx -> signEncodeRawTransaction(rawTx, password, from, chainId))
 				.flatMap(signedMessage -> Single.fromCallable( () -> {
 					txData.signature = Numeric.toHexString(signedMessage);
 					EthSendTransaction raw = web3j
@@ -175,13 +173,13 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<byte[]> getSignature(Wallet wallet, byte[] message, String password) {
-		return accountKeystoreService.signTransaction(wallet, password, message, networkRepository.getDefaultNetwork().chainId);
+	public Single<byte[]> getSignature(Wallet wallet, byte[] message, String password, int chainId) {
+		return accountKeystoreService.signTransaction(wallet, password, message, chainId);
 	}
 
 	@Override
-	public Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String password) {
-		return accountKeystoreService.signTransactionFast(wallet, password, message, networkRepository.getDefaultNetwork().chainId);
+	public Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String password, int chainId) {
+		return accountKeystoreService.signTransactionFast(wallet, password, message, chainId);
 	}
 
 	@Override
@@ -196,28 +194,34 @@ public class TransactionRepository implements TransactionRepositoryType {
 		accountKeystoreService.lockAccount(signer, signerPassword);
 	}
 
-	private Single<Transaction[]> fetchFromCache(NetworkInfo networkInfo, Wallet wallet) {
-	    return inDiskCache.fetchTransaction(networkInfo, wallet);
+	private Single<Transaction[]> fetchFromCache(Wallet wallet) {
+	    return inDiskCache.fetchTransaction(wallet);
     }
 
-	private Single<Transaction[]> fetchFromNetwork(NetworkInfo networkInfo, Wallet wallet, long lastBlock, String userAddress) {
-		return Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, wallet, lastBlock, userAddress));
+	private Single<Transaction[]> fetchFromNetwork(NetworkInfo networkInfo, String tokenAddress, long lastBlock, String userAddress) {
+		return Single.fromObservable(blockExplorerClient.fetchLastTransactions(networkInfo, tokenAddress, lastBlock, userAddress));
 	}
 
 	@Override
-	public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+	public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token, int count)
+	{
+		return inDiskCache.fetchTransactions(wallet, token, count);
+	}
+
+	@Override
+	public Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList)
 	{
 		if (txList.length == 0)
 		{
-			return noTransations();
+			return noTransactions();
 		}
 		else
 		{
-			return inDiskCache.putAndReturnTransactions(networkInfo, wallet, txList);
+			return inDiskCache.putAndReturnTransactions(wallet, txList);
 		}
 	}
 
-	private Single<Transaction[]> noTransations()
+	private Single<Transaction[]> noTransactions()
 	{
 		return Single.fromCallable(() -> new Transaction[0]);
 	}
@@ -276,11 +280,11 @@ public class TransactionRepository implements TransactionRepositoryType {
 	@Override
 	public Single<ContractType> queryInterfaceSpec(String address, TokenInfo tokenInfo)
 	{
-		NetworkInfo networkInfo = networkRepository.getDefaultNetwork();
-		ContractType checked = TokensService.checkInterfaceSpec(tokenInfo.address);
+		NetworkInfo networkInfo = networkRepository.getNetworkByChain(tokenInfo.chainId);
+		ContractType checked = TokensService.checkInterfaceSpec(tokenInfo.chainId, tokenInfo.address);
 		if (tokenInfo.name == null && tokenInfo.symbol == null)
 		{
-			return Single.fromCallable(() -> ContractType.OTHER);
+			return Single.fromCallable(() -> ContractType.NOT_SET);
 		}
 		else if (checked != null && checked != ContractType.NOT_SET && checked != ContractType.OTHER)
 		{

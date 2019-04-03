@@ -20,6 +20,7 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
 import io.stormbird.wallet.ui.widget.entity.AmountEntryItem;
@@ -30,6 +31,7 @@ import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.util.QRURLParser;
+import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.SendViewModel;
 import io.stormbird.wallet.viewmodel.SendViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
@@ -38,10 +40,9 @@ import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 
+import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.wallet.C.Key.WALLET;
-import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
 
 public class SendActivity extends BaseActivity implements Runnable, ItemClickListener, AmountUpdateCallback {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
@@ -63,7 +64,8 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     private ENSHandler ensHandler;
     private Handler handler;
     private AWalletAlertDialog dialog;
-    private int chainId;
+    private TextView chainName;
+    private int currentChain;
 
     private ImageButton scanQrImageView;
     private TextView tokenBalanceText;
@@ -94,18 +96,25 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-        chainId = getIntent().getIntExtra(C.EXTRA_NETWORKID, MAINNET_ID);
+        QrUrlResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
         myAddress = wallet.address;
+        currentChain = token.tokenInfo.chainId;
 
         setupTokenContent();
         initViews();
         setupAddressEditField();
 
         if (token.addressMatches(myAddress)) {
-            amountInput = new AmountEntryItem(this, tokenRepository, symbol, true);
+            amountInput = new AmountEntryItem(this, tokenRepository, symbol, true, currentChain, token.hasRealValue());
         } else {
             //currently we don't evaluate ERC20 token value. TODO: Should we?
-            amountInput = new AmountEntryItem(this, tokenRepository, symbol, false);
+            amountInput = new AmountEntryItem(this, tokenRepository, symbol, false, currentChain, token.hasRealValue());
+        }
+
+        if (result != null)
+        {
+            //restore payment request
+            validateEIP681Request(result);
         }
     }
 
@@ -169,7 +178,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
         if (isValid) {
             BigInteger amountInSubunits = BalanceUtils.baseToSubunit(currentAmount, decimals);
-            viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens, ensHandler.getEnsName());
+            viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens, ensHandler.getEnsName(), currentChain);
         }
     }
 
@@ -206,9 +215,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         if (requestCode == BARCODE_READER_REQUEST_CODE) {
             if (resultCode == FullScannerFragment.SUCCESS) {
                 if (data != null) {
-                    String barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
-                    if (barcode == null)
-                        barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+                    String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
 
                     //if barcode is still null, ensure we don't GPF
                     if (barcode == null) {
@@ -259,31 +266,42 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         if (result.chainId == 0)
         {
             displayScanError();
+            return;
         }
-        else if (result.chainId != chainId)
+        else
         {
-            //name of correct chain
-            String chainName = viewModel.getChainName(result.chainId);
-            String message = getString(R.string.wrong_chain, chainName);
-            displayScanError(R.string.wrong_chain_title, message);
+            //chain ID indicator
+            Utils.setChainColour(chainName, result.chainId);
+            chainName.setText(viewModel.getChainName(result.chainId));
+            currentChain = result.chainId;
+            amountInput.onClear();
         }
-        else if (result.getFunction().length() == 0 && !sendingTokens)
+
+        Token resultToken = viewModel.getToken(result.chainId, result.getAddress());
+
+        if (result.getFunction().length() == 0 && result.weiValue.compareTo(BigInteger.ZERO) > 0)
         {
             //correct chain and asset type
             String ethAmount = BalanceUtils.weiToEth(new BigDecimal(result.weiValue)).setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
-            amountInput.setAmount(ethAmount);
             TextView sendText = findViewById(R.id.text_payment_request);
             sendText.setVisibility(View.VISIBLE);
             sendText.setText(R.string.transfer_request);
+            token = viewModel.getToken(result.chainId, wallet.address);
+            toAddressEditText.setText(result.getAddress());
+            amountInput = new AmountEntryItem(this, tokenRepository, viewModel.getNetworkInfo(result.chainId).symbol, true, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
+            amountInput.setAmountText(ethAmount);
+            amountInput.setAmount(ethAmount);
+            setupTokenContent();
         }
-        else if (result.getFunction().length() > 0 && result.getAddress().equals(token.getAddress()))
+        else if (result.getFunction().length() > 0 && resultToken != null && !resultToken.isEthereum())
         {
             //sending ERC20 and we're on the correct asset
-            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, token.tokenInfo.decimals));
+            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, resultToken.tokenInfo.decimals));
             BigDecimal sendAmount = new BigDecimal(result.weiValue);
-            BigDecimal erc20Amount = token.tokenInfo.decimals > 0
+            BigDecimal erc20Amount = resultToken.tokenInfo.decimals > 0
                     ? sendAmount.divide(decimalDivisor) : sendAmount;
             String erc20AmountStr = erc20Amount.setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
+            amountInput = new AmountEntryItem(this, tokenRepository, resultToken.tokenInfo.symbol, false, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
             amountInput.setAmount(erc20AmountStr);
 
             //show function which will be called:
@@ -294,12 +312,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             TextView contractText = findViewById(R.id.text_contract_call);
             contractText.setVisibility(View.VISIBLE);
             contractText.setText(result.functionDetail);
-        }
-        else
-        {
-            //TODO: fetch Token name
-            String message = getString(R.string.wrong_token, result.getAddress());
-            displayScanError(R.string.wrong_token_title, message);
         }
     }
 
@@ -334,11 +346,12 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         amountInput.onClear();
     }
 
-    boolean isBalanceEnough(String eth) {
+    private boolean isBalanceEnough(String eth) {
         try {
-            BigDecimal amount = new BigDecimal(BalanceUtils.EthToWei(eth));
-            BigDecimal balance = new BigDecimal(BalanceUtils.EthToWei(tokenBalanceText.getText().toString()));
-            return (balance.subtract(amount).compareTo(BigDecimal.ZERO) == 0 || balance.subtract(amount).compareTo(BigDecimal.ZERO) > 0);
+            //Needs to take into account decimal of token
+            int decimals = (token != null && token.tokenInfo != null) ? token.tokenInfo.decimals : 18;
+            BigDecimal amount = new BigDecimal(BalanceUtils.baseToSubunit(eth, decimals));
+            return (token.balance.subtract(amount).compareTo(BigDecimal.ZERO) >= 0);
         } catch (Exception e) {
             return false;
         }
@@ -347,6 +360,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     public void setupTokenContent() {
         tokenBalanceText = findViewById(R.id.balance_eth);
         tokenSymbolText = findViewById(R.id.symbol);
+        chainName = findViewById(R.id.text_chain_name);
 
         tokenSymbolText.setText(TextUtils.isEmpty(token.tokenInfo.name)
                 ? token.tokenInfo.symbol.toUpperCase()
@@ -357,10 +371,15 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         BigDecimal ethBalance = tokenInfo.decimals > 0
                 ? token.balance.divide(decimalDivisor) : token.balance;
         ethBalance = ethBalance.setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros();
-        String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
+        String value = getEthString(ethBalance.doubleValue());
         tokenBalanceText.setText(value);
 
         tokenBalanceText.setVisibility(View.VISIBLE);
+        if (token != null)
+        {
+            Utils.setChainColour(chainName, token.tokenInfo.chainId);
+            chainName.setText(viewModel.getChainName(token.tokenInfo.chainId));
+        }
     }
 
     @Override

@@ -3,11 +3,9 @@ package io.stormbird.wallet.ui;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,25 +13,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
-
+import dagger.android.support.AndroidSupportInjection;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.TokenInterface;
-import io.stormbird.wallet.entity.TokensReceiver;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.ui.widget.adapter.TransactionsAdapter;
 import io.stormbird.wallet.viewmodel.TransactionsViewModel;
 import io.stormbird.wallet.viewmodel.TransactionsViewModelFactory;
-import io.stormbird.wallet.widget.DepositView;
 import io.stormbird.wallet.widget.EmptyTransactionsView;
 import io.stormbird.wallet.widget.SystemView;
 
 import javax.inject.Inject;
-
-import dagger.android.support.AndroidSupportInjection;
 
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
 
@@ -47,9 +36,9 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
     private SystemView systemView;
     private TransactionsAdapter adapter;
-    private Dialog dialog;
 
     private boolean isVisible = false;
+    private boolean firstView = true;
 
     RecyclerView list;
 
@@ -76,23 +65,19 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
 
         systemView.showProgress(false);
 
-
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.transactions().observe(this, this::onTransactions);
         viewModel.showEmpty().observe(this, this::showEmptyTx);
         viewModel.clearAdapter().observe(this, this::clearAdapter);
         viewModel.refreshAdapter().observe(this, this::refreshAdapter);
         viewModel.newTransactions().observe(this, this::onNewTransactions);
-        refreshLayout.setOnRefreshListener(() -> viewModel.forceUpdateTransactionView());
+        refreshLayout.setOnRefreshListener(() -> viewModel.prepare());
 
         adapter.clear();
 
         tokenReceiver = new TokensReceiver(getActivity(), this);
-
-        viewModel.prepare();
 
         return view;
     }
@@ -101,12 +86,9 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.try_again: {
-                viewModel.forceUpdateTransactionView();
+                viewModel.prepare();
             }
             break;
-            case R.id.action_buy: {
-                openExchangeDialog();
-            }
         }
     }
 
@@ -118,8 +100,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     @Override
     public void onResume() {
         super.onResume();
-        viewModel.setVisibility(isVisible);
-        viewModel.restartIfRequired();
+        viewModel.prepare();
     }
 
     @Override
@@ -127,9 +108,12 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         super.setUserVisibleHint(isVisibleToUser);
         isVisible = isVisibleToUser;
         if (isResumed()) { // fragment created
-            viewModel.setVisibility(isVisible);
             if (isVisible) {
-                viewModel.startTransactionRefresh();
+                if (firstView)
+                {
+                    adapter.notifyDataSetChanged(); //first time viewing, refresh each view element to ensure tokens are displayed
+                    firstView = false;
+                }
             }
         }
     }
@@ -137,11 +121,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     @Override
     public void onPause() {
         super.onPause();
-        //stop transaction refresh
-        viewModel.setVisibility(false);
-        if (dialog != null && dialog.isShowing()) {
-            dialog.dismiss();
-        }
     }
 
     private void onTransactions(Transaction[] transaction) {
@@ -165,11 +144,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         adapter.setDefaultWallet(wallet);
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo)
-    {
-        adapter.setDefaultNetwork(networkInfo);
-    }
-
     private void onError(ErrorEnvelope errorEnvelope) {
         if (errorEnvelope.code == EMPTY_COLLECTION || adapter.getItemCount() == 0) {
             showEmptyTx(true);
@@ -182,7 +156,6 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         if (show)
         {
             EmptyTransactionsView emptyView = new EmptyTransactionsView(getContext(), this);
-            emptyView.setNetworkInfo(viewModel.defaultNetwork().getValue());
             systemView.showEmpty(emptyView);
         }
         else
@@ -191,37 +164,13 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         }
     }
 
-    private void openExchangeDialog() {
-        Wallet wallet = viewModel.defaultWallet().getValue();
-        if (wallet == null) {
-            Toast.makeText(getContext(), getString(R.string.error_wallet_not_selected), Toast.LENGTH_SHORT)
-                    .show();
-        } else if (getContext() != null) {
-            BottomSheetDialog dialog = new BottomSheetDialog(getContext());
-            DepositView view = new DepositView(getContext(), wallet);
-            view.setOnDepositClickListener(this::onDepositClick);
-            dialog.setContentView(view);
-            dialog.show();
-            this.dialog = dialog;
-        }
-    }
-
-    private void onDepositClick(View view, Uri uri) {
-        viewModel.openDeposit(view.getContext(), uri);
-    }
-
-    public void tokensReady()
-    {
-        viewModel.forceUpdateTransactionView();
-    }
-
     @Override
     public void resetTokens()
     {
         //first abort the current operation
-        //viewModel.abortAndRestart(true);
         adapter.clear();
         list.setAdapter(adapter);
+        viewModel.clearProcesses();
     }
 
     @Override
@@ -236,14 +185,14 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         //need to refresh the transaction view
         adapter.clear();
         list.setAdapter(adapter);
-        viewModel.abortAndRestart(true);
+        viewModel.clearProcesses();
     }
 
     private void clearAdapter(Boolean aBoolean)
     {
         adapter.clear();
         list.setAdapter(adapter);
-        viewModel.abortAndRestart(false);
+        viewModel.clearProcesses();
     }
 
     private void refreshAdapter(Boolean aBoolean)

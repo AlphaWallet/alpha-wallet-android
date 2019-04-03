@@ -149,10 +149,9 @@ public class BrowseMarketActivity extends BaseActivity
     }
 
     private void onOrderClick(View view, MagicLinkData instance) {
-        Context context = view.getContext();
         MagicLinkParcel parcel = new MagicLinkParcel(instance);
         //TODO: just clicked on an order.
-        viewModel.showPurchaseTicket(context, parcel);
+        viewModel.showPurchaseTicket(this, parcel);
     }
 
     private void startUpdate(Boolean dummy) {

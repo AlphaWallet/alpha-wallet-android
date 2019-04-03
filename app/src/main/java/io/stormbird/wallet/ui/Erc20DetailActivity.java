@@ -1,6 +1,9 @@
 package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,23 +16,16 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import javax.inject.Inject;
-
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ContractType;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.router.EthereumInfoRouter;
-import io.stormbird.wallet.router.SendTokenRouter;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
 import io.stormbird.wallet.ui.widget.adapter.TransactionsAdapter;
 import io.stormbird.wallet.viewmodel.Erc20DetailViewModel;
 import io.stormbird.wallet.viewmodel.Erc20DetailViewModelFactory;
+
+import javax.inject.Inject;
 
 import static io.stormbird.wallet.C.Key.WALLET;
 
@@ -43,11 +39,9 @@ public class Erc20DetailActivity extends BaseActivity {
     private boolean sendingTokens = false;
     private boolean hasDefinition = false;
     private String myAddress;
-    private int decimals;
     private String symbol;
     private Wallet wallet;
     private Token token;
-    private String contractAddress;
 
     private Button sendBtn;
     private Button receiveBtn;
@@ -59,6 +53,7 @@ public class Erc20DetailActivity extends BaseActivity {
 
     private TransactionsAdapter recentTransactionsAdapter;
     private TokensAdapter tokenViewAdapter;
+    private boolean waitingForTransaction;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,15 +64,33 @@ public class Erc20DetailActivity extends BaseActivity {
         setTitle("");
         getIntentData();
         myAddress = wallet.address;
+        waitingForTransaction = false;
 
         viewModel = ViewModelProviders.of(this, erc20DetailViewModelFactory)
                 .get(Erc20DetailViewModel.class);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.transactions().observe(this, this::onTransactions);
         viewModel.token().observe(this, this::onTokenData);
+        viewModel.tokenTicker().observe(this, this::onTokenTicker);
+        viewModel.transactionUpdate().observe(this, this::newTransactions);
 
         initViews();
+    }
+
+    private void onTokenTicker(Ticker ticker)
+    {
+        if (token != null)
+        {
+            token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), token.getAddress(), ticker.price_usd, ticker.percentChange24h, null);
+            Token[] tokens = {token};
+            tokenViewAdapter.setTokens(tokens);
+            tokenViewAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void newTransactions(Transaction[] transactions)
+    {
+        recentTransactionsAdapter.addTransactions(transactions);
     }
 
     private void setUpRecentTransactionsView() {
@@ -97,7 +110,6 @@ public class Erc20DetailActivity extends BaseActivity {
             }
         });
         tokenViewAdapter = new TokensAdapter(this, null, viewModel.getAssetDefinitionService());
-        tokenViewAdapter.setDefaultNetwork(viewModel.getNetwork());
         Token[] tokens = {token};
         tokenViewAdapter.setTokens(tokens);
         tokenView.setAdapter(tokenViewAdapter);
@@ -108,8 +120,6 @@ public class Erc20DetailActivity extends BaseActivity {
     }
 
     private void getIntentData() {
-        contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-        decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, C.ETHER_DECIMALS);
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
@@ -118,41 +128,67 @@ public class Erc20DetailActivity extends BaseActivity {
         hasDefinition = getIntent().getBooleanExtra(C.EXTRA_HAS_DEFINITION, false);
     }
 
-    private void onTokenData(Token token) {
+    private void onTokenData(Token tokenUpdate)
+    {
+        if (token == null) return;
         tokenViewAdapter.clear();
-        if (token.addressMatches(myAddress)) {
-            token.setInterfaceSpec(ContractType.ETHEREUM);
+        if (token.checkBalanceChange(tokenUpdate))
+        {
+            //trigger transaction fetch
+            if (tokenUpdate.balanceIncrease(token)) playNotification();
+            viewModel.listenNewTransactions(HISTORY_LENGTH);
+            this.token = tokenUpdate; // update token
+            waitingForTransaction = true;
         }
+
+        token = tokenUpdate;
         Token[] tokens = {token};
         tokenViewAdapter.setTokens(tokens);
         tokenViewAdapter.notifyDataSetChanged();
     }
 
+    private void playNotification()
+    {
+        try
+        {
+            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            Ringtone r = RingtoneManager.getRingtone(this, notification);
+            r.play();
+        }
+        catch (Exception e)
+        {
+            //empty
+        }
+    }
+
     private void onTransactionClick(View view, Transaction transaction) {
-        viewModel.showDetails(view.getContext(), transaction);
+        viewModel.showDetails(this, transaction);
     }
 
     private void onTransactions(Transaction[] transactions) {
         progressBar.setVisibility(View.GONE);
         recentTransactionsView.setVisibility(View.VISIBLE);
-        recentTransactionsAdapter.clear();
 
-        int txCount = recentTransactionsAdapter.updateRecentTransactions(transactions, contractAddress, myAddress, HISTORY_LENGTH);
-        
-        if (txCount < 1) {
-            noTransactionsLayout.setVisibility(View.VISIBLE);
-        } else {
+        if (transactions.length > 0)
+        {
+            int txCount = recentTransactionsAdapter.updateRecentTransactions(transactions);
             noTransactionsLayout.setVisibility(View.GONE);
             recentTransactionsAdapter.notifyDataSetChanged();
+            if (txCount > 0)
+            {
+                waitingForTransaction = false;
+                viewModel.listenNewTransactions(0);
+            }
+            else if (waitingForTransaction)
+            {
+                token.balanceChanged = true; //trigger network refreshes until new transaction is received
+                                             //This is caused because sometimes etherscan isn't updated at exactly the same time as the node
+            }
         }
-    }
-
-    private void onNewEthPrice(Double ethPrice) {
-        tokenViewAdapter.clear();
-        token.setInterfaceSpec(ContractType.ETHEREUM);
-        Token[] tokens = {token};
-        tokenViewAdapter.setTokens(tokens);
-        tokenViewAdapter.notifyDataSetChanged();
+        else
+        {
+            noTransactionsLayout.setVisibility(View.VISIBLE);
+        }
     }
 
     private void initViews() {
@@ -235,15 +271,11 @@ public class Erc20DetailActivity extends BaseActivity {
     }
 
     private void onDefaultWallet(Wallet wallet) {
-        recentTransactionsAdapter.setDefaultWallet(wallet);
-        viewModel.updateDefaultBalance(token);
-        viewModel.fetchTransactions(wallet);
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
         setUpTokenView();
         setUpRecentTransactionsView();
-        recentTransactionsAdapter.setDefaultNetwork(networkInfo);
+        recentTransactionsAdapter.setDefaultWallet(wallet);
+        viewModel.updateDefaultBalance(token);
+        viewModel.fetchTransactions(token, HISTORY_LENGTH);
     }
 
     @Override
@@ -256,11 +288,7 @@ public class Erc20DetailActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare();
-
-        if (token.addressMatches(myAddress)) {
-            viewModel.startEthereumTicker();
-            viewModel.ethPriceReading().observe(this, this::onNewEthPrice);
-        }
+        viewModel.prepare(token);
+        viewModel.startEthereumTicker(token);
     }
 }

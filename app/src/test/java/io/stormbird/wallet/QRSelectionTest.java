@@ -52,51 +52,50 @@ public class QRSelectionTest
 
         transactionRepository = new TransactionRepositoryType()
         {
-
             @Override
-            public Observable<Transaction[]> fetchCachedTransactions(NetworkInfo network, Wallet wallet)
+            public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet)
             {
                 return null;
             }
 
             @Override
-            public Observable<Transaction[]> fetchNetworkTransaction(Wallet wallet, long lastBlock, String userAddress)
+            public Observable<Transaction[]> fetchNetworkTransaction(NetworkInfo network, String tokenAddress, long lastBlock, String userAddress)
             {
                 return null;
             }
 
             @Override
-            public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password)
+            public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password)
+            public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password)
+            public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password)
+            public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<byte[]> getSignature(Wallet wallet, byte[] message, String password)
+            public Single<byte[]> getSignature(Wallet wallet, byte[] message, String password, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String pass)
+            public Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String pass, int chainId)
             {
                 return Single.fromCallable(() -> {
                     //sign using the local key
@@ -130,7 +129,13 @@ public class QRSelectionTest
             }
 
             @Override
-            public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+            public Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList)
+            {
+                return null;
+            }
+
+            @Override
+            public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token, int count)
             {
                 return null;
             }
@@ -198,7 +203,7 @@ public class QRSelectionTest
                     .getMessage(qr.indices, CONTRACT_ADDR).blockingGet();
 
             byte[] sig = transactionRepository
-                    .getSignatureFast(null, messagePair.message.getBytes(), "hackintosh").blockingGet();
+                    .getSignatureFast(null, messagePair.message.getBytes(), "hackintosh", 1).blockingGet();
 
             qr.sigPair = new SignaturePair(messagePair.selection, sig, messagePair.message);
         }

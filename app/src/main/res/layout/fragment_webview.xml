@@ -53,7 +53,7 @@
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="10dp"
                 android:layout_toEndOf="@id/next"
-                android:layout_toStartOf="@id/home"
+                android:layout_toStartOf="@id/current_network"
                 android:animateLayoutChanges="true"
                 android:background="@drawable/background_address_bar"
                 android:completionThreshold="1"
@@ -63,7 +63,8 @@
                 android:imeOptions="actionGo"
                 android:inputType="textUri"
                 android:padding="5dp"
-                android:paddingRight="35dp" />
+                android:paddingRight="35dp"
+                android:textSize="18sp" />
 
             <ImageView
                 android:id="@+id/clear_url"
@@ -77,13 +78,18 @@
                 android:tint="@color/light_gray"
                 android:visibility="gone" />
 
-            <ImageView
-                android:id="@+id/home"
+            <TextView
+                android:id="@+id/current_network"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:src="@drawable/ic_browser_home" />
+                android:ellipsize="end"
+                android:fontFamily="@font/font_regular"
+                android:singleLine="true"
+                android:text="@string/ethereum"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
 
         </RelativeLayout>
     </android.support.v7.widget.Toolbar>
@@ -100,20 +106,57 @@
     <View
         android:id="@+id/anchor"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
+        android:layout_height="0dp"
         android:layout_below="@id/progressBar" />
 
-    <Button
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:id="@+id/secondary_toolbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Go"
-        android:visibility="gone" />
+        android:layout_below="@id/anchor"
+        android:layout_gravity="center"
+        android:background="@color/white">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/select_network_layout"
+            android:gravity="end"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp">
+
+            <TextView
+                android:id="@+id/balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:fontFamily="@font/font_regular"
+                android:gravity="center_vertical"
+                android:text="1000.0000"
+                android:textColor="@color/text_dark_gray"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/symbol"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:layout_toEndOf="@id/balance"
+                android:fontFamily="@font/font_semibold"
+                android:text="ETH"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="15sp" />
+        </RelativeLayout>
+
+    </RelativeLayout>
 
     <FrameLayout
         android:id="@+id/frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/progressBar"
+        android:layout_below="@+id/secondary_toolbar"
         android:focusable="true"
         android:focusableInTouchMode="true">
 

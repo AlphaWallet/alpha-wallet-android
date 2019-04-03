@@ -16,6 +16,7 @@ import java.util.List;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DApp;
 import io.stormbird.wallet.ui.widget.OnDappClickListener;
+import io.stormbird.wallet.ui.widget.OnHistoryItemRemovedListener;
 import io.stormbird.wallet.ui.widget.adapter.BrowserHistoryAdapter;
 import io.stormbird.wallet.util.DappBrowserUtils;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
@@ -24,12 +25,15 @@ import io.stormbird.wallet.widget.AWalletAlertDialog;
 public class BrowserHistoryFragment extends Fragment {
     private BrowserHistoryAdapter adapter;
     private OnDappClickListener onDappClickListener;
+    private OnHistoryItemRemovedListener onHistoryItemRemovedListener;
     private AWalletAlertDialog dialog;
     private TextView clear;
     private TextView noHistory;
 
-    void setCallbacks(OnDappClickListener listener) {
-        onDappClickListener = listener;
+    void setCallbacks(OnDappClickListener onDappClickListener,
+                      OnHistoryItemRemovedListener onHistoryItemRemovedListener) {
+        this.onDappClickListener = onDappClickListener;
+        this.onHistoryItemRemovedListener = onHistoryItemRemovedListener;
     }
 
     @Nullable
@@ -83,6 +87,7 @@ public class BrowserHistoryFragment extends Fragment {
     }
 
     private void onHistoryItemRemoved(DApp dapp) {
+        onHistoryItemRemovedListener.onHistoryItemRemoved(dapp);
         DappBrowserUtils.removeFromHistory(getContext(), dapp);
         adapter.setDapps(getData());
         showOrHideViews();

@@ -136,7 +136,7 @@ public class TransactionDecoder
                             char c = (char)v;
                             sb.append(c);
                         }
-                        thisData.miscData.add(sb.toString());
+                        thisData.miscData.add(Numeric.cleanHexPrefix(sb.toString()));
                         break;
                     case "address":
                         if (argData.length() >= 64 - ADDRESS_LENGTH_IN_HEX)
@@ -196,7 +196,7 @@ public class TransactionDecoder
         switch (state)
         {
             case ARGS:
-                thisData.miscData.add(input);
+                thisData.miscData.add(Numeric.cleanHexPrefix(input));
                 break;
             case SIGNATURE:
                 thisData.sigData.add(input);
@@ -288,10 +288,13 @@ public class TransactionDecoder
         addFunction("setApprovalForAll(address,bool)", ERC721, false);
         addFunction("getApproved(address,address,uint256)", ERC721, false);
         addFunction("isApprovedForAll(address,address)", ERC721, false);
-        addFunction("transfer(address,uint256)", ERC721, false);
+        addFunction("transfer(address,uint256)", ERC721_LEGACY, false);
         addFunction("giveBirth(uint256,uint256)", ERC721, false);
         addFunction("breedWithAuto(uint256,uint256)", ERC721, false);
+        addFunction("ownerOf(uint256)", ERC721, false);
         addFunction("createSaleAuction(uint256,uint256,uint256,uint256)", ERC721, false);
+        addFunction("mixGenes(uint256,uint256,uint256)", ERC721, false);
+        addFunction("tokensOfOwner(address)", ERC721, false);
 
         addFunction("dropCurrency(uint32,uint32,uint32,uint8,bytes32,bytes32,address)", CURRENCY, true);
         addFunction("withdraw(uint256)", CURRENCY, false); //0x2e1a7d4d0000000000000000000000000000000000000000000000000000000000000001
@@ -333,6 +336,10 @@ public class TransactionDecoder
 
         if (highestCount >= 2 || (highestCount == 1 && functionCount.size() == 1))
         {
+            if (highestType == ERC721 && functionCount.containsKey(ERC721_LEGACY))
+            {
+                highestType = ERC721_LEGACY;
+            }
             return highestType;
         }
         else

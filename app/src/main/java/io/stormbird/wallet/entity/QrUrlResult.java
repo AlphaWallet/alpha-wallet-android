@@ -1,5 +1,8 @@
 package io.stormbird.wallet.entity;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.math.BigInteger;
 import java.util.List;
 
@@ -8,7 +11,8 @@ import java.util.List;
  * Stormbird in Singapore
  */
 
-public class QrUrlResult {
+public class QrUrlResult implements Parcelable
+{
     private String protocol;
     private String address;
     private String functionStr;
@@ -31,8 +35,55 @@ public class QrUrlResult {
         chainId = 1;
         functionStr = "";
         functionDetail = "";
-        gasLimit = null;
-        gasPrice = null;
+        gasLimit = BigInteger.ZERO;
+        gasPrice = BigInteger.ZERO;
+        weiValue = BigInteger.ZERO;
+    }
+
+    protected QrUrlResult(Parcel in)
+    {
+        protocol = in.readString();
+        address = in.readString();
+        chainId = in.readInt();
+        functionStr = in.readString();
+        functionDetail = in.readString();
+        gasLimit = new BigInteger(in.readString(), 16);
+        gasPrice = new BigInteger(in.readString(), 16);
+        weiValue = new BigInteger(in.readString(), 16);
+    }
+
+    public static final Creator<QrUrlResult> CREATOR = new Creator<QrUrlResult>()
+    {
+        @Override
+        public QrUrlResult createFromParcel(Parcel in)
+        {
+            return new QrUrlResult(in);
+        }
+
+        @Override
+        public QrUrlResult[] newArray(int size)
+        {
+            return new QrUrlResult[size];
+        }
+    };
+
+    @Override
+    public int describeContents()
+    {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel p, int flags)
+    {
+        p.writeString(protocol);
+        p.writeString(address);
+        p.writeInt(chainId);
+        p.writeString(functionStr);
+        p.writeString(functionDetail);
+        p.writeString(gasLimit.toString(16));
+        p.writeString(gasPrice.toString(16));
+        p.writeString(weiValue.toString(16));
     }
 
     public String getProtocol() {

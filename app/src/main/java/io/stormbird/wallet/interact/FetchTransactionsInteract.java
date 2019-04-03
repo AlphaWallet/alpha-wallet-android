@@ -21,28 +21,33 @@ public class FetchTransactionsInteract {
         this.tokenRepository = tokenRepositoryType;
     }
 
-    public Observable<Transaction[]> fetchCached(NetworkInfo network, Wallet wallet) {
+    public Observable<Transaction[]> fetchCached(Wallet wallet) {
         return transactionRepository
-                .fetchCachedTransactions(network, wallet)
+                .fetchCachedTransactions(wallet)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Transaction[]> fetchNetworkTransactions(Wallet wallet, long lastBlock, String userAddress) {
+    public Observable<Transaction[]> fetchNetworkTransactions(NetworkInfo networkInfo, String tokenAddress, long lastBlock, String userAddress) {
         return transactionRepository
-                .fetchNetworkTransaction(wallet, lastBlock, userAddress)
+                .fetchNetworkTransaction(networkInfo, tokenAddress, lastBlock, userAddress)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<Transaction[]> storeTransactions(NetworkInfo networkInfo, Wallet wallet, Transaction[] txList)
+    public Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList)
     {
-        return transactionRepository.storeTransactions(networkInfo, wallet, txList);
+        return transactionRepository.storeTransactions(wallet, txList);
+    }
+
+    public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token, int count)
+    {
+        return transactionRepository.fetchTransactionsFromStorage(wallet, token, count);
     }
 
     public Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)
     {
-        return  tokenRepository.resolveProxyAddress(tokenInfo.address)
+        return  tokenRepository.resolveProxyAddress(tokenInfo)
                 .flatMap(address -> transactionRepository.queryInterfaceSpec(address, tokenInfo));
     }
 
@@ -59,7 +64,7 @@ public class FetchTransactionsInteract {
 
     private TokenInfo addSpecToService(TokenInfo info, ContractType contractType)
     {
-        TokensService.setInterfaceSpec(info.address, contractType);
+        TokensService.setInterfaceSpec(info.chainId, info.address, contractType);
         return info;
     }
 }

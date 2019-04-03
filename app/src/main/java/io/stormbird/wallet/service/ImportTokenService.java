@@ -47,16 +47,16 @@ public class ImportTokenService {
         this.passwordStore = passwordStore;
     }
 
-    public Single<byte[]> sign(Wallet wallet, byte[] importMessage)
+    public Single<byte[]> sign(Wallet wallet, byte[] importMessage, int chainId)
     {
         return passwordStore.getPassword(wallet)
-                .flatMap(password -> transactionRepository.getSignature(wallet, importMessage, password));
+                .flatMap(password -> transactionRepository.getSignature(wallet, importMessage, password, chainId));
                 //.map(sig -> new SignaturePair(messagePair.selection, sig, messagePair.message));
     }
 
     //sign the ticket data
-    public Single<byte[]> sign(Wallet wallet, String password, byte[] data) {
-        return transactionRepository.getSignature(wallet, data, password);
+    public Single<byte[]> sign(Wallet wallet, String password, byte[] data, int chainId) {
+        return transactionRepository.getSignature(wallet, data, password, chainId);
     }
 
     public static Sign.SignatureData sigFromByteArray(byte[] sig)

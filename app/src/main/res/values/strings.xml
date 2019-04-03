@@ -426,7 +426,7 @@
     <string name="currency_drop">Take Currency Drop</string>
     <string name="currency_import">Currency Import</string>
     <string name="you_will_receive">you will receive</string>
-    <string name="dust_value"><![CDATA[< 0.00001]]></string>
+    <string name="dust_value"><![CDATA[~0.00]]></string>
     <string name="action_scan_dapp">Scan QR Code</string>
     <string name="toast_invalid_code">Invalid Scan Result</string>
     <string name="address_found">Ethereum Address</string>
@@ -450,7 +450,7 @@
     <string name="backup_keystore">Backup Keystore</string>
     <string name="wallet_name_template">Wallet %1$d</string>
     <string name="no_token_found_title">Token Not Found</string>
-    <string name="no_token_found">No Token contract found at this address on %s. Try a different network.</string>
+    <string name="no_token_found">No Token contract found at this address on any active Ethereum chain.</string>
     <string name="welcome_to_the_decentralized_web">Welcome to the Decentralized web</string>
     <string name="action_remove">Remove</string>
     <string name="title_remove_dapp">Remove DApp</string>
@@ -472,4 +472,7 @@
     <string name="dapp_title">Title</string>
     <string name="dapp_address">Address</string>
     <string name="search_or_type_web_address">Search or type web address</string>
+    <string name="network">Network Filters</string>
+    <string name="select_network_filters">Select Active Networks:</string>
+    <string name="collectibles">Collectibles</string>
 </resources>

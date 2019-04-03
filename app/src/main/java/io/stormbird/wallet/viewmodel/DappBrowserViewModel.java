@@ -24,11 +24,14 @@ import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.GasSettings;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticker;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
+import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.AddEditDappActivity;
@@ -45,6 +48,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
+    private final MutableLiveData<Token> token = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
@@ -52,6 +56,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final ConfirmationRouter confirmationRouter;
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
     private double ethToUsd = 0;
     private ArrayList<String> bookmarks;
@@ -62,13 +67,15 @@ public class DappBrowserViewModel extends BaseViewModel  {
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
-            ConfirmationRouter confirmationRouter) {
+            ConfirmationRouter confirmationRouter,
+            EthereumNetworkRepositoryType ethereumNetworkRepository) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.confirmationRouter = confirmationRouter;
+        this.ethereumNetworkRepository = ethereumNetworkRepository;
     }
 
     public AssetDefinitionService getAssetDefinitionService() {
@@ -82,6 +89,11 @@ public class DappBrowserViewModel extends BaseViewModel  {
     public LiveData<Wallet> defaultWallet() {
         return defaultWallet;
     }
+
+    public LiveData<Token> token() {
+        return token;
+    }
+
     public MutableLiveData<GasSettings> gasSettings() {
         return gasSettings;
     }
@@ -133,6 +145,14 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
+        disposable = fetchTokensInteract.fetchEth(defaultNetwork.getValue(), wallet)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::updateBalance, this::onError);
+    }
+
+    private void updateBalance(Token token) {
+        this.token.postValue(token);
     }
 
     private void onTicker(Ticker ticker)
@@ -153,7 +173,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     }
 
     public void signMessage(byte[] signRequest, DAppFunction dAppFunction, Message<String> message) {
-        disposable = createTransactionInteract.sign(defaultWallet.getValue(), signRequest)
+        disposable = createTransactionInteract.sign(defaultWallet.getValue(), signRequest, defaultNetwork.getValue().chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig, message),
@@ -169,7 +189,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         if (addr.equals(BigInteger.ZERO)) //constructor
         {
             disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), transaction.gasPrice, transaction.gasLimit, transaction.payload)
+                    .create(defaultWallet.getValue(), transaction.gasPrice, transaction.gasLimit, transaction.payload, defaultNetwork.getValue().chainId)
                     .subscribe(hash -> onCreateTransaction(hash, dAppFunction, url),
                                error -> dAppFunction.DAppError(error, errorMsg));
 
@@ -178,7 +198,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         {
             byte[] data = Numeric.hexStringToByteArray(transaction.payload);
             disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, transaction.gasPrice, transaction.gasLimit, data)
+                    .create(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, transaction.gasPrice, transaction.gasLimit, data, defaultNetwork.getValue().chainId)
                     .subscribe(hash -> onCreateTransaction(hash, dAppFunction, url),
                                error -> dAppFunction.DAppError(error, errorMsg));
         }
@@ -191,11 +211,11 @@ public class DappBrowserViewModel extends BaseViewModel  {
         dAppFunction.DAppReturn(s.getBytes(), msg);
     }
 
-    public void openConfirmation(Context context, Web3Transaction transaction, String requesterURL)
+    public void openConfirmation(Context context, Web3Transaction transaction, String requesterURL, NetworkInfo networkInfo)
     {
-        String networkName = defaultNetwork.getValue().name;
-        boolean mainNet = defaultNetwork.getValue().isMainNetwork;
-        confirmationRouter.open(context, transaction, networkName, mainNet, requesterURL);
+        String networkName = networkInfo.name;
+        boolean mainNet = networkInfo.isMainNetwork;
+        confirmationRouter.open(context, transaction, networkName, mainNet, requesterURL, networkInfo.chainId);
     }
 
     private ArrayList<String> getBrowserBookmarksFromPrefs(Context context) {
@@ -247,5 +267,19 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public List<DApp> getDappsMasterList(Context context) {
         return DappBrowserUtils.getDappsList(context);
+    }
+
+    public NetworkInfo[] getNetworkList() {
+        return ethereumNetworkRepository.getAvailableNetworkList();
+    }
+
+    public void setNetwork(int chainId)
+    {
+        NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        if (info != null)
+        {
+            ethereumNetworkRepository.setDefaultNetworkInfo(info);
+            onDefaultNetwork(info);
+        }
     }
 }

@@ -31,8 +31,6 @@ import io.stormbird.wallet.service.TokensService;
  */
 public class TransferTicketDetailViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
-    private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
     private final MutableLiveData<String> userTransaction = new MutableLiveData<>();
@@ -53,6 +51,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
+    private Token token;
 
     private byte[] linkMessage;
 
@@ -99,14 +98,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     public void prepare(Token token)
     {
-        disposable = findDefaultNetworkInteract
-                .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo)
-    {
-        defaultNetwork.postValue(networkInfo);
+        this.token = token;
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -118,7 +110,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     public void generateSalesOrders(String contractAddr, BigInteger price, int[] ticketIndicies, BigInteger firstTicketId)
     {
-        marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId, processMessages);
+        marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId, processMessages, token.tokenInfo.chainId);
     }
 
     public void setWallet(Wallet wallet)
@@ -155,7 +147,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
         //sign this link
         disposable = createTransactionInteract
-                .sign(defaultWallet().getValue(), tradeBytes)
+                .sign(defaultWallet().getValue(), tradeBytes, token.tokenInfo.chainId)
                 .subscribe(this::gotSignature, this::onError);
     }
 
@@ -175,7 +167,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
         //sign this link
         disposable = createTransactionInteract
-                .sign(defaultWallet().getValue(), tradeBytes)
+                .sign(defaultWallet().getValue(), tradeBytes, token.tokenInfo.chainId)
                 .subscribe(this::gotSignature, this::onError);
     }
 
@@ -197,13 +189,13 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
         //sign this link
         disposable = createTransactionInteract
-                .sign(defaultWallet().getValue(), tradeBytes)
+                .sign(defaultWallet().getValue(), tradeBytes, token.tokenInfo.chainId)
                 .subscribe(this::gotSignature, this::onError);
     }
 
     private void gotSignature(byte[] signature)
     {
-        String universalLink = parser.completeUniversalLink(defaultNetwork.getValue().chainId, linkMessage, signature);
+        String universalLink = parser.completeUniversalLink(token.tokenInfo.chainId, linkMessage, signature);
         //Now open the share icon
         universalLinkReady.postValue(universalLink);
     }
@@ -213,32 +205,30 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         transferTicketDetailRouter.openTransfer(context, token, ticketIds, defaultWallet.getValue(), transferStatus);
     }
 
-    public void createTicketTransfer(String to, String contractAddress, String indexList, BigInteger gasPrice, BigInteger gasLimit)
+    public void createTicketTransfer(String to, Token token, String indexList, BigInteger gasPrice, BigInteger gasLimit)
     {
-        Token token = tokensService.getToken(contractAddress);
         if (token.unspecifiedSpec())
         {
             //need to determine the spec
             disposable = fetchTransactionsInteract.queryInterfaceSpec(token.tokenInfo)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(spec -> onInterfaceSpec(spec, to, contractAddress, indexList, gasPrice, gasLimit), this::onError);
+                    .subscribe(spec -> onInterfaceSpec(spec, to, token, indexList, gasPrice, gasLimit), this::onError);
         }
         else
         {
             final byte[] data = TokenRepository.createTicketTransferData(to, indexList, token);
             disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                    .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), gasPrice, gasLimit, data, token.tokenInfo.chainId)
                     .subscribe(this::onCreateTransaction, this::onError);
         }
     }
 
-    private void onInterfaceSpec(ContractType spec, String to, String contractAddress, String indexList, BigInteger gasPrice, BigInteger gasLimit)
+    private void onInterfaceSpec(ContractType spec, String to, Token token, String indexList, BigInteger gasPrice, BigInteger gasLimit)
     {
-        Token token = tokensService.getToken(contractAddress);
         token.setInterfaceSpec(spec);
-        TokensService.setInterfaceSpec(token.getAddress(), spec);
-        createTicketTransfer(to, contractAddress, indexList, gasPrice, gasLimit);
+        TokensService.setInterfaceSpec(token.tokenInfo.chainId, token.getAddress(), spec);
+        createTicketTransfer(to, token, indexList, gasPrice, gasLimit);
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -266,13 +256,12 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
         if (asset != null)
         {
-            confirmationRouter.openERC721Transfer(ctx, to, tokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails);
+            confirmationRouter.openERC721Transfer(ctx, to, tokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails, token.tokenInfo.chainId);
         }
     }
 
     public void checkENSAddress(String name)
     {
-        if (name == null || name.length() < 1) return;
         disposable = ensInteract.checkENSAddress (name)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

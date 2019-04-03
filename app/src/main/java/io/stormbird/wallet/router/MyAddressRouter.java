@@ -16,6 +16,7 @@ public class MyAddressRouter {
     public void open(Context context, Wallet wallet) {
         Intent intent = new Intent(context, MyAddressActivity.class);
         intent.putExtra(WALLET, wallet);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         context.startActivity(intent);
     }
 
@@ -23,6 +24,7 @@ public class MyAddressRouter {
         Intent intent = new Intent(context, MyAddressActivity.class);
         intent.putExtra(WALLET, wallet);
         intent.putExtra(C.EXTRA_TOKEN_ID, token);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         context.startActivity(intent);
     }
 }

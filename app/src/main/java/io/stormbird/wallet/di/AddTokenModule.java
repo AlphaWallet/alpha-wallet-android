@@ -7,6 +7,7 @@ import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.viewmodel.AddTokenViewModelFactory;
 
 import dagger.Module;
@@ -19,13 +20,14 @@ public class AddTokenModule {
     AddTokenViewModelFactory addTokenViewModelFactory(
             AddTokenInteract addTokenInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
-            HomeRouter homeRouter,
+            FetchTokensInteract fetchTokensInteract,
             SetupTokensInteract setupTokensInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
             FetchTransactionsInteract fetchTransactionsInteract,
-            AssetDefinitionService assetDefinitionService) {
+            AssetDefinitionService assetDefinitionService,
+            TokensService tokensService) {
         return new AddTokenViewModelFactory(
-                addTokenInteract, findDefaultWalletInteract, homeRouter, setupTokensInteract, findDefaultNetworkInteract, fetchTransactionsInteract, assetDefinitionService);
+                addTokenInteract, findDefaultWalletInteract, fetchTokensInteract, setupTokensInteract, ethereumNetworkRepository, fetchTransactionsInteract, assetDefinitionService, tokensService);
     }
 
     @Provides
@@ -36,19 +38,13 @@ public class AddTokenModule {
 
     @Provides
     AddTokenInteract provideAddTokenInteract(
-            TokenRepositoryType tokenRepository,
-            WalletRepositoryType walletRepository) {
-        return new AddTokenInteract(walletRepository, tokenRepository);
+            TokenRepositoryType tokenRepository) {
+        return new AddTokenInteract(tokenRepository);
     }
 
     @Provides
     FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
         return new FindDefaultWalletInteract(walletRepository);
-    }
-
-    @Provides
-    HomeRouter provideHomeRouter() {
-        return new HomeRouter();
     }
 
     @Provides
@@ -60,5 +56,10 @@ public class AddTokenModule {
     FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository,
                                                                TokenRepositoryType tokenRepositoryType) {
         return new FetchTransactionsInteract(transactionRepository, tokenRepositoryType);
+    }
+
+    @Provides
+    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
+        return new FetchTokensInteract(tokenRepository);
     }
 }

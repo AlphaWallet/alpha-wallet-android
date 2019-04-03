@@ -43,7 +43,7 @@
 
         <ImageButton
             android:id="@+id/img_scan_qr"
-            android:src="@mipmap/qr_code_icon"
+            android:src="@drawable/ic_camera"
             android:contentDescription="@string/scan_qr"
             android:background="?android:selectableItemBackground"
             android:padding="@dimen/big_padding"

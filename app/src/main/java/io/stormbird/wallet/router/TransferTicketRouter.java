@@ -17,6 +17,7 @@ public class TransferTicketRouter
     public void open(Context context, Token ticket) {
         Intent intent = new Intent(context, TransferTicketActivity.class);
         intent.putExtra(TICKET, ticket);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         //intent.putExtra(TICKET_RANGE, range);
         context.startActivity(intent);
     }

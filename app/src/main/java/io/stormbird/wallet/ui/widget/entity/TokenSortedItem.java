@@ -23,7 +23,9 @@ public class TokenSortedItem extends SortedItem<Token> {
             Token newToken = (Token) newItem.value;
 
             if (!oldToken.getAddress().equals(newToken.getAddress())) return false;
+            else if (weight != newItem.weight) return false;
             else if (!oldToken.getFullBalance().equals(newToken.getFullBalance())) return false;
+            else if (!oldToken.pendingBalance.equals(newToken.pendingBalance)) return false;
             else if (!oldToken.getFullName().equals(newToken.getFullName())) return false;
             else if (oldToken.ticker == null && newToken.ticker != null) return false;
 
@@ -32,9 +34,8 @@ public class TokenSortedItem extends SortedItem<Token> {
             {
                 Ticket oTick = (Ticket) oldToken;
                 Ticket nTick = (Ticket) newToken;
-                if (oTick.getBurnList() == null || nTick.getBurnList() == null) return false;
 
-                return (oTick.getBurnList().equals(nTick.getBurnList())) && oTick.isMatchedInXML() == nTick.isMatchedInXML();
+                return oTick.isMatchedInXML() == nTick.isMatchedInXML();
             }
 
             //TODO: balance value gone stale
@@ -55,7 +56,7 @@ public class TokenSortedItem extends SortedItem<Token> {
             Token oldToken = value;
             Token newToken = (Token) other.value;
 
-            return oldToken.getAddress().equals(newToken.getAddress());
+            return oldToken.getAddress().equals(newToken.getAddress()) && other.weight == weight;
         }
         else
         {

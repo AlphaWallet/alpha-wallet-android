@@ -3,26 +3,18 @@ package io.stormbird.wallet.viewmodel;
 import android.app.DownloadManager;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.content.BroadcastReceiver;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.net.Uri;
 import android.os.Environment;
-
-import java.io.File;
-
+import android.support.annotation.Nullable;
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.CryptoFunctions;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Transaction;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
@@ -34,12 +26,18 @@ import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.HomeActivity;
 import io.stormbird.wallet.util.LocaleUtils;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 public class HomeViewModel extends BaseViewModel {
     private final String TAG = "HVM";
     public static final String ALPHAWALLET_DIR = "AlphaWallet";
     public static final String ALPHAWALLET_FILE_URL = "https://awallet.io/apk";
+    private static final int TIMER_FREQUENCY = 1000;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -103,6 +101,11 @@ public class HomeViewModel extends BaseViewModel {
 
     public void prepare() {
         progress.postValue(false);
+    }
+
+    public void onClean()
+    {
+
     }
 
     public void showImportLink(Context context, String importData) {
@@ -210,39 +213,6 @@ public class HomeViewModel extends BaseViewModel {
         ctx.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
     }
 
-//    public void refreshWallets() {
-//        disposable = fetchWalletsInteract.loadWallets()
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(Schedulers.io())
-//                .subscribe(this::onWallets, this::onError);
-//    }
-//
-//    private void onWallets(Wallet[] wallets) {
-//        //combine this with a fetch from account
-//        Map<String, Wallet> walletBalances = new HashMap<>();
-//        disposable = fetchWalletsInteract.fetch(walletBalances)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(w -> combine(w, wallets), this::onError);
-//    }
-//
-//    private void combine(Wallet[] walletsFromFetch, Wallet[] walletsFromDB) {
-//        Map<String, Wallet> join = new HashMap<String, Wallet>();
-//        for (Wallet wallet : walletsFromFetch) {
-//            join.put(wallet.address, wallet);
-//        }
-//
-//        for (Wallet wallet : walletsFromDB) {
-//            join.put(wallet.address, wallet);
-//        }
-//
-//        wallets.postValue(join.values().toArray(new Wallet[0]));
-//    }
-
-//    private void onWritten(Integer wrote) {
-//        Log.d(TAG, "Wrote " + wrote + " Wallets");
-//    }
-
     public void getWalletName() {
         disposable = fetchWalletsInteract
                 .getWalletName(preferenceRepository.getCurrentWalletAddress())
@@ -257,5 +227,54 @@ public class HomeViewModel extends BaseViewModel {
 
     public LiveData<String> walletName() {
         return walletName;
+    }
+
+    public void cleanDatabases(Context ctx)
+    {
+        File[] files = ctx.getFilesDir().listFiles(new FilenameFilter()
+        {
+            @Override
+            public boolean accept(File file, String name)
+            {
+                return name.matches("^0x\\S{40}-.+-db.real\\S+")
+                        && !name.matches("^0x\\S{40}-721-db.real\\S+"); //match all deprecated databases
+            }
+        });
+
+        for (File file : files)
+        {
+            //erase file
+            deleteRecursive(file);
+        }
+    }
+
+    private void deleteRecursive(File fileDir)
+    {
+        if (fileDir.isDirectory()) {
+            for (File child : fileDir.listFiles()) {
+                deleteRecursive(child);
+            }
+        }
+
+        fileDir.delete();
+    }
+
+    public void cleanNewDatabases(Context ctx)
+    {
+        File[] files = ctx.getFilesDir().listFiles(new FilenameFilter()
+        {
+            @Override
+            public boolean accept(File file, String name)
+            {
+                return name.matches("^0x\\S{40}-db.real\\S+")
+                    || name.matches("^0x\\S{40}-721-db.real\\S+"); //match all deprecated databases
+            }
+        });
+
+        for (File file : files)
+        {
+            //erase file
+            deleteRecursive(file);
+        }
     }
 }

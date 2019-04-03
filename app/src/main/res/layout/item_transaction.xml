@@ -24,7 +24,7 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginStart="72dp"
-        android:layout_toStartOf="@+id/value"
+        android:layout_toStartOf="@+id/valueLayout"
         android:orientation="vertical">
 
         <LinearLayout
@@ -64,14 +64,36 @@
             android:text="Transaction pending ..." />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/value"
+    <LinearLayout
+        android:id="@+id/valueLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_marginEnd="@dimen/big_margin"
-        android:fontFamily="@font/font_semibold"
-        android:textColor="@color/colorAccent"
-        android:text="..." />
+        android:gravity="right"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/font_semibold"
+            android:textColor="@color/colorAccent"
+            android:text="..." />
+
+        <TextView
+            android:id="@+id/text_chain_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_status_pending"
+            android:fontFamily="@font/font_bold"
+            android:layout_marginTop="2dp"
+            android:padding="2dp"
+            android:text="@string/action_clear"
+            android:textColor="@color/white"
+            android:textSize="10sp"
+            android:visibility="visible" />
+
+    </LinearLayout>
 </RelativeLayout>

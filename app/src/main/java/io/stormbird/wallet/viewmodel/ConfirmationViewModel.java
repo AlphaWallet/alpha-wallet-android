@@ -36,7 +36,6 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final GasSettingsRouter gasSettingsRouter;
 
     private GasSettings gasSettingsOverride = null;
-    private NetworkInfo defaultNetwork;
 
     ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                                  FetchGasSettingsInteract fetchGasSettingsInteract,
@@ -54,26 +53,26 @@ public class ConfirmationViewModel extends BaseViewModel {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
     }
 
-    public void createTransaction(String from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit) {
+    public void createTransaction(String from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
         progress.postValue(true);
         disposable = createTransactionInteract
-                .create(new Wallet(from), to, amount, gasPrice, gasLimit, null)
+                .create(new Wallet(from), to, amount, gasPrice, gasLimit, null, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
-    public void createTokenTransfer(String from, String to, String contractAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit) {
+    public void createTokenTransfer(String from, String to, String contractAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
         progress.postValue(true);
         final byte[] data = TokenRepository.createTokenTransferData(to, amount);
         disposable = createTransactionInteract
-                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
-    public void createTicketTransfer(String from, String to, String contractAddress, String ids, BigInteger gasPrice, BigInteger gasLimit) {
+    public void createTicketTransfer(String from, String to, String contractAddress, String ids, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
         progress.postValue(true);
-        final byte[] data = getERC875TransferBytes(to, contractAddress, ids);
+        final byte[] data = getERC875TransferBytes(to, contractAddress, ids, chainId);
         disposable = createTransactionInteract
-                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
@@ -105,16 +104,7 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void prepare(ConfirmationActivity ctx)
     {
-        disposable = findDefaultNetworkInteract
-                .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
-
         fetchGasSettingsInteract.gasPriceUpdate().observe(ctx, this::onGasPrice);
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo)
-    {
-        defaultNetwork = networkInfo;
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -139,13 +129,14 @@ public class ConfirmationViewModel extends BaseViewModel {
         }
     }
 
-    public void getGasForSending(ConfirmationType confirmationType, Activity context)
+    public void getGasForSending(ConfirmationType confirmationType, Activity context, int chainId)
     {
         if (gasSettings.getValue() == null)
         {
             //deal with problem where gas settings are still null
-            disposable = fetchGasSettingsInteract.fetchDefault(confirmationType != ConfirmationType.ETH, defaultNetwork)
-                    .subscribe(this::onSendGasSettings, throwable -> onGasError(throwable, context));
+            NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(chainId);
+            disposable = fetchGasSettingsInteract.fetchDefault(confirmationType != ConfirmationType.ETH, network)
+                    .subscribe(this::onSendGasSettings, throwable -> onGasError(throwable, context, chainId));
         }
         else
         {
@@ -158,18 +149,18 @@ public class ConfirmationViewModel extends BaseViewModel {
         sendGasSettings.postValue(gasSettings);
     }
 
-    private void onGasError(Throwable throwable, Activity context)
+    private void onGasError(Throwable throwable, Activity context, int chainId)
     {
         //unknown problem. Has been observed once from crashlytics, send user to gas screen in this case
-        openGasSettings(context);
+        openGasSettings(context, chainId);
     }
 
     private void onGasSettings(GasSettings gasSettings) {
         this.gasSettings.postValue(gasSettings);
     }
 
-    public void openGasSettings(Activity context) {
-        gasSettingsRouter.open(context, gasSettings.getValue(), defaultNetwork.chainId);
+    public void openGasSettings(Activity context, int chainId) {
+        gasSettingsRouter.open(context, gasSettings.getValue(), chainId);
     }
 
     /**
@@ -181,8 +172,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     private void onGasPrice(BigInteger currentGasPrice)
     {
         if (this.gasSettings.getValue() != null //protect against race condition
-                && this.gasSettingsOverride == null //only update if user hasn't overriden
-                && defaultNetwork.chainId != EthereumNetworkRepository.XDAI_ID) //don't update xDai from received value
+                && this.gasSettingsOverride == null) //only update if user hasn't overriden
         {
             GasSettings updateSettings = new GasSettings(currentGasPrice, gasSettings.getValue().gasLimit);
             this.gasSettings.postValue(updateSettings);
@@ -191,7 +181,7 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void generateSalesOrders(String indexSendList, String contractAddr, BigInteger price, String idList) {
         //generate a list of integers
-        Ticket t = new Ticket(null, "0", "0", 0);
+        Ticket t = new Ticket(null, "0", 0, "", ContractType.NOT_SET);
         List<Integer> sends = t.stringIntsToIntegerList(indexSendList);
         List<Integer> iDs = t.stringIntsToIntegerList(idList);
 
@@ -213,7 +203,7 @@ public class ConfirmationViewModel extends BaseViewModel {
         }
     }
 
-    public void signWeb3DAppTransaction(Web3Transaction transaction, BigInteger gasPrice, BigInteger gasLimit)
+    public void signWeb3DAppTransaction(Web3Transaction transaction, BigInteger gasPrice, BigInteger gasLimit, int chainId)
     {
         progress.postValue(true);
         BigInteger addr = Numeric.toBigInt(transaction.recipient.toString());
@@ -221,7 +211,7 @@ public class ConfirmationViewModel extends BaseViewModel {
         if (addr.equals(BigInteger.ZERO)) //constructor
         {
             disposable = createTransactionInteract
-                    .createWithSig(defaultWallet.getValue(), gasPrice, gasLimit, transaction.payload)
+                    .createWithSig(defaultWallet.getValue(), gasPrice, gasLimit, transaction.payload, chainId)
                     .subscribe(this::onCreateDappTransaction,
                                this::onError);
         }
@@ -229,7 +219,7 @@ public class ConfirmationViewModel extends BaseViewModel {
         {
             byte[] data = Numeric.hexStringToByteArray(transaction.payload);
             disposable = createTransactionInteract
-                    .createWithSig(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, gasPrice, gasLimit, data)
+                    .createWithSig(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, gasPrice, gasLimit, data, chainId)
                     .subscribe(this::onCreateDappTransaction,
                                this::onError);
         }
@@ -240,24 +230,29 @@ public class ConfirmationViewModel extends BaseViewModel {
         newDappTransaction.postValue(txData);
     }
 
-    public void createERC721Transfer(String to, String contractAddress, String tokenId, BigInteger gasPrice, BigInteger gasLimit)
+    public void createERC721Transfer(String to, String contractAddress, String tokenId, BigInteger gasPrice, BigInteger gasLimit, int chainId)
     {
         progress.postValue(true);
-        final byte[] data = getERC721TransferBytes(to, contractAddress, tokenId);
+        final byte[] data = getERC721TransferBytes(to, contractAddress, tokenId, chainId);
         disposable = createTransactionInteract
-                .create(defaultWallet.getValue(), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data)
+                .create(defaultWallet.getValue(), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
-    public byte[] getERC721TransferBytes(String to, String contractAddress, String tokenId)
+    public byte[] getERC721TransferBytes(String to, String contractAddress, String tokenId, int chainId)
     {
-        Token token = tokensService.getToken(contractAddress);
+        Token token = tokensService.getToken(chainId, contractAddress);
         return TokenRepository.createERC721TransferFunction(to, token, tokenId);
     }
 
-    public byte[] getERC875TransferBytes(String to, String contractAddress, String tokenIds)
+    public byte[] getERC875TransferBytes(String to, String contractAddress, String tokenIds, int chainId)
     {
-        Token token = tokensService.getToken(contractAddress);
+        Token token = tokensService.getToken(chainId, contractAddress);
         return TokenRepository.createTicketTransferData(to, tokenIds, token);
+    }
+
+    public String getNetworkName(int chainId)
+    {
+        return findDefaultNetworkInteract.getNetworkName(chainId);
     }
 }

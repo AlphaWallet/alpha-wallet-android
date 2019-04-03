@@ -22,21 +22,7 @@ import io.stormbird.wallet.repository.TransactionsRealmCache;
 import io.stormbird.wallet.repository.WalletDataRealmSource;
 import io.stormbird.wallet.repository.WalletRepository;
 import io.stormbird.wallet.repository.WalletRepositoryType;
-import io.stormbird.wallet.service.AccountKeystoreService;
-import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.CoinmarketcapTickerService;
-import io.stormbird.wallet.service.EthplorerTokenService;
-import io.stormbird.wallet.service.FeeMasterService;
-import io.stormbird.wallet.service.GethKeystoreAccountService;
-import io.stormbird.wallet.service.ImportTokenService;
-import io.stormbird.wallet.service.MarketQueueService;
-import io.stormbird.wallet.service.OpenseaService;
-import io.stormbird.wallet.service.RealmManager;
-import io.stormbird.wallet.service.TickerService;
-import io.stormbird.wallet.service.TokenExplorerClientType;
-import io.stormbird.wallet.service.TokensService;
-import io.stormbird.wallet.service.TransactionsNetworkClient;
-import io.stormbird.wallet.service.TransactionsNetworkClientType;
+import io.stormbird.wallet.service.*;
 
 import java.io.File;
 
@@ -149,8 +135,8 @@ public class RepositoriesModule {
 
     @Singleton
     @Provides
-    TokenLocalSource provideRealmTokenSource(RealmManager realmManager) {
-	    return new TokensRealmSource(realmManager);
+    TokenLocalSource provideRealmTokenSource(RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository) {
+	    return new TokensRealmSource(realmManager, ethereumNetworkRepository);
     }
 
 	@Singleton
@@ -167,8 +153,8 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	TokensService provideTokensService( ) {
-		return new TokensService( );
+	TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository) {
+		return new TokensService(ethereumNetworkRepository);
 	}
 
 	@Singleton

@@ -17,6 +17,7 @@ public class RedeemAssetSelectRouter
     public void open(Context context, Token ticket) {
         Intent intent = new Intent(context, RedeemAssetSelectActivity.class);
         intent.putExtra(TICKET, ticket);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         context.startActivity(intent);
     }
 }

@@ -11,6 +11,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
 
@@ -126,6 +127,7 @@ public class WalletsViewModel extends BaseViewModel
 
     private void onDefaultNetwork(NetworkInfo networkInfo)
     {
+        networkInfo = findDefaultNetworkInteract.getNetworkInfo(EthereumNetworkRepository.MAINNET_ID); //always show mainnet eth in wallet page
         defaultNetwork.postValue(networkInfo);
         currentNetwork = networkInfo;
 
@@ -204,10 +206,12 @@ public class WalletsViewModel extends BaseViewModel
      */
     private void getWalletsBalance(Wallet[] wallets)
     {
+        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(EthereumNetworkRepository.MAINNET_ID);
+
         disposable = fetchWalletList(wallets)
                 .flatMapIterable(wallet -> wallet) //iterate through each wallet
                 .map(this::addWalletToMap)
-                .flatMap(wallet -> fetchTokensInteract.fetchEth(currentNetwork, wallet)) //fetch wallet balance
+                .flatMap(wallet -> fetchTokensInteract.fetchEth(network, wallet)) //fetch wallet balance
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::updateWallet, this::onError, this::updateBalances);
@@ -271,7 +275,6 @@ public class WalletsViewModel extends BaseViewModel
     {
         Log.d(TAG, "Stored " + count + " Wallets");
     }
-
 
     private Observable<List<Wallet>> fetchWalletList(Wallet[] wallets)
     {

@@ -21,6 +21,7 @@ import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.util.BalanceUtils;
+import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.ConfirmationViewModel;
 import io.stormbird.wallet.viewmodel.ConfirmationViewModelFactory;
 import io.stormbird.wallet.viewmodel.GasSettingsViewModel;
@@ -61,12 +62,15 @@ public class ConfirmationActivity extends BaseActivity {
     private TextView websiteText;
     private Button sendButton;
     private TextView title;
+    private TextView chainName;
 
     private BigDecimal amount;
     private int decimals;
     private String contractAddress;
     private String amountStr;
     private String toAddress;
+    private Token token;
+    private int chainId;
 
     private ConfirmationType confirmationType;
     private byte[] transactionBytes = null;
@@ -100,6 +104,7 @@ public class ConfirmationActivity extends BaseActivity {
         websiteLabel = findViewById(R.id.label_website);
         websiteText = findViewById(R.id.text_website);
         title = findViewById(R.id.title_confirm);
+        chainName = findViewById(R.id.text_chain_name);
         sendButton.setOnClickListener(view -> onSend());
 
         transaction = getIntent().getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
@@ -113,12 +118,18 @@ public class ConfirmationActivity extends BaseActivity {
         String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         String tokenList = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
+        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        chainId = token != null ? token.tokenInfo.chainId : getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
+
         String amountString;
 
         amount = new BigDecimal(getIntent().getStringExtra(C.EXTRA_AMOUNT));
 
         viewModel = ViewModelProviders.of(this, confirmationViewModelFactory)
                 .get(ConfirmationViewModel.class);
+
+        Utils.setChainColour(chainName, chainId);
+        chainName.setText(viewModel.getNetworkName(chainId));
 
         switch (confirmationType) {
             case ETH:
@@ -139,7 +150,7 @@ public class ConfirmationActivity extends BaseActivity {
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 contractAddrText.setText(contractAddress);
                 amountString = tokenList;
-                transactionBytes = viewModel.getERC875TransferBytes(toAddress, contractAddress, amountStr);
+                transactionBytes = viewModel.getERC875TransferBytes(toAddress, contractAddress, amountStr, chainId);
                 break;
             case MARKET:
                 amountString = tokenList;
@@ -188,7 +199,7 @@ public class ConfirmationActivity extends BaseActivity {
                 String contractTxt = contractAddress + " " + contractName;
                 contractAddrText.setText(contractTxt);
                 amountString = symbol;
-                transactionBytes = viewModel.getERC721TransferBytes(toAddress, contractAddress, amountStr);
+                transactionBytes = viewModel.getERC721TransferBytes(toAddress, contractAddress, amountStr, chainId);
                 break;
             default:
                 amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString();
@@ -229,7 +240,7 @@ public class ConfirmationActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings: {
-                viewModel.openGasSettings(ConfirmationActivity.this);
+                viewModel.openGasSettings(this, chainId);
             }
             break;
         }
@@ -268,7 +279,7 @@ public class ConfirmationActivity extends BaseActivity {
 
     private void onSend()
     {
-        viewModel.getGasForSending(confirmationType, this);
+        viewModel.getGasForSending(confirmationType, this, chainId);
     }
 
     private void onSendGasSettings(GasSettings gasSettings)
@@ -280,7 +291,8 @@ public class ConfirmationActivity extends BaseActivity {
                         toAddress,
                         amount.toBigInteger(),
                         gasSettings.gasPrice,
-                        gasSettings.gasLimit);
+                        gasSettings.gasLimit,
+                        chainId);
                 break;
 
             case ERC20:
@@ -290,7 +302,8 @@ public class ConfirmationActivity extends BaseActivity {
                         contractAddress,
                         amount.toBigInteger(),
                         gasSettings.gasPrice,
-                        gasSettings.gasLimit);
+                        gasSettings.gasLimit,
+                        chainId);
                 break;
 
             case ERC875:
@@ -300,11 +313,12 @@ public class ConfirmationActivity extends BaseActivity {
                         contractAddress,
                         amountStr,
                         gasSettings.gasPrice,
-                        gasSettings.gasLimit);
+                        gasSettings.gasLimit,
+                        chainId);
                 break;
 
             case WEB3TRANSACTION:
-                viewModel.signWeb3DAppTransaction(transaction, gasSettings.gasPrice, gasSettings.gasLimit);
+                viewModel.signWeb3DAppTransaction(transaction, gasSettings.gasPrice, gasSettings.gasLimit, chainId);
                 break;
 
             case MARKET:
@@ -319,7 +333,8 @@ public class ConfirmationActivity extends BaseActivity {
                         contractAddress,
                         amountStr,
                         gasSettings.gasPrice,
-                        gasSettings.gasLimit);
+                        gasSettings.gasLimit,
+                        chainId);
                 break;
 
             default:
@@ -405,7 +420,7 @@ public class ConfirmationActivity extends BaseActivity {
 
             //convert to ETH
             ethValueBD = Convert.fromWei(ethValueBD, Convert.Unit.ETHER);
-            String valueUpdate = getEthString(ethValueBD.doubleValue()) + " " + ETH_SYMBOL;
+            String valueUpdate = getEthString(ethValueBD.doubleValue());
             valueText.setText(valueUpdate);
         }
     }

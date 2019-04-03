@@ -5,16 +5,21 @@ import android.os.Parcelable;
 import android.view.View;
 
 import io.stormbird.wallet.ui.AddTokenActivity;
+import io.stormbird.wallet.util.Utils;
 
 public class TokenInfo implements Parcelable {
     public final String address;
     public final String name;
     public final String symbol;
     public final int decimals;
+    public final int chainId;
     public boolean isEnabled;
-    public final boolean isStormbird;
 
-    public TokenInfo(String address, String name, String symbol, int decimals, boolean isEnabled) {
+    public TokenInfo(String address, String name, String symbol, int decimals, boolean isEnabled, int chainId) {
+        if (address.contains("-"))
+        {
+            address = address.split("-")[0];
+        }
         if (address != null)
         {
             this.address = address.toLowerCase();
@@ -27,22 +32,7 @@ public class TokenInfo implements Parcelable {
         this.symbol = symbol != null ? symbol.toUpperCase() : null;
         this.decimals = decimals;
         this.isEnabled = isEnabled;
-        this.isStormbird = false;
-    }
-    public TokenInfo(String address, String name, String symbol, int decimals, boolean isEnabled, boolean isStormbird) {
-        if (address != null)
-        {
-            this.address = address.toLowerCase();
-        }
-        else
-        {
-            this.address = null;
-        }
-        this.name = name;
-        this.symbol = symbol != null ? symbol.toUpperCase() : null;
-        this.decimals = decimals;
-        this.isEnabled = isEnabled;
-        this.isStormbird = isStormbird;
+        this.chainId = chainId;
     }
 
     public TokenInfo(Parcel in) {
@@ -51,7 +41,7 @@ public class TokenInfo implements Parcelable {
         symbol = in.readString();
         decimals = in.readInt();
         isEnabled = in.readInt() == 1;
-        isStormbird = in.readInt() == 1;
+        chainId = in.readInt();
     }
 
     public static final Creator<TokenInfo> CREATOR = new Creator<TokenInfo>() {
@@ -78,15 +68,21 @@ public class TokenInfo implements Parcelable {
         dest.writeString(symbol);
         dest.writeInt(decimals);
         dest.writeInt(isEnabled ? 1 : 0);
-        dest.writeInt(isStormbird ? 1 : 0);
+        dest.writeInt(chainId);
     }
 
-    public void addTokenSetupPage(AddTokenActivity layout) {
+    public void addTokenSetupPage(AddTokenActivity layout, String chainName) {
         layout.inputAddressView.setAddress(address);
         layout.symbolInputView.setText(symbol);
         layout.decimalsInputView.setText(String.valueOf(decimals));
         layout.nameInputview.setText(name);
         layout.ticketLayout.setVisibility(View.GONE);
-        layout.isStormbird = isStormbird;
+
+        if (layout.chainName != null)
+        {
+            layout.chainName.setVisibility(View.VISIBLE);
+            layout.chainName.setText(chainName);
+            Utils.setChainColour(layout.chainName, chainId);
+        }
     }
 }

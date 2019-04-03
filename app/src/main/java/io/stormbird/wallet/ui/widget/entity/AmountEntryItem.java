@@ -43,7 +43,8 @@ public class AmountEntryItem
     private TextView tokenSymbolLabel;
     private TextView usdValue;
     private boolean usdInput = false;
-    private final String symbol;
+    private final boolean hasRealValue;
+    private final int chainId;
 
     private LinearLayout tokenEquivalentLayout;
     private TextView tokenEquivalent;
@@ -62,13 +63,14 @@ public class AmountEntryItem
         if (disposable != null && !disposable.isDisposed()) disposable.dispose();
     }
 
-    public AmountEntryItem(Activity activity, TokenRepositoryType tokenRepository, String symbol, boolean isEth)
+    public AmountEntryItem(Activity activity, TokenRepositoryType tokenRepository, String symbol, boolean isEth, int chainId, boolean hasRealValue)
     {
         currentEthPrice = 0.0;
         this.tokenRepository = tokenRepository;
         this.callback = (AmountUpdateCallback)activity;
-        this.symbol = symbol;
         amountError = activity.findViewById(R.id.amount_error);
+        this.chainId = chainId;
+        this.hasRealValue = hasRealValue;
 
         amountEditText = activity.findViewById(R.id.edit_amount);
         amountEditText.addTextChangedListener(new TextWatcher() {
@@ -84,7 +86,14 @@ public class AmountEntryItem
 
             @Override
             public void afterTextChanged(Editable s) {
-                updateEquivalentValue();
+                try
+                {
+                    updateEquivalentValue();
+                }
+                catch (NumberFormatException e)
+                {
+                    //
+                }
             }
         });
 
@@ -122,7 +131,15 @@ public class AmountEntryItem
                 tokenSymbolLabel.setVisibility(View.GONE);
                 tokenEquivalentLayout.setVisibility(View.VISIBLE);
             }
-            updateEquivalentValue();
+
+            try
+            {
+                updateEquivalentValue();
+            }
+            catch (NumberFormatException e)
+            {
+                //
+            }
         });
 
         quantityUpBtn = activity.findViewById(R.id.img_quantity_up);
@@ -164,19 +181,20 @@ public class AmountEntryItem
         }
     }
 
-    private void updateEquivalentValue() {
+    private void updateEquivalentValue() throws NumberFormatException
+    {
         if (usdInput) {
             String amountStr = amountEditText.getText().toString();
+            String tokenAmountEquivalent = ethEquivalent(amountStr);
+            tokenEquivalent.setText(tokenAmountEquivalent);
+
             double equivalent = 0.0;
 
-            if (amountStr.length() == 0) {
-                amountStr = "0";
-                tokenEquivalent.setText(amountStr);
-            } else {
+            if (amountStr.length() > 0) {
                 double amount = Double.parseDouble(amountStr);
                 equivalent = amount / currentEthPrice;
-                tokenEquivalent.setText(getEthString(equivalent));
             }
+
             callback.amountChanged(String.valueOf(equivalent));
         } else
         {
@@ -186,6 +204,7 @@ public class AmountEntryItem
             if (isValidAmount(amount))
             {
                 String usdEquivStr = "US$ " + getUsdString(Double.valueOf(amount) * currentEthPrice);
+                if (!hasRealValue) usdEquivStr = "(TEST) " + usdEquivStr;
                 usdValue.setText(usdEquivStr);
             }
             callback.amountChanged(amount);
@@ -213,27 +232,42 @@ public class AmountEntryItem
         callback.amountChanged(getEthValue());
     }
 
+    private String ethEquivalent(String amountStr) throws NumberFormatException
+    {
+        String result = "0";
+
+        if (amountStr.length() > 0) {
+            double equivalent = 0.0;
+            double amount = Double.parseDouble(amountStr);
+            equivalent = amount / currentEthPrice;
+            result = getEthString(equivalent);
+        }
+
+        return result;
+    }
+
     public void setAmount(String value)
     {
-        if (usdInput)
+        try
         {
-            tokenEquivalent.setText(value);
-            if (value.length() == 0)
-                value = "0.00";
-            if (isValidAmount(value))
+            if (usdInput)
             {
-                String usdEquivStr = getUsdString(Double.valueOf(value) * currentEthPrice);
-                amountEditText.setText(usdEquivStr);
+                tokenEquivalent.setText(ethEquivalent(value));
+            }
+            else
+            {
+                if (isValidAmount(value))
+                {
+                    String usdEquivStr = "US$ " + getUsdString(Double.valueOf(value) * currentEthPrice);
+                    if (!hasRealValue)
+                        usdEquivStr = "(TEST) " + usdEquivStr;
+                    usdValue.setText(usdEquivStr);
+                }
             }
         }
-        else
+        catch (NumberFormatException e)
         {
-            amountEditText.setText(value);
-            if (isValidAmount(value))
-            {
-                String usdEquivStr = "US$ " + getUsdString(Double.valueOf(value) * currentEthPrice);
-                usdValue.setText(usdEquivStr);
-            }
+            //
         }
     }
 
@@ -241,7 +275,7 @@ public class AmountEntryItem
     {
         disposable = Observable.interval(0, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> tokenRepository
-                        .getEthTicker()
+                        .getEthTicker(chainId)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onTicker, this::onError)).subscribe();
@@ -252,6 +286,8 @@ public class AmountEntryItem
         if (ticker != null && ticker.price_usd != null)
         {
             currentEthPrice = Double.valueOf(ticker.price_usd);
+            //now update UI
+            setAmount(amountEditText.getText().toString());
         }
     }
 
@@ -288,5 +324,10 @@ public class AmountEntryItem
     {
         amountError.setVisibility(View.VISIBLE);
         amountError.setText(errorMessage);
+    }
+
+    public void setAmountText(String ethAmount)
+    {
+        amountEditText.setText(ethAmount);
     }
 }

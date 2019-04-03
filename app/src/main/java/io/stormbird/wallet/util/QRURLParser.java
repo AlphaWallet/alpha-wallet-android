@@ -2,6 +2,10 @@ package io.stormbird.wallet.util;
 
 import io.stormbird.wallet.entity.EthereumProtocolParser;
 import io.stormbird.wallet.entity.QrUrlResult;
+import io.stormbird.wallet.ui.widget.entity.ENSHandler;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.stormbird.wallet.entity.EthereumProtocolParser.ADDRESS_LENGTH;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
@@ -21,6 +25,7 @@ import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 public class QRURLParser {
     private static QRURLParser mInstance;
+    private static final Pattern findAddress = Pattern.compile("(0x)([0-9a-fA-F]{40})($|\\s)");
 
     public static QRURLParser getInstance() {
         if (mInstance == null) {
@@ -38,7 +43,16 @@ public class QRURLParser {
     private static String extractAddress(String str) {
         String address;
         try {
-            if (str.startsWith("0x"))
+            if (!isValidAddress(str))
+            {
+                Matcher matcher = findAddress.matcher(str);
+                if (matcher.find())
+                {
+                    str = matcher.group(1) + matcher.group(2);
+                }
+            }
+
+            if (isValidAddress(str))
             {
                 address = str.substring(0, ADDRESS_LENGTH).toLowerCase();
             }
@@ -51,33 +65,39 @@ public class QRURLParser {
             return null;
         }
 
-        return checkAddress(address) ? address : null;
-    }
-
-    private static boolean checkAddress(String address) {
-        if (address == null || address.length() < 2) return false;
-        return !address.startsWith("0x") || isValidAddress(address);
+        return (isValidAddress(address) || ENSHandler.canBeENSName(address)) ? address : null;
     }
 
     public QrUrlResult parse(String url) {
+        if (url == null) return null;
         String[] parts = url.split(":");
+
+        QrUrlResult result = null;
 
         if (parts.length == 1)
         {
             String address = extractAddress(parts[0]);
 
             if (address != null) {
-                return new QrUrlResult(address.toLowerCase());
+                result = new QrUrlResult(address.toLowerCase());
+            }
+        }
+        else if (parts.length == 2)
+        {
+            EthereumProtocolParser parser = new EthereumProtocolParser();
+            result = parser.readProtocol(parts[0], parts[1]);
+        }
+
+        //it's not a recognised protocol, try garbled address (eg copy/paste from telegram).
+        if (result == null)
+        {
+            String address = extractAddress(url);
+            if (address != null) {
+                result = new QrUrlResult(address.toLowerCase());
             }
         }
 
-        if (parts.length == 2)
-        {
-            EthereumProtocolParser parser = new EthereumProtocolParser();
-            return parser.readProtocol(parts[0], parts[1]);
-        }
-
-        return null;
+        return result;
     }
 
     public String extractAddressFromQrString(String url) {

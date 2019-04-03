@@ -29,7 +29,6 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final SignatureGenerateInteract signatureGenerateInteract;
     private final SellTicketRouter sellTicketRouter;
-    private final HomeRouter homeRouter;
     private final MyAddressRouter myAddressRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final OpenseaService openseaService;
@@ -42,7 +41,6 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
             RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             SellTicketRouter sellTicketRouter,
-            HomeRouter homeRouter,
             MyAddressRouter myAddressRouter,
             AssetDefinitionService assetDefinitionService,
             OpenseaService openseaService) {
@@ -53,7 +51,6 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
         this.signatureGenerateInteract = signatureGenerateInteract;
         this.transferTicketRouter = transferTicketRouter;
         this.sellTicketRouter = sellTicketRouter;
-        this.homeRouter = homeRouter;
         this.myAddressRouter = myAddressRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.openseaService = openseaService;
@@ -62,6 +59,6 @@ public class AssetDisplayViewModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new AssetDisplayViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, homeRouter, myAddressRouter, assetDefinitionService, openseaService);
+        return (T) new AssetDisplayViewModel(fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, myAddressRouter, assetDefinitionService, openseaService);
     }
 }

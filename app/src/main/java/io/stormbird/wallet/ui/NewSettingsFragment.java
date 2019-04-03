@@ -45,7 +45,7 @@ public class NewSettingsFragment extends Fragment {
 
     private NewSettingsViewModel viewModel;
     private Wallet wallet;
-    private TextView networksSubtext;
+
     private TextView walletsSubtext;
     private TextView localeSubtext;
     private Switch notificationState;
@@ -57,12 +57,10 @@ public class NewSettingsFragment extends Fragment {
         AndroidSupportInjection.inject(this);
         viewModel = ViewModelProviders.of(this, newSettingsViewModelFactory).get(NewSettingsViewModel.class);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.setLocale(getContext());
 
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        networksSubtext = view.findViewById(R.id.networks_subtext);
         walletsSubtext = view.findViewById(R.id.wallets_subtext);
         localeSubtext = view.findViewById(R.id.locale_lang_subtext);
         notificationState = view.findViewById(R.id.switch_notifications);
@@ -94,18 +92,14 @@ public class NewSettingsFragment extends Fragment {
 
         final LinearLayout layoutSwitchnetworks = view.findViewById(R.id.layout_switch_network);
         layoutSwitchnetworks.setOnClickListener(v -> {
-            String currentNetwork = viewModel.getDefaultNetworkInfo().name;
-            SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), viewModel.getNetworkList(), currentNetwork);
+            SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), viewModel.getNetworkList(), viewModel.getFilterNetworkList(), false);
             dialog.setOnClickListener(v1 -> {
-                viewModel.setNetwork(dialog.getSelectedItem());
-                networksSubtext.setText(dialog.getSelectedItem());
-                if (!currentNetwork.equals(dialog.getSelectedItem())) {
-                    viewModel.showHome(getContext(), true, true);
-                }
+                viewModel.setFilterNetworks(dialog.getSelectedItems());
                 getActivity().sendBroadcast(new Intent(RESET_WALLET));
                 dialog.dismiss();
             });
             dialog.show();
+            dialog.setTitle(R.string.select_network_filters);
         });
 
         final LinearLayout layoutSwitchLocale = view.findViewById(R.id.layout_locale_lang);
@@ -196,10 +190,6 @@ public class NewSettingsFragment extends Fragment {
     private void updateNotificationState() {
         boolean state = viewModel.getNotificationState();
         notificationState.setChecked(state);
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        networksSubtext.setText(networkInfo.name);
     }
 
     private void onDefaultWallet(Wallet wallet) {

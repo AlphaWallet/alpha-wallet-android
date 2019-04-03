@@ -331,4 +331,6 @@
     <string name="dapp_title">Title</string>
     <string name="dapp_address">Address</string>
     <string name="search_or_type_web_address">Search or type web address</string>
+    <string name="network">Network</string>
+    <string name="collectibles">Collectibles</string>
 </resources>

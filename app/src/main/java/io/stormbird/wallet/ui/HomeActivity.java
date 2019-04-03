@@ -3,12 +3,8 @@ package io.stormbird.wallet.ui;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.arch.lifecycle.ViewModelProviders;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.arch.lifecycle.*;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -32,21 +28,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-
-import java.io.File;
-import java.lang.reflect.Method;
-
-import javax.inject.Inject;
-
 import dagger.android.AndroidInjection;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.DownloadInterface;
-import io.stormbird.wallet.entity.DownloadReceiver;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.FragmentMessenger;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
@@ -56,11 +43,11 @@ import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.DepositView;
 import io.stormbird.wallet.widget.SystemView;
 
-import static io.stormbird.wallet.widget.AWalletBottomNavigationView.DAPP_BROWSER;
-import static io.stormbird.wallet.widget.AWalletBottomNavigationView.MARKETPLACE;
-import static io.stormbird.wallet.widget.AWalletBottomNavigationView.SETTINGS;
-import static io.stormbird.wallet.widget.AWalletBottomNavigationView.TRANSACTIONS;
-import static io.stormbird.wallet.widget.AWalletBottomNavigationView.WALLET;
+import javax.inject.Inject;
+import java.io.File;
+import java.lang.reflect.Method;
+
+import static io.stormbird.wallet.widget.AWalletBottomNavigationView.*;
 
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, DownloadInterface, FragmentMessenger
 {
@@ -80,6 +67,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private final TransactionsFragment transactionsFragment;
     private final WalletFragment walletFragment;
     private String walletTitle;
+    private final LifecycleObserver lifeCycle;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -92,6 +80,30 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         transactionsFragment = new TransactionsFragment();
         settingsFragment = new NewSettingsFragment();
         walletFragment = new WalletFragment();
+        lifeCycle = new LifecycleObserver()
+        {
+            @OnLifecycleEvent(Lifecycle.Event.ON_START)
+            private void onMoveToForeground()
+            {
+                Log.d("LIFE", "AlphaWallet into foreground");
+                walletFragment.walletInFocus();
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+            private void onMoveToBackground()
+            {
+                Log.d("LIFE", "AlphaWallet into background");
+                walletFragment.walletOutOfFocus();
+            }
+
+            @Override
+            public int hashCode()
+            {
+                return super.hashCode();
+            }
+        };
+
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(lifeCycle);
     }
 
     @Override
@@ -167,6 +179,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             dappBrowserFragment.setArguments(bundle);
             showPage(DAPP_BROWSER);
         }
+
+        viewModel.cleanDatabases(this);
     }
 
     private void onWalletName(String name) {
@@ -203,18 +217,16 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 if (clipItem != null)
                 {
                     CharSequence clipText = clipItem.getText();
-                    //String importData = ImportTokenActivity.getMagiclinkFromClipboard(this);
-                    if (clipText != null && clipText.length() > 60 && clipText.length() < 300)
+                    if (clipText != null && clipText.length() > 60 && clipText.length() < 400)
                     {
-                        //let's try to import the link
-                        viewModel.showImportLink(this, clipText.toString());
+                        ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
+                        if (parser.parseUniversalLink(clipText.toString()).chainId > 0) //see if it's a valid link
+                        {
+                            //let's try to import the link
+                            viewModel.showImportLink(this, clipText.toString());
+                        }
                     }
                 }
-            }
-
-            if (walletFragment != null)
-            {
-                walletFragment.setTokenInterface(this);
             }
         }
         catch (Exception e)
@@ -236,8 +248,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         switch (viewPager.getCurrentItem())
         {
-            default:
+            case WALLET:
                 getMenuInflater().inflate(R.menu.menu_add, menu);
+                break;
+            default:
                 break;
         }
         return super.onCreateOptionsMenu(menu);
@@ -275,7 +289,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 return true;
             }
             case DAPP_BROWSER: {
-                showPage(DAPP_BROWSER);
+                if (getSelectedItem() == DAPP_BROWSER) {
+                    dappBrowserFragment.homePressed();
+                } else {
+                    showPage(DAPP_BROWSER);
+                }
                 return true;
             }
             case WALLET: {
@@ -330,6 +348,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         super.onDestroy();
         unregisterReceiver(downloadReceiver);
+        viewModel.onClean();
     }
 
     private void showPage(int page) {
@@ -389,7 +408,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void TokensReady()
     {
-        transactionsFragment.tokensReady();
+        if (transactionsFragment != null) transactionsFragment.resetTokens();
     }
 
     @Override

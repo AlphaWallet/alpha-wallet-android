@@ -47,8 +47,7 @@ public class AssetDisplayViewModel extends BaseViewModel
     private final MyAddressRouter myAddressRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final OpenseaService openseaService;
-    
-    private final HomeRouter homeRouter;
+
     private Token refreshToken;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
@@ -66,7 +65,6 @@ public class AssetDisplayViewModel extends BaseViewModel
             RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             SellTicketRouter sellTicketRouter,
-            HomeRouter homeRouter,
             MyAddressRouter myAddressRouter,
             AssetDefinitionService assetDefinitionService,
             OpenseaService openseaService) {
@@ -76,7 +74,6 @@ public class AssetDisplayViewModel extends BaseViewModel
         this.redeemAssetSelectRouter = redeemAssetSelectRouter;
         this.transferTicketRouter = transferTicketRouter;
         this.sellTicketRouter = sellTicketRouter;
-        this.homeRouter = homeRouter;
         this.myAddressRouter = myAddressRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.openseaService = openseaService;
@@ -177,9 +174,5 @@ public class AssetDisplayViewModel extends BaseViewModel
         progress.postValue(false);
         defaultWallet.setValue(wallet);
         fetchCurrentTicketBalance();
-    }
-
-    public void showHome(Context context, boolean isClearStack) {
-        homeRouter.open(context, isClearStack);
     }
 }

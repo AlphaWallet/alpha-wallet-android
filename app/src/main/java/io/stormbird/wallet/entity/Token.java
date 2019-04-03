@@ -6,16 +6,14 @@ import android.os.Parcelable;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
-
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
-
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -26,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.stormbird.wallet.C.ETH_SYMBOL;
 import static io.stormbird.wallet.interact.SetupTokensInteract.EXPIRED_CONTRACT;
 import static io.stormbird.wallet.interact.SetupTokensInteract.UNKNOWN_CONTRACT;
 
@@ -34,21 +31,48 @@ public class Token implements Parcelable
 {
     public final TokenInfo tokenInfo;
     public BigDecimal balance;
+    public BigDecimal pendingBalance;
     public long updateBlancaTime;
-    public boolean balanceIsLive = false;
     private String tokenWallet;
-    private short tokenNetwork;
     private boolean requiresAuxRefresh = true;
     protected ContractType contractType;
     public long lastBlockCheck = 0;
+    private final String shortNetworkName;
+    public float balanceUpdateWeight;
+    public float balanceUpdatePressure;
+    public boolean balanceChanged;
+    public boolean walletUIUpdateRequired;
+
+    public String getNetworkName() { return shortNetworkName; }
 
     public TokenTicker ticker;
     protected Map<String, String> auxData;
 
-    public Token(TokenInfo tokenInfo, BigDecimal balance, long updateBlancaTime) {
+    public Token(TokenInfo tokenInfo, BigDecimal balance, long updateBlancaTime, String networkName, ContractType type) {
         this.tokenInfo = tokenInfo;
+        if (balance == null)
+        {
+            balance = BigDecimal.ZERO;
+        }
         this.balance = balance;
         this.updateBlancaTime = updateBlancaTime;
+        this.shortNetworkName = networkName;
+        this.contractType = type;
+        this.pendingBalance = balance;
+
+        balanceUpdateWeight = calculateBalanceUpdateWeight();
+        balanceUpdatePressure = 0.0f;
+        balanceChanged = false;
+        walletUIUpdateRequired = false;
+    }
+
+    public void transferPreviousData(Token oldToken)
+    {
+        if (oldToken != null)
+        {
+            lastBlockCheck = oldToken.lastBlockCheck;
+            pendingBalance = oldToken.pendingBalance;
+        }
     }
 
     protected Token(Parcel in) {
@@ -56,6 +80,11 @@ public class Token implements Parcelable
         balance = new BigDecimal(in.readString());
         updateBlancaTime = in.readLong();
         int readType = in.readInt();
+        shortNetworkName = in.readString();
+        pendingBalance = new BigDecimal(in.readString());
+        tokenWallet = in.readString();
+        lastBlockCheck = in.readLong();
+        balanceChanged = false;
         if (readType <= ContractType.CREATION.ordinal())
         {
             contractType = ContractType.values()[readType];
@@ -93,10 +122,6 @@ public class Token implements Parcelable
         return getStringBalance();
     }
 
-    public String getBurnListStr() {
-        return "";
-    }
-
     public static final Creator<Token> CREATOR = new Creator<Token>() {
         @Override
         public Token createFromParcel(Parcel in) {
@@ -120,6 +145,10 @@ public class Token implements Parcelable
         dest.writeString(balance == null ? "0" : balance.toString());
         dest.writeLong(updateBlancaTime);
         dest.writeInt(contractType.ordinal());
+        dest.writeString(shortNetworkName);
+        dest.writeString(pendingBalance == null ? "0" : pendingBalance.toString());
+        dest.writeString(tokenWallet);
+        dest.writeLong(lastBlockCheck);
         int size = (auxData == null ? 0 : auxData.size());
         dest.writeInt(size);
         if (size > 0)
@@ -161,60 +190,9 @@ public class Token implements Parcelable
         return tokenInfo.name + (tokenInfo.symbol != null && tokenInfo.symbol.length() > 0 ? "(" + tokenInfo.symbol.toUpperCase() + ")" : "");
     }
 
-    public BigInteger getIntAddress() { return Numeric.toBigInt(tokenInfo.address); }
-
     public void clickReact(BaseViewModel viewModel, Context context)
     {
         viewModel.showErc20TokenDetail(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
-    }
-
-    public String populateIDs(List<Integer> d, boolean keepZeros)
-    {
-        return "";
-    }
-    public static final String EMPTY_BALANCE = "\u2014\u2014";
-
-    public boolean needsUpdate()
-    {
-        long now = System.currentTimeMillis();
-        long diff = (now - updateBlancaTime) / 1000; //seconds
-
-        if (diff > 50) // value is stale
-        {
-            Log.d("TOKEN", tokenInfo.name + " DIFF: " + diff);
-            return balanceIsLive;
-        }
-        else
-        {
-            return !balanceIsLive;
-        }
-    }
-
-    /**
-     * This function should check if the balance of the token is stale or not
-     * However the recycler view is subject to its own rules and laws, which I haven't decoded.
-     * This is a TODO.
-     * @param ctx
-     * @param holder
-     */
-    public void checkUpdateTimeValid(Context ctx, TokenHolder holder)
-    {
-        long now = System.currentTimeMillis();
-        long diff = (now - updateBlancaTime) / 1000; //seconds
-
-        if (diff > 50) // value is stale
-        {
-            Log.d("TOKEN", tokenInfo.name + " DIFF: " + diff);
-            holder.balanceEth.setTextColor(ContextCompat.getColor(ctx, R.color.holo_blue));
-            holder.symbol.setTextColor(ContextCompat.getColor(ctx, R.color.holo_blue));
-            balanceIsLive = false;
-        }
-        else
-        {
-            holder.balanceEth.setTextColor(ContextCompat.getColor(ctx, R.color.black));
-            holder.symbol.setTextColor(ContextCompat.getColor(ctx, R.color.black));
-            balanceIsLive = true;
-        }
     }
 
     public void setupContent(TokenHolder holder, AssetDefinitionService definition)
@@ -272,7 +250,6 @@ public class Token implements Parcelable
         }
 
         holder.balanceEth.setVisibility(View.VISIBLE);
-        holder.arrayBalance.setVisibility(View.GONE);
     }
 
     public List<Integer> ticketIdStringToIndexList(String userList)
@@ -380,7 +357,6 @@ public class Token implements Parcelable
         if (tokenInfo.name != null && realmToken.getName() != null) return true;
         if (tokenInfo.symbol != null && realmToken.getSymbol() == null) return true;
         if (tokenInfo.name != null && (!tokenInfo.name.equals(realmToken.getName()) || !tokenInfo.symbol.equals(realmToken.getSymbol()))) return true;
-        if (tokenInfo.isStormbird != realmToken.isStormbird()) return true;
         if (checkAuxDataChanged(realmToken)) return true;
         String currentBalance = getFullBalance();
         return !currentState.equals(currentBalance);
@@ -454,17 +430,12 @@ public class Token implements Parcelable
 
     public boolean isBad()
     {
-        return tokenInfo.name == null || tokenInfo.name.length() < 2;
+        return tokenInfo.symbol == null && tokenInfo.name == null;
     }
 
     public boolean checkTokenWallet(String address)
     {
-        return tokenWallet.equalsIgnoreCase(address);
-    }
-
-    public boolean checkTokenNetwork(int currentNetwork)// setTokenWallet(String tokenWallet)
-    {
-        return tokenNetwork == currentNetwork;
+        return tokenWallet != null && tokenWallet.equalsIgnoreCase(address);
     }
 
     public void setTokenWallet(String address)
@@ -472,10 +443,6 @@ public class Token implements Parcelable
         this.tokenWallet = address;
     }
 
-    public void setTokenNetwork(int tokenNetwork)
-    {
-        this.tokenNetwork = (short)tokenNetwork;
-    }
 
     public void patchAuxData(Token token)
     {
@@ -485,7 +452,26 @@ public class Token implements Parcelable
 
     public boolean checkBalanceChange(Token token)
     {
-        return !getFullBalance().equals(token.getFullBalance());
+        return token != null && !getFullBalance().equals(token.getFullBalance());
+    }
+
+    public String getPendingDiff()
+    {
+        if (pendingBalance == null || balance.equals(pendingBalance)) return null;
+        else
+        {
+            String prefix = "";
+            BigDecimal diff = pendingBalance.subtract(balance);
+            if (diff.compareTo(BigDecimal.ZERO) > 0) prefix = "+";
+            String diffStr = prefix + getScaledValue(diff, tokenInfo.decimals);
+            if (diffStr.startsWith("~")) diffStr = null;
+            return diffStr;
+        }
+    }
+
+    public boolean checkPendingChange(Token tokenUpdate)
+    {
+        return pendingBalance.equals(tokenUpdate.pendingBalance);
     }
 
     public void setRealmInterfaceSpec(RealmToken realmToken)
@@ -503,11 +489,7 @@ public class Token implements Parcelable
         }
         else
         {
-            //sanity check
-            ContractType fromRealm = ContractType.values()[realm.getInterfaceSpec()];
-            if (fromRealm == ContractType.ETHEREUM && !tokenInfo.symbol.contains(ETH_SYMBOL))
-                fromRealm = ContractType.NOT_SET;
-            this.contractType = fromRealm;
+            this.contractType = ContractType.values()[realm.getInterfaceSpec()];
         }
     }
 
@@ -521,7 +503,6 @@ public class Token implements Parcelable
      */
     public void setInterfaceSpec(ContractType type) { contractType = type; }
     public ContractType getInterfaceSpec() { return contractType; }
-    public boolean isOldSpec() { return false; }
     public List<BigInteger> stringHexToBigIntegerList(String integerString)
     {
         return null;
@@ -551,14 +532,11 @@ public class Token implements Parcelable
         return null;
     }
     public void checkIsMatchedInXML(AssetDefinitionService assetService) { }
-    public void setRealmBurn(RealmToken realmToken, List<Integer> burnList) { }
     public int[] getTicketIndices(String ticketIds) { return new int[0]; }
     public boolean unspecifiedSpec() { return contractType == ContractType.NOT_SET; }
 
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx) { }
     public List<BigInteger> getArrayBalance() { return new ArrayList<>(); }
-    public void addToBurnList(List<Uint16> burnList) { }
-    public List<Integer> getBurnList() { return new ArrayList<>(); }
     public boolean isMatchedInXML() { return false; }
 
     public String getOperationName(Transaction transaction, Context ctx)
@@ -591,6 +569,29 @@ public class Token implements Parcelable
         return name;
     }
 
+    public String getScaledBalance()
+    {
+        return getScaledValue(balance, tokenInfo.decimals);
+    }
+
+    public static String getScaledValue(BigDecimal value, long decimals)
+    {
+        value = value.divide(new BigDecimal(Math.pow(10, decimals)));
+        int scale = 4;
+        if (value.equals(BigDecimal.ZERO))
+        {
+            return "0";
+        }
+        if (value.abs().compareTo(BigDecimal.valueOf(0.0001)) < 0)
+        {
+            return "~0.00"; // very small amount of eth
+        }
+        else
+        {
+            return value.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
+        }
+    }
+
     /**
      * Universal scaled value method
      * @param valueStr
@@ -599,10 +600,19 @@ public class Token implements Parcelable
      */
     public static String getScaledValue(String valueStr, long decimals) {
         // Perform decimal conversion
-        BigDecimal value = new BigDecimal(valueStr);
-        value = value.divide(new BigDecimal(Math.pow(10, decimals)));
-        int scale = 4;
-        return value.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
+        if (decimals > 1 && valueStr != null && valueStr.length() > 0 && Character.isDigit(valueStr.charAt(0)))
+        {
+            BigDecimal value = new BigDecimal(valueStr);
+            return getScaledValue(value, decimals); //represent balance transfers according to 'decimals' contract indicator property
+        }
+        else if (valueStr != null)
+        {
+            return valueStr;
+        }
+        else
+        {
+            return "0";
+        }
     }
 
     public String getTransactionValue(Transaction transaction, Context context)
@@ -626,7 +636,7 @@ public class Token implements Parcelable
             result = result + " " + tokenInfo.symbol;
         }
 
-        if (result.length() > 0 && !result.equals("0"))
+        if (result.length() > 0 && !result.equals("0") && !result.startsWith("~"))
         {
             result = addSuffix(result, transaction);
         }
@@ -676,5 +686,140 @@ public class Token implements Parcelable
         {
             return tokenInfo.name;
         }
+    }
+
+    public boolean hasRealValue()
+    {
+        return EthereumNetworkRepository.hasRealValue(tokenInfo.chainId);
+    }
+
+    protected float calculateBalanceUpdateWeight()
+    {
+        float updateWeight = 0;
+        //calculate balance update time
+        if (!isTerminated() && !isBad())
+        {
+            if (hasRealValue())
+            {
+                if (isEthereum() || hasPositiveBalance())
+                {
+                    updateWeight = 1.0f;
+                }
+                else
+                {
+                    updateWeight = 0.5f;
+                }
+            }
+            else
+            {
+                //testnet: TODO: check time since last transaction - if greater than 1 month slow update further
+                if (isEthereum())
+                {
+                    updateWeight = 0.25f;
+                }
+                else if (hasPositiveBalance())
+                {
+                    updateWeight = 0.1f;
+                }
+                else if (tokenInfo.name != null)
+                {
+                    updateWeight = 0.05f;
+                }
+                else
+                {
+                    updateWeight = 0.01f;
+                }
+            }
+        }
+
+        //Log.d("TOKEN", tokenInfo.name + " Update weight " + updateWeight);
+
+        return updateWeight;
+    }
+
+    public boolean checkBalanceChange(List<BigInteger> balanceArray)
+    {
+        return false;
+    }
+
+    public boolean checkBalanceChange(BigDecimal balance)
+    {
+        if (balance != null && this.balance != null)
+        {
+            return !this.balance.equals(balance);
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public void updateBalanceCheckPressure(boolean isVisible)
+    {
+        if (!isTerminated())
+        {
+            float update = (isVisible ? 1.0f : 0.5f) * balanceUpdateWeight;
+            if (isEthereum() && !pendingBalance.equals(balance) && update < 1.0f) update = 1.0f; //if there's a pending balance check more frequently
+
+            balanceUpdatePressure += update;
+        }
+    }
+
+    public boolean walletUIUpdateRequired()
+    {
+        boolean requiresUpdate = walletUIUpdateRequired;
+        walletUIUpdateRequired = false;
+        return requiresUpdate;
+    }
+
+    public boolean requiresTransactionRefresh()
+    {
+        boolean requiresTransactionRefresh = balanceChanged;
+        balanceChanged = false;
+        if ((hasPositiveBalance() || isEthereum()) && lastBlockCheck == 0) //check transactions for native currency plus tokens with balance
+        {
+            lastBlockCheck = 1;
+            requiresTransactionRefresh = true;
+        }
+
+        return requiresTransactionRefresh;
+    }
+
+    public boolean getIsSent(Transaction transaction)
+    {
+        return transaction.from.equalsIgnoreCase(tokenWallet);
+    }
+
+    public String pruneIDList(String ticketIds, int quantity)
+    {
+        return "";
+    }
+
+    public void setFocus(boolean focus)
+    {
+        if (focus)
+        {
+            balanceUpdateWeight = 2.0f;
+        }
+        else
+        {
+            balanceUpdateWeight = calculateBalanceUpdateWeight();
+        }
+    }
+
+    public boolean balanceIncrease(Token token)
+    {
+        return balance != null && token.balance != null && balance.compareTo(token.balance) > 0;
+    }
+
+    public boolean equals(Token token)
+    {
+        return token != null && tokenInfo.chainId == token.tokenInfo.chainId && getAddress().equals(token.getAddress());
+    }
+
+    public void zeroiseBalance()
+    {
+        balance = BigDecimal.ZERO;
+        pendingBalance = BigDecimal.ZERO;
     }
 }

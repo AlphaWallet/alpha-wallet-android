@@ -12,7 +12,6 @@ public class TokenTicker implements Parcelable {
     @SerializedName("percent_change_24h")
     public final String percentChange24h;
     public final String image;
-    public final boolean isStormbird;
 
     public TokenTicker(String id, String contract, String price, String percentChange24h, String image) {
         this.id = id;
@@ -20,16 +19,6 @@ public class TokenTicker implements Parcelable {
         this.price = price;
         this.percentChange24h = percentChange24h;
         this.image = image;
-        this.isStormbird = false;
-    }
-
-    public TokenTicker(String id, String contract, String price, String percentChange24h, String image, boolean isStormbird) {
-        this.id = id;
-        this.contract = contract;
-        this.price = price;
-        this.percentChange24h = percentChange24h;
-        this.image = image;
-        this.isStormbird = isStormbird;
     }
 
     private TokenTicker(Parcel in) {
@@ -38,19 +27,6 @@ public class TokenTicker implements Parcelable {
         price = in.readString();
         percentChange24h = in.readString();
         image = in.readString();
-        byte type = in.readByte();
-        switch (type)
-        {
-            case 0:
-                isStormbird = false;
-                break;
-            case 1:
-                isStormbird = true;
-                break;
-            default:
-                isStormbird = false;
-                break;
-        }
     }
 
     public static final Creator<TokenTicker> CREATOR = new Creator<TokenTicker>() {
@@ -77,6 +53,5 @@ public class TokenTicker implements Parcelable {
         dest.writeString(price);
         dest.writeString(percentChange24h);
         dest.writeString(image);
-        dest.writeInt(isStormbird?0:1);
     }
 }

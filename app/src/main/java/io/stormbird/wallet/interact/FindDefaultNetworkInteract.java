@@ -21,7 +21,17 @@ public class FindDefaultNetworkInteract {
     }
 
     //get the ticker
-    public Single<Ticker> getTicker() {
-        return ethereumNetworkRepository.getTicker();
+    public Single<Ticker> getTicker(int chainId) {
+        return ethereumNetworkRepository.getTicker(chainId);
+    }
+
+    public String getNetworkName(int chainId)
+    {
+        return ethereumNetworkRepository.getNetworkByChain(chainId).getShortName();
+    }
+
+    public NetworkInfo getNetworkInfo(int chainId)
+    {
+        return ethereumNetworkRepository.getNetworkByChain(chainId);
     }
 }

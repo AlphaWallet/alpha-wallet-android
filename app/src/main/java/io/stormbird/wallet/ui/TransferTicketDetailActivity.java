@@ -495,7 +495,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
         viewModel.createTicketTransfer(
                 to,
-                token.getAddress(),
+                token,
                 token.integerListToString(token.ticketIdStringToIndexList(prunedIds), true),
                 Contract.GAS_PRICE,
                 Contract.GAS_LIMIT);
@@ -603,7 +603,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
         if (token instanceof ERC721Token)
         {
-            viewModel.openConfirm(getApplicationContext(), to, token, ticketIds, ensHandler.getEnsName());
+            viewModel.openConfirm(this, to, token, ticketIds, ensHandler.getEnsName());
         }
         else
         {

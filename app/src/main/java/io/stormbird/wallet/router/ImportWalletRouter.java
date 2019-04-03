@@ -8,13 +8,9 @@ import io.stormbird.wallet.ui.ImportWalletActivity;
 
 public class ImportWalletRouter {
 
-	public void open(Context context) {
-		Intent intent = new Intent(context, ImportWalletActivity.class);
-		context.startActivity(intent);
-	}
-
 	public void openForResult(Activity activity, int requestCode) {
 		Intent intent = new Intent(activity, ImportWalletActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
 		activity.startActivityForResult(intent, requestCode);
 	}
 }

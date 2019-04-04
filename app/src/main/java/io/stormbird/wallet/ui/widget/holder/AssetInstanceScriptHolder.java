@@ -16,12 +16,10 @@ import io.stormbird.token.util.DateTimeFactory;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.TokenFunctionActivity;
 import io.stormbird.wallet.web3.JsInjectorClient;
 import io.stormbird.wallet.web3.Web3TokenView;
-import io.stormbird.wallet.web3.Web3View;
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.PageReadyCallback;
 
@@ -42,10 +40,11 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     private final Web3TokenView tokenView;
     private final Token token;
     private final LinearLayout iFrameLayout;
+    private final boolean clickThrough;
 
     private final AssetDefinitionService assetDefinitionService; //need to cache this locally, unless we cache every string we need in the constructor
 
-    public AssetInstanceScriptHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService assetService)
+    public AssetInstanceScriptHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService assetService, boolean clickThrough)
     {
         super(resId, parent);
         iFrame = findViewById(R.id.iframe);
@@ -60,6 +59,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         tokenView.setWalletAddress(new Address(token.getWallet()));
         tokenView.setRpcUrl(token.tokenInfo.chainId);
         tokenView.setOnReadyCallback(this);
+        this.clickThrough = clickThrough;
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -120,13 +120,16 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
             //need to wait for the view to finish loading before we can call token render
             //see onPageLoaded
 
-            iFrameLayout.setOnClickListener(v -> {
-                Intent intent = new Intent(getContext(), TokenFunctionActivity.class);
-                intent.putExtra(TICKET, token);
-                intent.putExtra(C.EXTRA_TOKEN_ID, token.intArrayToString(data.tokenIds, false));
-                intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                getContext().startActivity(intent);
-            });
+            if (clickThrough)
+            {
+                iFrameLayout.setOnClickListener(v -> {
+                    Intent intent = new Intent(getContext(), TokenFunctionActivity.class);
+                    intent.putExtra(TICKET, token);
+                    intent.putExtra(C.EXTRA_TOKEN_ID, token.intArrayToString(data.tokenIds, false));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                    getContext().startActivity(intent);
+                });
+            }
         }
         catch (Exception ex)
         {

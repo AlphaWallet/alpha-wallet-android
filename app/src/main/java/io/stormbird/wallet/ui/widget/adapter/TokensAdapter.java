@@ -112,7 +112,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             }
             break;
             case AssetInstanceScriptHolder.VIEW_TYPE:
-                holder = new AssetInstanceScriptHolder(R.layout.item_iframe_token, parent, null, assetService);
+                holder = new AssetInstanceScriptHolder(R.layout.item_iframe_token, parent, null, assetService, false);
                 break;
             default:
             // NB to save ppl a lot of effort this view doesn't show - item_total_balance has height coded to 1dp.

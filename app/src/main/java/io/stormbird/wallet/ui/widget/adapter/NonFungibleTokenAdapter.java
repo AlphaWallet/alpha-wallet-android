@@ -37,10 +37,12 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     final Token token;
     protected OpenseaService openseaService;
     private ScriptFunction tokenScriptHolderCallback;
+    private boolean clickThrough = false;
 
     public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, AssetDefinitionService service, OpenseaService opensea) {
         super(tokenClickListener, service);
         token = t;
+        clickThrough = true;
         openseaService = opensea;
         if (t instanceof Ticket) setToken(t);
         if (t instanceof ERC721Token) setERC721Tokens(t, null);
@@ -59,7 +61,23 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     {
         super(null, service);
         this.token = token;
-        setTokenRange(token, displayIds);
+        clickThrough = false;
+        items.clear();
+        List<BigInteger> idList = token.stringHexToBigIntegerList(displayIds);
+        TicketRange r = new TicketRange(idList.get(0), token.getAddress());
+        r.tokenIds = idList;
+        items.add(new AssetInstanceSortedItem(r, 1));
+        notifyDataSetChanged();
+    }
+
+    public NonFungibleTokenAdapter(Token token, String viewCode)
+    {
+        super(null, null);
+        this.token = token;
+        TokenFunctionSortedItem item = new TokenFunctionSortedItem(viewCode, 200);
+        items.clear();
+        items.add(item);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -84,7 +102,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
                 holder = new OpenseaHolder(R.layout.item_opensea_token, parent, token);
                 break;
             case AssetInstanceScriptHolder.VIEW_TYPE:
-                holder = new AssetInstanceScriptHolder(R.layout.item_iframe_token, parent, token, assetService);
+                holder = new AssetInstanceScriptHolder(R.layout.item_iframe_token, parent, token, assetService, clickThrough);
                 break;
             case TokenFunctionViewHolder.VIEW_TYPE:
                 holder = new TokenFunctionViewHolder(R.layout.item_function_layout, parent, token);

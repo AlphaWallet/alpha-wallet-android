@@ -191,6 +191,9 @@
             android:name="io.stormbird.wallet.ui.TokenFunctionActivity"
             android:label="@string/token_function" />
 
+        <activity android:name=".ui.FunctionActivity"
+            android:label="@string/token_function" />
+
         <!--<service android:name="io.stormbird.wallet.service.AlphaWalletFirebaseMessagingService">-->
         <!--<intent-filter>-->
         <!--<action android:name="com.google.firebase.MESSAGING_EVENT" />-->

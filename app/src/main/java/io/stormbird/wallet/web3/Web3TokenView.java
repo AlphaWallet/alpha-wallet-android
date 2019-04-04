@@ -2,19 +2,16 @@ package io.stormbird.wallet.web3;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.webkit.WebResourceRequest;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import io.stormbird.token.entity.MagicLinkInfo;
-import io.stormbird.wallet.ui.widget.holder.AssetInstanceScriptHolder;
-import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.PageReadyCallback;
 
@@ -54,7 +51,6 @@ public class Web3TokenView extends WebView
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setDisplayZoomControls(false);
-        //webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(false);
         webSettings.setDomStorageEnabled(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
@@ -63,8 +59,15 @@ public class Web3TokenView extends WebView
         }
 
         setInitialScale(0);
+        addJavascriptInterface(this, "listener");
 
         super.setWebViewClient(tokenScriptClient);
+    }
+
+    @JavascriptInterface
+    public void onValue(String data)
+    {
+        System.out.println(data);
     }
 
     public void setWalletAddress(@NonNull Address address) {

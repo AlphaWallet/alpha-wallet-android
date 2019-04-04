@@ -33,7 +33,7 @@ import static io.stormbird.wallet.C.Key.TICKET;
  * Created by James on 2/04/2019.
  * Stormbird in Singapore
  */
-public class TokenFunctionActivity extends BaseActivity
+public class TokenFunctionActivity extends BaseActivity implements View.OnClickListener
 {
     @Inject
     protected TokenFunctionViewModelFactory tokenFunctionViewModelFactory;
@@ -52,7 +52,6 @@ public class TokenFunctionActivity extends BaseActivity
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
         list.setHapticFeedbackEnabled(true);
-        adapter.addFunctionView(token, viewModel.getAssetDefinitionService().getTokenFunctionView(token.getAddress()));
     }
 
     @Override
@@ -81,24 +80,15 @@ public class TokenFunctionActivity extends BaseActivity
         buttons[1] = findViewById(R.id.button_sell);
         buttons[2] = findViewById(R.id.button_transfer);
 
-        for (Button b : buttons) b.setVisibility(View.GONE);
+        for (Button b : buttons) { b.setOnClickListener(this); }
+
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.getAddress());
         if (functions != null)
         {
             int index = 0;
             for (String name : functions.keySet())
             {
-                TSAction action = functions.get(name);
                 buttons[index].setText(name);
-                buttons[index].setVisibility(View.VISIBLE);
-                buttons[index++].setOnClickListener(new View.OnClickListener()
-                {
-                    @Override
-                    public void onClick(View view)
-                    {
-                        adapter.passFunction(name);
-                    }
-                });
             }
         }
     }
@@ -117,5 +107,32 @@ public class TokenFunctionActivity extends BaseActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onClick(View v)
+    {
+        switch (v.getId())
+        {
+            case R.id.button_use:
+            {
+                Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.getAddress());
+                //this will be the user function
+                String buttonText = ((Button)v).getText().toString();
+                TSAction action = functions.get(buttonText);
+                viewModel.showFunction(this, token, action.view);
+            }
+            break;
+            case R.id.button_sell:
+            {
+                viewModel.sellTicketRouter(this, token);// showSalesOrder(this, ticket);
+            }
+            break;
+            case R.id.button_transfer:
+            {
+                viewModel.showTransferToken(this, token);
+            }
+            break;
+        }
     }
 }

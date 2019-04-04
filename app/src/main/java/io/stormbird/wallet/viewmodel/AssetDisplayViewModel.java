@@ -165,10 +165,6 @@ public class AssetDisplayViewModel extends BaseViewModel
         sellTicketRouter.open(ctx, token);
     }
 
-    public void showTransferToken(Context context, Ticket ticket, TicketRange range) {
-//        transferTicketRouter.openRange(context, ticket, range);
-    }
-
     private void onDefaultWallet(Wallet wallet) {
         //TODO: switch on 'use' button
         progress.postValue(false);

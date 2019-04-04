@@ -92,7 +92,6 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         switch (v.getId())
         {
             //if confirm is pressed
-
         }
     }
 }

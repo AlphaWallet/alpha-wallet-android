@@ -12,4 +12,6 @@ public interface GasSettingsRepositoryType {
     Single<GasSettings> getGasSettings(boolean forTokenTransfer);
     Single<GasSettings> getGasSettings(byte[] transactionBytes, boolean isNonFungible);
     MutableLiveData<BigInteger> gasPriceUpdate();
+    void startGasListener(int chainId);
+    void stopGasListener();
 }

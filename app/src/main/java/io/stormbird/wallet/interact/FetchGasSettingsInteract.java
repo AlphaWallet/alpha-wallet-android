@@ -20,6 +20,16 @@ public class FetchGasSettingsInteract {
         this.repository = repository;
     }
 
+    public void startGasSettingsFetch(int chainId)
+    {
+        repository.startGasListener(chainId);
+    }
+
+    public void stopGasSettingsFetch()
+    {
+        repository.stopGasListener();
+    }
+
     public Single<GasSettings> fetch(boolean forTokenTransfer) {
         return repository.getGasSettings(forTokenTransfer);
     }

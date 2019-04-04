@@ -38,5 +38,12 @@
             android:orderInCategory="25"
             android:title="@string/action_scan_dapp"
             app:showAsAction="withText" />
+
+        <item
+            android:id="@+id/action_home"
+            android:icon="@drawable/ic_browser_home"
+            android:orderInCategory="16"
+            android:title="@string/home"
+            app:showAsAction="withText" />
     </group>
 </menu>

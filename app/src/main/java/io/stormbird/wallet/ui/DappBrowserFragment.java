@@ -316,6 +316,11 @@ public class DappBrowserFragment extends Fragment implements
                     viewModel.addToMyDapps(getContext(), currentWebpageTitle, urlTv.getText().toString());
                     return true;
                 });
+        toolbar.getMenu().findItem(R.id.action_home)
+                .setOnMenuItemClickListener(menuItem -> {
+                    homePressed();
+                    return true;
+                });
 
         RelativeLayout layout = view.findViewById(R.id.address_bar_layout);
         layout.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
@@ -428,7 +433,7 @@ public class DappBrowserFragment extends Fragment implements
 
     private void detachFragment(String tag) {
         Fragment fragment = getChildFragmentManager().findFragmentByTag(tag);
-        if (fragment != null && fragment.isVisible()) {
+        if (fragment != null && fragment.isVisible() && !fragment.isDetached()) {
             getChildFragmentManager().beginTransaction()
                     .remove(fragment)
                     .commit();

@@ -475,4 +475,5 @@
     <string name="network">Network Filters</string>
     <string name="select_network_filters">Select Active Networks:</string>
     <string name="collectibles">Collectibles</string>
+    <string name="home">Home</string>
 </resources>

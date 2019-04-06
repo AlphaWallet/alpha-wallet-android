@@ -114,7 +114,8 @@ public class AppSiteController {
 
         model.addAttribute("tokenName", definition.getTokenName());
         model.addAttribute("link", data);
-        model.addAttribute("linkPrice", getEthString(data.price));
+        model.addAttribute("linkPrice",
+                getEthString(data.price) + " " + MagicLinkInfo.getNetworkNameById(data.chainId));
 
         try {
             updateContractInfo(model, data);
@@ -188,7 +189,8 @@ public class AppSiteController {
 
         model.addAttribute("tokenName", definition.getTokenName());
         model.addAttribute("link", data);
-        model.addAttribute("linkPrice", getEthString(data.price));
+        model.addAttribute("linkPrice",
+                getEthString(data.price) + " " + MagicLinkInfo.getNetworkNameById(data.chainId));
         model.addAttribute("domain", MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId));
 
         try {

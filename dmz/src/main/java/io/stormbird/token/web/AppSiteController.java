@@ -189,6 +189,7 @@ public class AppSiteController {
         model.addAttribute("tokenName", definition.getTokenName());
         model.addAttribute("link", data);
         model.addAttribute("linkPrice", getEthString(data.price));
+        model.addAttribute("domain", MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId));
 
         try {
             updateContractInfo(model, data);

@@ -275,6 +275,7 @@ public class ConfirmationActivity extends BaseActivity {
         super.onDestroy();
         hideDialog();
         unregisterReceiver(finishReceiver);
+        viewModel.onClear();
     }
 
     private void onSend()
@@ -348,10 +349,10 @@ public class ConfirmationActivity extends BaseActivity {
         {
             case ERC875:
             case ERC721:
-                viewModel.calculateGasSettings(transactionBytes, true);
+                viewModel.calculateGasSettings(transactionBytes, true, chainId);
                 break;
             default:
-                viewModel.calculateGasSettings(transactionBytes, false);
+                viewModel.calculateGasSettings(transactionBytes, false, chainId);
                 break;
         }
     }

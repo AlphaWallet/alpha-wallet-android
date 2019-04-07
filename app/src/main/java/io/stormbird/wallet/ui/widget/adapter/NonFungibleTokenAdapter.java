@@ -26,6 +26,7 @@ import io.stormbird.wallet.service.OpenseaService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.entity.*;
 import io.stormbird.wallet.ui.widget.holder.*;
+import io.stormbird.wallet.web3.entity.FunctionCallback;
 import io.stormbird.wallet.web3.entity.ScriptFunction;
 
 /**
@@ -38,6 +39,8 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     protected OpenseaService openseaService;
     private ScriptFunction tokenScriptHolderCallback;
     private boolean clickThrough = false;
+    private FunctionCallback functionCallback;
+    private boolean containsScripted = false;
 
     public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, AssetDefinitionService service, OpenseaService opensea) {
         super(tokenClickListener, service);
@@ -62,22 +65,19 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         super(null, service);
         this.token = token;
         clickThrough = false;
-        items.clear();
-        List<BigInteger> idList = token.stringHexToBigIntegerList(displayIds);
-        TicketRange r = new TicketRange(idList.get(0), token.getAddress());
-        r.tokenIds = idList;
-        items.add(new AssetInstanceSortedItem(r, 1));
-        notifyDataSetChanged();
+        setTokenRange(token, displayIds);
     }
 
-    public NonFungibleTokenAdapter(Token token, String viewCode)
+    public NonFungibleTokenAdapter(Token token, String viewCode, FunctionCallback callback)
     {
         super(null, null);
+        functionCallback = callback;
         this.token = token;
         TokenFunctionSortedItem item = new TokenFunctionSortedItem(viewCode, 200);
         items.clear();
         items.add(item);
         notifyDataSetChanged();
+        containsScripted = true;
     }
 
     @Override
@@ -105,7 +105,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
                 holder = new AssetInstanceScriptHolder(R.layout.item_iframe_token, parent, token, assetService, clickThrough);
                 break;
             case TokenFunctionViewHolder.VIEW_TYPE:
-                holder = new TokenFunctionViewHolder(R.layout.item_function_layout, parent, token);
+                holder = new TokenFunctionViewHolder(R.layout.item_function_layout, parent, token, functionCallback);
                 tokenScriptHolderCallback = (ScriptFunction)holder;
                 break;
         }
@@ -148,6 +148,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
 
         if (assetService.hasTokenView(t.getAddress()))
         {
+            containsScripted = true;
             holderType = AssetInstanceSortedItem.VIEW_TYPE;
         }
 
@@ -176,6 +177,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
 
         if (assetService.hasTokenView(t.getAddress()))
         {
+            containsScripted = true;
             holderType = AssetInstanceSortedItem.VIEW_TYPE;
         }
 
@@ -221,6 +223,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
                 item = (T) new IFrameSortedItem(range, weight);
                 break;
             case AssetInstanceScriptHolder.VIEW_TYPE:
+                containsScripted = true;
                 item = (T) new AssetInstanceSortedItem(range, weight);
                 break;
             case TicketSaleHolder.VIEW_TYPE:
@@ -301,9 +304,14 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         notifyDataSetChanged();
     }
 
-    public void passFunction(String function)
+    public boolean containsScripted()
+    {
+        return containsScripted;
+    }
+
+    public void passFunction(String function, String arg)
     {
         //pass into the view
-        tokenScriptHolderCallback.callFunction(function);
+        tokenScriptHolderCallback.callFunction(function, arg);
     }
 }

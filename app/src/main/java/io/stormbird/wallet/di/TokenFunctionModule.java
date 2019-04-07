@@ -1,5 +1,8 @@
 package io.stormbird.wallet.di;
 
+import io.stormbird.wallet.interact.CreateTransactionInteract;
+import io.stormbird.wallet.repository.PasswordStore;
+import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -18,10 +21,11 @@ public class TokenFunctionModule
     TokenFunctionViewModelFactory provideTokenFunctionViewModelFactory(
             AssetDefinitionService assetDefinitionService,
             SellTicketRouter sellTicketRouter,
-            TransferTicketRouter transferTicketRouter) {
+            TransferTicketRouter transferTicketRouter,
+            CreateTransactionInteract createTransactionInteract) {
 
         return new TokenFunctionViewModelFactory(
-                assetDefinitionService, sellTicketRouter, transferTicketRouter);
+                assetDefinitionService, sellTicketRouter, transferTicketRouter, createTransactionInteract);
     }
 
     @Provides
@@ -32,5 +36,10 @@ public class TokenFunctionModule
     @Provides
     TransferTicketRouter provideTransferTicketRouter() {
         return new TransferTicketRouter();
+    }
+
+    @Provides
+    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository, PasswordStore passwordStore) {
+        return new CreateTransactionInteract(transactionRepository, passwordStore);
     }
 }

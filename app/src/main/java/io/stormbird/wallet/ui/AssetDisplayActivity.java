@@ -100,6 +100,18 @@ public class AssetDisplayActivity extends BaseActivity implements View.OnClickLi
         list.setHapticFeedbackEnabled(true);
 
         finishReceiver = new FinishReceiver(this);
+        checkForTokenScript();
+    }
+
+    /**
+     * If tokenscript is present then hide the button bar
+     */
+    private void checkForTokenScript()
+    {
+        if (adapter.containsScripted())
+        {
+            findViewById(R.id.layoutButtons).setVisibility(View.GONE);
+        }
     }
 
     @Override

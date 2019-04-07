@@ -5,15 +5,21 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RawRes;
+import android.support.annotation.RequiresApi;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.webkit.*;
 import io.stormbird.token.entity.MagicLinkInfo;
-import io.stormbird.wallet.web3.entity.Address;
-import io.stormbird.wallet.web3.entity.PageReadyCallback;
+import io.stormbird.wallet.R;
+import io.stormbird.wallet.web3.entity.*;
+import okhttp3.HttpUrl;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
 
 /**
  * Created by James on 3/04/2019.
@@ -21,11 +27,16 @@ import io.stormbird.wallet.web3.entity.PageReadyCallback;
  */
 public class Web3TokenView extends WebView
 {
-    private static final String JS_FUNCTION_CALL = "%1$s(%2$s)";
+    private static final String JS_PROTOCOL_CANCELLED = "cancelled";
+    private static final String JS_PROTOCOL_ON_SUCCESSFUL = "executeCallback(%1$s, null, \"%2$s\")";
+    private static final String JS_PROTOCOL_ON_FAILURE = "executeCallback(%1$s, \"%2$s\", null)";
 
     private JsInjectorClient jsInjectorClient;
     private TokenScriptClient tokenScriptClient;
     private PageReadyCallback assetHolder;
+
+    @Nullable
+    private OnSignPersonalMessageListener onSignPersonalMessageListener;
 
     public Web3TokenView(@NonNull Context context) {
         super(context);
@@ -44,7 +55,7 @@ public class Web3TokenView extends WebView
 
     @SuppressLint("SetJavaScriptEnabled")
     private void init() {
-        tokenScriptClient = new TokenScriptClient();
+        tokenScriptClient = new TokenScriptClient(this);
         jsInjectorClient = new JsInjectorClient(getContext());
         WebSettings webSettings = super.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -59,7 +70,13 @@ public class Web3TokenView extends WebView
         }
 
         setInitialScale(0);
-        addJavascriptInterface(this, "listener");
+
+        addJavascriptInterface(new SignCallbackJSInterface(
+                this,
+                innerOnSignTransactionListener,
+                innerOnSignMessageListener,
+                innerOnSignPersonalMessageListener,
+                innerOnSignTypedMessageListener), "alpha");
 
         super.setWebViewClient(tokenScriptClient);
     }
@@ -82,18 +99,65 @@ public class Web3TokenView extends WebView
         jsInjectorClient.setRpcUrl(MagicLinkInfo.getNodeURLByNetworkId(chainId));
     }
 
+    public void onSignPersonalMessageSuccessful(Message message, String signHex) {
+        long callbackId = message.leafPosition;
+        callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
+    }
+
+    @Override
+    public String getUrl()
+    {
+        return "TokenScript";
+    }
+
     public void callToJS(String function) {
-        //String callback = String.format(function, callbackId, param);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             post(() -> evaluateJavascript(function, value -> Log.d("WEB_VIEW", value)));
         }
     }
 
-    public void callToJS(String function, String args) {
-        String callback = String.format(JS_FUNCTION_CALL, function, args);
+    private void callbackToJS(long callbackId, String function, String param) {
+        String callback = String.format(function, callbackId, param);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));
         }
+    }
+
+    public void setOnSignPersonalMessageListener(@Nullable OnSignPersonalMessageListener onSignPersonalMessageListener) {
+        this.onSignPersonalMessageListener = onSignPersonalMessageListener;
+    }
+
+    private final OnSignTransactionListener innerOnSignTransactionListener = new OnSignTransactionListener() {
+        @Override
+        public void onSignTransaction(Web3Transaction transaction, String url) {
+
+        }
+    };
+
+    private final OnSignMessageListener innerOnSignMessageListener = new OnSignMessageListener() {
+        @Override
+        public void onSignMessage(Message message) {
+
+        }
+    };
+
+    private final OnSignPersonalMessageListener innerOnSignPersonalMessageListener = new OnSignPersonalMessageListener() {
+        @Override
+        public void onSignPersonalMessage(Message message) {
+            onSignPersonalMessageListener.onSignPersonalMessage(message);
+        }
+    };
+
+    private final OnSignTypedMessageListener innerOnSignTypedMessageListener = new OnSignTypedMessageListener() {
+        @Override
+        public void onSignTypedMessage(Message<TypedData[]> message) {
+
+        }
+    };
+
+    public void onSignCancel(Message message) {
+        long callbackId = message.leafPosition;
+        callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
     }
 
     public void setOnReadyCallback(PageReadyCallback holder)
@@ -101,13 +165,43 @@ public class Web3TokenView extends WebView
         assetHolder = holder;
     }
 
+    public String injectWeb3TokenScript(Context ctx, String view)
+    {
+        return jsInjectorClient.injectWeb3TokenScript(ctx, view);
+    }
+
+    public String injectWeb3TokenInit(Context ctx, String view, String tokenContent)
+    {
+        return jsInjectorClient.injectWeb3TokenInit(ctx, view, tokenContent);
+    }
+
+    public String injectJS(String view, String buildToken)
+    {
+        return jsInjectorClient.injectJS(view, buildToken);
+    }
+
     private class TokenScriptClient extends WebViewClient
     {
         private boolean loadingFinished = true;
         private boolean redirect = false;
+        private Web3TokenView parent;
+
+        public TokenScriptClient(Web3TokenView web3)
+        {
+            super();
+            parent = web3;
+        }
 
         @Override
         public void onPageFinished(WebView view, String url)
+        {
+            super.onPageFinished(view, url);
+            if (assetHolder != null)
+                assetHolder.onPageLoaded();
+        }
+
+        @Override
+        public void onPageCommitVisible(WebView view, String url)
         {
             super.onPageFinished(view, url);
             if (assetHolder != null)

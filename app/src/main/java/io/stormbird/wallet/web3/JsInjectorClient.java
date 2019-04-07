@@ -8,12 +8,12 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.stormbird.token.entity.MagicLinkInfo;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.web3.entity.Address;
@@ -116,7 +116,29 @@ public class JsInjectorClient {
         return injectJS(html, js);
     }
 
-    public static String injectJS(String html, String js) {
+    String injectWeb3TokenScript(Context ctx, String view)
+    {
+        String initSrc = loadFile(ctx, R.raw.init_action);
+        initSrc = String.format(initSrc, walletAddress, MagicLinkInfo.getNodeURLByNetworkId(chainId), chainId);
+        //now insert this source into the view
+        return injectJSembed(view, initSrc);
+    }
+
+    String injectWeb3TokenInit(Context ctx, String view, String tokenContent)
+    {
+        String initSrc = loadFile(ctx, R.raw.init_token);
+        initSrc = String.format(initSrc, tokenContent, walletAddress);
+        //now insert this source into the view
+        return injectJSembed(view, initSrc);
+    }
+
+    String injectJSembed(String view, String initSrc)
+    {
+        initSrc = "<script>\n" + initSrc + "</script>\n";
+        return injectJS(view, initSrc);
+}
+
+    String injectJS(String html, String js) {
         if (TextUtils.isEmpty(html)) {
             return html;
         }
@@ -129,7 +151,7 @@ public class JsInjectorClient {
         return html;
     }
 
-    private static int getInjectionPosition(String body) {
+    private int getInjectionPosition(String body) {
         body = body.toLowerCase();
         int ieDetectTagIndex = body.indexOf("<!--[if");
         int scriptTagIndex = body.indexOf("<script");
@@ -168,7 +190,7 @@ public class JsInjectorClient {
         return String.format(initSrc, address, rpcUrl, chainId);
     }
 
-    private String loadFile(Context context, @RawRes int rawRes) {
+    private static String loadFile(Context context, @RawRes int rawRes) {
         byte[] buffer = new byte[0];
         try {
             InputStream in = context.getResources().openRawResource(rawRes);

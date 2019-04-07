@@ -126,4 +126,8 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = TokenFunctionModule.class)
 	abstract TokenFunctionActivity bindTokenFunctionActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = TokenFunctionModule.class)
+	abstract FunctionActivity bindFunctionActivity();
 }

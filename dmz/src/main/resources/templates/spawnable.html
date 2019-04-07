@@ -73,7 +73,7 @@
               >
               <p class="mb-3" style="font-weight: 300;">Once you've downloaded the app on your phone,
               copy this link and switch to the app.</p>
-              <input name="uri" readonly="readonly" id="uri" th:value="'https://aw.app/' + ${base64}" class="form-control-tx form-control-lg" />
+              <input name="uri" readonly="readonly" id="uri" th:value="'https://' + ${domain} + '/' + ${base64}" class="form-control-tx form-control-lg" />
               <input name="message" readonly="readonly" id="message" hidden="hidden" value="Link copied to clipboard." class="form-control-tx form-control-lg"/>
               <input name="submit" type="submit" id="clipboard-button" value="Copy to Clipboard" class="btn-y btn-xl"/>
             </form>

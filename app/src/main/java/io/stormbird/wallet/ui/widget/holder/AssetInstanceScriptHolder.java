@@ -25,6 +25,9 @@ import io.stormbird.wallet.web3.entity.PageReadyCallback;
 
 import java.math.BigInteger;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
+import io.stormbird.token.util.ZonedDateTime;
 
 import static io.stormbird.wallet.C.Key.TICKET;
 
@@ -40,11 +43,11 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     private final Web3TokenView tokenView;
     private final Token token;
     private final LinearLayout iFrameLayout;
-    private final boolean clickThrough;
+    private final boolean iconified;
 
     private final AssetDefinitionService assetDefinitionService; //need to cache this locally, unless we cache every string we need in the constructor
 
-    public AssetInstanceScriptHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService assetService, boolean clickThrough)
+    public AssetInstanceScriptHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService assetService, boolean iconified)
     {
         super(resId, parent);
         iFrame = findViewById(R.id.iframe);
@@ -59,7 +62,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         tokenView.setWalletAddress(new Address(token.getWallet()));
         tokenView.setRpcUrl(token.tokenInfo.chainId);
         tokenView.setOnReadyCallback(this);
-        this.clickThrough = clickThrough;
+        this.iconified = iconified;
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -68,59 +71,15 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     {
         try
         {
-            int index = -1;
-            for (int i = 0; i < data.tokenIds.size(); i++)
-            {
-                if (!data.tokenIds.get(i).equals(BigInteger.ZERO))
-                {
-                    index = i;
-                    break;
-                }
-            }
-
-            if (index == -1)
-            {
-                fillEmpty();
-                return;
-            }
-
-            NonFungibleToken nft = assetDefinitionService.getNonFungibleToken(token.getAddress(), data.tokenIds.get(index));
-            StringBuilder attrs = new StringBuilder();
-            addPair(attrs, "name", token.getTokenTitle(nft));
-            addPair(attrs, "symbol", token.tokenInfo.symbol);
-            addPair(attrs, "_count", String.valueOf(data.tokenIds.size()));
-
-            for (String attrKey : nft.getAttributes().keySet())
-            {
-                NonFungibleToken.Attribute attr = nft.getAttribute(attrKey);
-                addPair(attrs, attrKey, attr.text);
-            }
-
-            String buildToken = "<script> const currentTokenInstance = {\n" +
-                    attrs.toString() + //insert token definition
-                    "}\n\n" +
-                    "class TokenScriptDef {\n" +
-                    "        constructor(walletAddress, tokenDef) {\n" +
-                    "          this.address = walletAddress;\n" +
-                    "          this.token = tokenDef;\n" +
-                    "        }\n" +
-                    "      }\n\n" +
-                    "      const web3 = new TokenScriptDef(" + token.getWallet() + ", currentTokenInstance)\n\n" +
-                    "function goGetIt() {\n" +
-                    "   refresh()\n" +
-                    "}\n" +
-                    "</script>";
-
-            String view = assetDefinitionService.getTokenView(token.getAddress(), "view");
-
-            String viewData = JsInjectorClient.injectJS(view, buildToken);
+            if (data.tokenIds.size() == 0) { fillEmpty(); return; }
+            String tokenAttrs = buildTokenAttrs(data);
+            String viewType = iconified ? "view-iconified" : "view";
+            String view = assetDefinitionService.getTokenView(token.getAddress(), viewType);
+            String viewData = tokenView.injectWeb3TokenInit(getContext(), view, tokenAttrs);
 
             tokenView.loadData(viewData, "text/html", "utf-8");
 
-            //need to wait for the view to finish loading before we can call token render
-            //see onPageLoaded
-
-            if (clickThrough)
+            if (iconified)
             {
                 iFrameLayout.setOnClickListener(v -> {
                     Intent intent = new Intent(getContext(), TokenFunctionActivity.class);
@@ -137,6 +96,25 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         }
     }
 
+    private String buildTokenAttrs(TicketRange data) throws Exception
+    {
+        BigInteger firstTokenId = data.tokenIds.get(0);
+
+        NonFungibleToken nft = assetDefinitionService.getNonFungibleToken(token.getAddress(), firstTokenId);
+        StringBuilder attrs = new StringBuilder();
+        addPair(attrs, "name", token.getTokenTitle(nft));
+        addPair(attrs, "symbol", token.tokenInfo.symbol);
+        addPair(attrs, "_count", String.valueOf(data.tokenIds.size()));
+
+        for (String attrKey : nft.getAttributes().keySet())
+        {
+            NonFungibleToken.Attribute attr = nft.getAttribute(attrKey);
+            addPair(attrs, attrKey, attr.text);
+        }
+
+        return attrs.toString();
+    }
+
     private void addPair(StringBuilder attrs, String name, String value) throws ParseException
     {
         attrs.append(name);
@@ -145,7 +123,11 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         if (name.equals("time"))
         {
             DateTime dt = DateTimeFactory.getDateTime(value);
-            value = "{ venue: new Date(" + dt.toEpoch() + ") }";// ((DateTime) dt).toString();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
+            String JSDate = dt.format(simpleDateFormat) + "T" + dt.format(simpleTimeFormat);
+
+            value = "{ generalizedTime: \"" + value + "\", date: new Date(\"" + JSDate + "\") }";// ((DateTime) dt).toString();
             attrs.append(value);
         }
         else

@@ -2,7 +2,9 @@ package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
@@ -33,7 +35,7 @@ import static io.stormbird.wallet.C.Key.TICKET;
  * Created by James on 2/04/2019.
  * Stormbird in Singapore
  */
-public class TokenFunctionActivity extends BaseActivity implements View.OnClickListener
+public class TokenFunctionActivity extends BaseActivity implements View.OnClickListener, Runnable
 {
     @Inject
     protected TokenFunctionViewModelFactory tokenFunctionViewModelFactory;
@@ -42,6 +44,8 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
     private Token token;
     private RecyclerView list;
     private NonFungibleTokenAdapter adapter;
+    private Handler handler;
+    private SystemView systemView;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
@@ -62,15 +66,26 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
 
         viewModel = ViewModelProviders.of(this, tokenFunctionViewModelFactory)
                 .get(TokenFunctionViewModel.class);
-        SystemView systemView = findViewById(R.id.system_view);
+        systemView = findViewById(R.id.system_view);
         ProgressView progressView = findViewById(R.id.progress_view);
         systemView.hide();
         progressView.hide();
+        SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
+        systemView.attachSwipeRefreshLayout(refreshLayout);
+        refreshLayout.setOnRefreshListener(this::updateView);
 
         initViews();
         toolbar();
         setTitle(getString(R.string.token_function));
         setupFunctions();
+
+        handler = new Handler();
+    }
+
+    private void updateView()
+    {
+        adapter.notifyDataSetChanged();
+        systemView.hide();
     }
 
     private void setupFunctions()
@@ -97,6 +112,7 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
     public void onResume()
     {
         super.onResume();
+        handler.postDelayed(this, 300);
     }
 
     @Override
@@ -125,7 +141,7 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
             break;
             case R.id.button_sell:
             {
-                viewModel.sellTicketRouter(this, token);// showSalesOrder(this, ticket);
+                viewModel.sellTicketRouter(this, token);
             }
             break;
             case R.id.button_transfer:
@@ -134,5 +150,11 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
             }
             break;
         }
+    }
+
+    @Override
+    public void run()
+    {
+        adapter.notifyDataSetChanged();
     }
 }

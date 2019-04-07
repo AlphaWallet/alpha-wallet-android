@@ -6,5 +6,5 @@ package io.stormbird.wallet.web3.entity;
  */
 public interface ScriptFunction
 {
-    void callFunction(String function);
+    void callFunction(String function, String arg);
 }

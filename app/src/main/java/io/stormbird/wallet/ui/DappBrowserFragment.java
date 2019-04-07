@@ -93,7 +93,7 @@ public class DappBrowserFragment extends Fragment implements
     private static final String DISCOVER_DAPPS = "DISCOVER_DAPPS";
     private static final String HISTORY = "HISTORY";
     public static final String SEARCH = "SEARCH";
-    private static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
+    public static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
     public static final String CURRENT_FRAGMENT = "currentFragment";
 
     @Inject

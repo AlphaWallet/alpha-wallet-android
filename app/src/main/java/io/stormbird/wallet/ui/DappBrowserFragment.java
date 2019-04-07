@@ -436,7 +436,7 @@ public class DappBrowserFragment extends Fragment implements
 
     private void detachFragment(String tag) {
         Fragment fragment = getChildFragmentManager().findFragmentByTag(tag);
-        if (fragment != null && fragment.isVisible()) {
+        if (fragment != null && fragment.isVisible() && !fragment.isDetached()) {
             getChildFragmentManager().beginTransaction()
                     .remove(fragment)
                     .commit();

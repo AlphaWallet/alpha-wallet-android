@@ -14,6 +14,7 @@ import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.util.Hex;
 import io.stormbird.wallet.web3.JsInjectorClient;
 import io.stormbird.wallet.web3.OnSignPersonalMessageListener;
@@ -45,8 +46,9 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
     private final Token token;
     private SignMessageDialog dialog;
     private final FunctionCallback functionCallback;
+    private final AssetDefinitionService assetDefinitionService;
 
-    public TokenFunctionViewHolder(int resId, ViewGroup parent, Token t, FunctionCallback callback)
+    public TokenFunctionViewHolder(int resId, ViewGroup parent, Token t, FunctionCallback callback, AssetDefinitionService service)
     {
         super(resId, parent);
         tokenView = findViewById(R.id.token_frame);
@@ -58,6 +60,7 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSignPersonalMessageListener(this);
         functionCallback = callback;
+        assetDefinitionService = service;
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -67,6 +70,8 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
         try
         {
             String injectedView = tokenView.injectWeb3TokenScript(getContext(), view);
+            String style = assetDefinitionService.getTokenView(token.getAddress(), "style");
+            injectedView = tokenView.injectStyleData(injectedView, style);
             tokenView.loadData(injectedView, "text/html", "utf-8");
         }
         catch (Exception ex)

@@ -9,6 +9,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.beans.XMLEncoder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -30,7 +31,7 @@ public class TokenDefinition {
     private String nameSpace;
 
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";
-    private static final String TOKENSCRIPT = "http://tokenscript.org/ns/tokenscript";
+    private static final String TOKENSCRIPT = "http://tokenscript.org/2019/04/tokenscript";
 
     /* the following are incorrect, waiting to be further improved
      with suitable XML, because none of these String typed class variables
@@ -81,6 +82,10 @@ public class TokenDefinition {
         public AttributeType(Element attr) {
             name = getLocalisedString(attr,"name");
             if (name == null) return;
+            if (name.equals("locality"))
+            {
+                System.out.println("yoless");
+            }
             id = attr.getAttribute("id");
             try {
                 switch (attr.getAttribute("syntax")) { // We don't validate syntax here; schema does it.
@@ -155,6 +160,10 @@ public class TokenDefinition {
                             populate(origin);
                             break;
                         default: // "unsigned"
+                            if (name.equals("locality"))
+                            {
+                                System.out.println("yoless");
+                            }
                             as = As.Unsigned;
                     }
                     if (origin.hasAttribute("bitmask")) {
@@ -292,29 +301,39 @@ public class TokenDefinition {
     Node getLocalisedNode(Element nameContainer, String tagName) {
         NodeList nList = nameContainer.getElementsByTagNameNS(nameSpace, tagName);
         Element name;
+        Element nonLocalised = null;
         for (int i = 0; i < nList.getLength(); i++) {
             name = (Element) nList.item(i);
             String langAttr = getLocalisationLang(name);
             if (langAttr.equals(locale.getLanguage())) {
                 return name;
             }
+            else if (langAttr.length() == 0)
+            {
+                nonLocalised = name;
+            }
         }
 
-        return null;
+        return nonLocalised;
     }
 
     Node getNode(Element nameContainer, String tagName) {
-        NodeList nList = nameContainer.getElementsByTagNameNS(nameSpace, tagName);
+        NodeList nList = nameContainer.getElementsByTagName(tagName);
         Element name;
+        Element nonLocalised = null;
         for (int i = 0; i < nList.getLength(); i++) {
             name = (Element) nList.item(i);
             String langAttr = getLocalisationLang(name);
             if (langAttr.equals(locale.getLanguage())) {
                 return name;
             }
+            else if (langAttr.length() == 0)
+            {
+                nonLocalised = name;
+            }
         }
 
-        return null;
+        return nonLocalised;
     }
 
     String getLocalisedString(Element nameContainer, String tagName, String typeAttr) {
@@ -459,6 +478,7 @@ public class TokenDefinition {
         nList = cards.getElementsByTagNameNS(nameSpace, "token-card");
         if (nList.getLength() == 0) return;
         Map<String, String> attributeSet = new ConcurrentHashMap<>();
+        addToHTMLSet(attributeSet, cards, "style");
         addToHTMLSet(attributeSet, cards,"view-iconified");
         addToHTMLSet(attributeSet, cards,"view");
 
@@ -495,10 +515,11 @@ public class TokenDefinition {
 
     private void addToHTMLSet(Map<String, String> attributeSet, Element root, String tagName)
     {
-        Node iconified = getLocalisedNode(root, tagName);
-        if (iconified != null)
+        Node view = getLocalisedNode(root, tagName);
+        if (view == null) view = getNode(root, tagName);
+        if (view != null)
         {
-            String iconifiedContent = getHTMLContent(iconified);
+            String iconifiedContent = getHTMLContent(view);
             attributeSet.put(tagName, iconifiedContent);
         }
     }
@@ -703,15 +724,12 @@ public class TokenDefinition {
     private String getHTMLContent(Node content)
     {
         StringBuilder sb = new StringBuilder();
+
         for (int i = 0; i < content.getChildNodes().getLength(); i++)
         {
             Node child = content.getChildNodes().item(i);
             switch (child.getNodeType())
             {
-                case Node.TEXT_NODE:
-                    String parsed = child.getTextContent().replace("\u2019", "&#x2019;");
-                    sb.append(parsed);
-                    break;
                 case Node.ELEMENT_NODE:
                     if (child.getLocalName().equals("iframe")) continue;
                     sb.append("<");
@@ -723,9 +741,11 @@ public class TokenDefinition {
                     sb.append(child.getLocalName());
                     sb.append(">");
                     break;
-                case Node.COMMENT_NODE:
+                case Node.COMMENT_NODE: //no need to record comment nodes
                     break;
                 default:
+                    String parsed = child.getTextContent().replace("\u2019", "&#x2019;");
+                    sb.append(parsed);
                     break;
             }
         }

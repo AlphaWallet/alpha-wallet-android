@@ -75,7 +75,9 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
             String tokenAttrs = buildTokenAttrs(data);
             String viewType = iconified ? "view-iconified" : "view";
             String view = assetDefinitionService.getTokenView(token.getAddress(), viewType);
+            String style = assetDefinitionService.getTokenView(token.getAddress(), "style");
             String viewData = tokenView.injectWeb3TokenInit(getContext(), view, tokenAttrs);
+            viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
 
             tokenView.loadData(viewData, "text/html", "utf-8");
 

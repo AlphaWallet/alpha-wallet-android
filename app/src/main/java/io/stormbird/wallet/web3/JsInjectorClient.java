@@ -190,6 +190,12 @@ public class JsInjectorClient {
         return String.format(initSrc, address, rpcUrl, chainId);
     }
 
+    String injectStyle(String view, String style)
+    {
+        style = "<style type=\"text/css\">\n" + style + "</style>\n";
+        return injectJS(view, style);
+    }
+
     private static String loadFile(Context context, @RawRes int rawRes) {
         byte[] buffer = new byte[0];
         try {

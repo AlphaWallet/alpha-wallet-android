@@ -47,7 +47,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         token = getIntent().getParcelableExtra(TICKET);
         viewCode = getIntent().getStringExtra(C.EXTRA_STATE);
         list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(token, viewCode, this);
+        adapter = new NonFungibleTokenAdapter(token, viewCode, this, viewModel.getAssetDefinitionService());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
         list.setHapticFeedbackEnabled(true);

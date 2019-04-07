@@ -180,6 +180,11 @@ public class Web3TokenView extends WebView
         return jsInjectorClient.injectJS(view, buildToken);
     }
 
+    public String injectStyleData(String viewData, String style)
+    {
+        return jsInjectorClient.injectStyle(viewData, style);
+    }
+
     private class TokenScriptClient extends WebViewClient
     {
         private boolean loadingFinished = true;

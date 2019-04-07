@@ -68,9 +68,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         setTokenRange(token, displayIds);
     }
 
-    public NonFungibleTokenAdapter(Token token, String viewCode, FunctionCallback callback)
+    public NonFungibleTokenAdapter(Token token, String viewCode, FunctionCallback callback, AssetDefinitionService service)
     {
-        super(null, null);
+        super(null, service);
         functionCallback = callback;
         this.token = token;
         TokenFunctionSortedItem item = new TokenFunctionSortedItem(viewCode, 200);
@@ -105,7 +105,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
                 holder = new AssetInstanceScriptHolder(R.layout.item_iframe_token, parent, token, assetService, clickThrough);
                 break;
             case TokenFunctionViewHolder.VIEW_TYPE:
-                holder = new TokenFunctionViewHolder(R.layout.item_function_layout, parent, token, functionCallback);
+                holder = new TokenFunctionViewHolder(R.layout.item_function_layout, parent, token, functionCallback, assetService);
                 tokenScriptHolderCallback = (ScriptFunction)holder;
                 break;
         }

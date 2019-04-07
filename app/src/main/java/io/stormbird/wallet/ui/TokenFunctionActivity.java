@@ -12,7 +12,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import dagger.android.AndroidInjection;
+import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TSAction;
+import io.stormbird.token.entity.TicketRange;
+import io.stormbird.token.util.DateTime;
+import io.stormbird.token.util.DateTimeFactory;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
@@ -20,12 +24,17 @@ import io.stormbird.wallet.ui.widget.adapter.NonFungibleTokenAdapter;
 import io.stormbird.wallet.viewmodel.AssetDisplayViewModel;
 import io.stormbird.wallet.viewmodel.TokenFunctionViewModel;
 import io.stormbird.wallet.viewmodel.TokenFunctionViewModelFactory;
+import io.stormbird.wallet.web3.Web3TokenView;
+import io.stormbird.wallet.web3.entity.Address;
+import io.stormbird.wallet.web3.entity.PageReadyCallback;
 import io.stormbird.wallet.widget.ProgressView;
 import io.stormbird.wallet.widget.SystemView;
 
 import javax.inject.Inject;
 
 import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -35,44 +44,60 @@ import static io.stormbird.wallet.C.Key.TICKET;
  * Created by James on 2/04/2019.
  * Stormbird in Singapore
  */
-public class TokenFunctionActivity extends BaseActivity implements View.OnClickListener, Runnable
+public class TokenFunctionActivity extends BaseActivity implements View.OnClickListener, Runnable, PageReadyCallback
 {
     @Inject
     protected TokenFunctionViewModelFactory tokenFunctionViewModelFactory;
     private TokenFunctionViewModel viewModel;
 
     private Token token;
-    private RecyclerView list;
-    private NonFungibleTokenAdapter adapter;
     private Handler handler;
-    private SystemView systemView;
+    private Web3TokenView tokenView;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
         String displayIds = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
-        list = findViewById(R.id.listTickets);
+        tokenView = findViewById(R.id.web3_tokenview);
         List<BigInteger> idList = token.stringHexToBigIntegerList(displayIds);
-        adapter = new NonFungibleTokenAdapter(token, token.intArrayToString(idList, false), viewModel.getAssetDefinitionService());
-        list.setLayoutManager(new LinearLayoutManager(this));
-        list.setAdapter(adapter);
-        list.setHapticFeedbackEnabled(true);
+
+        tokenView.setChainId(token.tokenInfo.chainId);
+        tokenView.setWalletAddress(new Address(token.getWallet()));
+        tokenView.setRpcUrl(token.tokenInfo.chainId);
+        tokenView.setOnReadyCallback(this);
+
+        try
+        {
+            String tokenAttrs = buildTokenAttrs(idList);
+            String view = viewModel.getAssetDefinitionService().getTokenView(token.getAddress(), "view");
+            String style = viewModel.getAssetDefinitionService().getTokenView(token.getAddress(), "style");
+            String viewData = tokenView.injectWeb3TokenInit(this, view, tokenAttrs);
+            viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
+
+            tokenView.loadData(viewData, "text/html", "utf-8");
+        }
+        catch (Exception e)
+        {
+            fillEmpty();
+        }
+    }
+
+    private void fillEmpty()
+    {
+        tokenView.loadData("<html><body>No Data</body></html>", "text/html", "utf-8");
     }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_asset_display);
+        setContentView(R.layout.activity_script_view2);
 
         viewModel = ViewModelProviders.of(this, tokenFunctionViewModelFactory)
                 .get(TokenFunctionViewModel.class);
-        systemView = findViewById(R.id.system_view);
+        SystemView systemView = findViewById(R.id.system_view);
         ProgressView progressView = findViewById(R.id.progress_view);
         systemView.hide();
         progressView.hide();
-        SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
-        systemView.attachSwipeRefreshLayout(refreshLayout);
-        refreshLayout.setOnRefreshListener(this::updateView);
 
         initViews();
         toolbar();
@@ -84,8 +109,7 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
 
     private void updateView()
     {
-        adapter.notifyDataSetChanged();
-        systemView.hide();
+        //systemView.hide();
     }
 
     private void setupFunctions()
@@ -155,6 +179,54 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
     @Override
     public void run()
     {
-        adapter.notifyDataSetChanged();
+        //adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onPageLoaded()
+    {
+        tokenView.callToJS("refresh()");
+    }
+
+    private String buildTokenAttrs(List<BigInteger> tokenId) throws Exception
+    {
+        NonFungibleToken nft = viewModel.getAssetDefinitionService().getNonFungibleToken(token.getAddress(), tokenId.get(0));
+        StringBuilder attrs = new StringBuilder();
+        addPair(attrs, "name", token.getTokenTitle(nft));
+        addPair(attrs, "symbol", token.tokenInfo.symbol);
+        addPair(attrs, "_count", String.valueOf(tokenId.size()));
+
+        for (String attrKey : nft.getAttributes().keySet())
+        {
+            NonFungibleToken.Attribute attr = nft.getAttribute(attrKey);
+            addPair(attrs, attrKey, attr.text);
+        }
+
+        return attrs.toString();
+    }
+
+    private void addPair(StringBuilder attrs, String name, String value) throws ParseException
+    {
+        attrs.append(name);
+        attrs.append(": ");
+
+        if (name.equals("time"))
+        {
+            DateTime dt = DateTimeFactory.getDateTime(value);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
+            String JSDate = dt.format(simpleDateFormat) + "T" + dt.format(simpleTimeFormat);
+
+            value = "{ generalizedTime: \"" + value + "\", date: new Date(\"" + JSDate + "\") }";// ((DateTime) dt).toString();
+            attrs.append(value);
+        }
+        else
+        {
+            attrs.append("\"");
+            attrs.append(value);
+            attrs.append("\"");
+        }
+
+        attrs.append(",\n");
     }
 }

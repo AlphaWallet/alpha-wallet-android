@@ -59,10 +59,10 @@ public class Web3TokenView extends WebView
         jsInjectorClient = new JsInjectorClient(getContext());
         WebSettings webSettings = super.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setDisplayZoomControls(false);
-        webSettings.setLoadWithOverviewMode(false);
+        //webSettings.setLoadWithOverviewMode(false);
         webSettings.setDomStorageEnabled(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -70,6 +70,10 @@ public class Web3TokenView extends WebView
         }
 
         setInitialScale(0);
+        clearCache(true);
+
+
+        setWebChromeClient(new WebChromeClient());
 
         addJavascriptInterface(new SignCallbackJSInterface(
                 this,

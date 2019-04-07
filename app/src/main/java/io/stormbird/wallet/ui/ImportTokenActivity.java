@@ -281,17 +281,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         if (order.price == 0)
         {
-            String paymasterUrlPrefix;
-            switch (order.contractType)
-            {
-                case currencyLink:
-                    paymasterUrlPrefix = this.paymasterUrlPrefix;
-                    break;
-                default:
-                    paymasterUrlPrefix = viewModel.getAssetDefinitionService().getFeemasterAPI(viewModel.getSalesOrder().contractAddress);
-                    break;
-            }
-
             if (paymasterUrlPrefix != null)
             {
                 viewModel.checkFeemaster(paymasterUrlPrefix);

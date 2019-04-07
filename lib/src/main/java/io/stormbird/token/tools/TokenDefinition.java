@@ -9,7 +9,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.beans.XMLEncoder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -82,10 +81,6 @@ public class TokenDefinition {
         public AttributeType(Element attr) {
             name = getLocalisedString(attr,"name");
             if (name == null) return;
-            if (name.equals("locality"))
-            {
-                System.out.println("yoless");
-            }
             id = attr.getAttribute("id");
             try {
                 switch (attr.getAttribute("syntax")) { // We don't validate syntax here; schema does it.
@@ -160,10 +155,6 @@ public class TokenDefinition {
                             populate(origin);
                             break;
                         default: // "unsigned"
-                            if (name.equals("locality"))
-                            {
-                                System.out.println("yoless");
-                            }
                             as = As.Unsigned;
                     }
                     if (origin.hasAttribute("bitmask")) {
@@ -301,20 +292,15 @@ public class TokenDefinition {
     Node getLocalisedNode(Element nameContainer, String tagName) {
         NodeList nList = nameContainer.getElementsByTagNameNS(nameSpace, tagName);
         Element name;
-        Element nonLocalised = null;
         for (int i = 0; i < nList.getLength(); i++) {
             name = (Element) nList.item(i);
             String langAttr = getLocalisationLang(name);
             if (langAttr.equals(locale.getLanguage())) {
                 return name;
             }
-            else if (langAttr.length() == 0)
-            {
-                nonLocalised = name;
-            }
         }
 
-        return nonLocalised;
+        return null;
     }
 
     Node getNode(Element nameContainer, String tagName) {
@@ -342,13 +328,29 @@ public class TokenDefinition {
         for (int i = 0; i < nList.getLength(); i++) {
             name = (Element) nList.item(i);
             String langAttr = getLocalisationLang(name);
-            String type = name.getAttribute("type");
-            if (langAttr.equals(locale.getLanguage()) && type != null && type.equals(typeAttr)) {
+            if (langAttr.equals(locale.getLanguage()) && hasAttribute(name, typeAttr)) {
                 return name.getTextContent();
             }
         }
 
         return null;
+    }
+
+    private boolean hasAttribute(Element name, String typeAttr)
+    {
+        if (name.hasAttributes())
+        {
+            for (int i = 0; i < name.getAttributes().getLength(); i++)
+            {
+                Node thisAttr = name.getAttributes().item(i);
+                if (thisAttr.getTextContent() != null && thisAttr.getTextContent().equals(typeAttr))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private String getLocalisationLang(Element name)
@@ -508,7 +510,6 @@ public class TokenDefinition {
         {
             tsAction.view = getHTMLContent(viewNode);
         }
-        System.out.println("type");
 
         actions.put(name, tsAction);
     }

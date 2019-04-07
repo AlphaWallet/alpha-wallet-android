@@ -226,6 +226,14 @@ public class DappBrowserFragment extends Fragment implements
         getChildFragmentManager().beginTransaction()
                 .add(R.id.frame, fragment, tag)
                 .commit();
+
+        if (tag.equals(DISCOVER_DAPPS) || tag.equals(MY_DAPPS) || tag.equals(HISTORY)) {
+            back.setAlpha(1.0f);
+            back.setOnClickListener(v -> homePressed());
+        } else {
+            setBackForwardButtons();
+            back.setOnClickListener(v -> goToPreviousPage());
+        }
     }
 
     private void detachFragments(boolean detachHome) {
@@ -428,7 +436,7 @@ public class DappBrowserFragment extends Fragment implements
 
     private void detachFragment(String tag) {
         Fragment fragment = getChildFragmentManager().findFragmentByTag(tag);
-        if (fragment != null && fragment.isVisible()) {
+        if (fragment != null && fragment.isVisible() && !fragment.isDetached()) {
             getChildFragmentManager().beginTransaction()
                     .remove(fragment)
                     .commit();

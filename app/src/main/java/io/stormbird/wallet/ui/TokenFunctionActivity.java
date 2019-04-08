@@ -53,12 +53,13 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
     private Token token;
     private Handler handler;
     private Web3TokenView tokenView;
+    private List<BigInteger> idList;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
         String displayIds = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
         tokenView = findViewById(R.id.web3_tokenview);
-        List<BigInteger> idList = token.stringHexToBigIntegerList(displayIds);
+        idList = token.stringHexToBigIntegerList(displayIds);
 
         tokenView.setChainId(token.tokenInfo.chainId);
         tokenView.setWalletAddress(new Address(token.getWallet()));
@@ -158,9 +159,16 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
             {
                 Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.getAddress());
                 //this will be the user function
-                String buttonText = ((Button)v).getText().toString();
-                TSAction action = functions.get(buttonText);
-                viewModel.showFunction(this, token, action.view);
+                if (functions.size() == 0)
+                {
+                    viewModel.showRedeemToken(this, token, idList);
+                }
+                else
+                {
+                    String buttonText = ((Button) v).getText().toString();
+                    TSAction action = functions.get(buttonText);
+                    viewModel.showFunction(this, token, action.view);
+                }
             }
             break;
             case R.id.button_sell:

@@ -130,7 +130,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
             String JSDate = dt.format(simpleDateFormat) + "T" + dt.format(simpleTimeFormat);
 
             value = "{ generalizedTime: \"" + value + "\", date: new Date(\"" + JSDate + "\") }";// ((DateTime) dt).toString();
-            attrs.append(value);
+            attrs.append(value); ////{ generalizedTime: "1528988400", date: new Date("2018-06-14T03:00:00+0000") }
         }
         else
         {

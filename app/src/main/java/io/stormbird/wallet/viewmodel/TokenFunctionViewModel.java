@@ -3,6 +3,7 @@ package io.stormbird.wallet.viewmodel;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.entity.Wallet;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -14,9 +15,15 @@ import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.FunctionActivity;
+import io.stormbird.wallet.ui.RedeemAssetSelectActivity;
+import io.stormbird.wallet.ui.RedeemSignatureDisplayActivity;
+import io.stormbird.wallet.ui.widget.entity.TicketRangeParcel;
 import io.stormbird.wallet.web3.entity.Message;
 
-import static io.stormbird.wallet.C.Key.TICKET;
+import java.math.BigInteger;
+import java.util.List;
+
+import static io.stormbird.wallet.C.Key.*;
 
 /**
  * Created by James on 2/04/2019.
@@ -55,6 +62,17 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(TICKET, token);
         intent.putExtra(C.EXTRA_STATE, viewData);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        ctx.startActivity(intent);
+    }
+
+    public void showRedeemToken(Context ctx, Token token, List<BigInteger> ids) {
+
+        TicketRangeParcel parcel = new TicketRangeParcel(new TicketRange(ids, token.getAddress(), true));
+        Intent intent = new Intent(ctx, RedeemSignatureDisplayActivity.class);
+        intent.putExtra(WALLET, new Wallet(token.getWallet()));
+        intent.putExtra(TICKET, token);
+        intent.putExtra(TICKET_RANGE, parcel);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         ctx.startActivity(intent);
     }
 

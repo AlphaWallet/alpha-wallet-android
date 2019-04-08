@@ -93,16 +93,24 @@
             android:layout_height="0dp"
             android:layout_alignParentTop="true"
             android:layout_above="@id/layoutButtons"
-            android:layout_marginTop="10dp"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp">
+            android:layout_marginTop="10dp">
+
+            <LinearLayout
+                android:id="@+id/layout_webwrapper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_card_shadow"
+                android:layout_margin="3dp"
+                android:padding="10dp">
 
                 <io.stormbird.wallet.web3.Web3TokenView
                     android:id="@+id/web3_tokenview"
-                    android:background="@drawable/background_card_shadow"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
+
                 </io.stormbird.wallet.web3.Web3TokenView>
+
+            </LinearLayout>
         </LinearLayout>
 
     </RelativeLayout>

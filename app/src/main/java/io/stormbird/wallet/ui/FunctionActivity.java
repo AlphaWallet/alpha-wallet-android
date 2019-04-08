@@ -99,9 +99,8 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         handler = new Handler();
         systemView.hide();
         progressView.hide();
-        //SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
-        //systemView.attachSwipeRefreshLayout(refreshLayout);
-        //refreshLayout.setOnRefreshListener(this::updateView);
+
+        findViewById(R.id.layout_webwrapper).setBackgroundResource(R.drawable.background_card);
 
         initViews();
         toolbar();

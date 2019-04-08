@@ -346,7 +346,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         SelectNetworkDialog dialog = new SelectNetworkDialog(this, viewModel.getNetworkList(), String.valueOf(networkInfo.chainId), true);
         dialog.setOnClickListener(v1 -> {
             networkInfo = viewModel.getNetwork(dialog.getSelectedChainId());
-            setupNetwork(networkInfo.chainId);
+            if (networkInfo != null) setupNetwork(networkInfo.chainId);
             dialog.dismiss();
         });
         dialog.show();

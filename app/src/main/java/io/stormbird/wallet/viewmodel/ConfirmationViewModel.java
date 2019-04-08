@@ -131,7 +131,7 @@ public class ConfirmationViewModel extends BaseViewModel {
         if (gasSettings.getValue() == null)
         {
             disposable = fetchGasSettingsInteract
-                    .fetch(transaction, isNonFungible)
+                    .fetch(transaction, isNonFungible, chainId)
                     .subscribe(this::onGasSettings, this::onError);
         }
     }

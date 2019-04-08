@@ -34,8 +34,8 @@ public class FetchGasSettingsInteract {
         return repository.getGasSettings(forTokenTransfer);
     }
 
-    public Single<GasSettings> fetch(byte[] transactionBytes, boolean isNonFungible) {
-        return repository.getGasSettings(transactionBytes, isNonFungible);
+    public Single<GasSettings> fetch(byte[] transactionBytes, boolean isNonFungible, int chainId) {
+        return repository.getGasSettings(transactionBytes, isNonFungible, chainId);
     }
 
     public MutableLiveData<BigInteger> gasPriceUpdate()

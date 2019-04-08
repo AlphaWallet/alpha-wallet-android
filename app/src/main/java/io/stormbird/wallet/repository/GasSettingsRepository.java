@@ -18,8 +18,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 
-import static io.stormbird.wallet.C.GAS_LIMIT_MIN;
-import static io.stormbird.wallet.C.GAS_PER_BYTE;
+import static io.stormbird.wallet.C.*;
 
 public class GasSettingsRepository implements GasSettingsRepositoryType
 {
@@ -94,9 +93,10 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
         });
     }
 
-    public Single<GasSettings> getGasSettings(byte[] transactionBytes, boolean isNonFungible) {
+    public Single<GasSettings> getGasSettings(byte[] transactionBytes, boolean isNonFungible, int chainId) {
         return Single.fromCallable( () -> {
             BigInteger gasLimit = new BigInteger(C.DEFAULT_GAS_LIMIT);
+            if (cachedGasPrice == null) setCachedPrice(chainId);
             if (transactionBytes != null) {
                 if (isNonFungible)
                 {

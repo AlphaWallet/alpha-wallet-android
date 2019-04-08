@@ -25,6 +25,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 
 import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
+import static io.stormbird.token.tools.ParseMagicLink.spawnable;
 import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
 
 public class FeeMasterService
@@ -56,6 +57,8 @@ public class FeeMasterService
     {
         switch (order.contractType)
         {
+            case spawnable:
+                return sendFeemasterTransaction(url, chainId, wallet.address, order.expiry, "", order.signature).toObservable(); //empty string for spawn
             case currencyLink:
                 return sendFeemasterCurrencyTransaction(url, chainId, wallet.address, order);
             default:
@@ -142,6 +145,10 @@ public class FeeMasterService
             {
                 StringBuilder sb = new StringBuilder();
                 sb.append(url);
+                if ((url.length() - url.indexOf("/api")) < 6)
+                {
+                    sb.append("/claimToken/");
+                }
                 Map<String, String> args = new HashMap<>();
                 args.put("address", toAddress);
                 args.put("indices", indices);

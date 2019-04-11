@@ -2,6 +2,7 @@ package io.stormbird.token.tools;
 
 import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.NonFungibleToken;
+import io.stormbird.token.entity.ParseResult;
 import io.stormbird.token.entity.TSAction;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
@@ -31,6 +32,7 @@ public class TokenDefinition {
 
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";
     private static final String TOKENSCRIPT = "http://tokenscript.org/2019/04/tokenscript";
+    private static final String TOKENSCRIPTBASE = "http://tokenscript.org/";
 
     /* the following are incorrect, waiting to be further improved
      with suitable XML, because none of these String typed class variables
@@ -422,7 +424,7 @@ public class TokenDefinition {
         }
     }
 
-    public TokenDefinition(InputStream xmlAsset, Locale locale) throws IOException, SAXException{
+    public TokenDefinition(InputStream xmlAsset, Locale locale, ParseResult result) throws IOException, SAXException{
         this.locale = locale;
         /* guard input from bad programs which creates Locale not following ISO 639 */
         if (locale.getLanguage().length() < 2 || locale.getLanguage().length() > 3) {
@@ -440,16 +442,9 @@ public class TokenDefinition {
         }
         Document xml = dBuilder.parse(xmlAsset);
         xml.getDocumentElement().normalize();
-        nameSpace = ATTESTATION;
+        determineNamespace(xml, result);
 
-        NodeList nList = xml.getElementsByTagNameNS(ATTESTATION, "token");
-        NodeList nListTS = xml.getElementsByTagNameNS(TOKENSCRIPT, "token");
-
-        if (nList.getLength() == 0 && nListTS.getLength() > 0)
-        {
-            nameSpace = TOKENSCRIPT;
-            nList = nListTS;
-        }
+        NodeList nList = xml.getElementsByTagNameNS(nameSpace, "token");
 
         if (nList.getLength() == 0)
         {
@@ -469,6 +464,32 @@ public class TokenDefinition {
         //TODO: 'appearance' in XML needs to have an HTML attribute
         extractTags(xml, "appearance", true);
         extractTags(xml, "features", false);
+    }
+
+    private void determineNamespace(Document xml, ParseResult result)
+    {
+        nameSpace = ATTESTATION;
+
+        NodeList check = xml.getChildNodes();
+        for (int i = 0; i < check.getLength(); i++)
+        {
+            Node n = check.item(i);
+            if (!n.hasAttributes()) continue;
+            //check attributes
+            for (int j = 0; j < n.getAttributes().getLength(); j++)
+            {
+                Node thisAttr = n.getAttributes().item(j);
+                if (thisAttr.getNodeValue().contains(TOKENSCRIPTBASE))
+                {
+                    nameSpace = TOKENSCRIPT;
+                    if (!thisAttr.getNodeValue().equals(TOKENSCRIPT))
+                    {
+                        result.parseMessage(ParseResult.ParseResultId.OK);
+                    }
+                    return;
+                }
+            }
+        }
     }
 
     //TODO: switch from hard-code to token parser

@@ -12,9 +12,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.NonFungibleToken;
+import io.stormbird.token.entity.ParseResult;
 import io.stormbird.token.entity.TSAction;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.ui.HomeActivity;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.xml.sax.SAXException;
@@ -38,7 +40,7 @@ import static org.web3j.crypto.WalletUtils.isValidAddress;
  * and also provide a consistent way to get XML values
  */
 
-public class AssetDefinitionService
+public class AssetDefinitionService implements ParseResult
 {
     private static final String XML_EXT = "xml";
     private final Context context;
@@ -259,7 +261,7 @@ public class AssetDefinitionService
         TokenDefinition definition = null;
         definition = new TokenDefinition(
                 xmlInputStream,
-                context.getResources().getConfiguration().locale);
+                context.getResources().getConfiguration().getLocales().get(0), this);
 
         //now assign the networks
         if (definition.addresses.size() > 0)
@@ -690,6 +692,21 @@ public class AssetDefinitionService
         else
         {
             return null;
+        }
+    }
+
+    @Override
+    public void parseMessage(ParseResultId parseResult)
+    {
+        switch (parseResult)
+        {
+            case PARSER_OUT_OF_DATE:
+                HomeActivity.setUpdatePrompt();
+                break;
+            case XML_OUT_OF_DATE:
+                break;
+            case OK:
+                break;
         }
     }
 }

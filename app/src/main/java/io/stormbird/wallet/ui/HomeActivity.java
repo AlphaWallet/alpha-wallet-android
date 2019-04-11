@@ -68,6 +68,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private final WalletFragment walletFragment;
     private String walletTitle;
     private final LifecycleObserver lifeCycle;
+    private static boolean updatePrompt = false;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -109,7 +110,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        MultiDex.install(this);
     }
 
     @Override
@@ -403,6 +403,36 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 invalidateOptionsMenu();
                 break;
         }
+        checkWarnings();
+    }
+
+    private void checkWarnings()
+    {
+        if (updatePrompt)
+        {
+            hideDialog();
+            updatePrompt = false;
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+            int warns = pref.getInt("update_warns", 0) + 1;
+            if (warns < 3)
+            {
+                cDialog = new AWalletConfirmationDialog(this);
+                cDialog.setTitle(R.string.alphawallet_update);
+                cDialog.setCancelable(true);
+                cDialog.setSmallText("Using an old version of Alphawallet. Please update from the Play Store or Alphawallet website.");
+                cDialog.setPrimaryButtonText(R.string.ok);
+                cDialog.setPrimaryButtonListener(v -> {
+                    cDialog.dismiss();
+                });
+                cDialog.show();
+            }
+            else if (warns > 10)
+            {
+                warns = 0;
+            }
+
+            pref.edit().putInt("update_warns", warns).apply();
+        }
     }
 
     @Override
@@ -655,5 +685,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 view.setAlpha(0);
             }
         }
+    }
+
+    public static void setUpdatePrompt()
+    {
+        //TODO: periodically check this value (eg during page flipping)
+        //Set alert to user to update their app
+        updatePrompt = true;
     }
 }

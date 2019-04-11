@@ -124,13 +124,26 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
 
         if (name.equals("time"))
         {
+            String JSDate;
             DateTime dt = DateTimeFactory.getDateTime(value);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
-            String JSDate = dt.format(simpleDateFormat) + "T" + dt.format(simpleTimeFormat);
+            if (dt instanceof ZonedDateTime)
+            {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
+                JSDate = dt.format(simpleDateFormat) + "T" + dt.format(simpleTimeFormat);
+                value = "{ generalizedTime: \"" + value + "\", date: new Date(\"" + JSDate + "\") }";// ((DateTime) dt).toString();
+            }
+            else
+            {
+                //interpret binary time only provide date
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
+                SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("yyyyMMddhhmmssZ"); //20180711 090000+0800
+                JSDate = dt.format(simpleDateFormat) + "T" + dt.format(simpleTimeFormat);
+                value = "{ generalizedTime: \"" + dt.format(simpleDateFormat2) + "\",date: new Date(\"" + JSDate + "\") }";
+            }
 
-            value = "{ generalizedTime: \"" + value + "\", date: new Date(\"" + JSDate + "\") }";// ((DateTime) dt).toString();
-            attrs.append(value); ////{ generalizedTime: "1528988400", date: new Date("2018-06-14T03:00:00+0000") }
+            attrs.append(value);
         }
         else
         {

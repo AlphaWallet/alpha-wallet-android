@@ -22,6 +22,9 @@ import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
+import org.web3j.crypto.WalletUtils;
+import org.web3j.ens.EnsResolver;
+import org.web3j.ens.contracts.generated.ENS;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
@@ -401,20 +404,20 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<String> callAddressMethod(String method, byte[] resultHash, String address)
+    public Single<String> resolveENS(int chainId, String address)
     {
         return Single.fromCallable(() -> {
-            org.web3j.abi.datatypes.Function function = addressFunction(method, resultHash);
-            Wallet temp = new Wallet(null);
-            String responseValue = callCustomNetSmartContractFunction(function, address, temp, MAINNET_ID);
-
-            if (responseValue == null) return BURN_ADDRESS;
-
-            List<Type> response = FunctionReturnDecoder.decode(
-                    responseValue, function.getOutputParameters());
-            if (response.size() == 1) {
-                return (String)response.get(0).getValue();
-            } else {
+            int useChainId = chainId;
+            if (!EthereumNetworkRepository.hasRealValue(useChainId)) useChainId = MAINNET_ID;
+            Web3j service = getService(useChainId); //resolve ENS on mainnet unless this network has value
+            EnsResolver ensResolver = new EnsResolver(service);
+            String resolvedAddress = ensResolver.resolve(address);
+            if (WalletUtils.isValidAddress(resolvedAddress))
+            {
+                return resolvedAddress;
+            }
+            else
+            {
                 return BURN_ADDRESS;
             }
         });

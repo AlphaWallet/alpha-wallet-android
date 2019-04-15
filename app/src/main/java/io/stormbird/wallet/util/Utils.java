@@ -99,6 +99,9 @@ public class Utils {
             case EthereumNetworkRepository.RINKEBY_ID:
                 view.setBackgroundResource(R.drawable.background_rinkeby);
                 break;
+            case EthereumNetworkRepository.GOERLI_ID:
+                view.setBackgroundResource(R.drawable.background_goerli);
+                break;
             case EthereumNetworkRepository.XDAI_ID:
                 view.setBackgroundResource(R.drawable.background_xdai);
                 break;

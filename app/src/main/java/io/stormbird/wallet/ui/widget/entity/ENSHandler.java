@@ -13,6 +13,7 @@ import io.stormbird.wallet.entity.ENSCallback;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.ens.EnsResolver;
 
 import static org.web3j.crypto.WalletUtils.isValidAddress;
@@ -214,6 +215,6 @@ public class ENSHandler
 
     public static boolean canBeENSName(String address)
     {
-        return EnsResolver.isValidEnsName(address);
+        return address.length() > 5 && !address.startsWith("0x") && address.contains(".");
     }
 }

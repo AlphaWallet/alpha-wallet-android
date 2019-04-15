@@ -156,7 +156,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
             @Override
             public void ENSCheck(String name) {
-                viewModel.checkENSAddress(name);
+                viewModel.checkENSAddress(token.tokenInfo.chainId, name);
             }
         };
         ensHandler = new ENSHandler(this, handler, adapterUrl, this, ensCallback);

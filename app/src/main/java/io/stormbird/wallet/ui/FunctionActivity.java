@@ -29,13 +29,18 @@ import io.stormbird.wallet.web3.entity.PageReadyCallback;
 import io.stormbird.wallet.widget.ProgressView;
 import io.stormbird.wallet.widget.SignMessageDialog;
 import io.stormbird.wallet.widget.SystemView;
+import org.web3j.crypto.Hash;
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
 
 import javax.inject.Inject;
 
 import java.math.BigInteger;
+import java.security.SignatureException;
 import java.util.List;
 
 import static io.stormbird.wallet.C.Key.TICKET;
+import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 import static io.stormbird.wallet.ui.DappBrowserFragment.PERSONAL_MESSAGE_PREFIX;
 
 /**
@@ -193,6 +198,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
                 String signHex = Numeric.toHexString(data);
                 signHex = Numeric.cleanHexPrefix(signHex);
                 tokenView.onSignPersonalMessageSuccessful(message, signHex);
+                testRecoverAddressFromSignature(message.value, signHex);
                 dialog.dismiss();
             }
         };
@@ -212,5 +218,32 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
             dialog.dismiss();
         });
         dialog.show();
+    }
+
+    public void testRecoverAddressFromSignature(String message, String sig)
+    {
+        String prefix = PERSONAL_MESSAGE_PREFIX + message.length();
+        byte[] msgHash = (prefix + message).getBytes();
+        String msgBytes = Numeric.toHexString(msgHash);
+        System.out.println(msgBytes);
+
+        byte[] equivHash = Hash.sha3(msgHash);
+        String hashBytes = Numeric.toHexString(equivHash);
+        System.out.println(hashBytes);
+
+        byte[] signatureBytes = Numeric.hexStringToByteArray(sig);
+        Sign.SignatureData sd = sigFromByteArray(signatureBytes);
+        String addressRecovered;
+
+        try
+        {
+            BigInteger recoveredKey = Sign.signedMessageToKey(msgHash, sd);
+            addressRecovered = "0x" + Keys.getAddress(recoveredKey);
+            System.out.println("Recovered: " + addressRecovered);
+        }
+        catch (SignatureException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

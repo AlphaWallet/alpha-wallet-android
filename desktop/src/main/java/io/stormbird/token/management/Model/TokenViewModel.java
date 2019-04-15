@@ -14,7 +14,7 @@ public class TokenViewModel extends TokenDefinition {
     public List<ComboBoxDataModel> comboBoxDataModelList;
     public List<TextFieldDataModel> textFieldDataModelList;
     public TokenViewModel(InputStream xmlAsset, Locale locale) throws IOException, SAXException {
-        super(xmlAsset, locale);
+        super(xmlAsset, locale, null);
         this.comboBoxDataModelList=new ArrayList<>();
         this.textFieldDataModelList=new ArrayList<>();
         constructTokenViewModelForGUI(this);

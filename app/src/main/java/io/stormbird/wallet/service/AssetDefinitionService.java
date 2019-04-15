@@ -19,6 +19,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.ui.HomeActivity;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -26,6 +27,7 @@ import java.io.*;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.Security;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -252,11 +254,15 @@ public class AssetDefinitionService implements ParseResult
         {
             e.printStackTrace();
         }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
 
         return definition;
     }
 
-    private TokenDefinition parseFile(InputStream xmlInputStream) throws IOException, SAXException
+    private TokenDefinition parseFile(InputStream xmlInputStream) throws IOException, SAXException, Exception
     {
         TokenDefinition definition = null;
         definition = new TokenDefinition(
@@ -446,7 +452,7 @@ public class AssetDefinitionService implements ParseResult
                     {
                         try
                         {
-                            if (f.getName().contains("entry"))
+                            if (f.getName().contains("a66a"))
                             {
                                 System.out.println("door");
                             }
@@ -455,6 +461,10 @@ public class AssetDefinitionService implements ParseResult
                             if (external) addOverrideFile(td);
                         }
                         catch (SAXParseException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        catch (Exception e)
                         {
                             e.printStackTrace();
                         }

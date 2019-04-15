@@ -238,7 +238,7 @@ public class AppSiteController {
         try(FileInputStream in = new FileInputStream(xml)) {
             // TODO: give more detail in the error
             // TODO: reflect on this: should the page bail out for contracts with completely no matching XML?
-            definition = new TokenDefinition(in, new Locale("en"));
+            definition = new TokenDefinition(in, new Locale("en"), null);
         }
 
         return definition;
@@ -382,7 +382,7 @@ public class AppSiteController {
 	private static Set<Map.Entry<String, String>> getContractAddresses(Path path) {
         HashMap<String, String> map = new HashMap<>();
         try (InputStream input = Files.newInputStream(path)) {
-            TokenDefinition token = new TokenDefinition(input, new Locale("en"));
+            TokenDefinition token = new TokenDefinition(input, new Locale("en"), null);
             token.addresses.keySet().stream().forEach(address -> map.put(address, path.toString()));
             return map.entrySet();
         } catch (IOException | SAXException e) {

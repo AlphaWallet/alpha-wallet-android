@@ -443,8 +443,19 @@ public class TokenDefinition {
         Document xml = dBuilder.parse(xmlAsset);
         xml.getDocumentElement().normalize();
         determineNamespace(xml, result);
+        //TSValidator.check(xml, nameSpace);
 
         NodeList nList = xml.getElementsByTagNameNS(nameSpace, "token");
+
+        try
+        {
+            extractSignatureTag(nList);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
 
         if (nList.getLength() == 0)
         {
@@ -482,7 +493,7 @@ public class TokenDefinition {
                 if (thisAttr.getNodeValue().contains(TOKENSCRIPTBASE))
                 {
                     nameSpace = TOKENSCRIPT;
-                    if (!thisAttr.getNodeValue().equals(TOKENSCRIPT))
+                    if (result != null && !thisAttr.getNodeValue().equals(TOKENSCRIPT))
                     {
                         result.parseMessage(ParseResult.ParseResultId.OK);
                     }
@@ -648,6 +659,30 @@ public class TokenDefinition {
                     break;
             }
         }
+    }
+
+    private void extractSignatureTag(NodeList nList) throws Exception
+    {
+        Element token = (Element)nList.item(0);
+        for (int i = 0; i < token.getChildNodes().getLength(); i++)
+        {
+            Node child = token.getChildNodes().item(i);
+            if (child.getNodeType() == Node.ELEMENT_NODE)
+            {
+                if (child.getLocalName().equals("Signature"))
+                {
+                    TSValidator.check((Element)child);
+                    return;
+                }
+            }
+        }
+
+        //NodeList nList = xml.getElementsByTagNameNS(nameSpace, "Signature");
+        /* we allow multiple contracts, e.g. for issuing asset and for
+         * proxy usage. but for now we only deal with the first */
+        //Element contract = (Element) nList.item(0);
+
+        String tokenSig = getLocalisedString(token, "SignedInfo");
     }
 
     private void extractNameTag(Document xml)

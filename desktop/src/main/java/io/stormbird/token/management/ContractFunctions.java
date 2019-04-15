@@ -34,7 +34,7 @@ public class ContractFunctions extends JFrame {
 
     public ContractFunctions() {
         try {
-            TokenDefinition ad = new TokenDefinition(ticketXML, Locale.getDefault());
+            TokenDefinition ad = new TokenDefinition(ticketXML, Locale.getDefault(), null);
             NonFungibleToken ticket = new NonFungibleToken(BigInteger.valueOf(0x010CCB53), ad);
         } catch (IOException | IllegalArgumentException | SAXException e){
             e.printStackTrace();

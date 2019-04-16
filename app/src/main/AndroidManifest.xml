@@ -73,7 +73,7 @@
                     android:pathPrefix="/"
                     android:scheme="https" />
                 <data
-                    android:host="goerli.aw.io"
+                    android:host="goerli.aw.app"
                     android:pathPrefix="/"
                     android:scheme="https" />
             </intent-filter>

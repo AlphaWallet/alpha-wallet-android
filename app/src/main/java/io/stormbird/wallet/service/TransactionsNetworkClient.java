@@ -44,6 +44,17 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType 
 		this.context = context;
 	}
 
+	/**
+	 * Fetch transactions for address starting from lastBlock.
+	 * If using to fetch contract transactions (eg ERC20) also specify 'userAddress' so the transactions can be filtered to only show those relevant transactions
+	 * ** NB: this function returns an extra transaction which is used to set the 'Last Block Read' to optimise checking transactions
+	 * **     If you are using this function, beware of the extra transaction
+	 * @param networkInfo
+	 * @param tokenAddress
+	 * @param lastBlock
+	 * @param userAddress
+	 * @return ** One extra transaction **
+	 */
 	@Override
 	public Observable<Transaction[]> fetchLastTransactions(NetworkInfo networkInfo, String tokenAddress, long lastBlock, String userAddress)
 	{

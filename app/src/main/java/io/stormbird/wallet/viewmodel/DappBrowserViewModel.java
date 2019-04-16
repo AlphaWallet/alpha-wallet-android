@@ -35,12 +35,15 @@ import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.AddEditDappActivity;
+import io.stormbird.wallet.ui.DappBrowserFragment;
+import io.stormbird.wallet.ui.ImportTokenActivity;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.DappBrowserUtils;
 import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 
 import static io.stormbird.wallet.C.DAPP_DEFAULT_URL;
+import static io.stormbird.wallet.C.IMPORT_STRING;
 import static io.stormbird.wallet.ui.HomeActivity.DAPP_BARCODE_READER_REQUEST_CODE;
 import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
@@ -281,5 +284,13 @@ public class DappBrowserViewModel extends BaseViewModel  {
             ethereumNetworkRepository.setDefaultNetworkInfo(info);
             onDefaultNetwork(info);
         }
+    }
+
+    public void showImportLink(Context ctx, String qrCode)
+    {
+        Intent intent = new Intent(ctx, ImportTokenActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra(IMPORT_STRING, qrCode);
+        ctx.startActivity(intent);
     }
 }

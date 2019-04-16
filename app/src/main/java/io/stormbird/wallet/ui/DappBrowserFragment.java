@@ -31,6 +31,8 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import io.stormbird.token.tools.ParseMagicLink;
+import io.stormbird.wallet.entity.*;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
@@ -43,15 +45,6 @@ import dagger.android.support.AndroidSupportInjection;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.DApp;
-import io.stormbird.wallet.entity.DAppFunction;
-import io.stormbird.wallet.entity.FragmentMessenger;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.SignTransactionInterface;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.URLLoadInterface;
-import io.stormbird.wallet.entity.URLLoadReceiver;
-import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.OnDappClickListener;
 import io.stormbird.wallet.ui.widget.OnDappHomeNavClickListener;
 import io.stormbird.wallet.ui.widget.OnHistoryItemRemovedListener;
@@ -739,25 +732,40 @@ public class DappBrowserFragment extends Fragment implements
     {
         //result
         String qrCode = null;
-        if (resultCode == FullScannerFragment.SUCCESS && data != null)
+        try
         {
-            qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+            if (resultCode == FullScannerFragment.SUCCESS && data != null)
+            {
+                qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+            }
+
+            if (qrCode != null)
+            {
+                //detect magiclink
+                ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
+                if (parser.parseUniversalLink(qrCode).chainId > 0) //see if it's a valid link
+                {
+                    //handle magic link import
+                    viewModel.showImportLink(getActivity(), qrCode);
+                }
+                //detect if this is an address
+                else if (Utils.isAddressValid(qrCode))
+                {
+                    DisplayAddressFound(qrCode, messenger);
+                }
+                else
+                {
+                    //attempt to go to site
+                    loadUrl(qrCode);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            qrCode = null;
         }
 
-        if (qrCode != null)
-        {
-            //detect if this is an address
-            if (Utils.isAddressValid(qrCode))
-            {
-                DisplayAddressFound(qrCode, messenger);
-            }
-            else
-            {
-                //attempt to go to site
-                loadUrl(qrCode);
-            }
-        }
-        else
+        if (qrCode == null)
         {
             Toast.makeText(getContext(), R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
         }

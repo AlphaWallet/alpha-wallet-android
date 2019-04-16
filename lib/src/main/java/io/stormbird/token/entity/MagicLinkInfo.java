@@ -18,6 +18,7 @@ public class MagicLinkInfo
     private static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     private static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     private static final String SOKOL_RPC_URL = "https://sokol.poa.network";
+    private static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
 
     //domains for DMZ
     private static final String mainnetMagicLinkDomain = "aw.app";
@@ -30,6 +31,7 @@ public class MagicLinkInfo
     private static final String poaMagicLinkDomain = "poa.aw.app";
     private static final String sokolMagicLinkDomain = "sokol.aw.app";
     private static final String xDaiMagicLinkDomain = "xdai.aw.app";
+    private static final String goerliMagicLinkDomain = "goerli.aw.app";
     private static final String customMagicLinkDomain = "custom.aw.app";
 
     //network ids
@@ -42,6 +44,7 @@ public class MagicLinkInfo
     private static final int POA_NETWORK_ID = 99;
     private static final int SOKOL_NETWORK_ID = 77;
     private static final int XDAI_NETWORK_ID = 100;
+    private static final int GOERLI_NETWORK_ID = 5;
 
     //network names
     private static final String ETHEREUM_NETWORK = "Ethereum";
@@ -52,6 +55,7 @@ public class MagicLinkInfo
     private static final String POA_NETWORK = "POA";
     private static final String SOKOL_NETWORK = "Sokol";
     private static final String XDAI_NETWORK = "xDAI";
+    private static final String GOERLI_NETWORK = "Görli";
 
 
 
@@ -73,6 +77,8 @@ public class MagicLinkInfo
                 return CLASSIC_NETWORK;
             case XDAI_NETWORK_ID:
                 return XDAI_NETWORK;
+            case GOERLI_NETWORK_ID:
+                return GOERLI_NETWORK;
             default:
                 return ETHEREUM_NETWORK;
         }
@@ -96,6 +102,8 @@ public class MagicLinkInfo
                 return CLASSIC_RPC_URL;
             case XDAI_NETWORK_ID:
                 return XDAI_RPC_URL;
+            case GOERLI_NETWORK_ID:
+                return GOERLI_RPC_URL;
             default:
                 return MAINNET_RPC_URL;
         }
@@ -121,6 +129,8 @@ public class MagicLinkInfo
                 return classicMagicLinkDomain;
             case XDAI_NETWORK_ID:
                 return xDaiMagicLinkDomain;
+            case GOERLI_NETWORK_ID:
+                return goerliMagicLinkDomain;
             default:
                 return mainnetMagicLinkDomain;
         }
@@ -148,6 +158,8 @@ public class MagicLinkInfo
                 return SOKOL_NETWORK_ID;
             case xDaiMagicLinkDomain:
                 return XDAI_NETWORK_ID;
+            case goerliMagicLinkDomain:
+                return GOERLI_NETWORK_ID;
             default:
                 return MAINNET_NETWORK_ID;
         }

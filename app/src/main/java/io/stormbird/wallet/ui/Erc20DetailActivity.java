@@ -34,7 +34,8 @@ public class Erc20DetailActivity extends BaseActivity {
     Erc20DetailViewModelFactory erc20DetailViewModelFactory;
     Erc20DetailViewModel viewModel;
 
-    private static final int HISTORY_LENGTH = 3;
+    private static final int HISTORY_LENGTH = 5;
+    private static final int TX_CHECK_INTERVAL = 4; //check transactions every 4 intervals (or if balance update is seen).
 
     private boolean sendingTokens = false;
     private boolean hasDefinition = false;
@@ -53,7 +54,7 @@ public class Erc20DetailActivity extends BaseActivity {
 
     private TransactionsAdapter recentTransactionsAdapter;
     private TokensAdapter tokenViewAdapter;
-    private boolean waitingForTransaction;
+    private int txUpdateCounter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,7 +65,7 @@ public class Erc20DetailActivity extends BaseActivity {
         setTitle("");
         getIntentData();
         myAddress = wallet.address;
-        waitingForTransaction = false;
+        txUpdateCounter = 0;
 
         viewModel = ViewModelProviders.of(this, erc20DetailViewModelFactory)
                 .get(Erc20DetailViewModel.class);
@@ -132,19 +133,19 @@ public class Erc20DetailActivity extends BaseActivity {
     {
         if (token == null) return;
         tokenViewAdapter.clear();
-        if (token.checkBalanceChange(tokenUpdate))
+
+        if ((txUpdateCounter%TX_CHECK_INTERVAL) == 0 || token.checkBalanceChange(tokenUpdate))
         {
             //trigger transaction fetch
             if (tokenUpdate.balanceIncrease(token)) playNotification();
-            viewModel.listenNewTransactions(HISTORY_LENGTH);
-            this.token = tokenUpdate; // update token
-            waitingForTransaction = true;
+            viewModel.fetchNetworkTransactions(token, HISTORY_LENGTH);
         }
 
         token = tokenUpdate;
         Token[] tokens = {token};
         tokenViewAdapter.setTokens(tokens);
         tokenViewAdapter.notifyDataSetChanged();
+        txUpdateCounter++;
     }
 
     private void playNotification()
@@ -174,18 +175,8 @@ public class Erc20DetailActivity extends BaseActivity {
             int txCount = recentTransactionsAdapter.updateRecentTransactions(transactions);
             noTransactionsLayout.setVisibility(View.GONE);
             recentTransactionsAdapter.notifyDataSetChanged();
-            if (txCount > 0)
-            {
-                waitingForTransaction = false;
-                viewModel.listenNewTransactions(0);
-            }
-            else if (waitingForTransaction)
-            {
-                token.balanceChanged = true; //trigger network refreshes until new transaction is received
-                                             //This is caused because sometimes etherscan isn't updated at exactly the same time as the node
-            }
         }
-        else
+        else if (recentTransactionsAdapter.getItemCount() == 0)
         {
             noTransactionsLayout.setVisibility(View.VISIBLE);
         }

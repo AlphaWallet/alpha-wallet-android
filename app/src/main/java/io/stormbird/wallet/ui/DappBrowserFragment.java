@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.entity.*;
 import org.web3j.crypto.Keys;
@@ -672,6 +673,7 @@ public class DappBrowserFragment extends Fragment implements
         detachFragments(true);
         this.currentFragment = DAPP_BROWSER;
         cancelSearchSession();
+        if (checkForMagicLink(urlText)) return true;
         web3.loadUrl(Utils.formatUrl(urlText));
         urlTv.setText(Utils.formatUrl(urlText));
         web3.requestFocus();
@@ -739,17 +741,9 @@ public class DappBrowserFragment extends Fragment implements
                 qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
             }
 
-            if (qrCode != null)
+            if (qrCode != null && !checkForMagicLink(qrCode))
             {
-                //detect magiclink
-                ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
-                if (parser.parseUniversalLink(qrCode).chainId > 0) //see if it's a valid link
-                {
-                    //handle magic link import
-                    viewModel.showImportLink(getActivity(), qrCode);
-                }
-                //detect if this is an address
-                else if (Utils.isAddressValid(qrCode))
+                if (Utils.isAddressValid(qrCode))
                 {
                     DisplayAddressFound(qrCode, messenger);
                 }
@@ -769,6 +763,27 @@ public class DappBrowserFragment extends Fragment implements
         {
             Toast.makeText(getContext(), R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    private boolean checkForMagicLink(String data)
+    {
+        try
+        {
+            ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
+            if (parser.parseUniversalLink(data).chainId > 0) //see if it's a valid link
+            {
+                //handle magic link import
+                viewModel.showImportLink(getActivity(), data);
+                return true;
+            }
+        }
+        catch (SalesOrderMalformed e)
+        {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     private void DisplayAddressFound(String address, FragmentMessenger messenger)

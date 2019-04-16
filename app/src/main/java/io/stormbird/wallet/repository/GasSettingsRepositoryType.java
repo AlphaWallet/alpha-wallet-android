@@ -10,7 +10,7 @@ import java.math.BigInteger;
 
 public interface GasSettingsRepositoryType {
     Single<GasSettings> getGasSettings(boolean forTokenTransfer);
-    Single<GasSettings> getGasSettings(byte[] transactionBytes, boolean isNonFungible);
+    Single<GasSettings> getGasSettings(byte[] transactionBytes, boolean isNonFungible, int chainId);
     MutableLiveData<BigInteger> gasPriceUpdate();
     void startGasListener(int chainId);
     void stopGasListener();

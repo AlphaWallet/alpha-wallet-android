@@ -29,6 +29,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	public static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
 	public static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
 	public static final String SOKOL_RPC_URL = "https://sokol.poa.network";
+	public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
 
 	public static final int MAINNET_ID = 1;
 	public static final int CLASSIC_ID = 61;
@@ -38,6 +39,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	public static final int SOKOL_ID = 77;
 	public static final int RINKEBY_ID = 4;
 	public static final int XDAI_ID = 100;
+	public static final int GOERLI_ID = 5;
 
 	private final Map<Integer, NetworkInfo> networkMap;
 
@@ -78,6 +80,10 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 							"https://rinkeby.etherscan.io/tx/",RINKEBY_ID, false,
 							"https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
               "https://api-rinkeby.etherscan.io/", ETHEREUM_TICKER_NAME),
+			new NetworkInfo(GOERLI_NETWORK_NAME, GOERLI_SYMBOL, GOERLI_RPC_URL,
+							"https://goerli.etherscan.io/tx/",GOERLI_ID, false,
+							GOERLI_RPC_URL,
+							"https://api-goerli.etherscan.io/", ETHEREUM_TICKER_NAME),
 	};
 
 	private final PreferenceRepositoryType preferences;

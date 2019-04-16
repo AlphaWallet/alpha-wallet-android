@@ -361,44 +361,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void checkLiveToken(Token t)
     {
-        t.checkIsMatchedInXML(assetService);
+        if (t != null) t.checkIsMatchedInXML(assetService);
     }
 
     public void setClear()
     {
         needsRefresh = true;
-    }
-
-    public void onRemoveTokens(List<String> tokens)
-    {
-        List<Integer> removeList = new ArrayList<>();
-
-        for (int i = 0; i < items.size(); i++)
-        {
-            Object si = items.get(i);
-            if (si instanceof TokenSortedItem)
-            {
-                TokenSortedItem tsi = (TokenSortedItem)si;
-                Token thisToken = tsi.value;
-                if (tokens.contains(thisToken.getAddress()))
-                {
-                    removeList.add(i);
-                }
-            }
-        }
-
-        items.beginBatchedUpdates();
-        if (!removeList.isEmpty())
-        {
-            //remove in reverse order so indices stay the same
-            for (int i = removeList.size() - 1; i >= 0; i--)
-            {
-                int index = removeList.get(i);
-                TokenSortedItem tsi = (TokenSortedItem)items.get(index);
-                items.remove(tsi);
-                notifyItemChanged(index);
-            }
-        }
-        items.endBatchedUpdates();
     }
 }

@@ -125,7 +125,6 @@ public class WalletViewModel extends BaseViewModel
         }
         terminateBalanceUpdate();
         tokensService.clearTokens();
-        currentWallet = null;
     }
 
     private void terminateBalanceUpdate()

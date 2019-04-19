@@ -449,7 +449,8 @@ public class TokenDefinition {
 
         try
         {
-            extractSignatureTag(nList);
+            TSValidator.check(xml);
+            //extractSignatureTag(nList, xml);
         }
         catch (Exception e)
         {
@@ -661,7 +662,7 @@ public class TokenDefinition {
         }
     }
 
-    private void extractSignatureTag(NodeList nList) throws Exception
+    private void extractSignatureTag(NodeList nList, Document xml) throws Exception
     {
         Element token = (Element)nList.item(0);
         for (int i = 0; i < token.getChildNodes().getLength(); i++)
@@ -671,7 +672,7 @@ public class TokenDefinition {
             {
                 if (child.getLocalName().equals("Signature"))
                 {
-                    TSValidator.check((Element)child);
+                    TSValidator.check(xml);
                     return;
                 }
             }

@@ -681,6 +681,7 @@ public class DappBrowserFragment extends Fragment implements
         DappBrowserUtils.addToHistory(getContext(), dapp);
         adapter.addSuggestion(dapp);
         sessionHistory = web3.copyBackForwardList();
+        this.currentFragment = DAPP_BROWSER;
         setBackForwardButtons();
     }
 
@@ -704,7 +705,7 @@ public class DappBrowserFragment extends Fragment implements
 
     private boolean loadUrl(String urlText)
     {
-        lastHomeTag = currentFragment;
+        if (!lastHomeTag.equals(DAPP_BROWSER)) lastHomeTag = currentFragment;
         detachFragments(true);
         this.currentFragment = DAPP_BROWSER;
         cancelSearchSession();

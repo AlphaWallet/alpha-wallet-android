@@ -450,7 +450,7 @@ public class ImportTokenViewModel extends BaseViewModel
             //calculate gas settings
             final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
             disposable = fetchGasSettingsInteract
-                    .fetch(tradeData, true)
+                    .fetch(tradeData, true, importOrder.chainId)
                     .subscribe(this::performImportFinal, this::onTransactionError);
         }
         catch (SalesOrderMalformed e)
@@ -511,13 +511,13 @@ public class ImportTokenViewModel extends BaseViewModel
             switch (result)
             {
                 case 501:
-                    error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Duplicate transaction passed."));
+                    txError.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Duplicate transaction passed."));
                     break;
                 case 401:
-                    error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Signature invalid."));
+                    txError.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Signature invalid."));
                     break;
                 default:
-                    error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Transfer failed."));
+                    txError.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Transfer failed."));
                     break;
             }
         }

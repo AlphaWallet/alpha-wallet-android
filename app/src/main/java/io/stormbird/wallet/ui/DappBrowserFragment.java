@@ -31,6 +31,9 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import io.stormbird.token.entity.SalesOrderMalformed;
+import io.stormbird.token.tools.ParseMagicLink;
+import io.stormbird.wallet.entity.*;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
@@ -43,15 +46,6 @@ import dagger.android.support.AndroidSupportInjection;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.DApp;
-import io.stormbird.wallet.entity.DAppFunction;
-import io.stormbird.wallet.entity.FragmentMessenger;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.SignTransactionInterface;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.URLLoadInterface;
-import io.stormbird.wallet.entity.URLLoadReceiver;
-import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.OnDappClickListener;
 import io.stormbird.wallet.ui.widget.OnDappHomeNavClickListener;
 import io.stormbird.wallet.ui.widget.OnHistoryItemRemovedListener;
@@ -175,23 +169,39 @@ public class DappBrowserFragment extends Fragment implements
         return view;
     }
 
+    @Override
+    public void onAttachFragment(Fragment fragment) {
+        if (fragment instanceof DappHomeFragment) {
+            DappHomeFragment f = (DappHomeFragment) fragment;
+            f.setCallbacks(this, this);
+        }
+        if (fragment instanceof DiscoverDappsFragment) {
+            DiscoverDappsFragment f = (DiscoverDappsFragment) fragment;
+            f.setCallbacks(this);
+        }
+        if (fragment instanceof MyDappsFragment) {
+            MyDappsFragment f = (MyDappsFragment) fragment;
+            f.setCallbacks(this);
+        }
+        if (fragment instanceof BrowserHistoryFragment) {
+            BrowserHistoryFragment f = (BrowserHistoryFragment) fragment;
+            f.setCallbacks(this, this);
+        }
+    }
+
     private void attachFragment(Fragment fragment, String tag) {
         if (getChildFragmentManager().findFragmentByTag(tag) == null) {
             if (tag.equals(DAPP_HOME)) {
                 DappHomeFragment f = (DappHomeFragment) fragment;
-                f.setCallbacks(this, this);
                 showFragment(f, tag);
             } else if (tag.equals(DISCOVER_DAPPS)) {
                 DiscoverDappsFragment f = (DiscoverDappsFragment) fragment;
-                f.setCallbacks(this);
                 showFragment(f, tag);
             } else if (tag.equals(MY_DAPPS)) {
                 MyDappsFragment f = (MyDappsFragment) fragment;
-                f.setCallbacks(this);
                 showFragment(f, tag);
             } else if (tag.equals(HISTORY)) {
                 BrowserHistoryFragment f = (BrowserHistoryFragment) fragment;
-                f.setCallbacks(this, this);
                 showFragment(f, tag);
             } else {
                 showFragment(fragment, tag);
@@ -203,19 +213,15 @@ public class DappBrowserFragment extends Fragment implements
         if (getChildFragmentManager().findFragmentByTag(tag) == null) {
             if (tag.equals(DAPP_HOME)) {
                 DappHomeFragment f = new DappHomeFragment();
-                f.setCallbacks(this, this);
                 showFragment(f, tag);
             } else if (tag.equals(DISCOVER_DAPPS)) {
                 DiscoverDappsFragment f = new DiscoverDappsFragment();
-                f.setCallbacks(this);
                 showFragment(f, tag);
             } else if (tag.equals(MY_DAPPS)) {
                 MyDappsFragment f = new MyDappsFragment();
-                f.setCallbacks(this);
                 showFragment(f, tag);
             } else if (tag.equals(HISTORY)) {
                 BrowserHistoryFragment f = new BrowserHistoryFragment();
-                f.setCallbacks(this, this);
                 showFragment(f, tag);
             }
         }
@@ -226,6 +232,14 @@ public class DappBrowserFragment extends Fragment implements
         getChildFragmentManager().beginTransaction()
                 .add(R.id.frame, fragment, tag)
                 .commit();
+
+        if (tag.equals(DISCOVER_DAPPS) || tag.equals(MY_DAPPS) || tag.equals(HISTORY)) {
+            back.setAlpha(1.0f);
+            back.setOnClickListener(v -> homePressed());
+        } else {
+            setBackForwardButtons();
+            back.setOnClickListener(v -> goToPreviousPage());
+        }
     }
 
     private void detachFragments(boolean detachHome) {
@@ -427,8 +441,9 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void detachFragment(String tag) {
+        if (!isAdded()) return; //the dappBrowserFragment itself may not yet be attached.
         Fragment fragment = getChildFragmentManager().findFragmentByTag(tag);
-        if (fragment != null && fragment.isVisible()) {
+        if (fragment != null && fragment.isVisible() && !fragment.isDetached()) {
             getChildFragmentManager().beginTransaction()
                     .remove(fragment)
                     .commit();
@@ -671,6 +686,7 @@ public class DappBrowserFragment extends Fragment implements
         detachFragments(true);
         this.currentFragment = DAPP_BROWSER;
         cancelSearchSession();
+        if (checkForMagicLink(urlText)) return true;
         web3.loadUrl(Utils.formatUrl(urlText));
         urlTv.setText(Utils.formatUrl(urlText));
         web3.requestFocus();
@@ -731,28 +747,56 @@ public class DappBrowserFragment extends Fragment implements
     {
         //result
         String qrCode = null;
-        if (resultCode == FullScannerFragment.SUCCESS && data != null)
+        try
         {
-            qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+            if (resultCode == FullScannerFragment.SUCCESS && data != null)
+            {
+                qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+            }
+
+            if (qrCode != null && !checkForMagicLink(qrCode))
+            {
+                if (Utils.isAddressValid(qrCode))
+                {
+                    DisplayAddressFound(qrCode, messenger);
+                }
+                else
+                {
+                    //attempt to go to site
+                    loadUrl(qrCode);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            qrCode = null;
         }
 
-        if (qrCode != null)
-        {
-            //detect if this is an address
-            if (Utils.isAddressValid(qrCode))
-            {
-                DisplayAddressFound(qrCode, messenger);
-            }
-            else
-            {
-                //attempt to go to site
-                loadUrl(qrCode);
-            }
-        }
-        else
+        if (qrCode == null)
         {
             Toast.makeText(getContext(), R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    private boolean checkForMagicLink(String data)
+    {
+        try
+        {
+            ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
+            if (parser.parseUniversalLink(data).chainId > 0) //see if it's a valid link
+            {
+                //handle magic link import
+                viewModel.showImportLink(getActivity(), data);
+                return true;
+            }
+        }
+        catch (SalesOrderMalformed e)
+        {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     private void DisplayAddressFound(String address, FragmentMessenger messenger)

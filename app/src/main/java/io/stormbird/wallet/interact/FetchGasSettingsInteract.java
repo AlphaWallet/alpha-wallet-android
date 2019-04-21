@@ -20,12 +20,22 @@ public class FetchGasSettingsInteract {
         this.repository = repository;
     }
 
+    public void startGasSettingsFetch(int chainId)
+    {
+        repository.startGasListener(chainId);
+    }
+
+    public void stopGasSettingsFetch()
+    {
+        repository.stopGasListener();
+    }
+
     public Single<GasSettings> fetch(boolean forTokenTransfer) {
         return repository.getGasSettings(forTokenTransfer);
     }
 
-    public Single<GasSettings> fetch(byte[] transactionBytes, boolean isNonFungible) {
-        return repository.getGasSettings(transactionBytes, isNonFungible);
+    public Single<GasSettings> fetch(byte[] transactionBytes, boolean isNonFungible, int chainId) {
+        return repository.getGasSettings(transactionBytes, isNonFungible, chainId);
     }
 
     public MutableLiveData<BigInteger> gasPriceUpdate()

@@ -115,7 +115,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 instance.beginTransaction();
                 for (Transaction transaction : transactions)
                 {
-                    if (isBadTransaction(transaction))
+                    if (isBadTransaction(transaction) || alreadyRecorded(instance, transaction.hash))
                     {
                         continue;
                     }
@@ -136,6 +136,15 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 
             return transactions;
         });
+    }
+
+    private boolean alreadyRecorded(Realm instance, String hash)
+    {
+        RealmTransaction realmTx = instance.where(RealmTransaction.class)
+                .equalTo("hash", hash)
+                .findFirst();
+
+        return realmTx != null;
     }
 
     private boolean isBadTransaction(Transaction transaction)

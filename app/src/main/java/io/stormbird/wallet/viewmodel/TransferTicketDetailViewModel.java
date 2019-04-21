@@ -260,9 +260,9 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         }
     }
 
-    public void checkENSAddress(String name)
+    public void checkENSAddress(int chainId, String name)
     {
-        disposable = ensInteract.checkENSAddress (name)
+        disposable = ensInteract.checkENSAddress (chainId, name)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(ensResolve::postValue, throwable -> ensFail.postValue(""));

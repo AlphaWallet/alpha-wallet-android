@@ -46,7 +46,7 @@ public class TransactionInput
         address = Numeric.cleanHexPrefix(address);
         for (String thisAddr : addresses)
         {
-            if (thisAddr.contains(address))
+            if (thisAddr != null && thisAddr.contains(address))
             {
                 hasAddr = true;
                 break;

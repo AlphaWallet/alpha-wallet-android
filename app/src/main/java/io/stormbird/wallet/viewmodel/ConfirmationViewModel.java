@@ -110,6 +110,11 @@ public class ConfirmationViewModel extends BaseViewModel {
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
+    public void onClear()
+    {
+        fetchGasSettingsInteract.stopGasSettingsFetch();
+    }
+
     private void onCreateTransaction(String transaction) {
         progress.postValue(false);
         newTransaction.postValue(transaction);
@@ -119,12 +124,14 @@ public class ConfirmationViewModel extends BaseViewModel {
         defaultWallet.setValue(wallet);
     }
 
-    public void calculateGasSettings(byte[] transaction, boolean isNonFungible)
+    public void calculateGasSettings(byte[] transaction, boolean isNonFungible, int chainId)
     {
+        //start listening for gas
+        fetchGasSettingsInteract.startGasSettingsFetch(chainId);
         if (gasSettings.getValue() == null)
         {
             disposable = fetchGasSettingsInteract
-                    .fetch(transaction, isNonFungible)
+                    .fetch(transaction, isNonFungible, chainId)
                     .subscribe(this::onGasSettings, this::onError);
         }
     }

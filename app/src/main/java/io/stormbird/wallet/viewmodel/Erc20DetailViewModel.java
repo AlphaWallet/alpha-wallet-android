@@ -7,15 +7,14 @@ import android.support.annotation.Nullable;
 
 import java.util.concurrent.TimeUnit;
 
+import android.util.Log;
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FetchTransactionsInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.router.TransactionDetailRouter;
@@ -39,6 +38,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final TransactionDetailRouter transactionDetailRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
+    private final AddTokenInteract addTokenInteract;
 
     private int transactionFetchCount;
 
@@ -55,7 +55,8 @@ public class Erc20DetailViewModel extends BaseViewModel {
                                 FindDefaultWalletInteract findDefaultWalletInteract,
                                 TransactionDetailRouter transactionDetailRouter,
                                 AssetDefinitionService assetDefinitionService,
-                                TokensService tokensService) {
+                                TokensService tokensService,
+                                AddTokenInteract addTokenInteract) {
         this.myAddressRouter = myAddressRouter;
         this.fetchTokensInteract = fetchTokensInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
@@ -64,6 +65,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
         this.transactionDetailRouter = transactionDetailRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
+        this.addTokenInteract = addTokenInteract;
         transactionFetchCount = 0;
     }
 
@@ -111,8 +113,63 @@ public class Erc20DetailViewModel extends BaseViewModel {
                         .subscribe(this::onUpdateTransactions, this::onError);
     }
 
+    public void fetchNetworkTransactions(Token token, int historyCount) {
+        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId);
+        String userAddress = token.isEthereum() ? null : wallet.getValue().address; //only specify address if we're scanning token transactions - not all are relevant to us.
+
+        fetchTransactionDisposable =
+                fetchTransactionsInteract.fetchNetworkTransactions(network, token.getAddress(), token.lastBlockCheck, userAddress)
+                        .map(txs -> removeTopTx(txs, token)) //remove block marker TX
+                        .flatMap(txs -> fetchTransactionsInteract.storeTransactions(wallet.getValue(), txs).toObservable())
+                        .map(txs -> filterToHistory(txs, historyCount))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onNewTransactions, this::onError);
+    }
+
+    private Transaction[] removeTopTx(Transaction[] transactions, Token token)
+    {
+        if (transactions.length > 0)
+        {
+            long lastTxBlockNumber = Long.parseLong(transactions[transactions.length - 1].blockNumber);
+            if (transactions.length > 1)
+            {
+                Transaction[] newTxList = new Transaction[transactions.length-1];
+                System.arraycopy(transactions, 0, newTxList, 0, transactions.length-1);
+                transactions = newTxList;
+            }
+            else
+            {
+                transactions = new Transaction[0];
+            }
+
+            //now store the update
+            token.lastBlockCheck = lastTxBlockNumber;
+            addTokenInteract.updateBlockRead(token, defaultWallet().getValue());
+        }
+
+        return transactions;
+    }
+
+    private Transaction[] filterToHistory(Transaction[] transactions, int historyCount)
+    {
+        //pull out the first -historyCount- values
+        if (transactions.length > historyCount)
+        {
+            Transaction[] newTxList = new Transaction[historyCount];
+            System.arraycopy(transactions, 0, newTxList, 0, historyCount);
+            transactions = newTxList;
+        }
+
+        return transactions;
+    }
+
     private void onUpdateTransactions(Transaction[] transactions) {
         this.transactions.postValue(transactions);
+    }
+
+    private void onNewTransactions(Transaction[] transactions) {
+        this.transactionUpdate.postValue(transactions);
     }
 
     public LiveData<Transaction[]> transactions() {
@@ -204,15 +261,5 @@ public class Erc20DetailViewModel extends BaseViewModel {
     {
         new SendTokenRouter().open(ctx, address, token.tokenInfo.symbol, token.tokenInfo.decimals,
                                    false, wallet.getValue(), token);
-    }
-
-    private void newTransactions(Transaction[] transactions)
-    {
-        transactionUpdate.postValue(transactions);
-    }
-
-    public void listenNewTransactions(int historyLength)
-    {
-        transactionFetchCount = historyLength;
     }
 }

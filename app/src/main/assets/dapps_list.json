@@ -34,12 +34,13 @@
   {"name": "KyberSwap", "description": "Instant and Secure Token to Token Swaps", "url": "https://kyber.network/swap/eth_knc", "category": "Exchange"},
   {"name": "localethereum", "description": "Peer-to-peer marketplace allowing to trade eth to fiat", "url": "https://localethereum.com/", "category": "Exchange"},
   {"name": "Totle", "description": "Aggregating the liquidity of the top decentralized exchanges", "url": "https://app.totle.com/", "category": "Exchange"},
-  {"name": "Uniswap", "description": "Protocol for automated token exchange", "url": "https://uniswap.exchange/swap", "category": "Exchange"},
+  {"name": "Uniswap", "description": "Protocol for automated token exchange", "url": "https://uniswap.exchange", "category": "Exchange"},
   {"name": "Compound", "description": "Algorithmic money markets", "url": "https://app.compound.finance/", "category": "Finance"},
   {"name": "expo", "description": "Short/Leverag ETH", "url": "https://www.expotrading.com/trade", "category": "Finance"},
   {"name": "MakerDAO CDP Portal", "description": "Where you can interact with the Dai Credit System", "url": "https://cdp.makerdao.com/", "category": "Finance"},
   {"name": "Nexo", "description": "Instant Crypto Loans", "url": "https://nexo.io/", "category": "Finance"},
   {"name": "AirSwap", "description": "Peer-to-Peer trading on Ethereum", "url": "https://airswap.io", "category": "Exchange"},
   {"name": "Chibi Fighters", "description": "Chibi Fighters are fierce little warriors that know no mercy", "url": "https://chibifighters.io", "category": "Game"},
-  {"name": "CryptoKitties", "description": "Collect and breed digital cats!", "url": "https://cryptokitties.co", "category": "Game"}
+  {"name": "CryptoKitties", "description": "Collect and breed digital cats!", "url": "https://cryptokitties.co", "category": "Game"},
+  {"name": "BTU Hotel", "description": "BTU Hotel is a hotel booking Dapp takes 0% commission. Dapp user earns 100% of the hotel commission directly in crypto into their preferred browser wallet", "url": "https://btu-hotel.com", "category": "Travel"}
 ]

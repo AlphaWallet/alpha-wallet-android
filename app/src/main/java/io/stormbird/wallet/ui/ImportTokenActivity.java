@@ -341,7 +341,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         verifiedLayer.setVisibility(View.VISIBLE);
 
         int contractChainId = viewModel.getAssetDefinitionService().getChainId(viewModel.getSalesOrder().contractAddress);
-        if (contractChainId == chainId)
+        if (contractChainId == chainId || usingFeeMaster)
         {
             verified.setVisibility(View.VISIBLE);
             textVerified.setVisibility(View.VISIBLE);
@@ -387,6 +387,11 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         if (available)
         {
             priceETH.setText(R.string.free_import);
+            //is verified by stormbird
+            verified.setVisibility(View.VISIBLE);
+            textVerified.setVisibility(View.VISIBLE);
+            unVerified.setVisibility(View.GONE);
+            textUnverified.setVisibility(View.GONE);
             displayImportAction();
         }
         else
@@ -553,10 +558,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     private void completeImport()
     {
-        String feemasterServer = viewModel.getAssetDefinitionService().getFeemasterAPI(viewModel.getSalesOrder().contractAddress);
-        if (feemasterServer != null && usingFeeMaster)
+        if (paymasterUrlPrefix != null && usingFeeMaster)
         {
-            viewModel.importThroughFeemaster(feemasterServer);
+            viewModel.importThroughFeemaster(paymasterUrlPrefix);
         }
         else
         {

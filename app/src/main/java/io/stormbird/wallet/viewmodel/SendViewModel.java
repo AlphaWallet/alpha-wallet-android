@@ -67,9 +67,9 @@ public class SendViewModel extends BaseViewModel {
 
     public Token getToken(int chainId, String tokenAddress) { return tokensService.getToken(chainId, tokenAddress); };
 
-    public void checkENSAddress(String name)
+    public void checkENSAddress(int chainId, String name)
     {
-        disposable = ensInteract.checkENSAddress (name)
+        disposable = ensInteract.checkENSAddress(chainId, name)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(ensResolve::postValue, throwable -> ensFail.postValue(""));

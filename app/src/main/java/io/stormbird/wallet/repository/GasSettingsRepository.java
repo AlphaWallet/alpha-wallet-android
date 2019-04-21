@@ -18,14 +18,12 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 
-import static io.stormbird.wallet.C.GAS_LIMIT_MIN;
-import static io.stormbird.wallet.C.GAS_PER_BYTE;
+import static io.stormbird.wallet.C.*;
 
 public class GasSettingsRepository implements GasSettingsRepositoryType
 {
     private final EthereumNetworkRepositoryType networkRepository;
     private BigInteger cachedGasPrice;
-    private int currentChainId;
     private Disposable gasSettingsDisposable;
 
     private final MutableLiveData<BigInteger> gasPrice = new MutableLiveData<>();
@@ -34,24 +32,23 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
 
     public GasSettingsRepository(EthereumNetworkRepositoryType networkRepository) {
         this.networkRepository = networkRepository;
-
-        setCachedPrice();
-
-        gasSettingsDisposable = Observable.interval(0, FETCH_GAS_PRICE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l ->
-                        fetchGasSettings()
-                ).subscribe();
     }
 
-    private void setCachedPrice()
+    public void startGasListener(final int chainId)
     {
-        if (networkRepository.getDefaultNetwork() != null)
-        {
-            this.currentChainId = networkRepository.getDefaultNetwork().chainId;
-        }
-        else currentChainId = EthereumNetworkRepository.MAINNET_ID;
+        setCachedPrice(chainId);
+        gasSettingsDisposable = Observable.interval(0, FETCH_GAS_PRICE_INTERVAL, TimeUnit.SECONDS)
+                .doOnNext(l -> fetchGasSettings(chainId)).subscribe();
+    }
 
-        switch (currentChainId)
+    public void stopGasListener()
+    {
+        if (gasSettingsDisposable != null && !gasSettingsDisposable.isDisposed()) gasSettingsDisposable.dispose();
+    }
+
+    private void setCachedPrice(int chainId)
+    {
+        switch (chainId)
         {
             case EthereumNetworkRepository.XDAI_ID:
                 cachedGasPrice = new BigInteger(C.DEFAULT_XDAI_GAS_PRICE);
@@ -62,9 +59,9 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
         }
     }
 
-    private void fetchGasSettings() {
+    private void fetchGasSettings(int chainId) {
 
-        final Web3j web3j = Web3j.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl));
+        final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
 
         try {
             EthGasPrice price = web3j
@@ -75,13 +72,8 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
                 cachedGasPrice = price.getGasPrice();
                 gasPrice.postValue(cachedGasPrice);
             }
-            else if (networkRepository.getDefaultNetwork().chainId != currentChainId)
-            {
-                //didn't update the current price correctly, switch to default:
-                setCachedPrice();
-            }
         } catch (Exception ex) {
-            // silently
+            setCachedPrice(chainId);
         }
     }
 
@@ -101,9 +93,10 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
         });
     }
 
-    public Single<GasSettings> getGasSettings(byte[] transactionBytes, boolean isNonFungible) {
+    public Single<GasSettings> getGasSettings(byte[] transactionBytes, boolean isNonFungible, int chainId) {
         return Single.fromCallable( () -> {
             BigInteger gasLimit = new BigInteger(C.DEFAULT_GAS_LIMIT);
+            if (cachedGasPrice == null) setCachedPrice(chainId);
             if (transactionBytes != null) {
                 if (isNonFungible)
                 {

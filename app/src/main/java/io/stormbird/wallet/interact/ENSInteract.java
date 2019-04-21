@@ -23,11 +23,10 @@ public class ENSInteract
         this.tokenRepository = tokenRepository;
     }
 
-    public Single<String> checkENSAddress(String name)
+    public Single<String> checkENSAddress(int chainId, String name)
     {
         if (!ENSHandler.canBeENSName(name)) return Single.fromCallable(() -> "0");
-        return checkENSAddressFunc(name)
-                .flatMap(resultHash -> tokenRepository.callAddressMethod("owner", resultHash, ENSCONTRACT))
+        return tokenRepository.resolveENS(chainId, name)
                 .map(this::checkAddress);
     }
 
@@ -42,34 +41,5 @@ public class ENSInteract
         {
             return "0";
         }
-    }
-
-    private Single<byte[]> checkENSAddressFunc(final String name)
-    {
-        return Single.fromCallable(() -> {
-            //split name
-            String[] components = name.split("\\.");
-
-            byte[] resultHash = new byte[32];
-            Arrays.fill(resultHash, (byte)0);
-
-            for (int i = (components.length - 1); i >= 0; i--)
-            {
-                String nameComponent = components[i];
-                resultHash = hashJoin(resultHash, nameComponent.getBytes());
-            }
-
-            return resultHash;
-        });
-    }
-
-    private byte[] hashJoin(byte[] lastHash, byte[] input)
-    {
-        byte[] joined = new byte[lastHash.length*2];
-
-        byte[] inputHash = Hash.sha3(input);
-        System.arraycopy(lastHash, 0, joined, 0, lastHash.length);
-        System.arraycopy(inputHash, 0, joined, lastHash.length, inputHash.length);
-        return Hash.sha3(joined);
     }
 }

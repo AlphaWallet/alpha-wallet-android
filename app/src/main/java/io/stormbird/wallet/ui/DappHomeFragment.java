@@ -22,8 +22,9 @@ import io.stormbird.wallet.util.DappBrowserUtils;
 
 
 public class DappHomeFragment extends Fragment {
-    private MyDappsGridAdapter adapter;
+    @NonNull
     private OnDappClickListener onDappClickListener;
+    @NonNull
     private OnDappHomeNavClickListener onDappHomeNavClickListener;
 
     void setCallbacks(OnDappClickListener l1, OnDappHomeNavClickListener l2) {
@@ -37,19 +38,16 @@ public class DappHomeFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.layout_dapp_home, container, false);
         LinearLayout myDappsLayout = view.findViewById(R.id.my_dapps);
-        myDappsLayout.setOnClickListener(v ->
-                onDappHomeNavClickListener.onDappHomeNavClick(0));
+        myDappsLayout.setOnClickListener(v -> onDappHomeNavClickListener.onDappHomeNavClick(0));
 
         LinearLayout discoverDappsLayout = view.findViewById(R.id.discover_dapps);
-        discoverDappsLayout.setOnClickListener(v ->
-                onDappHomeNavClickListener.onDappHomeNavClick(1));
+        discoverDappsLayout.setOnClickListener(v -> onDappHomeNavClickListener.onDappHomeNavClick(1));
 
         LinearLayout historyLayout = view.findViewById(R.id.history);
-        historyLayout.setOnClickListener(v ->
-                onDappHomeNavClickListener.onDappHomeNavClick(2));
+        historyLayout.setOnClickListener(v -> onDappHomeNavClickListener.onDappHomeNavClick(2));
 
         RecyclerView grid = view.findViewById(R.id.my_dapps_grid);
-        adapter = new MyDappsGridAdapter(getData(), onDappClickListener);
+        MyDappsGridAdapter adapter = new MyDappsGridAdapter(getData(), onDappClickListener);
         grid.setNestedScrollingEnabled(false);
         grid.setLayoutManager(new GridLayoutManager(getActivity(), 3));
         grid.setAdapter(adapter);

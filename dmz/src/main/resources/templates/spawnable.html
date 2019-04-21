@@ -20,7 +20,7 @@
               </h1>
               <br>
               <div class="ticket-table mb-5">
-                <p id="price"><strong th:text="${linkPrice}"/> ETH
+                <p id="price"><strong th:text="${linkPrice}"/>
                   <strong class="ml-5" id="status" th:text="${tokenAvailable}" style="float: right;"/>
                 </p>
                 <hr>
@@ -38,9 +38,6 @@
                     <img class="box-img" src="images/category.png" />
                   </dt><dd class="ml-1" style="font-size: 0.85em;" th:text="${numero}"/>
                 </dl>
-                <p><span th:text="${attr1} + ': ' + ${val1}"/></p>
-                <p><span th:text="${attr2} + ': ' + ${val2}"/></p>
-                <p><span th:text="${attr3} + ': ' + ${val3}"/></p>
                 <p><br/></p>
                 <p>Available till <span th:attr="title='Unix Time is ' + ${link.expiry}" th:text="${#dates.format(new java.util.Date(link.expiry*1000))}"/></p>
               </span>

@@ -2,10 +2,7 @@ package io.stormbird.wallet.di;
 
 import dagger.Module;
 import dagger.Provides;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FetchTransactionsInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
@@ -26,7 +23,8 @@ class Erc20DetailModule {
                                                                    FindDefaultWalletInteract findDefaultWalletInteract,
                                                                    TransactionDetailRouter transactionDetailRouter,
                                                                    AssetDefinitionService assetDefinitionService,
-                                                                   TokensService tokensService) {
+                                                                   TokensService tokensService,
+                                                                   AddTokenInteract addTokenInteract) {
         return new Erc20DetailViewModelFactory(myAddressRouter,
                 fetchTokensInteract,
                 fetchTransactionsInteract,
@@ -34,7 +32,7 @@ class Erc20DetailModule {
                 findDefaultWalletInteract,
                 transactionDetailRouter,
                 assetDefinitionService,
-                tokensService);
+                tokensService, addTokenInteract);
     }
 
     @Provides
@@ -67,5 +65,11 @@ class Erc20DetailModule {
     FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepositoryType,
                                                                TokenRepositoryType tokenRepositoryType) {
         return new FetchTransactionsInteract(transactionRepositoryType, tokenRepositoryType);
+    }
+
+    @Provides
+    AddTokenInteract provideAddTokenInteract(
+            TokenRepositoryType tokenRepository) {
+        return new AddTokenInteract(tokenRepository);
     }
 }

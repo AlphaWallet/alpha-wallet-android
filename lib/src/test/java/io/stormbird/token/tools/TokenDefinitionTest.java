@@ -26,7 +26,7 @@ public class TokenDefinitionTest {
     @Test
     public void TokenInformationCanBeExtracted() throws IOException, SAXException {
         assertTrue(file.exists());
-        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("en"));
+        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("en"), null);
         assertFalse(ticketAsset.attributeTypes.isEmpty());
         assertNotEquals(0, ticketAsset.tokenName.length());
 
@@ -43,7 +43,7 @@ public class TokenDefinitionTest {
 
     @Test
     public void AttributeTypesShouldParse() throws IOException, SAXException {
-        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("en"));
+        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("en"), null);
 
         // the following test case only work with a very specific xml file.
         ticketIDs.map(ticketID -> new NonFungibleToken(ticketID, ticketAsset)).forEach(ticket -> {
@@ -61,13 +61,13 @@ public class TokenDefinitionTest {
 
     @Test
     public void XMLSignatureShouldValidate() throws IOException, SAXException {
-        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("en"));
+        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("en"), null);
         assertEquals("Shankai", ticketAsset.getKeyName());
         // TODO: actually validate XML signature
     }
 
     @Test(expected = SAXException.class)
     public void BadLocaleShouldThrowException() throws IOException, SAXException {
-        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("asdf"));
+        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("asdf"), null);
     }
 }

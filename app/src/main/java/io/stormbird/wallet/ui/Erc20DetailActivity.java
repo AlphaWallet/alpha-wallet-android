@@ -131,7 +131,7 @@ public class Erc20DetailActivity extends BaseActivity {
 
     private void onTokenData(Token tokenUpdate)
     {
-        if (token == null) return;
+        if (token == null || tokenUpdate == null) return;
         tokenViewAdapter.clear();
 
         if ((txUpdateCounter%TX_CHECK_INTERVAL) == 0 || token.checkBalanceChange(tokenUpdate))

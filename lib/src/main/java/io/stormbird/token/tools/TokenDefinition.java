@@ -1,9 +1,6 @@
 package io.stormbird.token.tools;
 
-import io.stormbird.token.entity.FunctionDefinition;
-import io.stormbird.token.entity.NonFungibleToken;
-import io.stormbird.token.entity.ParseResult;
-import io.stormbird.token.entity.TSAction;
+import io.stormbird.token.entity.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -117,7 +114,7 @@ public class TokenDefinition {
                 syntax = Syntax.DirectoryString; // 1.3.6.1.4.1.1466.115.121.1.15
             }
             bitmask = null;
-            for(Node node=attr.getFirstChild();
+            for(Node node = attr.getFirstChild();
                 node!=null; node=node.getNextSibling()){
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element origin = (Element) node;
@@ -430,10 +427,14 @@ public class TokenDefinition {
         if (locale.getLanguage().length() < 2 || locale.getLanguage().length() > 3) {
             throw new SAXException("Locale object wasn't created following ISO 639");
         }
+
         DocumentBuilder dBuilder;
+
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             dbFactory.setNamespaceAware(true);
+            dbFactory.setExpandEntityReferences(true);
+            dbFactory.setCoalescing(true);
             dBuilder = dbFactory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
             // TODO: if schema has problems (e.g. defined twice). Now, no schema, no exception.
@@ -443,20 +444,8 @@ public class TokenDefinition {
         Document xml = dBuilder.parse(xmlAsset);
         xml.getDocumentElement().normalize();
         determineNamespace(xml, result);
-        //TSValidator.check(xml, nameSpace);
 
         NodeList nList = xml.getElementsByTagNameNS(nameSpace, "token");
-
-        try
-        {
-            TSValidator.check(xml);
-            //extractSignatureTag(nList, xml);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
 
         if (nList.getLength() == 0)
         {
@@ -662,30 +651,6 @@ public class TokenDefinition {
         }
     }
 
-    private void extractSignatureTag(NodeList nList, Document xml) throws Exception
-    {
-        Element token = (Element)nList.item(0);
-        for (int i = 0; i < token.getChildNodes().getLength(); i++)
-        {
-            Node child = token.getChildNodes().item(i);
-            if (child.getNodeType() == Node.ELEMENT_NODE)
-            {
-                if (child.getLocalName().equals("Signature"))
-                {
-                    TSValidator.check(xml);
-                    return;
-                }
-            }
-        }
-
-        //NodeList nList = xml.getElementsByTagNameNS(nameSpace, "Signature");
-        /* we allow multiple contracts, e.g. for issuing asset and for
-         * proxy usage. but for now we only deal with the first */
-        //Element contract = (Element) nList.item(0);
-
-        String tokenSig = getLocalisedString(token, "SignedInfo");
-    }
-
     private void extractNameTag(Document xml)
     {
         NodeList nList = xml.getElementsByTagNameNS(nameSpace, "token");
@@ -801,9 +766,19 @@ public class TokenDefinition {
                     break;
                 case Node.COMMENT_NODE: //no need to record comment nodes
                     break;
+                case Node.ENTITY_REFERENCE_NODE:
+                    //load in external content
+                    String entityRef = child.getTextContent();
+                    EntityReference ref = (EntityReference) child;
+
+                    System.out.println(entityRef);
+                    break;
                 default:
-                    String parsed = child.getTextContent().replace("\u2019", "&#x2019;");
-                    sb.append(parsed);
+                    if (child != null && child.getTextContent() != null)
+                    {
+                        String parsed = child.getTextContent().replace("\u2019", "&#x2019;");
+                        sb.append(parsed);
+                    }
                     break;
             }
         }

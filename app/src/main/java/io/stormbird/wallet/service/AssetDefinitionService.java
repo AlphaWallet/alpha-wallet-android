@@ -1,6 +1,5 @@
 package io.stormbird.wallet.service;
 
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -19,7 +18,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.ui.HomeActivity;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -27,14 +26,12 @@ import java.io.*;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.Security;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static io.stormbird.wallet.C.ADDED_TOKEN;
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
-
 
 /**
  * AssetDefinitionService is the only place where we interface with XML files.
@@ -71,7 +68,7 @@ public class AssetDefinitionService implements ParseResult
             loadContracts(context.getFilesDir(), false);
             checkDownloadedFiles();
         }
-        catch (IOException|SAXException e)
+        catch (IOException| SAXException e)
         {
             e.printStackTrace();
         }
@@ -236,9 +233,9 @@ public class AssetDefinitionService implements ParseResult
 
     private TokenDefinition loadTokenDefinition(String address)
     {
-        if (address.startsWith("0xd2a0"))
+        if (address.contains("entry"))
         {
-            System.out.println("door");
+            System.out.println("yoless");
         }
         TokenDefinition definition = null;
         File xmlFile = getXMLFile(address.toLowerCase());
@@ -452,7 +449,7 @@ public class AssetDefinitionService implements ParseResult
                     {
                         try
                         {
-                            if (f.getName().contains("a66a"))
+                            if (f.getName().contains("entry"))
                             {
                                 System.out.println("door");
                             }

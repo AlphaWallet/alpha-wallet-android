@@ -49,15 +49,21 @@ public class MarketOrderTest
     public static void setUpRxSchedulers() {
         Scheduler immediate = new Scheduler() {
             @Override
+            public Worker createWorker()
+            {
+                return new ExecutorScheduler.ExecutorWorker(Runnable::run, false);
+            }
+
+            @Override
             public Disposable scheduleDirect(@NonNull Runnable run, long delay, @NonNull TimeUnit unit) {
                 // this prevents StackOverflowErrors when scheduling with a delay
                 return super.scheduleDirect(run, 0, unit);
             }
 
-            @Override
-            public Worker createWorker() {
-                return new ExecutorScheduler.ExecutorWorker(Runnable::run);
-            }
+//            @Override
+//            public Worker createWorker() {
+//                return new ExecutorScheduler.ExecutorWorker(Runnable::run);
+//            }
         };
 
         RxJavaPlugins.setInitIoSchedulerHandler(scheduler -> immediate);

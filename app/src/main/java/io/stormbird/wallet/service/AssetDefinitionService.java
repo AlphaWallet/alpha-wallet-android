@@ -29,8 +29,11 @@ import java.io.*;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static android.os.FileObserver.ALL_EVENTS;
 import static io.stormbird.wallet.C.ADDED_TOKEN;
@@ -51,8 +54,9 @@ public class AssetDefinitionService implements ParseResult
     private Map<String, TokenDefinition> assetDefinitions; //Mapping of contract address to token definitions
     private Map<String, Long> assetChecked;                //Mapping of contract address to when they were last fetched from server
     private List<String> devOverrideContracts;             //List of contract addresses which have been overridden by definition in developer folder
-    private FileObserver fileObserver;
+    private FileObserver fileObserver;                     //Observer which scans the override directory waiting for file change
     private final NotificationService notificationService;
+    private Map<String, String> fileHashes;                //Mapping of files and hashes.
 
     public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs)
     {
@@ -60,6 +64,7 @@ public class AssetDefinitionService implements ParseResult
         okHttpClient = client;
         assetChecked = new HashMap<>();
         devOverrideContracts = new ArrayList<>();
+        fileHashes = new ConcurrentHashMap<>();
         notificationService = svs;
 
         loadLocalContracts();
@@ -754,6 +759,13 @@ public class AssetDefinitionService implements ParseResult
                                         Environment.getExternalStorageDirectory()
                                                 + File.separator + ALPHAWALLET_DIR, s);
                                 FileInputStream stream = new FileInputStream(newTSFile);
+                                String hash = calcMD5(newTSFile);
+                                String fileName = newTSFile.getAbsolutePath();
+                                if (fileHashes.containsKey(fileName) && fileHashes.get(fileName).equals(hash))
+                                {
+                                    break;
+                                }
+                                fileHashes.put(fileName, hash);
                                 TokenDefinition td = parseFile(stream);
                                 addOverrideFile(td);
                                 notificationService.DisplayNotification("Definition Updated", s, NotificationCompat.PRIORITY_MAX);
@@ -782,4 +794,31 @@ public class AssetDefinitionService implements ParseResult
     }
 
 
+    private static String calcMD5(File file) throws IOException, NoSuchAlgorithmException
+    {
+        FileInputStream fis = new FileInputStream(file);
+        MessageDigest digest = MessageDigest.getInstance("MD5");
+
+        byte[] byteArray = new byte[1024];
+        int bytesCount = 0;
+
+        while ((bytesCount = fis.read(byteArray)) != -1) {
+            digest.update(byteArray, 0, bytesCount);
+        };
+
+        fis.close();
+
+        byte[] bytes = digest.digest();
+
+        //This bytes[] has bytes in decimal format;
+        //Convert it to hexadecimal format
+        StringBuilder sb = new StringBuilder();
+        for (byte aByte : bytes)
+        {
+            sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+        }
+
+        //return complete hash
+        return sb.toString();
+    }
 }

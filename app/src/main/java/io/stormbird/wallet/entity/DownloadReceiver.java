@@ -7,8 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 
-import static io.stormbird.wallet.C.DOWNLOAD_READY;
-import static io.stormbird.wallet.C.RESET_TOOLBAR;
+import static io.stormbird.wallet.C.*;
 
 public class DownloadReceiver extends BroadcastReceiver
 {
@@ -17,6 +16,7 @@ public class DownloadReceiver extends BroadcastReceiver
     {
         ctx.registerReceiver(this, new IntentFilter(DOWNLOAD_READY));
         ctx.registerReceiver(this, new IntentFilter(RESET_TOOLBAR));
+        ctx.registerReceiver(this, new IntentFilter(REQUEST_NOTIFICATION_ACCESS));
         this.downloadInterface = downloadInterface;
     }
 
@@ -32,6 +32,9 @@ public class DownloadReceiver extends BroadcastReceiver
                 break;
             case RESET_TOOLBAR:
                 downloadInterface.resetToolbar();
+                break;
+            case REQUEST_NOTIFICATION_ACCESS:
+                downloadInterface.requestNotificationPermission();
                 break;
             default:
                 break;

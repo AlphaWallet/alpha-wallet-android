@@ -72,6 +72,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
+    public static final int RC_ASSET_NOTIFICATION_PERM = 224;
 
     public static final int DAPP_BARCODE_READER_REQUEST_CODE = 1;
 
@@ -518,6 +519,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         invalidateOptionsMenu();
     }
 
+    @Override
+    public void requestNotificationPermission()
+    {
+        checkNotificationPermission(RC_ASSET_NOTIFICATION_PERM);
+    }
+
     private void hideDialog()
     {
         if (cDialog != null && cDialog.isShowing()) {
@@ -539,6 +546,30 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                                                                      Manifest.permission.WRITE_EXTERNAL_STORAGE))
             {
                 Log.w("HomeActivity", "Folder write permission is not granted. Requesting permission");
+                ActivityCompat.requestPermissions(this, permissions, permissionTag);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
+
+    private boolean checkNotificationPermission(int permissionTag)
+    {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NOTIFICATION_POLICY)
+                == PackageManager.PERMISSION_GRANTED)
+        {
+            return true;
+        }
+        else
+        {
+            final String[] permissions = new String[]{Manifest.permission.ACCESS_NOTIFICATION_POLICY};
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
+                                                                     Manifest.permission.ACCESS_NOTIFICATION_POLICY))
+            {
+                Log.w("HomeActivity", "Notification permission is not granted. Requesting permission");
                 ActivityCompat.requestPermissions(this, permissions, permissionTag);
                 return false;
             }

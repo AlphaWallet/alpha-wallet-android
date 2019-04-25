@@ -1,19 +1,29 @@
 package io.stormbird.wallet.service;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.FragmentMessenger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static io.stormbird.wallet.C.DOWNLOAD_READY;
+import static io.stormbird.wallet.C.REQUEST_NOTIFICATION_ACCESS;
 
 /**
  * Created by James on 25/04/2019.
@@ -43,7 +53,7 @@ public class NotificationService
 
             CharSequence name = context.getString(R.string.app_name);
             String description = context.getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_HIGH;
+            int importance = NotificationManager.IMPORTANCE_MAX;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
             channel.setSound(notification, attr);
@@ -59,7 +69,7 @@ public class NotificationService
     {
         int color;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-
+            checkNotificationPermission();
             color = context.getColor(R.color.holo_blue);
         }
         else
@@ -76,9 +86,20 @@ public class NotificationService
                 .setSound(notification, 1)
                 .setAutoCancel(true)
                 .setCategory(NotificationCompat.CATEGORY_EVENT)
-                .setDefaults(Notification.DEFAULT_ALL)
-                .setPriority(priority);
+                .setPriority(NotificationCompat.PRIORITY_MAX);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         notificationManager.notify(NOTIFICATION_ID, builder.build());
+    }
+
+    private void checkNotificationPermission()
+    {
+        if (!(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_NOTIFICATION_POLICY)
+                == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_NOTIFICATION_POLICY)
+                        != PackageManager.PERMISSION_DENIED))
+        {
+            Intent intent = new Intent(REQUEST_NOTIFICATION_ACCESS);
+            context.sendBroadcast(intent);
+        }
     }
 }

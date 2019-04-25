@@ -96,6 +96,7 @@ public class DApp implements Parcelable {
         if (this == o) return true;
         if (!(o instanceof DApp)) return false;
         DApp dApp = (DApp) o;
+        if (url == null || name == null || dApp.name == null || dApp.url == null) return false;
         return name.equals(dApp.name) && url.equals( dApp.url);
     }
 

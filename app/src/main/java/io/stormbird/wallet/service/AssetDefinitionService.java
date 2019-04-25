@@ -6,6 +6,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
+import android.os.FileObserver;
+import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -29,6 +32,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static android.os.FileObserver.ALL_EVENTS;
 import static io.stormbird.wallet.C.ADDED_TOKEN;
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
@@ -47,13 +51,16 @@ public class AssetDefinitionService implements ParseResult
     private Map<String, TokenDefinition> assetDefinitions; //Mapping of contract address to token definitions
     private Map<String, Long> assetChecked;                //Mapping of contract address to when they were last fetched from server
     private List<String> devOverrideContracts;             //List of contract addresses which have been overridden by definition in developer folder
+    private FileObserver fileObserver;
+    private final NotificationService notificationService;
 
-    public AssetDefinitionService(OkHttpClient client, Context ctx)
+    public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs)
     {
         context = ctx;
         okHttpClient = client;
         assetChecked = new HashMap<>();
         devOverrideContracts = new ArrayList<>();
+        notificationService = svs;
 
         loadLocalContracts();
     }
@@ -259,15 +266,23 @@ public class AssetDefinitionService implements ParseResult
         return definition;
     }
 
+    @SuppressWarnings("deprecation")
     private TokenDefinition parseFile(InputStream xmlInputStream) throws IOException, SAXException, Exception
     {
-        TokenDefinition definition = null;
-        definition = new TokenDefinition(
-                xmlInputStream,
-                context.getResources().getConfiguration().getLocales().get(0), this);
+        Locale locale;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            locale = context.getResources().getConfiguration().getLocales().get(0);
+        }
+        else
+        {
+            locale = context.getResources().getConfiguration().locale;
+        }
+
+        TokenDefinition definition = new TokenDefinition(
+                xmlInputStream, locale, this);
 
         //now assign the networks
-        if (definition.addresses.size() > 0)
+        if (definition != null && definition.addresses.size() > 0)
         {
             assignNetworks(definition);
         }
@@ -359,7 +374,7 @@ public class AssetDefinitionService implements ParseResult
             PackageInfo info = manager.getPackageInfo(
                     context.getPackageName(), 0);
             String appVersion = info.versionName;
-            String OSVersion = String.valueOf(Build.VERSION.RELEASE) ;
+            String OSVersion = String.valueOf(Build.VERSION.RELEASE);
 
             okhttp3.Response response = null;
 
@@ -428,6 +443,7 @@ public class AssetDefinitionService implements ParseResult
         try
         {
             loadContracts(directory, true);
+            startFileListener(directory);
         }
         catch (IOException|SAXException e)
         {
@@ -442,10 +458,10 @@ public class AssetDefinitionService implements ParseResult
         {
             for (File f : files)
             {
-                if (f.getName().contains(".xml"))
+                if (f.getName().contains(".xml") || f.getName().contains(".tsml"))
                 {
                     String extension = f.getName().substring(f.getName().lastIndexOf('.') + 1).toLowerCase();
-                    if (extension.equals("xml"))
+                    if (extension.equals("xml") || extension.equals("tsml"))
                     {
                         try
                         {
@@ -716,4 +732,54 @@ public class AssetDefinitionService implements ParseResult
                 break;
         }
     }
+
+    public void startFileListener(File path)
+    {
+        fileObserver = new FileObserver(path.getPath(), ALL_EVENTS)
+        {
+            @Override
+            public void onEvent(int i, @Nullable String s)
+            {
+                //watch for new files and file change
+                switch (i)
+                {
+                    case CREATE:
+                    case MODIFY:
+                        try
+                        {
+                            if (s.contains(".xml") || s.contains(".tsml"))
+                            {
+                                //form filename
+                                File newTSFile = new File(
+                                        Environment.getExternalStorageDirectory()
+                                                + File.separator + ALPHAWALLET_DIR, s);
+                                FileInputStream stream = new FileInputStream(newTSFile);
+                                TokenDefinition td = parseFile(stream);
+                                addOverrideFile(td);
+                                notificationService.DisplayNotification("Definition Updated", s, NotificationCompat.PRIORITY_MAX);
+                            }
+                        }
+                        catch (SAXException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+
+        fileObserver.startWatching();
+    }
+
+
 }

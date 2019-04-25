@@ -181,15 +181,21 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, Context ctx) {
-		return new AssetDefinitionService(okHttpClient, ctx);
-	}
-
-	@Singleton
-	@Provides
 	ImportTokenService provideImportTokenService(OkHttpClient okHttpClient,
 												 TransactionRepositoryType transactionRepository,
 												 PasswordStore passwordStore) {
 		return new ImportTokenService(okHttpClient, transactionRepository, passwordStore);
+	}
+
+	@Singleton
+	@Provides
+	NotificationService provideNotificationService(Context ctx) {
+		return new NotificationService(ctx);
+	}
+
+	@Singleton
+	@Provides
+	AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, Context ctx, NotificationService notificationService) {
+		return new AssetDefinitionService(okHttpClient, ctx, notificationService);
 	}
 }

@@ -334,4 +334,5 @@
     <string name="network">Network</string>
     <string name="collectibles">Collectibles</string>
     <string name="token_function">Token Function</string>
+    <string name="channel_description">Alphawallet notification channel</string>
 </resources>

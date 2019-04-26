@@ -18,10 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.webkit.WebBackForwardList;
-import android.webkit.WebChromeClient;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.webkit.*;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -122,6 +119,7 @@ public class DappBrowserFragment extends Fragment implements
     private String currentFragment;
 
     private WebBackForwardList sessionHistory;
+    private String lastHomeTag;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -148,6 +146,8 @@ public class DappBrowserFragment extends Fragment implements
         setupAddressBar();
         viewModel.prepare(getContext());
         URLReceiver = new URLLoadReceiver(getActivity(), this);
+
+        lastHomeTag = DAPP_HOME;
 
         // Load url from a link within the app
         if (getArguments() != null && getArguments().getString("url") != null) {
@@ -214,6 +214,7 @@ public class DappBrowserFragment extends Fragment implements
             if (tag.equals(DAPP_HOME)) {
                 DappHomeFragment f = new DappHomeFragment();
                 showFragment(f, tag);
+                lastHomeTag = DAPP_HOME;
             } else if (tag.equals(DISCOVER_DAPPS)) {
                 DiscoverDappsFragment f = new DiscoverDappsFragment();
                 showFragment(f, tag);
@@ -233,13 +234,8 @@ public class DappBrowserFragment extends Fragment implements
                 .add(R.id.frame, fragment, tag)
                 .commit();
 
-        if (tag.equals(DISCOVER_DAPPS) || tag.equals(MY_DAPPS) || tag.equals(HISTORY)) {
-            back.setAlpha(1.0f);
-            back.setOnClickListener(v -> homePressed());
-        } else {
-            setBackForwardButtons();
-            back.setOnClickListener(v -> goToPreviousPage());
-        }
+        setBackForwardButtons();
+        back.setOnClickListener(v -> goToPreviousPage());
     }
 
     private void detachFragments(boolean detachHome) {
@@ -643,7 +639,13 @@ public class DappBrowserFragment extends Fragment implements
         if (web3.canGoBack()) {
             web3.goBack();
             detachFragments(true);
-            urlTv.setText(sessionHistory.getItemAtIndex(sessionHistory.getCurrentIndex()-1).getUrl());
+            loadSessionUrl(-1);
+        }
+        else if (lastHomeTag != null && !currentFragment.equals(DAPP_HOME))//back into the dappBrowser fragments
+        {
+            detachFragments(true);
+            attachFragment(lastHomeTag);
+            lastHomeTag = DAPP_HOME;
         }
     }
 
@@ -651,7 +653,24 @@ public class DappBrowserFragment extends Fragment implements
         if (web3.canGoForward()) {
             web3.goForward();
             detachFragments(true);
-            urlTv.setText(sessionHistory.getItemAtIndex(sessionHistory.getCurrentIndex()+1).getUrl());
+            loadSessionUrl(1);
+        }
+    }
+
+    /**
+     * Browse to relative entry with sanity check on value
+     * @param relative relative addition or subtraction of browsing index
+     */
+    private void loadSessionUrl(int relative)
+    {
+        int newIndex = sessionHistory.getCurrentIndex() + relative;
+        if (newIndex < sessionHistory.getSize())
+        {
+            WebHistoryItem newItem = sessionHistory.getItemAtIndex(newIndex);
+            if (newItem != null)
+            {
+                urlTv.setText(newItem.getUrl());
+            }
         }
     }
 
@@ -662,6 +681,7 @@ public class DappBrowserFragment extends Fragment implements
         DappBrowserUtils.addToHistory(getContext(), dapp);
         adapter.addSuggestion(dapp);
         sessionHistory = web3.copyBackForwardList();
+        this.currentFragment = DAPP_BROWSER;
         setBackForwardButtons();
     }
 
@@ -669,11 +689,13 @@ public class DappBrowserFragment extends Fragment implements
         if (sessionHistory == null) {
             sessionHistory = web3.copyBackForwardList();
         }
-        if (sessionHistory.getCurrentIndex() > 0) {
-            back.setAlpha(1.0f);
-        } else {
+
+        if (currentFragment.equals(DAPP_HOME)) {
             back.setAlpha(0.3f);
+        } else {
+            back.setAlpha(1.0f);
         }
+
         if (sessionHistory.getCurrentIndex() < sessionHistory.getSize()-1) {
             next.setAlpha(1.0f);
         } else {
@@ -683,6 +705,7 @@ public class DappBrowserFragment extends Fragment implements
 
     private boolean loadUrl(String urlText)
     {
+        if (!lastHomeTag.equals(DAPP_BROWSER)) lastHomeTag = currentFragment;
         detachFragments(true);
         this.currentFragment = DAPP_BROWSER;
         cancelSearchSession();

@@ -12,7 +12,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
-
 import io.stormbird.wallet.R;
 
 public abstract class BarcodeScannerView extends FrameLayout implements Camera.PreviewCallback  {
@@ -22,7 +21,6 @@ public abstract class BarcodeScannerView extends FrameLayout implements Camera.P
     private IViewFinder mViewFinderView;
     private Rect mFramingRectInPreview;
     private CameraHandlerThread mCameraHandlerThread;
-    private Boolean mFlashState;
     private boolean mAutofocusState = true;
     private boolean mShouldScaleToFill = true;
 
@@ -191,9 +189,6 @@ public abstract class BarcodeScannerView extends FrameLayout implements Camera.P
         if(mCameraWrapper != null) {
             setupLayout(mCameraWrapper);
             mViewFinderView.setupViewFinder();
-            /*if(mFlashState != null) {
-                setFlash(mFlashState);
-            }*/
             setAutoFocus(mAutofocusState);
         }
     }
@@ -251,46 +246,6 @@ public abstract class BarcodeScannerView extends FrameLayout implements Camera.P
             mFramingRectInPreview = rect;
         }
         return mFramingRectInPreview;
-    }
-
-    public void setFlash(boolean flag) {
-        mFlashState = flag;
-        if(mCameraWrapper != null && CameraUtils.isFlashSupported(mCameraWrapper.mCamera)) {
-
-            Camera.Parameters parameters = mCameraWrapper.mCamera.getParameters();
-            if(flag) {
-                if(parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH)) {
-                    return;
-                }
-                parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-            } else {
-                if(parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_OFF)) {
-                    return;
-                }
-                parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-            }
-            mCameraWrapper.mCamera.setParameters(parameters);
-        }
-    }
-
-    public boolean getFlash() {
-        if(mCameraWrapper != null && CameraUtils.isFlashSupported(mCameraWrapper.mCamera)) {
-            Camera.Parameters parameters = mCameraWrapper.mCamera.getParameters();
-            return parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH);
-        }
-        return false;
-    }
-
-    public void toggleFlash() {
-        if(mCameraWrapper != null && CameraUtils.isFlashSupported(mCameraWrapper.mCamera)) {
-            Camera.Parameters parameters = mCameraWrapper.mCamera.getParameters();
-            if(parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH)) {
-                parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-            } else {
-                parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-            }
-            mCameraWrapper.mCamera.setParameters(parameters);
-        }
     }
 
     public void setAutoFocus(boolean state) {

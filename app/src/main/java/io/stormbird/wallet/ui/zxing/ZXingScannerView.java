@@ -8,30 +8,17 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Log;
-
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.BinaryBitmap;
-import com.google.zxing.DecodeHintType;
-import com.google.zxing.LuminanceSource;
-import com.google.zxing.MultiFormatReader;
-import com.google.zxing.NotFoundException;
-import com.google.zxing.PlanarYUVLuminanceSource;
-import com.google.zxing.ReaderException;
-import com.google.zxing.Result;
+import com.google.zxing.*;
 import com.google.zxing.common.HybridBinarizer;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-
 import io.stormbird.wallet.ui.QRScanning.BarcodeScannerView;
 import io.stormbird.wallet.ui.QRScanning.DisplayUtils;
+
+import java.util.*;
 
 public class ZXingScannerView extends BarcodeScannerView
 {
     private static final String TAG = "ZXingScannerView";
+    private final Context context;
 
     public interface ResultHandler {
         void handleResult(Result rawResult);
@@ -46,17 +33,19 @@ public class ZXingScannerView extends BarcodeScannerView
     {
         ALL_FORMATS.add(BarcodeFormat.QR_CODE);
         ALL_FORMATS.add(BarcodeFormat.AZTEC);
-        ALL_FORMATS.add(BarcodeFormat.MAXICODE);
+        //ALL_FORMATS.add(BarcodeFormat.MAXICODE);
     }
 
     public ZXingScannerView(Context context) {
         super(context);
         initMultiFormatReader();
+        this.context = context;
     }
 
     public ZXingScannerView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
         initMultiFormatReader();
+        this.context = context;
     }
 
     public void setFormats(List<BarcodeFormat> formats) {

@@ -1,0 +1,826 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><ts:token xmlns:ts="http://tokenscript.org/2019/05/tokenscript" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" custodian="false" xsi:schemaLocation="http://tokenscript.org/2019/05/tokenscript ../../schema/tokenscript.xsd">
+    <ts:name>
+        <ts:plurals xml:lang="en">
+            <ts:string quantity="one">Ticket</ts:string>
+            <ts:string quantity="other">Tickets</ts:string>
+        </ts:plurals>
+        <ts:plurals xml:lang="es">
+            <ts:string quantity="one">Boleto de admisión</ts:string>
+            <ts:string quantity="other">Boleto de admisiónes</ts:string>
+        </ts:plurals>
+        <ts:plurals xml:lang="zh">
+            <ts:string quantity="one">入場券</ts:string>
+            <ts:string quantity="other">入場券</ts:string>
+        </ts:plurals>
+    </ts:name>
+
+    <ts:contract interface="erc875" name="FIFA">
+        <ts:address network="1">0xA66A3F08068174e8F005112A8b2c7A507a822335</ts:address>
+        <ts:address network="3">0xd8e5f58de3933e1e35f9c65eb72cb188674624f3</ts:address>
+    </ts:contract>
+
+    <ts:origins>
+        <!-- Define the contract which holds the token that the user will use -->
+        <ts:ethereum contract="FIFA">
+        </ts:ethereum>
+    </ts:origins>
+
+    <ts:cards>
+        <ts:token-card>
+            <style type="text/css">.tbml-count {
+  font-family: "SourceSansPro";
+  font-weight: bolder;
+  font-size: 21px;
+  color: rgb(117, 185, 67);
+}
+.tbml-category {
+  font-family: "SourceSansPro";
+  font-weight: lighter;
+  font-size: 21px;
+  color: rgb(67, 67, 67);
+}
+.tbml-venue {
+  font-family: "SourceSansPro";
+  font-weight: lighter;
+  font-size: 16px;
+  color: rgb(67, 67, 67);
+}
+.tbml-date {
+  font-family: "SourceSansPro";
+  font-weight: bold;
+  font-size: 14px;
+  color: rgb(112, 112, 112);
+  margin-left: 7px;
+  margin-right: 7px;
+}
+.tbml-time {
+  font-family: "SourceSansPro";
+  font-weight: lighter;
+  font-size: 16px;
+  color: rgb(112, 112, 112);
+}
+html {
+}
+body {
+  padding: 0px;
+  margin: 0px;
+}
+div {
+  margin: 0px;
+  padding: 0px;
+}
+.data-icon {
+  height:16px;
+  vertical-align: middle
+}</style>
+            <ts:view-iconified xml:lang="en">
+                <script type="text/javascript" xml:base="file:///Users/sangalli/Documents/projects/TokenScript/examples/fifa/fifa.en.shtml">
+    (function() {
+        'use strict'
+
+        function GeneralizedTime(generalizedTime) {
+            this.rawData = generalizedTime;
+        }
+
+        GeneralizedTime.prototype.getYear = function () {
+            return parseInt(this.rawData.substring(0, 4), 10);
+        }
+
+        GeneralizedTime.prototype.getMonth = function () {
+            return parseInt(this.rawData.substring(4, 6), 10) - 1;
+        }
+
+        GeneralizedTime.prototype.getDay = function () {
+            return parseInt(this.rawData.substring(6, 8), 10)
+        },
+
+        GeneralizedTime.prototype.getHours = function () {
+            return parseInt(this.rawData.substring(8, 10), 10)
+        },
+
+        GeneralizedTime.prototype.getMinutes = function () {
+            var minutes = parseInt(this.rawData.substring(10, 12), 10)
+            if (minutes) return minutes
+            return 0
+        },
+
+        GeneralizedTime.prototype.getSeconds = function () {
+            var seconds = parseInt(this.rawData.substring(12, 14), 10)
+            if (seconds) return seconds
+            return 0
+        },
+
+        GeneralizedTime.prototype.getMilliseconds = function () {
+            var startIdx
+            if (time.indexOf('.') !== -1) {
+                startIdx = this.rawData.indexOf('.') + 1
+            } else if (time.indexOf(',') !== -1) {
+                startIdx = this.rawData.indexOf(',') + 1
+            } else {
+                return 0
+            }
+
+            var stopIdx = time.length - 1
+            var fraction = '0' + '.' + time.substring(startIdx, stopIdx)
+            var ms = parseFloat(fraction) * 1000
+            return ms
+        },
+
+        GeneralizedTime.prototype.getTimeZone = function () {
+            let time = this.rawData;
+            var length = time.length
+            var symbolIdx
+            if (time.charAt(length - 1 ) === 'Z') return 0
+            if (time.indexOf('+') !== -1) {
+                symbolIdx = time.indexOf('+')
+            } else if (time.indexOf('-') !== -1) {
+                symbolIdx = time.indexOf('-')
+            } else {
+                return NaN
+            }
+
+            var minutes = time.substring(symbolIdx + 2)
+            var hours = time.substring(symbolIdx + 1, symbolIdx + 2)
+            var one = (time.charAt(symbolIdx) === '+') ? 1 : -1
+
+            var intHr = one * parseInt(hours, 10) * 60 * 60 * 1000
+            var intMin = one * parseInt(minutes, 10) * 60 * 1000
+            var ms = minutes ? intHr + intMin : intHr
+            return ms
+        }
+
+        if (typeof exports === 'object') {
+            module.exports = GeneralizedTime
+        } else if (typeof define === 'function' &amp;&amp; define.amd) {
+            define(GeneralizedTime)
+        } else {
+            window.GeneralizedTime = GeneralizedTime
+        }
+    }())
+</script>
+<script type="text/javascript" xml:base="file:///Users/sangalli/Documents/projects/TokenScript/examples/fifa/fifa.en.shtml"><![CDATA[
+class Token {
+    constructor(tokenInstance) {
+        this.props = tokenInstance
+    }
+
+    formatGeneralizedTimeToDate(str) {
+        const d = new GeneralizedTime(str)
+        return new Date(d.getYear(), d.getMonth(), d.getDay(), d.getHours(), d.getMinutes(), d.getSeconds()).toLocaleDateString()
+    }
+    formatGeneralizedTimeToTime(str) {
+        const d = new GeneralizedTime(str)
+        return new Date(d.getYear(), d.getMonth(), d.getDay(), d.getHours(), d.getMinutes(), d.getSeconds()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+    }
+
+    render() {
+        let time;
+        let date;
+        if (this.props.time == null) {
+            time = ""
+            date = ""
+        } else {
+            time = this.formatGeneralizedTimeToTime(this.props.time.generalizedTime)
+            date = this.props.time == null ? "": this.formatGeneralizedTimeToDate(this.props.time.generalizedTime)
+        }
+        return `<div>
+          <div>
+            <span class="tbml-count">x${this.props._count}</span>  <span class="tbml-category">${this.props.category}</span>
+          </div>
+          <div>
+              <span class="tbml-venue">${this.props.venue}</span>
+          </div>
+           <div style="margin: 0px; padding:0px; clear: both; height: 6px">
+           &nbsp;
+           </div>
+          <div>
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAAA5CAYAAACMGIOFAAAABGdBTUEAALGPC/xhBQAABw9JREFUaAXtWt1vFFUUP3d224JVqHyVXTSCjzYVBFMx/eTJJ1tQ+yA+iBLEIDGa+CBP4h+gMcYXYgR8sDxUacs/YD8DkgjWBB+lpHa3hbZQpNDdzs71nNmZ3Xvv3PlYk+IWd5LNnM/fPWdm7p1zzyyDEo8DYzMvW2buFAB/Gl17qtuSH/YylguD6b58c2t2yTwLHJqBwVj1mvih3qYt06F+nMeyw6mv0e4gAJs04rGjfc31F8P8RL0hMmE055xZOfNHDryRA9Th79jyaPpwmB/pM0vml+j/Cvo+Tmfio/gRPo2TH4832uNjHFF8XZuSknz9l/ltnEPSdaazBdAk8n40RiXZqbyfn4pP41McfvY6eUlJWjwb94Bw8Mo8RrZAtVN5vZcGXxuH3ts7cPc1Xp1ZuNVg5HLrRR/D4NfPNydviDIdvX8k3SHKGRi3+1rrx0WZjt4/dnMXWLk6UdffmhgUeR29/2J6O5iwXdRZsdhCzfrN13obWNaV21ezc/TWE8xa/iI7l3obF4ZqfESkwwLjJAo+l4QaxrKsn0UxY3wQ+X2iTEfjPPsKOG9XdEzhvWzWOoSxfiYpLAswj2znUOosxKo+udCy+W+D7h5Y2VFcDI7g814tOZQ5Y+Ejpgsxnwd/D/MaofyMzPz0Cbx7z+uMV72Mw87s3PSnBuP81VWfTGACvBPnJG8UbRiwCW6ws6IsxmFQ5H1pw567BbVhwUSBCSBinJ3JGUyazwHmBRXFhc+rtFZwxg7h1HumYIT5xT3zkMHEhdaE5Fh0CKb+rV9fe+L7YGS9tq8tMYQa+hWOzuFUBzKFJCm/kt6ThoUuysFwWVREehZLHUmh8pKyyOjwdXEUPbxUSUnG6hJphFgSYfBd+KfI+9GccclO5f38VHzG4IETh5+LR15SkvSCxTn7ERbKpo3E4PfH2NpvPKgagQHGCfSbzavYbJ7XGCoiGx/HcfxM4Oxj8UWvmGvZkpIkhIH25KnamthTRrzqhd2tyT09rXW3tciKsL8tcblmU3yHYbAX6Uy8YqJlCZ/GiRnxXTQuja81DBDaFU+AXqs6t7d+BhUz/Vqtv7C3Ycs91P7qb6HXnGT2kxNaHuq9AUq+k35A5SyvJFnOd6eU2Cp3spSrVc62kVfXruH0c1gTvotNqE1SQgxMfBwuV7UkvtM1tA6O3HnyPn9wnIP1LAd8lTsHVTL0oqf3oO411I0NLOrv4H6xCWslOU4Os4yx0wNtiT9cvKCz7Oxj2T00vSPDLXyv8VqlOEOR3ec5jB21nej+gQhxkvP4lZHUINo4W7liZUcUJg73YPENtNvjvCYK7tShQ5tjBYFCYDH5PsbV2Nu+9bqi8rCR5mTGsDrtBD3ukgBbhvIxPnqzoZigrCtweAFsu4KgQHjwChqb4LX5uGSpjouUZIzBpM5ZljGPzZoqwL6qUwLKxgLHzLydILJJL55qES2uiMXA+eZEH86mMzilis+bPOIUNX1lEQBVRjgJj1NRreqIJznpnQpKMnHwpiShy2AcFA/F5YqCzqxzaEoKHCf04EBbcp/OiRpecba8QdLFanI/vbRhCv0kHNGG+iy5O+mEKCOadhNBxTYudMzuseYyMdHX5FXz1KASZS6N+0lcA+SmWKSFxwVwgD3ghSXTNVTOTiI3FHEo61y4v0INQwwizckQjLJX/y+SLOlxpTlpxMyN4q0zWLUZdU5aBi4XzkEtjKhzUv0sYOXic35z0sUXz5HuJC0AXcNTp8FaXrCy1nXxZ2aWJruGU5P0SU8EdumuodTRzGxqwTT5hOSHPHa675DetRXPhEe4hC/6EU1xUDwUl+jjR0dK8rWx9AGsMN6xKzE90rb8N0tZ+ealmXpccqk9skbW5DnEXEt6slP1Dp7+6xUmR/FQXKqfjo+UZI4DfXANOeyPspLN0jJsxUopZErweN5OckXGi6daRIsrYjFQYxkX8NW9qA6i8D0KDztbtlzDgt5pQqlah0e9bedVe/BkE7aYj0uW6riQq5x3oSIYdyFN+IgE7kLUAajoxl1Ix30I3oWoxTnh0Gd63IWMB+1CetvCi3PCKqniIYdyP3QVT6Q5We6JhcVXSTLsCq0WfaSFh5KptD8AKu2PwMe60v4IvDzwUNsfuLdIBbU/MFTpm6YQ+hJW2L7tD8IVbIvkSrY/3ro0t26RZ6X2x3+x1apl1fM/7N14t5h1kdIVA5FXV4JxgD3gYfudSvujeBNWjKpUPCt2aR8ycOVOPuQLvmLDMVxyF7B3s84dAf/CsoDtod9cfrWdsY+/C/8HVfy/LmN347j8X8FmUoebjG3Aod3lV9sZc1GPq/ifIfhWlT5KPP4N9JQx0JLsoS9Ej1Jibi64qp7ub912rlCsdI2mDuKH3yN4u3eLc9R1WDVnnIMY61W6g5Qgxf0P/UFw0L/BhyIAAAAASUVORK5CYII=" class="data-icon"/>
+            <span class="tbml-date">${date}</span>
+            <img src="data:image/png;base64,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" class="data-icon"/>
+            <span class="tbml-date">${this.props.countryA}-${this.props.countryB}</span>
+            <img src="data:image/png;base64,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" class="data-icon"/>
+            <span class="tbml-date">M${this.props.match}</span>
+          </div>
+          <div>
+            <span class="tbml-time">${time}, &nbsp;${this.props.locality}</span>
+          </div>
+        </div>`;
+    }
+}
+
+web3.tokens.dataChanged = (oldTokens, updatedTokens) => {
+    const currentTokenInstance = web3.tokens.data.currentInstance;
+    const domHtml = new Token(currentTokenInstance).render();
+    document.getElementById('root').innerHTML = domHtml
+};
+]]></script>
+<div id="root" xml:base="file:///Users/sangalli/Documents/projects/TokenScript/examples/fifa/fifa.en.shtml"/>
+
+            </ts:view-iconified>
+            <ts:view xml:lang="en">
+                <script type="text/javascript" xml:base="file:///Users/sangalli/Documents/projects/TokenScript/examples/fifa/fifa.en.shtml">
+    (function() {
+        'use strict'
+
+        function GeneralizedTime(generalizedTime) {
+            this.rawData = generalizedTime;
+        }
+
+        GeneralizedTime.prototype.getYear = function () {
+            return parseInt(this.rawData.substring(0, 4), 10);
+        }
+
+        GeneralizedTime.prototype.getMonth = function () {
+            return parseInt(this.rawData.substring(4, 6), 10) - 1;
+        }
+
+        GeneralizedTime.prototype.getDay = function () {
+            return parseInt(this.rawData.substring(6, 8), 10)
+        },
+
+        GeneralizedTime.prototype.getHours = function () {
+            return parseInt(this.rawData.substring(8, 10), 10)
+        },
+
+        GeneralizedTime.prototype.getMinutes = function () {
+            var minutes = parseInt(this.rawData.substring(10, 12), 10)
+            if (minutes) return minutes
+            return 0
+        },
+
+        GeneralizedTime.prototype.getSeconds = function () {
+            var seconds = parseInt(this.rawData.substring(12, 14), 10)
+            if (seconds) return seconds
+            return 0
+        },
+
+        GeneralizedTime.prototype.getMilliseconds = function () {
+            var startIdx
+            if (time.indexOf('.') !== -1) {
+                startIdx = this.rawData.indexOf('.') + 1
+            } else if (time.indexOf(',') !== -1) {
+                startIdx = this.rawData.indexOf(',') + 1
+            } else {
+                return 0
+            }
+
+            var stopIdx = time.length - 1
+            var fraction = '0' + '.' + time.substring(startIdx, stopIdx)
+            var ms = parseFloat(fraction) * 1000
+            return ms
+        },
+
+        GeneralizedTime.prototype.getTimeZone = function () {
+            let time = this.rawData;
+            var length = time.length
+            var symbolIdx
+            if (time.charAt(length - 1 ) === 'Z') return 0
+            if (time.indexOf('+') !== -1) {
+                symbolIdx = time.indexOf('+')
+            } else if (time.indexOf('-') !== -1) {
+                symbolIdx = time.indexOf('-')
+            } else {
+                return NaN
+            }
+
+            var minutes = time.substring(symbolIdx + 2)
+            var hours = time.substring(symbolIdx + 1, symbolIdx + 2)
+            var one = (time.charAt(symbolIdx) === '+') ? 1 : -1
+
+            var intHr = one * parseInt(hours, 10) * 60 * 60 * 1000
+            var intMin = one * parseInt(minutes, 10) * 60 * 1000
+            var ms = minutes ? intHr + intMin : intHr
+            return ms
+        }
+
+        if (typeof exports === 'object') {
+            module.exports = GeneralizedTime
+        } else if (typeof define === 'function' &amp;&amp; define.amd) {
+            define(GeneralizedTime)
+        } else {
+            window.GeneralizedTime = GeneralizedTime
+        }
+    }())
+</script>
+<script type="text/javascript" xml:base="file:///Users/sangalli/Documents/projects/TokenScript/examples/fifa/fifa.en.shtml"><![CDATA[
+class Token {
+    constructor(tokenInstance) {
+        this.props = tokenInstance
+    }
+
+    formatGeneralizedTimeToDate(str) {
+        const d = new GeneralizedTime(str)
+        return new Date(d.getYear(), d.getMonth(), d.getDay(), d.getHours(), d.getMinutes(), d.getSeconds()).toLocaleDateString()
+    }
+    formatGeneralizedTimeToTime(str) {
+        const d = new GeneralizedTime(str)
+        return new Date(d.getYear(), d.getMonth(), d.getDay(), d.getHours(), d.getMinutes(), d.getSeconds()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+    }
+
+    render() {
+        let time;
+        let date;
+        if (this.props.time == null) {
+            time = ""
+            date = ""
+        } else {
+            time = this.formatGeneralizedTimeToTime(this.props.time.generalizedTime)
+            date = this.props.time == null ? "": this.formatGeneralizedTimeToDate(this.props.time.generalizedTime)
+        }
+        return `<div>
+          <div>
+            <span class="tbml-count">x${this.props._count}</span>  <span class="tbml-category">${this.props.category}</span>
+          </div>
+          <div>
+              <span class="tbml-venue">${this.props.venue}</span>
+          </div>
+           <div style="margin: 0px; padding:0px; clear: both; height: 6px">
+           &nbsp;
+           </div>
+          <div>
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAAA5CAYAAACMGIOFAAAABGdBTUEAALGPC/xhBQAABw9JREFUaAXtWt1vFFUUP3d224JVqHyVXTSCjzYVBFMx/eTJJ1tQ+yA+iBLEIDGa+CBP4h+gMcYXYgR8sDxUacs/YD8DkgjWBB+lpHa3hbZQpNDdzs71nNmZ3Xvv3PlYk+IWd5LNnM/fPWdm7p1zzyyDEo8DYzMvW2buFAB/Gl17qtuSH/YylguD6b58c2t2yTwLHJqBwVj1mvih3qYt06F+nMeyw6mv0e4gAJs04rGjfc31F8P8RL0hMmE055xZOfNHDryRA9Th79jyaPpwmB/pM0vml+j/Cvo+Tmfio/gRPo2TH4832uNjHFF8XZuSknz9l/ltnEPSdaazBdAk8n40RiXZqbyfn4pP41McfvY6eUlJWjwb94Bw8Mo8RrZAtVN5vZcGXxuH3ts7cPc1Xp1ZuNVg5HLrRR/D4NfPNydviDIdvX8k3SHKGRi3+1rrx0WZjt4/dnMXWLk6UdffmhgUeR29/2J6O5iwXdRZsdhCzfrN13obWNaV21ezc/TWE8xa/iI7l3obF4ZqfESkwwLjJAo+l4QaxrKsn0UxY3wQ+X2iTEfjPPsKOG9XdEzhvWzWOoSxfiYpLAswj2znUOosxKo+udCy+W+D7h5Y2VFcDI7g814tOZQ5Y+Ejpgsxnwd/D/MaofyMzPz0Cbx7z+uMV72Mw87s3PSnBuP81VWfTGACvBPnJG8UbRiwCW6ws6IsxmFQ5H1pw567BbVhwUSBCSBinJ3JGUyazwHmBRXFhc+rtFZwxg7h1HumYIT5xT3zkMHEhdaE5Fh0CKb+rV9fe+L7YGS9tq8tMYQa+hWOzuFUBzKFJCm/kt6ThoUuysFwWVREehZLHUmh8pKyyOjwdXEUPbxUSUnG6hJphFgSYfBd+KfI+9GccclO5f38VHzG4IETh5+LR15SkvSCxTn7ERbKpo3E4PfH2NpvPKgagQHGCfSbzavYbJ7XGCoiGx/HcfxM4Oxj8UWvmGvZkpIkhIH25KnamthTRrzqhd2tyT09rXW3tciKsL8tcblmU3yHYbAX6Uy8YqJlCZ/GiRnxXTQuja81DBDaFU+AXqs6t7d+BhUz/Vqtv7C3Ycs91P7qb6HXnGT2kxNaHuq9AUq+k35A5SyvJFnOd6eU2Cp3spSrVc62kVfXruH0c1gTvotNqE1SQgxMfBwuV7UkvtM1tA6O3HnyPn9wnIP1LAd8lTsHVTL0oqf3oO411I0NLOrv4H6xCWslOU4Os4yx0wNtiT9cvKCz7Oxj2T00vSPDLXyv8VqlOEOR3ec5jB21nej+gQhxkvP4lZHUINo4W7liZUcUJg73YPENtNvjvCYK7tShQ5tjBYFCYDH5PsbV2Nu+9bqi8rCR5mTGsDrtBD3ukgBbhvIxPnqzoZigrCtweAFsu4KgQHjwChqb4LX5uGSpjouUZIzBpM5ZljGPzZoqwL6qUwLKxgLHzLydILJJL55qES2uiMXA+eZEH86mMzilis+bPOIUNX1lEQBVRjgJj1NRreqIJznpnQpKMnHwpiShy2AcFA/F5YqCzqxzaEoKHCf04EBbcp/OiRpecba8QdLFanI/vbRhCv0kHNGG+iy5O+mEKCOadhNBxTYudMzuseYyMdHX5FXz1KASZS6N+0lcA+SmWKSFxwVwgD3ghSXTNVTOTiI3FHEo61y4v0INQwwizckQjLJX/y+SLOlxpTlpxMyN4q0zWLUZdU5aBi4XzkEtjKhzUv0sYOXic35z0sUXz5HuJC0AXcNTp8FaXrCy1nXxZ2aWJruGU5P0SU8EdumuodTRzGxqwTT5hOSHPHa675DetRXPhEe4hC/6EU1xUDwUl+jjR0dK8rWx9AGsMN6xKzE90rb8N0tZ+ealmXpccqk9skbW5DnEXEt6slP1Dp7+6xUmR/FQXKqfjo+UZI4DfXANOeyPspLN0jJsxUopZErweN5OckXGi6daRIsrYjFQYxkX8NW9qA6i8D0KDztbtlzDgt5pQqlah0e9bedVe/BkE7aYj0uW6riQq5x3oSIYdyFN+IgE7kLUAajoxl1Ix30I3oWoxTnh0Gd63IWMB+1CetvCi3PCKqniIYdyP3QVT6Q5We6JhcVXSTLsCq0WfaSFh5KptD8AKu2PwMe60v4IvDzwUNsfuLdIBbU/MFTpm6YQ+hJW2L7tD8IVbIvkSrY/3ro0t26RZ6X2x3+x1apl1fM/7N14t5h1kdIVA5FXV4JxgD3gYfudSvujeBNWjKpUPCt2aR8ycOVOPuQLvmLDMVxyF7B3s84dAf/CsoDtod9cfrWdsY+/C/8HVfy/LmN347j8X8FmUoebjG3Aod3lV9sZc1GPq/ifIfhWlT5KPP4N9JQx0JLsoS9Ej1Jibi64qp7ub912rlCsdI2mDuKH3yN4u3eLc9R1WDVnnIMY61W6g5Qgxf0P/UFw0L/BhyIAAAAASUVORK5CYII=" class="data-icon"/>
+            <span class="tbml-date">${date}</span>
+            <img src="data:image/png;base64,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" class="data-icon"/>
+            <span class="tbml-date">${this.props.countryA}-${this.props.countryB}</span>
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAA5CAYAAACiXaIXAAAABGdBTUEAALGPC/xhBQAABkxJREFUaAXtWl1sVEUUnnPv3UUoFEH52R9JTMAYTIkRkEJ3F2MwCC9gYFvaiARMfCMSozExGmp8MD5oQH1RjBCI9GeJGiEBAX96d9uA8qAkrUYMiL3blvJvS7vd7p3xzLaz3C47t9ttu90mTHIzM+fOOee7s2fONzMtkMFSdaZ1UX8c1mB3ISMEhHyiagB2WSHwc53f+3s6hiS48nDrm4yR9/BxpA+Y0D4iVwjZW+f3vAbYFligQo9uMBn9VggKsQZQdoYCnk8FNoUS9rroFG7N3rBig2CD0c0IK+JCAPI9mVZUMSNmUuugfLf7NAX64717KGPbhW9wFD8UWjXzBu9rAnDyJRAjtGz2bTFwIuugHv2HkFQYE7W/m09sEjTG+eQr90Hn6ze7P9P5mmnNzlGwmTnZjehO5KKVuJIvak7nhzWl867Y6eTjnS1oct34DrPOWpF4+uPxF186a5QcXOG9LsAF9fangSXWY5J3CtmIayAmUCVct9p9MhtdKeiKiFFqmmztECOMuHr6yCsoe5/Lg02dC0miL4JM5CC4ccm5JFVNskU31tQGvD8MZ8dmITJ3JmUgd+WKGX98LDdZCUJKMvlMl0lBA3ngDNJ6b7oCAfVHIZs733MKxzSI/mhqtNMyVdUOZ2NDGh61vjltm/XoDpzZfUj10zFm+Y+4J+R3fyMMf7II+rD9TFX41ixVieW8rQUtYVrXibAvq6WgucKRgKc2eO7GcYjFSojivBRa9XA0k6HD/gdvZpKPl8wWNHc6uIGKjBeAXOxKYzoXY/nSyQp0sLlzer4AZePHFnRFY/vyYEPreXatr2uzblwpbzC2ZWN0vMdIYxoX4Ex6p+copox5SRCMzaUA+7c0RC/UrvY0cRljDCrC0Y+QXF7ALJNz9kAzFPX1ogXelw88CrHhPloKWunt8ZuEDQAWVtC6CWQTdpOgK8PRZ/FItIu/TpKaGDfiGpMqIVXd/0Z1VP1sOHVpeGBWvpdY0BqSQE/KqKKM6dEMCNxK2bZpSGd6jssT6Wg3WpCmFwt9zpB4UXJI9Gt97nObw0hAlG3Emco5PNAuZQT0er+7PnkRIxxIailoznZbIlefS9C+DzDecGsKlxSFvFPn8/5ltXXE79mPff6MumQDmDuRguYvOZVjtZW3C6lIY7qQQKZjmZSgbcODf2Ew3LYUF1opqPRibZn3hPUiMH0G8tW3BY2ZYTejZjVmBkJMQsrD0dPVjK2rBsD9+kDZEbk6o4smniIKdQrZiGuTmVqRcr5mmftaNrpS0BVh4zGTsd1WI8iAa1rCxnaU7ePyYNPt2V2Jrt9Q/gj/qNGURI/5X2VT24qaVe4/h7MjjWlMnEuQp+/NQgyeTBml3b4k4JQg9wbyQXHCpOuzsSAFrSnqH5kNQIuQa5p2Flksq59U6MhqnJ0Yghn2UMv1peFR43M14zXwXtwVvCocIXP9Ms/l/kL0+R3I1saOJ2KUliGn5R7TwEyHqvx6uMx9Wdi2q6WguVJotXcXLr5jGCYrKVMuzprmqkem7LcaPFQ2vxP7qXOj9d14tW1Bc6f1fs9prPhTMEUa0wWDMAOQSQnaNjz4fUac3qnGneNK3DpeAlDfDQVcqeyRYRLyIpKCRubTmsPRU3gmWZpkRMKWM2Kuq2psK7Gu8nK9DffSdMOojlsENwpE0Y8E7mYmu6+Xgm4Od5QhcSwdoszYjETC5IxYzeWVeuuSfkK/5iQ08GFcmkvh2uZWnIBr9QH3sH/TlMe0QmdmdA+QkptEdWVkzYyKWQgZ82QxikhBT3WwRiSTm+lGkG6PCtliv+sU/v36IB4cuzij5fqgfg/6OjFddR4Utu1qaXjwC8HyiLGJmQQNMS8a7cXF+FYo4E3dmuJuD28PyLbBx87PmL6TguZe6n3enzCuF1Tqbd7iae6Oz5cNZcMxRTICY7aguZ3BTX/rCGyO+1BpTI+751E4uA96FJM3ItVJOtPWf7NhUDAfAYwOwaJOQYYYLBpeV/6N7UW8j6eUjeW6QZCUef6d0IIInk8BQPKJr/C0iz6mPDiOcAdAMzILgW/n966FVHAzdjIEkDrvK8Wq820EfqGQQA7BAtDpdMJOq0z50jenq1idgrs55eMkeEuMWwfmvQ1wGYntgMPpWPJVqdew+v8fu3U3JdSdTg8AAAAASUVORK5CYII=" class="data-icon"/>
+            <span class="tbml-date">M${this.props.match}</span>
+          </div>
+          <div>
+            <span class="tbml-time">${time}, &nbsp;${this.props.locality}</span>
+          </div>
+        </div>`;
+    }
+}
+
+web3.tokens.dataChanged = (oldTokens, updatedTokens) => {
+    const currentTokenInstance = web3.tokens.data.currentInstance;
+    const domHtml = new Token(currentTokenInstance).render();
+    document.getElementById('root').innerHTML = domHtml
+};
+]]></script>
+<div id="root" xml:base="file:///Users/sangalli/Documents/projects/TokenScript/examples/fifa/fifa.en.shtml"/>
+
+            </ts:view>
+        </ts:token-card>
+    </ts:cards>
+
+    <ts:ordering>
+        <ts:order bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" name="default">
+            <ts:byName field="locality"/>
+            <ts:byValue field="match"/>
+            <ts:byValue field="number"/>
+        </ts:order>
+        <ts:order bitmask="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" name="concise">
+            <ts:byValue field="match"/>
+            <ts:byValue field="category"/>
+            <ts:byValue field="number"/>
+        </ts:order>
+    </ts:ordering>
+
+    <ts:attribute-types>
+        <!--
+    There are 64 matches (1-64), each has up to 16 ticket classes,
+    within each class, there are less than 65536 tickets.  A compact
+    format identifier would consist of 26 bits:
+
+    [6] [4] [16]
+
+    Representing:
+
+        Match ID: 1-64
+        Class: 1-16
+        Seats: 0-65536
+
+    These are represented by 7 hex codes. Therefore 0x40F0481 means
+    the final match (64th), class F (highest) ticket number 1153. But
+    we didn't end up using this compatct form.
+
+    Information about a match, like Venue, City, Date, which team
+    against which, can all be looked up by MatchID. There are
+    advantages and disadvantages in encoding them by a look up table
+    or by a bit field.
+
+    The advantage of storing them as a bit field is that one can
+    enquiry the range of it in the market queue server without the
+    server kowing the meaning of the bitfields. Furthermore it make
+    the android and ios library which accesses the XML file a bit
+    easier to write, but at the cost that the ticket issuing
+    (authorisation) server is a bit more complicated.
+
+    For now we decide to use bit-fields.  The fields, together with
+    its bitwidth or byte-width are represented in this table:
+
+    Fields:           City,   Venue,  Date,   TeamA,  TeamB,  Match, Category
+    Maximum, 2018:    11,     12,     32,     32,     32,     64,    16
+    Maximum, all time:64,     64,     64,     32,     32,     64,    64
+    Bitwidth:         6,      6,      6,      5,      5,      6,     6
+    Bytewidth:        1,      1,      4,      3,      3,      1,     1,
+
+    In practise, because this XML file is used in 3 to 4 places
+    (authorisation server, ios, android, potentially market-queue),
+    Weiwu thought that it helps the developers if we use byte-fields
+    instead of bit-fields.
+    1.3.6.1.4.1.1466.115.121.1.15 is DirectoryString
+    1.3.6.1.4.1.1466.115.121.1.24 is GeneralisedTime
+    1.3.6.1.4.1.1466.115.121.1.26 is IA5String
+    1.3.6.1.4.1.1466.115.121.1.27 is Integer
+  -->
+        <ts:attribute-type id="locality" oid="2.5.4.7" syntax="1.3.6.1.4.1.1466.115.121.1.15">
+            <ts:name>
+                <ts:string xml:lang="en">City</ts:string>
+                <ts:string xml:lang="zh">城市</ts:string>
+                <ts:string xml:lang="es">Ciudad</ts:string>
+                <ts:string xml:lang="ru">город</ts:string>
+            </ts:name>
+            <ts:origins>
+                <ts:token-id as="uint" bitmask="00000000000000000000000000000000FF000000000000000000000000000000">
+                    <ts:mapping>
+                        <ts:option key="1">
+                            <ts:value xml:lang="ru">Москва́</ts:value>
+                            <ts:value xml:lang="en">Moscow</ts:value>
+                            <ts:value xml:lang="zh">莫斯科</ts:value>
+                            <ts:value xml:lang="es">Moscú</ts:value>
+                        </ts:option>
+                        <ts:option key="2">
+                            <ts:value xml:lang="ru">Санкт-Петербу́рг</ts:value>
+                            <ts:value xml:lang="en">Saint Petersburg</ts:value>
+                            <ts:value xml:lang="zh">圣彼得堡</ts:value>
+                            <ts:value xml:lang="es">San Petersburgo</ts:value>
+                        </ts:option>
+                        <ts:option key="3">
+                            <ts:value xml:lang="ru">сочи</ts:value>
+                            <ts:value xml:lang="en">Sochi</ts:value>
+                            <ts:value xml:lang="zh">索契</ts:value>
+                            <ts:value xml:lang="es">Sochi</ts:value>
+                        </ts:option>
+                        <ts:option key="4">
+                            <ts:value xml:lang="ru">екатеринбург</ts:value>
+                            <ts:value xml:lang="en">Ekaterinburg</ts:value>
+                            <ts:value xml:lang="zh">叶卡捷琳堡</ts:value>
+                            <ts:value xml:lang="es">Ekaterinburg</ts:value>
+                        </ts:option>
+                        <ts:option key="5">
+                            <ts:value xml:lang="ru">Саранск</ts:value>
+                            <ts:value xml:lang="en">Saransk</ts:value>
+                            <ts:value xml:lang="zh">萨兰斯克</ts:value>
+                            <ts:value xml:lang="es">Saransk</ts:value>
+                        </ts:option>
+                        <ts:option key="6">
+                            <ts:value xml:lang="ru">казань</ts:value>
+                            <ts:value xml:lang="en">Kazan</ts:value>
+                            <ts:value xml:lang="zh">喀山</ts:value>
+                            <ts:value xml:lang="es">Kazan</ts:value>
+                        </ts:option>
+                        <ts:option key="7">
+                            <ts:value xml:lang="ru">Нижний Новгород</ts:value>
+                            <ts:value xml:lang="en">Nizhny Novgorod</ts:value>
+                            <ts:value xml:lang="zh">下诺夫哥罗德</ts:value>
+                            <ts:value xml:lang="es">Nizhny Novgorod</ts:value>
+                        </ts:option>
+                        <ts:option key="8">
+                            <ts:value xml:lang="ru">Ростов-на-Дону</ts:value>
+                            <ts:value xml:lang="en">Rostov-on-Don</ts:value>
+                            <ts:value xml:lang="zh">顿河畔罗斯托夫</ts:value>
+                            <ts:value xml:lang="es">Rostov-on-Don</ts:value>
+                        </ts:option>
+                        <ts:option key="9">
+                            <ts:value xml:lang="ru">Самара</ts:value>
+                            <ts:value xml:lang="en">Samara</ts:value>
+                            <ts:value xml:lang="zh">萨马拉</ts:value>
+                            <ts:value xml:lang="es">Samara</ts:value>
+                        </ts:option>
+                        <ts:option key="10">
+                            <ts:value xml:lang="ru">Волгоград</ts:value>
+                            <ts:value xml:lang="en">Volgograd</ts:value>
+                            <ts:value xml:lang="zh">伏尔加格勒</ts:value>
+                            <ts:value xml:lang="es">Volgogrado</ts:value>
+                        </ts:option>
+                        <ts:option key="11">
+                            <ts:value xml:lang="ru">Калининград</ts:value>
+                            <ts:value xml:lang="en">Kaliningrad</ts:value>
+                            <ts:value xml:lang="zh">加里宁格勒</ts:value>
+                            <ts:value xml:lang="es">Kaliningrad</ts:value>
+                        </ts:option>
+                    </ts:mapping>
+                </ts:token-id>
+            </ts:origins>
+        </ts:attribute-type>
+
+        <ts:attribute-type id="venue" syntax="1.3.6.1.4.1.1466.115.121.1.15">
+            <ts:name>
+                <ts:string xml:lang="en">Venue</ts:string>
+                <ts:string xml:lang="zh">场馆</ts:string>
+                <ts:string xml:lang="es">Lugar</ts:string>
+                <ts:string xml:lang="ru">место встречи</ts:string>
+            </ts:name>
+            <ts:origins>
+                <ts:token-id as="uint" bitmask="0000000000000000000000000000000000FF0000000000000000000000000000">
+                    <ts:mapping>
+                        <ts:option key="1">
+                            <ts:value xml:lang="ru">Стадион Калининград</ts:value>
+                            <ts:value xml:lang="en">Kaliningrad Stadium</ts:value>
+                            <ts:value xml:lang="zh">加里宁格勒体育场</ts:value>
+                            <ts:value xml:lang="es">Estadio de Kaliningrado</ts:value>
+                        </ts:option>
+                        <ts:option key="2">
+                            <ts:value xml:lang="ru">Екатеринбург Арена</ts:value>
+                            <ts:value xml:lang="en">Volgograd Arena</ts:value>
+                            <ts:value xml:lang="zh">伏尔加格勒体育场</ts:value>
+                            <ts:value xml:lang="es">Volgogrado Arena</ts:value>
+                        </ts:option>
+                        <ts:option key="3">
+                            <ts:value xml:lang="ru">Казань Арена</ts:value>
+                            <ts:value xml:lang="en">Ekaterinburg Arena</ts:value>
+                            <ts:value xml:lang="zh">加里宁格勒体育场</ts:value>
+                            <ts:value xml:lang="es">Ekaterimburgo Arena</ts:value>
+                        </ts:option>
+                        <ts:option key="4">
+                            <ts:value xml:lang="ru">Мордовия Арена</ts:value>
+                            <ts:value xml:lang="en">Fisht Stadium</ts:value>
+                            <ts:value xml:lang="zh">费什体育场</ts:value>
+                            <ts:value xml:lang="es">Estadio Fisht</ts:value>
+                        </ts:option>
+                        <ts:option key="5">
+                            <ts:value xml:lang="ru">Ростов Арена</ts:value>
+                            <ts:value xml:lang="en">Kazan Arena</ts:value>
+                            <ts:value xml:lang="zh">喀山体育场</ts:value>
+                            <ts:value xml:lang="es">Kazan Arena</ts:value>
+                        </ts:option>
+                        <ts:option key="6">
+                            <ts:value xml:lang="ru">Самара Арена</ts:value>
+                            <ts:value xml:lang="en">Nizhny Novgorod Stadium</ts:value>
+                            <ts:value xml:lang="zh">下诺夫哥罗德体育场</ts:value>
+                            <ts:value xml:lang="es">Estadio de Nizhni Novgorod</ts:value>
+                        </ts:option>
+                        <ts:option key="7">
+                            <ts:value xml:lang="ru">Стадион Калининград</ts:value>
+                            <ts:value xml:lang="en">Luzhniki Stadium</ts:value>
+                            <ts:value xml:lang="zh">卢日尼基体育场</ts:value>
+                            <ts:value xml:lang="es">Estadio Luzhniki</ts:value>
+                        </ts:option>
+                        <ts:option key="8">
+                            <ts:value xml:lang="ru">Стадион Лужники</ts:value>
+                            <ts:value xml:lang="en">Samara Arena</ts:value>
+                            <ts:value xml:lang="zh">萨马拉体育场</ts:value>
+                            <ts:value xml:lang="es">Samara Arena</ts:value>
+                        </ts:option>
+                        <ts:option key="9">
+                            <ts:value xml:lang="ru">Стадион Нижний Новгород</ts:value>
+                            <ts:value xml:lang="en">Rostov Arena</ts:value>
+                            <ts:value xml:lang="zh">罗斯托夫体育场</ts:value>
+                            <ts:value xml:lang="es">Rostov Arena</ts:value>
+                        </ts:option>
+                        <ts:option key="10">
+                            <ts:value xml:lang="ru">Стадион Спартак</ts:value>
+                            <ts:value xml:lang="en">Spartak Stadium</ts:value>
+                            <ts:value xml:lang="zh">斯巴达克体育场</ts:value>
+                            <ts:value xml:lang="es">Estadio del Spartak</ts:value>
+                        </ts:option>
+                        <ts:option key="11">
+                            <ts:value xml:lang="ru">Стадион Санкт-Петербург</ts:value>
+                            <ts:value xml:lang="en">Saint Petersburg Stadium</ts:value>
+                            <ts:value xml:lang="zh">圣彼得堡体育场</ts:value>
+                            <ts:value xml:lang="es">Estadio de San Petersburgo</ts:value>
+                        </ts:option>
+                        <ts:option key="12">
+                            <ts:value xml:lang="ru">Стадион Фишт</ts:value>
+                            <ts:value xml:lang="en">Mordovia Arena</ts:value>
+                            <ts:value xml:lang="zh">莫多维亚体育场</ts:value>
+                            <ts:value xml:lang="es">Mordovia Arena</ts:value>
+                        </ts:option>
+                    </ts:mapping>
+                </ts:token-id>
+            </ts:origins>
+        </ts:attribute-type>
+
+        <ts:attribute-type id="countryA" syntax="1.3.6.1.4.1.1466.115.121.1.26">
+            <!-- Intentionally avoid using countryName
+         (SYNTAX 1.3.6.1.4.1.1466.115.121.1.11) per RFC 4519
+             CountryName is two-characters long, not 3-characters.
+         -->
+            <ts:name>
+                <ts:string xml:lang="en">Team A</ts:string>
+                <ts:string xml:lang="zh">甲队</ts:string>
+                <ts:string xml:lang="es">Equipo A</ts:string>
+            </ts:name>
+            <ts:origins>
+                <ts:token-id as="utf8" bitmask="00000000000000000000000000000000000000000000FFFFFF00000000000000"/>
+            </ts:origins>
+        </ts:attribute-type>
+
+        <ts:attribute-type id="countryB" syntax="1.3.6.1.4.1.1466.115.121.1.26">
+            <ts:name>
+                <ts:string xml:lang="en">Team B</ts:string>
+                <ts:string xml:lang="zh">乙队</ts:string>
+                <ts:string xml:lang="es">Equipo B</ts:string>
+            </ts:name>
+            <ts:origins>
+                <ts:token-id as="utf8" bitmask="00000000000000000000000000000000000000000000000000FFFFFF00000000"/>
+            </ts:origins>
+        </ts:attribute-type>
+
+        <ts:attribute-type id="match" syntax="1.3.6.1.4.1.1466.115.121.1.27">
+            <ts:name>
+                <ts:string xml:lang="en">Match</ts:string>
+                <ts:string xml:lang="zh">场次</ts:string>
+                <ts:string xml:lang="es">Evento</ts:string>
+            </ts:name>
+            <ts:origins>
+                <ts:token-id as="utf8" bitmask="00000000000000000000000000000000000000000000000000000000FF000000"/>
+            </ts:origins>
+        </ts:attribute-type>
+
+        <ts:attribute-type id="category" syntax="1.3.6.1.4.1.1466.115.121.1.15">
+            <ts:name>
+                <ts:string xml:lang="en">Cat</ts:string>
+                <ts:string xml:lang="zh">等级</ts:string>
+                <ts:string xml:lang="es">Cat</ts:string>
+            </ts:name>
+            <ts:origins>
+                <ts:token-id as="uint" bitmask="0000000000000000000000000000000000000000000000000000000000FF0000">
+                    <ts:mapping>
+                        <ts:option key="1">
+                            <ts:value xml:lang="en">Category 1</ts:value>
+                            <ts:value xml:lang="zh">一类票</ts:value>
+                        </ts:option>
+                        <ts:option key="2">
+                            <ts:value xml:lang="en">Category 2</ts:value>
+                            <ts:value xml:lang="zh">二类票</ts:value>
+                        </ts:option>
+                        <ts:option key="3">
+                            <ts:value xml:lang="en">Category 3</ts:value>
+                            <ts:value xml:lang="zh">三类票</ts:value>
+                        </ts:option>
+                        <ts:option key="4">
+                            <ts:value xml:lang="en">Category 4</ts:value>
+                            <ts:value xml:lang="zh">四类票</ts:value>
+                        </ts:option>
+                        <ts:option key="5">
+                            <ts:value xml:lang="en">Match Club</ts:value>
+                            <ts:value xml:lang="zh">俱乐部坐席</ts:value>
+                        </ts:option>
+                        <ts:option key="6">
+                            <ts:value xml:lang="en">Match House Premier</ts:value>
+                            <ts:value xml:lang="zh">比赛之家坐席</ts:value>
+                        </ts:option>
+                        <ts:option key="7">
+                            <ts:value xml:lang="en">MATCH PAVILION</ts:value>
+                            <ts:value xml:lang="zh">款待大厅坐席</ts:value>
+                        </ts:option>
+                        <ts:option key="8">
+                            <ts:value xml:lang="en">MATCH BUSINESS SEAT</ts:value>
+                            <ts:value xml:lang="zh">商务坐席</ts:value>
+                        </ts:option>
+                        <ts:option key="9">
+                            <ts:value xml:lang="en">MATCH SHARED SUITE</ts:value>
+                            <ts:value xml:lang="zh">公共包厢</ts:value>
+                        </ts:option>
+                        <ts:option key="10">
+                            <ts:value xml:lang="en">TSARSKY LOUNGE</ts:value>
+                            <ts:value xml:lang="zh">特拉斯基豪华包厢</ts:value>
+                        </ts:option>
+                        <ts:option key="11">
+                            <ts:value xml:lang="en">MATCH PRIVATE SUITE</ts:value>
+                            <ts:value xml:lang="zh">私人包厢</ts:value>
+                        </ts:option>
+                    </ts:mapping>
+                </ts:token-id>
+            </ts:origins>
+        </ts:attribute-type>
+        <ts:attribute-type id="time" syntax="1.3.6.1.4.1.1466.115.121.1.24">
+            <ts:name>
+                <ts:string xml:lang="en">Time</ts:string>
+                <ts:string xml:lang="zh">时间</ts:string>
+                <ts:string xml:lang="es">Tiempo</ts:string>
+                <ts:string xml:lang="ru">время</ts:string>
+            </ts:name>
+            <ts:origins>
+                <ts:token-id as="uint" bitmask="000000000000000000000000000000000000FFFFFFFF00000000000000000000">
+                    <ts:mapping>
+                        <!-- $ TZ=Europe/Moscow date -d @1528988400 +%Y%m%d%H%M%S%z -->
+                        <ts:option key="1528988400">
+                            <ts:value>20180614180000+0300</ts:value>
+                        </ts:option>
+                        <!-- $ TZ=Europe/Moscow date -d @1529074800 +%Y%m%d%H%M%S%z -->
+                        <ts:option key="1529074800">
+                            <ts:value>20180615180000+0300</ts:value>
+                        </ts:option>
+                        <!-- $ TZ=Europe/Moscow date -d @1529420400 +%Y%m%d%H%M%S%z -->
+                        <ts:option key="1529420400">
+                            <ts:value>20180619180000+0300</ts:value>
+                        </ts:option>
+                        <!-- $ TZ=Europe/Moscow date -d @1529431200 +%Y%m%d%H%M%S%z -->
+                        <ts:option key="1529431200">
+                            <ts:value>20180619210000+0300</ts:value>
+                        </ts:option>
+                        <!-- $ TZ=Europe/Moscow date -d @1530900000 +%Y%m%d%H%M%S%z -->
+                        <ts:option key="1530900000">
+                            <ts:value>20180706210000+0300</ts:value>
+                        </ts:option>
+                        <!-- $ TZ=Europe/Moscow date -d @1531576800 +%Y%m%d%H%M%S%z -->
+                        <ts:option key="1531576800">
+                            <ts:value>20180714170000+0300</ts:value>
+                        </ts:option>
+                    </ts:mapping>
+                </ts:token-id>
+            </ts:origins>
+        </ts:attribute-type>
+
+        <ts:attribute-type id="numero" syntax="1.3.6.1.4.1.1466.115.121.1.27">
+            <ts:name>
+                <ts:string>№</ts:string>
+            </ts:name>
+            <ts:origins>
+                <ts:token-id as="utf8" bitmask="000000000000000000000000000000000000000000000000000000000000FFFF"/>
+            </ts:origins>
+        </ts:attribute-type>
+
+    </ts:attribute-types>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+<ds:SignedInfo>
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256"/>
+<ds:Reference URI="">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+<ds:DigestValue>G/f46qO3bavWAUP74LcJ29OxqrxiNTCJl+iFYI0lrrQ=</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue>
+AefcOry90l6fXk1rD94Tsg/9oRs0J4ACsGiKIsjco2oPO0Q0pUYJdx/tAI0cfEWNViLoxRV8yh9F
++s8oooAU04mdABD32J8NF8eUSXV3DME24yCa+SKejHgOou5YwfFWaqi9J3kN0IuoPmCdi2fJBZfT
+vGpWJqYZhyj6Z0LaHD+QwG1k
+</ds:SignatureValue>
+<ds:KeyInfo>
+<ds:KeyName>Shankai</ds:KeyName>
+<ds:X509Data>
+<ds:X509Certificate>
+MIIFBzCCBK2gAwIBAgIQKCMFmlBLtxz6L27XkUOsHjAKBggqhkjOPQQDAjCBkDELMAkGA1UEBhMC
+R0IxGzAZBgNVBAgTEkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UEBxMHU2FsZm9yZDEaMBgGA1UE
+ChMRQ09NT0RPIENBIExpbWl0ZWQxNjA0BgNVBAMTLUNPTU9ETyBFQ0MgRG9tYWluIFZhbGlkYXRp
+b24gU2VjdXJlIFNlcnZlciBDQTAeFw0xODA1MTEwMDAwMDBaFw0xOTA1MTEyMzU5NTlaMFAxITAf
+BgNVBAsTGERvbWFpbiBDb250cm9sIFZhbGlkYXRlZDEUMBIGA1UECxMLUG9zaXRpdmVTU0wxFTAT
+BgNVBAMTDHNrc3RyYXZlbC5jbjCBmzAQBgcqhkjOPQIBBgUrgQQAIwOBhgAEADc2VNAGlEOcdqeU
+A0vaxIC8gCFb9FDF8ZrrlJwqhpO/ZmnTCWUfe4LoI1a37Zv7QejC2+vPhyP0q55PvUtJT9INARfc
+VaG5jRpTw3ukSF1+ww/E/T6YqtrRV44U7rSF8XPTH0CmDrJD6z/b2aCXwcix4PByn8O6skTdZXOj
+LEXifqcjo4IC4zCCAt8wHwYDVR0jBBgwFoAUu/oI4L9U7lr9FqQ1AgmppMjs/UswHQYDVR0OBBYE
+FGyswybdwCsAau7aZaBGFEcL2XXmMA4GA1UdDwEB/wQEAwIFgDAMBgNVHRMBAf8EAjAAMB0GA1Ud
+JQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjBPBgNVHSAESDBGMDoGCysGAQQBsjEBAgIHMCswKQYI
+KwYBBQUHAgEWHWh0dHBzOi8vc2VjdXJlLmNvbW9kby5jb20vQ1BTMAgGBmeBDAECATBUBgNVHR8E
+TTBLMEmgR6BFhkNodHRwOi8vY3JsLmNvbW9kb2NhLmNvbS9DT01PRE9FQ0NEb21haW5WYWxpZGF0
+aW9uU2VjdXJlU2VydmVyQ0EuY3JsMIGFBggrBgEFBQcBAQR5MHcwTwYIKwYBBQUHMAKGQ2h0dHA6
+Ly9jcnQuY29tb2RvY2EuY29tL0NPTU9ET0VDQ0RvbWFpblZhbGlkYXRpb25TZWN1cmVTZXJ2ZXJD
+QS5jcnQwJAYIKwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmNvbW9kb2NhLmNvbTApBgNVHREEIjAgggxz
+a3N0cmF2ZWwuY26CEHd3dy5za3N0cmF2ZWwuY24wggEEBgorBgEEAdZ5AgQCBIH1BIHyAPAAdgDu
+S723dc5guuFCaR+r4Z5mow9+X7By2IMAxHuJeqj9ywAAAWNOX8kpAAAEAwBHMEUCIEIb/jymAGpZ
+LG4umW1TbfCe/7Sr5MEIYknkdRdd6I6qAiEA2pHlmnby7PaQwoZrFGqIPQEyJ6oChl+7VRrcoA4t
+5JsAdgB0ftqDMa0zEJEhnM4lT0Jwwr/9XkIgCMY3NXnmEHvMVgAAAWNOX8mcAAAEAwBHMEUCIQC/
+LOBZaO136CYN7GYr+OODcLZ/AG2r7ge7BigCRSk8fQIgC/n33uxEZD+w3ENTxTdOhCTxvSW6BL71
+wFYJPkFHYWkwCgYIKoZIzj0EAwIDSAAwRQIhAIi6VxP/HzmR3rGw6f9M6FLiH0TNgn1EbARAluAV
+bFTFAiBKJSQRqq66kI9yMPc1NJISGi8btpWfPiB78twtjuHe7A==
+</ds:X509Certificate>
+<ds:X509Certificate>
+MIIDnTCCAyKgAwIBAgIQUQYB5jtQZzxV7k4Z2jBMqDAKBggqhkjOPQQDAzCBhTELMAkGA1UEBhMC
+R0IxGzAZBgNVBAgTEkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UEBxMHU2FsZm9yZDEaMBgGA1UE
+ChMRQ09NT0RPIENBIExpbWl0ZWQxKzApBgNVBAMTIkNPTU9ETyBFQ0MgQ2VydGlmaWNhdGlvbiBB
+dXRob3JpdHkwHhcNMTQwMzEzMDAwMDAwWhcNMjkwMzEyMjM1OTU5WjCBkDELMAkGA1UEBhMCR0Ix
+GzAZBgNVBAgTEkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UEBxMHU2FsZm9yZDEaMBgGA1UEChMR
+Q09NT0RPIENBIExpbWl0ZWQxNjA0BgNVBAMTLUNPTU9ETyBFQ0MgRG9tYWluIFZhbGlkYXRpb24g
+U2VjdXJlIFNlcnZlciBDQTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABIg2jdgJVPWaKXk+JD06
+oiTxihgKVH3tQCza8LqO2YT1Rd03cJEkrLoU61FoIN3SSFUAXW9E7ggci/lVXySaVIOjggFlMIIB
+YTAfBgNVHSMEGDAWgBR1cacZSBm8nZ3qQUfflMRId5nTeTAdBgNVHQ4EFgQUu/oI4L9U7lr9FqQ1
+AgmppMjs/UswDgYDVR0PAQH/BAQDAgGGMBIGA1UdEwEB/wQIMAYBAf8CAQAwHQYDVR0lBBYwFAYI
+KwYBBQUHAwEGCCsGAQUFBwMCMBsGA1UdIAQUMBIwBgYEVR0gADAIBgZngQwBAgEwTAYDVR0fBEUw
+QzBBoD+gPYY7aHR0cDovL2NybC5jb21vZG9jYS5jb20vQ09NT0RPRUNDQ2VydGlmaWNhdGlvbkF1
+dGhvcml0eS5jcmwwcQYIKwYBBQUHAQEEZTBjMDsGCCsGAQUFBzAChi9odHRwOi8vY3J0LmNvbW9k
+b2NhLmNvbS9DT01PRE9FQ0NBZGRUcnVzdENBLmNydDAkBggrBgEFBQcwAYYYaHR0cDovL29jc3Au
+Y29tb2RvY2EuY29tMAoGCCqGSM49BAMDA2kAMGYCMQDtilgEuIgqZMub1nOMLJwPVr3Lrs/A4RVY
+uImPsVNTtWG65FL7j6YooeQtlSxIViACMQDvavtMsSKuUzwaH3x8vVhGiljleoI0iloIE64Adby0
+id6I7ObgYgAsmupHtaSvojI=
+</ds:X509Certificate>
+<ds:X509Certificate>
+MIID0DCCArigAwIBAgIQQ1ICP/qokB8Tn+P05cFETjANBgkqhkiG9w0BAQwFADBvMQswCQYDVQQG
+EwJTRTEUMBIGA1UEChMLQWRkVHJ1c3QgQUIxJjAkBgNVBAsTHUFkZFRydXN0IEV4dGVybmFsIFRU
+UCBOZXR3b3JrMSIwIAYDVQQDExlBZGRUcnVzdCBFeHRlcm5hbCBDQSBSb290MB4XDTAwMDUzMDEw
+NDgzOFoXDTIwMDUzMDEwNDgzOFowgYUxCzAJBgNVBAYTAkdCMRswGQYDVQQIExJHcmVhdGVyIE1h
+bmNoZXN0ZXIxEDAOBgNVBAcTB1NhbGZvcmQxGjAYBgNVBAoTEUNPTU9ETyBDQSBMaW1pdGVkMSsw
+KQYDVQQDEyJDT01PRE8gRUNDIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MHYwEAYHKoZIzj0CAQYF
+K4EEACIDYgAEA0d7L3XJghWF+3XkkRbUq2KZ9T5SCwbOQQB/l+EKJDwdAQTuPdKNCZcM4HXk+vt3
+iir1A2BLNosWIxatCXH0SvQoULT+iBxuP2wvLwlZW6VbCzOZ4sM9iflqLO+y0wbpo4H+MIH7MB8G
+A1UdIwQYMBaAFK29mHo0tCb3+sQmVO8DveAky1QaMB0GA1UdDgQWBBR1cacZSBm8nZ3qQUfflMRI
+d5nTeTAOBgNVHQ8BAf8EBAMCAYYwDwYDVR0TAQH/BAUwAwEB/zARBgNVHSAECjAIMAYGBFUdIAAw
+SQYDVR0fBEIwQDA+oDygOoY4aHR0cDovL2NybC50cnVzdC1wcm92aWRlci5jb20vQWRkVHJ1c3RF
+eHRlcm5hbENBUm9vdC5jcmwwOgYIKwYBBQUHAQEELjAsMCoGCCsGAQUFBzABhh5odHRwOi8vb2Nz
+cC50cnVzdC1wcm92aWRlci5jb20wDQYJKoZIhvcNAQEMBQADggEBAB3H+i5AtlwFSw+8VTYBWOBT
+BT1k+6zZpTi4pyE7r5VbvkjI00PUIWxB7QktnHMAcZyuIXN+/46NuY5YkI78jG12yAA6nyCmLX3M
+F/3NmJYyCRrJZfwE67SaCnjllztSjxLCdJcBns/hbWjYk7mcJPuWJ0gBnOqUP3CYQbNzUTcp6PYB
+erknuCRR2RFo1KaFpzanpZa6gPim/a5thCCuNXZzQg+HCezF3OeTAyIal+6ailFhp5cmHunudVEI
+kAWvL54TnJM/ev/m6+loeYyv4Lb67psSE/5FjNJ80zXrIRKT/mZ1JioVhCb3ZsnLjbsJQdQYr7Gz
+EPUQyp2aDrV1aug=
+</ds:X509Certificate>
+</ds:X509Data>
+</ds:KeyInfo>
+</ds:Signature></ts:token>

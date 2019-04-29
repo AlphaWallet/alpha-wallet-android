@@ -11,7 +11,6 @@ import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 
@@ -23,12 +22,10 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
     public static final String BarcodeObject = "Barcode";
     public static final int SUCCESS = 0; /* currenly, this is the only possible result, so does it really make sense to use it? - Weiwu */
 
-    private static final String FLASH_STATE = "FLASH_STATE";
     private static final String AUTO_FOCUS_STATE = "AUTO_FOCUS_STATE";
     private static final String SELECTED_FORMATS = "SELECTED_FORMATS";
     private static final String CAMERA_ID = "CAMERA_ID";
     private ZXingScannerView mScannerView;
-    private boolean mFlash;
     private boolean mAutoFocus;
     private ArrayList<Integer> mSelectedIndices;
     private int mCameraId = -1;
@@ -41,14 +38,12 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
 
         if (state != null)
         {
-            mFlash = state.getBoolean(FLASH_STATE, false);
             mAutoFocus = state.getBoolean(AUTO_FOCUS_STATE, true);
             mSelectedIndices = state.getIntegerArrayList(SELECTED_FORMATS);
             mCameraId = state.getInt(CAMERA_ID, -1);
         }
         else
         {
-            mFlash = false;
             mAutoFocus = true;
             mSelectedIndices = null;
             mCameraId = -1;
@@ -69,7 +64,6 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
         super.onResume();
         mScannerView.setResultHandler(this);
         mScannerView.startCamera(mCameraId);
-        mScannerView.setFlash(mFlash);
         mScannerView.setAutoFocus(mAutoFocus);
     }
 
@@ -77,7 +71,6 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
     public void onSaveInstanceState(Bundle outState)
     {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(FLASH_STATE, mFlash);
         outState.putBoolean(AUTO_FOCUS_STATE, mAutoFocus);
         outState.putIntegerArrayList(SELECTED_FORMATS, mSelectedIndices);
         outState.putInt(CAMERA_ID, mCameraId);

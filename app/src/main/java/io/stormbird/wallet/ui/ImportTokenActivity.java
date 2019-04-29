@@ -69,8 +69,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private LinearLayout costLayout;
     private int chainId = 0;
     private boolean usingFeeMaster = false;
-
-    private String paymasterUrlPrefix = "https://aw.app:80/api"; //default
+    private String paymasterUrlPrefix = "https://paymaster.stormbird.sg/api";
     private final String TAG = "ITA";
 
     @Override

@@ -70,7 +70,7 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
         try
         {
             String injectedView = tokenView.injectWeb3TokenScript(getContext(), view);
-            String style = assetDefinitionService.getTokenView(token.getAddress(), "style");
+            String style = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
             injectedView = tokenView.injectStyleData(injectedView, style);
             tokenView.loadData(injectedView, "text/html", "utf-8");
         }

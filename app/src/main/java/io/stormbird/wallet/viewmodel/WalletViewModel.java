@@ -361,7 +361,7 @@ public class WalletViewModel extends BaseViewModel
     @Override
     public void showErc20TokenDetail(Context context, String address, String symbol, int decimals, Token token) {
         boolean isToken = !address.equalsIgnoreCase(currentWallet.address);
-        boolean hasDefinition = assetDefinitionService.hasDefinition(address);
+        boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
         erc20DetailRouter.open(context, address, symbol, decimals, isToken, currentWallet, token, hasDefinition);
     }
 

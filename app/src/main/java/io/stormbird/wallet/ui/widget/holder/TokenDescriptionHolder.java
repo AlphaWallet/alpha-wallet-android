@@ -32,7 +32,7 @@ public class TokenDescriptionHolder extends BinderViewHolder<Token>
         assetService = service;
         if (service != null)
         {
-            issuer = service.getIssuerName(t.getAddress());
+            issuer = service.getIssuerName(t);
         }
         else
         {
@@ -44,11 +44,9 @@ public class TokenDescriptionHolder extends BinderViewHolder<Token>
     public void bind(@Nullable Token token, @NonNull Bundle addition) {
         count.setText(String.valueOf(token.getTicketCount()));
         String tokenName = token.tokenInfo.name;
-        if (assetService.getAssetDefinition(token.getAddress()) != null)
+        if (assetService.getAssetDefinition(token.tokenInfo.chainId, token.getAddress()) != null)
         {
-            String nameCandidate = null;
-            if (token.getTicketCount() > 1) nameCandidate = assetService.getAssetDefinition(token.getAddress()).getTokenNameCollective();
-            if (nameCandidate == null) nameCandidate = assetService.getAssetDefinition(token.getAddress()).getTokenName();
+            String nameCandidate = assetService.getAssetDefinition(token.tokenInfo.chainId, token.getAddress()).getTokenName(token.getTicketCount());
             if (nameCandidate != null && nameCandidate.length() > 0) tokenName = nameCandidate;
         }
         title.setText(tokenName);

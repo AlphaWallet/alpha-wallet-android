@@ -115,7 +115,7 @@ public class Erc20DetailActivity extends BaseActivity {
         tokenViewAdapter.setTokens(tokens);
         tokenView.setAdapter(tokenViewAdapter);
 
-        if (viewModel.hasIFrame(token.getAddress())) {
+        if (viewModel.hasIFrame(token)) {
             addTokenPage();
         }
     }
@@ -228,7 +228,7 @@ public class Erc20DetailActivity extends BaseActivity {
         LinearLayout viewWrapper = findViewById(R.id.layout_iframe);
         try {
             WebView iFrame = findViewById(R.id.iframe);
-            String tokenData = viewModel.getTokenData(token.getAddress());
+            String tokenData = viewModel.getTokenData(token);
             iFrame.loadData(tokenData, "text/html", "UTF-8");
             viewWrapper.setVisibility(View.VISIBLE);
         } catch (Exception e) {

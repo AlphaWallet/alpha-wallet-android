@@ -112,7 +112,7 @@ public class AppSiteController {
     {
         TokenDefinition definition = getTokenDefinition(data.contractAddress);
 
-        model.addAttribute("tokenName", definition.getTokenName());
+        model.addAttribute("tokenName", definition.getTokenName(data.ticketCount));
         model.addAttribute("link", data);
         model.addAttribute("linkPrice",
                 getEthString(data.price) + " " + MagicLinkInfo.getNetworkNameById(data.chainId));
@@ -185,9 +185,9 @@ public class AppSiteController {
     {
         TokenDefinition definition = getTokenDefinition(data.contractAddress);
 
-        String tokenName = definition.getTokenName();
+        String tokenName = definition.getTokenName(data.ticketCount);
 
-        model.addAttribute("tokenName", definition.getTokenName());
+        model.addAttribute("tokenName", definition.getTokenName(data.ticketCount));
         model.addAttribute("link", data);
         model.addAttribute("linkPrice",
                 getEthString(data.price) + " " + MagicLinkInfo.getNetworkNameById(data.chainId));

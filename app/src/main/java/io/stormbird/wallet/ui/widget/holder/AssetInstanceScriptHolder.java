@@ -74,8 +74,8 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
             if (data.tokenIds.size() == 0) { fillEmpty(); return; }
             String tokenAttrs = buildTokenAttrs(data);
             String viewType = iconified ? "view-iconified" : "view";
-            String view = assetDefinitionService.getTokenView(token.getAddress(), viewType);
-            String style = assetDefinitionService.getTokenView(token.getAddress(), "style");
+            String view = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), viewType);
+            String style = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
             String viewData = tokenView.injectWeb3TokenInit(getContext(), view, tokenAttrs);
             viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
 
@@ -102,7 +102,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     {
         BigInteger firstTokenId = data.tokenIds.get(0);
 
-        NonFungibleToken nft = assetDefinitionService.getNonFungibleToken(token.getAddress(), firstTokenId);
+        NonFungibleToken nft = assetDefinitionService.getNonFungibleToken(token.tokenInfo.chainId, token.getAddress(), firstTokenId);
         StringBuilder attrs = new StringBuilder();
         addPair(attrs, "name", token.getTokenTitle(nft));
         addPair(attrs, "symbol", token.tokenInfo.symbol);

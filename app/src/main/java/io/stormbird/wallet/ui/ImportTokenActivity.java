@@ -156,8 +156,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     viewModel.checkTokenNetwork(contractAddress, "requiredPrefix");
                     break;
                 default:
-                    //TODO: The line of code below will return a potentially incorrect value
-                    //TODO: if there are two contracts on different chains with the same address (owned by same key)
                     int checkNetworkId = viewModel.getAssetDefinitionService().getChainId(contractAddress);
                     if (checkNetworkId > 0)
                     {
@@ -422,7 +420,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         Token t = viewModel.getImportToken();
         TextView tv = findViewById(R.id.text_ticket_range);
         String importText = String.valueOf(order.ticketCount) + "x ";
-        importText += t.getTokenName(viewModel.getAssetDefinitionService());
+        importText += t.getTokenName(viewModel.getAssetDefinitionService(), order.ticketCount);
 
         tv.setText(importText);
     }
@@ -443,7 +441,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         Token t = viewModel.getImportToken();
         TextView tv = findViewById(R.id.text_ticket_range);
         String importText = String.valueOf(order.ticketCount) + "x ";
-        importText += t.getTokenName(viewModel.getAssetDefinitionService());
+        importText += t.getTokenName(viewModel.getAssetDefinitionService(), order.ticketCount);
         tv.setText(importText);
         //Note: it's actually not possible to pull the event or anything like that since we can't get the tokenID if it's been imported.
     }

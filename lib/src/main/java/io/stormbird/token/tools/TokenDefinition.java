@@ -11,24 +11,102 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import static io.stormbird.token.entity.TokenScriptParseType.ts;
 
 public class TokenDefinition {
     protected Document xml;
-    public Map<String, AttributeType> attributeTypes = new ConcurrentHashMap<>();
+    public Map<String, AttributeType> attributeTypes = new HashMap<>();
     protected Locale locale;
-    public Map<String, Integer> addresses = new HashMap<>();
-    public Map<String, FunctionDefinition> functions = new ConcurrentHashMap<>();
-    public Map<String, Map<String, String>> attributeSets = new ConcurrentHashMap<>(); //TODO: add language, in case user changes language during operation - see Weiwu's comment further down
-    public Map<String, TSAction> actions = new ConcurrentHashMap<>();
+
+    public Map<String, ContractInfo> contracts = new HashMap<>();
+    public Map<String, FunctionDefinition> functions = new HashMap<>();
+    public Map<String, Map<String, String>> attributeSets = new HashMap<>(); //TODO: add language, in case user changes language during operation - see Weiwu's comment further down
+    public Map<String, TSAction> actions = new HashMap<>();
+
+    private Map<String, String> names = new HashMap<>(); // store plural etc for token name
 
     private String nameSpace;
 
+    public void populateNetworks(Map<Integer, Map<String, TokenDefinition>> assets, Map<Integer, List<String>> devOverrideContracts)
+    {
+        for (String name : contracts.keySet())
+        {
+            ContractInfo info = contracts.get(name);
+            for (int network : info.addresses.keySet())
+            {
+                Map<String, TokenDefinition> definitionMapping = assets.get(network);
+                if (definitionMapping == null) //there is a cool shortcut when at API24+
+                {
+                    definitionMapping = new HashMap<>();
+                    assets.put(network, definitionMapping);
+                }
+
+                String address = info.addresses.get(network);
+                if (devOverrideContracts == null || !devOverrideContracts.containsKey(network) || !devOverrideContracts.get(network).contains(address))
+                {
+                    definitionMapping.put(address, this);
+                }
+            }
+        }
+    }
+
+    public void addContractsAtAddress(List<String> contractList, int networkId)
+    {
+        for (String name : contracts.keySet())
+        {
+            ContractInfo info = contracts.get(name);
+            if (info.addresses.containsKey(networkId)) contractList.add(info.addresses.get(networkId));
+        }
+    }
+
+    public boolean hasNetwork(int networkId)
+    {
+        for (String name : contracts.keySet())
+        {
+            ContractInfo info = contracts.get(name);
+            if (info.addresses.containsKey(networkId)) return true;
+        }
+
+        return false;
+    }
+
+    public boolean hasContracts()
+    {
+        return contracts.size() > 0;
+    }
+
+    public void addToOverrides(Map<Integer, List<String>> devOverrideContracts)
+    {
+        for (String name : contracts.keySet())
+        {
+            ContractInfo info = contracts.get(name);
+            for (int network : info.addresses.keySet())
+            {
+                String address = info.addresses.get(network);
+                List<String> contracts = devOverrideContracts.get(network);
+                if (contracts == null)
+                {
+                    contracts = new ArrayList<>();
+                    devOverrideContracts.put(network, contracts);
+                }
+
+                if (!contracts.contains(address)) contracts.add(address);
+            }
+        }
+    }
+
+    private class ContractInfo
+    {
+        public String contractInterface = null;
+        public Map<Integer, String> addresses = new HashMap<>();
+    }
+
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";
-    private static final String TOKENSCRIPT = "http://tokenscript.org/2019/04/tokenscript";
+    private static final String TOKENSCRIPT = "http://tokenscript.org/2019/05/tokenscript";
     private static final String TOKENSCRIPTBASE = "http://tokenscript.org/";
 
     /* the following are incorrect, waiting to be further improved
@@ -52,11 +130,7 @@ public class TokenDefinition {
     */
     protected String marketQueueAPI = null;
     protected String feemasterAPI = null;
-    protected String tokenName = null;
-    protected String tokenNameCollective = null;
     protected String keyName = null;
-    protected String contractType = null;
-    protected int networkId = 1; //default to main net unless otherwise specified
 
     public enum Syntax {
         DirectoryString, IA5String, Integer, GeneralizedTime,
@@ -77,9 +151,8 @@ public class TokenDefinition {
         public Map<BigInteger, String> members;
         public String function = null;
 
-        public AttributeType(Element attr) {
-            name = getLocalisedString(attr,"name");
-            if (name == null) return;
+        public AttributeType(Element attr)
+        {
             id = attr.getAttribute("id");
             try {
                 switch (attr.getAttribute("syntax")) { // We don't validate syntax here; schema does it.
@@ -114,6 +187,7 @@ public class TokenDefinition {
                 syntax = Syntax.DirectoryString; // 1.3.6.1.4.1.1466.115.121.1.15
             }
             bitmask = null;
+            int state = 0;
             for(Node node = attr.getFirstChild();
                 node!=null; node=node.getNextSibling()){
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -121,6 +195,14 @@ public class TokenDefinition {
                     String label = node.getLocalName();
                     switch (label)
                     {
+                        case "origins":
+                            handleOrigins(origin);
+                            break;
+                        case "name":
+                            name = getLocalisedString(origin, "string");
+                            break;
+                        case "inputs":
+                            break;
                         case "features":
                             //look for function
                             break;
@@ -166,6 +248,37 @@ public class TokenDefinition {
                 bitshift--;
             }
             // System.out.println("New FieldDefinition :" + name);
+        }
+
+        private void handleOrigins(Element origin)
+        {
+            //determine how to get this value
+                /*  <ts:ethereum contract="EntryToken" function="getLocality">
+                        <ts:inputs>
+                            <ts:uint256 ref="tokenID"></ts:uint256>
+                        </ts:inputs>
+                    </ts:ethereum>*/
+                /*      <ts:origins>
+        <ts:token-id as="utf8" bitmask="0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000"></ts:token-id>
+      </ts:origins>*/
+
+            for(Node node = origin.getFirstChild();
+                node!=null; node=node.getNextSibling())
+            {
+                if (node.getNodeType() == Node.ELEMENT_NODE)
+                {
+                    switch (node.getLocalName())
+                    {
+                        case "ethereum":
+                            //this value is obtained from a contract call
+
+                            break;
+                        case "token-id":
+                            //this value is obtained from the token id
+                            break;
+                    }
+                }
+            }
         }
 
         private void populate(Element mapping) {
@@ -447,17 +560,15 @@ public class TokenDefinition {
 
         NodeList nList = xml.getElementsByTagNameNS(nameSpace, "token");
 
-        if (nList.getLength() == 0)
+        if (nList.getLength() == 0 || !nameSpace.equals(TOKENSCRIPT))
         {
             System.out.println("Legacy XML format - no longer supported");
             return;
         }
 
-        //TODO: Needs to be namespace aware
-        CrawlAttrs(nList);
-
+        checkGlobalAttributes(xml);
         extractFeatureTag(xml);
-        extractContractTag(xml);
+        extractContracts(xml);
         extractNameTag(xml);
         extractSignedInfo(xml);
         extractCards(xml);
@@ -528,9 +639,14 @@ public class TokenDefinition {
             tsAction.exclude = excludeNode.getAttribute("selection");
         }
         Node viewNode = getLocalisedNode(action, "view");
+        Node styleNode = getNode(action, "style");
         if (viewNode != null)
         {
             tsAction.view = getHTMLContent(viewNode);
+        }
+        if (styleNode != null)
+        {
+            tsAction.style = getHTMLContent(styleNode);
         }
 
         actions.put(name, tsAction);
@@ -547,21 +663,17 @@ public class TokenDefinition {
         }
     }
 
-    private void CrawlAttrs(NodeList nList)
+    private void checkGlobalAttributes(Document xml)
     {
-        //Node impl = nList.item(i);
-        //NodeList cNodes = impl.getChildNodes();
-        for (int j = 0; j < nList.getLength(); j++)
+        NodeList nList = xml.getElementsByTagNameNS(nameSpace, "attribute-types");
+        if (nList.getLength() == 0) return;
+        Node attributeTypes = nList.item(0);
+        for (int j = 0; j < attributeTypes.getChildNodes().getLength(); j++)
         {
-            Node n = nList.item(j);
-            if (n.getPrefix() != null)
+            Node n = attributeTypes.getChildNodes().item(j);
+            if (n.getNodeType() == Node.ELEMENT_NODE && n.getLocalName().equals("attribute-type"))
             {
                 processAttrs(n);
-            }
-
-            if (n.hasChildNodes())
-            {
-                CrawlAttrs(n.getChildNodes());
             }
         }
     }
@@ -600,13 +712,57 @@ public class TokenDefinition {
         return feemasterAPI;
     }
 
-    public String getTokenName() { return tokenName; }
-    public String getTokenNameCollective() { return tokenNameCollective; }
-    public String getContractType() { return contractType; }
+    public String getTokenName(int count)
+    {
+        String value = null;
+        switch (count)
+        {
+            case 1:
+                if (names.containsKey("one")) value = names.get("one");
+                else value = names.get("");
+                break;
+            case 2:
+                value = names.get("two");
+                if (value != null) break; //drop through to 'other' if null.
+            default:
+                value = names.get("other");
+                break;
+        }
 
+        if (value == null)
+        {
+            for (String v : names.values()) //pick first value
+            {
+                value = v;
+                break;
+            }
+        }
+
+        return value;
+    }
+
+    /**
+     * This is only for legacy lookup, remove once safe to do so (see importTokenViewModel)
+     * Safe to do so = no more handling of legacy magiclinks.
+     *
+     * @param contractAddress
+     * @return
+     */
     public int getNetworkFromContract(String contractAddress)
     {
-        return (addresses.get(contractAddress) == null ? -1 : addresses.get(contractAddress));
+        for (String contractName : contracts.keySet())
+        {
+            ContractInfo info = contracts.get(contractName);
+            for (int network : info.addresses.keySet())
+            {
+                if (info.addresses.get(network).equals(contractAddress))
+                {
+                    return network;
+                }
+            }
+        }
+
+        return -1;
     }
 
     public Map<BigInteger, String> getMappingMembersByKey(String key){
@@ -653,49 +809,75 @@ public class TokenDefinition {
 
     private void extractNameTag(Document xml)
     {
-        NodeList nList = xml.getElementsByTagNameNS(nameSpace, "token");
+        NodeList nList = xml.getElementsByTagNameNS(nameSpace, "name");
         if (nList.getLength() == 0) return;
 
         Element contract = (Element) nList.item(0);
 
-        tokenName = getLocalisedString(contract, "name");
-        tokenNameCollective = getLocalisedString(contract, "name", "collective");
+        //deal with plurals
+        Node nameNode = getLocalisedNode(contract, "plurals");
+        if (nameNode != null)
+        {
+            for (int i = 0; i < nameNode.getChildNodes().getLength(); i++)
+            {
+                Node node = nameNode.getChildNodes().item(i);
+                handleNameNode(node);
+            }
+        }
+        else //no plural
+        {
+            nameNode = getLocalisedNode(contract, "string");
+            handleNameNode(nameNode);
+        }
     }
 
-    private void extractContractTag(Document xml)
+    private void handleNameNode(Node node)
+    {
+        if (node != null && node.getNodeType() == Node.ELEMENT_NODE && node.getLocalName().equals("string"))
+        {
+            Element element = (Element) node;
+            String quantity = element.getAttribute("quantity");
+            String name = element.getTextContent();
+            if (quantity != null && name != null)
+            {
+                names.put(quantity, name);
+            }
+        }
+    }
+
+    private void extractContracts(Document xml)
     {
         NodeList nList = xml.getElementsByTagNameNS(nameSpace, "contract");
-        /* we allow multiple contracts, e.g. for issuing asset and for
-         * proxy usage. but for now we only deal with the first */
-        Element contract = (Element) nList.item(0);
+        for (int i = 0; i < nList.getLength(); i++)
+        {
+            Node n = nList.item(i);
+            if (n.getNodeType() == Node.ELEMENT_NODE)
+            {
+                handleAddresses((Element) n);
+            }
+        }
+    }
 
-        tokenName = getLocalisedString(contract, "name");
+    private void handleAddresses(Element contract)
+    {
+        NodeList nList = contract.getElementsByTagNameNS(nameSpace, "address");
+        ContractInfo info = new ContractInfo();
+        String name = contract.getAttribute("name");
+        info.contractInterface = contract.getAttribute("interface");
+        contracts.put(name, info);
 
-        /*if hit NullPointerException in the next statement, then XML file
-         * must be missing <contract> elements */
-        /* TODO: select the contract of type "holding_contract" */
-        nList = contract.getElementsByTagNameNS(nameSpace, "address");
-        contractType = contract.getAttribute("id");
         for (int addrIndex = 0; addrIndex < nList.getLength(); addrIndex++)
         {
             Node node = nList.item(addrIndex);
             if (node.getNodeType() == Node.ELEMENT_NODE)
             {
-                int network = networkId;
-                if (node.hasAttributes() && node.getAttributes().item(0).getLocalName().equals("network"))
-                {
-                    String networkStr = node.getAttributes().item(0).getNodeValue();
-                    network = Integer.parseInt(networkStr);
-                }
+                Element addressElement = (Element) node;
+                String networkStr = addressElement.getAttribute("network");
+                int network = 1;
+                if (networkStr != null) network = Integer.parseInt(networkStr);
+                String address = addressElement.getTextContent();
 
-                for (int i = 0; i < node.getChildNodes().getLength(); i++)
-                {
-                    Node address = node.getChildNodes().item(i);
-                    if (address.getNodeType() == Node.TEXT_NODE)
-                    {
-                        addresses.put(address.getTextContent().toLowerCase(), network);
-                    }
-                }
+                info.addresses.put(network, address);
             }
         }
     }
@@ -729,7 +911,7 @@ public class TokenDefinition {
                             String contentString;
                             if (isHTML)
                             {
-                                contentString = getHTMLContent(content);
+                                contentString = getHTMLContent(content)  ;
                                 attributeSet.put(nodeName, contentString);
                             }
                             else
@@ -907,5 +1089,22 @@ public class TokenDefinition {
     public Map<String, TSAction> getActions()
     {
         return actions;
+    }
+
+
+    /** State Machine Parser
+     * Make TokenScript parsing more robust and flexible
+     *
+     */
+
+    private void parseTokenScript(NodeList nList)
+    {
+        TokenScriptParseType state = ts;
+        Queue<TokenScriptParseType> parseQueue = new LinkedList<>();
+
+        for (int i = 0; i < nList.getLength(); i++)
+        {
+            //get the type
+        }
     }
 }

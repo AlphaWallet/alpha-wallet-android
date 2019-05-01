@@ -69,8 +69,8 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
         try
         {
             String tokenAttrs = buildTokenAttrs(idList);
-            String view = viewModel.getAssetDefinitionService().getTokenView(token.getAddress(), "view");
-            String style = viewModel.getAssetDefinitionService().getTokenView(token.getAddress(), "style");
+            String view = viewModel.getAssetDefinitionService().getTokenView(token.tokenInfo.chainId, token.getAddress(), "view");
+            String style = viewModel.getAssetDefinitionService().getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
             String viewData = tokenView.injectWeb3TokenInit(this, view, tokenAttrs);
             viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
 
@@ -122,7 +122,7 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
 
         for (Button b : buttons) { b.setOnClickListener(this); }
 
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         if (functions != null)
         {
             int index = 0;
@@ -157,7 +157,7 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
         {
             case R.id.button_use:
             {
-                Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.getAddress());
+                Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
                 //this will be the user function
                 if (functions.size() == 0)
                 {
@@ -198,7 +198,7 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
 
     private String buildTokenAttrs(List<BigInteger> tokenId) throws Exception
     {
-        NonFungibleToken nft = viewModel.getAssetDefinitionService().getNonFungibleToken(token.getAddress(), tokenId.get(0));
+        NonFungibleToken nft = viewModel.getAssetDefinitionService().getNonFungibleToken(token.tokenInfo.chainId, token.getAddress(), tokenId.get(0));
         StringBuilder attrs = new StringBuilder();
         addPair(attrs, "name", token.getTokenTitle(nft));
         addPair(attrs, "symbol", token.tokenInfo.symbol);

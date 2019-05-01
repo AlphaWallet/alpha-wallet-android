@@ -86,23 +86,23 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     @Override
     public void bind(@Nullable Token data, @NonNull Bundle addition) {
         this.token = data;
-        if (! data.isERC20())
-        {
-            // TODO: apply styles for none ERC20 contracts
-            contractType.setVisibility(View.GONE);
-            contractSeparator.setVisibility(View.GONE);
-        }
+//        if (! data.isERC20())
+//        {
+//            // TODO: apply styles for none ERC20 contracts
+//            contractType.setVisibility(View.GONE);
+//            contractSeparator.setVisibility(View.GONE);
+//        }
 
         try
         {
             blockchain.setText(getString(R.string.blockchain, token.getNetworkName()));
             chainName.setText(token.getNetworkName());
             Utils.setChainColour(chainName, token.tokenInfo.chainId);
-            String displayTxt = assetDefinition.getIssuerName(token.getAddress(), token.getNetworkName());
+            String displayTxt = assetDefinition.getIssuerName(token);
             issuer.setText(displayTxt);
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
                         ? token.tokenInfo.symbol.toUpperCase()
-                        : token.getFullName());// getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol.toUpperCase()));
+                        : token.getFullName());
 
             animateTextWhileWaiting();
             token.setupContent(this, assetDefinition);
@@ -124,13 +124,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         {
             pendingText.setText("");
         }
-
-//        textPending.setVisibility(View.VISIBLE);
-//        if (qty > 0) {
-//            textPending.setText(getContext().getString(R.string.status_pending_with_qty, String.valueOf(qty)));
-//        } else {
-//            textPending.setVisibility(View.GONE);
-//        }
     }
 
     private void setIncompleteData(int qty) {

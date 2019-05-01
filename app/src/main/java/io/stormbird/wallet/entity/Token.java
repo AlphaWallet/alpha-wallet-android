@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import android.view.View;
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.entity.RealmToken;
@@ -187,6 +188,19 @@ public class Token implements Parcelable
         if (isTerminated()) return EXPIRED_CONTRACT;
         if (isBad()) return UNKNOWN_CONTRACT;
         return tokenInfo.name + (tokenInfo.symbol != null && tokenInfo.symbol.length() > 0 ? "(" + tokenInfo.symbol.toUpperCase() + ")" : "");
+    }
+
+    public String getFullName(AssetDefinitionService assetDefinition, int count)
+    {
+        String name = getFullName();
+        TokenDefinition def = assetDefinition.getAssetDefinition(tokenInfo.chainId, tokenInfo.address);
+        if (def != null)
+        {
+            String tokenTypeName = def.getTokenName(count);
+            if (name != null && tokenTypeName != null && !name.contains(tokenTypeName)) name = name + " " + tokenTypeName;
+        }
+
+        return name;
     }
 
     public void clickReact(BaseViewModel viewModel, Context context)
@@ -672,14 +686,13 @@ public class Token implements Parcelable
         return false;
     }
 
-    public String getTokenName(AssetDefinitionService assetService)
+    public String getTokenName(AssetDefinitionService assetService, int count)
     {
         //see if this token is covered by any contract
-        int networkId = assetService.getChainId(getAddress());
-        if (networkId >= 1)
+        if (assetService.hasDefinition(tokenInfo.chainId, tokenInfo.address))
         {
             if (tokenInfo.name != null) return tokenInfo.name;
-            else return assetService.getAssetDefinition(getAddress()).getTokenName();
+            else return assetService.getAssetDefinition(tokenInfo.chainId, getAddress()).getTokenName(count);
         }
         else
         {

@@ -9,4 +9,5 @@ public class TSAction
     public String type;
     public String exclude;
     public String view;
+    public String style;
 }

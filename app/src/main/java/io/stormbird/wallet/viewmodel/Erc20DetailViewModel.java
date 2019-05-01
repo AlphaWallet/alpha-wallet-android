@@ -97,12 +97,13 @@ public class Erc20DetailViewModel extends BaseViewModel {
         }
     }
 
-    public boolean hasIFrame(String address) {
-        return assetDefinitionService.hasIFrame(address);
+    public boolean hasIFrame(Token token)
+    {
+        return assetDefinitionService.hasIFrame(token.tokenInfo.chainId, token.getAddress());
     }
 
-    public String getTokenData(String address) {
-        return assetDefinitionService.getIntroductionCode(address);
+    public String getTokenData(Token token) {
+        return assetDefinitionService.getIntroductionCode(token.tokenInfo.chainId, token.getAddress());
     }
 
     public void fetchTransactions(Token token, int historyCount) {

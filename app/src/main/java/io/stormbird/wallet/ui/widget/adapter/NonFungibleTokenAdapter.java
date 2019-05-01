@@ -146,7 +146,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         items.clear();
         int holderType = TokenIdSortedItem.VIEW_TYPE;
 
-        if (assetService.hasTokenView(t.getAddress()))
+        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress()))
         {
             containsScripted = true;
             holderType = AssetInstanceSortedItem.VIEW_TYPE;
@@ -175,13 +175,13 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         //determine what kind of holder we need:
         int holderType = TokenIdSortedItem.VIEW_TYPE;
 
-        if (assetService.hasTokenView(t.getAddress()))
+        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress()))
         {
             containsScripted = true;
             holderType = AssetInstanceSortedItem.VIEW_TYPE;
         }
 
-        if (assetService.hasIFrame(t.getAddress()))
+        if (assetService.hasIFrame(t.tokenInfo.chainId, t.getAddress()))
         {
             if (sortedList.size() == 0)
             {

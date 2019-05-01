@@ -74,14 +74,4 @@ public class SendViewModel extends BaseViewModel {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(ensResolve::postValue, throwable -> ensFail.postValue(""));
     }
-
-    public boolean hasIFrame(String address)
-    {
-        return assetDefinitionService.hasIFrame(address);
-    }
-
-    public String getTokenData(String address)
-    {
-        return assetDefinitionService.getIntroductionCode(address);
-    }
 }

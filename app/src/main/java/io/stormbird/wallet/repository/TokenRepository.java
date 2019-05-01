@@ -331,7 +331,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<Token> callTokenFunctions(Token token, AssetDefinitionService service)
     {
-        TokenDefinition definition = service.getAssetDefinition(token.getAddress());
+        TokenDefinition definition = service.getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
         NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
 
         if (definition == null || definition.functions.size() == 0 || !token.requiresAuxRefresh()) return Single.fromCallable(() -> token); //quick return
@@ -879,12 +879,6 @@ public class TokenRepository implements TokenRepositoryType {
             if (responseValue.length() > 2 && name.length() == 0)
             {
                 name = checkBytesString(responseValue);
-            }
-            if (assetDefinitionService.getChainId(address) > 0)
-            {
-                //does name already contain the token type
-                String tokenTypeName = assetDefinitionService.getAssetDefinition(address).getTokenName();
-                if (name != null && !name.contains(tokenTypeName)) name = name + " " + tokenTypeName;
             }
             return name;
         } else {

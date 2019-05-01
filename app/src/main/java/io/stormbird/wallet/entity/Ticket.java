@@ -37,6 +37,8 @@ import io.stormbird.wallet.ui.BaseActivity;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
 
+import static io.stormbird.wallet.interact.SetupTokensInteract.EXPIRED_CONTRACT;
+import static io.stormbird.wallet.interact.SetupTokensInteract.UNKNOWN_CONTRACT;
 import static io.stormbird.wallet.util.Utils.isAlNum;
 
 /**
@@ -183,6 +185,7 @@ public class Ticket extends Token implements Parcelable
 
         tokenHolder.balanceEth.setText(String.valueOf(getTicketCount()));
         tokenHolder.layoutValueDetails.setVisibility(View.GONE);
+        tokenHolder.symbol.setText(getFullName(asset, getTicketCount())); //override name text
     }
 
     public String populateRange(TicketRange range)
@@ -496,7 +499,7 @@ public class Ticket extends Token implements Parcelable
         if (numberOfTickets > 0)
         {
             BigInteger firstTicket = range.tokenIds.get(0);
-            NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(range.contractAddress, firstTicket);
+            NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(tokenInfo.chainId, range.contractAddress, firstTicket);
 
             String nameStr = getTokenTitle(nonFungibleToken);
             String venueStr = (nonFungibleToken != null && nonFungibleToken.getAttribute("venue") != null)
@@ -653,8 +656,7 @@ public class Ticket extends Token implements Parcelable
 
     public void checkIsMatchedInXML(AssetDefinitionService assetService)
     {
-        int networkId = assetService.getChainId(getAddress());
-        isMatchedInXML = networkId >= 1;
+        isMatchedInXML = assetService.hasDefinition(tokenInfo.chainId, tokenInfo.address);
     }
 
     @Override

@@ -76,7 +76,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         try
         {
             String injectedView = tokenView.injectWeb3TokenScript(this, viewCode);
-            String style = viewModel.getAssetDefinitionService().getTokenView(token.getAddress(), "style");
+            String style = viewModel.getAssetDefinitionService().getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
             injectedView = tokenView.injectStyleData(injectedView, style);
             tokenView.loadData(injectedView, "text/html", "utf-8");
         }

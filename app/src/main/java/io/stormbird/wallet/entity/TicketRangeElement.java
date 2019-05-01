@@ -21,7 +21,7 @@ public class TicketRangeElement
 
     public TicketRangeElement(AssetDefinitionService assetService, Token token, BigInteger v)
     {
-        NonFungibleToken nft = assetService.getNonFungibleToken(token.getAddress(), v);
+        NonFungibleToken nft = assetService.getNonFungibleToken(token.tokenInfo.chainId, token.getAddress(), v);
         if (nft != null)
         {
             if (nft.getAttribute("numero") != null) ticketNumber = nft.getAttribute("numero").value.intValue();

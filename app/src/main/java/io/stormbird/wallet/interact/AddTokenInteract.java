@@ -30,8 +30,9 @@ public class AddTokenInteract {
 
     public Observable<Token> addTokenFunctionData(Token token, AssetDefinitionService service)
     {
-        if (token.hasPositiveBalance()) return tokenRepository.callTokenFunctions(token, service).toObservable();
-        else return Observable.fromCallable(() -> token);
+//        if (token.hasPositiveBalance()) return tokenRepository.callTokenFunctions(token, service).toObservable();
+//        else
+            return Observable.fromCallable(() -> token);
     }
 
     public Disposable updateBlockRead(Token token, Wallet wallet)

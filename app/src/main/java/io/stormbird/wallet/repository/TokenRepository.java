@@ -334,7 +334,9 @@ public class TokenRepository implements TokenRepositoryType {
         TokenDefinition definition = service.getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
         NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
 
-        if (definition == null || definition.functions.size() == 0 || !token.requiresAuxRefresh()) return Single.fromCallable(() -> token); //quick return
+        return null;
+
+        /*if (definition == null || definition.functions.size() == 0 || !token.requiresAuxRefresh()) return Single.fromCallable(() -> token); //quick return
         else return Single.fromCallable(() -> {
             token.auxDataRefreshed();
             //need to call the token functions now
@@ -361,7 +363,7 @@ public class TokenRepository implements TokenRepositoryType {
                 token.addAuxDataResult(keyName, result);
             }
             return token;
-        });
+        });*/
     }
 
     private String callStringFunction(String method, String address, NetworkInfo network, BigInteger tokenId)

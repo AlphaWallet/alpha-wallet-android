@@ -13,7 +13,6 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static io.stormbird.token.entity.TokenScriptParseType.ts;
 
@@ -23,7 +22,6 @@ public class TokenDefinition {
     protected Locale locale;
 
     public Map<String, ContractInfo> contracts = new HashMap<>();
-    public Map<String, FunctionDefinition> functions = new HashMap<>();
     public Map<String, Map<String, String>> attributeSets = new HashMap<>(); //TODO: add language, in case user changes language during operation - see Weiwu's comment further down
     public Map<String, TSAction> actions = new HashMap<>();
 
@@ -45,23 +43,26 @@ public class TokenDefinition {
                     assets.put(network, definitionMapping);
                 }
 
-                String address = info.addresses.get(network);
-                if (devOverrideContracts == null || !devOverrideContracts.containsKey(network) || !devOverrideContracts.get(network).contains(address))
+                List<String> addresses = info.addresses.get(network);
+                for (String address : addresses)
                 {
-                    definitionMapping.put(address, this);
+                    if (devOverrideContracts == null || !devOverrideContracts.containsKey(network) || !devOverrideContracts.get(network).contains(address))
+                    {
+                        definitionMapping.put(address, this);
+                    }
                 }
             }
         }
     }
 
-    public void addContractsAtAddress(List<String> contractList, int networkId)
-    {
-        for (String name : contracts.keySet())
-        {
-            ContractInfo info = contracts.get(name);
-            if (info.addresses.containsKey(networkId)) contractList.add(info.addresses.get(networkId));
-        }
-    }
+//    public void addContractsAtAddress(List<String> contractList, int networkId)
+//    {
+//        for (String name : contracts.keySet())
+//        {
+//            ContractInfo info = contracts.get(name);
+//            if (info.addresses.containsKey(networkId)) contractList.add(info.addresses.get(networkId));
+//        }
+//    }
 
     public boolean hasNetwork(int networkId)
     {
@@ -86,23 +87,20 @@ public class TokenDefinition {
             ContractInfo info = contracts.get(name);
             for (int network : info.addresses.keySet())
             {
-                String address = info.addresses.get(network);
-                List<String> contracts = devOverrideContracts.get(network);
-                if (contracts == null)
+                for (String address : info.addresses.get(network))
                 {
-                    contracts = new ArrayList<>();
-                    devOverrideContracts.put(network, contracts);
-                }
+                    List<String> contracts = devOverrideContracts.get(network);
+                    if (contracts == null)
+                    {
+                        contracts = new ArrayList<>();
+                        devOverrideContracts.put(network, contracts);
+                    }
 
-                if (!contracts.contains(address)) contracts.add(address);
+                    if (!contracts.contains(address))
+                        contracts.add(address);
+                }
             }
         }
-    }
-
-    private class ContractInfo
-    {
-        public String contractInterface = null;
-        public Map<Integer, String> addresses = new HashMap<>();
     }
 
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";
@@ -149,7 +147,8 @@ public class TokenDefinition {
         public Syntax syntax;
         public As as;
         public Map<BigInteger, String> members;
-        public String function = null;
+        public FunctionDefinition function = null;
+
 
         public AttributeType(Element attr)
         {
@@ -201,16 +200,10 @@ public class TokenDefinition {
                         case "name":
                             name = getLocalisedString(origin, "string");
                             break;
-                        case "inputs":
-                            break;
-                        case "features":
-                            //look for function
-                            break;
-                        case "contracts":
-                            //System.out.println(node.getAttributes().toString());
-                            break;
-                        case "appearance":
-
+                        case "mapping":
+                            members = new HashMap<>();
+                            as = As.Mapping;
+                            populate(origin);
                             break;
                     }
                     switch(origin.getAttribute("contract").toLowerCase()) {
@@ -221,25 +214,6 @@ public class TokenDefinition {
                             break;
                         default:
                             break;
-                    }
-                    switch(origin.getAttribute("as").toLowerCase()) {
-                        case "signed":
-                            as = As.Signed;
-                            break;
-                        case "utf8":
-                            as = As.UTF8;
-                            break;
-                        case "mapping":
-                            as = As.Mapping;
-                            // TODO: Syntax is not checked
-                            members = new ConcurrentHashMap<>();
-                            populate(origin);
-                            break;
-                        default: // "unsigned"
-                            as = As.Unsigned;
-                    }
-                    if (origin.hasAttribute("bitmask")) {
-                        bitmask = new BigInteger(origin.getAttribute("bitmask"), 16);
                     }
                 }
             }
@@ -252,31 +226,64 @@ public class TokenDefinition {
 
         private void handleOrigins(Element origin)
         {
-            //determine how to get this value
-                /*  <ts:ethereum contract="EntryToken" function="getLocality">
-                        <ts:inputs>
-                            <ts:uint256 ref="tokenID"></ts:uint256>
-                        </ts:inputs>
-                    </ts:ethereum>*/
-                /*      <ts:origins>
-        <ts:token-id as="utf8" bitmask="0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000"></ts:token-id>
-      </ts:origins>*/
-
             for(Node node = origin.getFirstChild();
                 node!=null; node=node.getNextSibling())
             {
                 if (node.getNodeType() == Node.ELEMENT_NODE)
                 {
+                    Element resolve = (Element) node;
                     switch (node.getLocalName())
                     {
                         case "ethereum":
+                            function = new FunctionDefinition();
                             //this value is obtained from a contract call
-
+                            String contract = resolve.getAttribute("contract");
+                            function.contract = contracts.get(contract);
+                            function.method = resolve.getAttribute("function");
+                            addFunctionInputs(function, resolve);
                             break;
                         case "token-id":
                             //this value is obtained from the token id
+                            switch(resolve.getAttribute("as").toLowerCase()) {
+                                case "signed":
+                                    as = As.Signed;
+                                    break;
+                                case "utf8":
+                                    as = As.UTF8;
+                                    break;
+                                case "mapping":
+                                    as = As.Mapping;
+                                    // TODO: Syntax is not checked
+                                    members = new ConcurrentHashMap<>();
+                                    populate(resolve);
+                                    break;
+                                default: // "unsigned"
+                                    as = As.Unsigned;
+                            }
+                            if (resolve.hasAttribute("bitmask")) {
+                                bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
+                            }
                             break;
                     }
+                }
+            }
+        }
+
+        private void addFunctionInputs(FunctionDefinition fd, Element eth)
+        {
+            NodeList nList = eth.getElementsByTagNameNS(nameSpace, "inputs");
+            if (nList.getLength() == 0) return;
+            Element inputs = (Element) nList.item(0);
+
+            for(Node input=inputs.getFirstChild(); input!=null; input=input.getNextSibling())
+            {
+                if (input.getNodeType() == Node.ELEMENT_NODE)
+                {
+                    Element inputElement = (Element) input;
+                    MethodArg arg = new MethodArg();
+                    arg.parameterType = input.getLocalName();
+                    arg.ref = inputElement.getAttribute("ref");
+                    fd.parameters.add(arg);
                 }
             }
         }
@@ -566,10 +573,10 @@ public class TokenDefinition {
             return;
         }
 
-        checkGlobalAttributes(xml);
-        extractFeatureTag(xml);
         extractContracts(xml);
         extractNameTag(xml);
+        checkGlobalAttributes(xml);
+        extractFeatureTag(xml);
         extractSignedInfo(xml);
         extractCards(xml);
 
@@ -681,16 +688,9 @@ public class TokenDefinition {
     private void processAttrs(Node n)
     {
         AttributeType attr = new AttributeType((Element) n);
-        if (attr.bitmask != null)
-        {// has <origin> which is from bitmask
-            attributeTypes.put(attr.id, attr);
-        } // TODO: take care of attributeTypes whose value does not originate from bitmask!
-        else if (attr.function != null)
+        if (attr.bitmask != null || attr.function != null)
         {
-            FunctionDefinition fd = new FunctionDefinition();
-            fd.method = attr.function;
-            fd.syntax = attr.syntax;
-            functions.put(attr.id, fd);
+            attributeTypes.put(attr.id, attr);
         }
     }
 
@@ -876,8 +876,17 @@ public class TokenDefinition {
                 int network = 1;
                 if (networkStr != null) network = Integer.parseInt(networkStr);
                 String address = addressElement.getTextContent();
+                List<String> addresses = info.addresses.get(network);
+                if (addresses == null)
+                {
+                    addresses = new ArrayList<>();
+                    info.addresses.put(network, addresses);
+                }
 
-                info.addresses.put(network, address);
+                if (!addresses.contains(address))
+                {
+                    addresses.add(address);
+                }
             }
         }
     }
@@ -914,8 +923,6 @@ public class TokenDefinition {
                                 contentString = getHTMLContent(content)  ;
                                 attributeSet.put(nodeName, contentString);
                             }
-                            else
-                                getContent(content);
                         }
                         break;
                     case Node.TEXT_NODE:
@@ -966,51 +973,6 @@ public class TokenDefinition {
         }
 
         return sb.toString();
-    }
-
-    private void getContent(Node content)
-    {
-        switch (content.getLocalName())
-        {
-            case "action":
-                handleFunction(content);
-                break;
-            case "contract":
-                //handleContract
-                break;
-        }
-    }
-
-    private void handleFunction(Node content)
-    {
-        String functionName = "";
-        for (int i = 0; i < content.getChildNodes().getLength(); i++)
-        {
-            Node child = content.getChildNodes().item(i);
-            switch (child.getNodeType())
-            {
-                case Node.TEXT_NODE:
-                    break;
-                case Node.ELEMENT_NODE:
-                    switch (child.getLocalName())
-                    {
-                        case "name":
-                            functionName = getHTMLContent(child);
-                            break;
-                        case "function":
-                            FunctionDefinition fd = getFunction(child);
-                            if (fd != null)
-                            {
-                                functions.put(functionName, fd);
-                            }
-                        default:
-                            break;
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
     }
 
     private String htmlAttributes(Node attribute)

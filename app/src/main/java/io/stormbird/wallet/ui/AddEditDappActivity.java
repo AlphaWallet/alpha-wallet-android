@@ -96,18 +96,28 @@ public class AddEditDappActivity extends BaseActivity {
     }
 
     private void save(DApp dapp) {
-        if (dapp == null || dapp.getName() == null || dapp.getUrl() == null) { finish(); return; }
-
-        List<DApp> myDapps = DappBrowserUtils.getMyDapps(this);
-        for (DApp d : myDapps) {
-            if (d.getName().equals(dapp.getName()) &&
-                    d.getUrl().equals(dapp.getUrl())) {
-                d.setName(name.getText().toString());
-                d.setUrl(url.getText().toString());
+        try
+        {
+            List<DApp> myDapps = DappBrowserUtils.getMyDapps(this);
+            for (DApp d : myDapps)
+            {
+                if (d.getName().equals(dapp.getName()) &&
+                        d.getUrl().equals(dapp.getUrl()))
+                {
+                    d.setName(name.getText().toString());
+                    d.setUrl(url.getText().toString());
+                }
             }
+            DappBrowserUtils.saveToPrefs(this, myDapps);
         }
-        DappBrowserUtils.saveToPrefs(this, myDapps);
-        finish();
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            finish();
+        }
     }
 
     private void add(DApp dapp) {

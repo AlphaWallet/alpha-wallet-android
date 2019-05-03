@@ -190,7 +190,7 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void attachFragment(Fragment fragment, String tag) {
-        if (getChildFragmentManager().findFragmentByTag(tag) == null) {
+        if (tag != null && getChildFragmentManager().findFragmentByTag(tag) == null) {
             if (tag.equals(DAPP_HOME)) {
                 DappHomeFragment f = (DappHomeFragment) fragment;
                 showFragment(f, tag);

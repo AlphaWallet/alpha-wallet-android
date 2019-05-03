@@ -57,28 +57,48 @@ public class DiscoverDappsFragment extends Fragment {
     }
 
     private void onDappRemoved(DApp dapp) {
-        List<DApp> myDapps = DappBrowserUtils.getMyDapps(getContext());
-        for (DApp d : myDapps) {
-            if (d.getName().equals(dapp.getName())
-                    && d.getUrl().equals(dapp.getUrl())) {
-                myDapps.remove(d);
-                break;
+        try
+        {
+            List<DApp> myDapps = DappBrowserUtils.getMyDapps(getContext());
+            for (DApp d : myDapps)
+            {
+                if (d.getName().equals(dapp.getName())
+                        && d.getUrl().equals(dapp.getUrl()))
+                {
+                    myDapps.remove(d);
+                    break;
+                }
             }
+            DappBrowserUtils.saveToPrefs(getContext(), myDapps);
         }
-        DappBrowserUtils.saveToPrefs(getContext(), myDapps);
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private List<DApp> getData() {
         List<DApp> dapps;
         dapps = DappBrowserUtils.getDappsList(getContext());
 
-        for (DApp d : dapps) {
-            for (DApp myDapp : DappBrowserUtils.getMyDapps(getContext())) {
-                if (d.getName().equals(myDapp.getName()) && myDapp.isAdded()) {
-                    d.setAdded(true);
+        try
+        {
+            for (DApp d : dapps)
+            {
+                for (DApp myDapp : DappBrowserUtils.getMyDapps(getContext()))
+                {
+                    if (d.getName().equals(myDapp.getName()) && myDapp.isAdded())
+                    {
+                        d.setAdded(true);
+                    }
                 }
             }
         }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
         return dapps;
     }
 }

@@ -10,15 +10,17 @@ import android.os.FileObserver;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.entity.NonFungibleToken;
-import io.stormbird.token.entity.ParseResult;
-import io.stormbird.token.entity.TSAction;
+import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.interact.SetupTokensInteract;
+import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.ui.HomeActivity;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -798,7 +800,6 @@ public class AssetDefinitionService implements ParseResult
         fileObserver.startWatching();
     }
 
-
     private static String calcMD5(File file) throws IOException, NoSuchAlgorithmException
     {
         FileInputStream fis = new FileInputStream(file);
@@ -825,5 +826,40 @@ public class AssetDefinitionService implements ParseResult
 
         //return complete hash
         return sb.toString();
+    }
+
+    public Single<List<Token>> checkEthereumFunctions(SetupTokensInteract setupTokensInteract, TokensService tokensService)
+    {
+        return Single.fromCallable(() -> {
+            List<Token> updatedTokens = new ArrayList<>();
+            for (int network : assetDefinitions.keySet())
+            {
+                Map<String, TokenDefinition> defMap = assetDefinitions.get(network);
+                for (TokenDefinition td : defMap.values())
+                {
+                    List<FunctionDefinition> fdList = td.getFunctionData();
+                    for (FunctionDefinition fd : fdList)
+                    {
+                        List<String> addresses = fd.contract.addresses.get(network);
+                        if (addresses != null)
+                        {
+                            for (String address : addresses)
+                            {
+                                //do we have this token?
+                                Token token = tokensService.getToken(network, address);
+
+                                //get information from contract, store and refresh the token data
+                                if (token != null)
+                                {
+                                    token.processFunctionResults(fd, setupTokensInteract).blockingIterable()
+                                            .forEach(tokensService::storeAuxData);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return updatedTokens;
+        });
     }
 }

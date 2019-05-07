@@ -130,6 +130,30 @@ public class TokenDefinition {
     protected String feemasterAPI = null;
     protected String keyName = null;
 
+    public List<FunctionDefinition> getFunctionData()
+    {
+        List<FunctionDefinition> defs = new ArrayList<>();
+        for (AttributeType attr : attributeTypes.values())
+        {
+            if (attr.function != null)
+            {
+                defs.add(attr.function);
+            }
+        }
+
+        return defs;
+    }
+
+    public boolean hasEthFunctions()
+    {
+        for (AttributeType attr : attributeTypes.values())
+        {
+            if (attr.function != null) return true;
+        }
+
+        return false;
+    }
+
     public enum Syntax {
         DirectoryString, IA5String, Integer, GeneralizedTime,
         Boolean, BitString, CountryString, JPEG, NumericString
@@ -241,6 +265,8 @@ public class TokenDefinition {
                             function.contract = contracts.get(contract);
                             function.method = resolve.getAttribute("function");
                             addFunctionInputs(function, resolve);
+                            if (syntax == Syntax.IA5String || syntax == Syntax.DirectoryString) function.syntax = Syntax.IA5String;
+                            else function.syntax = Syntax.NumericString;
                             break;
                         case "token-id":
                             //this value is obtained from the token id

@@ -2,6 +2,7 @@ package io.stormbird.wallet.service;
 
 import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 
 import java.util.HashMap;
@@ -51,5 +52,11 @@ public class RealmManager {
 
     private String get721Name(Wallet wallet) {
         return wallet.address + "-721-db.realm";
+    }
+
+    public Realm getAuxRealmInstance(String walletAddress)
+    {
+        String name = "AuxData-" + walletAddress + "-db.realm";
+        return getRealmInstance(name);
     }
 }

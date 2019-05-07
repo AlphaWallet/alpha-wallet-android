@@ -133,7 +133,7 @@ public class TransactionsViewModel extends BaseViewModel
                 queryUnknownTokensDisposable = setupTokensInteract.addToken(t.address, t.chainId) //fetch tokenInfo
                         .flatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
                         .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.chainId, tokenInfo.address), defaultWallet().getValue())) //add to database
-                        .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
+                        //.flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
                         .subscribe(this::updateTokenService, this::onError, this::reCheckUnknowns);

@@ -28,11 +28,14 @@ public class TokenDefinitionTest {
         assertTrue(file.exists());
         TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("en"), null);
         assertFalse(ticketAsset.attributeTypes.isEmpty());
-        assertNotEquals(0, ticketAsset.tokenName.length());
+        for (String contractName : ticketAsset.contracts.keySet())
+        {
+            assertNotEquals(0, contractName.length());
+        }
 
         // test contract address extraction
-        assertTrue(ticketAsset.addresses.size() > 0); //we have at least one address
-        for (String address : ticketAsset.addresses.keySet())
+        assertTrue(ticketAsset.contracts.size() > 0); //we have at least one address
+        for (String address : ticketAsset.contracts.keySet())
         {
             assertEquals(40+2, address.length());
         }

@@ -1,30 +1,29 @@
 package io.stormbird.wallet.repository;
 
-import android.support.annotation.NonNull;
-import android.text.format.DateUtils;
 import android.util.Log;
-import io.reactivex.*;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.SingleTransformer;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.entity.BadContract;
 import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.MagicLinkData;
-import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.token.entity.MethodArg;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TickerService;
 import io.stormbird.wallet.service.TokenExplorerClientType;
+import io.stormbird.wallet.service.TokensService;
 import okhttp3.OkHttpClient;
 import org.web3j.abi.*;
-import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.ens.EnsResolver;
-import org.web3j.ens.contracts.generated.ENS;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
@@ -41,7 +40,6 @@ import java.util.concurrent.TimeUnit;
 
 import static io.stormbird.wallet.C.BURN_ADDRESS;
 import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
-import static io.stormbird.wallet.repository.EthereumNetworkRepository.POA_ID;
 import static io.stormbird.wallet.util.Utils.isAlNum;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -327,43 +325,104 @@ public class TokenRepository implements TokenRepositoryType {
                 newToken);
     }
 
-    //TODO: This should be called on a per-token basis. User will usually only have one token, so currently it's ok
     @Override
-    public Single<Token> callTokenFunctions(Token token, AssetDefinitionService service)
+    public Observable<TransactionResult> callTokenFunction(Token token, BigInteger tokenId, FunctionDefinition def)
     {
-        TokenDefinition definition = service.getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
-        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
+        return Observable.fromCallable(() -> {
+            TransactionResult transactionResult = new TransactionResult(token, tokenId, def.method);
+            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
+            long currentTime = System.currentTimeMillis();
+            FunctionDefinition tokenFd = token.getFunctionData(tokenId, def.method);
 
-        return null;
-
-        /*if (definition == null || definition.functions.size() == 0 || !token.requiresAuxRefresh()) return Single.fromCallable(() -> token); //quick return
-        else return Single.fromCallable(() -> {
-            token.auxDataRefreshed();
-            //need to call the token functions now
-            for (String keyName : definition.functions.keySet())
+            if (tokenFd == null || (currentTime - tokenFd.resultTime) > 60 * 1000 * 10)
             {
-                FunctionDefinition fd = definition.functions.get(keyName);
-                //currently all function calls from XML have no params
-                String result = null;
-                switch (fd.syntax)
+                //take result as hex string
+                //construct function
+                List<Type> params = new ArrayList<>();
+                List<TypeReference<?>> returnTypes = new ArrayList<>();
+                for (MethodArg arg : def.parameters)
+                {
+                    switch (arg.parameterType)
+                    {
+                        case "uint256":
+                            switch (arg.ref)
+                            {
+                                case "tokenId":
+                                    params.add(new Uint256(tokenId));
+                                    break;
+                            }
+                            break;
+                        case "address":
+                            switch (arg.ref)
+                            {
+                                case "ownerAddress":
+                                    params.add(new Address(token.getWallet()));
+                                    break;
+                            }
+                            break;
+                        default:
+                            System.out.println("NOT IMPLEMENTED: " + arg.parameterType);
+                            break;
+                    }
+                }
+                switch (def.syntax)
                 {
                     case Boolean:
-                        result = callBoolFunction(fd.method, token.getAddress(), network);
+                    case Integer:
+                    case NumericString:
+                        returnTypes.add(new TypeReference<Uint256>()
+                        {
+                        });
                         break;
                     case IA5String:
-                        if (!token.getTokenID(0).equals(BigInteger.valueOf(-1)))
+                        returnTypes.add(new TypeReference<Utf8String>()
                         {
-                            result = callStringFunction(fd.method, token.getAddress(), network, token.getTokenID(0));
-                        }
-                        break;
-                    default:
+                        });
                         break;
                 }
 
-                token.addAuxDataResult(keyName, result);
+                Function function = new Function(def.method,
+                                                 params, returnTypes);
+
+                try
+                {
+                    String responseValue = callSmartContractFunction(function, token.getAddress(), network, new Wallet(token.getWallet()));
+                    //try to interpret the value
+                    List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
+                    if (response.size() > 0)
+                    {
+                        transactionResult.resultTime = currentTime;
+                        Type val = response.get(0);
+                        switch (def.syntax)
+                        {
+                            case Boolean:
+                            case Integer:
+                            case NumericString:
+                                transactionResult.result = Numeric.toHexStringWithPrefix(new BigDecimal(((Uint256) val).getValue()).toBigInteger());
+                                break;
+                            case IA5String:
+                                transactionResult.result = (String) response.get(0).getValue();
+                                if (responseValue.length() > 2 && transactionResult.result.length() == 0)
+                                {
+                                    transactionResult.result = checkBytesString(responseValue);
+                                }
+                                break;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
             }
-            return token;
-        });*/
+            else
+            {
+                transactionResult.resultTime = tokenFd.resultTime;
+                transactionResult.result = tokenFd.result;
+            }
+
+            return transactionResult;
+        });
     }
 
     private String callStringFunction(String method, String address, NetworkInfo network, BigInteger tokenId)
@@ -939,6 +998,12 @@ public class TokenRepository implements TokenRepositoryType {
         return new Function(param,
                             Arrays.asList(new Uint256(value)),
                             Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private static org.web3j.abi.datatypes.Function intParam(String param, BigInteger value) {
+        return new Function(param,
+                            Arrays.asList(new Uint256(value)),
+                            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function intParam(String param) {

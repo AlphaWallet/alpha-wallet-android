@@ -8,9 +8,12 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import io.reactivex.Observable;
+import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.util.DateTime;
 import io.stormbird.token.util.DateTimeFactory;
 
+import io.stormbird.wallet.interact.SetupTokensInteract;
 import io.stormbird.wallet.util.Utils;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.generated.Uint16;
@@ -21,12 +24,7 @@ import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
@@ -55,6 +53,7 @@ public class Ticket extends Token implements Parcelable
 {
     private final List<BigInteger> balanceArray;
     private boolean isMatchedInXML = false;
+    private Map<BigInteger, Map<String, FunctionDefinition>> auxData; //auxData for each tokenId
 
     public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
@@ -511,29 +510,7 @@ public class Ticket extends Token implements Parcelable
             String detailsText = "";
             long eventTime = 0;
 
-            // TODO: we should be checking the contract functions for individual ticket ranges
-            // TODO: Work on a coded placement system
-            if (checkDynamic())
-            {
-                if (auxData.containsKey("building")) nameStr = auxData.get("building");
-                venueStr += auxData.get("street");
-                venueStr += ", ";
-                venueStr += auxData.get("state");
-                textFieldVs = (auxData.get("expired").equals("true")) ? "expired" : "valid";
-                if (nonFungibleToken != null && nonFungibleToken.getAttribute("section") != null)
-                    textFieldNumero = nonFungibleToken.getAttribute("section").value.toString(10);
-
-                if (auxData.get("location") != null)
-                {
-                    detailsText = auxData.get("location");
-                }
-
-                if (auxData.get("expiry") != null)
-                {
-                    eventTime = Long.valueOf(auxData.get("expiry"));
-                }
-            }
-            else if (nonFungibleToken != null)
+            if (nonFungibleToken != null)
             {
                 String countryA = null;
                 String countryB = null;
@@ -629,18 +606,6 @@ public class Ticket extends Token implements Parcelable
         }
     }
 
-    private boolean checkDynamic()
-    {
-        boolean isDynamic = false;
-        if (auxData != null && auxData.size() > 0)
-        {
-            if (auxData.containsKey("street") || auxData.containsKey("building") || auxData.containsKey("state"))
-                isDynamic = true;
-        }
-
-        return isDynamic;
-    }
-
     @Override
     public String getTokenTitle(NonFungibleToken nonFungibleToken)
     {
@@ -671,6 +636,7 @@ public class Ticket extends Token implements Parcelable
         if (token instanceof Ticket)
         {
             this.contractType = ContractType.values()[token.interfaceOrdinal()];
+            auxData = ((Ticket)token).auxData;
         }
         super.patchAuxData(token);
     }
@@ -787,6 +753,14 @@ public class Ticket extends Token implements Parcelable
     @Override
     public List<BigInteger> getArrayBalance() { return balanceArray; }
 
+    @Override
+    public List<BigInteger> getNonZeroArrayBalance()
+    {
+        List<BigInteger> nonZeroValues = new ArrayList<>();
+        for (BigInteger value : balanceArray) if (value.compareTo(BigInteger.ZERO) != 0 && !nonZeroValues.contains(value)) nonZeroValues.add(value);
+        return nonZeroValues;
+    }
+
     /**
      * Detect a change of balance for ERC875 balance
      * @param balanceArray
@@ -816,5 +790,43 @@ public class Ticket extends Token implements Parcelable
             if (ct.type > 0) isSent = false;
         }
         return isSent;
+    }
+
+    //add auxData in
+    @Override
+    public boolean addAuxData(BigInteger tokenId, String method, String result, long resultTime)
+    {
+        if (!balanceArray.contains(tokenId)) return false;
+        if (auxData == null) auxData = new HashMap<>();
+        Map<String, FunctionDefinition> auxResult = auxData.get(tokenId);
+        if (auxResult == null)
+        {
+            auxResult = new HashMap<>();
+            auxData.put(tokenId, auxResult);
+        }
+
+        FunctionDefinition functionDef = new FunctionDefinition();
+        functionDef.method = method;
+        functionDef.result = result;
+        functionDef.resultTime = resultTime;
+
+        auxResult.put(method, functionDef);
+        return true;
+    }
+
+    @Override
+    public FunctionDefinition getFunctionData(BigInteger tokenId, String method)
+    {
+        if (auxData == null) return null;
+        Map<String, FunctionDefinition> auxResult = auxData.get(tokenId);
+        if (auxResult != null) return auxResult.get(method);
+        else return null;
+    }
+
+    @Override
+    public Observable<TransactionResult> processFunctionResults(FunctionDefinition fd, SetupTokensInteract setupTokensInteract)
+    {
+        return Observable.fromIterable(getNonZeroArrayBalance())
+                .concatMap(tokenId -> setupTokensInteract.getContractResult(this, tokenId, fd));
     }
 }

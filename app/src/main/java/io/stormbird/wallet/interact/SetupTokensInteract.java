@@ -4,17 +4,23 @@ package io.stormbird.wallet.interact;
  * Created by James on 16/01/2018.
  */
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.FunctionDefinition;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.TokenRepositoryType;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
 
 public class SetupTokensInteract {
@@ -77,5 +83,10 @@ public class SetupTokensInteract {
     {
         tokenRepository.terminateToken(token, wallet, network);
         return token;
+    }
+
+    public Observable<TransactionResult> getContractResult(Token token, BigInteger tokenId, FunctionDefinition fd)
+    {
+        return tokenRepository.callTokenFunction(token, tokenId, fd);
     }
 }

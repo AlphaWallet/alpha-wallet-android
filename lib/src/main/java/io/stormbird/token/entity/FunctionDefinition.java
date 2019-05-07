@@ -18,5 +18,5 @@ public class FunctionDefinition
     public List<MethodArg> parameters = new ArrayList<>();
 
     public String result;
-    public long resultTime;
+    public long resultTime = 0;
 }

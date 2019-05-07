@@ -4,11 +4,15 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
+import io.reactivex.Observable;
+import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.interact.SetupTokensInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
+import io.stormbird.wallet.repository.entity.RealmAuxData;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
@@ -550,7 +554,9 @@ public class Token implements Parcelable
 
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx) { }
     public List<BigInteger> getArrayBalance() { return new ArrayList<>(); }
+    public List<BigInteger> getNonZeroArrayBalance() { return new ArrayList<>(); }
     public boolean isMatchedInXML() { return false; }
+    public boolean addAuxData(BigInteger tokenId, String method, String result, long resultTime) { return false; }
 
     public String getOperationName(Transaction transaction, Context ctx)
     {
@@ -843,5 +849,17 @@ public class Token implements Parcelable
     public String getTokenTitle(NonFungibleToken nonFungibleToken)
     {
         return tokenInfo.name;
+    }
+
+    public FunctionDefinition getFunctionData(BigInteger tokenId, String method)
+    {
+        return null;
+    }
+
+    public Observable<TransactionResult> processFunctionResults(FunctionDefinition fd, SetupTokensInteract setupTokensInteract)
+    {
+        //process for ERC20
+        if (contractType == ContractType.ERC20) return setupTokensInteract.getContractResult(this, BigInteger.ZERO, fd);
+        else return Observable.fromCallable(() -> new TransactionResult(this, BigInteger.ZERO, fd.method));
     }
 }

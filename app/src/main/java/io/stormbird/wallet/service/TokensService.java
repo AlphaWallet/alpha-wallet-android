@@ -1,12 +1,21 @@
 package io.stormbird.wallet.service;
 
+import android.util.Log;
 import android.util.SparseArray;
-import io.stormbird.wallet.entity.ContractResult;
-import io.stormbird.wallet.entity.ContractType;
-import io.stormbird.wallet.entity.ERC721Token;
-import io.stormbird.wallet.entity.Token;
+import io.reactivex.Completable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableCompletableObserver;
+import io.realm.Realm;
+import io.realm.RealmResults;
+import io.stormbird.token.entity.FunctionDefinition;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
+import io.stormbird.wallet.repository.TransactionsRealmCache;
+import io.stormbird.wallet.repository.entity.RealmAuxData;
+import io.stormbird.wallet.repository.entity.RealmToken;
+import io.stormbird.wallet.web3.entity.PageReadyCallback;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,13 +32,15 @@ public class TokensService
     private String currentAddress = null;
     private boolean loaded;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final RealmManager realmManager;
     private final List<Integer> networkFilter;
     private final ConcurrentLinkedQueue<Token> transactionUpdateQueue = new ConcurrentLinkedQueue<>();
     private final ConcurrentLinkedQueue<Token> balanceUpdateQueue = new ConcurrentLinkedQueue<>();
     private Token focusToken;
 
-    public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository) {
+    public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository, RealmManager realmManager) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.realmManager = realmManager;
         loaded = false;
         networkFilter = new ArrayList<>(10);
         setupFilter();
@@ -422,5 +433,128 @@ public class TokensService
         {
             t.balanceUpdatePressure += (float)(Math.random()*15.0f);
         }
+    }
+
+    public Disposable loadAuxData()
+    {
+        return Completable.complete()
+                .subscribeWith(new DisposableCompletableObserver()
+                {
+                    Realm realm;
+
+                    @Override
+                    public void onStart()
+                    {
+                        realm = realmManager.getAuxRealmInstance(currentAddress);
+
+                        RealmResults<RealmAuxData> realmTokens = realm.where(RealmAuxData.class)
+                                .findAll();
+
+                        for (RealmAuxData aux : realmTokens)
+                        {
+                            Token t = getToken(aux.getChainId(), aux.getAddress());
+                            //now add the Aux data
+                            if (!t.addAuxData(aux.getTokenId(), aux.getFunctionId(), aux.getResult(), aux.getResultTime()))
+                            {
+                                if (!realm.isInTransaction()) realm.beginTransaction();
+                                aux.deleteFromRealm();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onComplete()
+                    {
+                        if (realm != null)
+                        {
+                            if (realm.isInTransaction())
+                            {
+                                realm.commitTransaction();
+                            }
+
+                            if (!realm.isClosed()) realm.close();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e)
+                    {
+                        if (realm != null && !realm.isClosed()) realm.close();
+                    }
+                });
+    }
+
+    Disposable storeAuxData(TransactionResult tResult)
+    {
+        return Completable.complete()
+                .subscribeWith(new DisposableCompletableObserver()
+                {
+                    Realm realm;
+
+                    @Override
+                    public void onStart()
+                    {
+                        if (tResult.result == null) return;
+                        tResult.token.addAuxData(tResult.tokenId, tResult.method, tResult.result, tResult.resultTime);
+                        realm = realmManager.getAuxRealmInstance(currentAddress);
+                        RealmAuxData realmToken = realm.where(RealmAuxData.class)
+                                .equalTo("instanceKey", functionKey(tResult.token, tResult.tokenId, tResult.method))
+                                .equalTo("chainId", tResult.token.tokenInfo.chainId)
+                                .findFirst();
+
+                        TransactionsRealmCache.addRealm();
+                        realm.beginTransaction();
+                        if (realmToken == null)
+                        {
+                            createAuxData(realm, tResult);
+                        }
+                        else
+                        {
+                            realmToken.setResult(tResult.result);
+                            realmToken.setResultTime(tResult.resultTime);
+                        }
+                    }
+
+                    @Override
+                    public void onComplete()
+                    {
+                        if (realm != null)
+                        {
+                            if (realm.isInTransaction())
+                                realm.commitTransaction();
+                            TransactionsRealmCache.subRealm();
+                            if (!realm.isClosed()) realm.close();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e)
+                    {
+                        if (realm != null && !realm.isClosed())
+                        {
+                            TransactionsRealmCache.subRealm();
+                            realm.close();
+                        }
+                    }
+                });
+    }
+
+    private void createAuxData(Realm realm, TransactionResult tResult)
+    {
+        Log.d("TokensService", "Save Aux: " + tResult.token.getFullName() + " :" + tResult.token.tokenInfo.address + " :" + tResult.tokenId.toString());
+
+        RealmAuxData realmData = realm.createObject(RealmAuxData.class, functionKey(tResult.token, tResult.tokenId, tResult.method));
+        realmData.setResultTime(tResult.resultTime);
+        realmData.setResult(tResult.result);
+        realmData.setChainId(tResult.token.tokenInfo.chainId);
+        realmData.setFunctionId(tResult.method);
+        realmData.setTokenId(tResult.tokenId.toString(Character.MAX_RADIX));
+    }
+
+    private String functionKey(Token token, BigInteger tokenId, String method)
+    {
+        //produce a unique key for this. token address, token Id, chainId
+        String key = token.tokenInfo.address + "-" + tokenId.toString(Character.MAX_RADIX) + "-" + token.tokenInfo.chainId + "-" + method;
+        return key;
     }
 }

@@ -3,6 +3,7 @@ package io.stormbird.wallet.interact;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
@@ -26,13 +27,6 @@ public class AddTokenInteract {
     public Single<Token[]> addERC721(Wallet wallet, Token[] tokens)
     {
         return tokenRepository.addERC721(wallet, tokens);
-    }
-
-    public Observable<Token> addTokenFunctionData(Token token, AssetDefinitionService service)
-    {
-//        if (token.hasPositiveBalance()) return tokenRepository.callTokenFunctions(token, service).toObservable();
-//        else
-            return Observable.fromCallable(() -> token);
     }
 
     public Disposable updateBlockRead(Token token, Wallet wallet)

@@ -164,10 +164,17 @@ public class TransactionsViewModel extends BaseViewModel
         if (t != null)
         {
             Log.d(TAG, "Checking Tx for: " + t.getFullName());
-            NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(t.tokenInfo.chainId);
+            NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(t.tokenInfo.chainId, false);
+            NetworkInfo networkWithEtherscanEvents = findDefaultNetworkInteract.getNetworkInfo(t.tokenInfo.chainId, false);
             String userAddress = t.isEthereum() ? null : wallet.getValue().address; //only specify address if we're scanning token transactions - not all are relevant to us.
             fetchTransactionDisposable =
                     fetchTransactionsInteract.fetchNetworkTransactions(network, t.getAddress(), t.lastBlockCheck, userAddress)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
+            //get transactions from etherscan event API
+            fetchTransactionDisposable =
+                    fetchTransactionsInteract.fetchNetworkTransactions(networkWithEtherscanEvents, t.getAddress(), t.lastBlockCheck, userAddress)
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);

@@ -73,12 +73,12 @@ public class SellDetailModel extends BaseViewModel {
 
     public String getSymbol()
     {
-        return findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId).symbol;
+        return findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId, false).symbol;
     }
 
     public NetworkInfo getNetwork()
     {
-        return findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId);
+        return findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId, false);
     }
 
     public void prepare(Token token, Wallet wallet) {

@@ -62,7 +62,7 @@ public class SendViewModel extends BaseViewModel {
 
     public NetworkInfo getNetworkInfo(int chainId)
     {
-        return networkRepository.getNetworkByChain(chainId);
+        return networkRepository.getNetworkByChain(chainId, false);
     }
 
     public Token getToken(int chainId, String tokenAddress) { return tokensService.getToken(chainId, tokenAddress); };

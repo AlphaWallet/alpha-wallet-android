@@ -278,7 +278,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public void setNetwork(int chainId)
     {
-        NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId, false);
         if (info != null)
         {
             ethereumNetworkRepository.setDefaultNetworkInfo(info);

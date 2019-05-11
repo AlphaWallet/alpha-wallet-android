@@ -277,7 +277,7 @@ public class ImportTokenViewModel extends BaseViewModel
         if (tokenInfo != null && tokenInfo.name != null)
         {
             TokenFactory tf = new TokenFactory();
-            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
+            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId, false);
             importToken = tf.createToken(tokenInfo, spec, network.getShortName());
             regularBalanceCheck();
         }

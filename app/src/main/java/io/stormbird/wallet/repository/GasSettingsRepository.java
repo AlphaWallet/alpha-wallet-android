@@ -61,7 +61,7 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
 
     private void fetchGasSettings(int chainId) {
 
-        final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
+        final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId, false).rpcServerUrl));
 
         try {
             EthGasPrice price = web3j

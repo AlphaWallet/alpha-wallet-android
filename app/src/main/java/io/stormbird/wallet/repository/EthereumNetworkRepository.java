@@ -21,6 +21,17 @@ import static io.stormbird.wallet.C.*;
 
 public class EthereumNetworkRepository implements EthereumNetworkRepositoryType {
 
+	//TODO, configure for API to get erc20 event list
+	//etherscan-compatible erc20 transaction event APIs
+	public static final String mainnetEtherscanAPIErc20Events = "https://api.etherscan.io/api?module=account&action=tokentx&address=";
+	public static final String ropstenEtherscanAPIErc20Events = "https://ropsten.etherscan.io/api?module=account&action=tokentx&address=";
+	public static final String kovanEtherscanAPIErc20Events = "https://api-kovan.etherscan.io/api?module=account&action=tokentx&address=";
+	public static final String rinkebyEtherscanAPIErc20Events = "https://rinkeby.etherscan.io/api?module=account&action=tokentx&address=";
+	public static final String xDaiAPIErc20Events = "https://blockscout.com/poa/dai/api?module=account&action=tokentx&address=";
+	public static final String poaNetworkCoreAPIErc20Events = "https://blockscout.com/poa/core/api?module=account&action=tokentx&address=";
+	public static final String goerliEtherscanAPIErc20Events = "https://api-goerli.etherscan.io/api?module=account&action=tokentx&address=";
+
+
 	public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
 	public static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
 	public static final String XDAI_RPC_URL = "https://dai.poa.network";
@@ -130,7 +141,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	}
 
 	@Override
-	public NetworkInfo getNetworkByChain(int chainId)
+	public NetworkInfo getNetworkByChain(int chainId, boolean erc20EventsFromEtherscan)
 	{
 		return networkMap.get(chainId);
 	}

@@ -70,7 +70,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	@Override
 	public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password, int chainId) {
-		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
+		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId, false).rpcServerUrl));
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
 		.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, chainId))
@@ -87,7 +87,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	@Override
 	public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password, int chainId) {
-		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
+		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId, false).rpcServerUrl));
 
 		TransactionData txData = new TransactionData();
 
@@ -108,7 +108,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	@Override
 	public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password, int chainId) {
-		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
+		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId, false).rpcServerUrl));
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
 				.flatMap(nonce -> getRawTransaction(nonce, gasPrice, gasLimit, BigInteger.ZERO, data))
@@ -126,7 +126,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	@Override
 	public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password, int chainId) {
-		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
+		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId, false).rpcServerUrl));
 
 		TransactionData txData = new TransactionData();
 
@@ -280,7 +280,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	@Override
 	public Single<ContractType> queryInterfaceSpec(String address, TokenInfo tokenInfo)
 	{
-		NetworkInfo networkInfo = networkRepository.getNetworkByChain(tokenInfo.chainId);
+		NetworkInfo networkInfo = networkRepository.getNetworkByChain(tokenInfo.chainId, false);
 		ContractType checked = TokensService.checkInterfaceSpec(tokenInfo.chainId, tokenInfo.address);
 		if (tokenInfo.name == null && tokenInfo.symbol == null)
 		{

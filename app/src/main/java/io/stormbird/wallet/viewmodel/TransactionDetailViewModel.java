@@ -44,14 +44,14 @@ public class TransactionDetailViewModel extends BaseViewModel {
     }
 
     public void showMoreDetails(Context context, Transaction transaction) {
-        Uri uri = buildEtherscanUri(transaction);
+        Uri uri = buildEtherscanUri(transaction, false);
         if (uri != null) {
             externalBrowserRouter.open(context, uri);
         }
     }
 
     public void shareTransactionDetail(Context context, Transaction transaction) {
-        Uri shareUri = buildEtherscanUri(transaction);
+        Uri shareUri = buildEtherscanUri(transaction, false);
         if (shareUri != null) {
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setType("text/plain");
@@ -67,8 +67,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
     }
 
     @Nullable
-    private Uri buildEtherscanUri(Transaction transaction) {
-        NetworkInfo networkInfo = networkInteract.getNetworkInfo(transaction.chainId);
+    private Uri buildEtherscanUri(Transaction transaction, boolean erc20EventAPI) {
+        NetworkInfo networkInfo = networkInteract.getNetworkInfo(transaction.chainId, erc20EventAPI);
         if (networkInfo != null && !TextUtils.isEmpty(networkInfo.etherscanUrl)) {
             return Uri.parse(networkInfo.etherscanUrl)
                     .buildUpon()
@@ -85,7 +85,7 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     public String getNetworkSymbol(int chainId)
     {
-        return networkInteract.getNetworkInfo(chainId).symbol;
+        return networkInteract.getNetworkInfo(chainId, false).symbol;
     }
 
     public LiveData<Wallet> defaultWallet() {

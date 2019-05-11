@@ -114,7 +114,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     }
 
     public void fetchNetworkTransactions(Token token, int historyCount) {
-        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId);
+        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(token.tokenInfo.chainId, false);
         String userAddress = token.isEthereum() ? null : wallet.getValue().address; //only specify address if we're scanning token transactions - not all are relevant to us.
 
         fetchTransactionDisposable =

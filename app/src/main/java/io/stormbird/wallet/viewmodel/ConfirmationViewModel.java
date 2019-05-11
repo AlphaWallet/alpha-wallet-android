@@ -141,7 +141,7 @@ public class ConfirmationViewModel extends BaseViewModel {
         if (gasSettings.getValue() == null)
         {
             //deal with problem where gas settings are still null
-            NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(chainId);
+            NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(chainId, false);
             disposable = fetchGasSettingsInteract.fetchDefault(confirmationType != ConfirmationType.ETH, network)
                     .subscribe(this::onSendGasSettings, throwable -> onGasError(throwable, context, chainId));
         }

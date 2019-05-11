@@ -376,7 +376,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 {
                     TokenFactory tf = new TokenFactory();
                     TokenInfo info = tf.createTokenInfo(rt);
-                    NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(info.chainId);
+                    NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(info.chainId, false);
                     Token newToken = tf.createToken(info, rt, rt.getUpdatedTime(), network.getShortName());//; new Token(info, balance, realmItem.getUpdatedTime());
                     newToken.setTokenWallet(wallet.address);
                     newToken.lastBlockCheck = rt.getLastBlock();
@@ -747,7 +747,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 //get all the assets for this ERC first
                 List<String> tokenIdAddrs = realmItem.getTokenIdList();
                 List<Asset> assets = getERC721Assets(tokenIdAddrs, realm, realmItem);
-                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(realmItem.getChainId());
+                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(realmItem.getChainId(), false);
                 result[i] = tf.createERC721Token(realmItem, assets, realmItem.getUpdatedTime(), network.getShortName());
                 result[i].setTokenWallet(wallet.address);
             }
@@ -792,7 +792,7 @@ public class TokensRealmSource implements TokenLocalSource {
             RealmToken realmItem = realmItems.get(i);
             if (realmItem != null) {
                 TokenInfo info = tf.createTokenInfo(realmItem);
-                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(info.chainId);
+                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(info.chainId, false);
                 result[i] = tf.createToken(info, realmItem, realmItem.getUpdatedTime(), network.getShortName());//; new Token(info, balance, realmItem.getUpdatedTime());
             }
         }
@@ -807,7 +807,7 @@ public class TokensRealmSource implements TokenLocalSource {
             if (realmItem != null)
             {
                 TokenInfo info = tf.createTokenInfo(realmItem);
-                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(info.chainId);
+                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(info.chainId, false);
                 Token token = tf.createToken(info, realmItem, now, network.getShortName());//; new Token(info, balance, realmItem.getUpdatedTime());
                 if (token != null)
                 {
@@ -827,7 +827,7 @@ public class TokensRealmSource implements TokenLocalSource {
         RealmToken realmItem = realmItems.get(0);
             if (realmItem != null) {
                 TokenInfo info = tf.createTokenInfo(realmItem);
-                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(info.chainId);
+                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(info.chainId, false);
                 result = tf.createToken(info, realmItem, realmItem.getUpdatedTime(), network.getShortName());//; new Token(info, balance, realmItem.getUpdatedTime());
             }
         return result;

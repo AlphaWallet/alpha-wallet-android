@@ -127,7 +127,7 @@ public class WalletsViewModel extends BaseViewModel
 
     private void onDefaultNetwork(NetworkInfo networkInfo)
     {
-        networkInfo = findDefaultNetworkInteract.getNetworkInfo(EthereumNetworkRepository.MAINNET_ID); //always show mainnet eth in wallet page
+        networkInfo = findDefaultNetworkInteract.getNetworkInfo(EthereumNetworkRepository.MAINNET_ID, false); //always show mainnet eth in wallet page
         defaultNetwork.postValue(networkInfo);
         currentNetwork = networkInfo;
 
@@ -206,7 +206,7 @@ public class WalletsViewModel extends BaseViewModel
      */
     private void getWalletsBalance(Wallet[] wallets)
     {
-        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(EthereumNetworkRepository.MAINNET_ID);
+        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(EthereumNetworkRepository.MAINNET_ID, false);
 
         disposable = fetchWalletList(wallets)
                 .flatMapIterable(wallet -> wallet) //iterate through each wallet

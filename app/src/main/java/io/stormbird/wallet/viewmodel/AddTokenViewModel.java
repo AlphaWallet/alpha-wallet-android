@@ -133,7 +133,7 @@ public class AddTokenViewModel extends BaseViewModel {
 
     public LiveData<Integer> switchNetwork() { return switchNetwork; }
 
-    public NetworkInfo getNetworkInfo(int chainId) { return ethereumNetworkRepository.getNetworkByChain(chainId); }
+    public NetworkInfo getNetworkInfo(int chainId, boolean erc20EventAPI) { return ethereumNetworkRepository.getNetworkByChain(chainId, erc20EventAPI); }
 
     private void findWallet()
     {
@@ -164,7 +164,7 @@ public class AddTokenViewModel extends BaseViewModel {
         Intent intent = new Intent(ctx, SendActivity.class);
         intent.putExtra(C.EXTRA_SENDING_TOKENS, false);
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, wallet.getValue().address);
-        intent.putExtra(C.EXTRA_SYMBOL, ethereumNetworkRepository.getNetworkByChain(result.chainId).symbol);
+        intent.putExtra(C.EXTRA_SYMBOL, ethereumNetworkRepository.getNetworkByChain(result.chainId, false).symbol);
         intent.putExtra(C.EXTRA_DECIMALS, 18);
         intent.putExtra(C.Key.WALLET, wallet.getValue());
         intent.putExtra(C.EXTRA_TOKEN_ID, tokensService.getToken(result.chainId, wallet.getValue().address));
@@ -179,7 +179,7 @@ public class AddTokenViewModel extends BaseViewModel {
 
     public NetworkInfo getNetwork(int chainId)
     {
-        NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(chainId);
+        NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(chainId, false);
         if (networkInfo != null)
         {
             ethereumNetworkRepository.setDefaultNetworkInfo(networkInfo);

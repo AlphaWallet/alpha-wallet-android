@@ -102,7 +102,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private Web3j getService(int chainId)
     {
-        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
+        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId, false);
         if (!web3jNodeServers.containsKey(chainId) && network != null)
         {
             HttpService publicNodeService = new HttpService(network.rpcServerUrl, okClient, false);
@@ -212,7 +212,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Observable<Token> fetchActiveSingle(String walletAddress, Token token)
     {
-        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
+        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId, false);
         Wallet wallet = new Wallet(walletAddress);
         return Single.merge(
                 fetchCachedToken(network, wallet, token.getAddress()),
@@ -238,7 +238,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Observable<Token> fetchActiveTokenBalance(String walletAddress, Token token)
     {
-        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
+        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId, false);
         Wallet wallet = new Wallet(walletAddress);
         return updateBalance(network, wallet, token)
                 .observeOn(Schedulers.newThread())
@@ -298,7 +298,7 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType interfaceSpec)
     {
         TokenFactory tf = new TokenFactory();
-        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
+        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId, false);
 
         //check balance before we store it
         List<BigInteger> balanceArray = null;
@@ -332,7 +332,7 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<Token> callTokenFunctions(Token token, AssetDefinitionService service)
     {
         TokenDefinition definition = service.getAssetDefinition(token.getAddress());
-        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
+        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId, false);
 
         if (definition == null || definition.functions.size() == 0 || !token.requiresAuxRefresh()) return Single.fromCallable(() -> token); //quick return
         else return Single.fromCallable(() -> {
@@ -722,7 +722,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private BigDecimal getBalance(Wallet wallet, TokenInfo tokenInfo) throws Exception {
         Function function = balanceOf(wallet.address);
-        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
+        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId, false);
         String responseValue = callSmartContractFunction(function, tokenInfo.address, network, wallet);
 
         if (responseValue == null) return BigDecimal.valueOf(-1); //early return for network error
@@ -770,7 +770,7 @@ public class TokenRepository implements TokenRepositoryType {
         try
         {
             org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
-            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
+            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId, false);
             List<Type> indices = callSmartContractFunctionArray(function, tokenInfo.address, network, wallet);
             if (indices != null)
             {
@@ -1166,7 +1166,7 @@ public class TokenRepository implements TokenRepositoryType {
         return Single.fromCallable(() -> {
             try
             {
-                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
+                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId, false);
                 return new TokenInfo(
                         address,
                         getName(address, network),
@@ -1217,7 +1217,7 @@ public class TokenRepository implements TokenRepositoryType {
             String contractAddress = tokenInfo.address;
             try
             {
-                NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
+                NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId, false);
                 String received = getContractData(networkInfo, tokenInfo.address, addrParam("implementation"), "");
                 if (received != null && isValidAddress(received))
                 {

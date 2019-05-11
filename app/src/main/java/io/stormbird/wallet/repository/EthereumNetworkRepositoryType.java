@@ -13,7 +13,7 @@ import io.reactivex.Single;
 public interface EthereumNetworkRepositoryType {
 
 	NetworkInfo getDefaultNetwork();
-	NetworkInfo getNetworkByChain(int chainId);
+	NetworkInfo getNetworkByChain(int chainId, boolean erc20EventsFromEtherscan);
 
 	Single<BigInteger> getLastTransactionNonce(Web3j web3j, String walletAddress);
 

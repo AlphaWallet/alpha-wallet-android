@@ -233,7 +233,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         if (found)
         {
             TokenInfo token = viewModel.tokenInfo().getValue();
-            token.addTokenSetupPage(this, viewModel.getNetworkInfo(token.chainId).getShortName());
+            token.addTokenSetupPage(this, viewModel.getNetworkInfo(token.chainId, false).getShortName());
         }
         else
         {
@@ -336,7 +336,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
     private void setupNetwork(int chainId)
     {
-        networkInfo = viewModel.getNetworkInfo(chainId);
+        networkInfo = viewModel.getNetworkInfo(chainId, false);
         currentNetwork.setText(networkInfo.name);
         Utils.setChainColour(networkIcon, networkInfo.chainId);
         viewModel.setPrimaryChain(chainId);

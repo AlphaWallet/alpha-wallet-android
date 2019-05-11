@@ -27,11 +27,11 @@ public class FindDefaultNetworkInteract {
 
     public String getNetworkName(int chainId)
     {
-        return ethereumNetworkRepository.getNetworkByChain(chainId).getShortName();
+        return ethereumNetworkRepository.getNetworkByChain(chainId, false).getShortName();
     }
 
-    public NetworkInfo getNetworkInfo(int chainId)
+    public NetworkInfo getNetworkInfo(int chainId, boolean erc20EventsFromEtherscan)
     {
-        return ethereumNetworkRepository.getNetworkByChain(chainId);
+        return ethereumNetworkRepository.getNetworkByChain(chainId, erc20EventsFromEtherscan);
     }
 }

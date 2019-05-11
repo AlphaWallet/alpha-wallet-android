@@ -95,7 +95,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
             int mode = intent.getIntExtra(KEY_MODE, MODE_ADDRESS);
             if (mode == MODE_POS) {
                 overrideNetwork = intent.getIntExtra(OVERRIDE_DEFAULT, 1);
-                networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(overrideNetwork);
+                networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(overrideNetwork, false);
                 showPointOfSaleMode();
             }
         }
@@ -128,7 +128,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         if (token != null && overrideNetwork == 0)
         {
-            this.networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(token.tokenInfo.chainId);
+            this.networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(token.tokenInfo.chainId, false);
         }
         else
         {

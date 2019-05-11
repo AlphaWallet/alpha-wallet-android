@@ -55,7 +55,7 @@ public class MyAddressViewModel extends BaseViewModel {
 
     public NetworkInfo setNetwork(int chainId)
     {
-        NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId, false);
         if (info != null)
         {
             ethereumNetworkRepository.setDefaultNetworkInfo(info);

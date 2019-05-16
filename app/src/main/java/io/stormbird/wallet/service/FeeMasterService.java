@@ -135,7 +135,7 @@ public class FeeMasterService
         Sign.SignatureData sigData = sigFromByteArray(sig);
         args.put("r", Numeric.toHexString(sigData.getR()));
         args.put("s", Numeric.toHexString(sigData.getS()));
-        args.put("v", Integer.toHexString(sigData.getV()));
+        args.put("v", Numeric.toHexString(sigData.getV()));
     }
 
     private Single<Integer> sendFeemasterTransaction(String url, int networkId, String toAddress, long expiry, String indices, byte[] tradeSig) {

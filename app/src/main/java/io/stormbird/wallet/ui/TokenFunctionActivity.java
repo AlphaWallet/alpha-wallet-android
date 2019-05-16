@@ -4,9 +4,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,14 +11,13 @@ import android.widget.Button;
 import dagger.android.AndroidInjection;
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TSAction;
-import io.stormbird.token.entity.TicketRange;
+import io.stormbird.token.entity.TokenScriptResult;
 import io.stormbird.token.util.DateTime;
 import io.stormbird.token.util.DateTimeFactory;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.ui.widget.adapter.NonFungibleTokenAdapter;
-import io.stormbird.wallet.viewmodel.AssetDisplayViewModel;
 import io.stormbird.wallet.viewmodel.TokenFunctionViewModel;
 import io.stormbird.wallet.viewmodel.TokenFunctionViewModelFactory;
 import io.stormbird.wallet.web3.Web3TokenView;
@@ -31,7 +27,6 @@ import io.stormbird.wallet.widget.ProgressView;
 import io.stormbird.wallet.widget.SystemView;
 
 import javax.inject.Inject;
-
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -53,13 +48,16 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
     private Token token;
     private Handler handler;
     private Web3TokenView tokenView;
-    private List<BigInteger> idList;
+    private List<BigInteger> idList = null;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
         String displayIds = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
         tokenView = findViewById(R.id.web3_tokenview);
-        idList = token.stringHexToBigIntegerList(displayIds);
+        if (token instanceof Ticket) //TODO: NFT flag
+        {
+            idList = token.stringHexToBigIntegerList(displayIds);
+        }
 
         tokenView.setChainId(token.tokenInfo.chainId);
         tokenView.setWalletAddress(new Address(token.getWallet()));
@@ -166,8 +164,7 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
                 else
                 {
                     String buttonText = ((Button) v).getText().toString();
-                    TSAction action = functions.get(buttonText);
-                    viewModel.showFunction(this, token, action.view);
+                    viewModel.showFunction(this, token, buttonText);
                 }
             }
             break;
@@ -198,15 +195,17 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
 
     private String buildTokenAttrs(List<BigInteger> tokenId) throws Exception
     {
-        NonFungibleToken nft = viewModel.getAssetDefinitionService().getNonFungibleToken(token.tokenInfo.chainId, token.getAddress(), tokenId.get(0));
+        if (tokenId == null) return "";
+        //NonFungibleToken nft = viewModel.getAssetDefinitionService().getNonFungibleToken(token, token.getAddress(), tokenId.get(0));
+        TokenScriptResult tsr = viewModel.getTokenScriptResult(token, tokenId.get(0));
         StringBuilder attrs = new StringBuilder();
-        addPair(attrs, "name", token.getTokenTitle(nft));
+        addPair(attrs, "name", token.getTokenTitle());
         addPair(attrs, "symbol", token.tokenInfo.symbol);
         addPair(attrs, "_count", String.valueOf(tokenId.size()));
 
-        for (String attrKey : nft.getAttributes().keySet())
+        for (String attrKey : tsr.getAttributes().keySet())
         {
-            NonFungibleToken.Attribute attr = nft.getAttribute(attrKey);
+            TokenScriptResult.Attribute attr = tsr.getAttribute(attrKey);
             addPair(attrs, attrKey, attr.text);
         }
 

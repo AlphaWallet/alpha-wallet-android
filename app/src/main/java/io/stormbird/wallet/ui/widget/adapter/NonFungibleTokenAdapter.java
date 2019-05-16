@@ -181,7 +181,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
             holderType = AssetInstanceSortedItem.VIEW_TYPE;
         }
 
-        if (assetService.hasIFrame(t.tokenInfo.chainId, t.getAddress()))
+        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress()))
         {
             if (sortedList.size() == 0)
             {

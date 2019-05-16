@@ -5,14 +5,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
 import io.reactivex.Observable;
-import io.stormbird.token.entity.FunctionDefinition;
-import io.stormbird.token.entity.NonFungibleToken;
-import io.stormbird.token.entity.TicketRange;
+import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.interact.SetupTokensInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
-import io.stormbird.wallet.repository.entity.RealmAuxData;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
@@ -50,7 +47,7 @@ public class Token implements Parcelable
     public String getNetworkName() { return shortNetworkName; }
 
     public TokenTicker ticker;
-    protected Map<String, String> auxData;
+    protected Map<String, FunctionDefinition> auxData;
 
     public Token(TokenInfo tokenInfo, BigDecimal balance, long updateBlancaTime, String networkName, ContractType type) {
         this.tokenInfo = tokenInfo;
@@ -97,11 +94,16 @@ public class Token implements Parcelable
         if (size > 0)
         {
             auxData = new ConcurrentHashMap<>();
-            for (; size > 0; size--)
+            for (int i = 0; i < size; i++)
             {
-                String key = in.readString();
-                String value = in.readString();
-                auxData.put(key, value);
+                String method = in.readString();
+                String result = in.readString();
+                long readTime = in.readLong();
+                FunctionDefinition fd = new FunctionDefinition();
+                fd.method = method;
+                fd.result = result;
+                fd.resultTime = readTime;
+                auxData.put(method, fd);
             }
         }
     }
@@ -155,12 +157,14 @@ public class Token implements Parcelable
         dest.writeLong(lastBlockCheck);
         int size = (auxData == null ? 0 : auxData.size());
         dest.writeInt(size);
-        if (size > 0)
+        if (auxData != null)
         {
-            for (String key : auxData.keySet())
+            for (String method : auxData.keySet())
             {
-                dest.writeString(key);
-                dest.writeString(auxData.get(key));
+                dest.writeString(method);
+                FunctionDefinition fd = auxData.get(method);
+                dest.writeString(fd.result);
+                dest.writeLong(fd.resultTime);
             }
         }
     }
@@ -356,13 +360,6 @@ public class Token implements Parcelable
         return true;
     }
 
-    public void addAuxDataResult(String id, String result)
-    {
-        if (auxData == null) auxData = new ConcurrentHashMap<>();
-        if (result == null) auxData.remove(id);
-        else auxData.put(id, result);
-    }
-
     public boolean checkRealmBalanceChange(RealmToken realmToken)
     {
         if (contractType == null || contractType.ordinal() != realmToken.getInterfaceSpec()) return true;
@@ -433,7 +430,7 @@ public class Token implements Parcelable
     public void restoreAuxDataFromRealm(RealmToken realmToken)
     {
         String values = realmToken.getAuxData();
-        auxData = restoreAuxData(values);
+        //auxData = restoreAuxData(values);
     }
 
     public void setIsEthereum()
@@ -518,7 +515,10 @@ public class Token implements Parcelable
     /**
      * Stub functions - these are intended to be overridden in inherited classes.
      */
-    public void setInterfaceSpec(ContractType type) { contractType = type; }
+    public void setInterfaceSpec(ContractType type)
+    {
+        contractType = type;
+    }
     public ContractType getInterfaceSpec() { return contractType; }
     public List<BigInteger> stringHexToBigIntegerList(String integerString)
     {
@@ -556,7 +556,6 @@ public class Token implements Parcelable
     public List<BigInteger> getArrayBalance() { return new ArrayList<>(); }
     public List<BigInteger> getNonZeroArrayBalance() { return new ArrayList<>(); }
     public boolean isMatchedInXML() { return false; }
-    public boolean addAuxData(BigInteger tokenId, String method, String result, long resultTime) { return false; }
 
     public String getOperationName(Transaction transaction, Context ctx)
     {
@@ -846,7 +845,7 @@ public class Token implements Parcelable
         pendingBalance = BigDecimal.ZERO;
     }
 
-    public String getTokenTitle(NonFungibleToken nonFungibleToken)
+    public String getTokenTitle()
     {
         return tokenInfo.name;
     }
@@ -860,6 +859,23 @@ public class Token implements Parcelable
     {
         //process for ERC20
         if (contractType == ContractType.ERC20) return setupTokensInteract.getContractResult(this, BigInteger.ZERO, fd);
-        else return Observable.fromCallable(() -> new TransactionResult(this, BigInteger.ZERO, fd.method));
+        else return Observable.fromCallable(() -> new TransactionResult(tokenInfo.chainId, tokenInfo.address, BigInteger.ZERO, fd.method));
+    }
+
+    public Map<String, FunctionDefinition> getTokenIdResults(BigInteger v)
+    {
+        return auxData;
+    }
+
+    public boolean addAuxData(BigInteger tokenId, String method, String result, long resultTime)
+    {
+        if (auxData == null) auxData = new ConcurrentHashMap<>();
+        FunctionDefinition functionDef = new FunctionDefinition();
+        functionDef.method = method;
+        functionDef.result = result;
+        functionDef.resultTime = resultTime;
+
+        auxData.put(method, functionDef);
+        return true;
     }
 }

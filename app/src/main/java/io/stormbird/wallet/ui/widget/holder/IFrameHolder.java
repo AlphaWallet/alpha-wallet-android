@@ -51,7 +51,7 @@ public class IFrameHolder extends BinderViewHolder<TicketRange> implements View.
     {
         try
         {
-            String getContent = assetDefinition.getIntroductionCode(token.tokenInfo.chainId, token.getAddress());
+            String getContent = assetDefinition.getTokenView(token.tokenInfo.chainId, token.getAddress(), "view");
 
 //            if (data.tokenIds.get(0).equals(BigInteger.ZERO))
 //            {

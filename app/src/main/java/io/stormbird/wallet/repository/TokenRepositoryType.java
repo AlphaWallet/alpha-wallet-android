@@ -2,17 +2,14 @@ package io.stormbird.wallet.repository;
 
 import io.reactivex.disposables.Disposable;
 import io.stormbird.token.entity.FunctionDefinition;
-import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.token.entity.TransactionResult;
 import io.stormbird.wallet.entity.*;
 
 import java.math.BigInteger;
-import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.TokensService;
 
 public interface TokenRepositoryType {
 
@@ -41,4 +38,5 @@ public interface TokenRepositoryType {
     Single<String> resolveProxyAddress(TokenInfo tokenInfo);
 
     Observable<TransactionResult> callTokenFunction(Token token, BigInteger tokenId, FunctionDefinition fd);
+    String generateTransactionPayload(Token token, BigInteger tokenId, FunctionDefinition fd);
 }

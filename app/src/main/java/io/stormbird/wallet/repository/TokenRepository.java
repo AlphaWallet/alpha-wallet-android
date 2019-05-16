@@ -6,16 +6,14 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.MagicLinkData;
-import io.stormbird.token.entity.MethodArg;
+import io.stormbird.token.entity.TransactionResult;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TickerService;
 import io.stormbird.wallet.service.TokenExplorerClientType;
-import io.stormbird.wallet.service.TokensService;
 import okhttp3.OkHttpClient;
 import org.web3j.abi.*;
 import org.web3j.abi.datatypes.*;
@@ -180,7 +178,6 @@ public class TokenRepository implements TokenRepositoryType {
         return Single.fromCallable(() -> {
             Map<Integer, Token> currencies = localSource.getTokenBalances(wallet, wallet.address);
             //always show eth balance, others optional
-            boolean hasEth = false;
             NetworkInfo[] allNetworks = ethereumNetworkRepository.getAvailableNetworkList();
 
             for (NetworkInfo info : allNetworks)
@@ -326,89 +323,57 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public String generateTransactionPayload(Token token, BigInteger tokenId, FunctionDefinition def)
+    {
+        Function function = def.generateTransactionFunction(token.getWallet(), tokenId);// generateTransactionFunction(token, tokenId, def);
+        String encodedFunction = FunctionEncoder.encode(function);
+        return encodedFunction;
+    }
+
+    @Override
     public Observable<TransactionResult> callTokenFunction(Token token, BigInteger tokenId, FunctionDefinition def)
     {
         return Observable.fromCallable(() -> {
-            TransactionResult transactionResult = new TransactionResult(token, tokenId, def.method);
+            TransactionResult transactionResult = new TransactionResult(token.tokenInfo.chainId, token.tokenInfo.address, tokenId, def.method);
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
             long currentTime = System.currentTimeMillis();
             FunctionDefinition tokenFd = token.getFunctionData(tokenId, def.method);
 
             if (tokenFd == null || (currentTime - tokenFd.resultTime) > 60 * 1000 * 10)
             {
-                //take result as hex string
-                //construct function
-                List<Type> params = new ArrayList<>();
-                List<TypeReference<?>> returnTypes = new ArrayList<>();
-                for (MethodArg arg : def.parameters)
-                {
-                    switch (arg.parameterType)
-                    {
-                        case "uint256":
-                            switch (arg.ref)
-                            {
-                                case "tokenId":
-                                    params.add(new Uint256(tokenId));
-                                    break;
-                            }
-                            break;
-                        case "address":
-                            switch (arg.ref)
-                            {
-                                case "ownerAddress":
-                                    params.add(new Address(token.getWallet()));
-                                    break;
-                            }
-                            break;
-                        default:
-                            System.out.println("NOT IMPLEMENTED: " + arg.parameterType);
-                            break;
-                    }
-                }
-                switch (def.syntax)
-                {
-                    case Boolean:
-                    case Integer:
-                    case NumericString:
-                        returnTypes.add(new TypeReference<Uint256>()
-                        {
-                        });
-                        break;
-                    case IA5String:
-                        returnTypes.add(new TypeReference<Utf8String>()
-                        {
-                        });
-                        break;
-                }
-
-                Function function = new Function(def.method,
-                                                 params, returnTypes);
+                Function function = def.generateTransactionFunction(token.getWallet(), tokenId);//generateTransactionFunction(token, tokenId, def);
 
                 try
                 {
                     String responseValue = callSmartContractFunction(function, token.getAddress(), network, new Wallet(token.getWallet()));
                     //try to interpret the value
-                    List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
-                    if (response.size() > 0)
-                    {
-                        transactionResult.resultTime = currentTime;
-                        Type val = response.get(0);
-                        switch (def.syntax)
-                        {
-                            case Boolean:
-                            case Integer:
-                            case NumericString:
-                                transactionResult.result = Numeric.toHexStringWithPrefix(new BigDecimal(((Uint256) val).getValue()).toBigInteger());
-                                break;
-                            case IA5String:
-                                transactionResult.result = (String) response.get(0).getValue();
-                                if (responseValue.length() > 2 && transactionResult.result.length() == 0)
-                                {
-                                    transactionResult.result = checkBytesString(responseValue);
-                                }
-                                break;
-                        }
-                    }
+                    def.handleTransactionResult(transactionResult, function, responseValue);
+
+//                    List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
+//                    if (response.size() > 0)
+//                    {
+//                        transactionResult.resultTime = currentTime;
+//                        Type val = response.get(0);
+//                        switch (def.syntax)
+//                        {
+//                            case Boolean:
+//                                BigDecimal value = new BigDecimal(((Uint256) val).getValue());
+//                                transactionResult.result = value.equals(BigDecimal.ZERO) ? "FALSE" : "TRUE";
+//                                break;
+//                            case Integer:
+//                            case NumericString:
+//                                transactionResult.result = new BigDecimal(((Uint256) val).getValue()).toString();
+//                                break;
+//                            case IA5String:
+//                            case DirectoryString:
+//                                transactionResult.result = (String) response.get(0).getValue();
+//                                if (responseValue.length() > 2 && transactionResult.result.length() == 0)
+//                                {
+//                                    transactionResult.result = checkBytesString(responseValue);
+//                                }
+//                                break;
+//                        }
+//                    }
                 }
                 catch (Exception e)
                 {

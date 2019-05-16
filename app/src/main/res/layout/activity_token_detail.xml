@@ -28,37 +28,11 @@
             android:textColor="@color/button_text_color"
             android:textSize="20sp" />
 
-        <LinearLayout
-            android:id="@+id/layout_function"
-            android:layout_alignParentTop="true"
-            android:layout_above="@id/button_transfer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="visible"
-            android:background="@drawable/background_card_shadow"
-            android:padding="15dp"
-            android:orientation="vertical"
-            android:maxHeight="220dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="YOLESS!"/>
-
-            <WebView
-                android:id="@+id/webview_token"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-            </WebView>
-
-        </LinearLayout>
-
         <ScrollView
             android:id="@+id/scroll_details"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
+            android:visibility="visible"
             android:layout_above="@id/button_transfer"
             android:background="@drawable/background_card">
 

@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Base64;
 
+import io.stormbird.token.tools.Numeric;
 import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
@@ -110,17 +111,17 @@ public class MagicLinkParcel implements Parcelable
             switch (order.contractType)
             {
                 case spawnable:
-                    data = TokenRepository.createSpawnPassTo(token, expiry, order.tokenIds, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS(), recipient);
+                    data = TokenRepository.createSpawnPassTo(token, expiry, order.tokenIds, Numeric.toBigInt(sellerSig.getV()).intValue(), sellerSig.getR(), sellerSig.getS(), recipient);
                     break;
                 case currencyLink:
                     // for testing only, we would be using an intermediate server
-                    data = TokenRepository.createDropCurrency(order, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS(), recipient);
+                    data = TokenRepository.createDropCurrency(order, Numeric.toBigInt(sellerSig.getV()).intValue(), sellerSig.getR(), sellerSig.getS(), recipient);
                     break;
                 default:
                     for (int ticketIndex : order.tickets) {
                         tokenElements.add(BigInteger.valueOf(ticketIndex));
                     }
-                    data = TokenRepository.createTrade(token, expiry, tokenElements, (int)sellerSig.getV(), sellerSig.getR(), sellerSig.getS());
+                    data = TokenRepository.createTrade(token, expiry, tokenElements, Numeric.toBigInt(sellerSig.getV()).intValue(), sellerSig.getR(), sellerSig.getS());
                     break;
             }
         }

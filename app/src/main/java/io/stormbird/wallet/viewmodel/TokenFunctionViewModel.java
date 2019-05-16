@@ -3,7 +3,9 @@ package io.stormbird.wallet.viewmodel;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.TicketRange;
+import io.stormbird.token.entity.TokenScriptResult;
 import io.stormbird.wallet.entity.Wallet;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -11,9 +13,11 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
+import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.FunctionActivity;
 import io.stormbird.wallet.ui.RedeemAssetSelectActivity;
 import io.stormbird.wallet.ui.RedeemSignatureDisplayActivity;
@@ -35,16 +39,22 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final SellTicketRouter sellTicketRouter;
     private final TransferTicketRouter transferTicketRouter;
     private final CreateTransactionInteract createTransactionInteract;
+    private final FetchTokensInteract fetchTokensInteract;
+    private final TokensService tokensService;
 
     TokenFunctionViewModel(
             AssetDefinitionService assetDefinitionService,
             SellTicketRouter sellTicketRouter,
             TransferTicketRouter transferTicketRouter,
-            CreateTransactionInteract createTransactionInteract) {
+            CreateTransactionInteract createTransactionInteract,
+            FetchTokensInteract fetchTokensInteract,
+            TokensService tokensService) {
         this.assetDefinitionService = assetDefinitionService;
         this.sellTicketRouter = sellTicketRouter;
         this.transferTicketRouter = transferTicketRouter;
         this.createTransactionInteract = createTransactionInteract;
+        this.fetchTokensInteract = fetchTokensInteract;
+        this.tokensService = tokensService;
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -56,11 +66,11 @@ public class TokenFunctionViewModel extends BaseViewModel
         sellTicketRouter.open(ctx, token);
     }
     public void showTransferToken(Context context, Token ticket) { transferTicketRouter.open(context, ticket); }
-    public void showFunction(Context ctx, Token token, String viewData)
+    public void showFunction(Context ctx, Token token, String method)
     {
         Intent intent = new Intent(ctx, FunctionActivity.class);
         intent.putExtra(TICKET, token);
-        intent.putExtra(C.EXTRA_STATE, viewData);
+        intent.putExtra(C.EXTRA_STATE, method);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
     }
@@ -83,5 +93,15 @@ public class TokenFunctionViewModel extends BaseViewModel
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig, message),
                            error -> dAppFunction.DAppError(error, message));
+    }
+
+    public String getTransactionBytes(Token token, BigInteger tokenId, FunctionDefinition def)
+    {
+        return fetchTokensInteract.getTransactionBytes(token, tokenId, def);
+    }
+
+    public TokenScriptResult getTokenScriptResult(Token token, BigInteger tokenId)
+    {
+        return assetDefinitionService.getTokenScriptResult(token, tokenId);
     }
 }

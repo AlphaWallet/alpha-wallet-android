@@ -169,11 +169,6 @@ public class Web3TokenView extends WebView
         assetHolder = holder;
     }
 
-    public String injectWeb3TokenScript(Context ctx, String view)
-    {
-        return jsInjectorClient.injectWeb3TokenScript(ctx, view);
-    }
-
     public String injectWeb3TokenInit(Context ctx, String view, String tokenContent)
     {
         return jsInjectorClient.injectWeb3TokenInit(ctx, view, tokenContent);

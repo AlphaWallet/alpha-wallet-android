@@ -9,25 +9,32 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.AttributeType;
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
+import io.stormbird.token.entity.TokenScriptResult;
 import io.stormbird.token.util.DateTime;
 import io.stormbird.token.util.DateTimeFactory;
+import io.stormbird.token.util.ZonedDateTime;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.TokenFunctionActivity;
-import io.stormbird.wallet.web3.JsInjectorClient;
 import io.stormbird.wallet.web3.Web3TokenView;
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.PageReadyCallback;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
-import io.stormbird.token.util.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static io.stormbird.wallet.C.Key.TICKET;
 
@@ -44,6 +51,8 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     private final Token token;
     private final LinearLayout iFrameLayout;
     private final boolean iconified;
+
+    private StringBuilder attrs;
 
     private final AssetDefinitionService assetDefinitionService; //need to cache this locally, unless we cache every string we need in the constructor
 
@@ -72,25 +81,26 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         try
         {
             if (data.tokenIds.size() == 0) { fillEmpty(); return; }
-            String tokenAttrs = buildTokenAttrs(data);
-            String viewType = iconified ? "view-iconified" : "view";
-            String view = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), viewType);
-            String style = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
-            String viewData = tokenView.injectWeb3TokenInit(getContext(), view, tokenAttrs);
-            viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
-
-            tokenView.loadData(viewData, "text/html", "utf-8");
-
-            if (iconified)
-            {
-                iFrameLayout.setOnClickListener(v -> {
-                    Intent intent = new Intent(getContext(), TokenFunctionActivity.class);
-                    intent.putExtra(TICKET, token);
-                    intent.putExtra(C.EXTRA_TOKEN_ID, token.intArrayToString(data.tokenIds, false));
-                    intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                    getContext().startActivity(intent);
-                });
-            }
+            //String tokenAttrs = buildTokenAttrs(data);
+            getAttrs(data);
+//            String viewType = iconified ? "view-iconified" : "view";
+//            String view = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), viewType);
+//            String style = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
+//            String viewData = tokenView.injectWeb3TokenInit(getContext(), view, tokenAttrs);
+//            viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
+//
+//            tokenView.loadData(viewData, "text/html", "utf-8");
+//
+//            if (iconified)
+//            {
+//                iFrameLayout.setOnClickListener(v -> {
+//                    Intent intent = new Intent(getContext(), TokenFunctionActivity.class);
+//                    intent.putExtra(TICKET, token);
+//                    intent.putExtra(C.EXTRA_TOKEN_ID, token.intArrayToString(data.tokenIds, false));
+//                    intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+//                    getContext().startActivity(intent);
+//                });
+//            }
         }
         catch (Exception ex)
         {
@@ -98,21 +108,86 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         }
     }
 
+    private void displayTicket(String tokenAttrs, TicketRange data)
+    {
+        String viewType = iconified ? "view-iconified" : "view";
+        String view = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), viewType);
+        String style = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
+        String viewData = tokenView.injectWeb3TokenInit(getContext(), view, tokenAttrs);
+        viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
+
+        tokenView.loadData(viewData, "text/html", "utf-8");
+
+        if (iconified)
+        {
+            iFrameLayout.setOnClickListener(v -> {
+                Intent intent = new Intent(getContext(), TokenFunctionActivity.class);
+                intent.putExtra(TICKET, token);
+                intent.putExtra(C.EXTRA_TOKEN_ID, token.intArrayToString(data.tokenIds, false));
+                intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                getContext().startActivity(intent);
+            });
+        }
+    }
+
+    private void getAttrs(TicketRange data) throws Exception
+    {
+        BigInteger tokenId = data.tokenIds.get(0);
+        attrs = new StringBuilder();
+
+        addPair(attrs, "name", token.getTokenTitle());
+        addPair(attrs, "symbol", token.tokenInfo.symbol);
+        addPair(attrs, "_count", String.valueOf(data.tokenIds.size()));
+
+        List<AttributeType> attrs = assetDefinitionService.getAttrs(token);
+
+        Disposable disposable = Observable.fromIterable(attrs)
+                .flatMap(attr -> assetDefinitionService.fetchAttrResult(attr, tokenId, token))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onAttr, this::onError, ()-> finishFetch(data));
+    }
+
+    private void finishFetch(TicketRange data)
+    {
+        displayTicket(attrs.toString(), data);
+    }
+
+    private void onError(Throwable throwable)
+    {
+        throwable.printStackTrace();
+    }
+
+    private void onAttr(TokenScriptResult.Attribute attribute)
+    {
+        //add to string
+        try
+        {
+            addPair(attrs, attribute.id, attribute.text);
+        }
+        catch (ParseException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     private String buildTokenAttrs(TicketRange data) throws Exception
     {
         BigInteger firstTokenId = data.tokenIds.get(0);
 
-        NonFungibleToken nft = assetDefinitionService.getNonFungibleToken(token.tokenInfo.chainId, token.getAddress(), firstTokenId);
-        StringBuilder attrs = new StringBuilder();
-        addPair(attrs, "name", token.getTokenTitle(nft));
+        //NonFungibleToken nft = assetDefinitionService.getNonFungibleToken(token, token.getAddress(), firstTokenId);
+        //TokenScriptResult tsr = assetDefinitionService.getTokenScriptResult(token, firstTokenId);
+        //StringBuilder attrs = new StringBuilder();
+        attrs = new StringBuilder();
+        addPair(attrs, "name", token.getTokenTitle());
         addPair(attrs, "symbol", token.tokenInfo.symbol);
         addPair(attrs, "_count", String.valueOf(data.tokenIds.size()));
-
-        for (String attrKey : nft.getAttributes().keySet())
-        {
-            NonFungibleToken.Attribute attr = nft.getAttribute(attrKey);
-            addPair(attrs, attrKey, attr.text);
-        }
+//
+//        for (String attrKey : tsr.getAttributes().keySet())
+//        {
+//            TokenScriptResult.Attribute attr = tsr.getAttribute(attrKey);
+//            addPair(attrs, attrKey, attr.text);
+//        }
 
         return attrs.toString();
     }

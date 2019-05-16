@@ -7,13 +7,11 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.realm.Realm;
 import io.realm.RealmResults;
-import io.stormbird.token.entity.FunctionDefinition;
+import io.stormbird.token.entity.TransactionResult;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TransactionsRealmCache;
 import io.stormbird.wallet.repository.entity.RealmAuxData;
-import io.stormbird.wallet.repository.entity.RealmToken;
-import io.stormbird.wallet.web3.entity.PageReadyCallback;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -229,10 +227,18 @@ public class TokensService
 
     public void addTokens(Token[] tokens)
     {
+        int i = 0;
         for (Token t : tokens)
         {
+            i++;
             t.setRequireAuxRefresh();
             addToken(t);
+
+            Token test = getToken(5, currentAddress);
+            if (test != null && test.getInterfaceSpec() != ContractType.ETHEREUM)
+            {
+                System.out.println("yoless");
+            }
         }
 
         loaded = true;
@@ -432,6 +438,7 @@ public class TokensService
         for (Token t : cachedTokens)
         {
             t.balanceUpdatePressure += (float)(Math.random()*15.0f);
+            if (t.isEthereum()) t.balanceUpdatePressure += 20.0f;
         }
     }
 
@@ -495,11 +502,11 @@ public class TokensService
                     public void onStart()
                     {
                         if (tResult.result == null) return;
-                        tResult.token.addAuxData(tResult.tokenId, tResult.method, tResult.result, tResult.resultTime);
+                        //tResult.token.addAuxData(tResult.tokenId, tResult.method, tResult.result, tResult.resultTime);
                         realm = realmManager.getAuxRealmInstance(currentAddress);
                         RealmAuxData realmToken = realm.where(RealmAuxData.class)
-                                .equalTo("instanceKey", functionKey(tResult.token, tResult.tokenId, tResult.method))
-                                .equalTo("chainId", tResult.token.tokenInfo.chainId)
+                                .equalTo("instanceKey", functionKey(tResult.contractChainId, tResult.contractAddress, tResult.tokenId, tResult.method))
+                                .equalTo("chainId", tResult.contractChainId)
                                 .findFirst();
 
                         TransactionsRealmCache.addRealm();
@@ -541,20 +548,19 @@ public class TokensService
 
     private void createAuxData(Realm realm, TransactionResult tResult)
     {
-        Log.d("TokensService", "Save Aux: " + tResult.token.getFullName() + " :" + tResult.token.tokenInfo.address + " :" + tResult.tokenId.toString());
+        //Log.d("TokensService", "Save Aux: " + tResult.token.getFullName() + " :" + tResult.token.tokenInfo.address + " :" + tResult.tokenId.toString());
 
-        RealmAuxData realmData = realm.createObject(RealmAuxData.class, functionKey(tResult.token, tResult.tokenId, tResult.method));
+        RealmAuxData realmData = realm.createObject(RealmAuxData.class, functionKey(tResult.contractChainId, tResult.contractAddress, tResult.tokenId, tResult.method));
         realmData.setResultTime(tResult.resultTime);
         realmData.setResult(tResult.result);
-        realmData.setChainId(tResult.token.tokenInfo.chainId);
+        realmData.setChainId(tResult.contractChainId);
         realmData.setFunctionId(tResult.method);
         realmData.setTokenId(tResult.tokenId.toString(Character.MAX_RADIX));
     }
 
-    private String functionKey(Token token, BigInteger tokenId, String method)
+    private String functionKey(int chainId, String address, BigInteger tokenId, String method)
     {
         //produce a unique key for this. token address, token Id, chainId
-        String key = token.tokenInfo.address + "-" + tokenId.toString(Character.MAX_RADIX) + "-" + token.tokenInfo.chainId + "-" + method;
-        return key;
+        return address + "-" + tokenId.toString(Character.MAX_RADIX) + "-" + chainId + "-" + method;
     }
 }

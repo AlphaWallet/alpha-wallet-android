@@ -27,7 +27,7 @@ public class TokenDefinition {
 
     private Map<String, String> names = new HashMap<>(); // store plural etc for token name
 
-    private String nameSpace;
+    public String nameSpace;
 
     public void populateNetworks(Map<Integer, Map<String, TokenDefinition>> assets, Map<Integer, List<String>> devOverrideContracts)
     {
@@ -54,15 +54,6 @@ public class TokenDefinition {
             }
         }
     }
-
-//    public void addContractsAtAddress(List<String> contractList, int networkId)
-//    {
-//        for (String name : contracts.keySet())
-//        {
-//            ContractInfo info = contracts.get(name);
-//            if (info.addresses.containsKey(networkId)) contractList.add(info.addresses.get(networkId));
-//        }
-//    }
 
     public boolean hasNetwork(int networkId)
     {
@@ -154,270 +145,47 @@ public class TokenDefinition {
         return false;
     }
 
+    public FunctionDefinition parseFunction(Element resolve, Syntax syntax)
+    {
+        FunctionDefinition function = new FunctionDefinition();
+        //this value is obtained from a contract call
+        String contract = resolve.getAttribute("contract");
+        function.contract = contracts.get(contract);
+        function.method = resolve.getAttribute("function");
+        addFunctionInputs(function, resolve);
+        function.syntax = syntax;
+        return function;
+    }
+
+    public As parseAs(Element resolve)
+    {
+        switch(resolve.getAttribute("as").toLowerCase()) {
+            case "signed":
+                return TokenDefinition.As.Signed;
+            case "utf8":
+            case "": //no type specified, return string
+                return TokenDefinition.As.UTF8;
+            case "bool":
+                return TokenDefinition.As.Boolean;
+            case "mapping":
+                return TokenDefinition.As.Mapping;
+            default: // "unsigned"
+                return TokenDefinition.As.Unsigned;
+        }
+    }
+
     public enum Syntax {
         DirectoryString, IA5String, Integer, GeneralizedTime,
         Boolean, BitString, CountryString, JPEG, NumericString
     }
 
     public enum As {  // always assume big endian
-        UTF8, Unsigned, Signed, Mapping
-    }
-
-    protected class AttributeType {
-        public BigInteger bitmask;    // TODO: BigInteger !== BitInt. Test edge conditions.
-        public String name;  // TODO: should be polyglot because user change change language in the run
-        public String id;
-        public int bitshift = 0;
-        public Syntax syntax;
-        public As as;
-        public Map<BigInteger, String> members;
-        public FunctionDefinition function = null;
-
-
-        public AttributeType(Element attr)
-        {
-            id = attr.getAttribute("id");
-            try {
-                switch (attr.getAttribute("syntax")) { // We don't validate syntax here; schema does it.
-                    case "1.3.6.1.4.1.1466.115.121.1.6":
-                        syntax = Syntax.BitString;
-                        break;
-                    case "1.3.6.1.4.1.1466.115.121.1.7":
-                        syntax = Syntax.Boolean;
-                        break;
-                    case "1.3.6.1.4.1.1466.115.121.1.11":
-                        syntax = Syntax.CountryString;
-                        break;
-                    case "1.3.6.1.4.1.1466.115.121.1.28":
-                        syntax = Syntax.JPEG;
-                        break;
-                    case "1.3.6.1.4.1.1466.115.121.1.36":
-                        syntax = Syntax.NumericString;
-                        break;
-                    case "1.3.6.1.4.1.1466.115.121.1.24":
-                        syntax = Syntax.GeneralizedTime;
-                        break;
-                    case "1.3.6.1.4.1.1466.115.121.1.26":
-                        syntax = Syntax.IA5String;
-                        break;
-                    case "1.3.6.1.4.1.1466.115.121.1.27":
-                        syntax = Syntax.Integer;
-                        break;
-                    default: // unknown syntax treat as Directory String
-                        syntax = Syntax.DirectoryString;
-                }
-            } catch (NullPointerException e) { // missing <syntax>
-                syntax = Syntax.DirectoryString; // 1.3.6.1.4.1.1466.115.121.1.15
-            }
-            bitmask = null;
-            int state = 0;
-            for(Node node = attr.getFirstChild();
-                node!=null; node=node.getNextSibling()){
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    Element origin = (Element) node;
-                    String label = node.getLocalName();
-                    switch (label)
-                    {
-                        case "origins":
-                            handleOrigins(origin);
-                            break;
-                        case "name":
-                            name = getLocalisedString(origin, "string");
-                            break;
-                        case "mapping":
-                            members = new HashMap<>();
-                            as = As.Mapping;
-                            populate(origin);
-                            break;
-                    }
-                    switch(origin.getAttribute("contract").toLowerCase()) {
-                        case "holding-contract":
-                            as = As.Mapping;
-                            // TODO: Syntax is not checked
-                            //getFunctions(origin);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-            if (bitmask != null ) {
-                while (bitmask.mod(BigInteger.ONE.shiftLeft(++bitshift)).equals(BigInteger.ZERO)) ; // !!
-                bitshift--;
-            }
-            // System.out.println("New FieldDefinition :" + name);
-        }
-
-        private void handleOrigins(Element origin)
-        {
-            for(Node node = origin.getFirstChild();
-                node!=null; node=node.getNextSibling())
-            {
-                if (node.getNodeType() == Node.ELEMENT_NODE)
-                {
-                    Element resolve = (Element) node;
-                    switch (node.getLocalName())
-                    {
-                        case "ethereum":
-                            function = new FunctionDefinition();
-                            //this value is obtained from a contract call
-                            String contract = resolve.getAttribute("contract");
-                            function.contract = contracts.get(contract);
-                            function.method = resolve.getAttribute("function");
-                            addFunctionInputs(function, resolve);
-                            if (syntax == Syntax.IA5String || syntax == Syntax.DirectoryString) function.syntax = Syntax.IA5String;
-                            else function.syntax = Syntax.NumericString;
-                            break;
-                        case "token-id":
-                            //this value is obtained from the token id
-                            switch(resolve.getAttribute("as").toLowerCase()) {
-                                case "signed":
-                                    as = As.Signed;
-                                    break;
-                                case "utf8":
-                                    as = As.UTF8;
-                                    break;
-                                case "mapping":
-                                    as = As.Mapping;
-                                    // TODO: Syntax is not checked
-                                    members = new ConcurrentHashMap<>();
-                                    populate(resolve);
-                                    break;
-                                default: // "unsigned"
-                                    as = As.Unsigned;
-                            }
-                            if (resolve.hasAttribute("bitmask")) {
-                                bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
-                            }
-                            break;
-                    }
-                }
-            }
-        }
-
-        private void addFunctionInputs(FunctionDefinition fd, Element eth)
-        {
-            NodeList nList = eth.getElementsByTagNameNS(nameSpace, "inputs");
-            if (nList.getLength() == 0) return;
-            Element inputs = (Element) nList.item(0);
-
-            for(Node input=inputs.getFirstChild(); input!=null; input=input.getNextSibling())
-            {
-                if (input.getNodeType() == Node.ELEMENT_NODE)
-                {
-                    Element inputElement = (Element) input;
-                    MethodArg arg = new MethodArg();
-                    arg.parameterType = input.getLocalName();
-                    arg.ref = inputElement.getAttribute("ref");
-                    fd.parameters.add(arg);
-                }
-            }
-        }
-
-        private void populate(Element mapping) {
-            Element option;
-            NodeList nList = mapping.getElementsByTagNameNS(nameSpace, "option");
-            for (int i = 0; i < nList.getLength(); i++) {
-                option = (Element) nList.item(i);
-                members.put(new BigInteger(option.getAttribute("key")), getLocalisedString(option, "value"));
-            }
-        }
-
-        /**
-         * Converts bitshifted/masked token numeric data into corresponding string.
-         * eg. Attr is 'venue'; choices are "1" -> "Kaliningrad Stadium", "2" -> "Volgograd Arena" etc.
-         * NB 'time' is Unix EPOCH, which is also a mapping.
-         * Since the value may not have a corresponding mapping, but is a valid time we should still return the time value
-         * and interpret it as a local time
-         *
-         * Also - some NF tokens which share a contract with others (eg World Cup, Meetup invites) will have mappings
-         * which intentionally have zero value - eg 'Match' has no lookup value for a meeting. Returning null is a guide for the
-         * token layout not to show the value.
-         *
-         * This will become less relevant once the IFrame system is in place - each token appearance will be defined explicitly.
-         * However it may be necessary for a default display of token attributes for ease of use while potential
-         * users become acquainted with the system.
-         *
-         * @param data
-         * @return
-         * @throws UnsupportedEncodingException
-         */
-        public String toString(BigInteger data) throws UnsupportedEncodingException
-        {
-            // TODO: in all cases other than UTF8, syntax should be checked
-            switch (as)
-            {
-                case UTF8:
-                    return new String(data.toByteArray(), "UTF8");
-
-                case Unsigned:
-                    return data.toString();
-
-                case Mapping:
-                    // members might be null, but it is better to throw up ( NullPointerException )
-                    // than silently ignore
-                    // JB: Existing contracts and tokens throw this error. The wallet 'crashes' each time existing tokens are opened
-                    // due to assumptions made with extra tickets (ie null member is assumed to return null and not display that element).
-                    if (members.containsKey(data))
-                    {
-                        return members.get(data);
-                    }
-                    else if (syntax == Syntax.GeneralizedTime)
-                    {
-                        //This is a time entry but without a localised mapped entry. Return the EPOCH time.
-                        return data.toString(10);
-                    }
-                    else
-                    {
-                        return null; // have to revert to this behaviour due to values being zero when tokens are created
-                        //refer to 'AlphaWallet meetup tickets' where 'Match' mapping is null but for FIFA is not.
-                        //throw new NullPointerException("Key " + data.toString() + " can't be mapped.");
-                    }
-                default:
-                    throw new NullPointerException("Missing valid 'as' attribute");
-            }
-        }
-    }
-
-    private FunctionDefinition getFunction(Node mapping) {
-        Element option;
-        FunctionDefinition fd = new FunctionDefinition();
-        if (mapping.getAttributes().getLength() > 0)
-        {
-            Node attr = mapping.getAttributes().getNamedItem("name");
-            if (attr != null)
-            {
-                fd.method = attr.getTextContent();
-                fd.syntax = Syntax.Integer;
-            }
-        }
-
-        for(Node child=mapping.getFirstChild(); child!=null; child=child.getNextSibling())
-        {
-            if (child.getNodeType() == Node.ELEMENT_NODE)
-            {
-                option = (Element) child;
-                String type = child.getLocalName();
-                String functionName = option.getAttribute("name");
-                //TODO: Get child elements; inputs and input param keys
-
-                switch (type)
-                {
-                    case "inputs":
-                        //TODO Read inputs from child node
-                        //String inputSpec = getChildElement(child, );
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        return fd;
+        UTF8, Unsigned, Signed, Mapping, Boolean, UnsignedInput
     }
 
     /* for many occurance of the same tag, return the text content of the one in user's current language */
     // FIXME: this function will break if there are nested <tagName> in the nameContainer
-    String getLocalisedString(Element nameContainer, String tagName) {
+    public String getLocalisedString(Element nameContainer, String tagName) {
         NodeList nList = nameContainer.getElementsByTagNameNS(nameSpace, tagName);
         Element name;
         for (int i = 0; i < nList.getLength(); i++) {
@@ -436,20 +204,7 @@ public class TokenDefinition {
 
     Node getLocalisedNode(Element nameContainer, String tagName) {
         NodeList nList = nameContainer.getElementsByTagNameNS(nameSpace, tagName);
-        Element name;
-        for (int i = 0; i < nList.getLength(); i++) {
-            name = (Element) nList.item(i);
-            String langAttr = getLocalisationLang(name);
-            if (langAttr.equals(locale.getLanguage())) {
-                return name;
-            }
-        }
-
-        return null;
-    }
-
-    Node getNode(Element nameContainer, String tagName) {
-        NodeList nList = nameContainer.getElementsByTagName(tagName);
+        if (nList.getLength() == 0) nList = nameContainer.getElementsByTagName(tagName);
         Element name;
         Element nonLocalised = null;
         for (int i = 0; i < nList.getLength(); i++) {
@@ -467,18 +222,27 @@ public class TokenDefinition {
         return nonLocalised;
     }
 
-    String getLocalisedString(Element nameContainer, String tagName, String typeAttr) {
-        NodeList nList = nameContainer.getElementsByTagNameNS(nameSpace, tagName);
-        Element name;
+    String getLocalisedString(Element container) {
+        NodeList nList = container.getChildNodes();
+
+        String nonLocalised = null;
         for (int i = 0; i < nList.getLength(); i++) {
-            name = (Element) nList.item(i);
-            String langAttr = getLocalisationLang(name);
-            if (langAttr.equals(locale.getLanguage()) && hasAttribute(name, typeAttr)) {
-                return name.getTextContent();
+            Node n = nList.item(i);
+            if (n.getNodeType() == Node.ELEMENT_NODE)
+            {
+                String langAttr = getLocalisationLang((Element)n);
+                if (langAttr.equals(locale.getLanguage()))
+                {
+                    return n.getTextContent();
+                }
+                else if (langAttr.equals(""))
+                {
+                    nonLocalised = n.getTextContent();
+                }
             }
         }
 
-        return null;
+        return nonLocalised;
     }
 
     private boolean hasAttribute(Element name, String typeAttr)
@@ -567,7 +331,7 @@ public class TokenDefinition {
         }
     }
 
-    public TokenDefinition(InputStream xmlAsset, Locale locale, ParseResult result) throws IOException, SAXException{
+    public TokenDefinition(InputStream xmlAsset, Locale locale, ParseResult result) throws IOException, SAXException {
         this.locale = locale;
         /* guard input from bad programs which creates Locale not following ISO 639 */
         if (locale.getLanguage().length() < 2 || locale.getLanguage().length() > 3) {
@@ -599,16 +363,24 @@ public class TokenDefinition {
             return;
         }
 
-        extractContracts(xml);
-        extractNameTag(xml);
-        checkGlobalAttributes(xml);
-        extractFeatureTag(xml);
-        extractSignedInfo(xml);
-        extractCards(xml);
-
-        //TODO: 'appearance' in XML needs to have an HTML attribute
-        extractTags(xml, "appearance", true);
-        extractTags(xml, "features", false);
+        try
+        {
+            extractContracts(xml);
+            extractNameTag(xml);
+            checkGlobalAttributes(xml);
+            extractFeatureTag(xml);
+            extractSignedInfo(xml);
+            extractCards(xml);
+        }
+        catch (IOException|SAXException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace(); //catch other type of exception not thrown by this function.
+            result.parseMessage(ParseResult.ParseResultId.PARSE_FAILED);
+        }
     }
 
     private void determineNamespace(Document xml, ParseResult result)
@@ -637,58 +409,108 @@ public class TokenDefinition {
         }
     }
 
-    //TODO: switch from hard-code to token parser
-    private void extractCards(Document xml)
+    private void extractCards(Document xml) throws Exception
     {
         NodeList nList = xml.getElementsByTagNameNS(nameSpace, "cards");
         if (nList.getLength() == 0) return;
         Element cards = (Element) nList.item(0);
         nList = cards.getElementsByTagNameNS(nameSpace, "token-card");
         if (nList.getLength() == 0) return;
-        Map<String, String> attributeSet = new ConcurrentHashMap<>();
-        addToHTMLSet(attributeSet, cards, "style");
-        addToHTMLSet(attributeSet, cards,"view-iconified");
-        addToHTMLSet(attributeSet, cards,"view");
+        Element viewRoot = (Element)nList.item(0);
+        Map<String, String> attributeSet = new HashMap<>();
+        addToHTMLSet(attributeSet, viewRoot, "style");
+        addToHTMLSet(attributeSet, viewRoot,"view-iconified");
+        addToHTMLSet(attributeSet, viewRoot,"view");
 
         if (attributeSet.size() > 0)
         {
             attributeSets.put("cards", attributeSet);
         }
 
-        nList = cards.getElementsByTagNameNS(nameSpace, "action");
-        if (nList.getLength() == 0) return;
-        Element action = (Element) nList.item(0);
-        TSAction tsAction = new TSAction();
-        //name (localised)
-        String name = getLocalisedString(action, "name");
-        tsAction.type = action.getAttribute("type");
-        //exclude
-        tsAction.exclude = "";
-        tsAction.view = "none";
-        nList = action.getElementsByTagNameNS(nameSpace, "exclude");
-        if (nList.getLength() > 0)
-        {
-            Element excludeNode = (Element) nList.item(0);
-            tsAction.exclude = excludeNode.getAttribute("selection");
-        }
-        Node viewNode = getLocalisedNode(action, "view");
-        Node styleNode = getNode(action, "style");
-        if (viewNode != null)
-        {
-            tsAction.view = getHTMLContent(viewNode);
-        }
-        if (styleNode != null)
-        {
-            tsAction.style = getHTMLContent(styleNode);
-        }
+        extractActions(cards);
+    }
 
-        actions.put(name, tsAction);
+    private void extractActions(Element cards) throws Exception
+    {
+        NodeList nList = cards.getElementsByTagNameNS(nameSpace, "action");
+        if (nList.getLength() == 0) return;
+        String name = null;
+        for (int i = 0; i < nList.getLength(); i++)
+        {
+            Element action = (Element) nList.item(i);
+            NodeList ll = action.getChildNodes();
+            TSAction tsAction = new TSAction();
+            tsAction.type = action.getAttribute("type");
+            tsAction.exclude = "";
+            tsAction.style = null;
+            for (int j = 0; j < ll.getLength(); j++)
+            {
+                Node node = ll.item(j);
+                switch (node.getNodeType())
+                {
+                    case Node.ELEMENT_NODE:
+                        Element element = (Element)node;
+                        switch (node.getLocalName())
+                        {
+                            case "name":
+                                System.out.println(node.getLocalName());
+                                name = getLocalisedString(element);
+                                break;
+                            case "attribute-type":
+                                AttributeType attr = new AttributeType(element, this);
+                                if (tsAction.attributeTypes == null) tsAction.attributeTypes = new HashMap<>();
+                                tsAction.attributeTypes.put(attr.id, attr);
+                                break;
+                            case "transaction":
+                                System.out.println(node.getLocalName());
+                                handleTransaction(tsAction, element);
+                                break;
+                            case "exclude":
+                                System.out.println(node.getLocalName());
+                                tsAction.exclude = element.getAttribute("selection");
+                                break;
+                            case "view":
+                                System.out.println(node.getLocalName());
+                                tsAction.view = getHTMLContent(element);
+                                break;
+                            case "style":
+                                System.out.println(node.getLocalName());
+                                tsAction.style = getHTMLContent(element);
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            actions.put(name, tsAction);
+        }
+    }
+
+    private void handleTransaction(TSAction tsAction, Element element)
+    {
+        for(Node node=element.getFirstChild(); node!=null; node=node.getNextSibling())
+        {
+            if (node.getNodeType() == Node.ELEMENT_NODE)
+            {
+                Element tx = (Element) node;
+                switch (tx.getLocalName())
+                {
+                    case "ethereum":
+                        tsAction.function = parseFunction(tx, Syntax.IA5String);
+                        tsAction.function.as = parseAs(tx);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
 
     private void addToHTMLSet(Map<String, String> attributeSet, Element root, String tagName)
     {
         Node view = getLocalisedNode(root, tagName);
-        if (view == null) view = getNode(root, tagName);
         if (view != null)
         {
             String iconifiedContent = getHTMLContent(view);
@@ -713,7 +535,7 @@ public class TokenDefinition {
 
     private void processAttrs(Node n)
     {
-        AttributeType attr = new AttributeType((Element) n);
+        AttributeType attr = new AttributeType((Element) n, this);
         if (attr.bitmask != null || attr.function != null)
         {
             attributeTypes.put(attr.id, attr);
@@ -901,7 +723,7 @@ public class TokenDefinition {
                 String networkStr = addressElement.getAttribute("network");
                 int network = 1;
                 if (networkStr != null) network = Integer.parseInt(networkStr);
-                String address = addressElement.getTextContent();
+                String address = addressElement.getTextContent().toLowerCase();
                 List<String> addresses = info.addresses.get(network);
                 if (addresses == null)
                 {
@@ -912,48 +734,6 @@ public class TokenDefinition {
                 if (!addresses.contains(address))
                 {
                     addresses.add(address);
-                }
-            }
-        }
-    }
-
-    private void extractTags(Document xml, String localName, boolean isHTML)
-    {
-        NodeList nList = xml.getElementsByTagNameNS(nameSpace, localName);
-        Element element = (Element) nList.item(0);
-
-        if (element != null)
-        {
-            Map<String, String> attributeSet = new ConcurrentHashMap<>();
-            attributeSets.put(localName, attributeSet);
-
-            //go through each child in this element looking for tags
-            for (int i = 0; i < element.getChildNodes().getLength(); i++)
-            {
-                Node node = element.getChildNodes().item(i);
-                switch (node.getNodeType())
-                {
-                    case Node.ATTRIBUTE_NODE:
-                        //System.out.println(node.getAttributes().toString());
-                        break;
-                    case Node.ELEMENT_NODE:
-                        String nodeName = node.getLocalName();
-                        if (attributeSet.containsKey(nodeName))
-                            continue;
-                        Node content = getLocalisedContent(element, nodeName);
-                        if (content != null)
-                        {
-                            String contentString;
-                            if (isHTML)
-                            {
-                                contentString = getHTMLContent(content)  ;
-                                attributeSet.put(nodeName, contentString);
-                            }
-                        }
-                        break;
-                    case Node.TEXT_NODE:
-                        //System.out.println(node.getTextContent());
-                        break;
                 }
             }
         }
@@ -1020,20 +800,84 @@ public class TokenDefinition {
         return sb.toString();
     }
 
-    /* take a token ID in byte-32, find all the fields in it and call back
-     * token.setField(fieldID, fieldName, text-value). This is abandoned
-     * temporarily for the need to retrofit the class with J.B.'s design */
+    public void parseField(BigInteger tokenId, NonFungibleToken token, Map<String, FunctionDefinition> functionMappings) {
+        for (String key : attributeTypes.keySet()) {
+            AttributeType attrtype = attributeTypes.get(key);
+            BigInteger val = BigInteger.ZERO;
+            try
+            {
+                if (attrtype.function != null && functionMappings != null)
+                {
+                    //obtain this value from the token function mappings
+                    FunctionDefinition functionDef = functionMappings.get(attrtype.function.method);
+                    String result = functionDef.result;
+                    System.out.println("Result: " + result);
+                    if (attrtype.syntax == Syntax.NumericString)
+                    {
+                        if (result.startsWith("0x")) result = result.substring(2);
+                        val = new BigInteger(result, 16);
+                    }
+                    token.setAttribute(attrtype.id,
+                                       new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, result));
+                }
+                else
+                {
+                    val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
+                    token.setAttribute(attrtype.id,
+                                       new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, attrtype.toString(val)));
+                }
+            }
+            catch (Exception e)
+            {
+                token.setAttribute(attrtype.id,
+                                   new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, "unsupported encoding"));
+            }
+        }
+    }
+
+    private void addFunctionInputs(FunctionDefinition fd, Element eth)
+    {
+        NodeList nList = eth.getElementsByTagNameNS(nameSpace, "inputs");
+        if (nList.getLength() == 0) return;
+        Element inputs = (Element) nList.item(0);
+
+        for(Node input=inputs.getFirstChild(); input!=null; input=input.getNextSibling())
+        {
+            if (input.getNodeType() == Node.ELEMENT_NODE)
+            {
+                Element inputElement = (Element) input;
+                MethodArg arg = new MethodArg();
+                arg.parameterType = input.getLocalName();
+                arg.ref = inputElement.getAttribute("ref");
+                arg.value = inputElement.getTextContent();
+                fd.parameters.add(arg);
+            }
+        }
+    }
 
     public void parseField(BigInteger tokenId, NonFungibleToken token) {
         for (String key : attributeTypes.keySet()) {
             AttributeType attrtype = attributeTypes.get(key);
-            BigInteger val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
-            try {
+            BigInteger val = BigInteger.ZERO;
+            try
+            {
+                if (attrtype.function != null)
+                {
+                    //obtain this from the function return, can't get it here
+                    token.setAttribute(attrtype.id,
+                                       new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, "unsupported encoding"));
+                }
+                else
+                {
+                    val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
+                    token.setAttribute(attrtype.id,
+                                       new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, attrtype.toString(val)));
+                }
+            }
+            catch (UnsupportedEncodingException e)
+            {
                 token.setAttribute(attrtype.id,
-                        new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, attrtype.toString(val)));
-            } catch (UnsupportedEncodingException e) {
-                token.setAttribute(attrtype.id,
-                        new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, "unsupported encoding"));
+                                   new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, "unsupported encoding"));
             }
         }
     }

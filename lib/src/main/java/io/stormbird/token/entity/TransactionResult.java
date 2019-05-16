@@ -1,4 +1,4 @@
-package io.stormbird.wallet.entity;
+package io.stormbird.token.entity;
 
 import java.math.BigInteger;
 
@@ -10,13 +10,15 @@ public class TransactionResult
 {
     public final BigInteger tokenId;
     public final String method;
-    public final Token token;
+    public final String contractAddress;
+    public final int contractChainId;
     public String result;
     public long resultTime;
 
-    public TransactionResult(Token token, BigInteger tokenId, String method)
+    public TransactionResult(int chainId, String address, BigInteger tokenId, String method)
     {
-        this.token = token;
+        this.contractAddress = address;
+        this.contractChainId = chainId;
         this.tokenId = tokenId;
         this.method = method;
         result = null;

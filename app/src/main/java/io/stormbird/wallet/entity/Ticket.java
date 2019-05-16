@@ -9,25 +9,20 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import io.reactivex.Observable;
-import io.stormbird.token.entity.FunctionDefinition;
+import io.stormbird.token.entity.*;
 import io.stormbird.token.util.DateTime;
 import io.stormbird.token.util.DateTimeFactory;
 
 import io.stormbird.wallet.interact.SetupTokensInteract;
-import io.stormbird.wallet.util.Utils;
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
-import io.stormbird.token.entity.NonFungibleToken;
-import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -35,8 +30,6 @@ import io.stormbird.wallet.ui.BaseActivity;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
 
-import static io.stormbird.wallet.interact.SetupTokensInteract.EXPIRED_CONTRACT;
-import static io.stormbird.wallet.interact.SetupTokensInteract.UNKNOWN_CONTRACT;
 import static io.stormbird.wallet.util.Utils.isAlNum;
 
 /**
@@ -80,6 +73,30 @@ public class Ticket extends Token implements Parcelable
                 balanceArray.add(val);
             }
         }
+        int tokenAuxCount = in.readInt();
+        if (tokenAuxCount > 0)
+        {
+            auxData = new HashMap<>();
+            for (int i = 0; i < tokenAuxCount; i++)
+            {
+                BigInteger key = new BigInteger(in.readString(), Character.MAX_RADIX);
+                int valueCount = in.readInt();
+                Map<String, FunctionDefinition> instance = new HashMap<>();
+                for (int j = 0; j < valueCount; j++)
+                {
+                    String method = in.readString();
+                    String result = in.readString();
+                    long readTime = in.readLong();
+                    FunctionDefinition fd = new FunctionDefinition();
+                    fd.method = method;
+                    fd.result = result;
+                    fd.resultTime = readTime;
+                    instance.put(method, fd);
+                }
+
+                auxData.put(key, instance);
+            }
+        }
     }
 
     @Override
@@ -116,6 +133,24 @@ public class Ticket extends Token implements Parcelable
         dest.writeInt(balanceArray.size());
         dest.writeInt(contractType.ordinal());
         if (balanceArray.size() > 0) dest.writeArray(balanceArray.toArray());
+        int size = (auxData == null ? 0 : auxData.size());
+        dest.writeInt(size);
+        if (auxData != null)
+        {
+            for (BigInteger key : auxData.keySet())
+            {
+                dest.writeString(key.toString(Character.MAX_RADIX));
+                Map<String, FunctionDefinition> instance = auxData.get(key);
+                dest.writeInt(instance.size());
+                for (String method : instance.keySet())
+                {
+                    dest.writeString(method);
+                    FunctionDefinition fd = instance.get(method);
+                    dest.writeString(fd.result);
+                    dest.writeLong(fd.resultTime);
+                }
+            }
+        }
     }
 
     /**
@@ -498,9 +533,10 @@ public class Ticket extends Token implements Parcelable
         if (numberOfTickets > 0)
         {
             BigInteger firstTicket = range.tokenIds.get(0);
-            NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(tokenInfo.chainId, range.contractAddress, firstTicket);
+            NonFungibleToken nonFungibleToken = assetService.getNonFungibleToken(this, range.contractAddress, firstTicket);
+            TokenScriptResult tsr = assetService.getTokenScriptResult(this, firstTicket);
 
-            String nameStr = getTokenTitle(nonFungibleToken);
+            String nameStr = getTokenTitle();
             String venueStr = (nonFungibleToken != null && nonFungibleToken.getAttribute("venue") != null)
                     ? nonFungibleToken.getAttribute("venue").text : "";
             String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
@@ -604,19 +640,6 @@ public class Ticket extends Token implements Parcelable
                 blankTicketExtra(activity);
             }
         }
-    }
-
-    @Override
-    public String getTokenTitle(NonFungibleToken nonFungibleToken)
-    {
-        String tokenTitle = getFullName();
-        if (nonFungibleToken != null && nonFungibleToken.getAttribute("category") != null)
-        {
-            String assetCategory = nonFungibleToken.getAttribute("category").text;
-            if (isAlNum(assetCategory)) tokenTitle = assetCategory;
-        }
-
-        return tokenTitle;
     }
 
     public void checkIsMatchedInXML(AssetDefinitionService assetService)
@@ -828,5 +851,12 @@ public class Ticket extends Token implements Parcelable
     {
         return Observable.fromIterable(getNonZeroArrayBalance())
                 .concatMap(tokenId -> setupTokensInteract.getContractResult(this, tokenId, fd));
+    }
+
+    @Override
+    public Map<String, FunctionDefinition> getTokenIdResults(BigInteger v)
+    {
+        if (auxData != null) return auxData.get(v);
+        else return null;
     }
 }

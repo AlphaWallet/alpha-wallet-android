@@ -14,17 +14,25 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.Ticket;
+import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.SetupTokensInteract;
-import io.stormbird.wallet.repository.TokenRepository;
+import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
+import io.stormbird.wallet.repository.entity.RealmAuxData;
 import io.stormbird.wallet.ui.HomeActivity;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.http.HttpService;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -37,11 +45,13 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import static android.os.FileObserver.ALL_EVENTS;
 import static io.stormbird.wallet.C.ADDED_TOKEN;
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
+import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 /**
  * AssetDefinitionService is the only place where we interface with XML files.
@@ -59,10 +69,15 @@ public class AssetDefinitionService implements ParseResult
     private Map<String, Long> assetChecked;                //Mapping of contract address to when they were last fetched from server
     private Map<Integer, List<String>> devOverrideContracts;             //List of contract addresses which have been overridden by definition in developer folder
     private FileObserver fileObserver;                     //Observer which scans the override directory waiting for file change
-    private final NotificationService notificationService;
     private Map<String, String> fileHashes;                //Mapping of files and hashes.
 
-    public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs)
+    private final NotificationService notificationService;
+    private final RealmManager realmManager;
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private Web3j web3j;
+    private int web3ChainId;
+
+    public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs, RealmManager rm, EthereumNetworkRepositoryType eth)
     {
         context = ctx;
         okHttpClient = client;
@@ -70,6 +85,9 @@ public class AssetDefinitionService implements ParseResult
         devOverrideContracts = new ConcurrentHashMap<>();
         fileHashes = new ConcurrentHashMap<>();
         notificationService = svs;
+        realmManager = rm;
+        ethereumNetworkRepository = eth;
+        web3ChainId = 0;
 
         loadLocalContracts();
     }
@@ -96,17 +114,285 @@ public class AssetDefinitionService implements ParseResult
      * @param v
      * @return
      */
-    public NonFungibleToken getNonFungibleToken(int chainId, String contractAddress, BigInteger v)
+    public NonFungibleToken getNonFungibleToken(Token token, String contractAddress, BigInteger v)
     {
-        TokenDefinition definition = getAssetDefinition(chainId, contractAddress);
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, contractAddress);
         if (definition != null)
         {
-            return new NonFungibleToken(v, definition);
+            Map<String, FunctionDefinition> tokenIdResults = token.getTokenIdResults(v);
+            return new NonFungibleToken(v, definition, tokenIdResults);
         }
         else
         {
             return null;
         }
+    }
+
+    public TokenScriptResult getTokenScriptResult(Token token)
+    {
+        return getTokenScriptResult(token, BigInteger.ZERO);
+    }
+
+    public List<AttributeType> getAttrs(Token token)
+    {
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        if (definition != null)
+        {
+            return new ArrayList<>(definition.attributeTypes.values());
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public Observable<TokenScriptResult.Attribute> getTokenScriptResultR(Token token, BigInteger tokenId)
+    {
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        if (definition == null) return Observable.fromCallable(() -> null);
+        List<AttributeType> attrs = new ArrayList<>(definition.attributeTypes.values());
+
+        return Observable.fromIterable(attrs)
+                .flatMap(attr -> fetchAttrResult(attr, tokenId, token));
+    }
+
+    private Observable<TokenScriptResult.Attribute> staticAttribute(AttributeType attr, BigInteger tokenId)
+    {
+        return Observable.fromCallable(() -> {
+            try
+            {
+                BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
+                return new TokenScriptResult.Attribute(attr.id, attr.name, val, attr.toString(val));
+            }
+            catch (Exception e)
+            {
+                return new TokenScriptResult.Attribute(attr.id, attr.name, tokenId, "unsupported encoding");
+            }
+        });
+    }
+
+    public Observable<TokenScriptResult.Attribute> fetchAttrResult(AttributeType attr, BigInteger tokenId, Token token)
+    {
+        if (attr.function == null)
+        {
+            return staticAttribute(attr, tokenId);
+        }
+        else
+        {
+            ContractAddress contract;
+            List<String> contracts = attr.function.contract.addresses.get(token.tokenInfo.chainId);
+            if (contracts.contains(token.tokenInfo.address))
+            {
+                contract = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
+            }
+            else
+            {
+                contract = getFromContracts(attr.function.contract.addresses);
+            }
+            if (contract == null) return Observable.fromCallable(() -> null);
+            FunctionDefinition functionDef = getFunctionResult(token.getWallet(), contract, attr.function.method, tokenId);
+            if (functionDef == null)
+            {
+                return fetchResultFromEthereum(token.getWallet(), contract, attr, tokenId);
+            }
+            else
+            {
+                return resultFromDatabase(functionDef, attr);
+            }
+        }
+    }
+
+    /**
+     * Haven't pre-cached this value yet, so need to fetch it before we can proceed
+     * @param wallet
+     * @param contract
+     * @param attr
+     * @param tokenId
+     * @return
+     */
+    private Observable<TokenScriptResult.Attribute> fetchResultFromEthereum(String wallet, ContractAddress contract, AttributeType attr, BigInteger tokenId)
+    {
+        return Observable.fromCallable(() -> {
+            // 1: create transaction call
+            org.web3j.abi.datatypes.Function transaction = attr.function.generateTransactionFunction(wallet, tokenId);
+            // 2: create web3 connection
+            if (web3ChainId != contract.chainId)
+            {
+                OkHttpClient okClient = new OkHttpClient.Builder()
+                        .connectTimeout(5, TimeUnit.SECONDS)
+                        .readTimeout(5, TimeUnit.SECONDS)
+                        .writeTimeout(5, TimeUnit.SECONDS)
+                        .retryOnConnectionFailure(false)
+                        .build();
+
+                HttpService nodeService = new HttpService(ethereumNetworkRepository.getNetworkByChain(contract.chainId).rpcServerUrl, okClient, false);
+
+                web3j = Web3j.build(nodeService);
+                web3ChainId = contract.chainId;
+            }
+            //now push the transaction
+            String result = callSmartContractFunction(transaction, contract.address, new Wallet(wallet));
+            TransactionResult transactionResult = new TransactionResult(contract.chainId, contract.address, tokenId, attr.function.method);
+
+            attr.function.handleTransactionResult(transactionResult, transaction, result);
+
+            String res = transactionResult.result;
+            BigInteger val = tokenId;
+            if (attr.syntax == TokenDefinition.Syntax.NumericString)
+            {
+                if (transactionResult.result.startsWith("0x"))
+                    res = res.substring(2);
+                val = new BigInteger(res, 16);
+            }
+            return new TokenScriptResult.Attribute(attr.id, attr.name, val, res);
+        });
+    }
+
+    private String callSmartContractFunction(
+            Function function, String contractAddress, Wallet wallet) throws Exception {
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        try
+        {
+            org.web3j.protocol.core.methods.request.Transaction transaction
+                    = createEthCallTransaction(wallet.address, contractAddress, encodedFunction);
+            EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+
+            return response.getValue();
+        }
+        catch (IOException e) //this call is expected to be interrupted when user switches network or wallet
+        {
+            return null;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private Observable<TokenScriptResult.Attribute> resultFromDatabase(FunctionDefinition functionDef, AttributeType attr)
+    {
+        return Observable.fromCallable(() -> {
+            String res = functionDef.result;
+            BigInteger val = BigInteger.ZERO;
+            if (attr.syntax == TokenDefinition.Syntax.NumericString)
+            {
+                if (res.startsWith("0x"))
+                    res = res.substring(2);
+                val = new BigInteger(res, 16);
+            }
+            return new TokenScriptResult.Attribute(attr.id, attr.name, val, res);
+        });
+    }
+
+    public int getAttrCount(Token token)
+    {
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        return definition.attributeTypes.size();
+    }
+
+    public TokenScriptResult getTokenScriptResult(Token token, BigInteger tokenId)
+    {
+        TokenScriptResult result = new TokenScriptResult();
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        if (definition != null)
+        {
+            //use a stream to get the result here
+            for (String key : definition.attributeTypes.keySet()) {
+                AttributeType attrtype = definition.attributeTypes.get(key);
+                ContractAddress contract;
+
+                try
+                {
+                    BigInteger val = tokenId;
+                    if (attrtype.function != null)
+                    {
+                        //determine contract address
+                        List<String> contracts = attrtype.function.contract.addresses.get(token.tokenInfo.chainId);
+                        if (contracts.contains(token.tokenInfo.address))
+                        {
+                            contract = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
+                        }
+                        else
+                        {
+                            contract = getFromContracts(attrtype.function.contract.addresses);
+                        }
+
+                        if (contract == null)
+                            continue;
+                        FunctionDefinition functionDef = getFunctionResult(token.getWallet(), contract, attrtype.function.method, tokenId); //t.getTokenIdResults(BigInteger.ZERO);
+                        String res = functionDef.result;
+                        if (attrtype.syntax == TokenDefinition.Syntax.NumericString)
+                        {
+                            if (res.startsWith("0x"))
+                                res = res.substring(2);
+                            val = new BigInteger(res, 16);
+                        }
+                        result.setAttribute(attrtype.id,
+                                           new TokenScriptResult.Attribute(attrtype.id, attrtype.name, val, res));
+                    }
+                    else
+                    {
+                        val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
+                        result.setAttribute(attrtype.id,
+                                           new TokenScriptResult.Attribute(attrtype.id, attrtype.name, val, attrtype.toString(val)));
+                    }
+                }
+                catch (Exception e)
+                {
+                    result.setAttribute(attrtype.id,
+                                       new TokenScriptResult.Attribute(attrtype.id, attrtype.name, tokenId, "unsupported encoding"));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private ContractAddress getFromContracts(Map<Integer, List<String>> addresses)
+    {
+        for (int chainId : addresses.keySet())
+        {
+            for (String addr : addresses.get(chainId))
+            {
+                return new ContractAddress(chainId, addr);
+            }
+        }
+
+        return null;
+    }
+
+    private Token getTokenFromContracts(TokensService service, Map<Integer, List<String>> addresses)
+    {
+        Token t = null;
+        for (int chainId : addresses.keySet())
+        {
+            for (String addr : addresses.get(chainId))
+            {
+                t = service.getToken(chainId, addr);
+                if (t != null) return t;
+            }
+        }
+
+        return null;
+    }
+
+    private String getContractNameFromDefiniton(Token token, TokenDefinition def)
+    {
+        for (String key : def.contracts.keySet())
+        {
+            ContractInfo info = def.contracts.get(key);
+            for (String addr : info.addresses.get(token.tokenInfo.chainId))
+            {
+                if (addr.equals(token.tokenInfo.address))
+                {
+                    return key;
+                }
+            }
+        }
+
+        return "";
     }
 
     /**
@@ -242,10 +528,6 @@ public class AssetDefinitionService implements ParseResult
 
     private TokenDefinition loadTokenDefinition(String address)
     {
-        if (address.contains("entry2"))
-        {
-            System.out.println("yoless");
-        }
         TokenDefinition definition = null;
         File xmlFile = getXMLFile(address.toLowerCase());
         try
@@ -646,46 +928,10 @@ public class AssetDefinitionService implements ParseResult
         assetChecked.clear();
     }
 
-    public boolean hasIFrame(int chainId, String contractAddr)
-    {
-        boolean hasIframe = false;
-        TokenDefinition td = getAssetDefinition(chainId, contractAddr);
-        if (td != null && td.attributeSets.containsKey("appearance"))
-        {
-            hasIframe = true;
-        }
-
-        return hasIframe;
-    }
-
     public boolean hasTokenView(int chainId, String contractAddr)
     {
         TokenDefinition td = getAssetDefinition(chainId, contractAddr);
         return (td != null && td.attributeSets.containsKey("cards"));
-    }
-
-    public String getIntroductionCode(int chainId, String contractAddr)
-    {
-        String appearance = "";
-        TokenDefinition td = getAssetDefinition(chainId, contractAddr);
-        if (td != null && td.attributeSets.containsKey("appearance"))
-        {
-            appearance = td.getAppearance("introduction");
-        }
-
-        return appearance;
-    }
-
-    public String getInstructionCode(int chainId, String contractAddr)
-    {
-        String appearance = "";
-        TokenDefinition td = getAssetDefinition(chainId, contractAddr);
-        if (td != null && td.attributeSets.containsKey("appearance"))
-        {
-            appearance = td.getAppearance("instruction");
-        }
-
-        return appearance;
     }
 
     public String getTokenView(int chainId, String contractAddr, String type)
@@ -728,6 +974,13 @@ public class AssetDefinitionService implements ParseResult
         {
             return null;
         }
+    }
+
+    public boolean hasAction(int chainId, String contractAddr)
+    {
+        TokenDefinition td = getAssetDefinition(chainId, contractAddr);
+        if (td != null && td.actions != null && td.actions.size() > 0) return true;
+        else return false;
     }
 
     @Override
@@ -830,6 +1083,7 @@ public class AssetDefinitionService implements ParseResult
 
     public Single<List<Token>> checkEthereumFunctions(SetupTokensInteract setupTokensInteract, TokensService tokensService)
     {
+        //this.tokensInteract = setupTokensInteract;
         return Single.fromCallable(() -> {
             List<Token> updatedTokens = new ArrayList<>();
             for (int network : assetDefinitions.keySet())
@@ -837,6 +1091,16 @@ public class AssetDefinitionService implements ParseResult
                 Map<String, TokenDefinition> defMap = assetDefinitions.get(network);
                 for (TokenDefinition td : defMap.values())
                 {
+//                    //need to go through all attribute-types and solve for each
+//                    for (String key : td.attributeTypes.keySet()) {
+//                        AttributeType attrtype = td.attributeTypes.get(key);
+//                        BigInteger val = BigInteger.ZERO;
+//                        if (attrtype.function != null)
+//                        {
+//                            //try to determine the value for this
+//                        }
+//
+
                     List<FunctionDefinition> fdList = td.getFunctionData();
                     for (FunctionDefinition fd : fdList)
                     {
@@ -861,5 +1125,38 @@ public class AssetDefinitionService implements ParseResult
             }
             return updatedTokens;
         });
+    }
+
+
+    //Database functions
+
+    private String functionKey(ContractAddress cAddr, BigInteger tokenId, String method)
+    {
+        //produce a unique key for this. token address, token Id, chainId
+        return cAddr.address + "-" + tokenId.toString(Character.MAX_RADIX) + "-" + cAddr.chainId + "-" + method;
+    }
+
+    public FunctionDefinition getFunctionResult(String walletAddress, ContractAddress contract, String method, BigInteger tokenId)
+    {
+        FunctionDefinition fd = null;
+        try (Realm realm = realmManager.getAuxRealmInstance(walletAddress)) {
+            RealmAuxData realmToken = realm.where(RealmAuxData.class)
+                    .equalTo("instanceKey", functionKey(contract, tokenId, method))
+                    .equalTo("chainId", contract.chainId)
+                    .findFirst();
+
+            if (realmToken != null)
+            {
+                fd = new FunctionDefinition();
+                fd.method = method;
+                fd.resultTime = realmToken.getResultTime();
+                fd.result = realmToken.getResult();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return fd;
     }
 }

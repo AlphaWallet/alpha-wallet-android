@@ -116,18 +116,10 @@ public class JsInjectorClient {
         return injectJS(html, js);
     }
 
-    String injectWeb3TokenScript(Context ctx, String view)
-    {
-        String initSrc = loadFile(ctx, R.raw.init_action);
-        initSrc = String.format(initSrc, walletAddress, MagicLinkInfo.getNodeURLByNetworkId(chainId), chainId);
-        //now insert this source into the view
-        return injectJSembed(view, initSrc);
-    }
-
     String injectWeb3TokenInit(Context ctx, String view, String tokenContent)
     {
         String initSrc = loadFile(ctx, R.raw.init_token);
-        initSrc = String.format(initSrc, tokenContent, walletAddress);
+        initSrc = String.format(initSrc, tokenContent, walletAddress, MagicLinkInfo.getNodeURLByNetworkId(chainId), chainId);
         //now insert this source into the view
         return injectJSembed(view, initSrc);
     }
@@ -143,7 +135,7 @@ public class JsInjectorClient {
             return html;
         }
         int position = getInjectionPosition(html);
-        if (position > 0) {
+        if (position >= 0) {
             String beforeTag = html.substring(0, position);
             String afterTab = html.substring(position);
             return beforeTag + js + afterTab;

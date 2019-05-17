@@ -145,9 +145,10 @@ public class ParseMagicLink
     {
         MagicLinkData data = new MagicLinkData();
         data.chainId = chainId;
-        byte[] fullOrder = cryptoInterface.Base64Decode(linkData);
+
         try
         {
+            byte[] fullOrder = cryptoInterface.Base64Decode(linkData);
             ByteArrayInputStream bas = new ByteArrayInputStream(fullOrder);
             EthereumReadBuffer ds = new EthereumReadBuffer(bas);
             data.contractType = ds.readByte();

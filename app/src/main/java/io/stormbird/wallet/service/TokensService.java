@@ -20,7 +20,6 @@ public class TokensService
 {
     private final Map<String, SparseArray<Token>> tokenMap = new ConcurrentHashMap<>();
     private static final Map<String, SparseArray<ContractType>> interfaceSpecMap = new ConcurrentHashMap<>();
-    private final Map<Integer, Token> currencies = new ConcurrentHashMap<>();
     private String currentAddress = null;
     private boolean loaded;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -57,15 +56,7 @@ public class TokensService
                 transactionUpdateQueue.add(t);
             }
 
-            if (t.isEthereum())
-            {
-                currencies.put(t.tokenInfo.chainId, t);
-                //if (t.tokenInfo.chainId == 1) addToken(1, t);
-            }
-            else
-            {
-                addToken(t.tokenInfo.chainId, t);
-            }
+            addToken(t.tokenInfo.chainId, t);
             return t;
         }
         else
@@ -82,15 +73,16 @@ public class TokensService
         if (tokenAddr == null)
         {
             tokenAddr = new SparseArray<>(1);
+            tokenMap.put(t.getAddress(), tokenAddr);
         }
-        else
+        else if (tokenAddr.get(chainId) == null)
         {
             SparseArray<Token> replacementArray = new SparseArray<>(tokenAddr.size() + 1);
             for (int i = 0; i < tokenAddr.size(); i++) replacementArray.put(tokenAddr.keyAt(i), tokenAddr.valueAt(i));
             tokenAddr = replacementArray;
+            tokenMap.put(t.getAddress(), tokenAddr);
         }
 
-        tokenMap.put(t.getAddress(), tokenAddr);
         tokenAddr.put(chainId, t);
         setSpec(t);
     }
@@ -109,16 +101,9 @@ public class TokensService
 
     public Token getToken(int chainId, String addr)
     {
-        if (addr != null)
+        if (addr != null && tokenMap.containsKey(addr.toLowerCase()))
         {
-            if (addr.equalsIgnoreCase(currentAddress))
-            {
-                return currencies.get(chainId);
-            }
-            else if (tokenMap.containsKey(addr.toLowerCase()))
-            {
-                return tokenMap.get(addr.toLowerCase()).get(chainId, null);
-            }
+            return tokenMap.get(addr.toLowerCase()).get(chainId, null);
         }
 
         return null;
@@ -178,7 +163,6 @@ public class TokensService
     public void clearTokens()
     {
         currentAddress = "";
-        currencies.clear();
         tokenMap.clear();
         transactionUpdateQueue.clear();
         balanceUpdateQueue.clear();
@@ -198,6 +182,7 @@ public class TokensService
     private List<Token> getAllAtAddress(String addr)
     {
         List<Token> tokens = new ArrayList<>();
+        if (addr == null) return tokens;
         SparseArray<Token> locals = tokenMap.get(addr);
         if (locals != null)
         {
@@ -210,14 +195,14 @@ public class TokensService
         return tokens;
     }
 
+    /**
+     * Return all tokens after applying the networkId filters
+     *
+     * @return list of network filtered tokens
+     */
     public List<Token> getAllLiveTokens()
     {
         List<Token> tokens = new ArrayList<>();
-        for (Integer chainId : currencies.keySet())
-        {
-            if (networkFilter.contains(chainId)) tokens.add(currencies.get(chainId));
-        }
-
         for (String addr : tokenMap.keySet())
         {
             List<Token> chainTokens = getAllAtAddress(addr);
@@ -293,12 +278,16 @@ public class TokensService
     {
         networkFilter.clear();
         networkFilter.addAll(ethereumNetworkRepository.getFilterNetworkList());
+
+        //after a filter change, ensure the base currency is checked and displayed first
+        List<Token> baseCurrencies = getAllAtAddress(currentAddress);
+        for (Token base : baseCurrencies) base.balanceUpdatePressure += 20.0f;
     }
 
     public ContractType getInterfaceSpec(int chainId, String address)
     {
         SparseArray<ContractType> types = interfaceSpecMap.get(address);
-        ContractType result = types != null ? result = types.get(chainId) : ContractType.OTHER;
+        ContractType result = types != null ? types.get(chainId) : ContractType.OTHER;
 
         if (result == ContractType.OTHER && tokenMap.containsKey(address))
         {
@@ -316,7 +305,7 @@ public class TokensService
         return result;
     }
 
-    public List<Token> getAllClass(int chainId, Class<?> tokenClass)
+    private List<Token> getAllClass(int chainId, Class<?> tokenClass)
     {
         List<Token> classTokens = new ArrayList<>();
         for (Token t : getAllTokens())
@@ -327,17 +316,6 @@ public class TokensService
             }
         }
         return classTokens;
-    }
-
-    public void clearBalanceOf(Class<?> tokenClass)
-    {
-        for (Token t : getAllTokens())
-        {
-            if (tokenClass.isInstance(t))
-            {
-                ((ERC721Token)t).tokenBalance.clear();
-            }
-        }
     }
 
     /**
@@ -378,17 +356,6 @@ public class TokensService
         return openSeaRefreshTokens.toArray(new Token[0]);
     }
 
-    private List<String> getAddresses(Token[] tokens)
-    {
-        List<String> addresses = new ArrayList<>();
-        for (Token t : tokens)
-        {
-            addresses.add(t.getAddress());
-        }
-
-        return addresses;
-    }
-
     public void updateTokenPressure(boolean isVisible)
     {
         //get all tokens
@@ -398,6 +365,7 @@ public class TokensService
 
         for (Token t : allTokens)
         {
+            if (t == null) continue;
             if (t.balanceUpdatePressure > highestPressure)
             {
                 highestPressureToken = t;
@@ -455,30 +423,4 @@ public class TokensService
             t.balanceUpdatePressure += (float)(Math.random()*15.0f);
         }
     }
-
-    //    public long getLastTransactionFetch(int chainId, String address)
-//    {
-//        SparseLongArray chainMap = transactionUpdateMap.get(address);
-//        if (chainMap == null)
-//        {
-//            chainMap = new SparseLongArray();
-//            transactionUpdateMap.put(address, chainMap);
-//        }
-//
-//        long value = chainMap.valueAt(chainId);
-//
-//        return value;
-//    }
-//
-//    public void setNextTransactionFetch(int chainId, String address, long updateTime)
-//    {
-//        SparseLongArray chainMap = transactionUpdateMap.get(address);
-//        if (chainMap == null)
-//        {
-//            chainMap = new SparseLongArray();
-//            transactionUpdateMap.put(address, chainMap);
-//        }
-//
-//        chainMap.put(chainId, updateTime);
-//    }
 }

@@ -43,6 +43,8 @@ import java.math.RoundingMode;
 
 import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.wallet.C.Key.WALLET;
+import static io.stormbird.wallet.ui.zxing.QRScanningActivity.DENY_PERMISSION;
+import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 
 public class SendActivity extends BaseActivity implements Runnable, ItemClickListener, AmountUpdateCallback {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
@@ -213,51 +215,71 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == BARCODE_READER_REQUEST_CODE) {
-            if (resultCode == FullScannerFragment.SUCCESS) {
-                if (data != null) {
-                    String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+            switch (resultCode)
+            {
+                case FullScannerFragment.SUCCESS:
+                    if (data != null) {
+                        String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
 
-                    //if barcode is still null, ensure we don't GPF
-                    if (barcode == null) {
-                        //Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
-                        displayScanError();
-                        return;
-                    }
-
-                    QRURLParser parser = QRURLParser.getInstance();
-                    QrUrlResult result = parser.parse(barcode);
-                    String extracted_address = null;
-                    if (result != null)
-                    {
-                        extracted_address = result.getAddress();
-                        switch (result.getProtocol())
-                        {
-                            case "address":
-                                break;
-                            case "ethereum":
-                                //EIP681 protocol
-                                validateEIP681Request(result);
-                                break;
-                            default:
-                                break;
+                        //if barcode is still null, ensure we don't GPF
+                        if (barcode == null) {
+                            //Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
+                            displayScanError();
+                            return;
                         }
 
-                        toAddressEditText.setText(extracted_address);
-                    }
+                        QRURLParser parser = QRURLParser.getInstance();
+                        QrUrlResult result = parser.parse(barcode);
+                        String extracted_address = null;
+                        if (result != null)
+                        {
+                            extracted_address = result.getAddress();
+                            switch (result.getProtocol())
+                            {
+                                case "address":
+                                    break;
+                                case "ethereum":
+                                    //EIP681 protocol
+                                    validateEIP681Request(result);
+                                    break;
+                                default:
+                                    break;
+                            }
 
-                    if (extracted_address == null)
-                    {
-                        displayScanError();
+                            toAddressEditText.setText(extracted_address);
+                        }
+
+                        if (extracted_address == null)
+                        {
+                            displayScanError();
+                        }
                     }
-                }
-            } else {
-                Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                        "Code: " + String.valueOf(resultCode)
-                ));
+                    break;
+                case DENY_PERMISSION:
+                    showCameraDenied();
+                    break;
+                default:
+                    Log.e("SEND", String.format(getString(R.string.barcode_error_format),
+                                                "Code: " + String.valueOf(resultCode)
+                    ));
+                    break;
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void showCameraDenied()
+    {
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.title_dialog_error);
+        dialog.setMessage(R.string.error_camera_permission_denied);
+        dialog.setIcon(ERROR);
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
     }
 
     private void validateEIP681Request(QrUrlResult result)

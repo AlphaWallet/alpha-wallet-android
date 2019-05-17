@@ -71,6 +71,8 @@ import io.stormbird.wallet.widget.SignMessageDialog;
 import static io.stormbird.wallet.C.RESET_TOOLBAR;
 import static io.stormbird.wallet.C.RESET_WALLET;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
+import static io.stormbird.wallet.ui.zxing.QRScanningActivity.DENY_PERMISSION;
+import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 
 public class DappBrowserFragment extends Fragment implements
         OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
@@ -772,22 +774,31 @@ public class DappBrowserFragment extends Fragment implements
         String qrCode = null;
         try
         {
-            if (resultCode == FullScannerFragment.SUCCESS && data != null)
+            switch (resultCode)
             {
-                qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
-            }
-
-            if (qrCode != null && !checkForMagicLink(qrCode))
-            {
-                if (Utils.isAddressValid(qrCode))
-                {
-                    DisplayAddressFound(qrCode, messenger);
-                }
-                else
-                {
-                    //attempt to go to site
-                    loadUrl(qrCode);
-                }
+                case FullScannerFragment.SUCCESS:
+                    if (data != null)
+                    {
+                        qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+                        if (qrCode != null && !checkForMagicLink(qrCode))
+                        {
+                            if (Utils.isAddressValid(qrCode))
+                            {
+                                DisplayAddressFound(qrCode, messenger);
+                            }
+                            else
+                            {
+                                //attempt to go to site
+                                loadUrl(qrCode);
+                            }
+                        }
+                    }
+                    break;
+                case DENY_PERMISSION:
+                    showCameraDenied();
+                    break;
+                default:
+                    break;
             }
         }
         catch (Exception e)
@@ -801,6 +812,18 @@ public class DappBrowserFragment extends Fragment implements
         }
     }
 
+    private void showCameraDenied()
+    {
+        resultDialog = new AWalletAlertDialog(getActivity());
+        resultDialog.setTitle(R.string.title_dialog_error);
+        resultDialog.setMessage(R.string.error_camera_permission_denied);
+        resultDialog.setIcon(ERROR);
+        resultDialog.setButtonText(R.string.button_ok);
+        resultDialog.setButtonListener(v -> {
+            resultDialog.dismiss();
+        });
+        resultDialog.show();
+    }
 
     private boolean checkForMagicLink(String data)
     {

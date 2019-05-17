@@ -333,4 +333,5 @@
     <string name="search_or_type_web_address">Search or type web address</string>
     <string name="network">Network</string>
     <string name="collectibles">Collectibles</string>
+    <string name="error_camera_permission_denied">Permission to use the camera was denied.</string>
 </resources>

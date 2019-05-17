@@ -39,6 +39,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static io.stormbird.wallet.C.ADDED_TOKEN;
+import static io.stormbird.wallet.ui.zxing.QRScanningActivity.DENY_PERMISSION;
+import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 public class AddTokenActivity extends BaseActivity implements View.OnClickListener {
@@ -56,7 +58,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     public TextView date;
     public TextView price;
 
-    private Dialog dialog;
+    private AWalletAlertDialog dialog;
     private String lastCheck;
 
     LinearLayout progressLayout;
@@ -166,49 +168,69 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == InputAddressView.BARCODE_READER_REQUEST_CODE) {
-            if (resultCode == FullScannerFragment.SUCCESS) {
-                if (data != null) {
-                    String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+            switch (resultCode)
+            {
+                case FullScannerFragment.SUCCESS:
+                    if (data != null) {
+                        String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
 
-                    QRURLParser parser = QRURLParser.getInstance();
-                    QrUrlResult result = parser.parse(barcode);
+                        QRURLParser parser = QRURLParser.getInstance();
+                        QrUrlResult result = parser.parse(barcode);
 
-                    String extracted_address = null;
+                        String extracted_address = null;
 
-                    if (result != null)
-                    {
-                        extracted_address = result.getAddress();
-                        switch (result.getProtocol())
+                        if (result != null)
                         {
-                            case "address":
-                                break;
-                            case "ethereum":
-                                //EIP681 protocol
-                                if (result.chainId != 0 && extracted_address != null)
-                                {
-                                    //this is a payment request
-                                    finishAndLaunchSend(result);
-                                }
-                                break;
-                            default:
-                                break;
+                            extracted_address = result.getAddress();
+                            switch (result.getProtocol())
+                            {
+                                case "address":
+                                    break;
+                                case "ethereum":
+                                    //EIP681 protocol
+                                    if (result.chainId != 0 && extracted_address != null)
+                                    {
+                                        //this is a payment request
+                                        finishAndLaunchSend(result);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
-                    }
 
-                    if (extracted_address == null) {
-                        Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
-                        return;
+                        if (extracted_address == null) {
+                            Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        inputAddressView.setAddress(extracted_address);
                     }
-                    inputAddressView.setAddress(extracted_address);
-                }
-            } else {
-                Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                        "Code: " + String.valueOf(resultCode)
-                        ));
+                    break;
+                case DENY_PERMISSION:
+                    showCameraDenied();
+                    break;
+                default:
+                    Log.e("SEND", String.format(getString(R.string.barcode_error_format),
+                                                "Code: " + String.valueOf(resultCode)
+                    ));
+                    break;
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void showCameraDenied()
+    {
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.title_dialog_error);
+        dialog.setMessage(R.string.error_camera_permission_denied);
+        dialog.setIcon(ERROR);
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+                                     dialog.dismiss();
+                                 });
+        dialog.show();
     }
 
     private void finishAndLaunchSend(QrUrlResult result)
@@ -243,11 +265,14 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {
-        dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.title_dialog_error)
-                .setMessage(R.string.error_add_token)
-                .setPositiveButton(R.string.try_again, null)
-                .create();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.title_dialog_error);
+        dialog.setMessage(R.string.error_add_token);
+        dialog.setIcon(ERROR);
+        dialog.setButtonText(R.string.try_again);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
         dialog.show();
     }
 

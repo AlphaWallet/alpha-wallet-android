@@ -14,13 +14,21 @@ public class TransactionResult
     public final int contractChainId;
     public String result;
     public long resultTime;
+    public final String attrId;
 
-    public TransactionResult(int chainId, String address, BigInteger tokenId, String method)
+    public TransactionResult(int chainId, String address, BigInteger tokenId, AttributeType attr)
     {
         this.contractAddress = address;
         this.contractChainId = chainId;
         this.tokenId = tokenId;
-        this.method = method;
+        this.method = attr.function.method;
+        this.attrId = attr.id;
         result = null;
+        resultTime = 0;
+    }
+
+    public boolean needsUpdating()
+    {
+        return ((System.currentTimeMillis() - resultTime) > 60 * 1000 * 10); //10 minutes: TODO: determine this from function volatility hint
     }
 }

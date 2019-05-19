@@ -2,6 +2,7 @@ package io.stormbird.wallet.ui.zxing;
 
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -13,6 +14,7 @@ import io.stormbird.wallet.ui.BaseActivity;
 public class QRScanningActivity extends BaseActivity
 {
     private static final int RC_HANDLE_CAMERA_PERM = 2;
+    public static final int DENY_PERMISSION = 1;
 
     @Override
     public void onCreate(Bundle state)
@@ -34,11 +36,7 @@ public class QRScanningActivity extends BaseActivity
         Log.w("QR SCanner", "Camera permission is not granted. Requesting permission");
 
         final String[] permissions = new String[]{Manifest.permission.CAMERA};
-
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
-                                                                 Manifest.permission.CAMERA)) {
-            ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM);
-        }
+        ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM); //always ask for permission to scan
     }
 
     @Override
@@ -64,8 +62,11 @@ public class QRScanningActivity extends BaseActivity
             }
         }
 
+        // Handle deny permission
         if (!handled)
         {
+            Intent intent = new Intent();
+            setResult(DENY_PERMISSION, intent);
             finish();
         }
     }

@@ -8,9 +8,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import dagger.android.AndroidInjection;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TSAction;
+import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.entity.TokenScriptResult;
 import io.stormbird.token.util.DateTime;
 import io.stormbird.token.util.DateTimeFactory;
@@ -48,12 +52,15 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
     private Token token;
     private Handler handler;
     private Web3TokenView tokenView;
+    private ProgressBar waitSpinner;
     private List<BigInteger> idList = null;
+    private StringBuilder attrs;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
         String displayIds = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
         tokenView = findViewById(R.id.web3_tokenview);
+        waitSpinner = findViewById(R.id.progress_element);
         if (token instanceof Ticket) //TODO: NFT flag
         {
             idList = token.stringHexToBigIntegerList(displayIds);
@@ -66,13 +73,9 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
 
         try
         {
-            String tokenAttrs = buildTokenAttrs(idList);
-            String view = viewModel.getAssetDefinitionService().getTokenView(token.tokenInfo.chainId, token.getAddress(), "view");
-            String style = viewModel.getAssetDefinitionService().getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
-            String viewData = tokenView.injectWeb3TokenInit(this, view, tokenAttrs);
-            viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
-
-            tokenView.loadData(viewData, "text/html", "utf-8");
+            waitSpinner.setVisibility(View.VISIBLE);
+            tokenView.setVisibility(View.GONE);
+            getAttrs(idList);
         }
         catch (Exception e)
         {
@@ -164,7 +167,7 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
                 else
                 {
                     String buttonText = ((Button) v).getText().toString();
-                    viewModel.showFunction(this, token, buttonText);
+                    viewModel.showFunction(this, token, buttonText, idList);
                 }
             }
             break;
@@ -193,47 +196,45 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
         tokenView.callToJS("refresh()");
     }
 
-    private String buildTokenAttrs(List<BigInteger> tokenId) throws Exception
+    private void getAttrs(List<BigInteger> tokenIds) throws Exception
     {
-        if (tokenId == null) return "";
-        //NonFungibleToken nft = viewModel.getAssetDefinitionService().getNonFungibleToken(token, token.getAddress(), tokenId.get(0));
-        TokenScriptResult tsr = viewModel.getTokenScriptResult(token, tokenId.get(0));
-        StringBuilder attrs = new StringBuilder();
-        addPair(attrs, "name", token.getTokenTitle());
-        addPair(attrs, "symbol", token.tokenInfo.symbol);
-        addPair(attrs, "_count", String.valueOf(tokenId.size()));
-
-        for (String attrKey : tsr.getAttributes().keySet())
-        {
-            TokenScriptResult.Attribute attr = tsr.getAttribute(attrKey);
-            addPair(attrs, attrKey, attr.text);
-        }
-
-        return attrs.toString();
+        BigInteger tokenId = tokenIds.get(0);
+        attrs = viewModel.getAssetDefinitionService().getTokenAttrs(token, tokenIds.size());
+        viewModel.getAssetDefinitionService().resolveAttrs(token, tokenId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onAttr, this::onError, () -> displayFunction(attrs.toString()))
+                .wait();
     }
 
-    private void addPair(StringBuilder attrs, String name, String value) throws ParseException
+    private void displayFunction(String tokenAttrs)
     {
-        attrs.append(name);
-        attrs.append(": ");
+        waitSpinner.setVisibility(View.GONE);
+        tokenView.setVisibility(View.VISIBLE);
 
-        if (name.equals("time"))
+        String view = viewModel.getAssetDefinitionService().getTokenView(token.tokenInfo.chainId, token.getAddress(), "view");
+        String style = viewModel.getAssetDefinitionService().getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
+        String viewData = tokenView.injectWeb3TokenInit(this, view, tokenAttrs);
+        viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
+
+        tokenView.loadData(viewData, "text/html", "utf-8");
+    }
+
+    private void onError(Throwable throwable)
+    {
+        throwable.printStackTrace();
+    }
+
+    private void onAttr(TokenScriptResult.Attribute attribute)
+    {
+        //add to string
+        try
         {
-            DateTime dt = DateTimeFactory.getDateTime(value);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
-            String JSDate = dt.format(simpleDateFormat) + "T" + dt.format(simpleTimeFormat);
-
-            value = "{ generalizedTime: \"" + value + "\", date: new Date(\"" + JSDate + "\") }";// ((DateTime) dt).toString();
-            attrs.append(value);
+            viewModel.getAssetDefinitionService().addPair(attrs, attribute.id, attribute.text);
         }
-        else
+        catch (ParseException e)
         {
-            attrs.append("\"");
-            attrs.append(value);
-            attrs.append("\"");
+            e.printStackTrace();
         }
-
-        attrs.append(",\n");
     }
 }

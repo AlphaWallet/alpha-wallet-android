@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,7 +48,6 @@ public class Token implements Parcelable
     public String getNetworkName() { return shortNetworkName; }
 
     public TokenTicker ticker;
-    protected Map<String, FunctionDefinition> auxData;
 
     public Token(TokenInfo tokenInfo, BigDecimal balance, long updateBlancaTime, String networkName, ContractType type) {
         this.tokenInfo = tokenInfo;
@@ -89,22 +89,6 @@ public class Token implements Parcelable
         if (readType <= ContractType.CREATION.ordinal())
         {
             contractType = ContractType.values()[readType];
-        }
-        int size = in.readInt();
-        if (size > 0)
-        {
-            auxData = new ConcurrentHashMap<>();
-            for (int i = 0; i < size; i++)
-            {
-                String method = in.readString();
-                String result = in.readString();
-                long readTime = in.readLong();
-                FunctionDefinition fd = new FunctionDefinition();
-                fd.method = method;
-                fd.result = result;
-                fd.resultTime = readTime;
-                auxData.put(method, fd);
-            }
         }
     }
 
@@ -155,18 +139,6 @@ public class Token implements Parcelable
         dest.writeString(pendingBalance == null ? "0" : pendingBalance.toString());
         dest.writeString(tokenWallet);
         dest.writeLong(lastBlockCheck);
-        int size = (auxData == null ? 0 : auxData.size());
-        dest.writeInt(size);
-        if (auxData != null)
-        {
-            for (String method : auxData.keySet())
-            {
-                dest.writeString(method);
-                FunctionDefinition fd = auxData.get(method);
-                dest.writeString(fd.result);
-                dest.writeLong(fd.resultTime);
-            }
-        }
     }
 
     public void setRealmBalance(RealmToken realmToken)
@@ -371,26 +343,8 @@ public class Token implements Parcelable
         if (tokenInfo.name != null && realmToken.getName() != null) return true;
         if (tokenInfo.symbol != null && realmToken.getSymbol() == null) return true;
         if (tokenInfo.name != null && (!tokenInfo.name.equals(realmToken.getName()) || !tokenInfo.symbol.equals(realmToken.getSymbol()))) return true;
-        if (checkAuxDataChanged(realmToken)) return true;
         String currentBalance = getFullBalance();
         return !currentState.equals(currentBalance);
-    }
-
-    //Detects if the auxData held in Realm is different from the current auxData.
-    private boolean checkAuxDataChanged(RealmToken realmToken)
-    {
-        if (auxData != null && (realmToken.getAuxData() == null || realmToken.getAuxData().length() <= 4)) return true;
-        else if (auxData != null && realmToken.getAuxData().length() > 4)
-        {
-            Map<String, String> currentRealmData = restoreAuxData(realmToken.getAuxData());
-            for (String key : auxData.keySet())
-            {
-                if (!currentRealmData.containsKey(key)) return true;
-                else if (!auxData.get(key).equals(currentRealmData.get(key))) return true;
-            }
-        }
-
-        return false;
     }
 
     private Map<String, String> restoreAuxData(String data)
@@ -407,30 +361,6 @@ public class Token implements Parcelable
         }
 
         return aux;
-    }
-
-    public void setRealmAuxData(RealmToken realmToken)
-    {
-        //first form the data
-        if (auxData != null)
-        {
-            StringBuilder auxDataStr = new StringBuilder();
-            for (String key : auxData.keySet())
-            {
-                auxDataStr.append(key);
-                auxDataStr.append(",");
-                auxDataStr.append(auxData.get(key));
-                auxDataStr.append(",");
-            }
-
-            realmToken.setAuxData(auxDataStr.toString());
-        }
-    }
-
-    public void restoreAuxDataFromRealm(RealmToken realmToken)
-    {
-        String values = realmToken.getAuxData();
-        //auxData = restoreAuxData(values);
     }
 
     public void setIsEthereum()
@@ -455,13 +385,6 @@ public class Token implements Parcelable
     public void setTokenWallet(String address)
     {
         this.tokenWallet = address;
-    }
-
-
-    public void patchAuxData(Token token)
-    {
-        auxData = token.auxData;
-        if (auxData != null) requiresAuxRefresh = false;
     }
 
     public boolean checkBalanceChange(Token token)
@@ -554,7 +477,7 @@ public class Token implements Parcelable
 
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx) { }
     public List<BigInteger> getArrayBalance() { return new ArrayList<>(); }
-    public List<BigInteger> getNonZeroArrayBalance() { return new ArrayList<>(); }
+    public List<BigInteger> getNonZeroArrayBalance() { return new ArrayList<>(Arrays.asList(BigInteger.ZERO)); }
     public boolean isMatchedInXML() { return false; }
 
     public String getOperationName(Transaction transaction, Context ctx)
@@ -848,34 +771,5 @@ public class Token implements Parcelable
     public String getTokenTitle()
     {
         return tokenInfo.name;
-    }
-
-    public FunctionDefinition getFunctionData(BigInteger tokenId, String method)
-    {
-        return null;
-    }
-
-    public Observable<TransactionResult> processFunctionResults(FunctionDefinition fd, SetupTokensInteract setupTokensInteract)
-    {
-        //process for ERC20
-        if (contractType == ContractType.ERC20) return setupTokensInteract.getContractResult(this, BigInteger.ZERO, fd);
-        else return Observable.fromCallable(() -> new TransactionResult(tokenInfo.chainId, tokenInfo.address, BigInteger.ZERO, fd.method));
-    }
-
-    public Map<String, FunctionDefinition> getTokenIdResults(BigInteger v)
-    {
-        return auxData;
-    }
-
-    public boolean addAuxData(BigInteger tokenId, String method, String result, long resultTime)
-    {
-        if (auxData == null) auxData = new ConcurrentHashMap<>();
-        FunctionDefinition functionDef = new FunctionDefinition();
-        functionDef.method = method;
-        functionDef.result = result;
-        functionDef.resultTime = resultTime;
-
-        auxData.put(method, functionDef);
-        return true;
     }
 }

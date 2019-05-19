@@ -2,6 +2,7 @@ package io.stormbird.wallet.di;
 
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
+import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
@@ -27,10 +28,11 @@ public class TokenFunctionModule
             TransferTicketRouter transferTicketRouter,
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
-            TokensService tokensService) {
+            TokensService tokensService,
+            EthereumNetworkRepositoryType ethereumNetworkRepository) {
 
         return new TokenFunctionViewModelFactory(
-                assetDefinitionService, sellTicketRouter, transferTicketRouter, createTransactionInteract, fetchTokensInteract, tokensService);
+                assetDefinitionService, sellTicketRouter, transferTicketRouter, createTransactionInteract, fetchTokensInteract, tokensService, ethereumNetworkRepository);
     }
 
     @Provides

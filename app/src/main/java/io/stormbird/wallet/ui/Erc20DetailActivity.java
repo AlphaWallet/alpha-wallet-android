@@ -29,6 +29,7 @@ import io.stormbird.wallet.viewmodel.Erc20DetailViewModelFactory;
 
 import javax.inject.Inject;
 
+import java.math.BigInteger;
 import java.util.Map;
 
 import static io.stormbird.wallet.C.Key.TICKET;
@@ -131,6 +132,7 @@ public class Erc20DetailActivity extends BaseActivity {
 
     private void setupAction()
     {
+        //TODO: work out which actions should be available from here
         final Map<String, TSAction> actions = viewModel.getActions(token);
         if (actions != null)
         {
@@ -151,6 +153,7 @@ public class Erc20DetailActivity extends BaseActivity {
                     Intent intent = new Intent(this, FunctionActivity.class);
                     intent.putExtra(TICKET, token);
                     intent.putExtra(C.EXTRA_STATE, action);
+                    intent.putExtra(C.EXTRA_TOKEN_ID, BigInteger.ZERO.toString(Character.MAX_RADIX));
                     intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
                     startActivity(intent);
                 });

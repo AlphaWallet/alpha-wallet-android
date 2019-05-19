@@ -64,6 +64,8 @@ public abstract class C {
     public static final String EXTRA_SUCCESS = "TX_SUCCESS";
     public static final String EXTRA_HEXDATA = "TX_HEX";
     public static final String EXTRA_NETWORKID = "NET_ID";
+    public static final String EXTRA_TRANSACTION_DATA = "TS_TRANSACTIONDATA";
+    public static final String EXTRA_FUNCTION_NAME = "TS_FUNC_NAME";
 
     public static final String PRUNE_ACTIVITY =
             "io.stormbird.wallet.PRUNE_ACTIVITY";

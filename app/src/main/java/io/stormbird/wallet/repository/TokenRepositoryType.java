@@ -37,6 +37,5 @@ public interface TokenRepositoryType {
     Disposable updateBlockRead(Token token, Wallet wallet);
     Single<String> resolveProxyAddress(TokenInfo tokenInfo);
 
-    Observable<TransactionResult> callTokenFunction(Token token, BigInteger tokenId, FunctionDefinition fd);
     String generateTransactionPayload(Token token, BigInteger tokenId, FunctionDefinition fd);
 }

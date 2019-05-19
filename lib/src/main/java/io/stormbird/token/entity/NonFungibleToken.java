@@ -56,6 +56,14 @@ public class NonFungibleToken
         ad.parseField(tokenId, this, functionMappings);
     }
 
+    public NonFungibleToken(BigInteger tokenId, TokenScriptResult tsr) {
+        this(tokenId);
+        for (TokenScriptResult.Attribute attr : tsr.getAttributes().values())
+        {
+            attributes.put(attr.id, new Attribute(attr.id, attr.name, attr.value, attr.text));
+        }
+    }
+
     public NonFungibleToken(BigInteger tokenId, TokenDefinition ad) {
         this(tokenId);
         ad.parseField(tokenId, this);

@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
+import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -22,6 +23,7 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final TokensService tokensService;
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
     public TokenFunctionViewModelFactory(
             AssetDefinitionService assetDefinitionService,
@@ -29,18 +31,20 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
             TransferTicketRouter transferTicketRouter,
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
-            TokensService tokensService) {
+            TokensService tokensService,
+            EthereumNetworkRepositoryType ethereumNetworkRepository) {
         this.assetDefinitionService = assetDefinitionService;
         this.sellTicketRouter = sellTicketRouter;
         this.transferTicketRouter = transferTicketRouter;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokensService = tokensService;
+        this.ethereumNetworkRepository = ethereumNetworkRepository;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new TokenFunctionViewModel(assetDefinitionService, sellTicketRouter, transferTicketRouter, createTransactionInteract, fetchTokensInteract, tokensService);
+        return (T) new TokenFunctionViewModel(assetDefinitionService, sellTicketRouter, transferTicketRouter, createTransactionInteract, fetchTokensInteract, tokensService, ethereumNetworkRepository);
     }
 }

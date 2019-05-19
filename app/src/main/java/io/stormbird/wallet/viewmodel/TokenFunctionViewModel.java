@@ -1,11 +1,12 @@
 package io.stormbird.wallet.viewmodel;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import io.stormbird.token.entity.ContractAddress;
 import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.entity.TokenScriptResult;
+import io.stormbird.wallet.entity.ConfirmationType;
 import io.stormbird.wallet.entity.Wallet;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -14,12 +15,14 @@ import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
+import io.stormbird.wallet.repository.EthereumNetworkRepository;
+import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
+import io.stormbird.wallet.ui.ConfirmationActivity;
 import io.stormbird.wallet.ui.FunctionActivity;
-import io.stormbird.wallet.ui.RedeemAssetSelectActivity;
 import io.stormbird.wallet.ui.RedeemSignatureDisplayActivity;
 import io.stormbird.wallet.ui.widget.entity.TicketRangeParcel;
 import io.stormbird.wallet.web3.entity.Message;
@@ -41,6 +44,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final TokensService tokensService;
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
     TokenFunctionViewModel(
             AssetDefinitionService assetDefinitionService,
@@ -48,13 +52,15 @@ public class TokenFunctionViewModel extends BaseViewModel
             TransferTicketRouter transferTicketRouter,
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
-            TokensService tokensService) {
+            TokensService tokensService,
+            EthereumNetworkRepositoryType ethereumNetworkRepository) {
         this.assetDefinitionService = assetDefinitionService;
         this.sellTicketRouter = sellTicketRouter;
         this.transferTicketRouter = transferTicketRouter;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.tokensService = tokensService;
+        this.ethereumNetworkRepository = ethereumNetworkRepository;
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -66,11 +72,13 @@ public class TokenFunctionViewModel extends BaseViewModel
         sellTicketRouter.open(ctx, token);
     }
     public void showTransferToken(Context context, Token ticket) { transferTicketRouter.open(context, ticket); }
-    public void showFunction(Context ctx, Token token, String method)
+    public void showFunction(Context ctx, Token token, String method, List<BigInteger> tokenIds)
     {
         Intent intent = new Intent(ctx, FunctionActivity.class);
         intent.putExtra(TICKET, token);
         intent.putExtra(C.EXTRA_STATE, method);
+        BigInteger firstId = tokenIds != null ? tokenIds.get(0) : BigInteger.ZERO;
+        intent.putExtra(C.EXTRA_TOKEN_ID, firstId.toString(Character.MAX_RADIX));
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
     }
@@ -103,5 +111,26 @@ public class TokenFunctionViewModel extends BaseViewModel
     public TokenScriptResult getTokenScriptResult(Token token, BigInteger tokenId)
     {
         return assetDefinitionService.getTokenScriptResult(token, tokenId);
+    }
+
+    public void confirmTransaction(Context ctx, int networkId, String functionData, String toAddress, String contractAddress, String additionalDetails, String functionName)
+    {
+        Intent intent = new Intent(ctx, ConfirmationActivity.class);
+        intent.putExtra(C.EXTRA_TRANSACTION_DATA, functionData);
+        intent.putExtra(C.EXTRA_NETWORKID, networkId);
+        intent.putExtra(C.EXTRA_NETWORK_NAME, ethereumNetworkRepository.getNetworkByChain(networkId).getShortName());
+        intent.putExtra(C.EXTRA_AMOUNT, "0"); //TODO: amount
+        if (toAddress != null) intent.putExtra(C.EXTRA_TO_ADDRESS, toAddress);
+        if (contractAddress != null) intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, contractAddress);
+        intent.putExtra(C.EXTRA_CONTRACT_NAME, additionalDetails);
+        intent.putExtra(C.EXTRA_FUNCTION_NAME, functionName);
+        intent.putExtra(C.TOKEN_TYPE, ConfirmationType.TOKENSCRIPT.ordinal());
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        ctx.startActivity(intent);
+    }
+
+    public Token getToken(ContractAddress cAddr)
+    {
+        return tokensService.getToken(cAddr.chainId, cAddr.address);
     }
 }

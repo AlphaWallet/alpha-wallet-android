@@ -13,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:gravity="center_horizontal"
         android:padding="15dp">
 
         <WebView
@@ -32,6 +33,13 @@
             android:visibility="gone">
 
         </io.stormbird.wallet.web3.Web3TokenView>
+
+        <ProgressBar
+            android:id="@+id/progress_element"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateTint="@color/colorPrimaryDark"
+            android:visibility="gone"/>
 
     </LinearLayout>
 

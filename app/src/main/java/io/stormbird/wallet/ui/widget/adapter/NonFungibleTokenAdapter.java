@@ -181,21 +181,6 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
             holderType = AssetInstanceSortedItem.VIEW_TYPE;
         }
 
-        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress()))
-        {
-            if (sortedList.size() == 0)
-            {
-                //display iframe information
-                IFrameSortedItem item = new IFrameSortedItem(new TicketRange(BigInteger.ZERO, token.getAddress()), 2);
-                items.add(item);
-            }
-            else
-            {
-                IFrameSortedItem item = new IFrameSortedItem(new TicketRange(sortedList.get(0).id, token.getAddress()), 2);
-                items.add(item);
-            }
-        }
-
         addSortedItems(sortedList, t, holderType);
     }
 

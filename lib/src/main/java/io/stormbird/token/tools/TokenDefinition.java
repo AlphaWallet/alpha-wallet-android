@@ -837,7 +837,7 @@ public class TokenDefinition {
 
     private void addFunctionInputs(FunctionDefinition fd, Element eth)
     {
-        NodeList nList = eth.getElementsByTagNameNS(nameSpace, "inputs");
+        NodeList nList = eth.getElementsByTagNameNS(nameSpace, "data");
         if (nList.getLength() == 0) return;
         Element inputs = (Element) nList.item(0);
 

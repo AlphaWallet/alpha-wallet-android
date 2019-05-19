@@ -232,6 +232,16 @@ public class ConfirmationViewModel extends BaseViewModel {
         }
     }
 
+    public void signTokenScriptTransaction(String transactionData, String contractAddress, BigInteger gasPrice, BigInteger gasLimit, int chainId)
+    {
+        progress.postValue(true);
+        byte[] data = Numeric.hexStringToByteArray(transactionData);
+            disposable = createTransactionInteract
+                    .create(defaultWallet.getValue(), contractAddress, BigInteger.ZERO, gasPrice, gasLimit, data, chainId)
+                    .subscribe(this::onCreateTransaction,
+                               this::onError);
+    }
+
     private void onCreateDappTransaction(TransactionData txData) {
         progress.postValue(false);
         newDappTransaction.postValue(txData);

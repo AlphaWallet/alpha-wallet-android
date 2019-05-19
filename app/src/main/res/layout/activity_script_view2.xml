@@ -93,6 +93,7 @@
             android:layout_height="0dp"
             android:layout_alignParentTop="true"
             android:layout_above="@id/layoutButtons"
+            android:orientation="vertical"
             android:layout_marginTop="10dp">
 
             <LinearLayout
@@ -101,6 +102,8 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/background_card_shadow"
                 android:layout_margin="3dp"
+                android:gravity="center"
+                android:orientation="vertical"
                 android:padding="10dp">
 
                 <io.stormbird.wallet.web3.Web3TokenView
@@ -110,7 +113,15 @@
 
                 </io.stormbird.wallet.web3.Web3TokenView>
 
+                <ProgressBar
+                    android:id="@+id/progress_element"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminateTint="@color/colorPrimaryDark"
+                    android:visibility="gone"/>
+
             </LinearLayout>
+
         </LinearLayout>
 
     </RelativeLayout>

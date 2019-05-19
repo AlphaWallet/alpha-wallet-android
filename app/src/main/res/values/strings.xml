@@ -477,4 +477,6 @@
     <string name="collectibles">Collectibles</string>
     <string name="token_function">Token Function</string>
     <string name="channel_description">Alphawallet notification channel</string>
+    <string name="error_camera_permission_denied">Permission to use the camera was denied.</string>
+    <string name="confirm_tokenscript_transaction">Confirm TokenScript Transaction</string>
 </resources>

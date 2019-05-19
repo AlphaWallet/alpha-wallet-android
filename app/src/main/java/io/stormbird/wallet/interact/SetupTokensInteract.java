@@ -81,9 +81,4 @@ public class SetupTokensInteract {
         tokenRepository.terminateToken(token, wallet, network);
         return token;
     }
-
-    public Observable<TransactionResult> getContractResult(Token token, BigInteger tokenId, FunctionDefinition fd)
-    {
-        return tokenRepository.callTokenFunction(token, tokenId, fd);
-    }
 }

@@ -1,4 +1,4 @@
-# AlphaWallet - The mobile wallet engine for the web3 world
+# AlphaWallet - No Nonsense Ethereum Wallet
 
 [![Build Status](https://api.travis-ci.com/AlphaWallet/alpha-wallet-android.svg?branch=master)](https://api.travis-ci.com/AlphaWallet/alpha-wallet-android.svg?branch=master) 
 [![License](https://img.shields.io/badge/license-GPL3-green.svg?style=flat)](https://github.com/fastlane/fastlane/blob/master/LICENSE)

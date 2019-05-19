@@ -77,16 +77,28 @@ public class MyDappsFragment extends Fragment {
     }
 
     private void removeDapp(DApp dapp) {
-        List<DApp> myDapps = DappBrowserUtils.getMyDapps(getContext());
-        for (DApp d : myDapps) {
-            if (d.getName().equals(dapp.getName())
-                    && d.getUrl().equals(dapp.getUrl())) {
-                myDapps.remove(d);
-                break;
+        try
+        {
+            List<DApp> myDapps = DappBrowserUtils.getMyDapps(getContext());
+            for (DApp d : myDapps)
+            {
+                if (d.getName().equals(dapp.getName())
+                        && d.getUrl().equals(dapp.getUrl()))
+                {
+                    myDapps.remove(d);
+                    break;
+                }
             }
+            DappBrowserUtils.saveToPrefs(getContext(), myDapps);
         }
-        DappBrowserUtils.saveToPrefs(getContext(), myDapps);
-        updateData();
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            updateData();
+        }
     }
 
     private void updateData() {

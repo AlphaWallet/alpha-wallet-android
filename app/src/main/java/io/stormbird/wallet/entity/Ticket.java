@@ -46,7 +46,6 @@ public class Ticket extends Token implements Parcelable
 {
     private final List<BigInteger> balanceArray;
     private boolean isMatchedInXML = false;
-    private Map<BigInteger, Map<String, FunctionDefinition>> auxData; //auxData for each tokenId
 
     public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
@@ -71,30 +70,6 @@ public class Ticket extends Token implements Parcelable
             {
                 BigInteger val = (BigInteger)o;
                 balanceArray.add(val);
-            }
-        }
-        int tokenAuxCount = in.readInt();
-        if (tokenAuxCount > 0)
-        {
-            auxData = new HashMap<>();
-            for (int i = 0; i < tokenAuxCount; i++)
-            {
-                BigInteger key = new BigInteger(in.readString(), Character.MAX_RADIX);
-                int valueCount = in.readInt();
-                Map<String, FunctionDefinition> instance = new HashMap<>();
-                for (int j = 0; j < valueCount; j++)
-                {
-                    String method = in.readString();
-                    String result = in.readString();
-                    long readTime = in.readLong();
-                    FunctionDefinition fd = new FunctionDefinition();
-                    fd.method = method;
-                    fd.result = result;
-                    fd.resultTime = readTime;
-                    instance.put(method, fd);
-                }
-
-                auxData.put(key, instance);
             }
         }
     }
@@ -133,24 +108,6 @@ public class Ticket extends Token implements Parcelable
         dest.writeInt(balanceArray.size());
         dest.writeInt(contractType.ordinal());
         if (balanceArray.size() > 0) dest.writeArray(balanceArray.toArray());
-        int size = (auxData == null ? 0 : auxData.size());
-        dest.writeInt(size);
-        if (auxData != null)
-        {
-            for (BigInteger key : auxData.keySet())
-            {
-                dest.writeString(key.toString(Character.MAX_RADIX));
-                Map<String, FunctionDefinition> instance = auxData.get(key);
-                dest.writeInt(instance.size());
-                for (String method : instance.keySet())
-                {
-                    dest.writeString(method);
-                    FunctionDefinition fd = instance.get(method);
-                    dest.writeString(fd.result);
-                    dest.writeLong(fd.resultTime);
-                }
-            }
-        }
     }
 
     /**
@@ -653,17 +610,6 @@ public class Ticket extends Token implements Parcelable
         return isMatchedInXML;
     }
 
-    @Override
-    public void patchAuxData(Token token)
-    {
-        if (token instanceof Ticket)
-        {
-            this.contractType = ContractType.values()[token.interfaceOrdinal()];
-            auxData = ((Ticket)token).auxData;
-        }
-        super.patchAuxData(token);
-    }
-
     public Function getTradeFunction(BigInteger expiry, List<BigInteger> indices, int v, byte[] r, byte[] s)
     {
         return new Function(
@@ -813,50 +759,5 @@ public class Ticket extends Token implements Parcelable
             if (ct.type > 0) isSent = false;
         }
         return isSent;
-    }
-
-    //add auxData in
-    @Override
-    public boolean addAuxData(BigInteger tokenId, String method, String result, long resultTime)
-    {
-        if (!balanceArray.contains(tokenId)) return false;
-        if (auxData == null) auxData = new HashMap<>();
-        Map<String, FunctionDefinition> auxResult = auxData.get(tokenId);
-        if (auxResult == null)
-        {
-            auxResult = new HashMap<>();
-            auxData.put(tokenId, auxResult);
-        }
-
-        FunctionDefinition functionDef = new FunctionDefinition();
-        functionDef.method = method;
-        functionDef.result = result;
-        functionDef.resultTime = resultTime;
-
-        auxResult.put(method, functionDef);
-        return true;
-    }
-
-    @Override
-    public FunctionDefinition getFunctionData(BigInteger tokenId, String method)
-    {
-        if (auxData == null) return null;
-        Map<String, FunctionDefinition> auxResult = auxData.get(tokenId);
-        if (auxResult != null) return auxResult.get(method);
-        else return null;
-    }
-
-    @Override
-    public Observable<TransactionResult> processFunctionResults(FunctionDefinition fd, SetupTokensInteract setupTokensInteract)
-    {
-        return Observable.fromIterable(getNonZeroArrayBalance())
-                .concatMap(tokenId -> setupTokensInteract.getContractResult(this, tokenId, fd));
-    }
-
-    @Override
-    public Map<String, FunctionDefinition> getTokenIdResults(BigInteger v)
-    {
-        if (auxData != null) return auxData.get(v);
-        else return null;
     }
 }

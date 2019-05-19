@@ -28,6 +28,7 @@ public class FunctionDefinition
 
     public String result;
     public long resultTime = 0;
+    public BigInteger tokenId;
 
     public Function generateTransactionFunction(String walletAddr, BigInteger tokenId)
     {
@@ -150,5 +151,18 @@ public class FunctionDefinition
         }
 
         return name;
+    }
+
+    public TokenScriptResult.Attribute parseFunctionResult(TransactionResult transactionResult, AttributeType attr)
+    {
+        String res = transactionResult.result;
+        BigInteger val = transactionResult.tokenId;
+        if (attr.syntax == TokenDefinition.Syntax.NumericString)
+        {
+            if (transactionResult.result.startsWith("0x"))
+                res = res.substring(2);
+            val = new BigInteger(res, 16);
+        }
+        return new TokenScriptResult.Attribute(attr.id, attr.name, val, res);
     }
 }

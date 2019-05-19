@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -28,6 +29,7 @@ import io.stormbird.wallet.ui.TokenFunctionActivity;
 import io.stormbird.wallet.web3.Web3TokenView;
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.PageReadyCallback;
+import io.stormbird.wallet.widget.ProgressView;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -51,6 +53,9 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     private final Token token;
     private final LinearLayout iFrameLayout;
     private final boolean iconified;
+    private final ProgressBar waitSpinner;
+
+    private BigInteger tokenId;
 
     private StringBuilder attrs;
 
@@ -62,6 +67,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         iFrame = findViewById(R.id.iframe);
         iFrameLayout = findViewById(R.id.layout_select_ticket);
         tokenView = findViewById(R.id.token_frame);
+        waitSpinner = findViewById(R.id.progress_element);
         iFrame.setVisibility(View.GONE);
         tokenView.setVisibility(View.VISIBLE);
         itemView.setOnClickListener(this);
@@ -81,26 +87,9 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         try
         {
             if (data.tokenIds.size() == 0) { fillEmpty(); return; }
-            //String tokenAttrs = buildTokenAttrs(data);
+            waitSpinner.setVisibility(View.VISIBLE);
+            tokenView.setVisibility(View.GONE);
             getAttrs(data);
-//            String viewType = iconified ? "view-iconified" : "view";
-//            String view = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), viewType);
-//            String style = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
-//            String viewData = tokenView.injectWeb3TokenInit(getContext(), view, tokenAttrs);
-//            viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
-//
-//            tokenView.loadData(viewData, "text/html", "utf-8");
-//
-//            if (iconified)
-//            {
-//                iFrameLayout.setOnClickListener(v -> {
-//                    Intent intent = new Intent(getContext(), TokenFunctionActivity.class);
-//                    intent.putExtra(TICKET, token);
-//                    intent.putExtra(C.EXTRA_TOKEN_ID, token.intArrayToString(data.tokenIds, false));
-//                    intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-//                    getContext().startActivity(intent);
-//                });
-//            }
         }
         catch (Exception ex)
         {
@@ -110,6 +99,9 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
 
     private void displayTicket(String tokenAttrs, TicketRange data)
     {
+        waitSpinner.setVisibility(View.GONE);
+        tokenView.setVisibility(View.VISIBLE);
+
         String viewType = iconified ? "view-iconified" : "view";
         String view = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), viewType);
         String style = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
@@ -132,30 +124,31 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
 
     private void getAttrs(TicketRange data) throws Exception
     {
-        BigInteger tokenId = data.tokenIds.get(0);
-        attrs = new StringBuilder();
-
-        addPair(attrs, "name", token.getTokenTitle());
-        addPair(attrs, "symbol", token.tokenInfo.symbol);
-        addPair(attrs, "_count", String.valueOf(data.tokenIds.size()));
-
-        List<AttributeType> attrs = assetDefinitionService.getAttrs(token);
-
-        Disposable disposable = Observable.fromIterable(attrs)
-                .flatMap(attr -> assetDefinitionService.fetchAttrResult(attr, tokenId, token))
+        tokenId = data.tokenIds.get(0);
+        attrs = assetDefinitionService.getTokenAttrs(token, data.tokenIds.size());
+        assetDefinitionService.resolveAttrs(token, tokenId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onAttr, this::onError, ()-> finishFetch(data));
-    }
-
-    private void finishFetch(TicketRange data)
-    {
-        displayTicket(attrs.toString(), data);
+                .subscribe(this::onAttr, this::onError, () -> displayTicket(attrs.toString(), data))
+                .isDisposed();
     }
 
     private void onError(Throwable throwable)
     {
         throwable.printStackTrace();
+        //fill attrs from database
+        TokenScriptResult tsr = assetDefinitionService.getTokenScriptResult(token, tokenId);
+        for (TokenScriptResult.Attribute attr : tsr.getAttributes().values())
+        {
+            try
+            {
+                assetDefinitionService.addPair(attrs, attr.id, attr.text);
+            }
+            catch (ParseException e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void onAttr(TokenScriptResult.Attribute attribute)
@@ -163,71 +156,12 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         //add to string
         try
         {
-            addPair(attrs, attribute.id, attribute.text);
+            assetDefinitionService.addPair(attrs, attribute.id, attribute.text);
         }
         catch (ParseException e)
         {
             e.printStackTrace();
         }
-    }
-
-    private String buildTokenAttrs(TicketRange data) throws Exception
-    {
-        BigInteger firstTokenId = data.tokenIds.get(0);
-
-        //NonFungibleToken nft = assetDefinitionService.getNonFungibleToken(token, token.getAddress(), firstTokenId);
-        //TokenScriptResult tsr = assetDefinitionService.getTokenScriptResult(token, firstTokenId);
-        //StringBuilder attrs = new StringBuilder();
-        attrs = new StringBuilder();
-        addPair(attrs, "name", token.getTokenTitle());
-        addPair(attrs, "symbol", token.tokenInfo.symbol);
-        addPair(attrs, "_count", String.valueOf(data.tokenIds.size()));
-//
-//        for (String attrKey : tsr.getAttributes().keySet())
-//        {
-//            TokenScriptResult.Attribute attr = tsr.getAttribute(attrKey);
-//            addPair(attrs, attrKey, attr.text);
-//        }
-
-        return attrs.toString();
-    }
-
-    private void addPair(StringBuilder attrs, String name, String value) throws ParseException
-    {
-        attrs.append(name);
-        attrs.append(": ");
-
-        if (name.equals("time"))
-        {
-            String JSDate;
-            DateTime dt = DateTimeFactory.getDateTime(value);
-            if (dt instanceof ZonedDateTime)
-            {
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
-                JSDate = dt.format(simpleDateFormat) + "T" + dt.format(simpleTimeFormat);
-                value = "{ generalizedTime: \"" + value + "\", date: new Date(\"" + JSDate + "\") }";// ((DateTime) dt).toString();
-            }
-            else
-            {
-                //interpret binary time only provide date
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
-                SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("yyyyMMddhhmmssZ"); //20180711 090000+0800
-                JSDate = dt.format(simpleDateFormat) + "T" + dt.format(simpleTimeFormat);
-                value = "{ generalizedTime: \"" + dt.format(simpleDateFormat2) + "\",date: new Date(\"" + JSDate + "\") }";
-            }
-
-            attrs.append(value);
-        }
-        else
-        {
-            attrs.append("\"");
-            attrs.append(value);
-            attrs.append("\"");
-        }
-
-        attrs.append(",\n");
     }
 
     private void fillEmpty()

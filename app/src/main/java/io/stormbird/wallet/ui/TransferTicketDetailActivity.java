@@ -33,6 +33,7 @@ import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.util.QRURLParser;
+import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.TransferTicketDetailViewModel;
 import io.stormbird.wallet.viewmodel.TransferTicketDetailViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
@@ -53,6 +54,8 @@ import java.util.Locale;
 import static io.stormbird.wallet.C.*;
 import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.C.Key.WALLET;
+import static io.stormbird.wallet.ui.zxing.QRScanningActivity.DENY_PERMISSION;
+import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 
 /**
  * Created by James on 21/02/2018.
@@ -533,37 +536,40 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         switch (requestCode)
         {
             case BARCODE_READER_REQUEST_CODE:
-            if (resultCode == FullScannerFragment.SUCCESS)
-            {
-                if (data != null)
+                switch (resultCode)
                 {
-                    String barcode = data.getParcelableExtra(FullScannerFragment.BarcodeObject);
-                    if (barcode == null) barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+                    case FullScannerFragment.SUCCESS:
+                        if (data != null)
+                        {
+                            String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
 
-                    //if barcode is still null, ensure we don't GPF
-                    if (barcode == null)
-                    {
-                        Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+                            //if barcode is still null, ensure we don't GPF
+                            if (barcode == null)
+                            {
+                                Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
 
-                    QRURLParser parser = QRURLParser.getInstance();
-                    String extracted_address = parser.extractAddressFromQrString(barcode);
-                    if (extracted_address == null)
-                    {
-                        Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    toAddressEditText.setText(extracted_address);
-                }
-            }
-            else
-            {
-                Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                        "Code: " + String.valueOf(resultCode)
+                            QRURLParser parser = QRURLParser.getInstance();
+                            String extracted_address = parser.extractAddressFromQrString(barcode);
+                            if (extracted_address == null)
+                            {
+                                Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            toAddressEditText.setText(extracted_address);
+                        }
+                        break;
+                    case DENY_PERMISSION:
+                        showCameraDenied();
+                        break;
+                    default:
+                        Log.e("SEND", String.format(getString(R.string.barcode_error_format),
+                                                    "Code: " + String.valueOf(resultCode)
                         ));
-            }
-            break;
+                        break;
+                }
+                break;
 
             case SEND_INTENT_REQUEST_CODE:
                 sendBroadcast(new Intent(PRUNE_ACTIVITY));
@@ -572,6 +578,19 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void showCameraDenied()
+    {
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.title_dialog_error);
+        dialog.setMessage(R.string.error_camera_permission_denied);
+        dialog.setIcon(ERROR);
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
     }
 
     private void linkReady(String universalLink)

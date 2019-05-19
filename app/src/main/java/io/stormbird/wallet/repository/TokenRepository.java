@@ -330,66 +330,6 @@ public class TokenRepository implements TokenRepositoryType {
         return encodedFunction;
     }
 
-    @Override
-    public Observable<TransactionResult> callTokenFunction(Token token, BigInteger tokenId, FunctionDefinition def)
-    {
-        return Observable.fromCallable(() -> {
-            TransactionResult transactionResult = new TransactionResult(token.tokenInfo.chainId, token.tokenInfo.address, tokenId, def.method);
-            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
-            long currentTime = System.currentTimeMillis();
-            FunctionDefinition tokenFd = token.getFunctionData(tokenId, def.method);
-
-            if (tokenFd == null || (currentTime - tokenFd.resultTime) > 60 * 1000 * 10)
-            {
-                Function function = def.generateTransactionFunction(token.getWallet(), tokenId);//generateTransactionFunction(token, tokenId, def);
-
-                try
-                {
-                    String responseValue = callSmartContractFunction(function, token.getAddress(), network, new Wallet(token.getWallet()));
-                    //try to interpret the value
-                    def.handleTransactionResult(transactionResult, function, responseValue);
-
-//                    List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
-//                    if (response.size() > 0)
-//                    {
-//                        transactionResult.resultTime = currentTime;
-//                        Type val = response.get(0);
-//                        switch (def.syntax)
-//                        {
-//                            case Boolean:
-//                                BigDecimal value = new BigDecimal(((Uint256) val).getValue());
-//                                transactionResult.result = value.equals(BigDecimal.ZERO) ? "FALSE" : "TRUE";
-//                                break;
-//                            case Integer:
-//                            case NumericString:
-//                                transactionResult.result = new BigDecimal(((Uint256) val).getValue()).toString();
-//                                break;
-//                            case IA5String:
-//                            case DirectoryString:
-//                                transactionResult.result = (String) response.get(0).getValue();
-//                                if (responseValue.length() > 2 && transactionResult.result.length() == 0)
-//                                {
-//                                    transactionResult.result = checkBytesString(responseValue);
-//                                }
-//                                break;
-//                        }
-//                    }
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
-            else
-            {
-                transactionResult.resultTime = tokenFd.resultTime;
-                transactionResult.result = tokenFd.result;
-            }
-
-            return transactionResult;
-        });
-    }
-
     private String callStringFunction(String method, String address, NetworkInfo network, BigInteger tokenId)
     {
         String result;
@@ -589,7 +529,6 @@ public class TokenRepository implements TokenRepositoryType {
                 {
                     Log.d(TAG, "Token balance changed! " + tInfo.name);
                     Token updated = tFactory.createToken(tInfo, balance, balanceArray, System.currentTimeMillis(), interfaceSpec, network.getShortName(), token.lastBlockCheck);
-                    updated.patchAuxData(token); //perform any updates we need here
                     localSource.updateTokenBalance(network, wallet, updated);
                     updated.setTokenWallet(wallet.address);
                     updated.transferPreviousData(token);

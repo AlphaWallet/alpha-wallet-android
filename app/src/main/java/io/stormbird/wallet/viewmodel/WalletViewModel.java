@@ -188,13 +188,13 @@ public class WalletViewModel extends BaseViewModel
     {
         fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.MAINNET_ID));
         updateTokenBalances();
-        tokensService.loadAuxData();
+        //tokensService.loadAuxData();
         resolveScriptFunctions();
     }
 
     private void resolveScriptFunctions()
     {
-        assetDefinitionService.checkEthereumFunctions(setupTokensInteract, tokensService)
+        assetDefinitionService.checkEthereumFunctions(tokensService)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onUpdatedTokens, this::onError);

@@ -12,7 +12,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.ValueCallback;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import dagger.android.AndroidInjection;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.token.tools.TokenDefinition;
@@ -65,28 +70,44 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     private TokenFunctionViewModel viewModel;
 
     private Token token;
+    private BigInteger tokenId;
     private String actionMethod;
     private SystemView systemView;
     private Web3TokenView tokenView;
+    private ProgressBar waitSpinner;
     private Handler handler;
     private SignMessageDialog dialog;
+    private String functionEffect;
     private Map<String, String> args = new HashMap<>();
+    private StringBuilder attrs;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
         actionMethod = getIntent().getStringExtra(C.EXTRA_STATE);
+        String tokenIdStr = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
+        if (tokenIdStr == null || tokenIdStr.length() == 0) tokenIdStr = "0";
+        tokenId = new BigInteger(tokenIdStr, Character.MAX_RADIX);
 
         tokenView = findViewById(R.id.web3_tokenview);
+        waitSpinner = findViewById(R.id.progress_element);
 
         tokenView.setChainId(token.tokenInfo.chainId);
         tokenView.setWalletAddress(new Address(token.getWallet()));
         tokenView.setRpcUrl(token.tokenInfo.chainId);
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSignPersonalMessageListener(this);
+        tokenView.setVisibility(View.GONE);
+        waitSpinner.setVisibility(View.VISIBLE);
 
+        getAttrs();
+    }
+
+    private void displayFunction(String tokenAttrs)
+    {
         try
         {
-            String tokenAttrs = buildTokenAttrs(null);
+            waitSpinner.setVisibility(View.GONE);
+            tokenView.setVisibility(View.VISIBLE);
             Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
             TSAction action = functions.get(actionMethod);
             String injectedView = tokenView.injectWeb3TokenInit(this, action.view, tokenAttrs);
@@ -97,6 +118,42 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         catch (Exception e)
         {
             fillEmpty();
+        }
+    }
+
+    private void getAttrs()
+    {
+        try
+        {
+            attrs = viewModel.getAssetDefinitionService().getTokenAttrs(token, 1);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        viewModel.getAssetDefinitionService().resolveAttrs(token, tokenId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onAttr, this::onError, () -> displayFunction(attrs.toString()))
+                .isDisposed();
+    }
+
+    private void onError(Throwable throwable)
+    {
+        throwable.printStackTrace();
+        displayFunction(attrs.toString());
+    }
+
+    private void onAttr(TokenScriptResult.Attribute attribute)
+    {
+        try
+        {
+            viewModel.getAssetDefinitionService().addPair(attrs, attribute.id, attribute.text);
+        }
+        catch (ParseException e)
+        {
+            e.printStackTrace();
         }
     }
 
@@ -221,6 +278,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
                                 //handle value
                                 if (attr.bitshift > 0)
                                 {
+                                    functionEffect = unsignedValue.toString();
                                     unsignedValue = unsignedValue.movePointRight(attr.bitshift);
                                     args.put(arg.ref, unsignedValue.toString());
                                 }
@@ -238,32 +296,6 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
             {
                 handleFunction(action.function);
             }
-
-            //String inputVal = getInput("amount");
-//            tokenView.evaluateJavascript(
-//                    "(function() { var x = document.getElementById(\"amount\");\n" +
-//                            "            return x.elements[0].value; })();",
-//                    html -> {
-//                        StringBuilder sb = new StringBuilder();
-//                        for (char ch : html.toCharArray()) if (ch!='\"') sb.append(ch);
-//                        BigDecimal bd = new BigDecimal(sb.toString());
-//                        System.out.println(bd.toString());
-//
-//                        //now process the transaction
-//                        String method = action.function.method;
-//                        MethodArg param1 = action.function.parameters.get(0);
-//                        MethodArg param2 = action.function.parameters.get(1);
-//
-//                        //how to resolve a reference?
-//                        if (param2.ref != null && param2.ref.length() > 0)
-//                        {
-//                            AttributeType attr = action.attributeTypes.get(param2.ref);
-//                            System.out.println(attr.name);
-//                        }
-//
-//                        System.out.println(method + " " + param1.ref + " " + param2.ref);
-//                    }
-//            );
         }
         else
         {
@@ -277,15 +309,23 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         //should have all the info we need to push the transaction
         //build transaction
         //need to regulate args
-        String functionData = viewModel.getTransactionBytes(token, BigInteger.ZERO, function);
-        System.out.println(functionData);
+
+        String functionData = viewModel.getTransactionBytes(token, tokenId, function);
+        //confirm the transaction
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        TSAction action = functions.get(actionMethod);
+        ContractAddress cAddr = viewModel.getAssetDefinitionService().getContractAddress(action.function, token);
+
+        functionEffect = functionEffect + " to " + action.function.method;
+
+        viewModel.confirmTransaction(this, cAddr.chainId, functionData, null, cAddr.address, actionMethod, functionEffect);
     }
 
     private void getInput(String value)
     {
         tokenView.evaluateJavascript(
                 "(function() { var x = document.getElementById(\"" + value + "\");\n" +
-                        "            return x.elements[0].value; })();",
+                        "            return x.value; })();",
                 html -> {
                     StringBuilder sb = new StringBuilder();
                     for (char ch : html.toCharArray()) if (ch!='\"') sb.append(ch);
@@ -350,25 +390,6 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         dialog.show();
     }
 
-    private String buildTokenAttrs(List<BigInteger> tokenIds) throws Exception
-    {
-        BigInteger tokenId = (tokenIds == null) ? BigInteger.ZERO : tokenIds.get(0);
-        //NonFungibleToken nft = viewModel.getAssetDefinitionService().getNonFungibleToken(token, token.getAddress(), tokenId);
-        TokenScriptResult tsr = viewModel.getTokenScriptResult(token, tokenId);
-        StringBuilder attrs = new StringBuilder();
-        addPair(attrs, "name", token.getTokenTitle());
-        addPair(attrs, "symbol", token.tokenInfo.symbol);
-        if (!tokenId.equals(BigInteger.ZERO)) addPair(attrs, "_count", String.valueOf(tokenIds.size()));
-
-        for (String attrKey : tsr.getAttributes().keySet())
-        {
-            TokenScriptResult.Attribute attr = tsr.getAttribute(attrKey);
-            addPair(attrs, attrKey, attr.text);
-        }
-
-        return attrs.toString();
-    }
-
     public void testRecoverAddressFromSignature(String message, String sig)
     {
         String prefix = PERSONAL_MESSAGE_PREFIX + message.length();
@@ -394,30 +415,5 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         {
             e.printStackTrace();
         }
-    }
-
-    private void addPair(StringBuilder attrs, String name, String value) throws ParseException
-    {
-        attrs.append(name);
-        attrs.append(": ");
-
-        if (name.equals("time"))
-        {
-            DateTime dt = DateTimeFactory.getDateTime(value);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
-            String JSDate = dt.format(simpleDateFormat) + "T" + dt.format(simpleTimeFormat);
-
-            value = "{ generalizedTime: \"" + value + "\", date: new Date(\"" + JSDate + "\") }";// ((DateTime) dt).toString();
-            attrs.append(value);
-        }
-        else
-        {
-            attrs.append("\"");
-            attrs.append(value);
-            attrs.append("\"");
-        }
-
-        attrs.append(",\n");
     }
 }

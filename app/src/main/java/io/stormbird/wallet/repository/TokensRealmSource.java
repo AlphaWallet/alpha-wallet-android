@@ -422,7 +422,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     realmToken.setDecimals(token.tokenInfo.decimals);
                 }
                 token.setRealmInterfaceSpec(realmToken);
-                token.setRealmAuxData(realmToken);
                 realm.commitTransaction();
                 TransactionsRealmCache.subRealm();
             }
@@ -503,7 +502,6 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setAddedTime(currentTime.getTime());
                 token.setRealmBalance(realmToken);
                 token.setRealmInterfaceSpec(realmToken);
-                token.setRealmAuxData(realmToken);
                 token.setRealmLastBlock(realmToken);
                 realmToken.setEnabled(true);
                 realmToken.setChainId(token.tokenInfo.chainId);
@@ -523,7 +521,6 @@ public class TokensRealmSource implements TokenLocalSource {
 //                    realmToken.setDecimals(token.tokenInfo.decimals);
                     realmToken.setAddedTime(currentTime.getTime());
                     token.setRealmInterfaceSpec(realmToken);
-                    token.setRealmAuxData(realmToken);
                     realmToken.setEnabled(true);
                     realm.commitTransaction();
                     token.setRealmBalance(realmToken);

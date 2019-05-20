@@ -56,3 +56,5 @@ window.web3.eth.getCoinbase = function(cb) {
     return cb(null, addressHex)
 }
 window.web3.eth.defaultAccount = addressHex
+
+window.ethereum = web3.currentProvider

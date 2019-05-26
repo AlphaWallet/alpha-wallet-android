@@ -2,62 +2,72 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="40dp"
-    android:layout_marginRight="40dp"
-    android:background="@drawable/background_marketplace_event"
+    android:background="@color/colorPrimary"
     android:orientation="vertical"
     android:scrollbarAlwaysDrawVerticalTrack="true"
-    android:scrollbars="vertical"
-    android:paddingBottom="30dp"
-    android:paddingTop="30dp">
+    android:scrollbars="vertical">
 
-    <TextView
-        android:id="@+id/dialog_main_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="20dp"
-        android:fontFamily="@font/font_light"
-        android:gravity="center_horizontal"
-        android:text="@string/select_network"
-        android:textColor="@color/text_black"
-        android:textSize="25sp" />
-
-    <Button
-        android:id="@+id/dialog_button"
-        style="@style/Widget.AppCompat.Button.Borderless.Colored"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="15dp"
-        android:background="@drawable/background_round_primary"
-        android:fontFamily="@font/font_regular"
-        android:gravity="center"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:text="@string/action_confirm"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:textSize="20sp" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_below="@id/dialog_main_text"
-        android:layout_above="@id/dialog_button">
+        android:layout_height="match_parent"
+        android:layout_marginTop="?android:attr/actionBarSize"
+        android:background="@drawable/background_card"
+        android:orientation="vertical"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="100dp"
+        android:paddingTop="20dp">
 
-    <ListView
-        android:id="@+id/dialog_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/dialog_main_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="20dp"
+            android:fontFamily="@font/font_light"
+            android:gravity="center_horizontal"
+            android:text="@string/select_network_filters"
+            android:textColor="@color/text_black"
+            android:textSize="25sp" />
+
+        <ListView
+            android:id="@+id/dialog_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/layoutButtons"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center"
+        android:background="@color/white"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="20dp">
+
+        <Button
+            android:id="@+id/dialog_button"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/selector_round_button"
+            android:fontFamily="@font/font_semibold"
+            android:gravity="center"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp"
+            android:text="@string/action_confirm"
+            android:textAllCaps="false"
+            android:textColor="@color/button_text_color"
+            android:textSize="16sp" />
+
+    </LinearLayout>
 
 </RelativeLayout>

@@ -18,7 +18,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.webkit.*;
+import android.webkit.WebBackForwardList;
+import android.webkit.WebChromeClient;
+import android.webkit.WebHistoryItem;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -28,9 +32,6 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
-import io.stormbird.token.entity.SalesOrderMalformed;
-import io.stormbird.token.tools.ParseMagicLink;
-import io.stormbird.wallet.entity.*;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
@@ -40,9 +41,22 @@ import java.security.SignatureException;
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
+import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.tools.Numeric;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.BuildConfig;
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.CryptoFunctions;
+import io.stormbird.wallet.entity.DApp;
+import io.stormbird.wallet.entity.DAppFunction;
+import io.stormbird.wallet.entity.FragmentMessenger;
+import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.SignTransactionInterface;
+import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.URLLoadInterface;
+import io.stormbird.wallet.entity.URLLoadReceiver;
+import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.OnDappClickListener;
 import io.stormbird.wallet.ui.widget.OnDappHomeNavClickListener;
 import io.stormbird.wallet.ui.widget.OnHistoryItemRemovedListener;
@@ -65,9 +79,9 @@ import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.TypedData;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
-import io.stormbird.wallet.widget.SelectNetworkDialog;
 import io.stormbird.wallet.widget.SignMessageDialog;
 
+import static android.app.Activity.RESULT_OK;
 import static io.stormbird.wallet.C.RESET_TOOLBAR;
 import static io.stormbird.wallet.C.RESET_WALLET;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
@@ -350,17 +364,10 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void selectNetwork() {
-        SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), viewModel.getNetworkList(), String.valueOf(networkInfo.chainId), true);
-        dialog.setOnClickListener(v1 -> {
-            if (networkInfo.chainId != dialog.getSelectedChainId()) {
-                viewModel.setNetwork(dialog.getSelectedChainId());
-                getActivity().sendBroadcast(new Intent(RESET_WALLET));
-                balance.setVisibility(View.GONE);
-                symbol.setVisibility(View.GONE);
-            }
-            dialog.dismiss();
-        });
-        dialog.show();
+        Intent intent = new Intent(getContext(), SelectNetworkActivity.class);
+        intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
+        intent.putExtra(C.EXTRA_CHAIN_ID, String.valueOf(networkInfo.chainId));
+        getActivity().startActivityForResult(intent, C.REQUEST_SELECT_NETWORK);
     }
 
     private void clearAddressBar() {
@@ -769,6 +776,18 @@ public class DappBrowserFragment extends Fragment implements
         else
         {
             web3.onSignCancel(transaction);
+        }
+    }
+
+    public void handleSelectNetwork(int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, -1);
+            if (networkInfo.chainId != networkId) {
+                viewModel.setNetwork(networkId);
+                getActivity().sendBroadcast(new Intent(RESET_WALLET));
+                balance.setVisibility(View.GONE);
+                symbol.setVisibility(View.GONE);
+            }
         }
     }
 

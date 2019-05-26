@@ -2,7 +2,6 @@ package io.stormbird.wallet.ui;
 
 
 import android.Manifest;
-import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -26,17 +25,14 @@ import javax.inject.Inject;
 import dagger.android.support.AndroidSupportInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.util.LocaleUtils;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModel;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModelFactory;
 import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.SelectLocaleDialog;
-import io.stormbird.wallet.widget.SelectNetworkDialog;
 
 import static io.stormbird.wallet.C.CHANGED_LOCALE;
-import static io.stormbird.wallet.C.RESET_WALLET;
 import static io.stormbird.wallet.ui.HomeActivity.RC_ASSET_EXTERNAL_WRITE_PERM;
 
 public class NewSettingsFragment extends Fragment {
@@ -92,14 +88,9 @@ public class NewSettingsFragment extends Fragment {
 
         final LinearLayout layoutSwitchnetworks = view.findViewById(R.id.layout_switch_network);
         layoutSwitchnetworks.setOnClickListener(v -> {
-            SelectNetworkDialog dialog = new SelectNetworkDialog(getActivity(), viewModel.getNetworkList(), viewModel.getFilterNetworkList(), false);
-            dialog.setOnClickListener(v1 -> {
-                viewModel.setFilterNetworks(dialog.getSelectedItems());
-                getActivity().sendBroadcast(new Intent(RESET_WALLET));
-                dialog.dismiss();
-            });
-            dialog.show();
-            dialog.setTitle(R.string.select_network_filters);
+            Intent intent = new Intent(getActivity(), SelectNetworkActivity.class);
+            intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
+            getActivity().startActivity(intent);
         });
 
         final LinearLayout layoutSwitchLocale = view.findViewById(R.id.layout_locale_lang);

@@ -3,11 +3,8 @@ package io.stormbird.wallet;
 import android.app.Activity;
 import android.support.multidex.MultiDexApplication;
 import android.support.v4.app.Fragment;
-
 import io.stormbird.wallet.di.DaggerAppComponent;
-
 import javax.inject.Inject;
-
 import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasActivityInjector;

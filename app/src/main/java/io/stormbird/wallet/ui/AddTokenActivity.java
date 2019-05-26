@@ -13,6 +13,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.tools.ParseMagicLink;
@@ -27,12 +30,9 @@ import io.stormbird.wallet.viewmodel.AddTokenViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.InputAddressView;
 import io.stormbird.wallet.widget.InputView;
-import io.stormbird.wallet.widget.SelectNetworkDialog;
-
 import javax.inject.Inject;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import static io.stormbird.wallet.C.ADDED_TOKEN;
 import static io.stormbird.wallet.ui.zxing.QRScanningActivity.DENY_PERMISSION;
 import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
@@ -157,79 +157,6 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
             progressLayout.setVisibility(View.VISIBLE);
         } else {
             progressLayout.setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == InputAddressView.BARCODE_READER_REQUEST_CODE) {
-            switch (resultCode)
-            {
-                case FullScannerFragment.SUCCESS:
-                    if (data != null) {
-                        String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
-
-                        QRURLParser parser = QRURLParser.getInstance();
-                        QrUrlResult result = parser.parse(barcode);
-
-                        String extracted_address = null;
-
-                        if (result != null)
-                        {
-                            extracted_address = result.getAddress();
-                            switch (result.getProtocol())
-                            {
-                                case "address":
-                                    break;
-                                case "ethereum":
-                                    //EIP681 protocol
-                                    if (result.chainId != 0 && extracted_address != null)
-                                    {
-                                        //this is a payment request
-                                        finishAndLaunchSend(result);
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        else //try magiclink
-                        {
-                            ParseMagicLink magicParser = new ParseMagicLink(new CryptoFunctions());
-                            try
-                            {
-                                if (magicParser.parseUniversalLink(barcode).chainId > 0) //see if it's a valid link
-                                {
-                                    //let's try to import the link
-                                    viewModel.showImportLink(this, barcode);
-                                    finish();
-                                    return;
-                                }
-                            }
-                            catch (SalesOrderMalformed e)
-                            {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        if (extracted_address == null) {
-                            Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        inputAddressView.setAddress(extracted_address);
-                    }
-                    break;
-                case DENY_PERMISSION:
-                    showCameraDenied();
-                    break;
-                default:
-                    Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                                                "Code: " + String.valueOf(resultCode)
-                    ));
-                    break;
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -381,12 +308,72 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void selectNetwork() {
-        SelectNetworkDialog dialog = new SelectNetworkDialog(this, viewModel.getNetworkList(), String.valueOf(networkInfo.chainId), true);
-        dialog.setOnClickListener(v1 -> {
-            networkInfo = viewModel.getNetwork(dialog.getSelectedChainId());
-            if (networkInfo != null) setupNetwork(networkInfo.chainId);
-            dialog.dismiss();
-        });
-        dialog.show();
+        Intent intent = new Intent(AddTokenActivity.this, SelectNetworkActivity.class);
+        intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
+        intent.putExtra(C.EXTRA_CHAIN_ID, String.valueOf(networkInfo.chainId));
+        startActivityForResult(intent, C.REQUEST_SELECT_NETWORK);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == InputAddressView.BARCODE_READER_REQUEST_CODE) {
+            switch (resultCode)
+            {
+                case FullScannerFragment.SUCCESS:
+                    if (data != null) {
+                        String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+
+                        QRURLParser parser = QRURLParser.getInstance();
+                        QrUrlResult result = parser.parse(barcode);
+
+                        String extracted_address = null;
+
+                        if (result != null)
+                        {
+                            extracted_address = result.getAddress();
+                            switch (result.getProtocol())
+                            {
+                                case "address":
+                                    break;
+                                case "ethereum":
+                                    //EIP681 protocol
+                                    if (result.chainId != 0 && extracted_address != null)
+                                    {
+                                        //this is a payment request
+                                        finishAndLaunchSend(result);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        if (extracted_address == null) {
+                            Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        inputAddressView.setAddress(extracted_address);
+                    }
+                    break;
+                case DENY_PERMISSION:
+                    showCameraDenied();
+                    break;
+                default:
+                    Log.e("SEND", String.format(getString(R.string.barcode_error_format),
+                            "Code: " + String.valueOf(resultCode)
+                    ));
+                    break;
+            }
+        } else if (requestCode == C.REQUEST_SELECT_NETWORK) {
+            if (resultCode == RESULT_OK) {
+                int network = data.getIntExtra(C.EXTRA_CHAIN_ID, -1);
+                networkInfo = viewModel.getNetwork(network);
+                if (networkInfo != null) {
+                    setupNetwork(networkInfo.chainId);
+                }
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 }

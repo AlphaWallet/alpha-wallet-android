@@ -216,6 +216,10 @@
         <activity
             android:name="io.stormbird.wallet.ui.AddEditDappActivity"
             android:label="Add DApp" />
+
+        <activity
+            android:name="io.stormbird.wallet.ui.SelectNetworkActivity"
+            android:label="Select Network Filters" />
     </application>
 
 </manifest>

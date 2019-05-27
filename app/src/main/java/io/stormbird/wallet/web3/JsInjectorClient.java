@@ -124,11 +124,22 @@ public class JsInjectorClient {
         return injectJSembed(view, initSrc);
     }
 
+    String injectJSAtEnd(String view, String newCode)
+    {
+        int position = getEndInjectionPosition(view);
+        if (position >= 0) {
+            String beforeTag = view.substring(0, position);
+            String afterTab = view.substring(position);
+            return beforeTag + newCode + afterTab;
+        }
+        return view;
+    }
+
     String injectJSembed(String view, String initSrc)
     {
         initSrc = "<script>\n" + initSrc + "</script>\n";
         return injectJS(view, initSrc);
-}
+    }
 
     String injectJS(String html, String js) {
         if (TextUtils.isEmpty(html)) {
@@ -158,6 +169,13 @@ public class JsInjectorClient {
             index = body.indexOf("</head");
         }
         return index;
+    }
+
+    private int getEndInjectionPosition(String body) {
+        body = body.toLowerCase();
+        int firstIndex = body.indexOf("<script");
+        int nextIndex = body.indexOf("web3", firstIndex);
+        return body.indexOf("</script", nextIndex);
     }
 
     @Nullable

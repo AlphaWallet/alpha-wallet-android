@@ -198,13 +198,13 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
 
     private void getAttrs(List<BigInteger> tokenIds) throws Exception
     {
-        BigInteger tokenId = tokenIds.get(0);
+        BigInteger tokenId = tokenIds != null ? tokenIds.get(0) : BigInteger.ZERO;
         attrs = viewModel.getAssetDefinitionService().getTokenAttrs(token, tokenIds.size());
         viewModel.getAssetDefinitionService().resolveAttrs(token, tokenId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onAttr, this::onError, () -> displayFunction(attrs.toString()))
-                .wait();
+                .isDisposed();
     }
 
     private void displayFunction(String tokenAttrs)

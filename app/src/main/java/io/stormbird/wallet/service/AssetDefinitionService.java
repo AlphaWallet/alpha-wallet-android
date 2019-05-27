@@ -63,7 +63,7 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
  * and also provide a consistent way to get XML values
  */
 
-public class AssetDefinitionService implements ParseResult
+public class AssetDefinitionService implements ParseResult, AttributeInterface
 {
     private static final String XML_EXT = "xml";
     private final Context context;
@@ -135,166 +135,28 @@ public class AssetDefinitionService implements ParseResult
         }
     }
 
-    public List<AttributeType> getAttrs(Token token)
+    @Override
+    public boolean resolveOptimisedAttr(ContractAddress contract, AttributeType attr, TransactionResult transactionResult)
     {
-        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
-        if (definition != null)
+        boolean optimised = false;
+        if (attr.function == null) return false;
+        Token checkToken = tokensService.getToken(contract.chainId, contract.address);
+        if (attr.function.method.equals("balanceOf") && checkToken != null)
         {
-            return new ArrayList<>(definition.attributeTypes.values());
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    private Observable<TokenScriptResult.Attribute> staticAttribute(AttributeType attr, BigInteger tokenId)
-    {
-        return Observable.fromCallable(() -> {
-            try
+            //ensure the arg check for this function call is checking the correct balance address
+            for (MethodArg arg : attr.function.parameters)
             {
-                BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
-                return new TokenScriptResult.Attribute(attr.id, attr.name, val, attr.toString(val));
-            }
-            catch (Exception e)
-            {
-                return new TokenScriptResult.Attribute(attr.id, attr.name, tokenId, "unsupported encoding");
-            }
-        });
-    }
-
-    public Observable<TokenScriptResult.Attribute> fetchAttrResult(AttributeType attr, BigInteger tokenId, Token token)
-    {
-        if (attr.function == null)
-        {
-            return staticAttribute(attr, tokenId);
-        }
-        else
-        {
-            ContractAddress contract = getContractAddress(attr.function, token);
-            Token checkToken = tokensService.getToken(contract.chainId, contract.address);
-            if (contract == null) return Observable.fromCallable(() -> null);
-            TransactionResult transactionResult = getFunctionResult(token.getWallet(), contract, attr, tokenId);
-            if (checkToken != null && checkToken.isERC20() && attr.function.method.equals("balanceOf"))
-            {
-                transactionResult.result = checkToken.balance.toString();
-                transactionResult.resultTime = checkToken.updateBlancaTime;
-                return resultFromDatabase(transactionResult, attr);
-            }
-            else if (transactionResult.needsUpdating()) //if value is old
-            {
-                return fetchResultFromEthereum(token.getWallet(), contract, attr, tokenId)
-                        .map(result -> restoreFromDBIfRequired(result, transactionResult))
-                        .map(result -> storeAuxData(token.getWallet(), result))
-                        .map(result -> attr.function.parseFunctionResult(result, attr));
-            }
-            else
-            {
-                return resultFromDatabase(transactionResult, attr);
-            }
-        }
-    }
-
-    /**
-     * Restore result from Database if required (eg connection failure), and if there was a database value to restore
-     * @param result
-     * @param transactionResult
-     * @return
-     */
-    private TransactionResult restoreFromDBIfRequired(TransactionResult result, TransactionResult transactionResult)
-    {
-        if (result.resultTime == -1 && transactionResult != null)
-        {
-            result.result = transactionResult.result;
-            result.resultTime = transactionResult.resultTime;
-        }
-
-        return result;
-    }
-
-    public ContractAddress getContractAddress(FunctionDefinition fd, Token token)
-    {
-        List<String> contracts = fd.contract.addresses.get(token.tokenInfo.chainId);
-        if (contracts.contains(token.tokenInfo.address)) return new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
-        else return getFromContracts(fd.contract.addresses);
-    }
-
-    /**
-     * Haven't pre-cached this value yet, so need to fetch it before we can proceed
-     * @param wallet
-     * @param contract
-     * @param attr
-     * @param tokenId
-     * @return
-     */
-    private Observable<TransactionResult> fetchResultFromEthereum(String wallet, ContractAddress contract, AttributeType attr, BigInteger tokenId)
-    {
-        return Observable.fromCallable(() -> {
-            TransactionResult transactionResult = new TransactionResult(contract.chainId, contract.address, tokenId, attr);
-            // precheck balanceOf optimisation
-            if (attr.function.method.equals("balanceOf"))
-            {
-                Token checkToken = tokensService.getToken(contract.chainId, contract.address);
-                if (checkToken != null)
+                if (arg.parameterType.equals("address") && arg.ref.equals("ownerAddress"))
                 {
                     transactionResult.result = checkToken.balance.toString();
                     transactionResult.resultTime = checkToken.updateBlancaTime;
-                    return transactionResult;
+                    optimised = true;
+                    break;
                 }
             }
-
-            // 1: create transaction call
-            org.web3j.abi.datatypes.Function transaction = attr.function.generateTransactionFunction(wallet, tokenId);
-            // 2: create web3 connection
-            if (web3ChainId != contract.chainId)
-            {
-                OkHttpClient okClient = new OkHttpClient.Builder()
-                        .connectTimeout(5, TimeUnit.SECONDS)
-                        .readTimeout(5, TimeUnit.SECONDS)
-                        .writeTimeout(5, TimeUnit.SECONDS)
-                        .retryOnConnectionFailure(false)
-                        .build();
-
-                HttpService nodeService = new HttpService(ethereumNetworkRepository.getNetworkByChain(contract.chainId).rpcServerUrl, okClient, false);
-
-                web3j = Web3j.build(nodeService);
-                web3ChainId = contract.chainId;
-            }
-            //now push the transaction
-            String result = callSmartContractFunction(transaction, contract.address, new Wallet(wallet));
-
-            attr.function.handleTransactionResult(transactionResult, transaction, result);
-            return transactionResult;
-        });
-    }
-
-    private String callSmartContractFunction(
-            Function function, String contractAddress, Wallet wallet) throws Exception {
-        String encodedFunction = FunctionEncoder.encode(function);
-
-        try
-        {
-            org.web3j.protocol.core.methods.request.Transaction transaction
-                    = createEthCallTransaction(wallet.address, contractAddress, encodedFunction);
-            EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
-
-            return response.getValue();
         }
-        catch (IOException e)
-        {
-            //Connection error. Use cached value
-            return null;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
-    private Observable<TokenScriptResult.Attribute> resultFromDatabase(TransactionResult transactionResult, AttributeType attr)
-    {
-        return Observable.fromCallable(() -> attr.function.parseFunctionResult(transactionResult, attr));
+        return optimised;
     }
 
     /**
@@ -315,10 +177,10 @@ public class AssetDefinitionService implements ParseResult
                 {
                     if (attrtype.function != null)
                     {
-                        ContractAddress contract = getContractAddress(attrtype.function, token);
+                        ContractAddress contract = new ContractAddress(attrtype.function, token.tokenInfo.chainId, token.tokenInfo.address);// getContractAddress(attrtype.function, token);
                         if (contract == null)
                             continue;
-                        TransactionResult tResult = getFunctionResult(token.getWallet(), contract, attrtype, tokenId); //t.getTokenIdResults(BigInteger.ZERO);
+                        TransactionResult tResult = getFunctionResult(contract, attrtype, tokenId); //t.getTokenIdResults(BigInteger.ZERO);
                         result.setAttribute(attrtype.id, attrtype.function.parseFunctionResult(tResult, attrtype));
                     }
                     else
@@ -350,38 +212,6 @@ public class AssetDefinitionService implements ParseResult
         }
 
         return null;
-    }
-
-    private Token getTokenFromContracts(TokensService service, Map<Integer, List<String>> addresses)
-    {
-        Token t = null;
-        for (int chainId : addresses.keySet())
-        {
-            for (String addr : addresses.get(chainId))
-            {
-                t = service.getToken(chainId, addr);
-                if (t != null) return t;
-            }
-        }
-
-        return null;
-    }
-
-    private String getContractNameFromDefiniton(Token token, TokenDefinition def)
-    {
-        for (String key : def.contracts.keySet())
-        {
-            ContractInfo info = def.contracts.get(key);
-            for (String addr : info.addresses.get(token.tokenInfo.chainId))
-            {
-                if (addr.equals(token.tokenInfo.address))
-                {
-                    return key;
-                }
-            }
-        }
-
-        return "";
     }
 
     /**
@@ -1100,20 +930,24 @@ public class AssetDefinitionService implements ParseResult
                                     if (token != null)
                                     {
                                         Observable.fromIterable(token.getNonZeroArrayBalance())
-                                                .map(tokenId -> getFunctionResult(walletAddress, cAddr, attr, tokenId))
+                                                .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
                                                 .filter(TransactionResult::needsUpdating)
-                                                .concatMap(result -> fetchResultFromEthereum(walletAddress, cAddr, attr, result.tokenId)).blockingIterable()
-                                                .forEach(result -> storeAuxData(walletAddress, result));
+                                                .concatMap(result -> td.fetchAttrResult(attr.id, result.tokenId, cAddr, this))
+                                                .subscribeOn(Schedulers.io())
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe();
                                     }
                                 }
                                 else
                                 {
                                     //doesn't have a contract interface, so just fetch the function
-                                    TransactionResult tr = getFunctionResult(walletAddress, cAddr, attr, BigInteger.ZERO);
+                                    TransactionResult tr = getFunctionResult(cAddr, attr, BigInteger.ZERO);
                                     if (tr.needsUpdating())
                                     {
-                                        fetchResultFromEthereum(walletAddress, cAddr, attr, tr.tokenId).blockingIterable()
-                                                .forEach(result -> storeAuxData(walletAddress, result));
+                                        td.fetchAttrResult(attr.id, tr.tokenId, cAddr, this)
+                                                .subscribeOn(Schedulers.io())
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe();
                                     }
                                 }
                             }
@@ -1133,10 +967,11 @@ public class AssetDefinitionService implements ParseResult
         return cAddr.address + "-" + tokenId.toString(Character.MAX_RADIX) + "-" + cAddr.chainId + "-" + attrId;
     }
 
-    public TransactionResult getFunctionResult(String walletAddress, ContractAddress contract, AttributeType attr, BigInteger tokenId)
+    @Override
+    public TransactionResult getFunctionResult(ContractAddress contract, AttributeType attr, BigInteger tokenId)
     {
         TransactionResult tr = new TransactionResult(contract.chainId, contract.address, tokenId, attr);
-        try (Realm realm = realmManager.getAuxRealmInstance(walletAddress)) {
+        try (Realm realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress())) {
             RealmAuxData realmToken = realm.where(RealmAuxData.class)
                     .equalTo("instanceKey", functionKey(contract, tokenId, attr.id))
                     .equalTo("chainId", contract.chainId)
@@ -1155,7 +990,8 @@ public class AssetDefinitionService implements ParseResult
         return tr;
     }
 
-    private TransactionResult storeAuxData(String walletAddress, TransactionResult tResult)
+    @Override
+    public TransactionResult storeAuxData(TransactionResult tResult)
     {
         Completable.complete()
                 .subscribeWith(new DisposableCompletableObserver()
@@ -1166,7 +1002,7 @@ public class AssetDefinitionService implements ParseResult
                     public void onStart()
                     {
                         if (tResult.result == null) return;
-                        realm = realmManager.getAuxRealmInstance(walletAddress);
+                        realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress());
                         ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
                         RealmAuxData realmToken = realm.where(RealmAuxData.class)
                                 .equalTo("instanceKey", functionKey(cAddr, tResult.tokenId, tResult.attrId))
@@ -1231,41 +1067,41 @@ public class AssetDefinitionService implements ParseResult
     {
         StringBuilder attrs = new StringBuilder();
 
-        addPair(attrs, "name", token.getTokenTitle());
-        addPair(attrs, "symbol", token.tokenInfo.symbol);
-        addPair(attrs, "_count", String.valueOf(count));
+        TokenScriptResult.addPair(attrs, "name", token.getTokenTitle());
+        TokenScriptResult.addPair(attrs, "symbol", token.tokenInfo.symbol);
+        TokenScriptResult.addPair(attrs, "_count", String.valueOf(count));
 
         return attrs;
     }
 
-    public void addPair(StringBuilder attrs, String name, String value) throws ParseException
+    /**
+     * Get all the magic values - eg native crypto balances for all chains
+     * @return
+     */
+    public String getMagicValuesForInjection(int chainId) throws Exception
     {
-        attrs.append(name);
-        attrs.append(": ");
+        String walletBalance = "walletBalance";
+        String prefix = "web3.eth";
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n\n");
+        Token nativeCurrency = tokensService.getToken(chainId, tokensService.getCurrentAddress());
+        sb.append(prefix).append(" = {\n").append(walletBalance).append(": ").append(nativeCurrency.balance.toString()).append("\n}\n");
 
-        if (name.equals("time"))
+        List<Token> nativeCurrencies = tokensService.getAllAtAddress(tokensService.getCurrentAddress());
+        for (Token currency : nativeCurrencies)
         {
-            DateTime dt = DateTimeFactory.getDateTime(value);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
-            String JSDate = dt.format(simpleDateFormat) + "T" + dt.format(simpleTimeFormat);
-
-            value = "{ generalizedTime: \"" + value + "\", date: new Date(\"" + JSDate + "\") }";// ((DateTime) dt).toString();
-            attrs.append(value);
-        }
-        else
-        {
-            attrs.append("\"");
-            attrs.append(value);
-            attrs.append("\"");
+            sb.append(prefix).append("_").append(currency.tokenInfo.chainId).append(" = {\n").append(walletBalance).append(": ").append(currency.balance.toString()).append("\n}\n");
         }
 
-        attrs.append(",\n");
+        sb.append("\n\n");
+
+        return sb.toString();
     }
 
     public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, BigInteger tokenId)
     {
-        return Observable.fromIterable(getAttrs(token))
-                .flatMap(attr -> fetchAttrResult(attr, tokenId, token));
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
+        return definition.resolveAttributes(tokenId, this, cAddr);
     }
 }

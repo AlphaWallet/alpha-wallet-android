@@ -19,6 +19,7 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -188,16 +189,21 @@ public class Token implements Parcelable
         viewModel.showErc20TokenDetail(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
     }
 
-    public void setupContent(TokenHolder holder, AssetDefinitionService definition)
+    public BigDecimal getCorrectedBalance(int scale)
     {
         BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
         BigDecimal ethBalance = tokenInfo.decimals > 0
                 ? balance.divide(decimalDivisor) : balance;
-        ethBalance = ethBalance.setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros();
+        return ethBalance.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros();
+    }
+
+    public void setupContent(TokenHolder holder, AssetDefinitionService definition)
+    {
+        BigDecimal ethBalance = getCorrectedBalance(4);
         String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
         if (ethBalance.compareTo(BigDecimal.ZERO) == 0 && balance.compareTo(BigDecimal.ZERO) > 0)
         {
-            ethBalance = balance.divide(decimalDivisor);
+            ethBalance = balance.divide(new BigDecimal(Math.pow(10, tokenInfo.decimals)));
             //fractional value. How to represent?
             value = getMinimalString(ethBalance.toPlainString());
             if (value.length() > 6)

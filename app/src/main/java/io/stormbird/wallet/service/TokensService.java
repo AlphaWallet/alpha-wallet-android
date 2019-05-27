@@ -188,7 +188,7 @@ public class TokensService
         return tokens;
     }
 
-    private List<Token> getAllAtAddress(String addr)
+    public List<Token> getAllAtAddress(String addr)
     {
         List<Token> tokens = new ArrayList<>();
         if (addr == null) return tokens;

@@ -34,6 +34,18 @@ public class MagicLinkInfo
     private static final String goerliMagicLinkDomain = "goerli.aw.app";
     private static final String customMagicLinkDomain = "custom.aw.app";
 
+    //Etherscan domains
+    private static final String mainNetEtherscan = "https://etherscan.io/";
+    private static final String classicEtherscan = "https://gastracker.io/";
+    private static final String callistoEtherscan = "https://etherscan.io/"; //TODO: determine callisto etherscan
+    private static final String kovanEtherscan = "https://kovan.etherscan.io/";
+    private static final String ropstenEtherscan = "https://ropsten.etherscan.io/";
+    private static final String rinkebyEtherscan = "https://rinkeby.etherscan.io/";
+    private static final String poaEtherscan = "https://poaexplorer.com/";
+    private static final String sokolEtherscan = "https://sokol-explorer.poa.network/account/";
+    private static final String xDaiEtherscan = "https://blockscout.com/poa/dai/";
+    private static final String goerliEtherscan = "https://goerli.etherscan.io/";
+
     //network ids
     private static final int LEGACY_VALUE = 0;
     private static final int MAINNET_NETWORK_ID = 1;
@@ -114,6 +126,7 @@ public class MagicLinkInfo
             case LEGACY_VALUE:
                 return legacyMagicLinkDomain;
             case MAINNET_NETWORK_ID:
+            default:
                 return mainnetMagicLinkDomain;
             case KOVAN_NETWORK_ID:
                 return kovanMagicLinkDomain;
@@ -131,8 +144,6 @@ public class MagicLinkInfo
                 return xDaiMagicLinkDomain;
             case GOERLI_NETWORK_ID:
                 return goerliMagicLinkDomain;
-            default:
-                return mainnetMagicLinkDomain;
         }
     }
 
@@ -141,6 +152,7 @@ public class MagicLinkInfo
     public static int getNetworkIdFromDomain(String domain) {
         switch(domain) {
             case mainnetMagicLinkDomain:
+            default:
                 return MAINNET_NETWORK_ID;
             case legacyMagicLinkDomain:
                 return MAINNET_NETWORK_ID;
@@ -160,8 +172,30 @@ public class MagicLinkInfo
                 return XDAI_NETWORK_ID;
             case goerliMagicLinkDomain:
                 return GOERLI_NETWORK_ID;
+        }
+    }
+
+    public static String getEtherscanURLbyNetwork(int networkId) {
+        switch (networkId) {
+            case MAINNET_NETWORK_ID:
             default:
-                return MAINNET_NETWORK_ID;
+                return mainNetEtherscan;
+            case KOVAN_NETWORK_ID:
+                return kovanEtherscan;
+            case ROPSTEN_NETWORK_ID:
+                return ropstenEtherscan;
+            case RINKEBY_NETWORK_ID:
+                return rinkebyEtherscan;
+            case POA_NETWORK_ID:
+                return poaEtherscan;
+            case SOKOL_NETWORK_ID:
+                return sokolEtherscan;
+            case CLASSIC_NETWORK_ID:
+                return classicEtherscan;
+            case XDAI_NETWORK_ID:
+                return xDaiEtherscan;
+            case GOERLI_NETWORK_ID:
+                return goerliEtherscan;
         }
     }
 

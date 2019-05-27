@@ -1,8 +1,7 @@
 package io.stormbird.token.web;
 
-import io.stormbird.token.entity.MagicLinkInfo;
+import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.TokenDefinition;
-import io.stormbird.token.util.DateTimeFactory;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.*;
@@ -18,13 +17,11 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import io.stormbird.token.entity.MagicLinkData;
-import io.stormbird.token.entity.NonFungibleToken;
-import io.stormbird.token.entity.SalesOrderMalformed;
+
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.web.Ethereum.TransactionHandler;
 import io.stormbird.token.web.Service.CryptoFunctions;
@@ -36,16 +33,15 @@ import javax.servlet.http.HttpServletRequest;
 import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.token.tools.Convert.getEthStringSzabo;
 import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
-import static io.stormbird.token.tools.ParseMagicLink.spawnable;
-
 
 @Controller
 @SpringBootApplication
 @RequestMapping("/")
-public class AppSiteController {
-
+public class AppSiteController implements AttributeInterface
+{
     private static CryptoFunctions cryptoFunctions = new CryptoFunctions();
-    private static Map<String, File> addresses;
+    private static Map<Integer, Map<String, File>> addresses;
+    private static Map<Integer, Map<String, Map<BigInteger, CachedResult>>> transactionResults = new ConcurrentHashMap<>();  //optimisation results
     private static final String appleAssociationConfig = "{\n" +
             "  \"applinks\": {\n" +
             "    \"apps\": [],\n" +
@@ -71,7 +67,7 @@ public class AppSiteController {
     }
 
     @GetMapping(value = "/{UniversalLink}")
-    public String handleUniversalLink(
+    public @ResponseBody String handleUniversalLink(
             @PathVariable("UniversalLink") String universalLink,
             @RequestHeader("User-Agent") String agent,
             Model model,
@@ -80,9 +76,10 @@ public class AppSiteController {
             throws IOException, SAXException, NoHandlerFoundException
     {
         String domain = request.getServerName();
-        ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
+        ParseMagicLink parser = new ParseMagicLink(cryptoFunctions);
         MagicLinkData data;
         model.addAttribute("base64", universalLink);
+
         try
         {
             data = parser.parseUniversalLink(universalLink);
@@ -97,60 +94,103 @@ public class AppSiteController {
         {
             case currencyLink:
                 return handleCurrencyLink(data, agent, model);
-            case spawnable:
-                return handleSpawnableLink(data, agent, model);
             default:
-                return handleTokenLink(data, agent, model);
+                return handleTokenLink(data, agent, model, universalLink);
         }
     }
 
     private String handleTokenLink(
             MagicLinkData data,
             String agent,
-            Model model
+            Model model,
+            String universalLink
     ) throws IOException, SAXException, NoHandlerFoundException
     {
-        TokenDefinition definition = getTokenDefinition(data.contractAddress);
+        TokenDefinition definition = getTokenDefinition(data.chainId, data.contractAddress);
 
-        model.addAttribute("tokenName", definition.getTokenName(data.ticketCount));
-        model.addAttribute("link", data);
-        model.addAttribute("linkPrice",
-                getEthString(data.price) + " " + MagicLinkInfo.getNetworkNameById(data.chainId));
+        //get attributes
+        BigInteger firstTokenId = BigInteger.ZERO;
 
-        try {
-            updateContractInfo(model, data);
-        } catch (Exception e) {
-            /* The link points to a non-existing contract - most
-	     * likely from a different chainID. Now, if Ethereum node
-	     * is offline, this may get triggered too. */
-            model.addAttribute("tokenAvailable", "unattainable");
-            return "index";
-        }
-
-        try {
+        try
+        {
             updateTokenInfo(model, data, definition);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             /* although contract is okay, we can't getting
-	     * tokens. This could be caused by a wrong signature. The
-	     * case that the tokens are redeemd is handled inside, not
-	     * as an exception */
+             * tokens. This could be caused by a wrong signature. The
+             * case that the tokens are redeemd is handled inside, not
+             * as an exception */
             model.addAttribute("tokenAvailable", "unavailable");
             return "index";
         }
 
-        if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000))){
-            model.addAttribute("tokenAvailable", "expired");
-        } else {
-            model.addAttribute("tokenAvailable", "available");
+        if (data.tokenIds != null && data.tokenIds.size() > 0)
+            firstTokenId = data.tokenIds.get(0);
+        System.out.println(firstTokenId.toString(16));
+        ContractAddress cAddr = new ContractAddress(data.chainId, data.contractAddress);
+        StringBuilder tokenData = new StringBuilder();
+        TransactionHandler txHandler = new TransactionHandler(data.chainId);
+
+        String tokenName = txHandler.getNameOnly(data.contractAddress);
+        String symbol = txHandler.getSymbolOnly(data.contractAddress);
+        String nameWithSymbol = tokenName + "(" + symbol + ")";
+
+        try
+        {
+            TokenScriptResult.addPair(tokenData, "name", tokenName);
+            TokenScriptResult.addPair(tokenData, "symbol", symbol);
+            TokenScriptResult.addPair(tokenData, "_count", String.valueOf(data.ticketCount));
         }
-        return "index";
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        definition.resolveAttributes(firstTokenId, this, cAddr)
+                .forEach(attr -> TokenScriptResult.addPair(tokenData, attr.id, attr.text))
+                .isDisposed();
+
+        String available = "available";
+        if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000))) available = "expired";
+
+        String price = getEthString(data.price) + " " + MagicLinkInfo.getNetworkNameById(data.chainId);
+
+        String title = data.ticketCount + " " + definition.getTokenName(data.ticketCount) + " " + available;
+
+        String view = definition.getCardData("view");
+        String style = definition.getCardData("style");
+        String initHTML = loadFile("templates/tokenscriptTemplate.html");
+
+        String scriptData = loadFile("templates/token_inject.js.tokenscript");
+        String tokenView = String.format(scriptData,
+                                         tokenData.toString(), view);
+
+        String expiry = new java.util.Date(data.expiry*1000).toString();
+
+        String availableUntil = "<span title=\"Unix Time is " + data.expiry + "\">" + expiry + "</span>";
+        String action = "\"" + universalLink + "\"";
+        String originalLink = "\"https://" + MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId) + "/" + universalLink + "\"";
+
+        String etherscanAccountLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "address/" + data.ownerAddress;
+        String etherscanTokenLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "token/" + data.contractAddress;
+
+        return String.format(initHTML,
+                                        title, style, String.valueOf(data.ticketCount), nameWithSymbol, definition.getTokenName(data.ticketCount),
+                                        price, available,
+                                        data.ticketCount, definition.getTokenName(data.ticketCount),
+                                        tokenView, availableUntil,
+                                        action, originalLink,
+                                        etherscanAccountLink, data.ownerAddress,
+                                        etherscanTokenLink, data.contractAddress
+                                        );
     }
 
     private String handleCurrencyLink(
             MagicLinkData data,
             String agent,
             Model model
-    ) throws IOException, SAXException, NoHandlerFoundException
+    )
     {
         String networkName = MagicLinkInfo.getNetworkNameById(data.chainId);
         model.addAttribute("link", data);
@@ -177,70 +217,22 @@ public class AppSiteController {
         return "currency";
     }
 
-    private String handleSpawnableLink(
-            MagicLinkData data,
-            String agent,
-            Model model
-    ) throws IOException, SAXException, NoHandlerFoundException
-    {
-        TokenDefinition definition = getTokenDefinition(data.contractAddress);
-
-        String tokenName = definition.getTokenName(data.ticketCount);
-
-        model.addAttribute("tokenName", definition.getTokenName(data.ticketCount));
-        model.addAttribute("link", data);
-        model.addAttribute("linkPrice",
-                getEthString(data.price) + " " + MagicLinkInfo.getNetworkNameById(data.chainId));
-        model.addAttribute("domain", MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId));
-
-        try {
-            updateContractInfo(model, data);
-        } catch (Exception e) {
-            /* The link points to a non-existing contract - most
-             * likely from a different chainID. Now, if Ethereum node
-             * is offline, this may get triggered too. */
-            model.addAttribute("tokenAvailable", "unattainable");
-            return "spawnable";
-        }
-
-        try {
-            updateTokenInfoForSpawnable(model, data, definition);
-        } catch (Exception e) {
-            /* although contract is okay, we can't getting
-             * tokens. This could be caused by a wrong signature. The
-             * case that the tokens are redeemd is handled inside, not
-             * as an exception */
-            model.addAttribute("tokenAvailable", "unavailable");
-            return "spawnable";
-        }
-
-        if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000))){
-            model.addAttribute("tokenAvailable", "expired");
-        } else {
-            model.addAttribute("tokenAvailable", "available");
-        }
-        return "spawnable";
-    }
-
-    private TokenDefinition getTokenDefinition(String contractAddress) throws IOException, SAXException, NoHandlerFoundException
+    private TokenDefinition getTokenDefinition(int chainId, String contractAddress) throws IOException, SAXException, NoHandlerFoundException
     {
         File xml = null;
-        TokenDefinition definition;
-        for (String address : addresses.keySet()) {
-            xml = addresses.get(address);
-            // TODO: when xml-schema-v1 is merged, produce a new "default XML" to fill the role of fallback.
-            if (address.equals(contractAddress)) { // this works as contractAddress is always in lowercase
-                break;
+        TokenDefinition definition = null;
+        if (addresses.containsKey(chainId))
+        {
+            xml = addresses.get(chainId).get(contractAddress);
+            if (xml == null) {
+                /* this is impossible to happen, because at least 1 xml should present or main() bails out */
+                throw new NoHandlerFoundException("GET", "/" + contractAddress, new HttpHeaders());
             }
-        }
-        if (xml == null) {
-            /* this is impossible to happen, because at least 1 xml should present or main() bails out */
-            throw new NoHandlerFoundException("GET", "/" + contractAddress, new HttpHeaders());
-        }
-        try(FileInputStream in = new FileInputStream(xml)) {
-            // TODO: give more detail in the error
-            // TODO: reflect on this: should the page bail out for contracts with completely no matching XML?
-            definition = new TokenDefinition(in, new Locale("en"), null);
+            try(FileInputStream in = new FileInputStream(xml)) {
+                // TODO: give more detail in the error
+                // TODO: reflect on this: should the page bail out for contracts with completely no matching XML?
+                definition = new TokenDefinition(in, new Locale("en"), null);
+            }
         }
 
         return definition;
@@ -255,57 +247,13 @@ public class AppSiteController {
         model.addAttribute("contractName", contractName);
     }
 
-    private void updateTokenInfoForSpawnable(Model model, MagicLinkData data, TokenDefinition definition) throws Exception {
-        // TODO: use the locale negotiated with user agent (content-negotiation) instead of English
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM HH:mm", Locale.ENGLISH);
-
-        List<NonFungibleToken> selection = Arrays.stream(data.tokenIds.toArray(new BigInteger[0]))
-                .filter(tokenId -> !tokenId.equals(BigInteger.ZERO))
-                .map(tokenId -> new NonFungibleToken(tokenId, definition))
-                .collect(Collectors.toList());
-
-        for (NonFungibleToken token : selection)
-        {
-            int index = 1;
-            for (String key : token.getAttributes().keySet())
-            {
-                String def = "attr" + index;
-                String val = "val" + index;
-                NonFungibleToken.Attribute attr = token.getAttribute(key);
-                switch (key)
-                {
-                    case "time":
-                        model.addAttribute("ticketDate", DateTimeFactory.getDateTime(attr).format(dateFormat));
-                        break;
-
-                    case "numero":
-                        model.addAttribute(key, attr.text);
-                        break;
-
-                    default:
-                        model.addAttribute(def, attr.name);
-                        model.addAttribute(val, attr.text);
-                        index++;
-                        break;
-                }
-            }
-
-            for (;index < 3;index++)
-            {
-                model.addAttribute("attr"+index, "");
-                model.addAttribute("val"+index, "");
-            }
-
-            //prevent page from failing if attribute didn't contain numero
-            if (!model.containsAttribute("numero"))
-            {
-                model.addAttribute("numero", "1");
-            }
-
-            break; // we only need 1 token's info. rest assumed to be the same
-        }
-    }
-
+    /**
+     * Check ownership of tokens: Ensure that all tokens are still owned by the party selling the tokens
+     * @param model
+     * @param data
+     * @param definition
+     * @throws Exception
+     */
     private void updateTokenInfo(
             Model model,
             MagicLinkData data,
@@ -313,32 +261,20 @@ public class AppSiteController {
     ) throws Exception {
         model.addAttribute("domain", MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId));
         TransactionHandler txHandler = new TransactionHandler(data.chainId);
-        // TODO: use the locale negotiated with user agent (content-negotiation) instead of English
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM HH:mm", Locale.ENGLISH);
         List<BigInteger> balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
+        data.tokenIds = new ArrayList<>();
 
         List<NonFungibleToken> selection = Arrays.stream(data.tickets)
                 .mapToObj(i -> balanceArray.get(i))
                 .filter(tokenId -> !tokenId.equals(BigInteger.ZERO))
-                .map(tokenId -> new NonFungibleToken(tokenId, definition))
+                .map(tokenId -> {
+                    data.tokenIds.add(tokenId);
+                    return new NonFungibleToken(tokenId, definition);
+                })
                 .collect(Collectors.toList());
 
-        for (NonFungibleToken token : selection) {
-            if (token.getAttribute("countryA") != null)
-            {
-                String sides = token.getAttribute("countryA").text;
-                sides += " - " + token.getAttribute("countryB").text;
-                model.addAttribute("ticketSides", sides);
-                model.addAttribute("ticketDate",
-                                   DateTimeFactory.getDateTime(token.getAttribute("time")).format(dateFormat));
-                model.addAttribute("ticketMatch", token.getAttribute("match").text);
-                model.addAttribute("ticketCategory", token.getAttribute("category").text);
-            }
-            break; // we only need 1 token's info. rest assumed to be the same
-        }
-
         if (selection.size() != data.tickets.length)
-            throw new Exception("Some or all non-fungiable tokens are not owned by the claimed owner");
+            throw new Exception("Some or all non-fungible tokens are not owned by the claimed owner");
     }
 
     private static Path repoDir;
@@ -349,16 +285,14 @@ public class AppSiteController {
     }
 
     public static void main(String[] args) throws IOException { // TODO: should run System.exit() if IOException
+        addresses = new HashMap<Integer, Map<String, File>>();
         SpringApplication.run(AppSiteController.class, args);
         try (Stream<Path> dirStream = Files.walk(repoDir)) {
-            addresses = dirStream.filter(path -> path.toString().toLowerCase().endsWith(".xml"))
+            dirStream.filter(path -> path.toString().toLowerCase().endsWith(".xml"))
                     .filter(Files::isRegularFile)
                     .filter(Files::isReadable)
-                    .map(path -> getContractAddresses(path))
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toMap(
-                            entry -> entry.getKey().toLowerCase(),
-                            entry -> new File(entry.getValue())));
+                    .forEach(AppSiteController::addContractAddresses);
+
             assert addresses != null : "Can't read all XML files";
         } catch (NoSuchFileException e) {
             System.err.println("repository.dir property is defined with a non-existing dir: " + repoDir.toString());
@@ -377,35 +311,152 @@ public class AppSiteController {
         } else {
             // the list should be reprinted whenever a new file is added.
             System.out.println("Serving an XML repo with the following contracts:");
-            addresses.forEach((addr, xml) -> System.out.println(addr + ":" + xml.getPath()));
+            addresses.forEach((chainId, addrMap) -> {
+                System.out.println("Network ID: " + MagicLinkInfo.getNetworkNameById(chainId) + "(" + chainId + ")");
+                addrMap.forEach((addr, xml) -> {
+                    System.out.println(addr + ":" + xml.getPath());
+                });
+                System.out.println(" ------------");
+            });
         }
 	}
 
-	private static Set<Map.Entry<String, String>> getContractAddresses(Path path) {
-        HashMap<String, String> map = new HashMap<>();
+    private static void addContractAddresses(Path path) {
         try (InputStream input = Files.newInputStream(path)) {
             TokenDefinition token = new TokenDefinition(input, new Locale("en"), null);
-            token.addresses.keySet().stream().forEach(address -> map.put(address, path.toString()));
-            return map.entrySet();
+            ContractInfo holdingContracts = token.contracts.get(token.holdingToken);
+            if (holdingContracts != null)
+                holdingContracts.addresses.keySet().stream().forEach(network -> addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), path.toString()))); //map.put(network, networkAddresses(holdingContracts.addresses.get(network), path.toString())));
         } catch (IOException | SAXException e) {
             throw new RuntimeException(e); // make it safe to use in stream
         }
+    }
+
+    private static void addContractsToNetwork(Integer network, Map<String, File> newTokenDescriptionAddresses)
+    {
+        Map<String, File> existingDefinitions = addresses.get(network);
+        if (existingDefinitions == null) existingDefinitions = new HashMap<>();
+
+        addresses.put(network, Stream.concat(existingDefinitions.entrySet().stream(), newTokenDescriptionAddresses.entrySet().stream())
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (value1, value2) -> new File(value2.getAbsolutePath())
+                         )
+                ));
+    }
+
+    private static Map<String, File> networkAddresses(List<String> strings, String path)
+    {
+        Map<String, File> addrMap = new HashMap<>();
+        strings.forEach(address -> addrMap.put(address, new File(path)));
+        return addrMap;
     }
 
     @GetMapping(value = "/0x{address}", produces = MediaType.TEXT_XML_VALUE) // TODO: use regexp 0x[0-9a-fA-F]{20}
     public @ResponseBody String getContractBehaviour(@PathVariable("address") String address)
             throws IOException, NoHandlerFoundException
     {
+        StringBuilder tokenDefinitionList = new StringBuilder();
         /* TODO: should parse the address, do checksum, store in a byte160 */
         address = "0x" + address.toLowerCase();
-        if (addresses.containsKey(address)) {
-            File file = addresses.get(address);
-            try (FileInputStream in = new FileInputStream(file)) {
-                /* TODO: check XML's encoding and serve a charset according to the encoding */
-                return IOUtils.toString(in, "utf8");
+        //find all potential hits
+        for (int networkId : addresses.keySet())
+        {
+            if (addresses.get(networkId).containsKey(address))
+            {
+                File file = addresses.get(networkId).get(address);
+                try (FileInputStream in = new FileInputStream(file)) {
+                    /* TODO: check XML's encoding and serve a charset according to the encoding */
+                    tokenDefinitionList.append("Network: ").append(MagicLinkInfo.getNetworkNameById(networkId));
+                    tokenDefinitionList.append(IOUtils.toString(in, "utf8"));
+                    tokenDefinitionList.append("-----------------------");
+                }
             }
-        } else {
+        }
+
+        if (tokenDefinitionList.length() == 0)
+        {
             throw new NoHandlerFoundException("GET", "/" + address, new HttpHeaders());
+        }
+        else
+        {
+            return tokenDefinitionList.toString();
+        }
+    }
+
+    private String loadFile(String fileName) {
+        byte[] buffer = new byte[0];
+        try {
+            InputStream in = getClass()
+                    .getClassLoader().getResourceAsStream(fileName);
+            buffer = new byte[in.available()];
+            int len = in.read(buffer);
+            if (len < 1) {
+                throw new IOException("Nothing is read.");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return new String(buffer);
+    }
+
+    //These functions are for caching and restoring results for optimsation.
+    //TODO: rather than a simple time invalidation method, periodically scan transactions for token contracts which have entries in this mapping
+    //      if any of those contracts has had a transaction written to it, then refresh all the cached entries
+    //      once events are available we can selectively update entries.
+
+    @Override
+    public TransactionResult getFunctionResult(ContractAddress contract, AttributeType attr, BigInteger tokenId)
+    {
+        String addressFunctionKey = contract.address + "-" + attr.id;
+        TransactionResult tr = new TransactionResult(contract.chainId, contract.address, tokenId, attr);
+        //existing entry in map?
+        if (transactionResults.containsKey(contract.chainId))
+        {
+            Map<BigInteger, CachedResult> contractResult = transactionResults.get(contract.chainId).get(addressFunctionKey);
+            if (contractResult != null && contractResult.containsKey(tokenId))
+            {
+                tr.resultTime = contractResult.get(tokenId).resultTime;
+                tr.result = contractResult.get(tokenId).result;
+            }
+        }
+
+        return tr;
+    }
+
+    @Override
+    public TransactionResult storeAuxData(TransactionResult tResult)
+    {
+        String addressFunctionKey = tResult.contractAddress + "-" + tResult.attrId;
+        if (!transactionResults.containsKey(tResult.contractChainId)) transactionResults.put(tResult.contractChainId, new HashMap<>());
+        if (!transactionResults.get(tResult.contractChainId).containsKey(addressFunctionKey)) transactionResults.get(tResult.contractChainId).put(addressFunctionKey, new HashMap<>());
+        Map<BigInteger, CachedResult> tokenResultMap = transactionResults.get(tResult.contractChainId).get(addressFunctionKey);
+        tokenResultMap.put(tResult.tokenId, new CachedResult(tResult.resultTime, tResult.result));
+        transactionResults.get(tResult.contractChainId).put(addressFunctionKey, tokenResultMap);
+
+        return tResult;
+    }
+
+    //Not relevant for website - this function is to access wallet internal balance for tokens
+    @Override
+    public boolean resolveOptimisedAttr(ContractAddress contract, AttributeType attr, TransactionResult transactionResult)
+    {
+        return false;
+    }
+
+    /**
+     * Can ditch this class once we have the transaction optimisation working as detailed in the "TO-DO" above
+     */
+    private class CachedResult
+    {
+        long resultTime;
+        String result;
+
+        CachedResult(long time, String r)
+        {
+            resultTime = time;
+            result = r;
         }
     }
 }

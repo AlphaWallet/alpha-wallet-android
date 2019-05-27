@@ -110,7 +110,9 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
             tokenView.setVisibility(View.VISIBLE);
             Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
             TSAction action = functions.get(actionMethod);
+            String magicValues = viewModel.getAssetDefinitionService().getMagicValuesForInjection(token.tokenInfo.chainId);
             String injectedView = tokenView.injectWeb3TokenInit(this, action.view, tokenAttrs);
+            injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
             if (action.style != null) injectedView = tokenView.injectStyleData(injectedView, action.style);
 
             tokenView.loadData(injectedView, "text/html", "utf-8");
@@ -182,11 +184,6 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         toolbar();
         setTitle(getString(R.string.token_function));
         setupFunctions();
-    }
-
-    private void updateView()
-    {
-        systemView.hide();
     }
 
     private void setupFunctions()
@@ -305,16 +302,11 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
 
     private void handleFunction(FunctionDefinition function)
     {
-        System.out.println("Handling");
-        //should have all the info we need to push the transaction
-        //build transaction
-        //need to regulate args
-
         String functionData = viewModel.getTransactionBytes(token, tokenId, function);
         //confirm the transaction
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         TSAction action = functions.get(actionMethod);
-        ContractAddress cAddr = viewModel.getAssetDefinitionService().getContractAddress(action.function, token);
+        ContractAddress cAddr = new ContractAddress(action.function, token.tokenInfo.chainId, token.tokenInfo.address); //viewModel.getAssetDefinitionService().getContractAddress(action.function, token);
 
         functionEffect = functionEffect + " to " + action.function.method;
 

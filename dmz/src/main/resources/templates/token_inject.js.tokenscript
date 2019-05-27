@@ -1,0 +1,25 @@
+<script>
+const _currentTokenInstance = {
+%1$s
+}
+
+web3 = {
+    tokens: {
+        data: {
+            currentInstance: {},
+        },
+        dataChanged: (tokens, test) => {
+            console.log('web3.tokens.data changed.')
+        }
+    }
+}
+
+web3.tokens.data.currentInstance = _currentTokenInstance
+
+function refresh() {
+   web3.tokens.dataChanged('test', 'test')
+}
+
+window.onload = refresh;
+</script>
+%2$s

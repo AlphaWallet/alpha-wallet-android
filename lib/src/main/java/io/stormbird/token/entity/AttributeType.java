@@ -1,5 +1,6 @@
 package io.stormbird.token.entity;
 
+import io.reactivex.Observable;
 import io.stormbird.token.tools.TokenDefinition;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -202,5 +203,20 @@ public class AttributeType {
             default:
                 throw new NullPointerException("Missing valid 'as' attribute");
         }
+    }
+
+    public Observable<TokenScriptResult.Attribute> staticAttribute(BigInteger tokenId)
+    {
+        return Observable.fromCallable(() -> {
+            try
+            {
+                BigInteger val = tokenId.and(bitmask).shiftRight(bitshift);
+                return new TokenScriptResult.Attribute(id, name, val, toString(val));
+            }
+            catch (Exception e)
+            {
+                return new TokenScriptResult.Attribute(id, name, tokenId, "unsupported encoding");
+            }
+        });
     }
 }

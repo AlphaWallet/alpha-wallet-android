@@ -142,7 +142,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         {
             try
             {
-                assetDefinitionService.addPair(attrs, attr.id, attr.text);
+                TokenScriptResult.addPair(attrs, attr.id, attr.text);
             }
             catch (ParseException e)
             {
@@ -156,7 +156,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         //add to string
         try
         {
-            assetDefinitionService.addPair(attrs, attribute.id, attribute.text);
+            TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
         }
         catch (ParseException e)
         {

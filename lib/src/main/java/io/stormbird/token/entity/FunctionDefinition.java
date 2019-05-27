@@ -1,17 +1,28 @@
 package io.stormbird.token.entity;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.stormbird.token.tools.TokenDefinition;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.OkHttpClient;
 import org.web3j.abi.*;
 import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
+
+import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 /**
  * Created by James on 10/11/2018.
@@ -30,7 +41,7 @@ public class FunctionDefinition
     public long resultTime = 0;
     public BigInteger tokenId;
 
-    public Function generateTransactionFunction(String walletAddr, BigInteger tokenId)
+    public Function generateTransactionFunction(String walletAddr, BigInteger tokenId, TokenDefinition definition)
     {
         List<Type> params = new ArrayList<Type>();
         List<TypeReference<?>> returnTypes = new ArrayList<TypeReference<?>>();
@@ -45,8 +56,15 @@ public class FunctionDefinition
                             params.add(new Uint256(tokenId));
                             break;
                         case "value":
-                        default:
                             params.add(new Uint256(new BigInteger(arg.value)));
+                            break;
+                        default:
+                            //could be a reference to another attribute
+                            if (definition != null)
+                            {
+                                String param = definition.fetchAttrResult(arg.ref, tokenId, null, definition.context.attrInterface).blockingSingle().text;
+                                if (param != null) params.add(new Uint256(new BigInteger(param)));
+                            }
                             break;
                     }
                     break;
@@ -164,5 +182,75 @@ public class FunctionDefinition
             val = new BigInteger(res, 16);
         }
         return new TokenScriptResult.Attribute(attr.id, attr.name, val, res);
+    }
+
+    public static final String ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
+    /**
+     * Haven't pre-cached this value yet, so need to fetch it before we can proceed
+     * @param override
+     * @param attr
+     * @param tokenId
+     * @param definition
+     * @return
+     */
+    public Observable<TransactionResult> fetchResultFromEthereum(ContractAddress override, AttributeType attr, BigInteger tokenId, TokenDefinition definition)
+    {
+        return Observable.fromCallable(() -> {
+            ContractAddress useAddress;
+            if (override == null) // contract not specified - is not holder contract
+            {
+                //determine address using definition context
+                useAddress = new ContractAddress(this, definition.context.cAddr.chainId, definition.context.cAddr.address);
+            }
+            else
+            {
+                useAddress = override;
+            }
+            TransactionResult transactionResult = new TransactionResult(useAddress.chainId, useAddress.address, tokenId, attr);
+            // 1: create transaction call
+            org.web3j.abi.datatypes.Function transaction = generateTransactionFunction(ZERO_ADDRESS, tokenId, definition);
+            // 2: create web3 connection
+            OkHttpClient okClient = new OkHttpClient.Builder()
+                        .connectTimeout(5, TimeUnit.SECONDS)
+                        .readTimeout(5, TimeUnit.SECONDS)
+                        .writeTimeout(5, TimeUnit.SECONDS)
+                        .retryOnConnectionFailure(false)
+                        .build();
+
+            HttpService nodeService = new HttpService(MagicLinkInfo.getNodeURLByNetworkId(useAddress.chainId), okClient, false);
+
+            Web3j web3j = Web3j.build(nodeService);
+
+            //now push the transaction
+            String result = callSmartContractFunction(web3j, transaction, useAddress.address, ZERO_ADDRESS);
+
+            attr.function.handleTransactionResult(transactionResult, transaction, result);
+            return transactionResult;
+        });
+    }
+
+    private String callSmartContractFunction(Web3j web3j,
+            Function function, String contractAddress, String walletAddr) throws Exception {
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        try
+        {
+            org.web3j.protocol.core.methods.request.Transaction transaction
+                    = createEthCallTransaction(walletAddr, contractAddress, encodedFunction);
+            EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+
+            return response.getValue();
+        }
+        catch (IOException e)
+        {
+            //Connection error. Use cached value
+            return null;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

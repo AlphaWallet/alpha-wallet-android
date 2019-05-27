@@ -1,5 +1,6 @@
 package io.stormbird.token.management.Model;
 
+import io.stormbird.token.entity.AttributeType;
 import io.stormbird.token.tools.TokenDefinition;
 
 import java.io.IOException;

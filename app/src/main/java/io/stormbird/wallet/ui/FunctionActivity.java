@@ -151,7 +151,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     {
         try
         {
-            viewModel.getAssetDefinitionService().addPair(attrs, attribute.id, attribute.text);
+            TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
         }
         catch (ParseException e)
         {

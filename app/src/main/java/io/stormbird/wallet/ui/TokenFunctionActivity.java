@@ -230,7 +230,7 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
         //add to string
         try
         {
-            viewModel.getAssetDefinitionService().addPair(attrs, attribute.id, attribute.text);
+            TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
         }
         catch (ParseException e)
         {

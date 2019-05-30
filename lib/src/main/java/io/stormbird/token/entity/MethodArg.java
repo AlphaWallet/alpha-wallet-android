@@ -9,6 +9,5 @@ package io.stormbird.token.entity;
 public class MethodArg
 {
     public String parameterType; //type of param eg uint256, address etc
-    public String ref;   //reference to the value to pass
-    public String value; //the actual value to pass
+    public TokenscriptElement element; // contains either the value or reference to the value
 }

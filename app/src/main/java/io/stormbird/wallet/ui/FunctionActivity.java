@@ -28,6 +28,9 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.ui.widget.adapter.NonFungibleTokenAdapter;
+import io.stormbird.wallet.util.BalanceUtils;
+import io.stormbird.wallet.util.KeyboardUtils;
+import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.TokenFunctionViewModel;
 import io.stormbird.wallet.viewmodel.TokenFunctionViewModelFactory;
 import io.stormbird.wallet.web3.OnSignPersonalMessageListener;
@@ -243,55 +246,12 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         {
             //check params for function.
             //if there's input params, resolve them
-            boolean resolved = true;
-            for (MethodArg arg : action.function.parameters)
-            {
-                if (arg.ref != null && arg.ref.length() > 0)
-                {
-                    AttributeType attr = action.attributeTypes.get(arg.ref);
-                    if (attr == null) continue;
-                    switch (attr.as)
-                    {
-                        case UnsignedInput:
-                            //do we have a mapping?
-                            String valueFromInput = args.get(arg.ref);
-                            if (valueFromInput == null)
-                            {
-                                //fetch mapping
-                                resolved = false;
-                                args.put(arg.ref, "__searching");
-                                getInput(arg.ref);
-                                return;
-                            }
-                            else if (valueFromInput.equals("__searching"))
-                            {
-                                //display error
-                                System.out.println("ERROR!!!");
-                                resolved = false;
-                            }
-                            else
-                            {
-                                BigDecimal unsignedValue = new BigDecimal(valueFromInput);
-                                //handle value
-                                if (attr.bitshift > 0)
-                                {
-                                    functionEffect = unsignedValue.toString();
-                                    unsignedValue = unsignedValue.movePointRight(attr.bitshift);
-                                    args.put(arg.ref, unsignedValue.toString());
-                                }
-                                arg.value = unsignedValue.toString();
-                            }
-                            break;
-                        default:
-                            resolved = false;
-                            break;
-                    }
-                }
-            }
+            boolean resolved = checkNativeTransaction(action, true);
+            resolved = checkFunctionArgs(action, resolved);
 
             if (resolved)
             {
-                handleFunction(action.function);
+                handleFunction(action);
             }
         }
         else
@@ -300,17 +260,128 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void handleFunction(FunctionDefinition function)
+    private boolean checkNativeTransaction(TSAction action, boolean resolved)
     {
-        String functionData = viewModel.getTransactionBytes(token, tokenId, function);
-        //confirm the transaction
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
-        TSAction action = functions.get(actionMethod);
-        ContractAddress cAddr = new ContractAddress(action.function, token.tokenInfo.chainId, token.tokenInfo.address); //viewModel.getAssetDefinitionService().getContractAddress(action.function, token);
+        FunctionDefinition function = action.function;
+        if (function.tx == null) return true;
+        for (TokenscriptElement e : function.tx.args.values())
+        {
+            resolved = checkTokenScriptElement(action, e, resolved);
+        }
 
-        functionEffect = functionEffect + " to " + action.function.method;
+        return resolved;
+    }
 
-        viewModel.confirmTransaction(this, cAddr.chainId, functionData, null, cAddr.address, actionMethod, functionEffect);
+    private boolean checkFunctionArgs(TSAction action, boolean resolved)
+    {
+        for (MethodArg arg : action.function.parameters)
+        {
+            resolved = checkTokenScriptElement(action, arg.element, resolved);
+        }
+
+        return resolved;
+    }
+
+    private boolean checkTokenScriptElement(TSAction action, TokenscriptElement e, boolean resolved)
+    {
+        if (e.ref != null && e.ref.length() > 0)
+        {
+            AttributeType attr = action.attributeTypes.get(e.ref);
+            if (attr == null) return true;
+            switch (attr.as)
+            {
+                case UnsignedInput:
+                    //do we have a mapping?
+                    String valueFromInput = args.get(e.ref);
+                    if (valueFromInput == null)
+                    {
+                        //fetch mapping
+                        args.put(e.ref, "__searching");
+                        getInput(e.ref);
+                        return false;
+                    }
+                    else if (valueFromInput.equals("__searching"))
+                    {
+                        //display error
+                        System.out.println("ERROR!!!");
+                        resolved = false;
+                    }
+                    else
+                    {
+                        BigDecimal unsignedValue = new BigDecimal(valueFromInput);
+                        //handle value
+                        if (attr.bitshift > 0)
+                        {
+                            functionEffect = unsignedValue.toString();
+                            unsignedValue = unsignedValue.movePointRight(attr.bitshift);
+                            args.put(e.ref, unsignedValue.toString());
+                        }
+                        e.value = unsignedValue.toString();
+                    }
+                    break;
+                default:
+                    resolved = false;
+                    break;
+            }
+        }
+
+        return resolved;
+    }
+
+    private void handleFunction(TSAction action)
+    {
+        if (action.function.tx != null)
+        {
+            //this is a native style transaction
+            NativeSend(action);
+        }
+        else
+        {
+            String functionData = viewModel.getTransactionBytes(token, tokenId, action.function);
+            //confirm the transaction
+            ContractAddress cAddr = new ContractAddress(action.function, token.tokenInfo.chainId, token.tokenInfo.address); //viewModel.getAssetDefinitionService().getContractAddress(action.function, token);
+
+            functionEffect = functionEffect + " to " + actionMethod;
+
+            viewModel.confirmTransaction(this, cAddr.chainId, functionData, null, cAddr.address, actionMethod, functionEffect);
+        }
+    }
+
+    private void NativeSend(TSAction action)
+    {
+        boolean isValid = true;
+        KeyboardUtils.hideKeyboard(getCurrentFocus());
+        FunctionDefinition function = action.function;
+
+        //check we have a 'to' and a 'value'
+        if (!(function.tx.args.containsKey("to") && function.tx.args.containsKey("value")))
+        {
+            isValid = false;
+            //TODO: Display error
+        }
+
+        //calculate native amount
+        BigDecimal value = new BigDecimal(function.tx.args.get("value").value);
+
+        if (token.balance.subtract(value).compareTo(BigDecimal.ZERO) < 0)
+        {
+            //amountInput.setError(R.string.error_insufficient_funds);
+            isValid = false;
+        }
+
+        String to = function.tx.args.get("to").value;
+        if (to == null || !Utils.isAddressValid(to))
+        {
+            isValid = false;
+            return;
+        }
+
+        //eg Send 2(*1) ETH(*2) to Alex's Amazing Coffee House(*3) (0xdeadacec0ffee(*4))
+        String extraInfo = String.format(getString(R.string.tokenscript_send_native), functionEffect, token.tokenInfo.symbol, actionMethod, to);
+
+        if (isValid) {
+            viewModel.confirmNativeTransaction(this, to, value, token, extraInfo);
+        }
     }
 
     private void getInput(String value)

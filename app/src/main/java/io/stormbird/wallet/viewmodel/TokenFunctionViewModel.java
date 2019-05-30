@@ -27,6 +27,7 @@ import io.stormbird.wallet.ui.RedeemSignatureDisplayActivity;
 import io.stormbird.wallet.ui.widget.entity.TicketRangeParcel;
 import io.stormbird.wallet.web3.entity.Message;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -125,6 +126,21 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.EXTRA_CONTRACT_NAME, additionalDetails);
         intent.putExtra(C.EXTRA_FUNCTION_NAME, functionName);
         intent.putExtra(C.TOKEN_TYPE, ConfirmationType.TOKENSCRIPT.ordinal());
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        ctx.startActivity(intent);
+    }
+
+    public void confirmNativeTransaction(Context ctx, String toAddress, BigDecimal value, Token nativeEth, String info)
+    {
+        Intent intent = new Intent(ctx, ConfirmationActivity.class);
+        intent.putExtra(C.EXTRA_TO_ADDRESS, toAddress);
+        intent.putExtra(C.EXTRA_AMOUNT, value.toString());
+        intent.putExtra(C.EXTRA_DECIMALS, nativeEth.tokenInfo.decimals);
+        intent.putExtra(C.EXTRA_SYMBOL, nativeEth.tokenInfo.symbol);
+        intent.putExtra(C.EXTRA_SENDING_TOKENS, false);
+        intent.putExtra(C.EXTRA_ENS_DETAILS, info);
+        intent.putExtra(C.EXTRA_NETWORKID, nativeEth.tokenInfo.chainId);
+        intent.putExtra(C.TOKEN_TYPE, ConfirmationType.ETH.ordinal());
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         ctx.startActivity(intent);
     }

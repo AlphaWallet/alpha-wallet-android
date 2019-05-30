@@ -132,7 +132,6 @@ public class Erc20DetailActivity extends BaseActivity {
 
     private void setupAction()
     {
-        //TODO: work out which actions should be available from here
         final Map<String, TSAction> actions = viewModel.getActions(token);
         if (actions != null)
         {

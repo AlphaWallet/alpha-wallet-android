@@ -531,7 +531,6 @@ public class TokenDefinition {
             {
                 case "name":
                     name = getLocalisedString(element);
-                    if (name == null) name = node.getTextContent();
                     break;
                 case "attribute-type":
                     AttributeType attr = new AttributeType(element, this);
@@ -611,21 +610,15 @@ public class TokenDefinition {
 
     private void handleTransaction(TSAction tsAction, Element element)
     {
-        for(Node node=element.getFirstChild(); node!=null; node=node.getNextSibling())
+        Element tx = getFirstChildElement(element);
+        switch (tx.getLocalName())
         {
-            if (node.getNodeType() == ELEMENT_NODE)
-            {
-                Element tx = (Element) node;
-                switch (tx.getLocalName())
-                {
-                    case "ethereum":
-                        tsAction.function = parseFunction(tx, Syntax.IA5String);
-                        tsAction.function.as = parseAs(tx);
-                        break;
-                    default:
-                        break;
-                }
-            }
+            case "ethereum":
+                tsAction.function = parseFunction(tx, Syntax.IA5String);
+                tsAction.function.as = parseAs(tx);
+                break;
+            default:
+                break;
         }
     }
 
@@ -668,13 +661,9 @@ public class TokenDefinition {
                 break;
         }
 
-        if (value == null)
+        if (value == null && names.values().size() > 0)
         {
-            for (String v : names.values()) //pick first value
-            {
-                value = v;
-                break;
-            }
+            value = names.values().iterator().next();
         }
 
         return value;
@@ -718,9 +707,8 @@ public class TokenDefinition {
 
     private void handleGlobalAttributes(Element attributes)
     {
-        for (int j = 0; j < attributes.getChildNodes().getLength(); j++)
+        for (Node n = attributes.getFirstChild(); n != null; n = n.getNextSibling())
         {
-            Node n = attributes.getChildNodes().item(j);
             if (n.getNodeType() == ELEMENT_NODE && n.getLocalName().equals("attribute-type"))
             {
                 processAttrs(n);
@@ -912,21 +900,48 @@ public class TokenDefinition {
 
     private void addFunctionInputs(FunctionDefinition fd, Element eth)
     {
-        NodeList nList = eth.getElementsByTagNameNS(nameSpace, "data");
-        if (nList.getLength() == 0) return;
-        Element inputs = (Element) nList.item(0);
-
-        for(Node input=inputs.getFirstChild(); input!=null; input=input.getNextSibling())
+        for(Node n=eth.getFirstChild(); n!=null; n=n.getNextSibling())
         {
-            if (input.getNodeType() == ELEMENT_NODE)
+            if (n.getNodeType() != ELEMENT_NODE) continue;
+            Element input = (Element)n;
+            switch (input.getLocalName())
             {
-                Element inputElement = (Element) input;
-                MethodArg arg = new MethodArg();
-                arg.parameterType = input.getLocalName();
-                arg.ref = inputElement.getAttribute("ref");
-                arg.value = inputElement.getTextContent();
-                fd.parameters.add(arg);
+                case "data":
+                    processDataInputs(fd, input);
+                    break;
+                case "to":
+                case "value":
+                    if (fd.tx == null) fd.tx = new EthereumTransaction();
+                    fd.tx.args.put(input.getLocalName(), parseTxTag(input));
+                    break;
+                default:
+                    //future elements
+                    break;
             }
+        }
+    }
+
+    private TokenscriptElement parseTxTag(Element input)
+    {
+        TokenscriptElement tse = new TokenscriptElement();
+        tse.ref = input.getAttribute("ref");
+        tse.value = input.getTextContent();
+
+        return tse;
+    }
+
+    private void processDataInputs(FunctionDefinition fd, Element input)
+    {
+        for(Node n=input.getFirstChild(); n!=null; n=n.getNextSibling())
+        {
+            if (n.getNodeType() != ELEMENT_NODE)
+                continue;
+
+            Element inputElement = (Element) n;
+            MethodArg arg = new MethodArg();
+            arg.parameterType = inputElement.getLocalName();
+            arg.element = parseTxTag(inputElement);
+            fd.parameters.add(arg);
         }
     }
 
@@ -1017,15 +1032,18 @@ public class TokenDefinition {
         }
         else
         {
-            TransactionResult transactionResult = attrIf.getFunctionResult(cAddr, attr, tokenId);
-            if (attrIf.resolveOptimisedAttr(cAddr, attr, transactionResult) || !transactionResult.needsUpdating()) //can we use wallet's known data or cached value?
+            ContractAddress useAddress;
+            if (cAddr == null) useAddress = new ContractAddress(attr.function);
+            else useAddress = new ContractAddress(attr.function, cAddr.chainId, cAddr.address);
+            TransactionResult transactionResult = attrIf.getFunctionResult(useAddress, attr, tokenId);
+            if (attrIf.resolveOptimisedAttr(useAddress, attr, transactionResult) || !transactionResult.needsUpdating()) //can we use wallet's known data or cached value?
             {
                 return resultFromDatabase(transactionResult, attr);
             }
             else  //if value is old or there wasn't any previous value
             {
                 //for function query, never need wallet address
-                return attr.function.fetchResultFromEthereum(cAddr, attr, tokenId, this)          // Fetch function result from blockchain
+                return attr.function.fetchResultFromEthereum(useAddress, attr, tokenId, this)          // Fetch function result from blockchain
                         .map(result -> restoreFromDBIfRequired(result, transactionResult))  // If network unavailable restore value from cache
                         .map(attrIf::storeAuxData)                                          // store new data
                         .map(result -> attr.function.parseFunctionResult(result, attr));    // write returned data into attribute

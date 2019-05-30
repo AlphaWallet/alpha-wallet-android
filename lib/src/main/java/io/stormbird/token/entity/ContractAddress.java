@@ -18,18 +18,39 @@ public class ContractAddress
         this.address = address;
     }
 
+    /**
+     * Select contract to use from list of allowed contracts.
+     * Selection rule:
+     * 1 - Is the token itself a viable choice? If so use the token contract
+     * 2 - Token contract not available - choose first contract on same chain
+     * 3 - Token contract not available and no contract on same chainId as token - must be a cross-chain call, use first contract in list.
+     * @param fd
+     * @param chainId
+     * @param address
+     */
     public ContractAddress(FunctionDefinition fd, int chainId, String address)
     {
-        this.chainId = chainId;
         List<String> contracts = fd.contract.addresses.get(chainId);
-        if (contracts.contains(address))
+        if (contracts != null && contracts.contains(address))
         {
             this.address = address;
+            this.chainId = chainId;
+        }
+        else if (contracts != null)
+        {
+            this.chainId = chainId;
+            this.address = fd.contract.addresses.get(chainId).iterator().next();
         }
         else
         {
-            if (fd.contract.addresses.get(chainId) == null) this.address = "0x";
-            else this.address = fd.contract.addresses.get(chainId).get(0);
+            this.chainId = fd.contract.addresses.keySet().iterator().next();
+            this.address = fd.contract.addresses.get(chainId).iterator().next();
         }
+    }
+
+    public ContractAddress(FunctionDefinition fd)
+    {
+        this.chainId = fd.contract.addresses.keySet().iterator().next();
+        this.address = fd.contract.addresses.get(chainId).iterator().next();
     }
 }

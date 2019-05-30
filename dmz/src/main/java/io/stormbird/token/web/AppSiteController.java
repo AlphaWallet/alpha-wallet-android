@@ -84,6 +84,11 @@ public class AppSiteController implements AttributeInterface
         {
             data = parser.parseUniversalLink(universalLink);
             data.chainId = MagicLinkInfo.getNetworkIdFromDomain(domain);
+
+            if (domain.contains("duckdns.org") || domain.contains("192.168"))
+            {
+                data.chainId = 3;
+            }
         }
         catch (SalesOrderMalformed e)
         {

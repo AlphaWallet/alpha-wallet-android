@@ -14,6 +14,7 @@ import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TickerService;
 import io.stormbird.wallet.service.TokenExplorerClientType;
+import io.stormbird.wallet.util.AWEnsResolver;
 import okhttp3.OkHttpClient;
 import org.web3j.abi.*;
 import org.web3j.abi.datatypes.*;
@@ -373,11 +374,12 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<String> resolveENS(int chainId, String address)
     {
         return Single.fromCallable(() -> {
-            int useChainId = chainId;
-            if (!EthereumNetworkRepository.hasRealValue(useChainId)) useChainId = MAINNET_ID;
-            Web3j service = getService(useChainId); //resolve ENS on mainnet unless this network has value
-            EnsResolver ensResolver = new EnsResolver(service);
-            String resolvedAddress = ensResolver.resolve(address);
+            String resolvedAddress = resolveAddress(chainId, address);
+            if (!WalletUtils.isValidAddress(resolvedAddress))
+            {
+                resolvedAddress = resolveAddress(MAINNET_ID, address); //try main net
+            }
+
             if (WalletUtils.isValidAddress(resolvedAddress))
             {
                 return resolvedAddress;
@@ -387,6 +389,25 @@ public class TokenRepository implements TokenRepositoryType {
                 return BURN_ADDRESS;
             }
         });
+    }
+
+    private String resolveAddress(int chainId, String address)
+    {
+        int useChainId = chainId;
+        if (!EthereumNetworkRepository.hasRealValue(useChainId)) useChainId = MAINNET_ID;
+        Web3j service = getService(useChainId); //resolve ENS on mainnet unless this network has value
+        AWEnsResolver ensResolver = new AWEnsResolver(service);
+        String resolvedAddress = "";
+        try
+        {
+            resolvedAddress = ensResolver.resolve(address);
+        }
+        catch (Exception e)
+        {
+            return "--";
+        }
+
+        return resolvedAddress;
     }
 
     @Override

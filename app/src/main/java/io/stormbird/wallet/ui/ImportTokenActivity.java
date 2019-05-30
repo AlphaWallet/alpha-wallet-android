@@ -156,16 +156,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     viewModel.checkTokenNetwork(contractAddress, "requiredPrefix");
                     break;
                 default:
-                    int checkNetworkId = viewModel.getAssetDefinitionService().getChainId(contractAddress);
-                    if (checkNetworkId > 0)
-                    {
-                        viewModel.switchNetwork(checkNetworkId);
-                        viewModel.loadToken();
-                    }
-                    else
-                    {
-                        viewModel.checkTokenNetwork(contractAddress, "name");
-                    }
+                    viewModel.checkTokenNetwork(contractAddress, "name");
                     break;
             }
         }
@@ -337,8 +328,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         verifiedLayer.setVisibility(View.VISIBLE);
 
-        int contractChainId = viewModel.getAssetDefinitionService().getChainId(viewModel.getSalesOrder().contractAddress);
-        if (contractChainId == chainId || usingFeeMaster)
+        //TODO: Must be signed
+        if (viewModel.getAssetDefinitionService().hasDefinition(data.chainId, data.contractAddress) || usingFeeMaster)
         {
             verified.setVisibility(View.VISIBLE);
             textVerified.setVisibility(View.VISIBLE);

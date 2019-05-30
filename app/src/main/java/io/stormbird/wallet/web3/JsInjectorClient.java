@@ -203,7 +203,7 @@ public class JsInjectorClient {
     String injectStyle(String view, String style)
     {
         style = "<style type=\"text/css\">\n" + style + "</style>\n";
-        return injectJS(view, style);
+        return style + view;
     }
 
     private static String loadFile(Context context, @RawRes int rawRes) {

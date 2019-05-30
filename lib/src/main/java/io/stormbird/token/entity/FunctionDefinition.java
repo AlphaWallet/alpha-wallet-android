@@ -40,6 +40,7 @@ public class FunctionDefinition
     public String result;
     public long resultTime = 0;
     public BigInteger tokenId;
+    public EthereumTransaction tx;
 
     public Function generateTransactionFunction(String walletAddr, BigInteger tokenId, TokenDefinition definition)
     {
@@ -47,36 +48,30 @@ public class FunctionDefinition
         List<TypeReference<?>> returnTypes = new ArrayList<TypeReference<?>>();
         for (MethodArg arg : parameters)
         {
+            resolveReference(arg, tokenId, definition);
             switch (arg.parameterType)
             {
                 case "uint256":
-                    switch (arg.ref)
+                    switch (arg.element.ref)
                     {
                         case "tokenId":
                             params.add(new Uint256(tokenId));
                             break;
                         case "value":
-                            params.add(new Uint256(new BigInteger(arg.value)));
-                            break;
                         default:
-                            //could be a reference to another attribute
-                            if (definition != null)
-                            {
-                                String param = definition.fetchAttrResult(arg.ref, tokenId, null, definition.context.attrInterface).blockingSingle().text;
-                                if (param != null) params.add(new Uint256(new BigInteger(param)));
-                            }
+                            params.add(new Uint256(new BigInteger(arg.element.value)));
                             break;
                     }
                     break;
                 case "address":
-                    switch (arg.ref)
+                    switch (arg.element.ref)
                     {
                         case "ownerAddress":
                             params.add(new Address(walletAddr));
                             break;
                         case "value":
                         default:
-                            params.add(new Address(arg.value));
+                            params.add(new Address(arg.element.value));
                             break;
                     }
                     break;
@@ -102,13 +97,19 @@ public class FunctionDefinition
                 break;
         }
 
-        Function function = new Function(method,
+        return new Function(method,
                                          params, returnTypes);
-
-        return function;
     }
 
-    public void handleTransactionResult(TransactionResult result, Function function, String responseValue)
+    private void resolveReference(MethodArg arg, BigInteger tokenId, TokenDefinition definition)
+    {
+        if (definition.attributeTypes.containsKey(arg.element.ref))
+        {
+            arg.element.value = definition.fetchAttrResult(arg.element.ref, tokenId, null, definition.context.attrInterface).blockingSingle().text;
+        }
+    }
+
+    private void handleTransactionResult(TransactionResult result, Function function, String responseValue)
     {
         try
         {
@@ -177,8 +178,14 @@ public class FunctionDefinition
         BigInteger val = transactionResult.tokenId;
         if (attr.syntax == TokenDefinition.Syntax.NumericString)
         {
-            if (transactionResult.result.startsWith("0x"))
+            if (transactionResult.result == null)
+            {
+                res = "0";
+            }
+            else if (transactionResult.result.startsWith("0x"))
+            {
                 res = res.substring(2);
+            }
             val = new BigInteger(res, 16);
         }
         return new TokenScriptResult.Attribute(attr.id, attr.name, val, res);

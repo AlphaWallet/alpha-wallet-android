@@ -505,6 +505,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private void loadContracts(File directory) throws IOException, SAXException
     {
         File[] files = directory.listFiles();
+        if (files == null || files.length == 0) return;
+
         Observable.fromArray(files)
                 .filter(File::isFile)
                 .filter(this::allowableExtension)

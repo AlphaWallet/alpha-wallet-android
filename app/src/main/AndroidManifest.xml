@@ -21,6 +21,7 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:testOnly="false"
+        android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme.NoActionBar"
         tools:replace="android:name, android:theme, android:allowBackup">
         <activity

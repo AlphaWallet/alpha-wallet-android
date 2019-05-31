@@ -101,7 +101,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/background_card_shadow"
-                android:layout_margin="3dp"
+                android:layout_margin="5dp"
                 android:gravity="center"
                 android:orientation="vertical"
                 android:padding="10dp">

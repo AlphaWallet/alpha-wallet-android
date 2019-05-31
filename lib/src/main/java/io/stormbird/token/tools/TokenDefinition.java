@@ -38,71 +38,6 @@ public class TokenDefinition {
     public TokenscriptContext context;
     public String holdingToken;
 
-    public void populateNetworks(Map<Integer, Map<String, TokenDefinition>> assets, Map<Integer, List<String>> devOverrideContracts)
-    {
-        for (String name : contracts.keySet())
-        {
-            ContractInfo info = contracts.get(name);
-            for (int network : info.addresses.keySet())
-            {
-                Map<String, TokenDefinition> definitionMapping = assets.get(network);
-                if (definitionMapping == null) //there is a cool shortcut when at API24+
-                {
-                    definitionMapping = new HashMap<>();
-                    assets.put(network, definitionMapping);
-                }
-
-                List<String> addresses = info.addresses.get(network);
-                for (String address : addresses)
-                {
-                    if (devOverrideContracts == null || !devOverrideContracts.containsKey(network) || !devOverrideContracts.get(network).contains(address))
-                    {
-                        definitionMapping.put(address, this);
-                    }
-                }
-            }
-        }
-    }
-
-    public boolean hasNetwork(int networkId)
-    {
-        for (String name : contracts.keySet())
-        {
-            ContractInfo info = contracts.get(name);
-            if (info.addresses.containsKey(networkId)) return true;
-        }
-
-        return false;
-    }
-
-    public boolean hasContracts()
-    {
-        return contracts.size() > 0;
-    }
-
-    public void addToOverrides(Map<Integer, List<String>> devOverrideContracts)
-    {
-        for (String name : contracts.keySet())
-        {
-            ContractInfo info = contracts.get(name);
-            for (int network : info.addresses.keySet())
-            {
-                for (String address : info.addresses.get(network))
-                {
-                    List<String> contracts = devOverrideContracts.get(network);
-                    if (contracts == null)
-                    {
-                        contracts = new ArrayList<>();
-                        devOverrideContracts.put(network, contracts);
-                    }
-
-                    if (!contracts.contains(address))
-                        contracts.add(address);
-                }
-            }
-        }
-    }
-
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";
     private static final String TOKENSCRIPT = "http://tokenscript.org/2019/05/tokenscript";
     private static final String TOKENSCRIPTBASE = "http://tokenscript.org/";
@@ -126,8 +61,6 @@ public class TokenDefinition {
      - each XML file can be signed mulitple times, with multiple
        <KeyName>.
     */
-    protected String marketQueueAPI = null;
-    protected String feemasterAPI = null;
     protected String keyName = null;
 
     public List<FunctionDefinition> getFunctionData()
@@ -142,16 +75,6 @@ public class TokenDefinition {
         }
 
         return defs;
-    }
-
-    public boolean hasEthFunctions()
-    {
-        for (AttributeType attr : attributeTypes.values())
-        {
-            if (attr.function != null) return true;
-        }
-
-        return false;
     }
 
     public FunctionDefinition parseFunction(Element resolve, Syntax syntax)
@@ -422,9 +345,6 @@ public class TokenDefinition {
 
     private void handleCards(Element cards) throws Exception
     {
-        //NodeList nList = xml.getElementsByTagNameNS(nameSpace, "cards");
-        //if (nList.getLength() == 0) return;
-        //Element cards = (Element) nList.item(0);
         for(Node node=cards.getFirstChild(); node!=null; node=node.getNextSibling())
         {
             if (node.getNodeType() == ELEMENT_NODE)

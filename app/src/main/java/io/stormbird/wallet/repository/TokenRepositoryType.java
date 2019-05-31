@@ -3,6 +3,7 @@ package io.stormbird.wallet.repository;
 import io.reactivex.disposables.Disposable;
 import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.TransactionResult;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.*;
 
 import java.math.BigInteger;
@@ -37,5 +38,5 @@ public interface TokenRepositoryType {
     Disposable updateBlockRead(Token token, Wallet wallet);
     Single<String> resolveProxyAddress(TokenInfo tokenInfo);
 
-    String generateTransactionPayload(Token token, BigInteger tokenId, FunctionDefinition fd);
+    String generateTransactionPayload(Token token, BigInteger tokenId, FunctionDefinition fd, TokenDefinition td);
 }

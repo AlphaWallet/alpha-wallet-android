@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.w3c.dom.Node.ELEMENT_NODE;
+
 /**
  * Created by James on 9/05/2019.
  * Stormbird in Sydney
@@ -32,6 +34,10 @@ public class AttributeType {
     {
         definition = def;
         id = attr.getAttribute("id");
+        if (id.equals("venue"))
+        {
+            System.out.println("yoless");
+        }
         try {
             switch (attr.getAttribute("syntax")) { // We don't validate syntax here; schema does it.
                 case "1.3.6.1.4.1.1466.115.121.1.6":
@@ -80,8 +86,6 @@ public class AttributeType {
                         name = definition.getLocalisedString(origin, "string");
                         break;
                     case "mapping":
-                        members = new HashMap<>();
-                        as = TokenDefinition.As.Mapping;
                         populate(origin);
                         break;
                 }
@@ -118,11 +122,7 @@ public class AttributeType {
                     case "token-id":
                         //this value is obtained from the token id
                         as = definition.parseAs(resolve);
-                        if (as == TokenDefinition.As.Mapping)
-                        {
-                            members = new HashMap<>();
-                            populate(origin);
-                        }
+                        populate(resolve); //check for mappings
                         if (function != null) function.as = as;
                         if (resolve.hasAttribute("bitmask")) {
                             bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
@@ -143,10 +143,23 @@ public class AttributeType {
 
     private void populate(Element origin) {
         Element option;
-        NodeList nList = origin.getElementsByTagNameNS(definition.nameSpace, "option");
-        for (int i = 0; i < nList.getLength(); i++) {
-            option = (Element) nList.item(i);
-            members.put(new BigInteger(option.getAttribute("key")), definition.getLocalisedString(option, "value"));
+        for (Node n = origin.getFirstChild(); n != null; n = n.getNextSibling())
+        {
+            if (n.getNodeType() == ELEMENT_NODE)
+            {
+                Element element = (Element) n;
+                if (element.getLocalName().equals("mapping"))
+                {
+                    members = new HashMap<>();
+                    as = TokenDefinition.As.Mapping;
+
+                    NodeList nList = origin.getElementsByTagNameNS(definition.nameSpace, "option");
+                    for (int i = 0; i < nList.getLength(); i++) {
+                        option = (Element) nList.item(i);
+                        members.put(new BigInteger(option.getAttribute("key")), definition.getLocalisedString(option, "value"));
+                    }
+                }
+            }
         }
     }
 

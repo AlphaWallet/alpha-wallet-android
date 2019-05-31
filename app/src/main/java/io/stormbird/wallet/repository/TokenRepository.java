@@ -10,6 +10,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.entity.TransactionResult;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TickerService;
@@ -324,9 +325,9 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public String generateTransactionPayload(Token token, BigInteger tokenId, FunctionDefinition def)
+    public String generateTransactionPayload(Token token, BigInteger tokenId, FunctionDefinition def, TokenDefinition td)
     {
-        Function function = def.generateTransactionFunction(token.getWallet(), tokenId, null);// generateTransactionFunction(token, tokenId, def);
+        Function function = def.generateTransactionFunction(token.getWallet(), tokenId, td);// generateTransactionFunction(token, tokenId, def);
         String encodedFunction = FunctionEncoder.encode(function);
         return encodedFunction;
     }

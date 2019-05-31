@@ -103,7 +103,7 @@ public class FunctionDefinition
 
     private void resolveReference(MethodArg arg, BigInteger tokenId, TokenDefinition definition)
     {
-        if (definition.attributeTypes.containsKey(arg.element.ref))
+        if (definition != null && definition.attributeTypes.containsKey(arg.element.ref))
         {
             arg.element.value = definition.fetchAttrResult(arg.element.ref, tokenId, null, definition.context.attrInterface).blockingSingle().text;
         }

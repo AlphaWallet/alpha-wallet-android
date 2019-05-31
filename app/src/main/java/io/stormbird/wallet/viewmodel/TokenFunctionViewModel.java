@@ -6,6 +6,7 @@ import io.stormbird.token.entity.ContractAddress;
 import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.entity.TokenScriptResult;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.ConfirmationType;
 import io.stormbird.wallet.entity.Wallet;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -106,7 +107,8 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     public String getTransactionBytes(Token token, BigInteger tokenId, FunctionDefinition def)
     {
-        return fetchTokensInteract.getTransactionBytes(token, tokenId, def);
+        TokenDefinition td = assetDefinitionService.getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        return fetchTokensInteract.getTransactionBytes(token, tokenId, def, td);
     }
 
     public TokenScriptResult getTokenScriptResult(Token token, BigInteger tokenId)

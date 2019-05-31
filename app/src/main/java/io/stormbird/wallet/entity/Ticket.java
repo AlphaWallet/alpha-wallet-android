@@ -179,11 +179,6 @@ public class Ticket extends Token implements Parcelable
         tokenHolder.symbol.setText(getFullName(asset, getTicketCount())); //override name text
     }
 
-    public String populateRange(TicketRange range)
-    {
-        return intArrayToString(range.tokenIds, false);
-    }
-
     @Override
     public int[] getTicketIndices(String ticketIds)
     {
@@ -201,37 +196,6 @@ public class Ticket extends Token implements Parcelable
      * Conversion functions used for manipulating tickets
      *
      */
-
-    /**
-     * Convert a list of ticket indices into a CSV string of the corresponding TicketIDs
-     * @param checkedIndexList
-     * @return
-     */
-    //produce a String containing all the TicketID (BigInteger) entries from a list of indices
-    public String parseList(List<Integer> checkedIndexList) {
-        StringBuilder sb = new StringBuilder();
-
-        boolean first = true;
-        if (checkedIndexList != null)
-        {
-            for (Integer i : checkedIndexList)
-            {
-                //reverse lookup the selected IDs
-                if (i < balanceArray.size())
-                {
-                    if (!first) sb.append(",");
-                    BigInteger ticketID = balanceArray.get(i);
-                    sb.append(Numeric.toHexStringNoPrefix(ticketID));
-                    first = false;
-                }
-            }
-        }
-        else {
-            sb.append("none");
-        }
-
-        return sb.toString();
-    }
 
     /**
      * Convert a CSV string of Hex values into a BigInteger List
@@ -258,25 +222,6 @@ public class Ticket extends Token implements Parcelable
         catch (Exception e)
         {
             idList = new ArrayList<>();
-        }
-
-        return idList;
-    }
-
-    /**
-     * Given a set of indices generate a list of BigInteger Ticket ID's
-     * @param prunedIndices
-     * @return
-     */
-    public List<BigInteger> indexArrayToTicketId(int[] prunedIndices)
-    {
-        List<BigInteger> idList = new ArrayList<>();
-        for (int i : prunedIndices)
-        {
-            if (i < balanceArray.size()) {
-                BigInteger ticketID = balanceArray.get(i);
-                idList.add(ticketID);
-            }
         }
 
         return idList;

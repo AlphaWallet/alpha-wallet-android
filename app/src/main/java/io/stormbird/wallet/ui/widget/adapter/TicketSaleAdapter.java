@@ -22,17 +22,7 @@ import io.stormbird.wallet.ui.widget.entity.RedeemHeaderSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TicketSaleSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TokenIdSortedItem;
 import io.stormbird.wallet.ui.widget.entity.TransferHeaderSortedItem;
-import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
-import io.stormbird.wallet.ui.widget.holder.OpenseaHolder;
-import io.stormbird.wallet.ui.widget.holder.OpenseaSelectHolder;
-import io.stormbird.wallet.ui.widget.holder.QuantitySelectorHolder;
-import io.stormbird.wallet.ui.widget.holder.RedeemTicketHolder;
-import io.stormbird.wallet.ui.widget.holder.SalesOrderHeaderHolder;
-import io.stormbird.wallet.ui.widget.holder.TicketHolder;
-import io.stormbird.wallet.ui.widget.holder.TicketSaleHolder;
-import io.stormbird.wallet.ui.widget.holder.TokenDescriptionHolder;
-import io.stormbird.wallet.ui.widget.holder.TotalBalanceHolder;
-import io.stormbird.wallet.ui.widget.holder.TransferHeaderHolder;
+import io.stormbird.wallet.ui.widget.holder.*;
 
 /**
  * Created by James on 12/02/2018.
@@ -85,6 +75,9 @@ public class TicketSaleAdapter extends NonFungibleTokenAdapter {
             } break;
             case TransferHeaderHolder.VIEW_TYPE: {
                 holder = new TransferHeaderHolder(R.layout.item_redeem_ticket, parent);
+            } break;
+            case TokenscriptViewHolder.VIEW_TYPE: {
+                holder = new TokenscriptViewHolder(R.layout.item_tokenscript, parent, token, assetService, false);
             } break;
             case OpenseaHolder.VIEW_TYPE: {
                 holder = new OpenseaSelectHolder(R.layout.item_opensea_token, parent, token);

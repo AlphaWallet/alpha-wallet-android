@@ -7,6 +7,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.MagicLinkData;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 
@@ -104,8 +105,8 @@ public class FetchTokensInteract {
         return pair;
     }
 
-    public String getTransactionBytes(Token token, BigInteger tokenId, FunctionDefinition def)
+    public String getTransactionBytes(Token token, BigInteger tokenId, FunctionDefinition def, TokenDefinition td)
     {
-        return tokenRepository.generateTransactionPayload(token, tokenId, def);
+        return tokenRepository.generateTransactionPayload(token, tokenId, def, td);
     }
 }

@@ -109,9 +109,19 @@ public class ERC721Token extends Token implements Parcelable
         try
         {
             BigInteger tokenIdBI = new BigInteger(tokenId);
-            List<Type> params = Arrays.asList(new Address(to), new Uint256(tokenIdBI));
+            List<Type> params;
             List<TypeReference<?>> returnTypes = Collections.emptyList();
-            function = new Function("transfer", params, returnTypes);
+            if (tokenUsesLegacyTransfer())
+            {
+                params = Arrays.asList(new Address(to), new Uint256(tokenIdBI));
+                function = new Function("transfer", params, returnTypes);
+            }
+            else
+            {
+                //function safeTransferFrom(address _from, address _to, uint256 _tokenId) external payable;
+                params = Arrays.asList(new Address(getWallet()), new Address(to), new Uint256(tokenIdBI));
+                function = new Function("safeTransferFrom", params, returnTypes);
+            }
         }
         catch (NumberFormatException e)
         {
@@ -212,5 +222,25 @@ public class ERC721Token extends Token implements Parcelable
     public void updateBalanceCheckPressure(boolean isVisible)
     {
 
+    }
+
+    /**
+     * This is a list of legacy contracts which are known to use the old ERC721 source,
+     * which only had 'transfer' as the transfer function.
+     * @return
+     */
+    private boolean tokenUsesLegacyTransfer()
+    {
+        switch (tokenInfo.address.toLowerCase())
+        {
+            case "0x06012c8cf97bead5deae237070f9587f8e7a266d":
+            case "0xabc7e6c01237e8eef355bba2bf925a730b714d5f":
+            case "0x71c118b00759b0851785642541ceb0f4ceea0bd5":
+            case "0x16baf0de678e52367adc69fd067e5edd1d33e3bf":
+                return true;
+
+            default:
+                return false;
+        }
     }
 }

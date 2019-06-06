@@ -96,6 +96,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
 
             if (iconified)
             {
+                webWrapper.setVisibility((View.VISIBLE));
                 webWrapper.setOnClickListener(v -> handleClick(v, data));
                 webWrapper.setOnLongClickListener(v -> handleLongClick(v, data));
             }

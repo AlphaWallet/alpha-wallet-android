@@ -5,6 +5,7 @@ import android.content.Context;
 
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticket;
+import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
@@ -24,7 +25,6 @@ public class RedeemAssetSelectViewModel extends BaseViewModel
     private final RedeemSignatureDisplayRouter redeemSignatureDisplayRouter;
     private final AssetDefinitionService assetDefinitionService;
 
-    private final MutableLiveData<Ticket> ticket = new MutableLiveData<>();
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
 
@@ -56,10 +56,10 @@ public class RedeemAssetSelectViewModel extends BaseViewModel
         defaultWallet.setValue(wallet);
     }
 
-    public void showRedeemSignature(Context ctx, TicketRange range, Ticket ticket)
+    public void showRedeemSignature(Context ctx, TicketRange range, Token token)
     {
         TicketRangeParcel parcel = new TicketRangeParcel(range);
-        redeemSignatureDisplayRouter.open(ctx, defaultWallet.getValue(), ticket, parcel);
+        redeemSignatureDisplayRouter.open(ctx, defaultWallet.getValue(), token, parcel);
     }
 
     public AssetDefinitionService getAssetDefinitionService()

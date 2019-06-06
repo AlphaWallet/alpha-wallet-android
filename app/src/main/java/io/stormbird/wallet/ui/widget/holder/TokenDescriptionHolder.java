@@ -23,8 +23,9 @@ public class TokenDescriptionHolder extends BinderViewHolder<Token>
     private final TextView issuerName;
     private final String issuer;
     private final AssetDefinitionService assetService;
+    private final int assetCount;
 
-    public TokenDescriptionHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService service) {
+    public TokenDescriptionHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService service, int tokenCount) {
         super(resId, parent);
         title = findViewById(R.id.name);
         count = findViewById(R.id.amount);
@@ -38,11 +39,12 @@ public class TokenDescriptionHolder extends BinderViewHolder<Token>
         {
             issuer = "";
         }
+        assetCount = tokenCount;
     }
 
     @Override
     public void bind(@Nullable Token token, @NonNull Bundle addition) {
-        count.setText(String.valueOf(token.getTicketCount()));
+        count.setText(String.valueOf(assetCount));
         String tokenName = token.tokenInfo.name;
         if (assetService.getAssetDefinition(token.tokenInfo.chainId, token.getAddress()) != null)
         {

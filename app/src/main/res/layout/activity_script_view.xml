@@ -1,12 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark">
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical">
 
-    <!--android:layout_marginBottom="?actionBarSize"-->
+    <include layout="@layout/layout_simple_toolbar" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/background_card">
+
+        <io.stormbird.wallet.widget.ProgressView
+            android:id="@+id/progress_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            tools:visibility="gone" />
+
 
         <LinearLayout
             android:id="@+id/layoutButtons"
@@ -71,14 +86,26 @@
                 android:textSize="20sp" />
         </LinearLayout>
 
-    <io.stormbird.wallet.web3.Web3TokenView
-        android:id="@+id/web3_tokenview"
-        android:layout_above="@id/layoutButtons"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_alignParentTop="true"
+            android:layout_above="@id/layoutButtons"
+            android:orientation="vertical"
+            android:layout_marginTop="10dp">
+
+            <include layout="@layout/item_ticket" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <io.stormbird.wallet.widget.SystemView
+        android:id="@+id/system_view"
         android:layout_width="match_parent"
-        android:layout_height="0dp">
+        android:layout_height="match_parent"
+        android:layout_marginTop="?actionBarSize"
+        android:background="@color/white"
+        tools:visibility="gone" />
 
-    </io.stormbird.wallet.web3.Web3TokenView>
-
-    <include layout="@layout/layout_simple_toolbar" />
-
-</RelativeLayout>
+</LinearLayout>

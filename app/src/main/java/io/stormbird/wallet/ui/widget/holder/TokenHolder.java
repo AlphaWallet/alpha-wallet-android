@@ -28,10 +28,12 @@ import io.stormbird.wallet.util.Utils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
-public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener {
+public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener, View.OnLongClickListener {
 
     public static final int VIEW_TYPE = 1005;
     public static final String EMPTY_BALANCE = "\u2014\u2014";
@@ -219,11 +221,25 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     @Override
     public void onClick(View v) {
         if (onTokenClickListener != null) {
-            onTokenClickListener.onTokenClick(v, token, BigInteger.ZERO);
+            onTokenClickListener.onTokenClick(v, token, null);
         }
     }
 
+    @Override
+    public boolean onLongClick(View v)
+    {
+        if (onTokenClickListener != null) {
+            onTokenClickListener.onLongTokenClick(v, token, null);
+        }
+
+        return true;
+    }
+
     public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener) {
+        this.onTokenClickListener = onTokenClickListener;
+    }
+
+    public void setOnLongClickListener(OnTokenClickListener onTokenClickListener) {
         this.onTokenClickListener = onTokenClickListener;
     }
 

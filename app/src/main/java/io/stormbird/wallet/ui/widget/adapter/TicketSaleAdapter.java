@@ -1,11 +1,13 @@
 package io.stormbird.wallet.ui.widget.adapter;
 
+import android.support.v7.widget.AppCompatRadioButton;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.stormbird.token.entity.TicketRange;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.Ticket;
@@ -15,13 +17,7 @@ import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTokenCheckListener;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
-import io.stormbird.wallet.ui.widget.entity.AssetSortedItem;
-import io.stormbird.wallet.ui.widget.entity.MarketSaleHeaderSortedItem;
-import io.stormbird.wallet.ui.widget.entity.QuantitySelectorSortedItem;
-import io.stormbird.wallet.ui.widget.entity.RedeemHeaderSortedItem;
-import io.stormbird.wallet.ui.widget.entity.TicketSaleSortedItem;
-import io.stormbird.wallet.ui.widget.entity.TokenIdSortedItem;
-import io.stormbird.wallet.ui.widget.entity.TransferHeaderSortedItem;
+import io.stormbird.wallet.ui.widget.entity.*;
 import io.stormbird.wallet.ui.widget.holder.*;
 
 /**
@@ -61,16 +57,16 @@ public class TicketSaleAdapter extends NonFungibleTokenAdapter {
                 holder = new TotalBalanceHolder(R.layout.item_total_balance, parent);
             } break;
             case TokenDescriptionHolder.VIEW_TYPE: {
-                holder = new TokenDescriptionHolder(R.layout.item_token_description, parent, token, assetService);
+                holder = new TokenDescriptionHolder(R.layout.item_token_description, parent, token, assetService, assetCount);
             } break;
             case SalesOrderHeaderHolder.VIEW_TYPE: {
-                holder = new SalesOrderHeaderHolder(R.layout.item_redeem_ticket, parent);
+                holder = new SalesOrderHeaderHolder(R.layout.item_redeem_ticket, parent, assetService);
             } break;
             case RedeemTicketHolder.VIEW_TYPE: {
                 holder = new RedeemTicketHolder(R.layout.item_redeem_ticket, parent);
             } break;
             case QuantitySelectorHolder.VIEW_TYPE: {
-                quantitySelector = new QuantitySelectorHolder(R.layout.item_quantity_selector, parent, getCheckedItem().tokenIds.size());
+                quantitySelector = new QuantitySelectorHolder(R.layout.item_quantity_selector, parent, getCheckedItem().tokenIds.size(), assetService);
                 holder = quantitySelector;
             } break;
             case TransferHeaderHolder.VIEW_TYPE: {
@@ -135,7 +131,16 @@ public class TicketSaleAdapter extends NonFungibleTokenAdapter {
     public void setRedeemTicket(Token t) {
         items.beginBatchedUpdates();
         items.clear();
-        items.add(new RedeemHeaderSortedItem(t));
+
+        TokenDefinition td = assetService.getAssetDefinition(t.tokenInfo.chainId, t.tokenInfo.address);
+        if (td != null)
+        {
+            items.add(new TokenscriptSortedItem(t));
+        }
+        else
+        {
+            items.add(new RedeemHeaderSortedItem(t));
+        }
 
         addRanges(t);
         items.endBatchedUpdates();

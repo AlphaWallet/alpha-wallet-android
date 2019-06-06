@@ -4,31 +4,20 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.ValueCallback;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import dagger.android.AndroidInjection;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.Numeric;
-import io.stormbird.token.tools.TokenDefinition;
-import io.stormbird.token.util.DateTime;
-import io.stormbird.token.util.DateTimeFactory;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.ui.widget.adapter.NonFungibleTokenAdapter;
-import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.TokenFunctionViewModel;
@@ -51,10 +40,7 @@ import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SignatureException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static io.stormbird.wallet.C.Key.TICKET;
@@ -152,14 +138,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
 
     private void onAttr(TokenScriptResult.Attribute attribute)
     {
-        try
-        {
-            TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
-        }
-        catch (ParseException e)
-        {
-            e.printStackTrace();
-        }
+        TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
     }
 
     private void fillEmpty()
@@ -171,7 +150,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_script_view2);
+        setContentView(R.layout.activity_script_view);
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(TokenFunctionViewModel.class);
@@ -181,7 +160,10 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         systemView.hide();
         progressView.hide();
 
+        //expose the webview and remove the token 'card' background
         findViewById(R.id.layout_webwrapper).setBackgroundResource(R.drawable.background_card);
+        findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
+        findViewById(R.id.layout_legacy).setVisibility(View.GONE);
 
         initViews();
         toolbar();

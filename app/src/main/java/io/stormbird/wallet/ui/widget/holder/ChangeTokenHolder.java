@@ -50,7 +50,7 @@ public class ChangeTokenHolder extends BinderViewHolder<Token> implements View.O
     public void onClick(View v) {
         if (onTokenClickListener != null) {
             enableControl.setChecked(!token.tokenInfo.isEnabled);
-            onTokenClickListener.onTokenClick(v, token, BigInteger.ZERO);
+            onTokenClickListener.onTokenClick(v, token, null);
         }
     }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_select_ticket"
@@ -7,10 +7,10 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
     android:animateLayoutChanges="true"
-    android:clickable="true"
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/total_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -28,214 +28,215 @@
             app:buttonTint="@color/transparent" />
 
         <LinearLayout
+            android:id="@+id/layout_legacy"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/background_card_shadow"
             android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_weight="1.2"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1.2"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingBottom="20dp"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:paddingTop="15dp">
-
-                <TextView
-                    android:id="@+id/redeemed"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/small_curved"
-                    android:fontFamily="@font/font_semibold"
-                    android:gravity="center"
-                    android:paddingLeft="7dp"
-                    android:paddingRight="7dp"
-                    android:text="@string/redeemed"
-                    android:textColor="@color/white"
-                    android:textSize="15sp"
-                    android:visibility="gone" />
+                android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="vertical"
+                    android:paddingBottom="20dp"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
+                    android:paddingTop="15dp">
 
                     <TextView
-                        android:id="@+id/amount"
+                        android:id="@+id/redeemed"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="5dp"
-                        android:fontFamily="@font/font_bold"
-                        android:text="x2"
-                        android:textColor="@color/green"
-                        android:textSize="21sp" />
-
-                    <TextView
-                        android:id="@+id/name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/NA"
-                        android:textColor="@color/text_black"
-                        android:textSize="21sp" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/venue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:fontFamily="@font/font_regular"
-                    android:text="@string/NA"
-                    android:textColor="@color/text_black"
-                    android:textSize="12sp" />
-
-                <LinearLayout
-                    android:id="@+id/bottom_part"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="35dp"
-                    android:orientation="horizontal">
+                        android:background="@drawable/small_curved"
+                        android:fontFamily="@font/font_semibold"
+                        android:gravity="center"
+                        android:paddingLeft="7dp"
+                        android:paddingRight="7dp"
+                        android:text="@string/redeemed"
+                        android:textColor="@color/white"
+                        android:textSize="15sp"
+                        android:visibility="gone" />
 
                     <LinearLayout
-                        android:id="@+id/datelayout"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1.2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:orientation="horizontal">
 
-                        <ImageView
-                            android:id="@+id/calendar"
+                        <TextView
+                            android:id="@+id/amount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginRight="5dp"
-                            android:contentDescription="@string/empty"
-                            android:src="@drawable/ic_calendar" />
+                            android:layout_marginEnd="5dp"
+                            android:fontFamily="@font/font_bold"
+                            android:text="x2"
+                            android:textColor="@color/green"
+                            android:textSize="21sp" />
+
+                        <TextView
+                            android:id="@+id/name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/font_light"
+                            android:text="@string/NA"
+                            android:textColor="@color/text_black"
+                            android:textSize="21sp" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/venue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:fontFamily="@font/font_regular"
+                        android:text="@string/NA"
+                        android:textColor="@color/text_black"
+                        android:textSize="12sp" />
+
+                    <LinearLayout
+                        android:id="@+id/bottom_part"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="35dp"
+                        android:orientation="horizontal">
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:id="@+id/datelayout"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_gravity="center_vertical"
-                            android:orientation="vertical">
+                            android:layout_weight="1.2"
+                            android:orientation="horizontal">
 
-                            <TextView
-                                android:id="@+id/date"
+                            <ImageView
+                                android:id="@+id/calendar"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:paddingRight="5dp"
-                                android:textSize="12sp" />
+                                android:layout_marginRight="5dp"
+                                android:contentDescription="@string/empty"
+                                android:src="@drawable/ic_calendar" />
 
-                            <TextView
-                                android:id="@+id/time"
+                            <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:paddingRight="5dp"
-                                android:visibility="gone"
-                                android:textSize="12sp" />
+                                android:orientation="vertical">
 
+                                <TextView
+                                    android:id="@+id/date"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_vertical"
+                                    android:paddingRight="5dp"
+                                    android:textSize="12sp" />
+
+                                <TextView
+                                    android:id="@+id/time"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_vertical"
+                                    android:paddingRight="5dp"
+                                    android:visibility="gone"
+                                    android:textSize="12sp" />
+
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/ticketlayout"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/ticketicon"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginRight="5dp"
+                                android:contentDescription="@string/empty"
+                                android:src="@drawable/ic_ticket" />
+
+                            <TextView
+                                android:id="@+id/tickettext"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:fontFamily="@font/font_semibold"
+                                android:textColor="@color/semi_dark_grey"
+                                android:textSize="15sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/catlayout"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/caticon"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginRight="5dp"
+                                android:contentDescription="@string/empty"
+                                android:src="@drawable/ic_category" />
+
+                            <TextView
+                                android:id="@+id/cattext"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:fontFamily="@font/font_semibold"
+                                android:textColor="@color/semi_dark_grey"
+                                android:textSize="15sp" />
                         </LinearLayout>
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:id="@+id/ticketlayout"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:id="@+id/ticketicon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginRight="5dp"
-                            android:contentDescription="@string/empty"
-                            android:src="@drawable/ic_ticket" />
-
-                        <TextView
-                            android:id="@+id/tickettext"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:fontFamily="@font/font_semibold"
-                            android:textColor="@color/semi_dark_grey"
-                            android:textSize="15sp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/catlayout"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:id="@+id/caticon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginRight="5dp"
-                            android:contentDescription="@string/empty"
-                            android:src="@drawable/ic_category" />
-
-                        <TextView
-                            android:id="@+id/cattext"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:fontFamily="@font/font_semibold"
-                            android:textColor="@color/semi_dark_grey"
-                            android:textSize="15sp" />
-                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/symbol"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/normal_margin"
+                        android:layout_marginStart="@dimen/big_margin"
+                        android:textAllCaps="true"
+                        android:textAppearance="?attr/textAppearanceListItem"
+                        android:textSize="12sp"
+                        android:visibility="gone"
+                        tools:text="" />
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/symbol"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/normal_margin"
-                    android:layout_marginStart="@dimen/big_margin"
-                    android:textAllCaps="true"
-                    android:textAppearance="?attr/textAppearanceListItem"
-                    android:textSize="12sp"
-                    android:visibility="gone"
-                    tools:text="" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_ticket_details"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:animateLayoutChanges="true"
-                android:background="@drawable/background_card_gray"
-                android:orientation="vertical"
-                android:padding="20dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/ticket_details"
+                <LinearLayout
+                    android:id="@+id/layout_ticket_details"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_light"
-                    android:text=""
-                    android:textColor="@color/text_black" />
+                    android:animateLayoutChanges="true"
+                    android:background="@drawable/background_card_gray"
+                    android:orientation="vertical"
+                    android:padding="20dp"
+                    android:visibility="gone">
 
+                    <TextView
+                        android:id="@+id/ticket_details"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/font_light"
+                        android:text=""
+                        android:textColor="@color/text_black" />
+
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
 
             <ImageView
                 android:id="@+id/image_view"
@@ -246,72 +247,50 @@
                 android:layout_height="wrap_content" />
 
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_webwrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_card_shadow"
+            android:gravity="center"
+            android:visibility="gone"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
+
+            <io.stormbird.wallet.web3.Web3TokenView
+                android:id="@+id/web3_tokenview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            </io.stormbird.wallet.web3.Web3TokenView>
+
+            <ProgressBar
+                android:id="@+id/progress_element"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminateTint="@color/colorPrimaryDark"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/layoutButtons"
+        android:id="@+id/click_layer"
         android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:layout_gravity="center"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:visibility="gone"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:layout_alignTop="@id/total_wrapper"
+        android:layout_alignBottom="@id/total_wrapper"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="visible"
+        android:orientation="vertical"
+        android:background="@color/transparent">
 
-        <Button
-            android:id="@+id/button_func1"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp"
-            android:text="Func 1"
-            android:textAllCaps="false"
-            android:visibility="invisible"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
-
-        <include layout="@layout/button_divider" />
-
-        <Button
-            android:id="@+id/button_func2"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp"
-            android:text="Func 2"
-            android:textAllCaps="false"
-            android:visibility="invisible"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
-
-        <include layout="@layout/button_divider" />
-
-        <Button
-            android:id="@+id/button_func3"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp"
-            android:text="Func 3"
-            android:textAllCaps="false"
-            android:visibility="invisible"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.AppCompatRadioButton;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -17,7 +18,12 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.ui.TokenDetailActivity;
 import io.stormbird.wallet.entity.opensea.Asset;
+import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.util.KittyUtils;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by James on 3/10/2018.
@@ -32,6 +38,8 @@ public class OpenseaHolder extends BinderViewHolder<Asset> {
     private final TextView cooldown;
     private final TextView statusText;
     private final LinearLayout layoutToken;
+    private OnTokenClickListener tokenClickListener;
+    private final AppCompatRadioButton itemSelect;
 
     public OpenseaHolder(int resId, ViewGroup parent, Token token) {
         super(resId, parent);
@@ -41,6 +49,7 @@ public class OpenseaHolder extends BinderViewHolder<Asset> {
         cooldown = findViewById(R.id.cooldown);
         statusText = findViewById(R.id.status);
         layoutToken = findViewById(R.id.layout_token);
+        itemSelect = findViewById(R.id.radioBox);
         this.token = token;
     }
 
@@ -53,6 +62,16 @@ public class OpenseaHolder extends BinderViewHolder<Asset> {
             assetName = "ID# " + String.valueOf(asset.getTokenId());
         }
         titleText.setText(assetName);
+
+        if (asset.exposeRadio)
+        {
+            itemSelect.setVisibility(View.VISIBLE);
+            itemSelect.setChecked(asset.isChecked);
+        }
+        else
+        {
+            itemSelect.setVisibility(View.GONE);
+        }
 
         if (asset.getTraitFromType("generation") != null) {
             generation.setText(String.format("Gen %s",
@@ -79,12 +98,8 @@ public class OpenseaHolder extends BinderViewHolder<Asset> {
                 .load(asset.getImagePreviewUrl())
                 .into(image);
 
-        layoutToken.setOnClickListener(v -> {
-            Intent intent = new Intent(getContext(), TokenDetailActivity.class);
-            intent.putExtra("asset", asset);
-            intent.putExtra("token", token);
-            getContext().startActivity(intent);
-        });
+        layoutToken.setOnClickListener(v -> handleClick(v, asset));
+        layoutToken.setOnLongClickListener(v -> handleLongClick(v, asset));
     }
 
     private void setStatus(C.TokenStatus status) {
@@ -99,5 +114,39 @@ public class OpenseaHolder extends BinderViewHolder<Asset> {
         } else {
             statusText.setVisibility(View.GONE);
         }
+    }
+
+    public void handleClick(View v, Asset asset)
+    {
+        if (asset.exposeRadio)
+        {
+            if (!asset.isChecked)
+            {
+                tokenClickListener.onTokenClick(v, token, new ArrayList<>(Arrays.asList(new BigInteger(asset.getTokenId()))));
+                asset.isChecked = true;
+                itemSelect.setChecked(true);
+            }
+        }
+        else
+        {
+            Intent intent = new Intent(getContext(), TokenDetailActivity.class);
+            intent.putExtra("asset", asset);
+            intent.putExtra("token", token);
+            getContext().startActivity(intent);
+        }
+    }
+
+    private boolean handleLongClick(View v, Asset asset)
+    {
+        //open up the radio view and signal to holding app
+        tokenClickListener.onLongTokenClick(v, token, new ArrayList<>(Arrays.asList(new BigInteger(asset.getTokenId()))));
+        asset.isChecked = true;
+        itemSelect.setChecked(true);
+        return true;
+    }
+
+    public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener)
+    {
+        tokenClickListener = onTokenClickListener;
     }
 }

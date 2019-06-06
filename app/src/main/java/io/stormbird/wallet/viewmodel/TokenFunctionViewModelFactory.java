@@ -7,6 +7,7 @@ import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.SellTicketRouter;
+import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.router.TransferTicketRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
@@ -19,7 +20,7 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
 {
     private final AssetDefinitionService assetDefinitionService;
     private final SellTicketRouter sellTicketRouter;
-    private final TransferTicketRouter transferTicketRouter;
+    private final TransferTicketDetailRouter transferTicketRouter;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final TokensService tokensService;
@@ -28,7 +29,7 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
     public TokenFunctionViewModelFactory(
             AssetDefinitionService assetDefinitionService,
             SellTicketRouter sellTicketRouter,
-            TransferTicketRouter transferTicketRouter,
+            TransferTicketDetailRouter transferTicketRouter,
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
             TokensService tokensService,

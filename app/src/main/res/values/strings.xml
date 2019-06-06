@@ -131,7 +131,7 @@
     <string name="token_name">%1$s (%2$s)</string>
     <string name="copy_addr_to_clipboard">copy address to clipboard</string>
     <string name="create_sell_order">Create Sales Order</string>
-    <string name="select_tickets">Select Tickets to Sell:</string>
+    <string name="select_tickets">Select %1$s to Sell:</string>
     <string name="select_tickets_redeem">Select Tickets to Redeem:</string>
     <string name="marketplace_title">Marketplace</string>
     <string name="title_marketplace">Marketplace</string>
@@ -207,7 +207,7 @@
     <string name="total_cost_label">Total Cost:</string>
     <string name="equivalent_in_usd">Equivalent in USD</string>
     <string name="total_cost">%1s %2s</string>
-    <string name="select_quantity_tickets">Select Quantity of Tickets</string>
+    <string name="select_quantity_tickets">Select Quantity of %1$s</string>
     <string name="redeemed">Redeemed</string>
     <string name="ticket_redeemed">Your ticket has been redeemed</string>
     <string name="filter">Filter</string>
@@ -314,7 +314,7 @@
     <string name="ticket_range_inavlid">Tickets partially imported</string>
     <string name="free_import">Free Import</string>
     <string name="select_network">Select Network:</string>
-    <string name="title_select_ticket_quantity">Select Ticket Quantity:</string>
+    <string name="title_select_ticket_quantity">Select %1$s Quantity:</string>
     <string name="title_select_transfer_method">Select Transfer Method:</string>
     <string name="title_set_universal_link_expiry">Set MagicLink Expiry:</string>
     <string name="title_input_wallet_address">Input Transfer Address:</string>

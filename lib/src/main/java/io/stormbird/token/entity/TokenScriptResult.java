@@ -1,5 +1,6 @@
 package io.stormbird.token.entity;
 
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.token.util.DateTime;
 import io.stormbird.token.util.DateTimeFactory;
 
@@ -53,27 +54,56 @@ public class TokenScriptResult
         }
     }
 
-    public static void addPair(StringBuilder attrs, String name, String value) throws ParseException
+    public static void addPair(StringBuilder attrs, Attribute attr)
     {
-        attrs.append(name);
+        if (attr.id.equals("time"))
+        {
+            System.out.println("yoless");
+        }
+        attrs.append(attr.id);
         attrs.append(": ");
 
-        if (name.equals("time"))
-        {
-            DateTime dt = DateTimeFactory.getDateTime(value);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
-            String JSDate = dt.format(simpleDateFormat) + "T" + dt.format(simpleTimeFormat);
+        attrs.append("\"");
+        attrs.append(attr.text);
+        attrs.append("\"");
 
-            value = "{ generalizedTime: \"" + value + "\", date: new Date(\"" + JSDate + "\") }";// ((DateTime) dt).toString();
-            attrs.append(value);
-        }
-        else
-        {
-            attrs.append("\"");
-            attrs.append(value);
-            attrs.append("\"");
-        }
+        attrs.append(",\n");
+    }
+
+    public static void addPair(StringBuilder attrs, String attrId, String attrValue)
+    {
+        attrs.append(attrId);
+        attrs.append(": ");
+
+//        if (attrId.equals("time"))
+//        {
+//            try
+//            {
+//                DateTime dt = DateTimeFactory.getDateTime(attrValue);
+//                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//                SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
+//                String JSDate = dt.format(simpleDateFormat) + "T" + dt.format(simpleTimeFormat);
+//
+//                attrValue = "{ generalizedTime: \"" + attrValue + "\", date: new Date(\"" + JSDate + "\") }";// ((DateTime) dt).toString();
+//                attrs.append(attrValue);
+//            }
+//            catch (ParseException e)
+//            {
+//                attrs.append("\"");
+//                attrs.append(attrValue);
+//                attrs.append("\"");
+//            }
+//        }
+//        else
+//        {
+//            attrs.append("\"");
+//            attrs.append(attrValue);
+//            attrs.append("\"");
+//        }
+
+        if (attrValue != null && attrValue.charAt(0) != '{') attrs.append("\"");
+        attrs.append(attrValue);
+        if (attrValue != null && attrValue.charAt(0) != '{') attrs.append("\"");
 
         attrs.append(",\n");
     }

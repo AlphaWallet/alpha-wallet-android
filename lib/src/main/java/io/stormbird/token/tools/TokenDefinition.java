@@ -987,7 +987,7 @@ public class TokenDefinition {
             try
             {
                 BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
-                return new TokenScriptResult.Attribute(attr.id, attr.name, val, attr.toString(val));
+                return new TokenScriptResult.Attribute(attr.id, attr.name, val, attr.getSyntaxVal(attr.toString(val)));
             }
             catch (Exception e)
             {

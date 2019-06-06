@@ -10,6 +10,7 @@ import android.widget.CompoundButton;
 
 import android.widget.LinearLayout;
 
+import android.widget.RelativeLayout;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.opensea.Asset;
@@ -23,7 +24,7 @@ public class OpenseaSelectHolder extends OpenseaHolder
 {
     private final AppCompatRadioButton select;
     private OnOpenseaAssetCheckListener onTokenCheckListener;
-    private final LinearLayout ticketLayout;
+    private final RelativeLayout ticketLayout;
 
     public OpenseaSelectHolder(int resId, ViewGroup parent, Token token)
     {

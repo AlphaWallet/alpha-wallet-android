@@ -25,6 +25,7 @@ import java.util.List;
 public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     protected final OnSalesOrderClickListener onSalesOrderClickListener;
+    private int assetCount = 1;
     private final List<SalesOrderSortedItem> currentList = new ArrayList<>();
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
         @Override
@@ -83,7 +84,7 @@ public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> 
                 holder = tokenHolder;
             } break;
             case TokenDescriptionHolder.VIEW_TYPE: {
-                holder = new TokenDescriptionHolder(R.layout.item_token_description, parent, null, null);
+                holder = new TokenDescriptionHolder(R.layout.item_token_description, parent, null, null, assetCount);
             } break;
         }
 

@@ -17,6 +17,7 @@ public class TicketRange
     //public final int seatStart;
     //public int seatCount;
     public boolean isChecked;
+    public boolean exposeRadio;
     public String contractAddress; // Should this be address or actual token?
 
     public List<BigInteger> tokenIds;
@@ -27,6 +28,7 @@ public class TicketRange
         tokenIds = new ArrayList<>();
         tokenIds.add(tokenId);
         this.isChecked = false;
+        this.exposeRadio = false;
     }
 
     public TicketRange(List<BigInteger> tokenIds, String contractAddress, boolean isChecked)
@@ -34,6 +36,7 @@ public class TicketRange
         this.contractAddress = contractAddress;
         this.tokenIds = tokenIds;
         this.isChecked = isChecked;
+        this.exposeRadio = false;
     }
 
     public void selectSubRange(int count)

@@ -2,8 +2,10 @@ package io.stormbird.wallet.ui.widget.adapter;
 
 import android.content.Context;
 import android.support.v7.util.SortedList;
+import android.support.v7.widget.AppCompatRadioButton;
 import android.view.ViewGroup;
 
+import android.widget.RadioButton;
 import com.bumptech.glide.Glide;
 
 import java.math.BigInteger;
@@ -41,9 +43,11 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     private boolean clickThrough = false;
     private FunctionCallback functionCallback;
     private boolean containsScripted = false;
+    protected int assetCount;
 
     public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, AssetDefinitionService service, OpenseaService opensea) {
         super(tokenClickListener, service);
+        assetCount = 0;
         token = t;
         clickThrough = true;
         openseaService = opensea;
@@ -54,8 +58,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token token, String ticketIds, AssetDefinitionService service, OpenseaService opensea)
     {
         super(tokenClickListener, service);
+        assetCount = 0;
         this.token = token;
-        if (token instanceof Ticket) setTokenRange(token, ticketIds);
+        if (token.isERC875()) setTokenRange(token, ticketIds);
         openseaService = opensea;
         if (token instanceof ERC721Token) setERC721Tokens(token, ticketIds);
     }
@@ -85,24 +90,22 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         BinderViewHolder holder = null;
         switch (viewType) {
             case TicketHolder.VIEW_TYPE:
-                TicketHolder tokenHolder = new TicketHolder(R.layout.item_ticket, parent, token, assetService);
-                tokenHolder.setOnTokenClickListener(onTokenClickListener);
-                holder = tokenHolder;
+                holder = new TicketHolder(R.layout.item_ticket, parent, token, assetService);
+                holder.setOnTokenClickListener(onTokenClickListener);
                 break;
             case TotalBalanceHolder.VIEW_TYPE:
                 holder = new TotalBalanceHolder(R.layout.item_total_balance, parent);
                 break;
             case TokenDescriptionHolder.VIEW_TYPE:
-                holder = new TokenDescriptionHolder(R.layout.item_token_description, parent, token, assetService);
-                break;
-            case IFrameHolder.VIEW_TYPE:
-                holder = new IFrameHolder(R.layout.item_iframe_token, parent, token, assetService);
+                holder = new TokenDescriptionHolder(R.layout.item_token_description, parent, token, assetService, assetCount);
                 break;
             case OpenseaHolder.VIEW_TYPE:
                 holder = new OpenseaHolder(R.layout.item_opensea_token, parent, token);
+                holder.setOnTokenClickListener(onTokenClickListener);
                 break;
             case AssetInstanceScriptHolder.VIEW_TYPE:
-                holder = new AssetInstanceScriptHolder(R.layout.item_iframe_token, parent, token, assetService, clickThrough);
+                holder = new AssetInstanceScriptHolder(R.layout.item_ticket, parent, token, assetService, clickThrough);
+                holder.setOnTokenClickListener(onTokenClickListener);
                 break;
             case TokenFunctionViewHolder.VIEW_TYPE:
                 holder = new TokenFunctionViewHolder(R.layout.item_function_layout, parent, token, functionCallback, assetService);
@@ -127,6 +130,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
             if (ticketId == null || ticketId.equals(asset.getTokenId()))
             {
                 items.add(new AssetSortedItem(asset, weight++));
+                assetCount++;
             }
         }
         items.endBatchedUpdates();
@@ -163,7 +167,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         items.beginBatchedUpdates();
         items.clear();
         items.add(new TokenBalanceSortedItem(t));
-
+        assetCount = t.getTicketCount();
         if (t instanceof Ticket) addRanges(t);
         items.endBatchedUpdates();
     }
@@ -173,13 +177,14 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         currentRange = null;
         List<TicketRangeElement> sortedList = generateSortedList(assetService, t, t.getArrayBalance());
         //determine what kind of holder we need:
-        int holderType = TokenIdSortedItem.VIEW_TYPE;
+        int holderType = AssetInstanceSortedItem.VIEW_TYPE;
+        containsScripted = true;
 
-        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress()))
-        {
-            containsScripted = true;
-            holderType = AssetInstanceSortedItem.VIEW_TYPE;
-        }
+//        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress()))
+//        {
+//            containsScripted = true;
+//            holderType = AssetInstanceSortedItem.VIEW_TYPE;
+//        }
 
         addSortedItems(sortedList, t, holderType);
     }
@@ -191,7 +196,6 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         {
             if (v.compareTo(BigInteger.ZERO) == 0) continue;
             TicketRangeElement e = new TicketRangeElement(assetService, token, v);
-            e.id = v;
             sortedList.add(e);
         }
         TicketRangeElement.sortElements(sortedList);
@@ -204,9 +208,6 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         T item;
         switch (id)
         {
-            case IFrameHolder.VIEW_TYPE:
-                item = (T) new IFrameSortedItem(range, weight);
-                break;
             case AssetInstanceScriptHolder.VIEW_TYPE:
                 containsScripted = true;
                 item = (T) new AssetInstanceSortedItem(range, weight);
@@ -225,8 +226,6 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
 
     protected <T> SortedList<T> addSortedItems(List<TicketRangeElement> sortedList, Token t, int id)
     {
-        int currentNumber = -1;
-        int currentCat = 0;
         long currentTime = 0;
 
         for (int i = 0; i < sortedList.size(); i++)
@@ -236,12 +235,11 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
             {
                 currentRange.tokenIds.add(e.id);
             }
-            else if (currentRange == null || (e.ticketNumber != currentNumber + 1 && e.ticketNumber != currentNumber) || e.category != currentCat || e.time != currentTime) //check consecutive seats and zone is still the same, and push final ticket
+            else if (currentRange == null || e.time != currentTime) //check consecutive seats and zone is still the same, and push final ticket
             {
                 currentRange = new TicketRange(e.id, t.getAddress());
                 final T item = generateType(currentRange, 10 + i, id);
                 items.add((SortedItem)item);
-                currentCat = e.category;
                 currentTime = e.time;
             }
             else
@@ -249,7 +247,6 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
                 //update
                 currentRange.tokenIds.add(e.id);
             }
-            currentNumber = e.ticketNumber;
         }
 
         return null;
@@ -270,10 +267,11 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
 
         if (token instanceof ERC721Token)
         {
-            Disposable d = clearCache(ctx)
+            clearCache(ctx)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::cleared, error -> System.out.println("Cache clean: " + error.getMessage()));
+                    .subscribe(this::cleared, error -> System.out.println("Cache clean: " + error.getMessage()))
+                    .isDisposed();
         }
     }
 
@@ -298,5 +296,44 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     {
         //pass into the view
         tokenScriptHolderCallback.callFunction(function, arg);
+    }
+
+    public void setRadioButtons(boolean expose)
+    {
+        boolean requiresFullRedraw = false;
+        //uncheck all ranges, note that the selected range will be checked after the refresh
+        for (int i = 0; i < items.size(); i++)
+        {
+            SortedItem si = items.get(i);
+            if (si.viewType == AssetInstanceSortedItem.VIEW_TYPE)
+            {
+                AssetInstanceSortedItem ais = (AssetInstanceSortedItem) si;
+                if (ais.value.exposeRadio != expose) requiresFullRedraw = true;
+                if (ais.view != null)
+                {
+                    AppCompatRadioButton button = ais.view.itemView.findViewById(R.id.radioBox);
+                    if (button != null && (button.isChecked() || ais.value.isChecked)) button.setChecked(false);
+                }
+                ais.value.isChecked = false;
+                ais.value.exposeRadio = expose;
+            }
+            else if (si.viewType == OpenseaHolder.VIEW_TYPE)
+            {
+                AssetSortedItem asi = (AssetSortedItem) si;
+                if (asi.value.exposeRadio != expose) requiresFullRedraw = true;
+                if (asi.view != null)
+                {
+                    AppCompatRadioButton button = asi.view.itemView.findViewById(R.id.radioBox);
+                    if (button != null && (button.isChecked() || asi.value.isChecked)) button.setChecked(false);
+                }
+                asi.value.isChecked = false;
+                asi.value.exposeRadio = expose;
+            }
+        }
+
+        if (requiresFullRedraw)
+        {
+            notifyDataSetChanged();
+        }
     }
 }

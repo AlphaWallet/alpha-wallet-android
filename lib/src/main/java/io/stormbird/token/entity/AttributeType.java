@@ -2,12 +2,17 @@ package io.stormbird.token.entity;
 
 import io.reactivex.Observable;
 import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.token.util.DateTime;
+import io.stormbird.token.util.DateTimeFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,7 +39,11 @@ public class AttributeType {
     {
         definition = def;
         id = attr.getAttribute("id");
-        if (id.equals("venue"))
+        if (id.equals("match"))
+        {
+            System.out.println("yoless");
+        }
+        if (id.equals("numero"))
         {
             System.out.println("yoless");
         }
@@ -71,7 +80,6 @@ public class AttributeType {
             syntax = TokenDefinition.Syntax.DirectoryString; // 1.3.6.1.4.1.1466.115.121.1.15
         }
         bitmask = null;
-        int state = 0;
         for(Node node = attr.getFirstChild();
             node!=null; node=node.getNextSibling()){
             if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -123,7 +131,7 @@ public class AttributeType {
                         //this value is obtained from the token id
                         as = definition.parseAs(resolve);
                         populate(resolve); //check for mappings
-                        if (function != null) function.as = as;
+                        if (function != null) function.as = definition.parseAs(resolve);
                         if (resolve.hasAttribute("bitmask")) {
                             bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
                         }
@@ -160,6 +168,69 @@ public class AttributeType {
                     }
                 }
             }
+        }
+    }
+
+    public String getSyntaxVal(String data)
+    {
+        if (data == null) return null;
+        switch (syntax)
+        {
+            case DirectoryString:
+                return data;
+            case IA5String:
+                return data;
+            case Integer:
+                //convert to integer
+                if (Character.isDigit(data.charAt(0)))
+                {
+                    return data;
+                }
+                else
+                {
+                    //convert from byte value
+                    return new BigInteger(data.getBytes()).toString();
+                }
+            case GeneralizedTime:
+                //return data;
+                try
+                {
+                    DateTime dt = DateTimeFactory.getDateTime(data);
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
+                    String generalizedTime = dt.format(simpleDateFormat) + "T" + dt.format(simpleTimeFormat);
+                    return "{ generalizedTime: \"" + data + "\", date: new Date(\"" + generalizedTime + "\") }";
+                }
+                catch (ParseException e)
+                {
+                    return data;
+                }
+            case Boolean:
+                if (Character.isDigit(data.charAt(0)))
+                {
+                    return (data.charAt(0) == '0') ? "FALSE" : "TRUE";
+                }
+                else if (data.charAt(0) == 0) return "FALSE";
+                else if (data.charAt(0) == 1) return "TRUE";
+                else return data;
+            case BitString:
+                return data;
+            case CountryString:
+                return data;
+            case JPEG:
+                return data;
+            case NumericString:
+                if (data == null)
+                {
+                    return "0";
+                }
+                else if (data.startsWith("0x"))
+                {
+                    data = data.substring(2);
+                }
+                return data;
+            default:
+                return data;
         }
     }
 
@@ -205,7 +276,10 @@ public class AttributeType {
                 else if (syntax == TokenDefinition.Syntax.GeneralizedTime)
                 {
                     //This is a time entry but without a localised mapped entry. Return the EPOCH time.
-                    return data.toString(10);
+                    Date date = new Date(data.multiply(BigInteger.valueOf(1000)).longValue());
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+                    return sdf.format(date);
+                    //return data.multiply(BigInteger.valueOf(1000)).toString(10);
                 }
                 else
                 {
@@ -216,20 +290,5 @@ public class AttributeType {
             default:
                 throw new NullPointerException("Missing valid 'as' attribute");
         }
-    }
-
-    public Observable<TokenScriptResult.Attribute> staticAttribute(BigInteger tokenId)
-    {
-        return Observable.fromCallable(() -> {
-            try
-            {
-                BigInteger val = tokenId.and(bitmask).shiftRight(bitshift);
-                return new TokenScriptResult.Attribute(id, name, val, toString(val));
-            }
-            catch (Exception e)
-            {
-                return new TokenScriptResult.Attribute(id, name, tokenId, "unsupported encoding");
-            }
-        });
     }
 }

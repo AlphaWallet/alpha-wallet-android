@@ -1,15 +1,19 @@
 package io.stormbird.wallet.ui.widget.holder;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.AppCompatRadioButton;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -26,6 +30,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.TokenFunctionActivity;
+import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.web3.Web3TokenView;
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.PageReadyCallback;
@@ -44,38 +49,28 @@ import static io.stormbird.wallet.C.Key.TICKET;
  * Created by James on 26/03/2019.
  * Stormbird in Singapore
  */
-public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener, PageReadyCallback
+public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> implements PageReadyCallback
 {
     public static final int VIEW_TYPE = 1011;
 
-    private final WebView iFrame;
     private final Web3TokenView tokenView;
     private final Token token;
-    private final LinearLayout iFrameLayout;
+    private final RelativeLayout frameLayout;
+    private final LinearLayout webWrapper;
     private final boolean iconified;
-    private final ProgressBar waitSpinner;
-
-    private BigInteger tokenId;
-
-    private StringBuilder attrs;
-
+    private OnTokenClickListener tokenClickListener;
+    private final AppCompatRadioButton itemSelect;
     private final AssetDefinitionService assetDefinitionService; //need to cache this locally, unless we cache every string we need in the constructor
 
     public AssetInstanceScriptHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService assetService, boolean iconified)
     {
         super(resId, parent);
-        iFrame = findViewById(R.id.iframe);
-        iFrameLayout = findViewById(R.id.layout_select_ticket);
-        tokenView = findViewById(R.id.token_frame);
-        waitSpinner = findViewById(R.id.progress_element);
-        iFrame.setVisibility(View.GONE);
-        tokenView.setVisibility(View.VISIBLE);
-        itemView.setOnClickListener(this);
+        frameLayout = findViewById(R.id.layout_select_ticket);
+        tokenView = findViewById(R.id.web3_tokenview);
         assetDefinitionService = assetService;
+        webWrapper = findViewById(R.id.click_layer);
+        itemSelect = findViewById(R.id.radioBox);
         token = t;
-        tokenView.setChainId(token.tokenInfo.chainId);
-        tokenView.setWalletAddress(new Address(token.getWallet()));
-        tokenView.setRpcUrl(token.tokenInfo.chainId);
         tokenView.setOnReadyCallback(this);
         this.iconified = iconified;
     }
@@ -87,9 +82,23 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         try
         {
             if (data.tokenIds.size() == 0) { fillEmpty(); return; }
-            waitSpinner.setVisibility(View.VISIBLE);
-            tokenView.setVisibility(View.GONE);
-            getAttrs(data);
+            if (data.exposeRadio)
+            {
+                itemSelect.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                itemSelect.setVisibility(View.GONE);
+            }
+
+            itemSelect.setChecked(data.isChecked);
+            token.displayTicketHolder(data, frameLayout, assetDefinitionService, getContext(), iconified);
+
+            if (iconified)
+            {
+                webWrapper.setOnClickListener(v -> handleClick(v, data));
+                webWrapper.setOnLongClickListener(v -> handleLongClick(v, data));
+            }
         }
         catch (Exception ex)
         {
@@ -97,86 +106,49 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         }
     }
 
-    private void displayTicket(String tokenAttrs, TicketRange data)
-    {
-        waitSpinner.setVisibility(View.GONE);
-        tokenView.setVisibility(View.VISIBLE);
-
-        String viewType = iconified ? "view-iconified" : "view";
-        String view = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), viewType);
-        String style = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
-        String viewData = tokenView.injectWeb3TokenInit(getContext(), view, tokenAttrs);
-        viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
-
-        tokenView.loadData(viewData, "text/html", "utf-8");
-
-        if (iconified)
-        {
-            iFrameLayout.setOnClickListener(v -> {
-                Intent intent = new Intent(getContext(), TokenFunctionActivity.class);
-                intent.putExtra(TICKET, token);
-                intent.putExtra(C.EXTRA_TOKEN_ID, token.intArrayToString(data.tokenIds, false));
-                intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                getContext().startActivity(intent);
-            });
-        }
-    }
-
-    private void getAttrs(TicketRange data) throws Exception
-    {
-        tokenId = data.tokenIds.get(0);
-        attrs = assetDefinitionService.getTokenAttrs(token, data.tokenIds.size());
-        assetDefinitionService.resolveAttrs(token, tokenId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onAttr, this::onError, () -> displayTicket(attrs.toString(), data))
-                .isDisposed();
-    }
-
-    private void onError(Throwable throwable)
-    {
-        throwable.printStackTrace();
-        //fill attrs from database
-        TokenScriptResult tsr = assetDefinitionService.getTokenScriptResult(token, tokenId);
-        for (TokenScriptResult.Attribute attr : tsr.getAttributes().values())
-        {
-            try
-            {
-                TokenScriptResult.addPair(attrs, attr.id, attr.text);
-            }
-            catch (ParseException e)
-            {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void onAttr(TokenScriptResult.Attribute attribute)
-    {
-        //add to string
-        try
-        {
-            TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
-        }
-        catch (ParseException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
     private void fillEmpty()
     {
-        iFrame.loadData("<html><body>No Data</body></html>", "text/html", "utf-8");
-    }
-
-    @Override
-    public void onClick(View v) {
-
+        tokenView.loadData("<html><body>No Data</body></html>", "text/html", "utf-8");
     }
 
     @Override
     public void onPageLoaded()
     {
         tokenView.callToJS("refresh()");
+    }
+
+    public void handleClick(View v, TicketRange data)
+    {
+        if (data.exposeRadio)
+        {
+            if (!data.isChecked)
+            {
+                tokenClickListener.onTokenClick(v,token,data.tokenIds);
+                data.isChecked = true;
+                itemSelect.setChecked(true);
+            }
+        }
+        else
+        {
+            Intent intent = new Intent(getContext(), TokenFunctionActivity.class);
+            intent.putExtra(TICKET, token);
+            intent.putExtra(C.EXTRA_TOKEN_ID, token.intArrayToString(data.tokenIds, false));
+            intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+            getContext().startActivity(intent);
+        }
+    }
+
+    private boolean handleLongClick(View v, TicketRange data)
+    {
+        //open up the radio view and signal to holding app
+        tokenClickListener.onLongTokenClick(v, token, data.tokenIds);
+        data.isChecked = true;
+        itemSelect.setChecked(true);
+        return true;
+    }
+
+    public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener)
+    {
+        tokenClickListener = onTokenClickListener;
     }
 }

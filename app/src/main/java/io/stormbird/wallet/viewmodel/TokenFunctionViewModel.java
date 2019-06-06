@@ -19,12 +19,11 @@ import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.SellTicketRouter;
+import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.router.TransferTicketRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
-import io.stormbird.wallet.ui.ConfirmationActivity;
-import io.stormbird.wallet.ui.FunctionActivity;
-import io.stormbird.wallet.ui.RedeemSignatureDisplayActivity;
+import io.stormbird.wallet.ui.*;
 import io.stormbird.wallet.ui.widget.entity.TicketRangeParcel;
 import io.stormbird.wallet.web3.entity.Message;
 
@@ -32,6 +31,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
+import static io.stormbird.wallet.C.*;
 import static io.stormbird.wallet.C.Key.*;
 
 /**
@@ -42,7 +42,7 @@ public class TokenFunctionViewModel extends BaseViewModel
 {
     private final AssetDefinitionService assetDefinitionService;
     private final SellTicketRouter sellTicketRouter;
-    private final TransferTicketRouter transferTicketRouter;
+    private final TransferTicketDetailRouter transferTicketRouter;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final TokensService tokensService;
@@ -51,7 +51,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     TokenFunctionViewModel(
             AssetDefinitionService assetDefinitionService,
             SellTicketRouter sellTicketRouter,
-            TransferTicketRouter transferTicketRouter,
+            TransferTicketDetailRouter transferTicketRouter,
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
             TokensService tokensService,
@@ -70,10 +70,27 @@ public class TokenFunctionViewModel extends BaseViewModel
         return assetDefinitionService;
     }
 
+    //sellDetailRouter.openUniversalLink(context, ticket, selection, defaultWallet.getValue(), SET_A_PRICE, 0);
+    public void openUniversalLink(Context context, Token token, String ticketIDs) {
+        Intent intent = new Intent(context, SellDetailActivity.class);
+        intent.putExtra(WALLET, new Wallet(token.getWallet()));
+        intent.putExtra(TICKET, token);
+        intent.putExtra(EXTRA_TOKENID_LIST, ticketIDs);
+        intent.putExtra(EXTRA_STATE, SellDetailActivity.SET_A_PRICE);
+        intent.putExtra(EXTRA_PRICE, 0);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        context.startActivity(intent);
+    }
+
     public void sellTicketRouter(Context ctx, Token token) {
         sellTicketRouter.open(ctx, token);
     }
-    public void showTransferToken(Context context, Token ticket) { transferTicketRouter.open(context, ticket); }
+    public void showTransferToken(Context context, Token token, String tokenIds)
+    {
+        //transferTicketDetailRouter.open(context, token.getValue(), ticketIDs, defaultWallet.getValue());
+        transferTicketRouter.open(context, token, tokenIds, new Wallet(token.getWallet()));
+    }
+
     public void showFunction(Context ctx, Token token, String method, List<BigInteger> tokenIds)
     {
         Intent intent = new Intent(ctx, FunctionActivity.class);
@@ -150,5 +167,15 @@ public class TokenFunctionViewModel extends BaseViewModel
     public Token getToken(ContractAddress cAddr)
     {
         return tokensService.getToken(cAddr.chainId, cAddr.address);
+    }
+
+    public void selectRedeemToken(Context ctx, Token token, List<BigInteger> idList)
+    {
+        TicketRangeParcel parcel = new TicketRangeParcel(new TicketRange(idList, token.getAddress(), true));
+        Intent intent = new Intent(ctx, RedeemAssetSelectActivity.class);
+        intent.putExtra(TICKET, token);
+        intent.putExtra(TICKET_RANGE, parcel);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        ctx.startActivity(intent);
     }
 }

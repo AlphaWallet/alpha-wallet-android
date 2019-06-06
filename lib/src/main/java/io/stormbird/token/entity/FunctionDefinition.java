@@ -174,8 +174,9 @@ public class FunctionDefinition
 
     public TokenScriptResult.Attribute parseFunctionResult(TransactionResult transactionResult, AttributeType attr)
     {
-        String res = transactionResult.result;
-        BigInteger val = transactionResult.tokenId;
+        String res = attr.getSyntaxVal(transactionResult.result);
+        BigInteger val = transactionResult.tokenId; //?
+
         if (attr.syntax == TokenDefinition.Syntax.NumericString)
         {
             if (transactionResult.result == null)

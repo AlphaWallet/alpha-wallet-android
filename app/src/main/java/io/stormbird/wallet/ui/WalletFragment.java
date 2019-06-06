@@ -21,6 +21,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.service.TokensService;
+import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
 import io.stormbird.wallet.util.TabUtils;
 import io.stormbird.wallet.viewmodel.WalletViewModel;
@@ -39,7 +40,7 @@ import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
  * Created by justindeguzman on 2/28/18.
  */
 
-public class WalletFragment extends Fragment implements View.OnClickListener, TokenInterface
+public class WalletFragment extends Fragment implements OnTokenClickListener, View.OnClickListener, TokenInterface
 {
     private static final String TAG = "WFRAG";
 
@@ -90,7 +91,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         viewModel.tokensReady().observe(this, this::tokensReady);
         viewModel.fetchKnownContracts().observe(this, this::fetchKnownContracts);
 
-        adapter = new TokensAdapter(getActivity(), this::onTokenClick, viewModel.getAssetDefinitionService());
+        adapter = new TokensAdapter(getActivity(),(OnTokenClickListener)this, viewModel.getAssetDefinitionService());
         adapter.setHasStableIds(true);
         list.setLayoutManager(new LinearLayoutManager(getContext()));
         list.setAdapter(adapter);
@@ -215,9 +216,16 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         return super.onOptionsItemSelected(item);
     }
 
-    private void onTokenClick(View view, Token token, BigInteger id) {
+    @Override
+    public void onTokenClick(View view, Token token, List<BigInteger> ids) {
         token = viewModel.getTokenFromService(token);
         token.clickReact(viewModel, getActivity());
+    }
+
+    @Override
+    public void onLongTokenClick(View view, Token token, List<BigInteger> tokenId)
+    {
+        System.out.println("yoless");
     }
 
     @Override

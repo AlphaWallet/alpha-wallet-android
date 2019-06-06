@@ -174,12 +174,8 @@ public class Token implements Parcelable
     public String getFullName(AssetDefinitionService assetDefinition, int count)
     {
         String name = getFullName();
-        TokenDefinition def = assetDefinition.getAssetDefinition(tokenInfo.chainId, tokenInfo.address);
-        if (def != null)
-        {
-            String tokenTypeName = def.getTokenName(count);
-            if (name != null && tokenTypeName != null && !name.contains(tokenTypeName)) name = name + " " + tokenTypeName;
-        }
+        String tokenTypeName = assetDefinition.getTokenName(tokenInfo.chainId, tokenInfo.address, count);
+        if (name != null && tokenTypeName != null && !name.contains(tokenTypeName)) name = name + " " + tokenTypeName;
 
         return name;
     }
@@ -276,9 +272,32 @@ public class Token implements Parcelable
         return sb.toString();
     }
 
+    /**
+     * Produce a string CSV of integer IDs given an input list of values
+     * @param idList
+     * @param keepZeros
+     * @return
+     */
     public String intArrayToString(List<BigInteger> idList, boolean keepZeros)
     {
-        return "";
+        if (idList == null) return "";
+        String displayIDs = "";
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
+        for (BigInteger id : idList)
+        {
+            if (!keepZeros && id.compareTo(BigInteger.ZERO) == 0) continue;
+            if (!first)
+            {
+                sb.append(",");
+            }
+            first = false;
+
+            sb.append(Numeric.toHexStringNoPrefix(id));
+            displayIDs = sb.toString();
+        }
+
+        return displayIDs;
     }
 
     public List<Integer> stringIntsToIntegerList(String userList)
@@ -481,6 +500,7 @@ public class Token implements Parcelable
     public int[] getTicketIndices(String ticketIds) { return new int[0]; }
     public boolean unspecifiedSpec() { return contractType == ContractType.NOT_SET; }
 
+    public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx, boolean iconified) { }
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx) { }
     public List<BigInteger> getArrayBalance() { return new ArrayList<>(); }
     public List<BigInteger> getNonZeroArrayBalance() { return new ArrayList<>(Arrays.asList(BigInteger.ZERO)); }
@@ -778,4 +798,6 @@ public class Token implements Parcelable
     {
         return tokenInfo.name;
     }
+
+    public boolean isERC875() { return false; }
 }

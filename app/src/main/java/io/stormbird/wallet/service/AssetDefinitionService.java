@@ -66,12 +66,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final RealmManager realmManager;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokensService tokensService;
+    private TokenDefinition cachedDefinition = null;
+    private Map<Integer, Map<String, Map<Integer, String>>> tokenTypeName;
 
     public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs, RealmManager rm, EthereumNetworkRepositoryType eth, TokensService tokensService)
     {
         context = ctx;
         okHttpClient = client;
         assetChecked = new HashMap<>();
+        tokenTypeName = new HashMap<>();
         fileHashes = new ConcurrentHashMap<>();
         notificationService = svs;
         realmManager = rm;
@@ -153,32 +156,52 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         if (definition != null)
         {
-            for (String key : definition.attributeTypes.keySet()) {
-                AttributeType attrtype = definition.attributeTypes.get(key);
-                try
-                {
-                    if (attrtype.function != null)
-                    {
-                        ContractAddress contract = new ContractAddress(attrtype.function, token.tokenInfo.chainId, token.tokenInfo.address);// getContractAddress(attrtype.function, token);
-                        TransactionResult tResult = getFunctionResult(contract, attrtype, tokenId); //t.getTokenIdResults(BigInteger.ZERO);
-                        result.setAttribute(attrtype.id, attrtype.function.parseFunctionResult(tResult, attrtype));
-                    }
-                    else
-                    {
-                        BigInteger val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
-                        result.setAttribute(attrtype.id,
-                                           new TokenScriptResult.Attribute(attrtype.id, attrtype.name, val, attrtype.toString(val)));
-                    }
-                }
-                catch (Exception e)
-                {
-                    result.setAttribute(attrtype.id,
-                                       new TokenScriptResult.Attribute(attrtype.id, attrtype.name, tokenId, "unsupported encoding"));
-                }
+            for (String key : definition.attributeTypes.keySet())
+            {
+                result.setAttribute(key, getTokenscriptAttr(definition, token, tokenId, key));
             }
         }
 
         return result;
+    }
+
+    private TokenScriptResult.Attribute getTokenscriptAttr(TokenDefinition td, Token token, BigInteger tokenId, String attribute)
+    {
+        TokenScriptResult.Attribute result;
+        AttributeType attrtype = td.attributeTypes.get(attribute);
+        try
+        {
+            if (attrtype.function != null)
+            {
+                ContractAddress cAddr = new ContractAddress(attrtype.function, token.tokenInfo.chainId, token.tokenInfo.address);
+                TransactionResult tResult = getFunctionResult(cAddr, attrtype, tokenId); //t.getTokenIdResults(BigInteger.ZERO);
+                result = attrtype.function.parseFunctionResult(tResult, attrtype);
+            }
+            else
+            {
+                BigInteger val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
+                result = new TokenScriptResult.Attribute(attrtype.id, attrtype.name, val, attrtype.getSyntaxVal(attrtype.toString(val)));
+            }
+        }
+        catch (Exception e)
+        {
+            result = new TokenScriptResult.Attribute(attrtype.id, attrtype.name, tokenId, "unsupported encoding");
+        }
+
+        return result;
+    }
+
+    public TokenScriptResult.Attribute getAttribute(Token token, BigInteger tokenId, String attribute)
+    {
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        if (definition != null && definition.attributeTypes.containsKey(attribute))
+        {
+            return getTokenscriptAttr(definition, token, tokenId, attribute);
+        }
+        else
+        {
+            return null;
+        }
     }
 
     private ContractAddress getFromContracts(Map<Integer, List<String>> addresses)
@@ -217,7 +240,20 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private TokenDefinition getDefinition(int chainId, String address)
     {
-        TokenDefinition definition = null;
+        TokenDefinition result = null;
+        //try cache
+        if (cachedDefinition != null)
+        {
+            for (String contractName : cachedDefinition.contracts.keySet())
+            {
+                if (cachedDefinition.contracts.get(contractName).addresses.containsKey(chainId)
+                    && cachedDefinition.contracts.get(contractName).addresses.get(chainId).contains(address))
+                {
+                    return cachedDefinition;
+                }
+            }
+        }
+
         try
         {
             if (assetDefinitions.containsKey(chainId) && assetDefinitions.get(chainId).containsKey(address))
@@ -226,7 +262,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 if (tokenScriptFile != null && tokenScriptFile.canRead())
                 {
                     FileInputStream is = new FileInputStream(tokenScriptFile);
-                    definition = parseFile(is);
+                    cachedDefinition = parseFile(is);
+                    result = cachedDefinition;
                 }
             }
         }
@@ -239,7 +276,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             e.printStackTrace();
         }
 
-        return definition;
+        return result;
     }
 
     /**
@@ -264,6 +301,27 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return assetDef; // if nothing found use default
+    }
+
+    public String getTokenName(int chainId, String address, int count)
+    {
+        if (count > 2) count = 2;
+
+        if (tokenTypeName.containsKey(chainId) && tokenTypeName.get(chainId).containsKey(address)
+                && tokenTypeName.get(chainId).get(address).containsKey(count))
+        {
+            return tokenTypeName.get(chainId).get(address).get(count);
+        }
+        else
+        {
+            TokenDefinition td = getAssetDefinition(chainId, address);
+            if (td == null) return null;
+
+            if (!tokenTypeName.containsKey(chainId)) tokenTypeName.put(chainId, new HashMap<>());
+            if (!tokenTypeName.get(chainId).containsKey(address)) tokenTypeName.get(chainId).put(address, new HashMap<>());
+            tokenTypeName.get(chainId).get(address).put(count, td.getTokenName(count));
+            return td.getTokenName(count);
+        }
     }
 
     /**
@@ -598,9 +656,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return file;
     }
 
-    public boolean hasDefinition(int networkId, String address)
+    public boolean hasDefinition(int chainId, String address)
     {
-        return getDefinition(networkId, address) != null;
+        return assetDefinitions.containsKey(chainId) && assetDefinitions.get(chainId).containsKey(address);
     }
 
     private Observable<String> checkFileTime(File localDefinition)
@@ -954,7 +1012,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    public StringBuilder getTokenAttrs(Token token, int count) throws Exception
+    public StringBuilder getTokenAttrs(Token token, int count)
     {
         StringBuilder attrs = new StringBuilder();
 

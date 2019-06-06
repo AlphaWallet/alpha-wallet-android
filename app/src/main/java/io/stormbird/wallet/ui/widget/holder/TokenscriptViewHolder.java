@@ -129,28 +129,14 @@ public class TokenscriptViewHolder extends BinderViewHolder<TicketRange> impleme
         TokenScriptResult tsr = assetDefinitionService.getTokenScriptResult(token, tokenId);
         for (TokenScriptResult.Attribute attr : tsr.getAttributes().values())
         {
-            try
-            {
-                TokenScriptResult.addPair(attrs, attr.id, attr.text);
-            }
-            catch (ParseException e)
-            {
-                e.printStackTrace();
-            }
+            TokenScriptResult.addPair(attrs, attr.id, attr.text);
         }
     }
 
     private void onAttr(TokenScriptResult.Attribute attribute)
     {
         //add to string
-        try
-        {
-            TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
-        }
-        catch (ParseException e)
-        {
-            e.printStackTrace();
-        }
+        TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
     }
 
     private void fillEmpty()

@@ -18,9 +18,16 @@ import com.bumptech.glide.Glide;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.entity.opensea.Trait;
 import io.stormbird.wallet.util.KittyUtils;
+
+import static io.stormbird.wallet.C.EXTRA_STATE;
+import static io.stormbird.wallet.C.EXTRA_TOKENID_LIST;
+import static io.stormbird.wallet.C.Key.TICKET;
+import static io.stormbird.wallet.C.Key.WALLET;
+import static io.stormbird.wallet.ui.TransferTicketDetailActivity.TRANSFER_TO_ADDRESS;
 
 public class TokenDetailActivity extends BaseActivity {
     private ImageView image;
@@ -34,6 +41,8 @@ public class TokenDetailActivity extends BaseActivity {
     private TextView openExternal;
     private TextView labelAttributes;
     private GridLayout grid;
+    private Token token;
+    private Asset asset;
 
     private void initViews() {
         title = findViewById(R.id.title);
@@ -60,26 +69,30 @@ public class TokenDetailActivity extends BaseActivity {
         setTitle(R.string.empty);
 
         if (getIntent() != null && getIntent().getExtras() != null) {
-            Asset asset = getIntent().getExtras().getParcelable("asset");
-            Token token = getIntent().getExtras().getParcelable("token");
+            asset = getIntent().getExtras().getParcelable("asset");
+            token = getIntent().getExtras().getParcelable("token");
             title.setText(String.format("%s %s", "1", token.getFullName()));
-            setupPage(asset, token);
+            setupPage();
         } else {
             finish();
         }
     }
 
-    private void setupPage(Asset asset, Token token) {
+    private void setupPage() {
         setImage(asset);
         setDetails(asset);
         setNameAndDesc(asset);
         setExternalLink(asset);
         setTraits(asset);
 
-        if (token instanceof ERC721Token)
-        {
-            findViewById(R.id.button_transfer).setVisibility(View.GONE);
-        }
+//        if (token instanceof ERC721Token)
+//        {
+//            findViewById(R.id.button_transfer).setVisibility(View.GONE);
+//        }
+
+        findViewById(R.id.button_transfer).setOnClickListener(v -> {
+            openTransferDirectDialog();
+        });
     }
 
     private void setTraits(Asset asset) {
@@ -175,5 +188,16 @@ public class TokenDetailActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openTransferDirectDialog()
+    {
+        Intent intent = new Intent(this, TransferTicketDetailActivity.class);
+        intent.putExtra(WALLET, new Wallet(token.getWallet()));
+        intent.putExtra(TICKET, token);
+        intent.putExtra(EXTRA_TOKENID_LIST, asset.getTokenId());
+        intent.putExtra(EXTRA_STATE, TRANSFER_TO_ADDRESS);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        startActivity(intent);
     }
 }

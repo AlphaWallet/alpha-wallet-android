@@ -215,7 +215,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private void setTicket(boolean ticket, boolean progress, boolean invalid)
     {
         LinearLayout progress_ticket = findViewById(R.id.layout_select_overlay);
-        LinearLayout valid_ticket = findViewById(R.id.layout_select_ticket);
+        RelativeLayout valid_ticket = findViewById(R.id.layout_select_ticket);
         LinearLayout invalid_ticket = findViewById(R.id.layout_select_invalid);
         if (ticket)
         {

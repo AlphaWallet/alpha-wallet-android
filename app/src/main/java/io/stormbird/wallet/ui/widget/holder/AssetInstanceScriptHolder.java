@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -49,7 +50,7 @@ import static io.stormbird.wallet.C.Key.TICKET;
  * Created by James on 26/03/2019.
  * Stormbird in Singapore
  */
-public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> implements PageReadyCallback
+public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> implements PageReadyCallback, Runnable
 {
     public static final int VIEW_TYPE = 1011;
 
@@ -61,6 +62,8 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     private OnTokenClickListener tokenClickListener;
     private final AppCompatRadioButton itemSelect;
     private final AssetDefinitionService assetDefinitionService; //need to cache this locally, unless we cache every string we need in the constructor
+    private boolean activeClick;
+    private final Handler handler;
 
     public AssetInstanceScriptHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService assetService, boolean iconified)
     {
@@ -73,12 +76,14 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         token = t;
         tokenView.setOnReadyCallback(this);
         this.iconified = iconified;
+        handler = new Handler();
     }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void bind(@Nullable TicketRange data, @NonNull Bundle addition)
     {
+        activeClick = false;
         try
         {
             if (data.tokenIds.size() == 0) { fillEmpty(); return; }
@@ -131,6 +136,9 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         }
         else
         {
+            if (activeClick) return;
+            activeClick = true;
+            handler.postDelayed(this, 500);
             Intent intent = new Intent(getContext(), TokenFunctionActivity.class);
             intent.putExtra(TICKET, token);
             intent.putExtra(C.EXTRA_TOKEN_ID, token.intArrayToString(data.tokenIds, false));
@@ -151,5 +159,11 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener)
     {
         tokenClickListener = onTokenClickListener;
+    }
+
+    @Override
+    public void run()
+    {
+        activeClick = false;
     }
 }

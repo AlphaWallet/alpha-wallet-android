@@ -56,10 +56,6 @@ public class TokenScriptResult
 
     public static void addPair(StringBuilder attrs, Attribute attr)
     {
-        if (attr.id.equals("time"))
-        {
-            System.out.println("yoless");
-        }
         attrs.append(attr.id);
         attrs.append(": ");
 

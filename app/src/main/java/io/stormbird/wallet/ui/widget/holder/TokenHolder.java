@@ -16,6 +16,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
@@ -56,6 +57,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
     private final TextView blockchain;
     private final TextView pendingText;
+    private final RelativeLayout tokenLayout;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
@@ -81,6 +83,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         blockchain = findViewById(R.id.text_chain);
         chainName = findViewById(R.id.text_chain_name);
         pendingText = findViewById(R.id.balance_eth_pending);
+        tokenLayout = findViewById(R.id.token_layout);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
     }
@@ -97,6 +100,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
         try
         {
+            tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             blockchain.setText(getString(R.string.blockchain, token.getNetworkName()));
             chainName.setText(token.getNetworkName());
             Utils.setChainColour(chainName, token.tokenInfo.chainId);
@@ -221,6 +225,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     @Override
     public void onClick(View v) {
         if (onTokenClickListener != null) {
+            tokenLayout.setBackgroundResource(R.drawable.background_token_selected);
             onTokenClickListener.onTokenClick(v, token, null);
         }
     }

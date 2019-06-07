@@ -233,12 +233,6 @@ public class TokensService
             i++;
             t.setRequireAuxRefresh();
             addToken(t);
-
-            Token test = getToken(5, currentAddress);
-            if (test != null && test.getInterfaceSpec() != ContractType.ETHEREUM)
-            {
-                System.out.println("yoless");
-            }
         }
 
         loaded = true;

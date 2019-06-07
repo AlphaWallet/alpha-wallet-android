@@ -2,6 +2,7 @@ package io.stormbird.wallet.ui.widget.holder;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
@@ -29,7 +30,7 @@ import java.util.Arrays;
  * Created by James on 3/10/2018.
  * Stormbird in Singapore
  */
-public class OpenseaHolder extends BinderViewHolder<Asset> {
+public class OpenseaHolder extends BinderViewHolder<Asset> implements Runnable {
     public static final int VIEW_TYPE = 1302;
     private final Token token;
     private final TextView titleText;
@@ -40,6 +41,8 @@ public class OpenseaHolder extends BinderViewHolder<Asset> {
     private final LinearLayout layoutToken;
     private OnTokenClickListener tokenClickListener;
     private final AppCompatRadioButton itemSelect;
+    private Handler handler;
+    private boolean activeClick;
 
     public OpenseaHolder(int resId, ViewGroup parent, Token token) {
         super(resId, parent);
@@ -56,6 +59,8 @@ public class OpenseaHolder extends BinderViewHolder<Asset> {
     @Override
     public void bind(@Nullable Asset asset, @NonNull Bundle addition) {
         String assetName;
+        activeClick = false;
+        handler = new Handler();
         if (asset.getName() != null && !asset.getName().equals("null")) {
             assetName = asset.getName();
         } else {
@@ -129,6 +134,9 @@ public class OpenseaHolder extends BinderViewHolder<Asset> {
         }
         else
         {
+            if (activeClick) return;
+            activeClick = true;
+            handler.postDelayed(this, 500);
             Intent intent = new Intent(getContext(), TokenDetailActivity.class);
             intent.putExtra("asset", asset);
             intent.putExtra("token", token);
@@ -148,5 +156,11 @@ public class OpenseaHolder extends BinderViewHolder<Asset> {
     public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener)
     {
         tokenClickListener = onTokenClickListener;
+    }
+
+    @Override
+    public void run()
+    {
+        activeClick = false;
     }
 }

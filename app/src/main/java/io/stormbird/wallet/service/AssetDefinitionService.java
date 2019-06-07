@@ -4,11 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.support.annotation.Nullable;
+import android.support.annotation.RawRes;
 import android.support.v4.app.NotificationCompat;
+import android.util.SparseArray;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -31,6 +34,7 @@ import okhttp3.Request;
 import org.xml.sax.SAXException;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -67,14 +71,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokensService tokensService;
     private TokenDefinition cachedDefinition = null;
-    private Map<Integer, Map<String, Map<Integer, String>>> tokenTypeName;
+    private SparseArray<Map<String, SparseArray<String>>> tokenTypeName;
+    private SparseArray<Map<String, String>> issuerName;
 
     public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs, RealmManager rm, EthereumNetworkRepositoryType eth, TokensService tokensService)
     {
         context = ctx;
         okHttpClient = client;
         assetChecked = new HashMap<>();
-        tokenTypeName = new HashMap<>();
+        tokenTypeName = new SparseArray<>();
+        issuerName = new SparseArray<>();
         fileHashes = new ConcurrentHashMap<>();
         notificationService = svs;
         realmManager = rm;
@@ -259,17 +265,34 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             if (assetDefinitions.containsKey(chainId) && assetDefinitions.get(chainId).containsKey(address))
             {
                 File tokenScriptFile = assetDefinitions.get(chainId).get(address);
-                if (tokenScriptFile != null && tokenScriptFile.canRead())
+                if (tokenScriptFile != null)
                 {
-                    FileInputStream is = new FileInputStream(tokenScriptFile);
-                    cachedDefinition = parseFile(is);
-                    result = cachedDefinition;
+                    InputStream is = null;
+                    if (tokenScriptFile.canRead())
+                    {
+                        is = new FileInputStream(tokenScriptFile);
+                    }
+                    else
+                    {
+                        //try asset directory
+                        is = context.getResources().getAssets().open(tokenScriptFile.getPath());
+                    }
+
+                    if (is != null)
+                    {
+                        cachedDefinition = parseFile(is);
+                        result = cachedDefinition;
+                    }
                 }
             }
         }
         catch (IOException|SAXException e)
         {
             e.printStackTrace();
+        }
+        catch (NumberFormatException e)
+        {
+            //unknown file
         }
         catch (Exception e)
         {
@@ -306,9 +329,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public String getTokenName(int chainId, String address, int count)
     {
         if (count > 2) count = 2;
-
-        if (tokenTypeName.containsKey(chainId) && tokenTypeName.get(chainId).containsKey(address)
-                && tokenTypeName.get(chainId).get(address).containsKey(count))
+        if (tokenTypeName.get(chainId) != null && tokenTypeName.get(chainId).containsKey(address)
+                && tokenTypeName.get(chainId).get(address).get(count) != null)
         {
             return tokenTypeName.get(chainId).get(address).get(count);
         }
@@ -317,8 +339,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             TokenDefinition td = getAssetDefinition(chainId, address);
             if (td == null) return null;
 
-            if (!tokenTypeName.containsKey(chainId)) tokenTypeName.put(chainId, new HashMap<>());
-            if (!tokenTypeName.get(chainId).containsKey(address)) tokenTypeName.get(chainId).put(address, new HashMap<>());
+            if (tokenTypeName.get(chainId) == null) tokenTypeName.put(chainId, new HashMap<>());
+            if (!tokenTypeName.get(chainId).containsKey(address)) tokenTypeName.get(chainId).put(address, new SparseArray<>());
             tokenTypeName.get(chainId).get(address).put(count, td.getTokenName(count));
             return td.getTokenName(count);
         }
@@ -345,22 +367,30 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     /**
      * Get the issuer name given the contract address
-     * Note: this
+     * Note: this is optimised so as we don't need to keep loading in definitions as the user scrolls
      * @param token
      * @return
      */
     public String getIssuerName(Token token)
     {
-        TokenDefinition definition = getDefinition(token.tokenInfo.chainId, token.getAddress());
+        int chainId = token.tokenInfo.chainId;
+        String address = token.tokenInfo.address;
 
-        if (definition != null)
+        if (issuerName.get(chainId) != null && issuerName.get(chainId).containsKey(address))
         {
-            String issuer = definition.getKeyName();
-            return (issuer == null || issuer.length() == 0) ? context.getString(R.string.stormbird) : issuer;
+            return issuerName.get(chainId).get(address);
         }
         else
         {
-            return token.getNetworkName();
+            TokenDefinition td = getAssetDefinition(chainId, address);
+            if (td == null) return token.getNetworkName();
+
+            String issuer = td.getKeyName();
+            issuer = issuer == null ? context.getString(R.string.stormbird) : issuer;
+
+            if (issuerName.get(chainId) == null) issuerName.put(chainId, new HashMap<>());
+            issuerName.get(chainId).put(address, issuer);
+            return issuer;
         }
     }
 
@@ -496,6 +526,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         try
         {
             loadContracts(directory);
+
+            Observable.fromIterable(getCanonicalized())
+                    .forEach(this::addContractAddresses).isDisposed();
+
+            Observable.fromIterable(getCanonicalizedAssets())
+                    .forEach(this::addContractAssets).isDisposed();
+
             startFileListener(directory);
         }
         catch (IOException|SAXException e)
@@ -523,6 +560,38 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         Map<String, File> addrMap = new HashMap<>();
         strings.forEach(address -> addrMap.put(address, new File(path)));
         return addrMap;
+    }
+
+    private boolean addContractAssets(String asset)
+    {
+        try (InputStream input = context.getResources().getAssets().open(asset)) {
+            TokenDefinition token = parseFile(input);
+            ContractInfo holdingContracts = token.contracts.get(token.holdingToken);
+            if (holdingContracts != null)
+            {
+                holdingContracts.addresses.keySet().stream().forEach(network -> addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), asset)));
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private boolean addContractAddresses(@RawRes int resourceId)
+    {//activity.getResources().getAssets()
+        try (InputStream input = context.getResources().openRawResource(resourceId)) {
+            TokenDefinition token = parseFile(input);
+            ContractInfo holdingContracts = token.contracts.get(token.holdingToken);
+            if (holdingContracts != null)
+            {
+                holdingContracts.addresses.keySet().stream().forEach(network -> addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), String.valueOf(resourceId))));
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private boolean addContractAddresses(File file)
@@ -1057,5 +1126,43 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
         return definition.resolveAttributes(tokenId, this, cAddr);
+    }
+
+    public List<Integer> getCanonicalized()
+    {
+        List<Integer> canonicalizedFiles = new ArrayList<>();
+        for (Field field : R.xml.class.getFields())
+        {
+            if (field.getName().contains("canonicalized"))
+            {
+                canonicalizedFiles.add(context.getResources().getIdentifier(field.getName(), "xml", context.getPackageName()));
+            }
+        }
+
+        return canonicalizedFiles;
+    }
+
+    private List<String> getCanonicalizedAssets()
+    {
+        List<String> canonicalizedFilesStr = new ArrayList<>();
+        AssetManager mgr = context.getResources().getAssets();
+        try
+        {
+            String[] filelist = mgr.list("");
+            for (String file : filelist)
+            {
+                if (file.contains("canonicalized"))
+                {
+                    canonicalizedFilesStr.add(file);
+                }
+            }
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        return canonicalizedFilesStr;
     }
 }

@@ -39,14 +39,6 @@ public class AttributeType {
     {
         definition = def;
         id = attr.getAttribute("id");
-        if (id.equals("match"))
-        {
-            System.out.println("yoless");
-        }
-        if (id.equals("numero"))
-        {
-            System.out.println("yoless");
-        }
         try {
             switch (attr.getAttribute("syntax")) { // We don't validate syntax here; schema does it.
                 case "1.3.6.1.4.1.1466.115.121.1.6":

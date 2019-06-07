@@ -2,10 +2,7 @@ package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.os.Bundle;
-import android.os.Parcel;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
+import android.os.*;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -48,7 +45,7 @@ import static io.stormbird.wallet.C.Key.TICKET;
 /**
  *
  */
-public class AssetDisplayActivity extends BaseActivity implements OnTokenClickListener, View.OnClickListener
+public class AssetDisplayActivity extends BaseActivity implements OnTokenClickListener, View.OnClickListener, Runnable
 {
     @Inject
     protected AssetDisplayViewModelFactory assetDisplayViewModelFactory;
@@ -61,6 +58,8 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
     private NonFungibleTokenAdapter adapter;
     private String balance = null;
     private List<BigInteger> selection;
+    private Handler handler;
+    private boolean activeClick;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -138,6 +137,8 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
     {
         super.onResume();
         viewModel.prepare(token);
+        handler = new Handler();
+        activeClick = false;
     }
 
     @Override
@@ -189,24 +190,30 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
     @Override
     public void onClick(View v)
     {
-        switch (v.getId())
+        if (!activeClick)
         {
-            case R.id.button_use:
+            activeClick = true;
+            handler.postDelayed(this, 500);
+
+            switch (v.getId())
             {
-                //TODO: function here
-                viewModel.selectRedeemTokens(this, token, selection);
+                case R.id.button_use:
+                {
+                    //TODO: function here
+                    viewModel.selectRedeemTokens(this, token, selection);
+                }
+                break;
+                case R.id.button_sell:
+                {
+                    viewModel.sellTicketRouter(this, token, token.intArrayToString(selection, false));
+                }
+                break;
+                case R.id.button_transfer:
+                {
+                    viewModel.showTransferToken(this, token, selection);
+                }
+                break;
             }
-            break;
-            case R.id.button_sell:
-            {
-                viewModel.sellTicketRouter(this, token, token.intArrayToString(selection, false));
-            }
-            break;
-            case R.id.button_transfer:
-            {
-                viewModel.showTransferToken(this, token, selection);
-            }
-            break;
         }
     }
 
@@ -235,5 +242,11 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
         {
             findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void run()
+    {
+        activeClick = false;
     }
 }

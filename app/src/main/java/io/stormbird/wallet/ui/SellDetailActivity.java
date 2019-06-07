@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -55,7 +56,7 @@ import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
  * Created by James on 21/02/2018.
  */
 
-public class SellDetailActivity extends BaseActivity implements OnTokenClickListener
+public class SellDetailActivity extends BaseActivity implements OnTokenClickListener, Runnable
 {
     private static final int SEND_INTENT_REQUEST_CODE = 2;
     public static final int SET_A_PRICE = 1;
@@ -99,6 +100,8 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     private TextView confirmPricePerTicketText;
     private TextView confirmTotalCostText;
     private TextView currencyText;
+    private boolean activeClick;
+    private Handler handler;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -255,6 +258,10 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
 
     private void onNext()
     {
+        if (activeClick) return;
+        activeClick = true;
+        handler.postDelayed(this, 500);
+
         switch (saleStatus)
         {
             case SET_A_PRICE:
@@ -539,6 +546,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     @Override
     protected void onResume() {
         super.onResume();
+        handler = new Handler();
     }
 
     @Override
@@ -572,5 +580,11 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    @Override
+    public void run()
+    {
+        activeClick = false;
     }
 }

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -40,7 +41,7 @@ import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
  * Created by justindeguzman on 2/28/18.
  */
 
-public class WalletFragment extends Fragment implements OnTokenClickListener, View.OnClickListener, TokenInterface
+public class WalletFragment extends Fragment implements OnTokenClickListener, View.OnClickListener, TokenInterface, Runnable
 {
     private static final String TAG = "WFRAG";
 
@@ -55,6 +56,8 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     private ProgressView progressView;
     private TokensAdapter adapter;
     private FragmentMessenger homeMessager;
+    private View selectedToken;
+    private Handler handler;
 
     private boolean isVisible;
 
@@ -91,7 +94,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         viewModel.tokensReady().observe(this, this::tokensReady);
         viewModel.fetchKnownContracts().observe(this, this::fetchKnownContracts);
 
-        adapter = new TokensAdapter(getActivity(),(OnTokenClickListener)this, viewModel.getAssetDefinitionService());
+        adapter = new TokensAdapter(getActivity(),this, viewModel.getAssetDefinitionService());
         adapter.setHasStableIds(true);
         list.setLayoutManager(new LinearLayoutManager(getContext()));
         list.setAdapter(adapter);
@@ -218,19 +221,26 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
     @Override
     public void onTokenClick(View view, Token token, List<BigInteger> ids) {
-        token = viewModel.getTokenFromService(token);
-        token.clickReact(viewModel, getActivity());
+        if (selectedToken == null)
+        {
+            selectedToken = view;
+            token = viewModel.getTokenFromService(token);
+            token.clickReact(viewModel, getActivity());
+            handler.postDelayed(this, 700);
+        }
     }
 
     @Override
     public void onLongTokenClick(View view, Token token, List<BigInteger> tokenId)
     {
-        System.out.println("yoless");
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        if (handler == null) handler = new Handler();
+        selectedToken = null;
         viewModel.setVisibility(isVisible);
         viewModel.prepare();
     }
@@ -331,7 +341,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     private void fetchKnownContracts(Boolean notUsed)
     {
         //fetch list of contracts for this network from the XML contract directory
-
         List<ContractResult> knownContracts = new ArrayList<>(getAllKnownContractsOnNetwork(EthereumNetworkRepository.MAINNET_ID));
         knownContracts.addAll(getAllKnownContractsOnNetwork(EthereumNetworkRepository.XDAI_ID));
 
@@ -367,5 +376,15 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     public void walletInFocus()
     {
         if (viewModel != null) viewModel.reloadTokens();
+    }
+
+    @Override
+    public void run()
+    {
+        if (selectedToken != null && selectedToken.findViewById(R.id.token_layout) != null)
+        {
+            selectedToken.findViewById(R.id.token_layout).setBackgroundResource(R.drawable.background_marketplace_event);
+        }
+        selectedToken = null;
     }
 }

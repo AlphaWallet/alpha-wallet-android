@@ -39,6 +39,12 @@ window.AlphaWallet.init(rpcURL, {
     const { id = 8888 } = msgParams
     AlphaWallet.addCallback(id, cb)
     alpha.signTypedMessage(id, JSON.stringify(data))
+  },
+  enable: function() {
+      return new Promise(function(resolve, reject) {
+          //send back the coinbase account as an array of one
+          resolve([addressHex])
+      })
   }
 }, {
     address: addressHex,
@@ -56,3 +62,5 @@ window.web3.eth.getCoinbase = function(cb) {
     return cb(null, addressHex)
 }
 window.web3.eth.defaultAccount = addressHex
+
+window.ethereum = web3.currentProvider

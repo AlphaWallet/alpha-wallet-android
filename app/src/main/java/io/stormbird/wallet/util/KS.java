@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.preference.PreferenceManager;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.UserNotAuthenticatedException;
@@ -50,6 +51,8 @@ public class KS {
 	private static final String BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC;
 	private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7;
 	private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
+	private static final int AUTHENTICATION_DURATION_SECONDS = 30;
+	private static final String USER_ATHENTICATION = "user_auth";
 
 	private synchronized static boolean setData(
 			Context context,
@@ -76,12 +79,13 @@ public class KS {
 				keyGenerator.init(new KeyGenParameterSpec.Builder(
 						alias,
 						KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-						.setBlockModes(BLOCK_MODE)
-						.setKeySize(256)
-						.setUserAuthenticationRequired(false)
-						.setRandomizedEncryptionRequired(true)
-						.setEncryptionPaddings(PADDING)
-						.build());
+										  .setBlockModes(BLOCK_MODE)
+										  .setKeySize(256)
+										  .setUserAuthenticationRequired(true)
+										  .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
+										  .setRandomizedEncryptionRequired(true)
+										  .setEncryptionPaddings(PADDING)
+										  .build());
 				keyGenerator.generateKey();
 			}
 			String encryptedDataFilePath = getFilePath(context, aliasFile);
@@ -102,24 +106,27 @@ public class KS {
 						ServiceErrorException.FAIL_TO_SAVE_IV_FILE,
 						"Failed to saveTokens the iv file for: " + alias);
 			}
-			CipherOutputStream cipherOutputStream = null;
-			try {
-				cipherOutputStream = new CipherOutputStream(
-						new FileOutputStream(encryptedDataFilePath),
-						inCipher);
+			try (CipherOutputStream cipherOutputStream = new CipherOutputStream(
+					new FileOutputStream(encryptedDataFilePath),
+					inCipher))
+			{
 				cipherOutputStream.write(data);
-			} catch (Exception ex) {
+				PreferenceManager
+						.getDefaultSharedPreferences(context)
+						.edit()
+						.putBoolean(USER_ATHENTICATION + alias, true)
+						.apply();
+			}
+			catch (Exception ex)
+			{
 				throw new ServiceErrorException(
 						ServiceErrorException.KEY_STORE_ERROR,
 						"Failed to saveTokens the file for: " + alias);
-			} finally {
-				if (cipherOutputStream != null) {
-					cipherOutputStream.close();
-				}
 			}
 			return true;
 		} catch (UserNotAuthenticatedException e) {
 			throw new ServiceErrorException(USER_NOT_AUTHENTICATED);
+			//showAuthenticationScreen2(context);
 		} catch (ServiceErrorException ex) {
 			Log.d(TAG, "Key store error", ex);
 			throw ex;
@@ -137,12 +144,15 @@ public class KS {
 			throws ServiceErrorException {
 		KeyStore keyStore;
 		String encryptedDataFilePath = getFilePath(context, aliasFile);
+
+		//boolean hasUserAuth = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(USER_ATHENTICATION + alias, false);
+
 		try {
 			keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
 			keyStore.load(null);
 			SecretKey secretKey = (SecretKey) keyStore.getKey(alias, null);
 			if (secretKey == null) {
-                /* no such key, the key is just simply not there */
+				/* no such key, the key is just simply not there */
 				boolean fileExists = new File(encryptedDataFilePath).exists();
 				if (!fileExists) {
 					return null;/* file also not there, fine then */
@@ -154,6 +164,7 @@ public class KS {
 
 			boolean ivExists = new File(getFilePath(context, aliasIV)).exists();
 			boolean aliasExists = new File(getFilePath(context, aliasFile)).exists();
+
 			if (!ivExists || !aliasExists) {
 				removeAliasAndFiles(context, alias, aliasFile, aliasIV);
 				//report it if one exists and not the other.
@@ -178,7 +189,8 @@ public class KS {
 			return readBytesFromStream(cipherInputStream);
 		} catch (InvalidKeyException e) {
 			if (e instanceof UserNotAuthenticatedException) {
-//				showAuthenticationScreen(context, requestCode);
+				//showAuthenticationScreen2(context);
+				//return null;
 				throw new ServiceErrorException(USER_NOT_AUTHENTICATED);
 			} else {
 				throw new ServiceErrorException(INVALID_KEY);
@@ -279,30 +291,5 @@ public class KS {
 
 	public static byte[] get(Context context, String address) throws ServiceErrorException {
 		return getData(context, address, address, address+"iv");
-	}
-
-	public static void showAuthenticationScreen(Context context, int requestCode) {
-		// Create the Confirm Credentials screen. You can customize the title and description. Or
-		// we will provide a generic one for you if you leave it null
-		Log.e(TAG, "showAuthenticationScreen: ");
-		if (context instanceof Activity) {
-			Activity app = (Activity) context;
-			KeyguardManager mKeyguardManager = (KeyguardManager) app.getSystemService(Context.KEYGUARD_SERVICE);
-			if (mKeyguardManager == null) {
-				return;
-			}
-			Intent intent = mKeyguardManager
-					.createConfirmDeviceCredentialIntent(
-							context.getString(R.string.unlock_screen_title_android),
-							context.getString(R.string.unlock_screen_prompt_android));
-			if (intent != null) {
-				app.startActivityForResult(intent, requestCode);
-			} else {
-				Log.e(TAG, "showAuthenticationScreen: failed to create intent for auth");
-				app.finish();
-			}
-		} else {
-			Log.e(TAG, "showAuthenticationScreen: context is not activity!");
-		}
 	}
 }

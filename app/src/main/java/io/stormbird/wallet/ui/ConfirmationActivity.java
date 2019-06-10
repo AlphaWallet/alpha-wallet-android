@@ -27,6 +27,7 @@ import io.stormbird.wallet.viewmodel.ConfirmationViewModelFactory;
 import io.stormbird.wallet.viewmodel.GasSettingsViewModel;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
+import io.stormbird.wallet.widget.SignTransactionDialog;
 import org.web3j.utils.Convert;
 
 import javax.inject.Inject;
@@ -40,7 +41,7 @@ import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
 import static io.stormbird.wallet.entity.ConfirmationType.WEB3TRANSACTION;
 import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 
-public class ConfirmationActivity extends BaseActivity {
+public class ConfirmationActivity extends BaseActivity implements AuthenticationCallback {
     AWalletAlertDialog dialog;
 
     @Inject
@@ -75,10 +76,7 @@ public class ConfirmationActivity extends BaseActivity {
     private ConfirmationType confirmationType;
     private byte[] transactionBytes = null;
     private Web3Transaction transaction;
-    private boolean isMainNet;
-    private String networkName;
-
-    private List<TicketRange> salesOrderRange = null;
+    private SignTransactionDialog signDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -175,8 +173,6 @@ public class ConfirmationActivity extends BaseActivity {
                     }
                 }
                 String urlRequester = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);
-                networkName = getIntent().getStringExtra(C.EXTRA_NETWORK_NAME);
-                isMainNet = getIntent().getBooleanExtra(C.EXTRA_NETWORK_MAINNET, false);
 
                 if (urlRequester != null)
                 {
@@ -280,7 +276,7 @@ public class ConfirmationActivity extends BaseActivity {
 
     private void onSend()
     {
-        viewModel.getGasForSending(confirmationType, this, chainId);
+        checkAuthentication();
     }
 
     private void onSendGasSettings(GasSettings gasSettings)
@@ -448,6 +444,16 @@ public class ConfirmationActivity extends BaseActivity {
         dialog.show();
     }
 
+    private void checkAuthentication()
+    {
+        signDialog = new SignTransactionDialog(this, 1);
+        signDialog.setBigText("Authenticate Credentials");
+        signDialog.setSecondaryButtonText(R.string.action_cancel);
+        signDialog.setPrimaryButtonText(R.string.dialog_title_sign_message);
+        signDialog.show();
+        signDialog.getFingerprintAuthorisation(this);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == GasSettingsViewModel.SET_GAS_SETTINGS) {
@@ -459,5 +465,17 @@ public class ConfirmationActivity extends BaseActivity {
                 //viewModel.gasSettings().postValue(settings);
             }
         }
+    }
+
+    @Override
+    public void authenticatePass(int callbackId)
+    {
+        viewModel.getGasForSending(confirmationType, this, chainId);
+    }
+
+    @Override
+    public void authenticateFail(String fail)
+    {
+        //display fail
     }
 }

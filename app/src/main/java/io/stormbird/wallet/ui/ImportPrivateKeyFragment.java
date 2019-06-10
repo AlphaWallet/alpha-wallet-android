@@ -11,15 +11,19 @@ import android.view.ViewGroup;
 
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.AuthenticationCallback;
 import io.stormbird.wallet.ui.widget.OnImportPrivateKeyListener;
 import io.stormbird.wallet.widget.InputView;
+import io.stormbird.wallet.widget.SignTransactionDialog;
 
-public class ImportPrivateKeyFragment extends Fragment implements View.OnClickListener {
+public class ImportPrivateKeyFragment extends Fragment implements View.OnClickListener, AuthenticationCallback
+{
 
     private static final OnImportPrivateKeyListener dummyOnImportPrivateKeyListener = key -> { };
 
     private InputView privateKey;
     private OnImportPrivateKeyListener onImportPrivateKeyListener = dummyOnImportPrivateKeyListener;
+    private SignTransactionDialog signDialog;
 
     public static ImportPrivateKeyFragment create() {
         return new ImportPrivateKeyFragment();
@@ -47,12 +51,12 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
 
         if (!TextUtils.isEmpty(value))
         {
-            value = Numeric.cleanHexPrefix(value.replaceAll("\\s+", "")); //remove whitespace and leading 0x
-            if (value.length() == 64)
-            {
-                onImportPrivateKeyListener.onPrivateKey(value);
-                return;
-            }
+            signDialog = new SignTransactionDialog(this.getActivity(), 1);
+            signDialog.setBigText("Authenticate Credentials");
+            signDialog.setSecondaryButtonText(R.string.action_cancel);
+            signDialog.setPrimaryButtonText(R.string.dialog_title_sign_message);
+            signDialog.show();
+            signDialog.getFingerprintAuthorisation(this);
         }
 
         privateKey.setError(getString(R.string.error_field_required));
@@ -62,5 +66,24 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
         this.onImportPrivateKeyListener = onImportPrivateKeyListener == null
                 ? dummyOnImportPrivateKeyListener
                 : onImportPrivateKeyListener;
+    }
+
+    @Override
+    public void authenticatePass(int callbackId)
+    {
+        switch (callbackId)
+        {
+            case 1:
+                String value = privateKey.getText().toString();
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void authenticateFail(String fail)
+    {
+
     }
 }

@@ -33,12 +33,6 @@ public class PasswordStoreFactory {
 		}
 	}
 
-	public static void showAuthenticationScreen(Context context, int unlockScreenRequest) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			KS.showAuthenticationScreen(context, unlockScreenRequest);
-		}
-	}
-
 	public static String generatePassword() {
 		byte bytes[] = new byte[256];
 		SecureRandom random = new SecureRandom();

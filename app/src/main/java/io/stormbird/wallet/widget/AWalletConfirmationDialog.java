@@ -23,9 +23,11 @@ public class AWalletConfirmationDialog extends Dialog {
     private TextView mediumText;
     private TextView bigText;
     private TextView extraText;
-    private Button btnPrimary;
     private Button btnSecondary;
-    private Context context;
+
+    //package private
+    Context context;
+    Button btnPrimary;
 
     public AWalletConfirmationDialog(@NonNull Activity activity) {
         super(activity);

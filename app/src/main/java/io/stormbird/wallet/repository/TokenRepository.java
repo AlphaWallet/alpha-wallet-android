@@ -25,6 +25,7 @@ import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.ens.EnsResolver;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.web3j.protocol.core.methods.response.EthCall;
@@ -646,21 +647,31 @@ public class TokenRepository implements TokenRepositoryType {
                 .fetchEnabledToken(network, wallet, address);
     }
 
+    private BigDecimal updatePending(Token oldToken, BigDecimal pendingBalance)
+    {
+        if (pendingBalance.equals(BigDecimal.valueOf(-1)))
+        {
+            oldToken.pendingBalance = oldToken.balance;
+        }
+        else
+        {
+            oldToken.pendingBalance = pendingBalance;
+        }
+        return pendingBalance;
+    }
+
     private Single<Token> attachEth(NetworkInfo network, Wallet wallet, Token oldToken) {
-        final boolean pending = !oldToken.balance.equals(BigDecimal.ZERO) && oldToken.balance.equals(oldToken.pendingBalance);
-
-        return getEthBalanceInternal(network, wallet, pending)
+        return getEthBalanceInternal(network, wallet, true)
+                .map(pendingBalance -> updatePending(oldToken, pendingBalance))
+                .flatMap(balance -> getEthBalanceInternal(network, wallet, false))
                 .map(balance -> {
-                    BigDecimal oldBalance = oldToken.balance;
-                    if (balance.equals(BigDecimal.valueOf(-1))) return oldToken;
-
-                    if (pending && !balance.equals(oldToken.pendingBalance))
+                    if (balance.equals(BigDecimal.valueOf(-1)))
                     {
-                        Log.d(TAG, "ETH: " + balance.toPlainString() + " OLD: " + oldBalance.toPlainString());
-                        oldToken.pendingBalance = balance;
+                        oldToken.pendingBalance = oldToken.balance;
                         return oldToken;
                     }
-                    else if (!balance.equals(oldBalance))
+
+                    if (!balance.equals(oldToken.balance))
                     {
                         Log.d(TAG, "Tx Update requested for: " + oldToken.getFullName());
                         TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true,
@@ -673,6 +684,11 @@ public class TokenRepository implements TokenRepositoryType {
                         eth.transferPreviousData(oldToken);
                         eth.pendingBalance = balance;
                         return eth;
+                    }
+                    else if (!balance.equals(oldToken.pendingBalance))
+                    {
+                        Log.d(TAG, "ETH: " + balance.toPlainString() + " OLD: " + oldToken.pendingBalance.toPlainString());
+                        return oldToken;
                     }
                     else
                     {
@@ -726,18 +742,10 @@ public class TokenRepository implements TokenRepositoryType {
     {
         return Single.fromCallable(() -> {
             try {
-                if (pending)
-                {
-                    return new BigDecimal(getService(network.chainId).ethGetBalance(wallet.address, DefaultBlockParameterName.PENDING)
+                DefaultBlockParameterName balanceCheckType = pending ? DefaultBlockParameterName.PENDING : DefaultBlockParameterName.LATEST;
+                return new BigDecimal(getService(network.chainId).ethGetBalance(wallet.address, balanceCheckType)
                                                   .send()
                                                   .getBalance());
-                }
-                else
-                {
-                    return new BigDecimal(getService(network.chainId).ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
-                                                  .send()
-                                                  .getBalance());
-                }
             }
             catch (IOException e)
             {

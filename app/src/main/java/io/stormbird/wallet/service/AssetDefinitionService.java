@@ -275,7 +275,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     else
                     {
                         //try asset directory
-                        is = context.getResources().getAssets().open(tokenScriptFile.getPath());
+                        is = context.getResources().getAssets().open(tokenScriptFile.getName());
                     }
 
                     if (is != null)

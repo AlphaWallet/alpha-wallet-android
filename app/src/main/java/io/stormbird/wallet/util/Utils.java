@@ -17,13 +17,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.widget.TextView;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
-
-import static io.stormbird.token.entity.MagicLinkInfo.getNetworkNameById;
 
 public class Utils {
 
@@ -41,7 +37,7 @@ public class Utils {
             return url;
         } else {
             if (isValidUrl(url)) {
-                return C.HTTP_PREFIX + url;
+                return C.HTTPS_PREFIX + url;
             } else {
                 return C.GOOGLE_SEARCH_PREFIX + url;
             }

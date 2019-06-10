@@ -146,6 +146,6 @@ public abstract class C {
         DEFAULT, PENDING, INCOMPLETE
     }
 
-    public static final String GOOGLE_SEARCH_PREFIX = "http://www.google.com/search?q=";
-    public static final String HTTP_PREFIX = "http://";
+    public static final String GOOGLE_SEARCH_PREFIX = "https://www.google.com/search?q=";
+    public static final String HTTPS_PREFIX = "https://";
 }

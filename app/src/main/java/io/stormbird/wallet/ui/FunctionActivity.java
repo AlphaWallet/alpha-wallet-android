@@ -28,6 +28,7 @@ import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.FunctionCallback;
 import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.PageReadyCallback;
+import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.ProgressView;
 import io.stormbird.wallet.widget.SignMessageDialog;
 import io.stormbird.wallet.widget.SystemView;
@@ -69,6 +70,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     private String functionEffect;
     private Map<String, String> args = new HashMap<>();
     private StringBuilder attrs;
+    private AWalletAlertDialog alertDialog;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
@@ -347,13 +349,15 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
 
         if (token.balance.subtract(value).compareTo(BigDecimal.ZERO) < 0)
         {
-            //amountInput.setError(R.string.error_insufficient_funds);
+            //flash up dialog box insufficent funds
+            errorInsufficientFunds();
             isValid = false;
         }
 
         String to = function.tx.args.get("to").value;
         if (to == null || !Utils.isAddressValid(to))
         {
+            errorInvalidAddress(to);
             isValid = false;
             return;
         }
@@ -364,6 +368,28 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         if (isValid) {
             viewModel.confirmNativeTransaction(this, to, value, token, extraInfo);
         }
+    }
+
+    private void errorInvalidAddress(String address)
+    {
+        alertDialog = new AWalletAlertDialog(this);
+        alertDialog.setIcon(AWalletAlertDialog.ERROR);
+        alertDialog.setTitle(R.string.error_invalid_address);
+        alertDialog.setMessage(getString(R.string.invalid_address_explain, address));
+        alertDialog.setButtonText(R.string.button_ok);
+        alertDialog.setButtonListener(v ->alertDialog.dismiss());
+        alertDialog.show();
+    }
+
+    private void errorInsufficientFunds()
+    {
+        alertDialog = new AWalletAlertDialog(this);
+        alertDialog.setIcon(AWalletAlertDialog.ERROR);
+        alertDialog.setTitle(R.string.error_insufficient_funds);
+        alertDialog.setMessage(getString(R.string.current_funds, token.getCorrectedBalance(token.tokenInfo.decimals), token.tokenInfo.symbol));
+        alertDialog.setButtonText(R.string.button_ok);
+        alertDialog.setButtonListener(v ->alertDialog.dismiss());
+        alertDialog.show();
     }
 
     private void getInput(String value)

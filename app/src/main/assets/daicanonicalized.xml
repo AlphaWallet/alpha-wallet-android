@@ -1,8 +1,19 @@
-<ts:token xmlns="http://www.w3.org/1999/xhtml" xmlns:ts="http://tokenscript.org/2019/05/tokenscript" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" custodian="false" xsi:schemaLocation="http://tokenscript.org/2019/05/tokenscript ../../schema/tokenscript.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE token  [
+    <!ENTITY style SYSTEM "shared.css">
+    <!ENTITY dai-bridge.en SYSTEM "dai-bridge.en.shtml">
+    ]>
+<ts:token xmlns:ts="http://tokenscript.org/2019/05/tokenscript"
+          xmlns="http://www.w3.org/1999/xhtml"
+          xmlns:xml="http://www.w3.org/XML/1998/namespace"
+          xsi:schemaLocation="http://tokenscript.org/2019/05/tokenscript ../../schema/tokenscript.xsd"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          custodian="false"
+>
     <ts:name>
         <ts:string xml:lang="en">DAI</ts:string>
     </ts:name>
-    <ts:contract interface="erc20" name="dai">
+    <ts:contract name="dai" interface="erc20">
         <ts:address network="1">0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359</ts:address>
     </ts:contract>
     <ts:origins>
@@ -11,7 +22,7 @@
     </ts:origins>
     <ts:cards>
         <ts:token-card>
-            <ts:view-iconified></ts:view-iconified>
+            <ts:view-iconified/>
             <ts:view>
             </ts:view>
         </ts:token-card>
@@ -27,55 +38,113 @@
                 <ts:origins>
                     <!-- e18 is a hard coded multiplier.
                     rationale for hardcoding: avoiding over-design  -->
-                    <ts:user-entry as="e18"></ts:user-entry>
+                    <ts:user-entry as="e18"/>
                 </ts:origins>
             </ts:attribute-type>
             <ts:transaction>
-                <ts:ethereum contract="dai" function="transfer">
+                <ts:ethereum function="transfer" contract="dai">
                     <ts:data>
                         <!-- to convert erc20 DAI to native xDAI, transfer to this address -->
                         <ts:address>0x4aa42145Aa6Ebf72e164C9bBC74fbD3788045016</ts:address>
-                        <ts:uint256 ref="amount"></ts:uint256>
+                        <ts:uint256 ref="amount"/>
                     </ts:data>
                 </ts:ethereum>
             </ts:transaction>
-            <style type="text/css">body {
-  font-family: Arial;
-    }
-table {
-  margin: 25px;
-  width: 90%;
-  table-layout: auto;
-    }
-.fixed {
-  table-layout: fixed;
-    }
-table,
-td,
-th {
-  border-collapse: collapse;
-    }
-th,
-td {
-  border: solid 0px;
-  text-align: left;
-    }
-form {
-  display: flex;
-  align-items: center;
-    }
+            <style type="text/css">
+            html,
+body {
+  height: 100%;
+}
+html {
+  font-size: 14px;
+}
+body {
+  margin: 0px;
+  padding: 0px;
+  overflow-x: hidden;
+  min-width: 320px;
+  background: #FFFFFF;
+  font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1.4285em;
+  color: rgba(0, 0, 0, 0.87);
+  font-smoothing: antialiased;
+}
+.ui.container {
+  display: block;
+  max-width: 100% !important;
+}
+@media only screen and (max-width: 767px) {
+  .ui.container {
+    width: auto !important;
+    margin-left: 1em !important;
+    margin-right: 1em !important;
+  }
+}
+@media only screen and (min-width: 768px) and (max-width: 991px) {
+  .ui.container {
+    width: 723px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+@media only screen and (min-width: 992px) and (max-width: 1199px) {
+  .ui.container {
+    width: 933px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+@media only screen and (min-width: 1200px) {
+  .ui.container {
+    width: 1127px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+.ui.segment {
+  position: relative;
+  background: #FFFFFF;
+  -webkit-box-shadow: 0px 1px 2px 0 rgba(34, 36, 38, 0.15);
+  box-shadow: 0px 1px 2px 0 rgba(34, 36, 38, 0.15);
+  margin: 1rem 0em;
+  padding: 1em 1em;
+  border-radius: 0.28571429rem;
+  border: 1px solid rgba(34, 36, 38, 0.15);
+}
+.ui.segment:first-child {
+  margin-top: 0em;
+}
+.ui.segment:last-child {
+  margin-bottom: 0em;
+}
 input {
-  background-color: #FFFFFF;
-  border: #D8D8D8 solid 1px;
-  border-radius: 6px;
-  padding: 0.5em;
-  width: 70%;
-  height: 50px;
-  margin-top: 5px;
-  font-size: 1em;
-    }
-</style>
-            <ts:view><script type="text/javascript">
+  position: relative;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 12px;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  color: rgba(0, 0, 0, 0.87);
+  padding: 9.5px 14px;
+  width: 300px;
+  border-color: #D8D8D8;
+}
+input[type=text]:focus {
+  border-color: #D8D8D8;
+  background: #FAFAFA;
+  color: rgba(0, 0, 0, 0.87);
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+label {
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 6px;
+}
+            </style>
+            <ts:view>
+            <script type="text/javascript"><![CDATA[
 class Token {
     constructor(tokenInstance) {
         this.props = tokenInstance
@@ -83,47 +152,28 @@ class Token {
 
     render() {
         return `
-        &lt;div&gt;
-            &lt;table&gt;
-				&lt;thead&gt;
-					&lt;tr&gt;
-						&lt;th&gt;DAI Balance&lt;/th&gt;
-					&lt;/tr&gt;
-				&lt;/thead&gt;
-				&lt;tbody&gt;
-					&lt;tr&gt;
-						&lt;td id="daiBalance"&gt;
-							&lt;img
-								src="data:image/png;base64,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"
-								height="20" alt="Dai Balance" /&gt;
-							&lt;div id="daiVal"&gt;&lt;/div&gt;
-						&lt;/td&gt;
-					&lt;/tr&gt;
-				&lt;/tbody&gt;
-			&lt;/table&gt;
-			&lt;h2&gt;Convert to xDAI&lt;/h2&gt;
-			&lt;form action="/"&gt;
-				&lt;p&gt;
-					&lt;input type="number" id="amount" /&gt;
-					&lt;img
-						src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAoCAYAAACfKfiZAAAABGdBTUEAALGPC/xhBQAAAcNJREFUWAntl71KxEAQx03OyuJSiIKtCIIfT+ATiOnEsxMld6X2Fgo2PoBgdXfJNT5BtNM7BLGysvQZvM5CuFzifwJzjHf5uLBbbiDszO7M/H87bGBjLZQ8vu9vxXEcWpb14HnedUl4utzpdB6TJDmQsch/ajabrpwj256ekH6v19sej8cDFFsHxBUK38r1AnszYy1rLh+AxEejUR+FVrkYQC4rQHBa4ZjZAYjsRFE0kOJcRTfEDACJQ6wPoRUWnR51QvwDCIJgt0ycYXRBTABIHAfupWjnLM6jDogUIAzDpariEqLb7XrsVx0XKcF13V987/fY0bIo4MA+EX5q4nv+RNwrz9u2ncD+YL/qmAKgaIzEG5mMw7gBoRkAEm+1WhcyVsWenAGVIiq5BsB0wHTAdMB0wHTAdMB0wHTAdCC9FatcKtvt9jHy92QN3JxnfutoDrF3Mg638XdlABQ5QvFDWTjHpv+Mc7mGvDXlM1Cv108B8SYLz2NTjuM4Z8oAjUbjBxD7VSAolnIoVxmAdlsFQopTrhaAeSGmxbUClEFkiWsHyIPIEy8EqNVq30gcUhA/8BO8X+znjXwmsP5MLx+4rPg/qL3E8KLnDDoAAAAASUVORK5CYII="
-						style="display: inline;vertical-align: -15px;" height="40" alt="xDai Bridge" /&gt;
-				&lt;/p&gt;
-			&lt;/form&gt;
-        &lt;/div&gt;`;
+        <div class="ui container">
+              <div class="ui segment">
+                <span>DAI Balance: <b>${(this.props.balance / 1e+18).toFixed(2)}</b><br></span>
+              </div>
+              <label>Amount to Convert</label>
+              <input type="number" id="amount" placeholder="0"/>
+              <img
+              src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAoCAYAAACfKfiZAAAABGdBTUEAALGPC/xhBQAAAcNJREFUWAntl71KxEAQx03OyuJSiIKtCIIfT+ATiOnEsxMld6X2Fgo2PoBgdXfJNT5BtNM7BLGysvQZvM5CuFzifwJzjHf5uLBbbiDszO7M/H87bGBjLZQ8vu9vxXEcWpb14HnedUl4utzpdB6TJDmQsch/ajabrpwj256ekH6v19sej8cDFFsHxBUK38r1AnszYy1rLh+AxEejUR+FVrkYQC4rQHBa4ZjZAYjsRFE0kOJcRTfEDACJQ6wPoRUWnR51QvwDCIJgt0ycYXRBTABIHAfupWjnLM6jDogUIAzDpariEqLb7XrsVx0XKcF13V987/fY0bIo4MA+EX5q4nv+RNwrz9u2ncD+YL/qmAKgaIzEG5mMw7gBoRkAEm+1WhcyVsWenAGVIiq5BsB0wHTAdMB0wHTAdMB0wHTAdCC9FatcKtvt9jHy92QN3JxnfutoDrF3Mg638XdlABQ5QvFDWTjHpv+Mc7mGvDXlM1Cv108B8SYLz2NTjuM4Z8oAjUbjBxD7VSAolnIoVxmAdlsFQopTrhaAeSGmxbUClEFkiWsHyIPIEy8EqNVq30gcUhA/8BO8X+znjXwmsP5MLx+4rPg/qL3E8KLnDDoAAAAASUVORK5CYII="
+              width="20px">
+              </img>
+        </div>`;
     }
 }
 
-web3.tokens.dataChanged = (oldTokens, updatedTokens) =&gt; {
+web3.tokens.dataChanged = (oldTokens, updatedTokens) => {
     const currentTokenInstance = web3.tokens.data.currentInstance;
-    const domHtml = new Token(currentTokenInstance).render();
-    document.getElementById('root').innerHTML = domHtml
-    if (currentTokenInstance.balance != null) {
-        document.getElementById('daiVal').innerHTML = currentTokenInstance.balance / 1e+18;
-    }
+    document.getElementById('root').innerHTML = new Token(currentTokenInstance).render();
 };
-</script>
-<div id="root"></div></ts:view>
+
+]]></script>
+<div id="root"></div>
+            </ts:view>
         </ts:action>
     </ts:cards>
     <ts:attribute-types>
@@ -132,9 +182,9 @@ web3.tokens.dataChanged = (oldTokens, updatedTokens) =&gt; {
                 <ts:string xml:lang="en">DAI-Balance</ts:string>
             </ts:name>
             <ts:origins>
-                <ts:ethereum as="uint" contract="dai" function="balanceOf">
+                <ts:ethereum function="balanceOf" contract="dai" as="uint">
                     <ts:data>
-                        <ts:address ref="ownerAddress"></ts:address>
+                        <ts:address ref="ownerAddress"/>
                     </ts:data>
                 </ts:ethereum>
             </ts:origins>

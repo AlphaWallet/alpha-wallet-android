@@ -514,24 +514,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
-    private File getExternalFile(String contractAddress)
-    {
-        File directory = new File(
-                Environment.getExternalStorageDirectory()
-                        + File.separator + ALPHAWALLET_DIR);
-
-        if (directory.exists())
-        {
-            File externalFile = new File(directory, contractAddress.toLowerCase());
-            if (externalFile.exists())
-            {
-                return externalFile;
-            }
-        }
-
-        return null;
-    }
-
     private void loadExternalContracts(File directory)
     {
         try
@@ -673,11 +655,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return null;
     }
 
-    private String convertToAddress(File f)
-    {
-        return f.getName().substring(0, f.getName().lastIndexOf('.')).toLowerCase();
-    }
-
     private List<String> getScriptsInSecureZone()
     {
         List<String> checkScripts = new ArrayList<>();
@@ -742,36 +719,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public boolean hasDefinition(int chainId, String address)
     {
         return assetDefinitions.containsKey(chainId) && assetDefinitions.get(chainId).containsKey(address);
-    }
-
-    private Observable<String> checkFileTime(String address)
-    {
-        return Observable.fromCallable(() -> {
-            File existingFile = getXMLFile(address);
-            String contractAddress = address;
-            StringBuilder sb = new StringBuilder();
-            sb.append(TOKENSCRIPT_REPO_SERVER);
-            sb.append(TOKENSCRIPT_CURRENT_SCHEMA);
-            sb.append("/");
-            sb.append(address);
-
-            URL url = new URL("https://repo.awallet.io/" + address);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setIfModifiedSince( existingFile.lastModified() );
-
-            switch (conn.getResponseCode())
-            {
-                case HttpURLConnection.HTTP_OK:
-                    break;
-
-                case HttpURLConnection.HTTP_NOT_MODIFIED:
-                    contractAddress = "";
-                    break;
-            }
-
-            conn.disconnect();
-            return contractAddress;
-        });
     }
 
     //when user reloads the tokens we should also check XML for any files

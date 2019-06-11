@@ -402,10 +402,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         //first check the last time we tried this session
         if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() - assetChecked.get(correctedAddress)) > 1000*60*60)
         {
-            Disposable d = fetchXMLFromServer(correctedAddress)
+            fetchXMLFromServer(correctedAddress)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::handleFileLoad, this::onError);
+                    .subscribe(this::handleFileLoad, this::onError).isDisposed();
         }
     }
 
@@ -432,7 +432,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void handleFileLoad(File newFile)
     {
-        if (newFile != null && newFile.canRead())
+        if (newFile != null && !newFile.getName().equals("cache") && newFile.canRead())
         {
             addContractAddresses(newFile);
             context.sendBroadcast(new Intent(ADDED_TOKEN)); //inform walletview there is a new token
@@ -442,7 +442,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private Observable<File> fetchXMLFromServer(String address)
     {
         return Observable.fromCallable(() -> {
-            if (address.equals("")) return null;
+            File result = context.getCacheDir();
+            if (address.equals("")) return result;
 
             //peek to see if this file exists
             File existingFile = getXMLFile(address);
@@ -461,7 +462,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             sb.append(TOKENSCRIPT_CURRENT_SCHEMA);
             sb.append("/");
             sb.append(address);
-            File result = null;
 
             //prepare Android headers
             PackageManager manager = context.getPackageManager();
@@ -490,7 +490,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 switch (response.code())
                 {
                     case HttpURLConnection.HTTP_NOT_MODIFIED:
-                        result = null;
                         break;
                     case HttpURLConnection.HTTP_OK:
                         String xmlBody = response.body().string();

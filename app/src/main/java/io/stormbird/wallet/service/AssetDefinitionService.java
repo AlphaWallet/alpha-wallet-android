@@ -33,6 +33,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.xml.sax.SAXException;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
@@ -47,6 +48,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static android.os.FileObserver.ALL_EVENTS;
+import static io.stormbird.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
+import static io.stormbird.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
 import static io.stormbird.wallet.C.ADDED_TOKEN;
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
 
@@ -450,10 +453,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             }
 
             SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH);
+            format.setTimeZone(TimeZone.getTimeZone("UTC"));
             String dateFormat = format.format(new Date(fileTime));
 
             StringBuilder sb = new StringBuilder();
-            sb.append("https://repo.aw.app/");
+            sb.append(TOKENSCRIPT_REPO_SERVER);
+            sb.append(TOKENSCRIPT_CURRENT_SCHEMA);
+            sb.append("/");
             sb.append(address);
             File result = null;
 
@@ -481,11 +487,17 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
                 response = okHttpClient.newCall(request).execute();
 
-                String xmlBody = response.body().string();
-
-                if (response.code() == HttpURLConnection.HTTP_OK && xmlBody != null && xmlBody.length() > 10)
+                switch (response.code())
                 {
-                    result = storeFile(address, xmlBody);
+                    case HttpURLConnection.HTTP_NOT_MODIFIED:
+                        result = null;
+                        break;
+                    case HttpURLConnection.HTTP_OK:
+                        String xmlBody = response.body().string();
+                        result = storeFile(address, xmlBody);
+                        break;
+                    default:
+                        break;
                 }
             }
             catch (Exception e)
@@ -676,7 +688,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 if (isInSecureZone(assetDefinitions.get(networkId).get(address)))
                 {
-                    checkScripts.add(address);
+                    if (!checkScripts.contains(address)) checkScripts.add(address);
                 }
             }
         }
@@ -696,6 +708,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         //check all definitions in the download zone
         Disposable d = Observable.fromIterable(getScriptsInSecureZone())
+                //.concatMap(this::checkFileTime)
                 .concatMap(this::fetchXMLFromServer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -711,6 +724,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      */
     private File storeFile(String address, String result) throws IOException
     {
+        if (result == null || result.length() < 10) return null;
+
         String fName = address + ".xml";
 
         //Store received files in the internal storage area - no need to ask for permissions
@@ -730,13 +745,20 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return assetDefinitions.containsKey(chainId) && assetDefinitions.get(chainId).containsKey(address);
     }
 
-    private Observable<String> checkFileTime(File localDefinition)
+    private Observable<String> checkFileTime(String address)
     {
         return Observable.fromCallable(() -> {
-            String contractAddress = convertToAddress(localDefinition);
-            URL url = new URL("https://repo.awallet.io/" + contractAddress);
+            File existingFile = getXMLFile(address);
+            String contractAddress = address;
+            StringBuilder sb = new StringBuilder();
+            sb.append(TOKENSCRIPT_REPO_SERVER);
+            sb.append(TOKENSCRIPT_CURRENT_SCHEMA);
+            sb.append("/");
+            sb.append(address);
+
+            URL url = new URL("https://repo.awallet.io/" + address);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setIfModifiedSince( localDefinition.lastModified() );
+            conn.setIfModifiedSince( existingFile.lastModified() );
 
             switch (conn.getResponseCode())
             {

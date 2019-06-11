@@ -321,6 +321,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         }
         else
         {
+            //TODO: try to match the transaction with known token functions and check if this function will pass (insufficient funds or gas etc).
             String functionData = viewModel.getTransactionBytes(token, tokenId, action.function);
             //confirm the transaction
             ContractAddress cAddr = new ContractAddress(action.function, token.tokenInfo.chainId, token.tokenInfo.address); //viewModel.getAssetDefinitionService().getContractAddress(action.function, token);

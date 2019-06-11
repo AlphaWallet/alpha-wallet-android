@@ -38,8 +38,11 @@ public class TokenDefinition {
     public TokenscriptContext context;
     public String holdingToken;
 
+    public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2019/05";
+    public static final String TOKENSCRIPT_REPO_SERVER = "https://repo.tokenscript.org/";
+
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";
-    private static final String TOKENSCRIPT = "http://tokenscript.org/2019/05/tokenscript";
+    private static final String TOKENSCRIPT = "http://tokenscript.org/" + TOKENSCRIPT_CURRENT_SCHEMA + "/tokenscript";
     private static final String TOKENSCRIPTBASE = "http://tokenscript.org/";
 
     /* the following are incorrect, waiting to be further improved

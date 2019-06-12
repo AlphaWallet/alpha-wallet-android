@@ -29,12 +29,15 @@
             android:textSize="20sp" />
 
         <ScrollView
+            android:id="@+id/scroll_details"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:visibility="visible"
             android:layout_above="@id/button_transfer"
             android:background="@drawable/background_card">
 
             <RelativeLayout
+                android:id="@+id/layout_asset"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="20dp">

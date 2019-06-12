@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
  * by Weiwu, 2018. Modeled after Java8's ZonedDateTime, intended to be
  * replaced by Java8's ZonedDateTime as soon as Android 8.0 gets popular
  */
-class ZonedDateTime extends DateTime
+public class ZonedDateTime extends DateTime
 {
     //private final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX");
 

@@ -22,7 +22,7 @@
     <string name="token_name">%1$s (%2$s)</string>
      <string name="copy_addr_to_clipboard">复制地址到剪贴板</string>
     <string name="create_sell_order">创建卖单</string>
-    <string name="select_tickets">选择要出售的门票:</string>
+    <string name="select_tickets">选择要出售的%1$s:</string>
      <string name="select_tickets_redeem">选择要兑换的门票:</string>
     <string name="marketplace_title">公共市场</string>
      <string name="title_marketplace">公共市场</string>
@@ -97,7 +97,7 @@
     <string name="total_cost_label">总价:</string>
     <string name="equivalent_in_usd">相当于USD</string>
     <string name="total_cost">%1s %2s</string>
-    <string name="select_quantity_tickets">选择门票数量</string>
+    <string name="select_quantity_tickets">选择%1$s数量</string>
     <string name="redeemed">已兑换</string>
     <string name="ticket_redeemed">你的门票已经被兑换</string>
     <string name="filter">筛选</string>
@@ -205,7 +205,7 @@
 <string name="ticket_range_inavlid">部分门票之前已被导入过</string>
 <string name="free_import">免费导入</string>
 <string name="select_network">选择网络:</string>
-<string name="title_select_ticket_quantity">选择门票数量:</string>
+<string name="title_select_ticket_quantity">选择门%1$s数量:</string>
 <string name="title_select_transfer_method">选择转让方式:</string>
 <string name="title_input_wallet_address">输入钱包地址:</string>
 <string name="title_import">导入钱包</string>
@@ -331,7 +331,14 @@
     <string name="dapp_title">Title</string>
     <string name="dapp_address">Address</string>
     <string name="search_or_type_web_address">Search or type web address</string>
+    <string name="select_network_filters">Select Active Networks:</string>
     <string name="network">Network</string>
     <string name="collectibles">Collectibles</string>
+    <string name="token_function">Token Function</string>
+    <string name="channel_description">Alphawallet notification channel</string>
     <string name="error_camera_permission_denied">Permission to use the camera was denied.</string>
+    <string name="confirm_tokenscript_transaction">Confirm TokenScript Transaction</string>
+    <string name="tokenscript_send_native">Send %1$s %2$s to %3$s (%4$s)</string>
+    <string name="current_funds">Current funds: %1$s %2$s</string>
+    <string name="invalid_address_explain">%1$s is not a valid ethereum address</string>
 </resources>

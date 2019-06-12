@@ -1,35 +1,57 @@
 package io.stormbird.wallet.service;
 
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Environment;
+import android.os.FileObserver;
+import android.support.annotation.Nullable;
+import android.support.annotation.RawRes;
+import android.support.v4.app.NotificationCompat;
+import android.util.SparseArray;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.entity.NonFungibleToken;
+import io.realm.Realm;
+import io.realm.exceptions.RealmPrimaryKeyConstraintException;
+import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
+import io.stormbird.wallet.repository.TransactionsRealmCache;
+import io.stormbird.wallet.repository.entity.RealmAuxData;
+import io.stormbird.wallet.ui.HomeActivity;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
+import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static android.os.FileObserver.ALL_EVENTS;
+import static io.stormbird.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
+import static io.stormbird.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
 import static io.stormbird.wallet.C.ADDED_TOKEN;
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
-import static org.web3j.crypto.WalletUtils.isValidAddress;
-
 
 /**
  * AssetDefinitionService is the only place where we interface with XML files.
@@ -37,21 +59,36 @@ import static org.web3j.crypto.WalletUtils.isValidAddress;
  * and also provide a consistent way to get XML values
  */
 
-public class AssetDefinitionService
+public class AssetDefinitionService implements ParseResult, AttributeInterface
 {
-    private static final String XML_EXT = "xml";
     private final Context context;
     private final OkHttpClient okHttpClient;
-    private Map<String, TokenDefinition> assetDefinitions; //Mapping of contract address to token definitions
-    private Map<String, Long> assetChecked;                //Mapping of contract address to when they were last fetched from server
-    private List<String> devOverrideContracts;             //List of contract addresses which have been overridden by definition in developer folder
 
-    public AssetDefinitionService(OkHttpClient client, Context ctx)
+    private Map<Integer, Map<String, File>> assetDefinitions;
+    private Map<String, Long> assetChecked;                //Mapping of contract address to when they were last fetched from server
+    private FileObserver fileObserver;                     //Observer which scans the override directory waiting for file change
+    private Map<String, String> fileHashes;                //Mapping of files and hashes.
+
+    private final NotificationService notificationService;
+    private final RealmManager realmManager;
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final TokensService tokensService;
+    private TokenDefinition cachedDefinition = null;
+    private SparseArray<Map<String, SparseArray<String>>> tokenTypeName;
+    private SparseArray<Map<String, String>> issuerName;
+
+    public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs, RealmManager rm, EthereumNetworkRepositoryType eth, TokensService tokensService)
     {
         context = ctx;
         okHttpClient = client;
         assetChecked = new HashMap<>();
-        devOverrideContracts = new ArrayList<>();
+        tokenTypeName = new SparseArray<>();
+        issuerName = new SparseArray<>();
+        fileHashes = new ConcurrentHashMap<>();
+        notificationService = svs;
+        realmManager = rm;
+        ethereumNetworkRepository = eth;
+        this.tokensService = tokensService;
 
         loadLocalContracts();
     }
@@ -62,11 +99,10 @@ public class AssetDefinitionService
 
         try
         {
-            assetDefinitions.clear();
-            loadContracts(context.getFilesDir(), false);
+            loadContracts(context.getFilesDir());
             checkDownloadedFiles();
         }
-        catch (IOException|SAXException e)
+        catch (IOException| SAXException e)
         {
             e.printStackTrace();
         }
@@ -74,21 +110,120 @@ public class AssetDefinitionService
 
     /**
      * Fetches non fungible token definition given contract address and token ID
+     * @param token
      * @param contractAddress
-     * @param v
+     * @param tokenId
      * @return
      */
-    public NonFungibleToken getNonFungibleToken(String contractAddress, BigInteger v)
+    public NonFungibleToken getNonFungibleToken(Token token, String contractAddress, BigInteger tokenId)
     {
-        TokenDefinition definition = getAssetDefinition(contractAddress);
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, contractAddress);
         if (definition != null)
         {
-            return new NonFungibleToken(v, definition);
+            TokenScriptResult tsr = getTokenScriptResult(token, tokenId);
+            return new NonFungibleToken(tokenId, tsr);
         }
         else
         {
             return null;
         }
+    }
+
+    @Override
+    public boolean resolveOptimisedAttr(ContractAddress contract, AttributeType attr, TransactionResult transactionResult)
+    {
+        boolean optimised = false;
+        if (attr.function == null) return false;
+        Token checkToken = tokensService.getToken(contract.chainId, contract.address);
+        if (attr.function.method.equals("balanceOf") && checkToken != null)
+        {
+            //ensure the arg check for this function call is checking the correct balance address
+            for (MethodArg arg : attr.function.parameters)
+            {
+                if (arg.parameterType.equals("address") && arg.element.ref.equals("ownerAddress"))
+                {
+                    transactionResult.result = checkToken.balance.toString();
+                    transactionResult.resultTime = checkToken.updateBlancaTime;
+                    optimised = true;
+                    break;
+                }
+            }
+        }
+
+        return optimised;
+    }
+
+    /**
+     * Fetch attributes from local storage; not using contract lookup
+     * @param token
+     * @param tokenId
+     * @return
+     */
+    public TokenScriptResult getTokenScriptResult(Token token, BigInteger tokenId)
+    {
+        TokenScriptResult result = new TokenScriptResult();
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        if (definition != null)
+        {
+            for (String key : definition.attributeTypes.keySet())
+            {
+                result.setAttribute(key, getTokenscriptAttr(definition, token, tokenId, key));
+            }
+        }
+
+        return result;
+    }
+
+    private TokenScriptResult.Attribute getTokenscriptAttr(TokenDefinition td, Token token, BigInteger tokenId, String attribute)
+    {
+        TokenScriptResult.Attribute result;
+        AttributeType attrtype = td.attributeTypes.get(attribute);
+        try
+        {
+            if (attrtype.function != null)
+            {
+                ContractAddress cAddr = new ContractAddress(attrtype.function, token.tokenInfo.chainId, token.tokenInfo.address);
+                TransactionResult tResult = getFunctionResult(cAddr, attrtype, tokenId); //t.getTokenIdResults(BigInteger.ZERO);
+                result = attrtype.function.parseFunctionResult(tResult, attrtype);
+            }
+            else
+            {
+                BigInteger val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
+                result = new TokenScriptResult.Attribute(attrtype.id, attrtype.name, val, attrtype.getSyntaxVal(attrtype.toString(val)));
+            }
+        }
+        catch (Exception e)
+        {
+            result = new TokenScriptResult.Attribute(attrtype.id, attrtype.name, tokenId, "unsupported encoding");
+        }
+
+        return result;
+    }
+
+    public TokenScriptResult.Attribute getAttribute(Token token, BigInteger tokenId, String attribute)
+    {
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        if (definition != null && definition.attributeTypes.containsKey(attribute))
+        {
+            return getTokenscriptAttr(definition, token, tokenId, attribute);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private ContractAddress getFromContracts(Map<Integer, List<String>> addresses)
+    {
+        for (int chainId : addresses.keySet())
+        {
+            for (String addr : addresses.get(chainId))
+            {
+                return new ContractAddress(chainId, addr);
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -109,13 +244,65 @@ public class AssetDefinitionService
             directory.mkdir(); //does this throw if we haven't given permission?
         }
 
-        loadExternalContracts();
+        loadExternalContracts(directory);
     }
 
-    public boolean hasDefinition(String contractAddress)
+    private TokenDefinition getDefinition(int chainId, String address)
     {
-        TokenDefinition d = getAssetDefinition(contractAddress.toLowerCase());
-        return d != null;
+        TokenDefinition result = null;
+        //try cache
+        if (cachedDefinition != null)
+        {
+            for (String contractName : cachedDefinition.contracts.keySet())
+            {
+                if (cachedDefinition.contracts.get(contractName).addresses.containsKey(chainId)
+                    && cachedDefinition.contracts.get(contractName).addresses.get(chainId).contains(address))
+                {
+                    return cachedDefinition;
+                }
+            }
+        }
+
+        try
+        {
+            if (assetDefinitions.containsKey(chainId) && assetDefinitions.get(chainId).containsKey(address))
+            {
+                File tokenScriptFile = assetDefinitions.get(chainId).get(address);
+                if (tokenScriptFile != null)
+                {
+                    InputStream is = null;
+                    if (tokenScriptFile.canRead())
+                    {
+                        is = new FileInputStream(tokenScriptFile);
+                    }
+                    else
+                    {
+                        //try asset directory
+                        is = context.getResources().getAssets().open(tokenScriptFile.getName());
+                    }
+
+                    if (is != null)
+                    {
+                        cachedDefinition = parseFile(is);
+                        result = cachedDefinition;
+                    }
+                }
+            }
+        }
+        catch (IOException|SAXException e)
+        {
+            e.printStackTrace();
+        }
+        catch (NumberFormatException e)
+        {
+            //unknown file
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     /**
@@ -124,37 +311,42 @@ public class AssetDefinitionService
      * @param address
      * @return
      */
-    public TokenDefinition getAssetDefinition(String address)
+    public TokenDefinition getAssetDefinition(int chainId, String address)
     {
         TokenDefinition assetDef = null;
-        String correctedAddress = address.toLowerCase(); //ensure address is in the format we want
-        //is asset definition currently read?
-        assetDef = assetDefinitions.get(correctedAddress);
-        if (assetDef == null)
+        if (address.equalsIgnoreCase(tokensService.getCurrentAddress()))
         {
-            //try to load from the cache directory
-            File xmlFile = getXMLFile(correctedAddress);
-
+            address = "ethereum";
+        }
+        //is asset definition currently read?
+        assetDef = getDefinition(chainId, address.toLowerCase());
+        if (assetDef == null && !address.equals("ethereum"))
+        {
             //try web
-            if (xmlFile == null)
-            {
-                loadScriptFromServer(correctedAddress); //this will complete asynchronously, and display will be updated
-            }
-            else
-            {
-                assetDef = loadTokenDefinition(correctedAddress);
-                if (assetDef.addresses.size() > 0)
-                {
-                    assetDefinitions.put(address.toLowerCase(), assetDef);
-                }
-                else
-                {
-                    assetDef = null;
-                }
-            }
+            loadScriptFromServer(address.toLowerCase()); //this will complete asynchronously and display will be updated
         }
 
         return assetDef; // if nothing found use default
+    }
+
+    public String getTokenName(int chainId, String address, int count)
+    {
+        if (count > 2) count = 2;
+        if (tokenTypeName.get(chainId) != null && tokenTypeName.get(chainId).containsKey(address)
+                && tokenTypeName.get(chainId).get(address).get(count) != null)
+        {
+            return tokenTypeName.get(chainId).get(address).get(count);
+        }
+        else
+        {
+            TokenDefinition td = getAssetDefinition(chainId, address);
+            if (td == null) return null;
+
+            if (tokenTypeName.get(chainId) == null) tokenTypeName.put(chainId, new HashMap<>());
+            if (!tokenTypeName.get(chainId).containsKey(address)) tokenTypeName.get(chainId).put(address, new SparseArray<>());
+            tokenTypeName.get(chainId).get(address).put(count, td.getTokenName(count));
+            return td.getTokenName(count);
+        }
     }
 
     /**
@@ -165,51 +357,44 @@ public class AssetDefinitionService
      */
     public List<String> getAllContracts(int networkId)
     {
-        List<String> contractList = new ArrayList<>();
-        for (TokenDefinition td : assetDefinitions.values())
+        Map<String, File> networkList = assetDefinitions.get(networkId);
+        if (networkList != null)
         {
-            for (String address : td.addresses.keySet())
-            {
-                if ((td.addresses.get(address) == 1 || td.addresses.get(address) == networkId) && !contractList.contains(address))
-                {
-                    contractList.add(address);
-                }
-            }
+            return new ArrayList<>(networkList.keySet());
         }
-        return contractList;
+        else
+        {
+            return new ArrayList<>();
+        }
     }
 
     /**
      * Get the issuer name given the contract address
-     * Note: this
-     * @param contractAddress
+     * Note: this is optimised so as we don't need to keep loading in definitions as the user scrolls
+     * @param token
      * @return
      */
-    public String getIssuerName(String contractAddress, String network)
+    public String getIssuerName(Token token)
     {
-        //only specify the issuer name if we're on mainnet, otherwise default to 'Ethereum'
-        //TODO: Remove the main-net stipulation once we do multi-XML handling
-        //Note we check that the contract is actually specified in the XML - if we're just using the XML
-        //as a default then we will just get default 'ethereum' issuer.
-        TokenDefinition definition = getAssetDefinition(contractAddress);
+        int chainId = token.tokenInfo.chainId;
+        String address = token.tokenInfo.address;
 
-        if (definition != null && definition.addresses.containsKey(contractAddress))
+        if (issuerName.get(chainId) != null && issuerName.get(chainId).containsKey(address))
         {
-            String issuer = definition.getKeyName();
-            return (issuer == null || issuer.length() == 0) ? context.getString(R.string.stormbird) : issuer;
-        }
-        else if (network != null)
-        {
-            return network;
+            return issuerName.get(chainId).get(address);
         }
         else
         {
-            return context.getString(R.string.ethereum);
+            TokenDefinition td = getAssetDefinition(chainId, address);
+            if (td == null) return token.getNetworkName();
+
+            String issuer = td.getKeyName();
+            issuer = issuer == null ? context.getString(R.string.stormbird) : issuer;
+
+            if (issuerName.get(chainId) == null) issuerName.put(chainId, new HashMap<>());
+            issuerName.get(chainId).put(address, issuer);
+            return issuer;
         }
-    }
-    public String getIssuerName(String contractAddress)
-    {
-        return getIssuerName(contractAddress, null);
     }
 
     private void loadScriptFromServer(String correctedAddress)
@@ -217,10 +402,10 @@ public class AssetDefinitionService
         //first check the last time we tried this session
         if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() - assetChecked.get(correctedAddress)) > 1000*60*60)
         {
-            Disposable d = fetchXMLFromServer(correctedAddress)
+            fetchXMLFromServer(correctedAddress)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::handleFileLoad, this::onError);
+                    .subscribe(this::handleFileLoad, this::onError).isDisposed();
         }
     }
 
@@ -229,104 +414,36 @@ public class AssetDefinitionService
         throwable.printStackTrace();
     }
 
-    private TokenDefinition loadTokenDefinition(String address)
+    @SuppressWarnings("deprecation")
+    private TokenDefinition parseFile(InputStream xmlInputStream) throws IOException, SAXException, Exception
     {
-        TokenDefinition definition = null;
-        File xmlFile = getXMLFile(address.toLowerCase());
-        try
-        {
-            if (xmlFile != null && xmlFile.exists())
-            {
-                FileInputStream is = new FileInputStream(xmlFile);
-                definition = parseFile(is);
-            }
+        Locale locale;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            locale = context.getResources().getConfiguration().getLocales().get(0);
         }
-        catch (IOException|SAXException e)
+        else
         {
-            e.printStackTrace();
+            locale = context.getResources().getConfiguration().locale;
         }
 
-        return definition;
+        return new TokenDefinition(
+                xmlInputStream, locale, this);
     }
 
-    private TokenDefinition parseFile(InputStream xmlInputStream) throws IOException, SAXException
+    private void handleFileLoad(File newFile)
     {
-        TokenDefinition definition = null;
-        definition = new TokenDefinition(
-                xmlInputStream,
-                context.getResources().getConfiguration().locale);
-
-        //now assign the networks
-        if (definition.addresses.size() > 0)
+        if (newFile != null && !newFile.getName().equals("cache") && newFile.canRead())
         {
-            assignNetworks(definition);
-        }
-
-        return definition;
-    }
-
-    private void assignNetworks(TokenDefinition definition)
-    {
-        if (definition != null)
-        {
-            //now map all contained addresses
-            for (String contractAddress : definition.addresses.keySet())
-            {
-                contractAddress = contractAddress.toLowerCase();
-                if (notOverriden(contractAddress))
-                {
-                    assetDefinitions.put(contractAddress, definition);
-                }
-            }
-        }
-    }
-
-    /**
-     * Add the contract addresses defined in the developer XML file to the override list.
-     * Subsequent refresh of XML from server will not override these definitions.
-     * @param definition interpreted definition
-     */
-    private void addOverrideFile(TokenDefinition definition)
-    {
-        if (definition != null)
-        {
-            //now map all contained addresses
-            for (String contractAddress : definition.addresses.keySet())
-            {
-                contractAddress = contractAddress.toLowerCase();
-                if (!devOverrideContracts.contains(contractAddress)) devOverrideContracts.add(contractAddress);
-            }
-        }
-    }
-
-    private void handleFileLoad(String address)
-    {
-        if (isValidAddress(address))
-        {
-            handleFile(address);
+            addContractAddresses(newFile);
             context.sendBroadcast(new Intent(ADDED_TOKEN)); //inform walletview there is a new token
         }
     }
 
-    private void handleFile(String address)
-    {
-        //this is file stored on the phone, notify to the main app to reload (use receiver)
-        TokenDefinition assetDefinition = loadTokenDefinition(address);
-        if (assetDefinition != null && assetDefinition.attributeTypes.size() > 0 && assetDefinition.addresses.size() > 0 && notOverriden(address))
-        {
-            assetDefinitions.put(address.toLowerCase(), assetDefinition);
-        }
-    }
-
-    /*SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH);
-            String dateFormat = format.format(new Date(fileTime));
-            conn.addRequestProperty("If-Modified-Since", dateFormat);
-*/
-
-    private Observable<String> fetchXMLFromServer(String address)
+    private Observable<File> fetchXMLFromServer(String address)
     {
         return Observable.fromCallable(() -> {
-            if (address.equals("")) return "0x";
+            File result = context.getCacheDir();
+            if (address.equals("")) return result;
 
             //peek to see if this file exists
             File existingFile = getXMLFile(address);
@@ -337,19 +454,21 @@ public class AssetDefinitionService
             }
 
             SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH);
+            format.setTimeZone(TimeZone.getTimeZone("UTC"));
             String dateFormat = format.format(new Date(fileTime));
 
             StringBuilder sb = new StringBuilder();
-            sb.append("https://repo.aw.app/");
+            sb.append(TOKENSCRIPT_REPO_SERVER);
+            sb.append(TOKENSCRIPT_CURRENT_SCHEMA);
+            sb.append("/");
             sb.append(address);
-            String result = null;
 
             //prepare Android headers
             PackageManager manager = context.getPackageManager();
             PackageInfo info = manager.getPackageInfo(
                     context.getPackageName(), 0);
             String appVersion = info.versionName;
-            String OSVersion = String.valueOf(Build.VERSION.RELEASE) ;
+            String OSVersion = String.valueOf(Build.VERSION.RELEASE);
 
             okhttp3.Response response = null;
 
@@ -368,16 +487,16 @@ public class AssetDefinitionService
 
                 response = okHttpClient.newCall(request).execute();
 
-                String xmlBody = response.body().string();
-
-                if (response.code() == HttpURLConnection.HTTP_OK && xmlBody != null && xmlBody.length() > 10)
+                switch (response.code())
                 {
-                    storeFile(address, xmlBody);
-                    result = address;
-                }
-                else
-                {
-                    result = "0x";
+                    case HttpURLConnection.HTTP_NOT_MODIFIED:
+                        break;
+                    case HttpURLConnection.HTTP_OK:
+                        String xmlBody = response.body().string();
+                        result = storeFile(address, xmlBody);
+                        break;
+                    default:
+                        break;
                 }
             }
             catch (Exception e)
@@ -395,34 +514,16 @@ public class AssetDefinitionService
         });
     }
 
-    private File getExternalFile(String contractAddress)
+    private void loadExternalContracts(File directory)
     {
-        File directory = new File(
-                Environment.getExternalStorageDirectory()
-                        + File.separator + ALPHAWALLET_DIR);
-
-        if (directory.exists())
-        {
-            File externalFile = new File(directory, contractAddress.toLowerCase());
-            if (externalFile.exists())
-            {
-                return externalFile;
-            }
-        }
-
-        return null;
-    }
-
-    public void loadExternalContracts()
-    {
-        //TODO: Check if external contracts override the internal ones - this is the expected behaviour
-        File directory = new File(
-                Environment.getExternalStorageDirectory()
-                        + File.separator + ALPHAWALLET_DIR);
-
         try
         {
-            loadContracts(directory, true);
+            loadContracts(directory);
+
+            Observable.fromIterable(getCanonicalizedAssets())
+                    .forEach(this::addContractAssets).isDisposed();
+
+            startFileListener(directory);
         }
         catch (IOException|SAXException e)
         {
@@ -430,32 +531,87 @@ public class AssetDefinitionService
         }
     }
 
-    private void loadContracts(File directory, boolean external) throws IOException, SAXException
+    private void addContractsToNetwork(Integer network, Map<String, File> newTokenDescriptionAddresses)
     {
-        File[] files = directory.listFiles();
-        if (files != null)
+        if (assetDefinitions.get(network) == null) assetDefinitions.put(network, new HashMap<>());
+        for (String address : newTokenDescriptionAddresses.keySet())
         {
-            for (File f : files)
+            assetDefinitions.get(network).put(address, new File(newTokenDescriptionAddresses.get(address).getAbsolutePath()));
+        }
+    }
+
+    private Map<String, File> networkAddresses(List<String> strings, String path)
+    {
+        Map<String, File> addrMap = new HashMap<>();
+        strings.forEach(address -> addrMap.put(address, new File(path)));
+        return addrMap;
+    }
+
+    private boolean addContractAssets(String asset)
+    {
+        try (InputStream input = context.getResources().getAssets().open(asset)) {
+            TokenDefinition token = parseFile(input);
+            ContractInfo holdingContracts = token.contracts.get(token.holdingToken);
+            if (holdingContracts != null)
             {
-                if (f.getName().contains(".xml"))
+                //some Android versions don't have stream()
+                for (int network : holdingContracts.addresses.keySet())
                 {
-                    String extension = f.getName().substring(f.getName().lastIndexOf('.') + 1).toLowerCase();
-                    if (extension.equals("xml"))
-                    {
-                        try
-                        {
-                            FileInputStream stream = new FileInputStream(f);
-                            TokenDefinition td = parseFile(stream);
-                            if (external) addOverrideFile(td);
-                        }
-                        catch (SAXParseException e)
-                        {
-                            e.printStackTrace();
-                        }
-                    }
+                    addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), asset));
                 }
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private boolean addContractAddresses(File file)
+    {
+        try (FileInputStream input = new FileInputStream(file)) {
+            TokenDefinition token = parseFile(input);
+            ContractInfo holdingContracts = token.contracts.get(token.holdingToken);
+            if (holdingContracts != null)
+            {
+                holdingContracts.addresses.keySet().stream().forEach(network -> addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), file.getAbsolutePath())));
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private boolean allowableExtension(File file)
+    {
+        int index = file.getName().lastIndexOf(".");
+        if (index >= 0)
+        {
+            String extension = file.getName().substring(index+1);
+            switch (extension)
+            {
+                case "xml":
+                case "tsml":
+                    return true;
+                default:
+                    break;
             }
         }
+
+        return false;
+    }
+
+    private void loadContracts(File directory) throws IOException, SAXException
+    {
+        File[] files = directory.listFiles();
+        if (files == null || files.length == 0) return;
+
+        Observable.fromArray(files)
+                .filter(File::isFile)
+                .filter(this::allowableExtension)
+                .filter(File::canRead)
+                .forEach(this::addContractAddresses).isDisposed();
     }
 
     /**
@@ -468,43 +624,37 @@ public class AssetDefinitionService
      */
     private File getXMLFile(String contractAddress)
     {
-        //build filename
-        String fileName = contractAddress.toLowerCase() + "." + XML_EXT;
-
-        //check
-        File check = new File(context.getFilesDir(), fileName);
-        if (check.exists())
+        for (int networkId : assetDefinitions.keySet())
         {
-            return check;
-        }
-        else
-        {
-            return getExternalFile(contractAddress);
-        }
-    }
-
-    private List<File> getFileList(File directory)
-    {
-        File[] files = context.getFilesDir().listFiles();
-        return new ArrayList<File>(Arrays.asList(files));
-    }
-
-    private boolean isValidXML(File f)
-    {
-        int index = f.getName().lastIndexOf('.');
-        if (index > 0)
-        {
-            String extension = f.getName().substring(index + 1).toLowerCase();
-            String name = f.getName().substring(0, index).toLowerCase();
-            return extension.equals("xml") && isValidAddress(name);
+            if (assetDefinitions.get(networkId).containsKey(contractAddress.toLowerCase()))
+            {
+                return assetDefinitions.get(networkId).get(contractAddress.toLowerCase());
+            }
         }
 
-        return false;
+        return null;
     }
 
-    private String convertToAddress(File f)
+    private List<String> getScriptsInSecureZone()
     {
-        return f.getName().substring(0, f.getName().lastIndexOf('.')).toLowerCase();
+        List<String> checkScripts = new ArrayList<>();
+        for (int networkId : assetDefinitions.keySet())
+        {
+            for (String address : assetDefinitions.get(networkId).keySet())
+            {
+                if (isInSecureZone(assetDefinitions.get(networkId).get(address)))
+                {
+                    if (!checkScripts.contains(address)) checkScripts.add(address);
+                }
+            }
+        }
+
+        return checkScripts;
+    }
+
+    private boolean isInSecureZone(File file)
+    {
+        return file.getPath().contains(context.getFilesDir().getPath());
     }
 
     /**
@@ -512,19 +662,13 @@ public class AssetDefinitionService
      */
     private void checkDownloadedFiles()
     {
-        Disposable d = Observable.fromIterable(getFileList(context.getFilesDir()))
-                .filter(this::isValidXML)
-                .map(this::convertToAddress)
-                .filter(this::notOverriden)
+        //check all definitions in the download zone
+        Disposable d = Observable.fromIterable(getScriptsInSecureZone())
+                //.concatMap(this::checkFileTime)
                 .concatMap(this::fetchXMLFromServer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::handleFile, this::onError);
-    }
-
-    private boolean notOverriden(String address)
-    {
-        return !devOverrideContracts.contains(address);
+                .subscribe(this::handleFileLoad, this::onError);
     }
 
     /**
@@ -536,6 +680,8 @@ public class AssetDefinitionService
      */
     private File storeFile(String address, String result) throws IOException
     {
+        if (result == null || result.length() < 10) return null;
+
         String fName = address + ".xml";
 
         //Store received files in the internal storage area - no need to ask for permissions
@@ -550,53 +696,9 @@ public class AssetDefinitionService
         return file;
     }
 
-    public int getChainId(String address)
+    public boolean hasDefinition(int chainId, String address)
     {
-        TokenDefinition definition = getAssetDefinition(address);
-        if (definition != null)
-        {
-            return definition.getNetworkFromContract(address);
-        }
-        else
-        {
-            return 0;
-        }
-    }
-
-    private Observable<String> checkFileTime(File localDefinition)
-    {
-        return Observable.fromCallable(() -> {
-            String contractAddress = convertToAddress(localDefinition);
-            URL url = new URL("https://repo.awallet.io/" + contractAddress);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setIfModifiedSince( localDefinition.lastModified() );
-
-            switch (conn.getResponseCode())
-            {
-                case HttpURLConnection.HTTP_OK:
-                    break;
-
-                case HttpURLConnection.HTTP_NOT_MODIFIED:
-                    contractAddress = "";
-                    break;
-            }
-
-            conn.disconnect();
-            return contractAddress;
-        });
-    }
-
-    public String getFeemasterAPI(String address)
-    {
-        TokenDefinition td = getAssetDefinition(address);
-        if (td != null)
-        {
-            return td.getFeemasterAPI();
-        }
-        else
-        {
-            return null;
-        }
+        return assetDefinitions.containsKey(chainId) && assetDefinitions.get(chainId).containsKey(address);
     }
 
     //when user reloads the tokens we should also check XML for any files
@@ -605,39 +707,410 @@ public class AssetDefinitionService
         assetChecked.clear();
     }
 
-    public boolean hasIFrame(String contractAddr)
+    public boolean hasTokenView(int chainId, String contractAddr)
     {
-        boolean hasIframe = false;
-        TokenDefinition td = assetDefinitions.get(contractAddr);
-        if (td != null && td.attributeSets.containsKey("appearance"))
-        {
-            hasIframe = true;
-        }
-
-        return hasIframe;
+        TokenDefinition td = getAssetDefinition(chainId, contractAddr);
+        return (td != null && td.attributeSets.containsKey("cards"));
     }
 
-    public String getIntroductionCode(String contractAddr)
+    public String getTokenView(int chainId, String contractAddr, String type)
     {
-        String appearance = "";
-        TokenDefinition td = assetDefinitions.get(contractAddr);
-        if (td != null && td.attributeSets.containsKey("appearance"))
+        String viewHTML = "";
+        TokenDefinition td = getAssetDefinition(chainId, contractAddr);
+        if (td != null && td.attributeSets.containsKey("cards"))
         {
-            appearance = td.getAppearance("introduction");
+            viewHTML = td.getCardData(type);
         }
 
-        return appearance;
+        return viewHTML;
     }
 
-    public String getInstructionCode(String contractAddr)
+    public Map<String, TSAction> getTokenFunctionMap(int chainId, String contractAddr)
     {
-        String appearance = "";
-        TokenDefinition td = assetDefinitions.get(contractAddr);
-        if (td != null && td.attributeSets.containsKey("appearance"))
+        TokenDefinition td = getAssetDefinition(chainId, contractAddr);
+        if (td != null)
         {
-            appearance = td.getAppearance("instruction");
+            return td.getActions();
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public String getTokenFunctionView(int chainId, String contractAddr)
+    {
+        TokenDefinition td = getAssetDefinition(chainId, contractAddr);
+        if (td != null && td.getActions().size() > 0)
+        {
+            for (TSAction a : td.getActions().values())
+            {
+                return a.view;
+            }
+            return null;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public boolean hasAction(int chainId, String contractAddr)
+    {
+        TokenDefinition td = getAssetDefinition(chainId, contractAddr);
+        if (td != null && td.actions != null && td.actions.size() > 0) return true;
+        else return false;
+    }
+
+    @Override
+    public void parseMessage(ParseResultId parseResult)
+    {
+        switch (parseResult)
+        {
+            case PARSER_OUT_OF_DATE:
+                HomeActivity.setUpdatePrompt();
+                break;
+            case XML_OUT_OF_DATE:
+                break;
+            case OK:
+                break;
+        }
+    }
+
+    public void startFileListener(File path)
+    {
+        fileObserver = new FileObserver(path.getPath(), ALL_EVENTS)
+        {
+            @Override
+            public void onEvent(int i, @Nullable String s)
+            {
+                //watch for new files and file change
+                switch (i)
+                {
+                    case CREATE:
+                    case MODIFY:
+                        try
+                        {
+                            if (s.contains(".xml") || s.contains(".tsml"))
+                            {
+                                //form filename
+                                File newTSFile = new File(
+                                        Environment.getExternalStorageDirectory()
+                                                + File.separator + ALPHAWALLET_DIR, s);
+                                FileInputStream stream = new FileInputStream(newTSFile);
+                                String hash = calcMD5(newTSFile);
+                                String fileName = newTSFile.getAbsolutePath();
+                                if (fileHashes.containsKey(fileName) && fileHashes.get(fileName).equals(hash))
+                                {
+                                    break;
+                                }
+                                fileHashes.put(fileName, hash);
+                                if (addContractAddresses(newTSFile))
+                                {
+                                    notificationService.DisplayNotification("Definition Updated", s, NotificationCompat.PRIORITY_MAX);
+                                }
+                            }
+                        }
+                        catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+
+        fileObserver.startWatching();
+    }
+
+    private static String calcMD5(File file) throws IOException, NoSuchAlgorithmException
+    {
+        FileInputStream fis = new FileInputStream(file);
+        MessageDigest digest = MessageDigest.getInstance("MD5");
+
+        byte[] byteArray = new byte[1024];
+        int bytesCount = 0;
+
+        while ((bytesCount = fis.read(byteArray)) != -1) {
+            digest.update(byteArray, 0, bytesCount);
+        };
+
+        fis.close();
+
+        byte[] bytes = digest.digest();
+
+        //This bytes[] has bytes in decimal format;
+        //Convert it to hexadecimal format
+        StringBuilder sb = new StringBuilder();
+        for (byte aByte : bytes)
+        {
+            sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
         }
 
-        return appearance;
+        //return complete hash
+        return sb.toString();
+    }
+
+    public Single<List<Token>> checkEthereumFunctions(TokensService tokensService)
+    {
+        return Single.fromCallable(() -> {
+            List<Token> updatedTokens = new ArrayList<>();
+            for (int networkId : assetDefinitions.keySet())
+            {
+                Map<String, File> defMap = assetDefinitions.get(networkId);
+                for (String tokenScriptAddress : defMap.keySet())
+                {
+                    //fetch all attr solutions
+                    TokenDefinition td = getDefinition(networkId, tokenScriptAddress);
+                    List<AttributeType> attrs = new ArrayList<>(td.attributeTypes.values());
+                    for (AttributeType attr : attrs)
+                    {
+                        if (attr.function == null) continue;
+                        FunctionDefinition fd = attr.function;
+                        ContractInfo cInfo = fd.contract;
+                        List<String> addresses = cInfo.addresses.get(networkId);
+
+                        if (addresses != null)
+                        {
+                            for (String address : addresses)
+                            {
+                                ContractAddress cAddr = new ContractAddress(networkId, address);
+                                if (cInfo.contractInterface != null)
+                                {
+                                    //do we have this token?
+                                    Token token = tokensService.getToken(networkId, address);
+                                    if (token != null)
+                                    {
+                                        Observable.fromIterable(token.getNonZeroArrayBalance())
+                                                .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
+                                                .filter(TransactionResult::needsUpdating)
+                                                .concatMap(result -> td.fetchAttrResult(attr.id, result.tokenId, cAddr,this))
+                                                .subscribeOn(Schedulers.io())
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe();
+                                    }
+                                }
+                                else
+                                {
+                                    //doesn't have a contract interface, so just fetch the function
+                                    TransactionResult tr = getFunctionResult(cAddr, attr, BigInteger.ZERO);
+                                    if (tr.needsUpdating())
+                                    {
+                                        td.fetchAttrResult(attr.id, tr.tokenId, cAddr,this)
+                                                .subscribeOn(Schedulers.io())
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return updatedTokens;
+        });
+    }
+
+
+    //Database functions
+    private String functionKey(ContractAddress cAddr, BigInteger tokenId, String attrId)
+    {
+        //produce a unique key for this. token address, token Id, chainId
+        return cAddr.address + "-" + tokenId.toString(Character.MAX_RADIX) + "-" + cAddr.chainId + "-" + attrId;
+    }
+
+    @Override
+    public TransactionResult getFunctionResult(ContractAddress contract, AttributeType attr, BigInteger tokenId)
+    {
+        TransactionResult tr = new TransactionResult(contract.chainId, contract.address, tokenId, attr);
+        try (Realm realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress())) {
+            RealmAuxData realmToken = realm.where(RealmAuxData.class)
+                    .equalTo("instanceKey", functionKey(contract, tokenId, attr.id))
+                    .equalTo("chainId", contract.chainId)
+                    .findFirst();
+
+            if (realmToken != null)
+            {
+                tr.resultTime = realmToken.getResultTime();
+                tr.result = realmToken.getResult();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return tr;
+    }
+
+    @Override
+    public TransactionResult storeAuxData(TransactionResult tResult)
+    {
+        Completable.complete()
+                .subscribeWith(new DisposableCompletableObserver()
+                {
+                    Realm realm;
+
+                    @Override
+                    public void onStart()
+                    {
+                        if (tResult.result == null) return;
+                        realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress());
+                        ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
+                        RealmAuxData realmToken = realm.where(RealmAuxData.class)
+                                .equalTo("instanceKey", functionKey(cAddr, tResult.tokenId, tResult.attrId))
+                                .equalTo("chainId", tResult.contractChainId)
+                                .findFirst();
+
+                        if (realmToken == null)
+                        {
+                            TransactionsRealmCache.addRealm();
+                            realm.beginTransaction();
+                            createAuxData(realm, tResult);
+                        }
+                        else if (realmToken.getResultTime() != tResult.resultTime)
+                        {
+                            TransactionsRealmCache.addRealm();
+                            realm.beginTransaction();
+                            realmToken.setResult(tResult.result);
+                            realmToken.setResultTime(tResult.resultTime);
+                        }
+                    }
+
+                    @Override
+                    public void onComplete()
+                    {
+                        if (realm != null)
+                        {
+                            if (realm.isInTransaction())
+                            {
+                                realm.commitTransaction();
+                                TransactionsRealmCache.subRealm();
+                            }
+                            if (!realm.isClosed()) realm.close();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e)
+                    {
+                        if (realm != null && !realm.isClosed())
+                        {
+                            if (realm.isInTransaction()) TransactionsRealmCache.subRealm();
+                            realm.close();
+                        }
+                    }
+                }).isDisposed();
+
+        return tResult;
+    }
+
+    private void createAuxData(Realm realm, TransactionResult tResult)
+    {
+        try
+        {
+            ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
+            RealmAuxData realmData = realm.createObject(RealmAuxData.class, functionKey(cAddr, tResult.tokenId, tResult.attrId));
+            realmData.setResultTime(tResult.resultTime);
+            realmData.setResult(tResult.result);
+            realmData.setChainId(tResult.contractChainId);
+            realmData.setFunctionId(tResult.method);
+            realmData.setTokenId(tResult.tokenId.toString(Character.MAX_RADIX));
+        }
+        catch (RealmPrimaryKeyConstraintException e)
+        {
+            //in theory we should never see this
+            e.printStackTrace();
+        }
+    }
+
+    public StringBuilder getTokenAttrs(Token token, int count)
+    {
+        StringBuilder attrs = new StringBuilder();
+
+        TokenScriptResult.addPair(attrs, "name", token.getTokenTitle());
+        TokenScriptResult.addPair(attrs, "symbol", token.tokenInfo.symbol);
+        TokenScriptResult.addPair(attrs, "_count", String.valueOf(count));
+
+        if (token.isEthereum())
+        {
+            TokenScriptResult.addPair(attrs, "balance", token.balance.toString());
+        }
+
+        return attrs;
+    }
+
+    /**
+     * Get all the magic values - eg native crypto balances for all chains
+     * @return
+     */
+    public String getMagicValuesForInjection(int chainId) throws Exception
+    {
+        String walletBalance = "walletBalance";
+        String prefix = "web3.eth";
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n\n");
+        Token nativeCurrency = tokensService.getToken(chainId, tokensService.getCurrentAddress());
+        sb.append(prefix).append(" = {\n").append(walletBalance).append(": ").append(nativeCurrency.balance.toString()).append("\n}\n");
+
+        List<Token> nativeCurrencies = tokensService.getAllAtAddress(tokensService.getCurrentAddress());
+        for (Token currency : nativeCurrencies)
+        {
+            sb.append(prefix).append("_").append(currency.tokenInfo.chainId).append(" = {\n").append(walletBalance).append(": ").append(currency.balance.toString()).append("\n}\n");
+        }
+
+        sb.append("\n\n");
+
+        return sb.toString();
+    }
+
+    public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, BigInteger tokenId)
+    {
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
+        return definition.resolveAttributes(tokenId, this, cAddr);
+    }
+
+    public List<Integer> getCanonicalized()
+    {
+        List<Integer> canonicalizedFiles = new ArrayList<>();
+        for (Field field : R.xml.class.getFields())
+        {
+            if (field.getName().contains("canonicalized"))
+            {
+                canonicalizedFiles.add(context.getResources().getIdentifier(field.getName(), "xml", context.getPackageName()));
+            }
+        }
+
+        return canonicalizedFiles;
+    }
+
+    private List<String> getCanonicalizedAssets()
+    {
+        List<String> canonicalizedFilesStr = new ArrayList<>();
+        AssetManager mgr = context.getResources().getAssets();
+        try
+        {
+            String[] filelist = mgr.list("");
+            for (String file : filelist)
+            {
+                if (file.contains("canonicalized"))
+                {
+                    canonicalizedFilesStr.add(file);
+                }
+            }
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        return canonicalizedFilesStr;
     }
 }

@@ -156,18 +156,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     viewModel.checkTokenNetwork(contractAddress, "requiredPrefix");
                     break;
                 default:
-                    //TODO: The line of code below will return a potentially incorrect value
-                    //TODO: if there are two contracts on different chains with the same address (owned by same key)
-                    int checkNetworkId = viewModel.getAssetDefinitionService().getChainId(contractAddress);
-                    if (checkNetworkId > 0)
-                    {
-                        viewModel.switchNetwork(checkNetworkId);
-                        viewModel.loadToken();
-                    }
-                    else
-                    {
-                        viewModel.checkTokenNetwork(contractAddress, "name");
-                    }
+                    viewModel.checkTokenNetwork(contractAddress, "name");
                     break;
             }
         }
@@ -226,7 +215,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private void setTicket(boolean ticket, boolean progress, boolean invalid)
     {
         LinearLayout progress_ticket = findViewById(R.id.layout_select_overlay);
-        LinearLayout valid_ticket = findViewById(R.id.layout_select_ticket);
+        RelativeLayout valid_ticket = findViewById(R.id.layout_select_ticket);
         LinearLayout invalid_ticket = findViewById(R.id.layout_select_invalid);
         if (ticket)
         {
@@ -339,8 +328,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         verifiedLayer.setVisibility(View.VISIBLE);
 
-        int contractChainId = viewModel.getAssetDefinitionService().getChainId(viewModel.getSalesOrder().contractAddress);
-        if (contractChainId == chainId || usingFeeMaster)
+        //TODO: Must be signed
+        if (viewModel.getAssetDefinitionService().hasDefinition(data.chainId, data.contractAddress) || usingFeeMaster)
         {
             verified.setVisibility(View.VISIBLE);
             textVerified.setVisibility(View.VISIBLE);
@@ -422,7 +411,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         Token t = viewModel.getImportToken();
         TextView tv = findViewById(R.id.text_ticket_range);
         String importText = String.valueOf(order.ticketCount) + "x ";
-        importText += t.getTokenName(viewModel.getAssetDefinitionService());
+        importText += t.getTokenName(viewModel.getAssetDefinitionService(), order.ticketCount);
 
         tv.setText(importText);
     }
@@ -443,7 +432,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         Token t = viewModel.getImportToken();
         TextView tv = findViewById(R.id.text_ticket_range);
         String importText = String.valueOf(order.ticketCount) + "x ";
-        importText += t.getTokenName(viewModel.getAssetDefinitionService());
+        importText += t.getTokenName(viewModel.getAssetDefinitionService(), order.ticketCount);
         tv.setText(importText);
         //Note: it's actually not possible to pull the event or anything like that since we can't get the tokenID if it's been imported.
     }

@@ -8,12 +8,12 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.stormbird.token.entity.MagicLinkInfo;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.web3.entity.Address;
@@ -23,7 +23,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-class JsInjectorClient {
+public class JsInjectorClient {
 
     private static final String DEFAULT_CHARSET = "utf-8";
     private static final String DEFAULT_MIME_TYPE = "text/html";
@@ -39,7 +39,7 @@ class JsInjectorClient {
     //Note: this default RPC is overriden before injection
     private String rpcUrl = EthereumNetworkRepository.MAINNET_RPC_URL;
 
-    JsInjectorClient(Context context) {
+    public JsInjectorClient(Context context) {
         this.context = context;
         this.httpClient = createHttpClient();
     }
@@ -68,12 +68,6 @@ class JsInjectorClient {
         this.rpcUrl = rpcUrl;
     }
 
-    JsInjectorResponse loadUrl(final String url, String userAgent) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("User-Agent", userAgent);
-        return loadUrl(url, headers);
-    }
-
     @Nullable
     JsInjectorResponse loadUrl(final String url, final Map<String, String> headers) {
         Request request = buildRequest(url, headers);
@@ -93,7 +87,6 @@ class JsInjectorClient {
         }
         String initJs = loadInitJs(context);
         return String.format(template, jsLibrary, initJs);
-
     }
 
     @Nullable
@@ -123,12 +116,37 @@ class JsInjectorClient {
         return injectJS(html, js);
     }
 
-    private String injectJS(String html, String js) {
+    String injectWeb3TokenInit(Context ctx, String view, String tokenContent)
+    {
+        String initSrc = loadFile(ctx, R.raw.init_token);
+        initSrc = String.format(initSrc, tokenContent, walletAddress, MagicLinkInfo.getNodeURLByNetworkId(chainId), chainId);
+        //now insert this source into the view
+        return injectJSembed(view, initSrc);
+    }
+
+    String injectJSAtEnd(String view, String newCode)
+    {
+        int position = getEndInjectionPosition(view);
+        if (position >= 0) {
+            String beforeTag = view.substring(0, position);
+            String afterTab = view.substring(position);
+            return beforeTag + newCode + afterTab;
+        }
+        return view;
+    }
+
+    String injectJSembed(String view, String initSrc)
+    {
+        initSrc = "<script>\n" + initSrc + "</script>\n";
+        return injectJS(view, initSrc);
+    }
+
+    String injectJS(String html, String js) {
         if (TextUtils.isEmpty(html)) {
             return html;
         }
         int position = getInjectionPosition(html);
-        if (position > 0) {
+        if (position >= 0) {
             String beforeTag = html.substring(0, position);
             String afterTab = html.substring(position);
             return beforeTag + js + afterTab;
@@ -153,6 +171,13 @@ class JsInjectorClient {
         return index;
     }
 
+    private int getEndInjectionPosition(String body) {
+        body = body.toLowerCase();
+        int firstIndex = body.indexOf("<script");
+        int nextIndex = body.indexOf("web3", firstIndex);
+        return body.indexOf("</script", nextIndex);
+    }
+
     @Nullable
     private Request buildRequest(String url, Map<String, String> headers) {
         HttpUrl httpUrl = HttpUrl.parse(url);
@@ -175,7 +200,13 @@ class JsInjectorClient {
         return String.format(initSrc, address, rpcUrl, chainId);
     }
 
-    private String loadFile(Context context, @RawRes int rawRes) {
+    String injectStyle(String view, String style)
+    {
+        style = "<style type=\"text/css\">\n" + style + "</style>\n";
+        return style + view;
+    }
+
+    private static String loadFile(Context context, @RawRes int rawRes) {
         byte[] buffer = new byte[0];
         try {
             InputStream in = context.getResources().openRawResource(rawRes);

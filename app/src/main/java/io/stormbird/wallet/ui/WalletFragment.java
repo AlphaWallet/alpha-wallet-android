@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -21,6 +22,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.service.TokensService;
+import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
 import io.stormbird.wallet.util.TabUtils;
 import io.stormbird.wallet.viewmodel.WalletViewModel;
@@ -39,7 +41,7 @@ import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
  * Created by justindeguzman on 2/28/18.
  */
 
-public class WalletFragment extends Fragment implements View.OnClickListener, TokenInterface
+public class WalletFragment extends Fragment implements OnTokenClickListener, View.OnClickListener, TokenInterface, Runnable
 {
     private static final String TAG = "WFRAG";
 
@@ -54,6 +56,8 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     private ProgressView progressView;
     private TokensAdapter adapter;
     private FragmentMessenger homeMessager;
+    private View selectedToken;
+    private Handler handler;
 
     private boolean isVisible;
 
@@ -90,7 +94,7 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         viewModel.tokensReady().observe(this, this::tokensReady);
         viewModel.fetchKnownContracts().observe(this, this::fetchKnownContracts);
 
-        adapter = new TokensAdapter(getActivity(), this::onTokenClick, viewModel.getAssetDefinitionService());
+        adapter = new TokensAdapter(getActivity(),this, viewModel.getAssetDefinitionService());
         adapter.setHasStableIds(true);
         list.setLayoutManager(new LinearLayoutManager(getContext()));
         list.setAdapter(adapter);
@@ -215,14 +219,28 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
         return super.onOptionsItemSelected(item);
     }
 
-    private void onTokenClick(View view, Token token, BigInteger id) {
-        token = viewModel.getTokenFromService(token);
-        token.clickReact(viewModel, getActivity());
+    @Override
+    public void onTokenClick(View view, Token token, List<BigInteger> ids) {
+        if (selectedToken == null)
+        {
+            selectedToken = view;
+            token = viewModel.getTokenFromService(token);
+            token.clickReact(viewModel, getActivity());
+            handler.postDelayed(this, 700);
+        }
+    }
+
+    @Override
+    public void onLongTokenClick(View view, Token token, List<BigInteger> tokenId)
+    {
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        if (handler == null) handler = new Handler();
+        selectedToken = null;
         viewModel.setVisibility(isVisible);
         viewModel.prepare();
     }
@@ -323,7 +341,6 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     private void fetchKnownContracts(Boolean notUsed)
     {
         //fetch list of contracts for this network from the XML contract directory
-
         List<ContractResult> knownContracts = new ArrayList<>(getAllKnownContractsOnNetwork(EthereumNetworkRepository.MAINNET_ID));
         knownContracts.addAll(getAllKnownContractsOnNetwork(EthereumNetworkRepository.XDAI_ID));
 
@@ -359,5 +376,15 @@ public class WalletFragment extends Fragment implements View.OnClickListener, To
     public void walletInFocus()
     {
         if (viewModel != null) viewModel.reloadTokens();
+    }
+
+    @Override
+    public void run()
+    {
+        if (selectedToken != null && selectedToken.findViewById(R.id.token_layout) != null)
+        {
+            selectedToken.findViewById(R.id.token_layout).setBackgroundResource(R.drawable.background_marketplace_event);
+        }
+        selectedToken = null;
     }
 }

@@ -3,11 +3,12 @@ package io.stormbird.wallet.entity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.View;
-import io.stormbird.token.entity.TicketRange;
+import io.reactivex.Observable;
+import io.stormbird.token.entity.*;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.interact.SetupTokensInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -18,8 +19,10 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,7 +49,6 @@ public class Token implements Parcelable
     public String getNetworkName() { return shortNetworkName; }
 
     public TokenTicker ticker;
-    protected Map<String, String> auxData;
 
     public Token(TokenInfo tokenInfo, BigDecimal balance, long updateBlancaTime, String networkName, ContractType type) {
         this.tokenInfo = tokenInfo;
@@ -88,17 +90,6 @@ public class Token implements Parcelable
         if (readType <= ContractType.CREATION.ordinal())
         {
             contractType = ContractType.values()[readType];
-        }
-        int size = in.readInt();
-        if (size > 0)
-        {
-            auxData = new ConcurrentHashMap<>();
-            for (; size > 0; size--)
-            {
-                String key = in.readString();
-                String value = in.readString();
-                auxData.put(key, value);
-            }
         }
     }
 
@@ -149,16 +140,6 @@ public class Token implements Parcelable
         dest.writeString(pendingBalance == null ? "0" : pendingBalance.toString());
         dest.writeString(tokenWallet);
         dest.writeLong(lastBlockCheck);
-        int size = (auxData == null ? 0 : auxData.size());
-        dest.writeInt(size);
-        if (size > 0)
-        {
-            for (String key : auxData.keySet())
-            {
-                dest.writeString(key);
-                dest.writeString(auxData.get(key));
-            }
-        }
     }
 
     public void setRealmBalance(RealmToken realmToken)
@@ -190,21 +171,35 @@ public class Token implements Parcelable
         return tokenInfo.name + (tokenInfo.symbol != null && tokenInfo.symbol.length() > 0 ? "(" + tokenInfo.symbol.toUpperCase() + ")" : "");
     }
 
+    public String getFullName(AssetDefinitionService assetDefinition, int count)
+    {
+        String name = getFullName();
+        String tokenTypeName = assetDefinition.getTokenName(tokenInfo.chainId, tokenInfo.address, count);
+        if (name != null && tokenTypeName != null && !name.contains(tokenTypeName)) name = name + " " + tokenTypeName;
+
+        return name;
+    }
+
     public void clickReact(BaseViewModel viewModel, Context context)
     {
         viewModel.showErc20TokenDetail(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
     }
 
-    public void setupContent(TokenHolder holder, AssetDefinitionService definition)
+    public BigDecimal getCorrectedBalance(int scale)
     {
         BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
         BigDecimal ethBalance = tokenInfo.decimals > 0
                 ? balance.divide(decimalDivisor) : balance;
-        ethBalance = ethBalance.setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros();
+        return ethBalance.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros();
+    }
+
+    public void setupContent(TokenHolder holder, AssetDefinitionService definition)
+    {
+        BigDecimal ethBalance = getCorrectedBalance(4);
         String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
         if (ethBalance.compareTo(BigDecimal.ZERO) == 0 && balance.compareTo(BigDecimal.ZERO) > 0)
         {
-            ethBalance = balance.divide(decimalDivisor);
+            ethBalance = balance.divide(new BigDecimal(Math.pow(10, tokenInfo.decimals)));
             //fractional value. How to represent?
             value = getMinimalString(ethBalance.toPlainString());
             if (value.length() > 6)
@@ -277,9 +272,32 @@ public class Token implements Parcelable
         return sb.toString();
     }
 
+    /**
+     * Produce a string CSV of integer IDs given an input list of values
+     * @param idList
+     * @param keepZeros
+     * @return
+     */
     public String intArrayToString(List<BigInteger> idList, boolean keepZeros)
     {
-        return "";
+        if (idList == null) return "";
+        String displayIDs = "";
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
+        for (BigInteger id : idList)
+        {
+            if (!keepZeros && id.compareTo(BigInteger.ZERO) == 0) continue;
+            if (!first)
+            {
+                sb.append(",");
+            }
+            first = false;
+
+            sb.append(Numeric.toHexStringNoPrefix(id));
+            displayIDs = sb.toString();
+        }
+
+        return displayIDs;
     }
 
     public List<Integer> stringIntsToIntegerList(String userList)
@@ -339,13 +357,6 @@ public class Token implements Parcelable
         return true;
     }
 
-    public void addAuxDataResult(String id, String result)
-    {
-        if (auxData == null) auxData = new ConcurrentHashMap<>();
-        if (result == null) auxData.remove(id);
-        else auxData.put(id, result);
-    }
-
     public boolean checkRealmBalanceChange(RealmToken realmToken)
     {
         if (contractType == null || contractType.ordinal() != realmToken.getInterfaceSpec()) return true;
@@ -357,26 +368,8 @@ public class Token implements Parcelable
         if (tokenInfo.name != null && realmToken.getName() != null) return true;
         if (tokenInfo.symbol != null && realmToken.getSymbol() == null) return true;
         if (tokenInfo.name != null && (!tokenInfo.name.equals(realmToken.getName()) || !tokenInfo.symbol.equals(realmToken.getSymbol()))) return true;
-        if (checkAuxDataChanged(realmToken)) return true;
         String currentBalance = getFullBalance();
         return !currentState.equals(currentBalance);
-    }
-
-    //Detects if the auxData held in Realm is different from the current auxData.
-    private boolean checkAuxDataChanged(RealmToken realmToken)
-    {
-        if (auxData != null && (realmToken.getAuxData() == null || realmToken.getAuxData().length() <= 4)) return true;
-        else if (auxData != null && realmToken.getAuxData().length() > 4)
-        {
-            Map<String, String> currentRealmData = restoreAuxData(realmToken.getAuxData());
-            for (String key : auxData.keySet())
-            {
-                if (!currentRealmData.containsKey(key)) return true;
-                else if (!auxData.get(key).equals(currentRealmData.get(key))) return true;
-            }
-        }
-
-        return false;
     }
 
     private Map<String, String> restoreAuxData(String data)
@@ -393,30 +386,6 @@ public class Token implements Parcelable
         }
 
         return aux;
-    }
-
-    public void setRealmAuxData(RealmToken realmToken)
-    {
-        //first form the data
-        if (auxData != null)
-        {
-            StringBuilder auxDataStr = new StringBuilder();
-            for (String key : auxData.keySet())
-            {
-                auxDataStr.append(key);
-                auxDataStr.append(",");
-                auxDataStr.append(auxData.get(key));
-                auxDataStr.append(",");
-            }
-
-            realmToken.setAuxData(auxDataStr.toString());
-        }
-    }
-
-    public void restoreAuxDataFromRealm(RealmToken realmToken)
-    {
-        String values = realmToken.getAuxData();
-        auxData = restoreAuxData(values);
     }
 
     public void setIsEthereum()
@@ -441,13 +410,6 @@ public class Token implements Parcelable
     public void setTokenWallet(String address)
     {
         this.tokenWallet = address;
-    }
-
-
-    public void patchAuxData(Token token)
-    {
-        auxData = token.auxData;
-        if (auxData != null) requiresAuxRefresh = false;
     }
 
     public boolean checkBalanceChange(Token token)
@@ -501,7 +463,10 @@ public class Token implements Parcelable
     /**
      * Stub functions - these are intended to be overridden in inherited classes.
      */
-    public void setInterfaceSpec(ContractType type) { contractType = type; }
+    public void setInterfaceSpec(ContractType type)
+    {
+        contractType = type;
+    }
     public ContractType getInterfaceSpec() { return contractType; }
     public List<BigInteger> stringHexToBigIntegerList(String integerString)
     {
@@ -535,8 +500,10 @@ public class Token implements Parcelable
     public int[] getTicketIndices(String ticketIds) { return new int[0]; }
     public boolean unspecifiedSpec() { return contractType == ContractType.NOT_SET; }
 
+    public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx, boolean iconified) { }
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx) { }
     public List<BigInteger> getArrayBalance() { return new ArrayList<>(); }
+    public List<BigInteger> getNonZeroArrayBalance() { return new ArrayList<>(Arrays.asList(BigInteger.ZERO)); }
     public boolean isMatchedInXML() { return false; }
 
     public String getOperationName(Transaction transaction, Context ctx)
@@ -673,14 +640,13 @@ public class Token implements Parcelable
         return false;
     }
 
-    public String getTokenName(AssetDefinitionService assetService)
+    public String getTokenName(AssetDefinitionService assetService, int count)
     {
         //see if this token is covered by any contract
-        int networkId = assetService.getChainId(getAddress());
-        if (networkId >= 1)
+        if (assetService.hasDefinition(tokenInfo.chainId, tokenInfo.address))
         {
             if (tokenInfo.name != null) return tokenInfo.name;
-            else return assetService.getAssetDefinition(getAddress()).getTokenName();
+            else return assetService.getAssetDefinition(tokenInfo.chainId, getAddress()).getTokenName(count);
         }
         else
         {
@@ -790,6 +756,11 @@ public class Token implements Parcelable
         return transaction.from.equalsIgnoreCase(tokenWallet);
     }
 
+    public String getWallet()
+    {
+        return tokenWallet;
+    }
+
     public String pruneIDList(String ticketIds, int quantity)
     {
         return "";
@@ -822,4 +793,11 @@ public class Token implements Parcelable
         balance = BigDecimal.ZERO;
         pendingBalance = BigDecimal.ZERO;
     }
+
+    public String getTokenTitle()
+    {
+        return tokenInfo.name;
+    }
+
+    public boolean isERC875() { return false; }
 }

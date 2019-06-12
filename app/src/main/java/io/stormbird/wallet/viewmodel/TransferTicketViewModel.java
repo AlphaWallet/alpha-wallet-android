@@ -3,6 +3,7 @@ package io.stormbird.wallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.Nullable;
 
 import io.stormbird.wallet.entity.NetworkInfo;
@@ -18,7 +19,12 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.ui.TransferTicketDetailActivity;
 
+import static io.stormbird.wallet.C.EXTRA_STATE;
+import static io.stormbird.wallet.C.EXTRA_TOKENID_LIST;
+import static io.stormbird.wallet.C.Key.TICKET;
+import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.ui.TransferTicketDetailActivity.TRANSFER_TO_ADDRESS;
 
 public class TransferTicketViewModel extends BaseViewModel {

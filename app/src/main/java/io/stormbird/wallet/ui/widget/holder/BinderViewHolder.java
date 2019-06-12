@@ -8,6 +8,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import io.stormbird.wallet.ui.widget.OnTokenClickListener;
+import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
+import io.stormbird.wallet.web3.entity.FunctionCallback;
 
 public abstract class BinderViewHolder<T> extends RecyclerView.ViewHolder {
 	public BinderViewHolder(int resId, ViewGroup parent) {
@@ -36,4 +39,6 @@ public abstract class BinderViewHolder<T> extends RecyclerView.ViewHolder {
 	public String getString(int stringResId, Object... args) {
 		return getContext().getString(stringResId, args);
 	}
+
+	public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener) { }
 }

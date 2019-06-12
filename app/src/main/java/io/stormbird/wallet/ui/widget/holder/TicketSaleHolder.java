@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 
+import android.widget.RelativeLayout;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -27,7 +28,7 @@ public class TicketSaleHolder extends BaseTicketHolder
     private OnTokenCheckListener onTokenCheckListener;
 
     private final AppCompatRadioButton select;
-    private final LinearLayout ticketLayout;
+    private final RelativeLayout ticketLayout;
 
     public TicketSaleHolder(int resId, ViewGroup parent, Token token, AssetDefinitionService assetService)
     {

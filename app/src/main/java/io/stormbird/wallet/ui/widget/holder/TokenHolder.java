@@ -16,6 +16,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
@@ -28,10 +29,12 @@ import io.stormbird.wallet.util.Utils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
-public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener {
+public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener, View.OnLongClickListener {
 
     public static final int VIEW_TYPE = 1005;
     public static final String EMPTY_BALANCE = "\u2014\u2014";
@@ -54,6 +57,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
     private final TextView blockchain;
     private final TextView pendingText;
+    private final RelativeLayout tokenLayout;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
@@ -79,6 +83,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         blockchain = findViewById(R.id.text_chain);
         chainName = findViewById(R.id.text_chain_name);
         pendingText = findViewById(R.id.balance_eth_pending);
+        tokenLayout = findViewById(R.id.token_layout);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
     }
@@ -86,23 +91,24 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     @Override
     public void bind(@Nullable Token data, @NonNull Bundle addition) {
         this.token = data;
-        if (! data.isERC20())
-        {
-            // TODO: apply styles for none ERC20 contracts
-            contractType.setVisibility(View.GONE);
-            contractSeparator.setVisibility(View.GONE);
-        }
+//        if (! data.isERC20())
+//        {
+//            // TODO: apply styles for none ERC20 contracts
+//            contractType.setVisibility(View.GONE);
+//            contractSeparator.setVisibility(View.GONE);
+//        }
 
         try
         {
+            tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             blockchain.setText(getString(R.string.blockchain, token.getNetworkName()));
             chainName.setText(token.getNetworkName());
             Utils.setChainColour(chainName, token.tokenInfo.chainId);
-            String displayTxt = assetDefinition.getIssuerName(token.getAddress(), token.getNetworkName());
+            String displayTxt = assetDefinition.getIssuerName(token);
             issuer.setText(displayTxt);
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
                         ? token.tokenInfo.symbol.toUpperCase()
-                        : token.getFullName());// getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol.toUpperCase()));
+                        : token.getFullName());
 
             animateTextWhileWaiting();
             token.setupContent(this, assetDefinition);
@@ -124,13 +130,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         {
             pendingText.setText("");
         }
-
-//        textPending.setVisibility(View.VISIBLE);
-//        if (qty > 0) {
-//            textPending.setText(getContext().getString(R.string.status_pending_with_qty, String.valueOf(qty)));
-//        } else {
-//            textPending.setVisibility(View.GONE);
-//        }
     }
 
     private void setIncompleteData(int qty) {
@@ -226,11 +225,26 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     @Override
     public void onClick(View v) {
         if (onTokenClickListener != null) {
-            onTokenClickListener.onTokenClick(v, token, BigInteger.ZERO);
+            tokenLayout.setBackgroundResource(R.drawable.background_token_selected);
+            onTokenClickListener.onTokenClick(v, token, null);
         }
     }
 
+    @Override
+    public boolean onLongClick(View v)
+    {
+        if (onTokenClickListener != null) {
+            onTokenClickListener.onLongTokenClick(v, token, null);
+        }
+
+        return true;
+    }
+
     public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener) {
+        this.onTokenClickListener = onTokenClickListener;
+    }
+
+    public void setOnLongClickListener(OnTokenClickListener onTokenClickListener) {
         this.onTokenClickListener = onTokenClickListener;
     }
 

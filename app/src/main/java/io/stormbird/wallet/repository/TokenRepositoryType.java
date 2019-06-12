@@ -1,15 +1,16 @@
 package io.stormbird.wallet.repository;
 
 import io.reactivex.disposables.Disposable;
+import io.stormbird.token.entity.FunctionDefinition;
+import io.stormbird.token.entity.TransactionResult;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.*;
 
 import java.math.BigInteger;
-import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.stormbird.wallet.service.AssetDefinitionService;
 
 public interface TokenRepositoryType {
 
@@ -25,7 +26,6 @@ public interface TokenRepositoryType {
     Disposable memPoolListener(int chainId, SubscribeWrapper wrapper); //only listen to transactions relating to this address
     Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
     Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType interfaceSpec);
-    Single<Token> callTokenFunctions(Token token, AssetDefinitionService service);
     Single<Ticker> getEthTicker(int chainId);
     Single<Token> getEthBalance(NetworkInfo network, Wallet wallet);
     Single<BigInteger> fetchLatestBlockNumber(int chainId);
@@ -37,4 +37,6 @@ public interface TokenRepositoryType {
 
     Disposable updateBlockRead(Token token, Wallet wallet);
     Single<String> resolveProxyAddress(TokenInfo tokenInfo);
+
+    String generateTransactionPayload(Token token, BigInteger tokenId, FunctionDefinition fd, TokenDefinition td);
 }

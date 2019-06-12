@@ -20,14 +20,7 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import io.realm.exceptions.RealmException;
-import io.stormbird.wallet.entity.ERC721Token;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.TokenFactory;
-import io.stormbird.wallet.entity.TokenInfo;
-import io.stormbird.wallet.entity.TokenTicker;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.entity.opensea.AssetContract;
 import io.stormbird.wallet.entity.opensea.Trait;
@@ -429,7 +422,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     realmToken.setDecimals(token.tokenInfo.decimals);
                 }
                 token.setRealmInterfaceSpec(realmToken);
-                token.setRealmAuxData(realmToken);
                 realm.commitTransaction();
                 TransactionsRealmCache.subRealm();
             }
@@ -510,7 +502,6 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setAddedTime(currentTime.getTime());
                 token.setRealmBalance(realmToken);
                 token.setRealmInterfaceSpec(realmToken);
-                token.setRealmAuxData(realmToken);
                 token.setRealmLastBlock(realmToken);
                 realmToken.setEnabled(true);
                 realmToken.setChainId(token.tokenInfo.chainId);
@@ -530,7 +521,6 @@ public class TokensRealmSource implements TokenLocalSource {
 //                    realmToken.setDecimals(token.tokenInfo.decimals);
                     realmToken.setAddedTime(currentTime.getTime());
                     token.setRealmInterfaceSpec(realmToken);
-                    token.setRealmAuxData(realmToken);
                     realmToken.setEnabled(true);
                     realm.commitTransaction();
                     token.setRealmBalance(realmToken);
@@ -811,6 +801,10 @@ public class TokensRealmSource implements TokenLocalSource {
                 Token token = tf.createToken(info, realmItem, now, network.getShortName());//; new Token(info, balance, realmItem.getUpdatedTime());
                 if (token != null)
                 {
+                    if (info.address.equalsIgnoreCase(wallet.address) && realmItem.getInterfaceSpec() != ContractType.ETHEREUM.ordinal())
+                    {
+                        token.setInterfaceSpec(ContractType.ETHEREUM);
+                    }
                     token.setTokenWallet(wallet.address);
                     tokenList.add(token);
                 }

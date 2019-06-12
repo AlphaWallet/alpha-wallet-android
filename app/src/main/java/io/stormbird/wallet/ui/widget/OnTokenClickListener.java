@@ -4,7 +4,9 @@ import android.view.View;
 import io.stormbird.wallet.entity.Token;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public interface OnTokenClickListener {
-    void onTokenClick(View view, Token token, BigInteger tokenId);
+    void onTokenClick(View view, Token token, List<BigInteger> tokenIds);
+    void onLongTokenClick(View view, Token token, List<BigInteger> tokenIds);
 }

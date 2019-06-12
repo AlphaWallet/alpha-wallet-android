@@ -69,6 +69,7 @@ public class ConfirmationActivity extends BaseActivity {
     private String contractAddress;
     private String amountStr;
     private String toAddress;
+    private String transactionHex;
     private Token token;
     private int chainId;
 
@@ -155,6 +156,21 @@ public class ConfirmationActivity extends BaseActivity {
             case MARKET:
                 amountString = tokenList;
                 toAddress = "Stormbird market";
+                break;
+            case TOKENSCRIPT:
+                title.setVisibility(View.VISIBLE);
+                title.setText(R.string.confirm_tokenscript_transaction);
+                toAddress = "TokenScript: " + getIntent().getStringExtra(C.EXTRA_FUNCTION_NAME);
+
+                contractAddrText.setVisibility(View.VISIBLE);
+                contractAddrLabel.setVisibility(View.VISIBLE);
+                contractAddrText.setText(contractAddress);
+                amountString = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);
+                symbolText.setVisibility(View.GONE);
+
+                networkName = getIntent().getStringExtra(C.EXTRA_NETWORK_NAME);
+                transactionHex = getIntent().getStringExtra(C.EXTRA_TRANSACTION_DATA);
+
                 break;
             case WEB3TRANSACTION:
                 title.setVisibility(View.VISIBLE);
@@ -320,6 +336,10 @@ public class ConfirmationActivity extends BaseActivity {
 
             case WEB3TRANSACTION:
                 viewModel.signWeb3DAppTransaction(transaction, gasSettings.gasPrice, gasSettings.gasLimit, chainId);
+                break;
+
+            case TOKENSCRIPT:
+                viewModel.signTokenScriptTransaction(transactionHex, contractAddress, gasSettings.gasPrice, gasSettings.gasLimit, chainId);
                 break;
 
             case MARKET:

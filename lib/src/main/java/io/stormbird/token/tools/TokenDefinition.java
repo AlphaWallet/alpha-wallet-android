@@ -1,11 +1,16 @@
 package io.stormbird.token.tools;
 
-import io.stormbird.token.entity.FunctionDefinition;
-import io.stormbird.token.entity.NonFungibleToken;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.internal.operators.observable.ObservableError;
+import io.stormbird.token.entity.*;
+import org.w3c.dom.*;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -15,20 +20,30 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
+
+import static org.w3c.dom.Node.ELEMENT_NODE;
 
 public class TokenDefinition {
     protected Document xml;
-    public Map<String, AttributeType> attributeTypes = new ConcurrentHashMap<>();
+    public Map<String, AttributeType> attributeTypes = new HashMap<>();
     protected Locale locale;
-    public Map<String, Integer> addresses = new HashMap<>();
-    public Map<String, FunctionDefinition> functions = new ConcurrentHashMap<>();
-    public Map<String, Map<String, String>> attributeSets = new ConcurrentHashMap<>(); //TODO: add language, in case user changes language during operation - see Weiwu's comment further down
+
+    public Map<String, ContractInfo> contracts = new HashMap<>();
+    public Map<String, Map<String, String>> attributeSets = new HashMap<>(); //TODO: add language, in case user changes language during operation - see Weiwu's comment further down
+    public Map<String, TSAction> actions = new HashMap<>();
+    private Map<String, String> names = new HashMap<>(); // store plural etc for token name
+
+    public String nameSpace;
+    public TokenscriptContext context;
+    public String holdingToken;
+
+    public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2019/05";
+    public static final String TOKENSCRIPT_REPO_SERVER = "https://repo.tokenscript.org/";
 
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";
+    private static final String TOKENSCRIPT = "http://tokenscript.org/" + TOKENSCRIPT_CURRENT_SCHEMA + "/tokenscript";
+    private static final String TOKENSCRIPTBASE = "http://tokenscript.org/";
 
     /* the following are incorrect, waiting to be further improved
      with suitable XML, because none of these String typed class variables
@@ -49,11 +64,50 @@ public class TokenDefinition {
      - each XML file can be signed mulitple times, with multiple
        <KeyName>.
     */
-    protected String marketQueueAPI = null;
-    protected String feemasterAPI = null;
-    protected String tokenName = null;
     protected String keyName = null;
-    protected int networkId = 1; //default to main net unless otherwise specified
+
+    public List<FunctionDefinition> getFunctionData()
+    {
+        List<FunctionDefinition> defs = new ArrayList<>();
+        for (AttributeType attr : attributeTypes.values())
+        {
+            if (attr.function != null)
+            {
+                defs.add(attr.function);
+            }
+        }
+
+        return defs;
+    }
+
+    public FunctionDefinition parseFunction(Element resolve, Syntax syntax)
+    {
+        FunctionDefinition function = new FunctionDefinition();
+        //this value is obtained from a contract call
+        String contract = resolve.getAttribute("contract");
+        function.contract = contracts.get(contract);
+        function.method = resolve.getAttribute("function");
+        addFunctionInputs(function, resolve);
+        function.syntax = syntax;
+        return function;
+    }
+
+    public As parseAs(Element resolve)
+    {
+        switch(resolve.getAttribute("as").toLowerCase()) {
+            case "signed":
+                return TokenDefinition.As.Signed;
+            case "utf8":
+            case "": //no type specified, return string
+                return TokenDefinition.As.UTF8;
+            case "bool":
+                return TokenDefinition.As.Boolean;
+            case "mapping":
+                return TokenDefinition.As.Mapping;
+            default: // "unsigned"
+                return TokenDefinition.As.Unsigned;
+        }
+    }
 
     public enum Syntax {
         DirectoryString, IA5String, Integer, GeneralizedTime,
@@ -61,215 +115,13 @@ public class TokenDefinition {
     }
 
     public enum As {  // always assume big endian
-        UTF8, Unsigned, Signed, Mapping
-    }
-
-    protected class AttributeType {
-        public BigInteger bitmask;    // TODO: BigInteger !== BitInt. Test edge conditions.
-        public String name;  // TODO: should be polyglot because user change change language in the run
-        public String id;
-        public int bitshift = 0;
-        public Syntax syntax;
-        public As as;
-        public Map<BigInteger, String> members;
-        public String function = null;
-
-        public AttributeType(Element attr) {
-            name = getLocalisedString(attr,"name");
-            if (name == null) return;
-            id = attr.getAttribute("id");
-            try {
-                switch (attr.getAttribute("syntax")) { // We don't validate syntax here; schema does it.
-                    case "1.3.6.1.4.1.1466.115.121.1.6":
-                        syntax = Syntax.BitString;
-                        break;
-                    case "1.3.6.1.4.1.1466.115.121.1.7":
-                        syntax = Syntax.Boolean;
-                        break;
-                    case "1.3.6.1.4.1.1466.115.121.1.11":
-                        syntax = Syntax.CountryString;
-                        break;
-                    case "1.3.6.1.4.1.1466.115.121.1.28":
-                        syntax = Syntax.JPEG;
-                        break;
-                    case "1.3.6.1.4.1.1466.115.121.1.36":
-                        syntax = Syntax.NumericString;
-                        break;
-                    case "1.3.6.1.4.1.1466.115.121.1.24":
-                        syntax = Syntax.GeneralizedTime;
-                        break;
-                    case "1.3.6.1.4.1.1466.115.121.1.26":
-                        syntax = Syntax.IA5String;
-                        break;
-                    case "1.3.6.1.4.1.1466.115.121.1.27":
-                        syntax = Syntax.Integer;
-                        break;
-                    default: // unknown syntax treat as Directory String
-                        syntax = Syntax.DirectoryString;
-                }
-            } catch (NullPointerException e) { // missing <syntax>
-                syntax = Syntax.DirectoryString; // 1.3.6.1.4.1.1466.115.121.1.15
-            }
-            bitmask = null;
-            for(Node node=attr.getFirstChild();
-                node!=null; node=node.getNextSibling()){
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    Element origin = (Element) node;
-                    String label = node.getLocalName();
-                    switch (label)
-                    {
-                        case "features":
-                            //look for function
-                            break;
-                        case "contracts":
-                            //System.out.println(node.getAttributes().toString());
-                            break;
-                        case "appearance":
-
-                            break;
-                    }
-                    switch(origin.getAttribute("contract").toLowerCase()) {
-                        case "holding-contract":
-                            as = As.Mapping;
-                            // TODO: Syntax is not checked
-                            //getFunctions(origin);
-                            break;
-                        default:
-                            break;
-                    }
-                    switch(origin.getAttribute("as").toLowerCase()) {
-                        case "signed":
-                            as = As.Signed;
-                            break;
-                        case "utf8":
-                            as = As.UTF8;
-                            break;
-                        case "mapping":
-                            as = As.Mapping;
-                            // TODO: Syntax is not checked
-                            members = new ConcurrentHashMap<>();
-                            populate(origin);
-                            break;
-                        default: // "unsigned"
-                            as = As.Unsigned;
-                    }
-                    if (origin.hasAttribute("bitmask")) {
-                        bitmask = new BigInteger(origin.getAttribute("bitmask"), 16);
-                    }
-                }
-            }
-            if (bitmask != null ) {
-                while (bitmask.mod(BigInteger.ONE.shiftLeft(++bitshift)).equals(BigInteger.ZERO)) ; // !!
-                bitshift--;
-            }
-            // System.out.println("New FieldDefinition :" + name);
-        }
-
-        private void populate(Element mapping) {
-            Element option;
-            NodeList nList = mapping.getElementsByTagNameNS(ATTESTATION, "option");
-            for (int i = 0; i < nList.getLength(); i++) {
-                option = (Element) nList.item(i);
-                members.put(new BigInteger(option.getAttribute("key")), getLocalisedString(option, "value"));
-            }
-        }
-
-        /**
-         * Converts bitshifted/masked token numeric data into corresponding string.
-         * eg. Attr is 'venue'; choices are "1" -> "Kaliningrad Stadium", "2" -> "Volgograd Arena" etc.
-         * NB 'time' is Unix EPOCH, which is also a mapping.
-         * Since the value may not have a corresponding mapping, but is a valid time we should still return the time value
-         * and interpret it as a local time
-         *
-         * Also - some NF tokens which share a contract with others (eg World Cup, Meetup invites) will have mappings
-         * which intentionally have zero value - eg 'Match' has no lookup value for a meeting. Returning null is a guide for the
-         * token layout not to show the value.
-         *
-         * This will become less relevant once the IFrame system is in place - each token appearance will be defined explicitly.
-         * However it may be necessary for a default display of token attributes for ease of use while potential
-         * users become acquainted with the system.
-         *
-         * @param data
-         * @return
-         * @throws UnsupportedEncodingException
-         */
-        public String toString(BigInteger data) throws UnsupportedEncodingException
-        {
-            // TODO: in all cases other than UTF8, syntax should be checked
-            switch (as)
-            {
-                case UTF8:
-                    return new String(data.toByteArray(), "UTF8");
-
-                case Unsigned:
-                    return data.toString();
-
-                case Mapping:
-                    // members might be null, but it is better to throw up ( NullPointerException )
-                    // than silently ignore
-                    // JB: Existing contracts and tokens throw this error. The wallet 'crashes' each time existing tokens are opened
-                    // due to assumptions made with extra tickets (ie null member is assumed to return null and not display that element).
-                    if (members.containsKey(data))
-                    {
-                        return members.get(data);
-                    }
-                    else if (syntax == Syntax.GeneralizedTime)
-                    {
-                        //This is a time entry but without a localised mapped entry. Return the EPOCH time.
-                        return data.toString(10);
-                    }
-                    else
-                    {
-                        return null; // have to revert to this behaviour due to values being zero when tokens are created
-                        //refer to 'AlphaWallet meetup tickets' where 'Match' mapping is null but for FIFA is not.
-                        //throw new NullPointerException("Key " + data.toString() + " can't be mapped.");
-                    }
-                default:
-                    throw new NullPointerException("Missing valid 'as' attribute");
-            }
-        }
-    }
-
-    private FunctionDefinition getFunction(Node mapping) {
-        Element option;
-        FunctionDefinition fd = new FunctionDefinition();
-        if (mapping.getAttributes().getLength() > 0)
-        {
-            Node attr = mapping.getAttributes().getNamedItem("name");
-            if (attr != null)
-            {
-                fd.method = attr.getTextContent();
-                fd.syntax = Syntax.Integer;
-            }
-        }
-
-        for(Node child=mapping.getFirstChild(); child!=null; child=child.getNextSibling())
-        {
-            if (child.getNodeType() == Node.ELEMENT_NODE)
-            {
-                option = (Element) child;
-                String type = child.getLocalName();
-                String functionName = option.getAttribute("name");
-                //TODO: Get child elements; inputs and input param keys
-
-                switch (type)
-                {
-                    case "inputs":
-                        //TODO Read inputs from child node
-                        //String inputSpec = getChildElement(child, );
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        return fd;
+        UTF8, Unsigned, Signed, Mapping, Boolean, UnsignedInput
     }
 
     /* for many occurance of the same tag, return the text content of the one in user's current language */
     // FIXME: this function will break if there are nested <tagName> in the nameContainer
-    String getLocalisedString(Element nameContainer, String tagName) {
-        NodeList nList = nameContainer.getElementsByTagNameNS(ATTESTATION, tagName);
+    public String getLocalisedString(Element nameContainer, String tagName) {
+        NodeList nList = nameContainer.getElementsByTagNameNS(nameSpace, tagName);
         Element name;
         for (int i = 0; i < nList.getLength(); i++) {
             name = (Element) nList.item(i);
@@ -283,6 +135,66 @@ public class TokenDefinition {
         // TODO: catch the indice out of bound exception and throw it again suggesting dev to check schema
         if (name != null) return name.getTextContent();
         else return null;
+    }
+
+    Node getLocalisedNode(Element nameContainer, String tagName) {
+        NodeList nList = nameContainer.getElementsByTagNameNS(nameSpace, tagName);
+        if (nList.getLength() == 0) nList = nameContainer.getElementsByTagName(tagName);
+        Element name;
+        Element nonLocalised = null;
+        for (int i = 0; i < nList.getLength(); i++) {
+            name = (Element) nList.item(i);
+            String langAttr = getLocalisationLang(name);
+            if (langAttr.equals(locale.getLanguage())) {
+                return name;
+            }
+            else if (langAttr.length() == 0)
+            {
+                nonLocalised = name;
+            }
+        }
+
+        return nonLocalised;
+    }
+
+    String getLocalisedString(Element container) {
+        NodeList nList = container.getChildNodes();
+
+        String nonLocalised = null;
+        for (int i = 0; i < nList.getLength(); i++) {
+            Node n = nList.item(i);
+            if (n.getNodeType() == ELEMENT_NODE)
+            {
+                String langAttr = getLocalisationLang((Element)n);
+                if (langAttr.equals(locale.getLanguage()))
+                {
+                    return n.getTextContent();
+                }
+                else if (langAttr.equals(""))
+                {
+                    nonLocalised = n.getTextContent();
+                }
+            }
+        }
+
+        return nonLocalised;
+    }
+
+    private boolean hasAttribute(Element name, String typeAttr)
+    {
+        if (name.hasAttributes())
+        {
+            for (int i = 0; i < name.getAttributes().getLength(); i++)
+            {
+                Node thisAttr = name.getAttributes().item(i);
+                if (thisAttr.getTextContent() != null && thisAttr.getTextContent().equals(typeAttr))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private String getLocalisationLang(Element name)
@@ -315,7 +227,7 @@ public class TokenDefinition {
             {
                 case Node.TEXT_NODE:
                     break;
-                case Node.ELEMENT_NODE:
+                case ELEMENT_NODE:
                     fallback = node;
                     if (node.getLocalName().equals(tagName))
                     {
@@ -354,16 +266,20 @@ public class TokenDefinition {
         }
     }
 
-    public TokenDefinition(InputStream xmlAsset, Locale locale) throws IOException, SAXException{
+    public TokenDefinition(InputStream xmlAsset, Locale locale, ParseResult result) throws IOException, SAXException {
         this.locale = locale;
         /* guard input from bad programs which creates Locale not following ISO 639 */
         if (locale.getLanguage().length() < 2 || locale.getLanguage().length() > 3) {
             throw new SAXException("Locale object wasn't created following ISO 639");
         }
+
         DocumentBuilder dBuilder;
+
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             dbFactory.setNamespaceAware(true);
+            dbFactory.setExpandEntityReferences(true);
+            dbFactory.setCoalescing(true);
             dBuilder = dbFactory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
             // TODO: if schema has problems (e.g. defined twice). Now, no schema, no exception.
@@ -371,60 +287,270 @@ public class TokenDefinition {
             return;
         }
         Document xml = dBuilder.parse(xmlAsset);
-        xml.getDocumentElement().normalize(); // good for parcel, bad for signature verification. JB likes it that way. -weiwu
-        NodeList nList;
-        nList = xml.getElementsByTagNameNS(ATTESTATION, "token");
+        xml.getDocumentElement().normalize();
+        determineNamespace(xml, result);
 
-        if (nList.getLength() == 0)
+        NodeList nList = xml.getElementsByTagNameNS(nameSpace, "token");
+
+        if (nList.getLength() == 0 || !nameSpace.equals(TOKENSCRIPT))
         {
             System.out.println("Legacy XML format - no longer supported");
             return;
         }
 
-        //TODO: Needs to be namespace aware
-        CrawlAttrs(nList);
-
-        extractFeatureTag(xml);
-        extractContractTag(xml);
-        extractSignedInfo(xml);
-
-        //TODO: 'appearance' in XML needs to have an HTML attribute
-        extractTags(xml, "appearance", true);
-        extractTags(xml, "features", false);
+        try
+        {
+            parseTags(xml);
+            extractSignedInfo(xml);
+        }
+        catch (IOException|SAXException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace(); //catch other type of exception not thrown by this function.
+            result.parseMessage(ParseResult.ParseResultId.PARSE_FAILED);
+        }
     }
 
-    private void CrawlAttrs(NodeList nList)
+    private void extractTags(Element token) throws Exception
     {
-        //Node impl = nList.item(i);
-        //NodeList cNodes = impl.getChildNodes();
-        for (int j = 0; j < nList.getLength(); j++)
+        //trawl through the child nodes, interpret each in turn
+        for (Node n = token.getFirstChild(); n != null; n = n.getNextSibling())
         {
-            Node n = nList.item(j);
-            if (n.getPrefix() != null)
+            if (n.getNodeType() == ELEMENT_NODE)
             {
-                processAttrs(n);
+                Element element = (Element)n;
+                switch (element.getLocalName())
+                {
+                    case "origins":
+                        parseOrigins(element);
+                        break;
+                    case "contract":
+                        handleAddresses(element);
+                        break;
+                    case "name":
+                        extractNameTag(element);
+                        break;
+                    case "attribute-types":
+                        handleGlobalAttributes(element);
+                        break;
+                    case "cards":
+                        handleCards(element);
+                        break;
+                    default:
+                        break;
+                }
             }
+        }
+    }
 
-            if (n.hasChildNodes())
+    private void handleCards(Element cards) throws Exception
+    {
+        for(Node node=cards.getFirstChild(); node!=null; node=node.getNextSibling())
+        {
+            if (node.getNodeType() == ELEMENT_NODE)
             {
-                CrawlAttrs(n.getChildNodes());
+                Element card = (Element) node;
+                switch (card.getLocalName())
+                {
+                    case "token-card":
+                        processTokenCardElements(card);
+                        break;
+                    case "action":
+                        extractActions(card);
+                        break;
+                }
             }
+        }
+    }
+
+    private void processTokenCardElements(Element card)
+    {
+        Map<String, Map<String, String>> attributeSet = new HashMap<>();
+        for(Node node=card.getFirstChild(); node!=null; node=node.getNextSibling())
+        {
+            if (node.getNodeType() == ELEMENT_NODE)
+            {
+                String htmlContent = getHTMLContent(node);
+                if (!attributeSet.containsKey(node.getLocalName())) attributeSet.put(node.getLocalName(), new HashMap<>());
+                attributeSet.get(node.getLocalName()).put(getLocalisationLang((Element)node), htmlContent);
+            }
+        }
+
+        if (attributeSet.size() > 0)
+        {
+            //create localised attribute set
+            Map<String, String> localisedAttributes = new HashMap<>();
+            for (String attr : attributeSet.keySet())
+            {
+                Map<String, String> attrEntry = attributeSet.get(attr);
+                localisedAttributes.put(attr, getLocalisedEntry(attrEntry));
+            }
+            attributeSets.put("cards", localisedAttributes);
+        }
+    }
+
+    private String getLocalisedEntry(Map<String, String> attrEntry)
+    {
+        //Picking order
+        //1. actual locale
+        //2. entry with no locale
+        //3. first non-localised locale
+        String bestGuess = null;
+        for (String lang: attrEntry.keySet())
+        {
+            if (lang.equals(locale.getLanguage())) return attrEntry.get(lang);
+            if (lang.equals("")) bestGuess = attrEntry.get(lang);
+        }
+
+        if (bestGuess == null) bestGuess = attrEntry.values().iterator().next(); //first non-localised locale
+
+        return bestGuess;
+    }
+
+    private void determineNamespace(Document xml, ParseResult result)
+    {
+        nameSpace = ATTESTATION;
+
+        NodeList check = xml.getChildNodes();
+        for (int i = 0; i < check.getLength(); i++)
+        {
+            Node n = check.item(i);
+            if (!n.hasAttributes()) continue;
+            //check attributes
+            for (int j = 0; j < n.getAttributes().getLength(); j++)
+            {
+                Node thisAttr = n.getAttributes().item(j);
+                if (thisAttr.getNodeValue().contains(TOKENSCRIPTBASE))
+                {
+                    nameSpace = TOKENSCRIPT;
+                    if (result != null && !thisAttr.getNodeValue().equals(TOKENSCRIPT))
+                    {
+                        result.parseMessage(ParseResult.ParseResultId.OK);
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
+    private void extractActions(Element action) throws Exception
+    {
+        String name = null;
+        NodeList ll = action.getChildNodes();
+        TSAction tsAction = new TSAction();
+        tsAction.type = action.getAttribute("type");
+        tsAction.exclude = "";
+        tsAction.style = null;
+        for (int j = 0; j < ll.getLength(); j++)
+        {
+            Node node = ll.item(j);
+            if (node.getNodeType() != ELEMENT_NODE)
+                continue;
+            Element element = (Element) node;
+            switch (node.getLocalName())
+            {
+                case "name":
+                    name = getLocalisedString(element);
+                    break;
+                case "attribute-type":
+                    AttributeType attr = new AttributeType(element, this);
+                    if (tsAction.attributeTypes == null)
+                        tsAction.attributeTypes = new HashMap<>();
+                    tsAction.attributeTypes.put(attr.id, attr);
+                    break;
+                case "transaction":
+                    handleTransaction(tsAction, element);
+                    break;
+                case "exclude":
+                    tsAction.exclude = element.getAttribute("selection");
+                    break;
+                case "view": //localised?
+                    tsAction.view = getHTMLContent(element);
+                    break;
+                case "style":
+                    tsAction.style = getHTMLContent(element);
+                    break;
+                case "input": //required for action only scripts
+                    handleInput(element);
+                    holdingToken = contracts.keySet().iterator().next(); //first key value
+                    break;
+                default:
+                    System.out.println("Unknown tag while processing Action: " + node.getLocalName());
+                    break;
+            }
+        }
+
+        actions.put(name, tsAction);
+    }
+
+    private Element getFirstChildElement(Element e)
+    {
+        for(Node n=e.getFirstChild(); n!=null; n=n.getNextSibling())
+        {
+            if (n.getNodeType() == ELEMENT_NODE) return (Element)n;
+        }
+
+        return null;
+    }
+
+    private void handleInput(Element element) throws Exception
+    {
+        ContractInfo ci = new ContractInfo();
+
+        for(Node n=element.getFirstChild(); n!=null; n=n.getNextSibling())
+        {
+            if (n.getNodeType() != ELEMENT_NODE) continue;
+            Element tokenType = (Element)n;
+            String name = tokenType.getAttribute("name");
+            switch (tokenType.getLocalName())
+            {
+                case "token":
+                    Element tokenSpec = getFirstChildElement(tokenType);
+                    if (tokenSpec != null)
+                    {
+                        ci.contractInterface = tokenSpec.getLocalName();
+                        switch (tokenSpec.getLocalName())
+                        {
+                            case "ethereum":
+                                String chainIdStr = tokenSpec.getAttribute("network");
+                                int chainId = Integer.parseInt(chainIdStr);
+                                ci.addresses.put(chainId, new ArrayList<>(Arrays.asList(ci.contractInterface)));
+                                contracts.put(name, ci);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void handleTransaction(TSAction tsAction, Element element)
+    {
+        Element tx = getFirstChildElement(element);
+        switch (tx.getLocalName())
+        {
+            case "ethereum":
+                tsAction.function = parseFunction(tx, Syntax.IA5String);
+                tsAction.function.as = parseAs(tx);
+                break;
+            default:
+                break;
         }
     }
 
     private void processAttrs(Node n)
     {
-        AttributeType attr = new AttributeType((Element) n);
-        if (attr.bitmask != null)
-        {// has <origin> which is from bitmask
-            attributeTypes.put(attr.id, attr);
-        } // TODO: take care of attributeTypes whose value does not originate from bitmask!
-        else if (attr.function != null)
+        AttributeType attr = new AttributeType((Element) n, this);
+        if (attr.bitmask != null || attr.function != null)
         {
-            FunctionDefinition fd = new FunctionDefinition();
-            fd.method = attr.function;
-            fd.syntax = attr.syntax;
-            functions.put(attr.id, fd);
+            attributeTypes.put(attr.id, attr);
         }
     }
 
@@ -441,16 +567,29 @@ public class TokenDefinition {
         return this.keyName;
     }
 
-    public String getFeemasterAPI()
+    public String getTokenName(int count)
     {
-        return feemasterAPI;
-    }
+        String value = null;
+        switch (count)
+        {
+            case 1:
+                if (names.containsKey("one")) value = names.get("one");
+                else value = names.get("");
+                break;
+            case 2:
+                value = names.get("two");
+                if (value != null) break; //drop through to 'other' if null.
+            default:
+                value = names.get("other");
+                break;
+        }
 
-    public String getTokenName() { return tokenName; }
+        if (value == null && names.values().size() > 0)
+        {
+            value = names.values().iterator().next();
+        }
 
-    public int getNetworkFromContract(String contractAddress)
-    {
-        return (addresses.get(contractAddress) == null ? -1 : addresses.get(contractAddress));
+        return value;
     }
 
     public Map<BigInteger, String> getMappingMembersByKey(String key){
@@ -472,22 +611,80 @@ public class TokenDefinition {
         return null;
     }
 
-    private void extractFeatureTag(Document xml)
+    private void parseTags(Document xml) throws Exception
     {
-        NodeList l;
-        NodeList nList = xml.getElementsByTagNameNS(ATTESTATION, "feature");
-        for (int i = 0; i < nList.getLength(); i++) {
-            Element feature = (Element) nList.item(i);
-            switch (feature.getAttribute("type")) {
-                case "feemaster":
-                    l = feature.getElementsByTagNameNS(ATTESTATION, "feemaster");
-                    for (int j = 0; j < l.getLength(); j++)
-                        feemasterAPI = l.item(j).getTextContent();
+        for (Node n = xml.getFirstChild(); n != null; n = n.getNextSibling())
+        {
+            if (n.getNodeType() != ELEMENT_NODE) continue;
+            switch (n.getLocalName())
+            {
+                case "action": //action only script
+                    extractActions((Element)n);
                     break;
-                case "market-queue":
-                    l = feature.getElementsByTagNameNS(ATTESTATION, "gateway");
-                    for (int j = 0; j < l.getLength(); j++)
-                        marketQueueAPI = l.item(j).getTextContent();
+                default:
+                    extractTags((Element)n);
+                    break;
+            }
+        }
+    }
+
+    private void handleGlobalAttributes(Element attributes)
+    {
+        for (Node n = attributes.getFirstChild(); n != null; n = n.getNextSibling())
+        {
+            if (n.getNodeType() == ELEMENT_NODE && n.getLocalName().equals("attribute-type"))
+            {
+                processAttrs(n);
+            }
+        }
+    }
+
+    private void extractNameTag(Element nameTag)
+    {
+        //deal with plurals
+        Node nameNode = getLocalisedNode(nameTag, "plurals");
+        if (nameNode != null)
+        {
+            for (int i = 0; i < nameNode.getChildNodes().getLength(); i++)
+            {
+                Node node = nameNode.getChildNodes().item(i);
+                handleNameNode(node);
+            }
+        }
+        else //no plural
+        {
+            nameNode = getLocalisedNode(nameTag, "string");
+            handleNameNode(nameNode);
+        }
+    }
+
+    private void handleNameNode(Node node)
+    {
+        if (node != null && node.getNodeType() == ELEMENT_NODE && node.getLocalName().equals("string"))
+        {
+            Element element = (Element) node;
+            String quantity = element.getAttribute("quantity");
+            String name = element.getTextContent();
+            if (quantity != null && name != null)
+            {
+                names.put(quantity, name);
+            }
+        }
+    }
+
+    private void parseOrigins(Element origins)
+    {
+        for (Node n = origins.getFirstChild(); n != null; n = n.getNextSibling())
+        {
+            if (n.getNodeType() != ELEMENT_NODE)
+                continue;
+
+            Element element = (Element) n;
+
+            switch (element.getLocalName())
+            {
+                case "ethereum":
+                    holdingToken = element.getAttribute("contract");
                     break;
                 default:
                     break;
@@ -495,86 +692,34 @@ public class TokenDefinition {
         }
     }
 
-    private void extractContractTag(Document xml)
+    private void handleAddresses(Element contract)
     {
-        String nameDefault = null;
-        String nameEnglish = null;
-        NodeList nList = xml.getElementsByTagNameNS(ATTESTATION, "contract");
-        /* we allow multiple contracts, e.g. for issuing asset and for
-         * proxy usage. but for now we only deal with the first */
-        Element contract = (Element) nList.item(0);
+        NodeList nList = contract.getElementsByTagNameNS(nameSpace, "address");
+        ContractInfo info = new ContractInfo();
+        String name = contract.getAttribute("name");
+        info.contractInterface = contract.getAttribute("interface");
+        contracts.put(name, info);
 
-        /* if there is no token name in <contract> this breaks;
-         * token name shouldn't be in <contract> anyway, re-design pending */
-        tokenName = getLocalisedString(contract, "name");
-
-        /*if hit NullPointerException in the next statement, then XML file
-         * must be missing <contract> elements */
-        /* TODO: select the contract of type "holding_contract" */
-        nList = contract.getElementsByTagNameNS(ATTESTATION, "address");
         for (int addrIndex = 0; addrIndex < nList.getLength(); addrIndex++)
         {
             Node node = nList.item(addrIndex);
-            if (node.getNodeType() == Node.ELEMENT_NODE)
+            if (node.getNodeType() == ELEMENT_NODE)
             {
-                int network = networkId;
-                if (node.hasAttributes() && node.getAttributes().item(0).getLocalName().equals("network"))
+                Element addressElement = (Element) node;
+                String networkStr = addressElement.getAttribute("network");
+                int network = 1;
+                if (networkStr != null) network = Integer.parseInt(networkStr);
+                String address = addressElement.getTextContent().toLowerCase();
+                List<String> addresses = info.addresses.get(network);
+                if (addresses == null)
                 {
-                    String networkStr = node.getAttributes().item(0).getNodeValue();
-                    network = Integer.parseInt(networkStr);
+                    addresses = new ArrayList<>();
+                    info.addresses.put(network, addresses);
                 }
 
-                for (int i = 0; i < node.getChildNodes().getLength(); i++)
+                if (!addresses.contains(address))
                 {
-                    Node address = node.getChildNodes().item(i);
-                    if (address.getNodeType() == Node.TEXT_NODE)
-                    {
-                        addresses.put(address.getTextContent().toLowerCase(), network);
-                    }
-                }
-            }
-        }
-    }
-
-    private void extractTags(Document xml, String localName, boolean isHTML)
-    {
-        NodeList nList = xml.getElementsByTagNameNS(ATTESTATION, localName);
-        Element element = (Element) nList.item(0);
-
-        if (element != null)
-        {
-            Map<String, String> attributeSet = new ConcurrentHashMap<>();
-            attributeSets.put(localName, attributeSet);
-
-            //go through each child in this element looking for tags
-            for (int i = 0; i < element.getChildNodes().getLength(); i++)
-            {
-                Node node = element.getChildNodes().item(i);
-                switch (node.getNodeType())
-                {
-                    case Node.ATTRIBUTE_NODE:
-                        //System.out.println(node.getAttributes().toString());
-                        break;
-                    case Node.ELEMENT_NODE:
-                        String nodeName = node.getLocalName();
-                        if (attributeSet.containsKey(nodeName))
-                            continue;
-                        Node content = getLocalisedContent(element, nodeName);
-                        if (content != null)
-                        {
-                            String contentString;
-                            if (isHTML)
-                            {
-                                contentString = getHTMLContent(content);
-                                attributeSet.put(nodeName, contentString);
-                            }
-                            else
-                                getContent(content);
-                        }
-                        break;
-                    case Node.TEXT_NODE:
-                        //System.out.println(node.getTextContent());
-                        break;
+                    addresses.add(address);
                 }
             }
         }
@@ -583,16 +728,13 @@ public class TokenDefinition {
     private String getHTMLContent(Node content)
     {
         StringBuilder sb = new StringBuilder();
+
         for (int i = 0; i < content.getChildNodes().getLength(); i++)
         {
             Node child = content.getChildNodes().item(i);
             switch (child.getNodeType())
             {
-                case Node.TEXT_NODE:
-                    String parsed = child.getTextContent().replace("\u2019", "&#x2019;");
-                    sb.append(parsed);
-                    break;
-                case Node.ELEMENT_NODE:
+                case ELEMENT_NODE:
                     if (child.getLocalName().equals("iframe")) continue;
                     sb.append("<");
                     sb.append(child.getLocalName());
@@ -603,59 +745,26 @@ public class TokenDefinition {
                     sb.append(child.getLocalName());
                     sb.append(">");
                     break;
-                case Node.COMMENT_NODE:
+                case Node.COMMENT_NODE: //no need to record comment nodes
+                    break;
+                case Node.ENTITY_REFERENCE_NODE:
+                    //load in external content
+                    String entityRef = child.getTextContent();
+                    EntityReference ref = (EntityReference) child;
+
+                    System.out.println(entityRef);
                     break;
                 default:
+                    if (child != null && child.getTextContent() != null)
+                    {
+                        String parsed = child.getTextContent().replace("\u2019", "&#x2019;");
+                        sb.append(parsed);
+                    }
                     break;
             }
         }
 
         return sb.toString();
-    }
-
-    private void getContent(Node content)
-    {
-        switch (content.getLocalName())
-        {
-            case "action":
-                handleFunction(content);
-                break;
-            case "contract":
-                //handleContract
-                break;
-        }
-    }
-
-    private void handleFunction(Node content)
-    {
-        String functionName = "";
-        for (int i = 0; i < content.getChildNodes().getLength(); i++)
-        {
-            Node child = content.getChildNodes().item(i);
-            switch (child.getNodeType())
-            {
-                case Node.TEXT_NODE:
-                    break;
-                case Node.ELEMENT_NODE:
-                    switch (child.getLocalName())
-                    {
-                        case "name":
-                            functionName = getHTMLContent(child);
-                            break;
-                        case "function":
-                            FunctionDefinition fd = getFunction(child);
-                            if (fd != null)
-                            {
-                                functions.put(functionName, fd);
-                            }
-                        default:
-                            break;
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
     }
 
     private String htmlAttributes(Node attribute)
@@ -677,20 +786,111 @@ public class TokenDefinition {
         return sb.toString();
     }
 
-    /* take a token ID in byte-32, find all the fields in it and call back
-     * token.setField(fieldID, fieldName, text-value). This is abandoned
-     * temporarily for the need to retrofit the class with J.B.'s design */
+    public void parseField(BigInteger tokenId, NonFungibleToken token, Map<String, FunctionDefinition> functionMappings) {
+        for (String key : attributeTypes.keySet()) {
+            AttributeType attrtype = attributeTypes.get(key);
+            BigInteger val = BigInteger.ZERO;
+            try
+            {
+                if (attrtype.function != null && functionMappings != null)
+                {
+                    //obtain this value from the token function mappings
+                    FunctionDefinition functionDef = functionMappings.get(attrtype.function.method);
+                    String result = functionDef.result;
+                    System.out.println("Result: " + result);
+                    if (attrtype.syntax == Syntax.NumericString)
+                    {
+                        if (result.startsWith("0x")) result = result.substring(2);
+                        val = new BigInteger(result, 16);
+                    }
+                    token.setAttribute(attrtype.id,
+                                       new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, result));
+                }
+                else
+                {
+                    val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
+                    token.setAttribute(attrtype.id,
+                                       new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, attrtype.toString(val)));
+                }
+            }
+            catch (Exception e)
+            {
+                token.setAttribute(attrtype.id,
+                                   new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, "unsupported encoding"));
+            }
+        }
+    }
+
+    private void addFunctionInputs(FunctionDefinition fd, Element eth)
+    {
+        for(Node n=eth.getFirstChild(); n!=null; n=n.getNextSibling())
+        {
+            if (n.getNodeType() != ELEMENT_NODE) continue;
+            Element input = (Element)n;
+            switch (input.getLocalName())
+            {
+                case "data":
+                    processDataInputs(fd, input);
+                    break;
+                case "to":
+                case "value":
+                    if (fd.tx == null) fd.tx = new EthereumTransaction();
+                    fd.tx.args.put(input.getLocalName(), parseTxTag(input));
+                    break;
+                default:
+                    //future elements
+                    break;
+            }
+        }
+    }
+
+    private TokenscriptElement parseTxTag(Element input)
+    {
+        TokenscriptElement tse = new TokenscriptElement();
+        tse.ref = input.getAttribute("ref");
+        tse.value = input.getTextContent();
+
+        return tse;
+    }
+
+    private void processDataInputs(FunctionDefinition fd, Element input)
+    {
+        for(Node n=input.getFirstChild(); n!=null; n=n.getNextSibling())
+        {
+            if (n.getNodeType() != ELEMENT_NODE)
+                continue;
+
+            Element inputElement = (Element) n;
+            MethodArg arg = new MethodArg();
+            arg.parameterType = inputElement.getLocalName();
+            arg.element = parseTxTag(inputElement);
+            fd.parameters.add(arg);
+        }
+    }
 
     public void parseField(BigInteger tokenId, NonFungibleToken token) {
         for (String key : attributeTypes.keySet()) {
             AttributeType attrtype = attributeTypes.get(key);
-            BigInteger val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
-            try {
+            BigInteger val = BigInteger.ZERO;
+            try
+            {
+                if (attrtype.function != null)
+                {
+                    //obtain this from the function return, can't get it here
+                    token.setAttribute(attrtype.id,
+                                       new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, "unsupported encoding"));
+                }
+                else
+                {
+                    val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
+                    token.setAttribute(attrtype.id,
+                                       new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, attrtype.toString(val)));
+                }
+            }
+            catch (UnsupportedEncodingException e)
+            {
                 token.setAttribute(attrtype.id,
-                        new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, attrtype.toString(val)));
-            } catch (UnsupportedEncodingException e) {
-                token.setAttribute(attrtype.id,
-                        new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, "unsupported encoding"));
+                                   new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, "unsupported encoding"));
             }
         }
     }
@@ -711,5 +911,113 @@ public class TokenDefinition {
         {
             return "";
         }
+    }
+
+    /**
+     * Check for 'cards' attribute set
+     * @param tag
+     * @return
+     */
+    public String getCardData(String tag)
+    {
+        Map<String, String> appearanceSet = attributeSets.get("cards");
+        if (appearanceSet != null)
+        {
+            return appearanceSet.get(tag);
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    public Map<String, TSAction> getActions()
+    {
+        return actions;
+    }
+
+
+    //Generic methods for resolving attributes
+    //need a method to simply 'fetch' an attribute
+//    public Single<TokenScriptResult.Attribute> getAttribute(String attribute, BigInteger tokenId, ContractAddress cAddr, AttributeInterface attrIf)
+//    {
+//
+//    }
+
+
+    public Observable<TokenScriptResult.Attribute> fetchAttrResult(String attribute, BigInteger tokenId, ContractAddress cAddr, AttributeInterface attrIf)
+    {
+        AttributeType attr = attributeTypes.get(attribute);
+        if (attr == null) return Observable.fromCallable(() -> null);
+        if (attr.function == null)  // static attribute from tokenId (eg city mapping from tokenId)
+        {
+            return staticAttribute(attr, tokenId);
+        }
+        else
+        {
+            ContractAddress useAddress;
+            if (cAddr == null) useAddress = new ContractAddress(attr.function);
+            else useAddress = new ContractAddress(attr.function, cAddr.chainId, cAddr.address);
+            TransactionResult transactionResult = attrIf.getFunctionResult(useAddress, attr, tokenId);
+            if (attrIf.resolveOptimisedAttr(useAddress, attr, transactionResult) || !transactionResult.needsUpdating()) //can we use wallet's known data or cached value?
+            {
+                return resultFromDatabase(transactionResult, attr);
+            }
+            else  //if value is old or there wasn't any previous value
+            {
+                //for function query, never need wallet address
+                return attr.function.fetchResultFromEthereum(useAddress, attr, tokenId, this)          // Fetch function result from blockchain
+                        .map(result -> restoreFromDBIfRequired(result, transactionResult))  // If network unavailable restore value from cache
+                        .map(attrIf::storeAuxData)                                          // store new data
+                        .map(result -> attr.function.parseFunctionResult(result, attr));    // write returned data into attribute
+            }
+        }
+    }
+
+    public Observable<TokenScriptResult.Attribute> resolveAttributes(BigInteger tokenId, AttributeInterface attrIf, ContractAddress cAddr)
+    {
+        context = new TokenscriptContext();
+        context.cAddr = cAddr;
+        context.attrInterface = attrIf;
+
+        return Observable.fromIterable(new ArrayList<>(attributeTypes.values()))
+                .flatMap(attr -> fetchAttrResult(attr.id, tokenId, cAddr, attrIf));
+    }
+
+    private Observable<TokenScriptResult.Attribute> staticAttribute(AttributeType attr, BigInteger tokenId)
+    {
+        return Observable.fromCallable(() -> {
+            try
+            {
+                BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
+                return new TokenScriptResult.Attribute(attr.id, attr.name, val, attr.getSyntaxVal(attr.toString(val)));
+            }
+            catch (Exception e)
+            {
+                return new TokenScriptResult.Attribute(attr.id, attr.name, tokenId, "unsupported encoding");
+            }
+        });
+    }
+
+    private Observable<TokenScriptResult.Attribute> resultFromDatabase(TransactionResult transactionResult, AttributeType attr)
+    {
+        return Observable.fromCallable(() -> attr.function.parseFunctionResult(transactionResult, attr));
+    }
+
+    /**
+     * Restore result from Database if required (eg connection failure), and if there was a database value to restore
+     * @param result
+     * @param transactionResult
+     * @return
+     */
+    private TransactionResult restoreFromDBIfRequired(TransactionResult result, TransactionResult transactionResult)
+    {
+        if (result.resultTime == 0 && transactionResult != null)
+        {
+            result.result = transactionResult.result;
+            result.resultTime = transactionResult.resultTime;
+        }
+
+        return result;
     }
 }

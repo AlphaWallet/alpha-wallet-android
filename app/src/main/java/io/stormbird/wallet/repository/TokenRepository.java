@@ -1,31 +1,31 @@
 package io.stormbird.wallet.repository;
 
-import android.support.annotation.NonNull;
-import android.text.format.DateUtils;
 import android.util.Log;
-import io.reactivex.*;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.SingleTransformer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.entity.BadContract;
 import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.MagicLinkData;
+import io.stormbird.token.entity.TransactionResult;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TickerService;
 import io.stormbird.wallet.service.TokenExplorerClientType;
+import io.stormbird.wallet.util.AWEnsResolver;
 import okhttp3.OkHttpClient;
 import org.web3j.abi.*;
-import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.ens.EnsResolver;
-import org.web3j.ens.contracts.generated.ENS;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.web3j.protocol.core.methods.response.EthCall;
@@ -41,7 +41,6 @@ import java.util.concurrent.TimeUnit;
 
 import static io.stormbird.wallet.C.BURN_ADDRESS;
 import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
-import static io.stormbird.wallet.repository.EthereumNetworkRepository.POA_ID;
 import static io.stormbird.wallet.util.Utils.isAlNum;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -182,7 +181,6 @@ public class TokenRepository implements TokenRepositoryType {
         return Single.fromCallable(() -> {
             Map<Integer, Token> currencies = localSource.getTokenBalances(wallet, wallet.address);
             //always show eth balance, others optional
-            boolean hasEth = false;
             NetworkInfo[] allNetworks = ethereumNetworkRepository.getAvailableNetworkList();
 
             for (NetworkInfo info : allNetworks)
@@ -327,41 +325,12 @@ public class TokenRepository implements TokenRepositoryType {
                 newToken);
     }
 
-    //TODO: This should be called on a per-token basis. User will usually only have one token, so currently it's ok
     @Override
-    public Single<Token> callTokenFunctions(Token token, AssetDefinitionService service)
+    public String generateTransactionPayload(Token token, BigInteger tokenId, FunctionDefinition def, TokenDefinition td)
     {
-        TokenDefinition definition = service.getAssetDefinition(token.getAddress());
-        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
-
-        if (definition == null || definition.functions.size() == 0 || !token.requiresAuxRefresh()) return Single.fromCallable(() -> token); //quick return
-        else return Single.fromCallable(() -> {
-            token.auxDataRefreshed();
-            //need to call the token functions now
-            for (String keyName : definition.functions.keySet())
-            {
-                FunctionDefinition fd = definition.functions.get(keyName);
-                //currently all function calls from XML have no params
-                String result = null;
-                switch (fd.syntax)
-                {
-                    case Boolean:
-                        result = callBoolFunction(fd.method, token.getAddress(), network);
-                        break;
-                    case IA5String:
-                        if (!token.getTokenID(0).equals(BigInteger.valueOf(-1)))
-                        {
-                            result = callStringFunction(fd.method, token.getAddress(), network, token.getTokenID(0));
-                        }
-                        break;
-                    default:
-                        break;
-                }
-
-                token.addAuxDataResult(keyName, result);
-            }
-            return token;
-        });
+        Function function = def.generateTransactionFunction(token.getWallet(), tokenId, td);// generateTransactionFunction(token, tokenId, def);
+        String encodedFunction = FunctionEncoder.encode(function);
+        return encodedFunction;
     }
 
     private String callStringFunction(String method, String address, NetworkInfo network, BigInteger tokenId)
@@ -407,11 +376,12 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<String> resolveENS(int chainId, String address)
     {
         return Single.fromCallable(() -> {
-            int useChainId = chainId;
-            if (!EthereumNetworkRepository.hasRealValue(useChainId)) useChainId = MAINNET_ID;
-            Web3j service = getService(useChainId); //resolve ENS on mainnet unless this network has value
-            EnsResolver ensResolver = new EnsResolver(service);
-            String resolvedAddress = ensResolver.resolve(address);
+            String resolvedAddress = resolveAddress(chainId, address);
+            if (!WalletUtils.isValidAddress(resolvedAddress))
+            {
+                resolvedAddress = resolveAddress(MAINNET_ID, address); //try main net
+            }
+
             if (WalletUtils.isValidAddress(resolvedAddress))
             {
                 return resolvedAddress;
@@ -421,6 +391,25 @@ public class TokenRepository implements TokenRepositoryType {
                 return BURN_ADDRESS;
             }
         });
+    }
+
+    private String resolveAddress(int chainId, String address)
+    {
+        int useChainId = chainId;
+        if (!EthereumNetworkRepository.hasRealValue(useChainId)) useChainId = MAINNET_ID;
+        Web3j service = getService(useChainId); //resolve ENS on mainnet unless this network has value
+        AWEnsResolver ensResolver = new AWEnsResolver(service);
+        String resolvedAddress = "";
+        try
+        {
+            resolvedAddress = ensResolver.resolve(address);
+        }
+        catch (Exception e)
+        {
+            return "--";
+        }
+
+        return resolvedAddress;
     }
 
     @Override
@@ -563,7 +552,6 @@ public class TokenRepository implements TokenRepositoryType {
                 {
                     Log.d(TAG, "Token balance changed! " + tInfo.name);
                     Token updated = tFactory.createToken(tInfo, balance, balanceArray, System.currentTimeMillis(), interfaceSpec, network.getShortName(), token.lastBlockCheck);
-                    updated.patchAuxData(token); //perform any updates we need here
                     localSource.updateTokenBalance(network, wallet, updated);
                     updated.setTokenWallet(wallet.address);
                     updated.transferPreviousData(token);
@@ -659,21 +647,31 @@ public class TokenRepository implements TokenRepositoryType {
                 .fetchEnabledToken(network, wallet, address);
     }
 
+    private BigDecimal updatePending(Token oldToken, BigDecimal pendingBalance)
+    {
+        if (pendingBalance.equals(BigDecimal.valueOf(-1)))
+        {
+            oldToken.pendingBalance = oldToken.balance;
+        }
+        else
+        {
+            oldToken.pendingBalance = pendingBalance;
+        }
+        return pendingBalance;
+    }
+
     private Single<Token> attachEth(NetworkInfo network, Wallet wallet, Token oldToken) {
-        final boolean pending = !oldToken.balance.equals(BigDecimal.ZERO) && oldToken.balance.equals(oldToken.pendingBalance);
-
-        return getEthBalanceInternal(network, wallet, pending)
+        return getEthBalanceInternal(network, wallet, true)
+                .map(pendingBalance -> updatePending(oldToken, pendingBalance))
+                .flatMap(balance -> getEthBalanceInternal(network, wallet, false))
                 .map(balance -> {
-                    BigDecimal oldBalance = oldToken.balance;
-                    if (balance.equals(BigDecimal.valueOf(-1))) return oldToken;
-
-                    if (pending && !balance.equals(oldToken.pendingBalance))
+                    if (balance.equals(BigDecimal.valueOf(-1)))
                     {
-                        Log.d(TAG, "ETH: " + balance.toPlainString() + " OLD: " + oldBalance.toPlainString());
-                        oldToken.pendingBalance = balance;
+                        oldToken.pendingBalance = oldToken.balance;
                         return oldToken;
                     }
-                    else if (!balance.equals(oldBalance))
+
+                    if (!balance.equals(oldToken.balance))
                     {
                         Log.d(TAG, "Tx Update requested for: " + oldToken.getFullName());
                         TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true,
@@ -686,6 +684,11 @@ public class TokenRepository implements TokenRepositoryType {
                         eth.transferPreviousData(oldToken);
                         eth.pendingBalance = balance;
                         return eth;
+                    }
+                    else if (!balance.equals(oldToken.pendingBalance))
+                    {
+                        Log.d(TAG, "ETH: " + balance.toPlainString() + " OLD: " + oldToken.pendingBalance.toPlainString());
+                        return oldToken;
                     }
                     else
                     {
@@ -739,18 +742,10 @@ public class TokenRepository implements TokenRepositoryType {
     {
         return Single.fromCallable(() -> {
             try {
-                if (pending)
-                {
-                    return new BigDecimal(getService(network.chainId).ethGetBalance(wallet.address, DefaultBlockParameterName.PENDING)
+                DefaultBlockParameterName balanceCheckType = pending ? DefaultBlockParameterName.PENDING : DefaultBlockParameterName.LATEST;
+                return new BigDecimal(getService(network.chainId).ethGetBalance(wallet.address, balanceCheckType)
                                                   .send()
                                                   .getBalance());
-                }
-                else
-                {
-                    return new BigDecimal(getService(network.chainId).ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
-                                                  .send()
-                                                  .getBalance());
-                }
             }
             catch (IOException e)
             {
@@ -880,12 +875,6 @@ public class TokenRepository implements TokenRepositoryType {
             {
                 name = checkBytesString(responseValue);
             }
-            if (assetDefinitionService.getChainId(address) > 0)
-            {
-                //does name already contain the token type
-                String tokenTypeName = assetDefinitionService.getAssetDefinition(address).getTokenName();
-                if (name != null && !name.contains(tokenTypeName)) name = name + " " + tokenTypeName;
-            }
             return name;
         } else {
             return null;
@@ -943,6 +932,12 @@ public class TokenRepository implements TokenRepositoryType {
         return new Function(param,
                             Arrays.asList(new Uint256(value)),
                             Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private static org.web3j.abi.datatypes.Function intParam(String param, BigInteger value) {
+        return new Function(param,
+                            Arrays.asList(new Uint256(value)),
+                            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function intParam(String param) {

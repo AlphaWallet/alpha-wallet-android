@@ -1,6 +1,7 @@
 package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -17,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import dagger.android.AndroidInjection;
+import io.stormbird.token.entity.TSAction;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
@@ -27,6 +29,10 @@ import io.stormbird.wallet.viewmodel.Erc20DetailViewModelFactory;
 
 import javax.inject.Inject;
 
+import java.math.BigInteger;
+import java.util.Map;
+
+import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.C.Key.WALLET;
 
 public class Erc20DetailActivity extends BaseActivity {
@@ -115,8 +121,42 @@ public class Erc20DetailActivity extends BaseActivity {
         tokenViewAdapter.setTokens(tokens);
         tokenView.setAdapter(tokenViewAdapter);
 
-        if (viewModel.hasIFrame(token.getAddress())) {
+        if (viewModel.hasIFrame(token)) {
             addTokenPage();
+        }
+
+        if (viewModel.hasAction(token)) {
+            setupAction();
+        }
+    }
+
+    private void setupAction()
+    {
+        final Map<String, TSAction> actions = viewModel.getActions(token);
+        if (actions != null)
+        {
+            final Button[] buttons = new Button[3];
+            buttons[0] = findViewById(R.id.button_action1);
+            buttons[1] = findViewById(R.id.button_action2);
+            buttons[2] = findViewById(R.id.button_action3);
+            findViewById(R.id.layoutActionButtons).setVisibility(View.VISIBLE);
+
+            int index = 0;
+            for (String action : actions.keySet())
+            {
+                Button actionButton = buttons[index++];
+                actionButton.setVisibility(View.VISIBLE);
+                actionButton.setText(action);
+                actionButton.setOnClickListener(view -> {
+                    //open function page
+                    Intent intent = new Intent(this, FunctionActivity.class);
+                    intent.putExtra(TICKET, token);
+                    intent.putExtra(C.EXTRA_STATE, action);
+                    intent.putExtra(C.EXTRA_TOKEN_ID, BigInteger.ZERO.toString(Character.MAX_RADIX));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                    startActivity(intent);
+                });
+            }
         }
     }
 
@@ -228,7 +268,7 @@ public class Erc20DetailActivity extends BaseActivity {
         LinearLayout viewWrapper = findViewById(R.id.layout_iframe);
         try {
             WebView iFrame = findViewById(R.id.iframe);
-            String tokenData = viewModel.getTokenData(token.getAddress());
+            String tokenData = viewModel.getTokenData(token);
             iFrame.loadData(tokenData, "text/html", "UTF-8");
             viewWrapper.setVisibility(View.VISIBLE);
         } catch (Exception e) {

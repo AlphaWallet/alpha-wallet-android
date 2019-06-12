@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import android.util.Log;
@@ -13,6 +14,7 @@ import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.TSAction;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.MyAddressRouter;
@@ -97,12 +99,27 @@ public class Erc20DetailViewModel extends BaseViewModel {
         }
     }
 
-    public boolean hasIFrame(String address) {
-        return assetDefinitionService.hasIFrame(address);
+    public boolean hasIFrame(Token token)
+    {
+        return assetDefinitionService.hasTokenView(token.tokenInfo.chainId, token.getAddress());
     }
 
-    public String getTokenData(String address) {
-        return assetDefinitionService.getIntroductionCode(address);
+    public String getTokenData(Token token) {
+        return assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "view");
+    }
+
+    public boolean hasAction(Token token)
+    {
+        return assetDefinitionService.hasAction(token.tokenInfo.chainId, token.getAddress());
+    }
+
+    public String getActionText(Token token)
+    {
+        Map<String, TSAction> actions = assetDefinitionService.getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        for (String key : actions.keySet())
+            return key;
+
+        return null;
     }
 
     public void fetchTransactions(Token token, int historyCount) {
@@ -261,5 +278,21 @@ public class Erc20DetailViewModel extends BaseViewModel {
     {
         new SendTokenRouter().open(ctx, address, token.tokenInfo.symbol, token.tokenInfo.decimals,
                                    false, wallet.getValue(), token);
+    }
+
+    public String getActionData(Token token, String actionText)
+    {
+        Map<String, TSAction> actions = assetDefinitionService.getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        TSAction action = actions.get(actionText);
+        if (action != null)
+        {
+            return action.view;
+        }
+        return null;
+    }
+
+    public Map<String, TSAction> getActions(Token token)
+    {
+        return assetDefinitionService.getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
     }
 }

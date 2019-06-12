@@ -43,7 +43,8 @@ public class Asset implements Parcelable {
     @Expose
     private List<Trait> traits = null;
 
-    public boolean isChecked;
+    public boolean isChecked = false;
+    public boolean exposeRadio = false;
 
     protected Asset(Parcel in) {
         tokenId = in.readString();

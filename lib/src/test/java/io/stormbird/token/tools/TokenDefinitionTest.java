@@ -1,6 +1,6 @@
 package io.stormbird.token.tools;
 
-import io.stormbird.token.entity.NonFungibleToken;
+import io.stormbird.token.entity.*;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -14,60 +14,90 @@ import java.util.stream.Stream;
 import static org.junit.Assert.*;
 
 
-public class TokenDefinitionTest {
+public class TokenDefinitionTest implements AttributeInterface
+{
     Stream<BigInteger> ticketIDs = Stream.of(
-            // time: 5B2282F0, TPE vs DEN match: 01, category 0C
-            "01015B2282F054504544454E010BCB53", "01015B2282F054504544454E010BCB54",
-            // time: 5B23D470, VIE vs SIN match: 02, category 02
-            "01015B2282F056494553494E0202CB53", "01015B2282F056494553494E0202CB54"
+            "1015b4a28f000000000000000000000", "1015b4a28f000000000000000000000",
+            "1015b4a28f000000000000000000000", "1015b4a28f000000000000000000000"
     ).map(hexstr -> new BigInteger(hexstr, 16));
-    File file = new File("src/test/tbml/TicketingContract.xml");
+    File file = new File("src/test/ts/entrytoken.xml");
 
     @Test
     public void TokenInformationCanBeExtracted() throws IOException, SAXException {
         assertTrue(file.exists());
-        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("en"));
-        assertFalse(ticketAsset.attributeTypes.isEmpty());
-        assertNotEquals(0, ticketAsset.tokenName.length());
-
-        // test contract address extraction
-        assertTrue(ticketAsset.addresses.size() > 0); //we have at least one address
-        for (String address : ticketAsset.addresses.keySet())
+        TokenDefinition entryToken = new TokenDefinition(new FileInputStream(file), new Locale("en"), null);
+        assertFalse(entryToken.attributeTypes.isEmpty());
+        for (String contractName : entryToken.contracts.keySet())
         {
-            assertEquals(40+2, address.length());
+            assertNotEquals(0, contractName.length());
         }
 
-        // test feature extraction
-        assertEquals("https://", ticketAsset.marketQueueAPI.substring(0,8));
+        // test contract address extraction
+        String holdingContract = entryToken.holdingToken;
+        ContractInfo ci = entryToken.contracts.get(holdingContract);
+
+        assertTrue(entryToken.contracts.size() > 0); //we have at least one address
+
+        for (int networkId : ci.addresses.keySet())
+        {
+            for (String address : ci.addresses.get(networkId))
+            {
+                assertEquals(40+2, address.length());
+            }
+        }
     }
 
     @Test
     public void AttributeTypesShouldParse() throws IOException, SAXException {
-        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("en"));
+        TokenDefinition entryToken = new TokenDefinition(new FileInputStream(file), new Locale("en"), null);
+        BigInteger tokenId = new BigInteger("1015b4a28f000000000000000000000", 16);
 
-        // the following test case only work with a very specific xml file.
-        ticketIDs.map(ticketID -> new NonFungibleToken(ticketID, ticketAsset)).forEach(ticket -> {
-            assertTrue(BigInteger.valueOf(0xCB53).compareTo(ticket.getAttribute("numero").value) < 1);
-            assertTrue(BigInteger.valueOf(0xCB54).compareTo(ticket.getAttribute("numero").value) > -1);
-            String nameCheck = ticket.getAttribute("numero").name;
-            final String nameConst = "\u2116";
-            assertEquals(nameConst, nameCheck);
-            assertEquals("20180614180000+0300", ticket.getAttribute("time").text);
-        });
-        /* Epoch, the following test only works from Singapore */
-        /* Travis isn't in Singapore ... */
-        //assertEquals("Thu Jan 01 07:30:00 SGT 1970", ticket.getAttribute("time").text);
+        //StringBuilder tokenData = new StringBuilder();
+
+        //get first holding token
+        String holdingContract = entryToken.holdingToken;
+        ContractInfo ci = entryToken.contracts.get(holdingContract); //ropsten
+        ContractAddress cAddr = new ContractAddress(3, ci.addresses.get(3).get(0));
+
+        //test fetching street attribute
+        TokenScriptResult.Attribute streetAttr = entryToken.fetchAttrResult("street", tokenId, cAddr, this).blockingFirst();
+
+        assertNotNull(streetAttr);
+        assertNotNull(streetAttr.text);
+        assertTrue(streetAttr.text.length() > 0);
     }
 
     @Test
     public void XMLSignatureShouldValidate() throws IOException, SAXException {
-        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("en"));
-        assertEquals("Shankai", ticketAsset.getKeyName());
+        TokenDefinition entryToken = new TokenDefinition(new FileInputStream(file), new Locale("en"), null);
+        assertEquals("EntryToken", entryToken.holdingToken);
         // TODO: actually validate XML signature
     }
 
     @Test(expected = SAXException.class)
     public void BadLocaleShouldThrowException() throws IOException, SAXException {
-        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("asdf"));
+        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("asdf"), null);
+    }
+
+
+
+    //No caching or optimisation for tests
+
+    @Override
+    public TransactionResult getFunctionResult(ContractAddress contract, AttributeType attr, BigInteger tokenId)
+    {
+        return new TransactionResult(contract.chainId, contract.address, tokenId, attr);
+    }
+
+    @Override
+    public TransactionResult storeAuxData(TransactionResult tResult)
+    {
+        return tResult;
+    }
+
+    @Override
+    public boolean resolveOptimisedAttr(ContractAddress contract, AttributeType attr, TransactionResult transactionResult)
+    {
+        return false;
     }
 }

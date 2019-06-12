@@ -3,13 +3,11 @@ package io.stormbird.wallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Ticket;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
@@ -20,6 +18,8 @@ import io.stormbird.wallet.router.RedeemAssetSelectRouter;
 import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketRouter;
 
+import java.math.BigInteger;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -29,6 +29,15 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
+import io.stormbird.wallet.ui.AssetDisplayActivity;
+import io.stormbird.wallet.ui.RedeemAssetSelectActivity;
+import io.stormbird.wallet.ui.SellDetailActivity;
+import io.stormbird.wallet.ui.TransferTicketDetailActivity;
+import io.stormbird.wallet.ui.widget.entity.TicketRangeParcel;
+
+import static io.stormbird.wallet.C.*;
+import static io.stormbird.wallet.C.Key.*;
+import static io.stormbird.wallet.ui.TransferTicketDetailActivity.TRANSFER_TO_ADDRESS;
 
 /**
  * Created by James on 22/01/2018.
@@ -165,8 +174,15 @@ public class AssetDisplayViewModel extends BaseViewModel
         sellTicketRouter.open(ctx, token);
     }
 
-    public void showTransferToken(Context context, Ticket ticket, TicketRange range) {
-//        transferTicketRouter.openRange(context, ticket, range);
+    public void sellTicketRouter(Context context, Token token, String tokenIds) {
+        Intent intent = new Intent(context, SellDetailActivity.class);
+        intent.putExtra(WALLET, new Wallet(token.getWallet()));
+        intent.putExtra(TICKET, token);
+        intent.putExtra(EXTRA_TOKENID_LIST, tokenIds);
+        intent.putExtra(EXTRA_STATE, SellDetailActivity.SET_A_PRICE);
+        intent.putExtra(EXTRA_PRICE, 0);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        context.startActivity(intent);
     }
 
     private void onDefaultWallet(Wallet wallet) {
@@ -174,5 +190,40 @@ public class AssetDisplayViewModel extends BaseViewModel
         progress.postValue(false);
         defaultWallet.setValue(wallet);
         fetchCurrentTicketBalance();
+    }
+
+    public void selectRedeemTokens(Context ctx, Token token, List<BigInteger> idList)
+    {
+        TicketRangeParcel parcel = new TicketRangeParcel(new TicketRange(idList, token.getAddress(), true));
+        Intent intent = new Intent(ctx, RedeemAssetSelectActivity.class);
+        intent.putExtra(TICKET, token);
+        intent.putExtra(TICKET_RANGE, parcel);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        ctx.startActivity(intent);
+    }
+
+    public void showTransferToken(Context ctx, Token token, List<BigInteger> selection)
+    {
+        Intent intent = new Intent(ctx, TransferTicketDetailActivity.class);
+        intent.putExtra(WALLET, new Wallet(token.getWallet()));
+        intent.putExtra(TICKET, token);
+
+        if (token instanceof ERC721Token)
+        {
+            intent.putExtra(EXTRA_TOKENID_LIST, selection.iterator().next().toString(10));
+            intent.putExtra(EXTRA_STATE, TRANSFER_TO_ADDRESS);
+        }
+        else
+        {
+            intent.putExtra(EXTRA_TOKENID_LIST, token.intArrayToString(selection, false));
+        }
+
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        ctx.startActivity(intent);
+    }
+
+    private void openTransferDirectDialog(Intent intent, Token token, String tokenId)
+    {
+
     }
 }

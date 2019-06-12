@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE action  [
+        <!ENTITY style SYSTEM "shared.css">
+        <!ENTITY xdai-bridge.en SYSTEM "xdai-bridge.en.shtml">
+]>
+<ts:action xmlns:ts="http://tokenscript.org/2019/05/tokenscript"
+           xmlns="http://www.w3.org/1999/xhtml"
+           xmlns:xml="http://www.w3.org/XML/1998/namespace"
+>
+    <ts:name>
+        <ts:string xml:lang="en">Transfer to DAI</ts:string>
+        <ts:string xml:lang="zh">將xDAI轉爲DAI</ts:string>
+    </ts:name>
+    <!-- because this action has xdai as input, it should be listed as
+         an action under XDAI's token view. -->
+    <ts:input>
+        <ts:token name="xdai">
+            <ts:ethereum network="100"/>
+        </ts:token>
+    </ts:input>
+    <!-- because this action has DAI as output, when a user decides to
+         create a new token, this action qallows DAI token to be chosen as
+         the new token to create -->
+    <ts:output>
+        <ts:token name="dai">
+            <ts:contract>
+                <ts:address network="1">0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359</ts:address>
+            </ts:contract>
+        </ts:token>
+    </ts:output>
+    <ts:attribute-type id="amount" syntax="1.3.6.1.4.1.1466.115.121.1.36">
+        <ts:name>
+            <ts:string xml:lang="en">Amount</ts:string>
+            <ts:string xml:lang="zh">代幣金額</ts:string>
+        </ts:name>
+        <ts:origins>
+            <!-- e18 is a hard coded multiplier.
+            rationale for hardcoding: avoiding over-design  -->
+            <ts:user-entry as="e18"/>
+        </ts:origins>
+    </ts:attribute-type>
+    <!-- if the user tries to use this action when having little xdai
+         balance, either by clicking this action under the XDAI's
+         token view, or by clicking "create" token and choosing DAI,
+         the following message shows. -->
+    <!-- The exclusion rule here is excluded out to reduce the scope of schema-2019-05
+    <ts:exclude>
+        <ts:selection>
+            <ts:token filter="balance<=1000000000"/>
+        </ts:selection>
+        <ts:message>
+            <ts:string xml:lang="en">Not enough balance.</ts:string>
+        </ts:message>
+    </exclude>
+    -->
+    <ts:transaction>
+        <ts:ethereum>
+            <ts:to>0x7301CFA0e1756B71869E93d4e4Dca5c7d0eb0AA6</ts:to>
+            <ts:value ref="amount"/>
+        </ts:ethereum>
+    </ts:transaction>
+    <style type="text/css">
+        html,
+body {
+    height: 100%;
+}
+html {
+    font-size: 14px;
+}
+body {
+    margin: 0px;
+    padding: 0px;
+    overflow-x: hidden;
+    min-width: 320px;
+    background: #FFFFFF;
+    font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    line-height: 1.4285em;
+    color: rgba(0, 0, 0, 0.87);
+    font-smoothing: antialiased;
+}
+.ui.container {
+    display: block;
+    max-width: 100% !important;
+}
+@media only screen and (max-width: 767px) {
+    .ui.container {
+        width: auto !important;
+        margin-left: 1em !important;
+        margin-right: 1em !important;
+    }
+}
+@media only screen and (min-width: 768px) and (max-width: 991px) {
+    .ui.container {
+        width: 723px;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+@media only screen and (min-width: 992px) and (max-width: 1199px) {
+    .ui.container {
+        width: 933px;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+@media only screen and (min-width: 1200px) {
+    .ui.container {
+        width: 1127px;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+.ui.segment {
+    position: relative;
+    background: #FFFFFF;
+    -webkit-box-shadow: 0px 1px 2px 0 rgba(34, 36, 38, 0.15);
+    box-shadow: 0px 1px 2px 0 rgba(34, 36, 38, 0.15);
+    margin: 1rem 0em;
+    padding: 1em 1em;
+    border-radius: 0.28571429rem;
+    border: 1px solid rgba(34, 36, 38, 0.15);
+}
+.ui.segment:first-child {
+    margin-top: 0em;
+}
+.ui.segment:last-child {
+    margin-bottom: 0em;
+}
+input {
+    position: relative;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 12px;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    color: rgba(0, 0, 0, 0.87);
+    padding: 9.5px 14px;
+    width: 300px;
+    border-color: #D8D8D8;
+}
+input[type=text]:focus {
+    border-color: #D8D8D8;
+    background: #FAFAFA;
+    color: rgba(0, 0, 0, 0.87);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+label {
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 6px;
+}
+    </style>
+    <ts:view>
+        <script type="text/javascript"><![CDATA[
+class Token {
+
+    constructor(tokenInstance) {
+        this.props = tokenInstance
+    }
+
+    render() {
+        return `
+        <div class="ui container">
+              <div class="ui segment">
+                <span>xDAI to DAI bridge<b></b><br></span>
+              </div>
+              <label>Amount to Convert</label>
+              <input type="number" id="amount" placeholder="0"/>
+              <img
+              src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAoCAYAAACfKfiZAAAABGdBTUEAALGPC/xhBQAAAcNJREFUWAntl71KxEAQx03OyuJSiIKtCIIfT+ATiOnEsxMld6X2Fgo2PoBgdXfJNT5BtNM7BLGysvQZvM5CuFzifwJzjHf5uLBbbiDszO7M/H87bGBjLZQ8vu9vxXEcWpb14HnedUl4utzpdB6TJDmQsch/ajabrpwj256ekH6v19sej8cDFFsHxBUK38r1AnszYy1rLh+AxEejUR+FVrkYQC4rQHBa4ZjZAYjsRFE0kOJcRTfEDACJQ6wPoRUWnR51QvwDCIJgt0ycYXRBTABIHAfupWjnLM6jDogUIAzDpariEqLb7XrsVx0XKcF13V987/fY0bIo4MA+EX5q4nv+RNwrz9u2ncD+YL/qmAKgaIzEG5mMw7gBoRkAEm+1WhcyVsWenAGVIiq5BsB0wHTAdMB0wHTAdMB0wHTAdCC9FatcKtvt9jHy92QN3JxnfutoDrF3Mg638XdlABQ5QvFDWTjHpv+Mc7mGvDXlM1Cv108B8SYLz2NTjuM4Z8oAjUbjBxD7VSAolnIoVxmAdlsFQopTrhaAeSGmxbUClEFkiWsHyIPIEy8EqNVq30gcUhA/8BO8X+znjXwmsP5MLx+4rPg/qL3E8KLnDDoAAAAASUVORK5CYII="
+              width="20px">
+              </img>
+        </div>`;
+    }
+}
+
+web3.tokens.dataChanged = (oldTokens, updatedTokens) => {
+    const currentTokenInstance = web3.tokens.data.currentInstance;
+    document.getElementById('root').innerHTML = new Token(currentTokenInstance).render();
+};
+
+]]></script>
+<div id="root"></div>
+    </ts:view>
+</ts:action>

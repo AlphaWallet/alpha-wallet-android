@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import io.stormbird.wallet.R;
@@ -16,17 +17,19 @@ import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 
-public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener
+import java.math.BigInteger;
+
+public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener, View.OnLongClickListener
 {
     private TicketRange thisData;
-    private Ticket ticket;
+    private Token token;
     private OnTokenClickListener onTokenClickListener;
     private final AssetDefinitionService assetService; //need to cache this locally, unless we cache every string we need in the constructor
 
     private final View activityView;
     protected final TextView ticketRedeemed;
     protected final LinearLayout ticketDetailsLayout;
-    protected final LinearLayout ticketLayout;
+    protected final RelativeLayout ticketLayout;
     protected final TextView ticketDetails;
 
     public BaseTicketHolder(int resId, ViewGroup parent, Token ticket, AssetDefinitionService service) {
@@ -40,7 +43,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
         ticketDetails = findViewById(R.id.ticket_details);
         ticketLayout = findViewById(R.id.layout_select_ticket);
         assetService = service;
-        this.ticket = (Ticket)ticket;
+        token = ticket;
     }
 
     @Override
@@ -50,18 +53,29 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
 
         if (data.tokenIds.size() > 0)
         {
-            ticket.displayTicketHolder(data, activityView, assetService, getContext());
+            token.displayTicketHolder(data, activityView, assetService, getContext());
         }
     }
 
     @Override
     public void onClick(View v) {
         if (onTokenClickListener != null) {
-            onTokenClickListener.onTokenClick(v, ticket, thisData.tokenIds.get(0));
+            onTokenClickListener.onTokenClick(v, token, thisData.tokenIds);
         }
     }
 
     public void setOnTokenClickListener(OnTokenClickListener onTokenClickListener) {
         this.onTokenClickListener = onTokenClickListener;
+    }
+
+    @Override
+    public boolean onLongClick(View view)
+    {
+        if (onTokenClickListener != null)
+        {
+            onTokenClickListener.onLongTokenClick(view, token, thisData.tokenIds);
+        }
+
+        return true;
     }
 }

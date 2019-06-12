@@ -47,4 +47,9 @@ public abstract class DateTime
     public long toEpochSecond() {
         return time/1000L;
     }
+
+    public long toEpoch()
+    {
+        return time;
+    }
 }

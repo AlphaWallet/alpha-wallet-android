@@ -64,6 +64,8 @@ public abstract class C {
     public static final String EXTRA_SUCCESS = "TX_SUCCESS";
     public static final String EXTRA_HEXDATA = "TX_HEX";
     public static final String EXTRA_NETWORKID = "NET_ID";
+    public static final String EXTRA_TRANSACTION_DATA = "TS_TRANSACTIONDATA";
+    public static final String EXTRA_FUNCTION_NAME = "TS_FUNC_NAME";
 
     public static final String PRUNE_ACTIVITY =
             "io.stormbird.wallet.PRUNE_ACTIVITY";
@@ -82,6 +84,8 @@ public abstract class C {
             "io.stormbird.wallet.RESET_TOOLBAR";
     public static final String SIGN_DAPP_TRANSACTION =
             "io.stormbird.wallet.SIGN_TRANSACTION";
+    public static final String REQUEST_NOTIFICATION_ACCESS =
+            "io.stormbird.wallet.REQUEST_NOTIFICATION";
 
     public static final String COINBASE_WIDGET_CODE = "88d6141a-ff60-536c-841c-8f830adaacfd";
     public static final String SHAPESHIFT_KEY = "c4097b033e02163da6114fbbc1bf15155e759ddfd8352c88c55e7fef162e901a800e7eaecf836062a0c075b2b881054e0b9aa2324be7bc3694578493faf59af4";

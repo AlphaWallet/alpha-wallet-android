@@ -1,12 +1,19 @@
 package io.stormbird.wallet.service;
 
+import android.util.Log;
 import android.util.SparseArray;
-import io.stormbird.wallet.entity.ContractResult;
-import io.stormbird.wallet.entity.ContractType;
-import io.stormbird.wallet.entity.ERC721Token;
-import io.stormbird.wallet.entity.Token;
+import io.reactivex.Completable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableCompletableObserver;
+import io.realm.Realm;
+import io.realm.RealmResults;
+import io.stormbird.token.entity.TransactionResult;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
+import io.stormbird.wallet.repository.TransactionsRealmCache;
+import io.stormbird.wallet.repository.entity.RealmAuxData;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,13 +30,15 @@ public class TokensService
     private String currentAddress = null;
     private boolean loaded;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final RealmManager realmManager;
     private final List<Integer> networkFilter;
     private final ConcurrentLinkedQueue<Token> transactionUpdateQueue = new ConcurrentLinkedQueue<>();
     private final ConcurrentLinkedQueue<Token> balanceUpdateQueue = new ConcurrentLinkedQueue<>();
     private Token focusToken;
 
-    public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository) {
+    public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository, RealmManager realmManager) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.realmManager = realmManager;
         loaded = false;
         networkFilter = new ArrayList<>(10);
         setupFilter();
@@ -179,7 +188,7 @@ public class TokensService
         return tokens;
     }
 
-    private List<Token> getAllAtAddress(String addr)
+    public List<Token> getAllAtAddress(String addr)
     {
         List<Token> tokens = new ArrayList<>();
         if (addr == null) return tokens;
@@ -218,8 +227,10 @@ public class TokensService
 
     public void addTokens(Token[] tokens)
     {
+        int i = 0;
         for (Token t : tokens)
         {
+            i++;
             t.setRequireAuxRefresh();
             addToken(t);
         }
@@ -421,6 +432,7 @@ public class TokensService
         for (Token t : cachedTokens)
         {
             t.balanceUpdatePressure += (float)(Math.random()*15.0f);
+            if (t.isEthereum()) t.balanceUpdatePressure += 20.0f;
         }
     }
 }

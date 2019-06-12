@@ -16,6 +16,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.FinishReceiver;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.adapter.TicketSaleAdapter;
 import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.viewmodel.SellTicketModel;
@@ -38,7 +39,8 @@ import static io.stormbird.wallet.C.Key.TICKET;
  * Created by James on 13/02/2018.
  */
 
-public class SellTicketActivity extends BaseActivity {
+public class SellTicketActivity extends BaseActivity implements OnTokenClickListener
+{
     @Inject
     protected SellTicketModelFactory viewModelFactory;
     protected SellTicketModel viewModel;
@@ -102,7 +104,7 @@ public class SellTicketActivity extends BaseActivity {
 
         RecyclerView list = findViewById(R.id.listTickets);
 
-        adapter = new TicketSaleAdapter(this::onTokenClick, token, viewModel.getAssetDefinitionService());
+        adapter = new TicketSaleAdapter(this, token, viewModel.getAssetDefinitionService());
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
     }
@@ -178,8 +180,15 @@ public class SellTicketActivity extends BaseActivity {
         selected.setText(selectionStr);
     }
 
-    private void onTokenClick(View view, Token token, BigInteger id) {
+    @Override
+    public void onTokenClick(View view, Token token, List<BigInteger> ids) {
         Context context = view.getContext();
         //TODO: what action should be performed when clicking on a range?
+    }
+
+    @Override
+    public void onLongTokenClick(View view, Token token, List<BigInteger> tokenId)
+    {
+
     }
 }

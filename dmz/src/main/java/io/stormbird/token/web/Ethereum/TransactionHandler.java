@@ -63,6 +63,36 @@ public class TransactionHandler
         return result;
     }
 
+    public String getNameOnly(String address)
+    {
+        String name = "";
+        try
+        {
+            name = getContractData(address, stringParam("name"));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return name;
+    }
+
+    public String getSymbolOnly(String address)
+    {
+        String symbol = "";
+        try
+        {
+            symbol = getContractData(address, stringParam("symbol"));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return symbol;
+    }
+
     public String getName(String address)
     {
         String name = "";

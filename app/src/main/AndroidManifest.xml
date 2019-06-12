@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    android:targetSandboxVersion="1"
     xmlns:tools="http://schemas.android.com/tools"
     package="io.stormbird.wallet">
 
@@ -190,6 +191,13 @@
         <activity
             android:name="io.stormbird.wallet.ui.Erc20DetailActivity"
             android:label="@string/erc20_details" />
+
+        <activity
+            android:name="io.stormbird.wallet.ui.TokenFunctionActivity"
+            android:label="@string/token_function" />
+
+        <activity android:name=".ui.FunctionActivity"
+            android:label="@string/token_function" />
 
         <!--<service android:name="io.stormbird.wallet.service.AlphaWalletFirebaseMessagingService">-->
         <!--<intent-filter>-->

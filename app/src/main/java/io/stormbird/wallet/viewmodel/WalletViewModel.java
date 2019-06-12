@@ -188,7 +188,23 @@ public class WalletViewModel extends BaseViewModel
     {
         fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.MAINNET_ID));
         updateTokenBalances();
+        //tokensService.loadAuxData();
+        resolveScriptFunctions();
     }
+
+    private void resolveScriptFunctions()
+    {
+        assetDefinitionService.checkEthereumFunctions(tokensService)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onUpdatedTokens, this::onError);
+    }
+
+    private void onUpdatedTokens(List<Token> tokens)
+    {
+        //update tokens as required after we've fetched the token data
+    }
+
 
     /**
      * Stage 2: Fetch opensea tokens
@@ -278,7 +294,7 @@ public class WalletViewModel extends BaseViewModel
 
     private void checkTokenUpdates()
     {
-        if (balanceCheckDisposable == null || balanceCheckDisposable.isDisposed())
+        //if (balanceCheckDisposable == null || balanceCheckDisposable.isDisposed())
         {
             Token t = tokensService.getNextInBalanceUpdateQueue();
 
@@ -286,7 +302,7 @@ public class WalletViewModel extends BaseViewModel
             {
                 Log.d("TOKEN", "Updating: " + t.tokenInfo.name + " : " + t.getAddress() + " [" + t.balanceUpdateWeight + "]");
                 balanceCheckDisposable = fetchTokensInteract.updateDefaultBalance(t, currentWallet)
-                        .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
+                        //.flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onTokenUpdate, this::balanceUpdateError, this::checkComplete);
@@ -361,7 +377,7 @@ public class WalletViewModel extends BaseViewModel
     @Override
     public void showErc20TokenDetail(Context context, String address, String symbol, int decimals, Token token) {
         boolean isToken = !address.equalsIgnoreCase(currentWallet.address);
-        boolean hasDefinition = assetDefinitionService.hasDefinition(address);
+        boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
         erc20DetailRouter.open(context, address, symbol, decimals, isToken, currentWallet, token, hasDefinition);
     }
 
@@ -440,7 +456,7 @@ public class WalletViewModel extends BaseViewModel
     {
         disposable = fetchTransactionsInteract.queryInterfaceSpecForService(info)
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.chainId, tokenInfo.address), currentWallet))
-                .flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
+                //.flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::finishedImport, this::onTokenAddError);

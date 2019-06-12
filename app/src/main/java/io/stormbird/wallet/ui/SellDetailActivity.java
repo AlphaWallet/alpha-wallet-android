@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,6 +21,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
@@ -34,7 +36,7 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.ui.widget.adapter.TicketAdapter;
+import io.stormbird.wallet.ui.widget.adapter.NonFungibleTokenAdapter;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.viewmodel.SellDetailModel;
 import io.stormbird.wallet.viewmodel.SellDetailModelFactory;
@@ -54,7 +56,8 @@ import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
  * Created by James on 21/02/2018.
  */
 
-public class SellDetailActivity extends BaseActivity {
+public class SellDetailActivity extends BaseActivity implements OnTokenClickListener, Runnable
+{
     private static final int SEND_INTENT_REQUEST_CODE = 2;
     public static final int SET_A_PRICE = 1;
     public static final int SET_EXPIRY = 2;
@@ -69,7 +72,7 @@ public class SellDetailActivity extends BaseActivity {
     private Token token;
     private Wallet wallet;
     private TicketRange ticketRange;
-    private TicketAdapter adapter;
+    private NonFungibleTokenAdapter adapter;
     private String ticketIds;
     private String prunedIds;
     private double ethToUsd;
@@ -97,6 +100,8 @@ public class SellDetailActivity extends BaseActivity {
     private TextView confirmPricePerTicketText;
     private TextView confirmTotalCostText;
     private TextView currencyText;
+    private boolean activeClick;
+    private Handler handler;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -123,7 +128,7 @@ public class SellDetailActivity extends BaseActivity {
 
         //we should import a token and a list of chosen ids
         list = findViewById(R.id.listTickets);
-        adapter = new TicketAdapter(this::onTokenClick, token, ticketIds, viewModel.getAssetDefinitionService(), null);
+        adapter = new NonFungibleTokenAdapter(this, token, ticketIds, viewModel.getAssetDefinitionService(), null);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -253,6 +258,10 @@ public class SellDetailActivity extends BaseActivity {
 
     private void onNext()
     {
+        if (activeClick) return;
+        activeClick = true;
+        handler.postDelayed(this, 500);
+
         switch (saleStatus)
         {
             case SET_A_PRICE:
@@ -537,11 +546,19 @@ public class SellDetailActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        handler = new Handler();
     }
 
-    private void onTokenClick(View view, Token token, BigInteger id) {
+    @Override
+    public void onTokenClick(View view, Token token, List<BigInteger> ids) {
         Context context = view.getContext();
         //TODO: what action should be performed when clicking on a range?
+    }
+
+    @Override
+    public void onLongTokenClick(View view, Token token, List<BigInteger> tokenId)
+    {
+
     }
 
     private void hideErrorMessages() {
@@ -563,5 +580,11 @@ public class SellDetailActivity extends BaseActivity {
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    @Override
+    public void run()
+    {
+        activeClick = false;
     }
 }

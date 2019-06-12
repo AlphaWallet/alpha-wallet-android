@@ -94,7 +94,7 @@ public class AddTokenViewModel extends BaseViewModel {
 
     private void onSaved(Token token)
     {
-        assetDefinitionService.getAssetDefinition(token.getAddress());
+        assetDefinitionService.getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
         tokensService.addToken(token);
         progress.postValue(false);
         result.postValue(true);
@@ -115,6 +115,11 @@ public class AddTokenViewModel extends BaseViewModel {
     public void setPrimaryChain(int chainId)
     {
         primaryChainId = chainId;
+    }
+
+    public int getSelectedChain()
+    {
+        return primaryChainId;
     }
 
     private void setupToken(int chainId, String addr) {

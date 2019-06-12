@@ -25,8 +25,9 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.router.HomeRouter;
+import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
-import io.stormbird.wallet.ui.widget.adapter.TicketAdapter;
+import io.stormbird.wallet.ui.widget.adapter.NonFungibleTokenAdapter;
 import io.stormbird.wallet.ui.widget.entity.ENSHandler;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
@@ -49,6 +50,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import static io.stormbird.wallet.C.*;
@@ -61,7 +63,7 @@ import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
  * Created by James on 21/02/2018.
  */
 
-public class TransferTicketDetailActivity extends BaseActivity implements Runnable, ItemClickListener
+public class TransferTicketDetailActivity extends BaseActivity implements Runnable, ItemClickListener, OnTokenClickListener
 {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
     private static final int SEND_INTENT_REQUEST_CODE = 2;
@@ -80,7 +82,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private FinishReceiver finishReceiver;
 
     private Token token;
-    private TicketAdapter adapter;
+    private NonFungibleTokenAdapter adapter;
 
     private TextView titleText;
     private TextView toAddressError;
@@ -150,7 +152,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new TicketAdapter(this::onTokenClick, token, ticketIds, viewModel.getAssetDefinitionService(), null);
+        adapter = new NonFungibleTokenAdapter(this, token, ticketIds, viewModel.getAssetDefinitionService(), null);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -380,7 +382,8 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
             case CHOOSE_QUANTITY:
                 initQuantitySelector();
                 pickTicketQuantity.setVisibility(View.VISIBLE);
-                titleText.setText(R.string.title_select_ticket_quantity);
+                String typeName = viewModel.getAssetDefinitionService().getTokenName(token.tokenInfo.chainId, token.tokenInfo.address, 1);
+                titleText.setText(getString(R.string.title_select_ticket_quantity, typeName != null ? typeName : getString(R.string.ticket)));
                 break;
             case PICK_TRANSFER_METHOD:
                 setupRadioButtons();
@@ -525,9 +528,16 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         }
     }
 
-    private void onTokenClick(View view, Token token, BigInteger id) {
+    @Override
+    public void onTokenClick(View view, Token token, List<BigInteger> ids) {
         Context context = view.getContext();
         //TODO: what action should be performed when clicking on a range?
+    }
+
+    @Override
+    public void onLongTokenClick(View view, Token token, List<BigInteger> tokenId)
+    {
+
     }
 
     @Override

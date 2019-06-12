@@ -40,7 +40,7 @@ public class OrderHolder extends BinderViewHolder<MagicLinkData> implements View
     private final TextView ticketTypeText;
     private final RelativeLayout updateOverlay;
     private final RelativeLayout unavailableOverlay;
-    private final LinearLayout ticketLayout;
+    private final RelativeLayout ticketLayout;
     private ImageView calendarImg;
     private ImageView ticketImg;
     private ImageView catImg;

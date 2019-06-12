@@ -23,7 +23,7 @@ import io.stormbird.wallet.entity.FinishReceiver;
 import io.stormbird.wallet.entity.SignaturePair;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.ui.widget.adapter.TicketAdapter;
+import io.stormbird.wallet.ui.widget.adapter.NonFungibleTokenAdapter;
 import io.stormbird.wallet.ui.widget.entity.TicketRangeParcel;
 import io.stormbird.wallet.viewmodel.RedeemSignatureDisplayModel;
 import io.stormbird.wallet.viewmodel.RedeemSignatureDisplayModelFactory;
@@ -53,7 +53,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     private Token token;
     private TicketRangeParcel ticketRange;
 
-    TicketAdapter adapter;
+    NonFungibleTokenAdapter adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -84,6 +84,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
         View baseView = findViewById(android.R.id.content);
 
+        //given a webview populate with rendered token
         token.displayTicketHolder(ticketRange.range, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
         finishReceiver = new FinishReceiver(this);
     }

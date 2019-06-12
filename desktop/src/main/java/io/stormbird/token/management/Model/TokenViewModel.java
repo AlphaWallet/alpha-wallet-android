@@ -1,5 +1,6 @@
 package io.stormbird.token.management.Model;
 
+import io.stormbird.token.entity.AttributeType;
 import io.stormbird.token.tools.TokenDefinition;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ public class TokenViewModel extends TokenDefinition {
     public List<ComboBoxDataModel> comboBoxDataModelList;
     public List<TextFieldDataModel> textFieldDataModelList;
     public TokenViewModel(InputStream xmlAsset, Locale locale) throws IOException, SAXException {
-        super(xmlAsset, locale);
+        super(xmlAsset, locale, null);
         this.comboBoxDataModelList=new ArrayList<>();
         this.textFieldDataModelList=new ArrayList<>();
         constructTokenViewModelForGUI(this);

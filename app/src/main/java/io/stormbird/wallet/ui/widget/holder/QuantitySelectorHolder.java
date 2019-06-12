@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.service.AssetDefinitionService;
 
 /**
  * Created by James on 28/02/2018.
@@ -23,26 +24,32 @@ public class QuantitySelectorHolder extends BinderViewHolder<Token> {
     private final RelativeLayout plusButton;
     private final RelativeLayout minusButton;
     private final TextView quantity;
+    private final TextView title;
     private int currentQuantity;
     private int quantityLimit;
+    private AssetDefinitionService assetService;
 
     public int getCurrentQuantity()
     {
         return currentQuantity;
     }
 
-    public QuantitySelectorHolder(int resId, ViewGroup parent, int quantityLimit) {
+    public QuantitySelectorHolder(int resId, ViewGroup parent, int quantityLimit, AssetDefinitionService assetService) {
         super(resId, parent);
         quantity = findViewById(R.id.text_quantity);
+        title = findViewById(R.id.text_quantity_select);
         plusButton = findViewById(R.id.layout_quantity_add);
         minusButton = findViewById(R.id.layout_quantity_minus);
         currentQuantity = Integer.parseInt(quantity.getText().toString());
         this.quantityLimit = quantityLimit;
+        this.assetService = assetService;
     }
 
     @Override
     public void bind(@Nullable Token token, @NonNull Bundle addition)
     {
+        String typeName = assetService.getTokenName(token.tokenInfo.chainId, token.tokenInfo.address, 2);
+        title.setText(getContext().getString(R.string.select_quantity_tickets, typeName != null ? typeName : "Tickets"));
         plusButton.setOnClickListener(v -> {
             int val = Integer.parseInt(quantity.getText().toString());
             if ((val + 1) <= quantityLimit) {

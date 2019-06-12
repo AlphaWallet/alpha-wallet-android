@@ -32,7 +32,7 @@ public class SignMessageDialog extends Dialog {
     private LinearLayout layoutBtnApprove;
     private Context context;
 
-    public SignMessageDialog(@NonNull Activity activity) {
+    public SignMessageDialog(@NonNull Context activity) {
         super(activity);
         this.context = activity;
 
@@ -56,7 +56,7 @@ public class SignMessageDialog extends Dialog {
         btnReject.setOnClickListener(v -> dismiss());
     }
 
-    public SignMessageDialog(Activity activity, Message<String> message) {
+    public SignMessageDialog(Context activity, Message<String> message) {
         this(activity);
 
         setMessage(message.value);

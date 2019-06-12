@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 
+import io.stormbird.wallet.interact.SetupTokensInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.GasSettingsRepository;
@@ -153,8 +154,8 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository) {
-		return new TokensService(ethereumNetworkRepository);
+	TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository, RealmManager realmManager) {
+		return new TokensService(ethereumNetworkRepository, realmManager);
 	}
 
 	@Singleton
@@ -181,15 +182,21 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, Context ctx) {
-		return new AssetDefinitionService(okHttpClient, ctx);
-	}
-
-	@Singleton
-	@Provides
 	ImportTokenService provideImportTokenService(OkHttpClient okHttpClient,
 												 TransactionRepositoryType transactionRepository,
 												 PasswordStore passwordStore) {
 		return new ImportTokenService(okHttpClient, transactionRepository, passwordStore);
+	}
+
+	@Singleton
+	@Provides
+	NotificationService provideNotificationService(Context ctx) {
+		return new NotificationService(ctx);
+	}
+
+	@Singleton
+	@Provides
+	AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, Context ctx, NotificationService notificationService, RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, TokensService tokensService) {
+		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, ethereumNetworkRepository, tokensService);
 	}
 }

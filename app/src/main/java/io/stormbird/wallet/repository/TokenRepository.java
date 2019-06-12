@@ -199,10 +199,9 @@ public class TokenRepository implements TokenRepositoryType {
     {
         TokenInfo tokenInfo = new TokenInfo(wallet.address, network.name, network.symbol, 18, true, network.chainId);
         BigDecimal balance = BigDecimal.ZERO;
-        Token eth = new Token(tokenInfo, balance, System.currentTimeMillis(), network.getShortName(), ContractType.ETHEREUM);
+        Token eth = new Token(tokenInfo, balance, 0, network.getShortName(), ContractType.ETHEREUM); //create with zero time index to ensure it's updated immediately
         eth.setTokenWallet(wallet.address);
         eth.setIsEthereum();
-        eth.balanceUpdatePressure = 10.0f;
         eth.pendingBalance = balance;
         return eth;
     }
@@ -368,6 +367,14 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<Token[]> addERC721(Wallet wallet, Token[] tokens)
     {
         return localSource.saveERC721Tokens(
+                wallet,
+                tokens);
+    }
+
+    @Override
+    public Single<Token[]> addERC20(Wallet wallet, Token[] tokens)
+    {
+        return localSource.saveERC20Tokens(
                 wallet,
                 tokens);
     }

@@ -39,4 +39,6 @@ public interface TokenRepositoryType {
     Single<String> resolveProxyAddress(TokenInfo tokenInfo);
 
     String generateTransactionPayload(Token token, BigInteger tokenId, FunctionDefinition fd, TokenDefinition td);
+
+    Single<Token[]> addERC20(Wallet wallet, Token[] tokens);
 }

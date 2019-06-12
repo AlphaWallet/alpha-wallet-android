@@ -154,8 +154,8 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository, RealmManager realmManager) {
-		return new TokensService(ethereumNetworkRepository, realmManager);
+	TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository, RealmManager realmManager, OkHttpClient okHttpClient) {
+		return new TokensService(ethereumNetworkRepository, realmManager, okHttpClient);
 	}
 
 	@Singleton

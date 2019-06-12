@@ -263,8 +263,6 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     //TODO: Find out how to calculate the storage hash for each image and reproduce that, deleting only the right image.
     public void reloadAssets(Context ctx)
     {
-        token.setRequireAuxRefresh();
-
         if (token instanceof ERC721Token)
         {
             clearCache(ctx)

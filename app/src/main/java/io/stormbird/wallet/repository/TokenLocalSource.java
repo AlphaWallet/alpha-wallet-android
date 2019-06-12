@@ -33,4 +33,6 @@ public interface TokenLocalSource {
     Single<Token[]> saveERC721Tokens(Wallet wallet, Token[] tokens);
 
     Disposable storeBlockRead(Token token, Wallet wallet);
+
+    Single<Token[]> saveERC20Tokens(Wallet wallet, Token[] tokens);
 }

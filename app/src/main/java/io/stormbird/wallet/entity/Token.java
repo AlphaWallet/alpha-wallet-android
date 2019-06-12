@@ -37,12 +37,10 @@ public class Token implements Parcelable
     public BigDecimal pendingBalance;
     public long updateBlancaTime;
     private String tokenWallet;
-    private boolean requiresAuxRefresh = true;
     protected ContractType contractType;
     public long lastBlockCheck = 0;
     private final String shortNetworkName;
     public float balanceUpdateWeight;
-    public float balanceUpdatePressure;
     public boolean balanceChanged;
     public boolean walletUIUpdateRequired;
 
@@ -63,7 +61,6 @@ public class Token implements Parcelable
         this.pendingBalance = balance;
 
         balanceUpdateWeight = calculateBalanceUpdateWeight();
-        balanceUpdatePressure = 0.0f;
         balanceChanged = false;
         walletUIUpdateRequired = false;
     }
@@ -480,18 +477,6 @@ public class Token implements Parcelable
     {
         return BigInteger.valueOf(-1);
     }
-    public void auxDataRefreshed()
-    {
-        requiresAuxRefresh = false;
-    }
-    public void setRequireAuxRefresh()
-    {
-        requiresAuxRefresh = true;
-    }
-    public boolean requiresAuxRefresh()
-    {
-        return (requiresAuxRefresh);
-    }
     public Function getTransferFunction(String to, String tokenId)
     {
         return null;
@@ -717,17 +702,6 @@ public class Token implements Parcelable
         else
         {
             return false;
-        }
-    }
-
-    public void updateBalanceCheckPressure(boolean isVisible)
-    {
-        if (!isTerminated())
-        {
-            float update = (isVisible ? 1.0f : 0.5f) * balanceUpdateWeight;
-            if (isEthereum() && !pendingBalance.equals(balance) && update < 1.0f) update = 1.0f; //if there's a pending balance check more frequently
-
-            balanceUpdatePressure += update;
         }
     }
 

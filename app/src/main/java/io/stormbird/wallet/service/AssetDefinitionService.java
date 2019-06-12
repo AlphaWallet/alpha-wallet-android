@@ -9,7 +9,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.support.annotation.Nullable;
-import android.support.annotation.RawRes;
 import android.support.v4.app.NotificationCompat;
 import android.util.SparseArray;
 import io.reactivex.Completable;
@@ -33,19 +32,15 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.xml.sax.SAXException;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static android.os.FileObserver.ALL_EVENTS;
 import static io.stormbird.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
@@ -574,8 +569,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             ContractInfo holdingContracts = token.contracts.get(token.holdingToken);
             if (holdingContracts != null)
             {
-                holdingContracts.addresses.keySet().stream().forEach(network -> addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), file.getAbsolutePath())));
-                return true;
+                for (int network : holdingContracts.addresses.keySet())
+                {
+                    addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), file.getAbsolutePath()));
+                }
+                 return true;
             }
         } catch (Exception e) {
             e.printStackTrace();

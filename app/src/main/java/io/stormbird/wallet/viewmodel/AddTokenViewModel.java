@@ -117,6 +117,11 @@ public class AddTokenViewModel extends BaseViewModel {
         primaryChainId = chainId;
     }
 
+    public int getSelectedChain()
+    {
+        return primaryChainId;
+    }
+
     private void setupToken(int chainId, String addr) {
         disposable = setupTokensInteract
                 .update(addr, chainId)

@@ -520,9 +520,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             loadContracts(directory);
 
-            Observable.fromIterable(getCanonicalized())
-                    .forEach(this::addContractAddresses).isDisposed();
-
             Observable.fromIterable(getCanonicalizedAssets())
                     .forEach(this::addContractAssets).isDisposed();
 
@@ -536,16 +533,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void addContractsToNetwork(Integer network, Map<String, File> newTokenDescriptionAddresses)
     {
-        Map<String, File> existingDefinitions = assetDefinitions.get(network);
-        if (existingDefinitions == null) existingDefinitions = new HashMap<>();
-
-        assetDefinitions.put(network, Stream.concat(existingDefinitions.entrySet().stream(), newTokenDescriptionAddresses.entrySet().stream())
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (value1, value2) -> new File(value2.getAbsolutePath())
-                         )
-                ));
+        if (assetDefinitions.get(network) == null) assetDefinitions.put(network, new HashMap<>());
+        for (String address : newTokenDescriptionAddresses.keySet())
+        {
+            assetDefinitions.get(network).put(address, new File(newTokenDescriptionAddresses.get(address).getAbsolutePath()));
+        }
     }
 
     private Map<String, File> networkAddresses(List<String> strings, String path)
@@ -562,23 +554,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             ContractInfo holdingContracts = token.contracts.get(token.holdingToken);
             if (holdingContracts != null)
             {
-                holdingContracts.addresses.keySet().stream().forEach(network -> addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), asset)));
-                return true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    private boolean addContractAddresses(@RawRes int resourceId)
-    {//activity.getResources().getAssets()
-        try (InputStream input = context.getResources().openRawResource(resourceId)) {
-            TokenDefinition token = parseFile(input);
-            ContractInfo holdingContracts = token.contracts.get(token.holdingToken);
-            if (holdingContracts != null)
-            {
-                holdingContracts.addresses.keySet().stream().forEach(network -> addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), String.valueOf(resourceId))));
+                //some Android versions don't have stream()
+                for (int network : holdingContracts.addresses.keySet())
+                {
+                    addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), asset));
+                }
                 return true;
             }
         } catch (Exception e) {

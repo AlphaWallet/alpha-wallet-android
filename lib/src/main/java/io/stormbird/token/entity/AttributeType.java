@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -186,6 +187,9 @@ public class AttributeType {
                 //return data;
                 try
                 {
+                    //ensure data is alphanum
+                    data = checkAlphaNum(data);
+
                     DateTime dt = DateTimeFactory.getDateTime(data);
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
                     SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
@@ -223,6 +227,23 @@ public class AttributeType {
             default:
                 return data;
         }
+    }
+
+    private String checkAlphaNum(String data)
+    {
+        for (char ch : data.toCharArray())
+        {
+            if (!(Character.isAlphabetic(ch) || Character.isDigit(ch) || ch == '+' || ch == '-' || Character.isWhitespace(ch)))
+            {
+                //set to current time
+                SimpleDateFormat format = new SimpleDateFormat("yyyymmddHHmmssZ", Locale.ENGLISH);
+                //data = "20180714170000+0300";
+                data = format.format(new Date(System.currentTimeMillis()));
+                break;
+            }
+        }
+
+        return data;
     }
 
     /**

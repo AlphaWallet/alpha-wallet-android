@@ -1,5 +1,6 @@
 package io.stormbird.wallet.util;
 
+import io.stormbird.wallet.entity.GasSettings;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.ens.Contracts;
 import org.web3j.ens.EnsResolutionException;
@@ -12,8 +13,9 @@ import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthSyncing;
 import org.web3j.protocol.core.methods.response.NetVersion;
 import org.web3j.tx.ClientTransactionManager;
+import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
-import org.web3j.tx.gas.DefaultGasProvider;
+//import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Numeric;
 
 /**
@@ -116,14 +118,16 @@ public class AWEnsResolver
 
         ENS ensRegistry = ENS.load(
                 registryContract, web3j, transactionManager,
-                DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT);
+                Contract.GAS_PRICE, Contract.GAS_LIMIT);
+                //DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT);
 
         byte[] nameHash = NameHash.nameHashAsBytes(ensName);
 
         String resolverAddress = ensRegistry.resolver(nameHash).send();
         PublicResolver resolver = PublicResolver.load(
                 resolverAddress, web3j, transactionManager,
-                DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT);
+                Contract.GAS_PRICE, Contract.GAS_LIMIT);
+                //DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT);
 
         return resolver;
     }

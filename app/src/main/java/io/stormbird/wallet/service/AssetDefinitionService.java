@@ -9,7 +9,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.support.annotation.Nullable;
-import android.support.annotation.RawRes;
 import android.support.v4.app.NotificationCompat;
 import android.util.SparseArray;
 import io.reactivex.Completable;
@@ -25,27 +24,25 @@ import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.tokenscript.TokenscriptFunction;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TransactionsRealmCache;
 import io.stormbird.wallet.repository.entity.RealmAuxData;
 import io.stormbird.wallet.ui.HomeActivity;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.datatypes.Function;
 import org.xml.sax.SAXException;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
-import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static android.os.FileObserver.ALL_EVENTS;
 import static io.stormbird.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
@@ -77,6 +74,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private SparseArray<Map<String, SparseArray<String>>> tokenTypeName;
     private SparseArray<Map<String, String>> issuerName;
 
+    private final TokenscriptFunction tokenscriptUtility;
+
     public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs, RealmManager rm, EthereumNetworkRepositoryType eth, TokensService tokensService)
     {
         context = ctx;
@@ -89,6 +88,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         realmManager = rm;
         ethereumNetworkRepository = eth;
         this.tokensService = tokensService;
+        tokenscriptUtility = new TokenscriptFunction() { }; //no overriden functions
 
         loadLocalContracts();
     }
@@ -184,7 +184,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 ContractAddress cAddr = new ContractAddress(attrtype.function, token.tokenInfo.chainId, token.tokenInfo.address);
                 TransactionResult tResult = getFunctionResult(cAddr, attrtype, tokenId); //t.getTokenIdResults(BigInteger.ZERO);
-                result = attrtype.function.parseFunctionResult(tResult, attrtype);
+                result = tokenscriptUtility.parseFunctionResult(tResult, attrtype);//  attrtype.function.parseFunctionResult(tResult, attrtype);
             }
             else
             {
@@ -890,7 +890,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                         Observable.fromIterable(token.getNonZeroArrayBalance())
                                                 .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
                                                 .filter(TransactionResult::needsUpdating)
-                                                .concatMap(result -> td.fetchAttrResult(attr.id, result.tokenId, cAddr,this))
+                                                .concatMap(result -> tokenscriptUtility.fetchAttrResult(attr.id, result.tokenId, cAddr, td, this))// td.fetchAttrResult(attr.id, result.tokenId, cAddr,this))
                                                 .subscribeOn(Schedulers.io())
                                                 .observeOn(AndroidSchedulers.mainThread())
                                                 .subscribe();
@@ -902,7 +902,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                     TransactionResult tr = getFunctionResult(cAddr, attr, BigInteger.ZERO);
                                     if (tr.needsUpdating())
                                     {
-                                        td.fetchAttrResult(attr.id, tr.tokenId, cAddr,this)
+                                        tokenscriptUtility.fetchAttrResult(attr.id, tr.tokenId, cAddr, td, this)
                                                 .subscribeOn(Schedulers.io())
                                                 .observeOn(AndroidSchedulers.mainThread())
                                                 .subscribe();
@@ -1073,21 +1073,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
-        return definition.resolveAttributes(tokenId, this, cAddr);
-    }
-
-    public List<Integer> getCanonicalized()
-    {
-        List<Integer> canonicalizedFiles = new ArrayList<>();
-        for (Field field : R.xml.class.getFields())
-        {
-            if (field.getName().contains("canonicalized"))
-            {
-                canonicalizedFiles.add(context.getResources().getIdentifier(field.getName(), "xml", context.getPackageName()));
-            }
-        }
-
-        return canonicalizedFiles;
+        //return definition.resolveAttributes(tokenId, this, cAddr);
+        //resolveAttributes(BigInteger tokenId, AttributeInterface attrIf, ContractAddress cAddr, TokenDefinition td)
+        return tokenscriptUtility.resolveAttributes(tokenId, this, cAddr, definition);
     }
 
     private List<String> getCanonicalizedAssets()
@@ -1112,5 +1100,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return canonicalizedFilesStr;
+    }
+
+    public String generateTransactionPayload(Token token, BigInteger tokenId, FunctionDefinition def)
+    {
+        TokenDefinition td = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        if (td == null) return "";
+        Function function = tokenscriptUtility.generateTransactionFunction(token.getWallet(), tokenId, td, def, this);
+        String encodedFunction = FunctionEncoder.encode(function);
+        return encodedFunction;
     }
 }

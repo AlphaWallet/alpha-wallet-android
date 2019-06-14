@@ -1,16 +1,7 @@
 package io.stormbird.token.tools;
 
-import io.reactivex.Observable;
-import io.reactivex.Single;
-import io.reactivex.internal.operators.observable.ObservableError;
 import io.stormbird.token.entity.*;
 import org.w3c.dom.*;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Uint256;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -934,90 +925,5 @@ public class TokenDefinition {
     public Map<String, TSAction> getActions()
     {
         return actions;
-    }
-
-
-    //Generic methods for resolving attributes
-    //need a method to simply 'fetch' an attribute
-//    public Single<TokenScriptResult.Attribute> getAttribute(String attribute, BigInteger tokenId, ContractAddress cAddr, AttributeInterface attrIf)
-//    {
-//
-//    }
-
-
-    public Observable<TokenScriptResult.Attribute> fetchAttrResult(String attribute, BigInteger tokenId, ContractAddress cAddr, AttributeInterface attrIf)
-    {
-        AttributeType attr = attributeTypes.get(attribute);
-        if (attr == null) return Observable.fromCallable(() -> null);
-        if (attr.function == null)  // static attribute from tokenId (eg city mapping from tokenId)
-        {
-            return staticAttribute(attr, tokenId);
-        }
-        else
-        {
-            ContractAddress useAddress;
-            if (cAddr == null) useAddress = new ContractAddress(attr.function);
-            else useAddress = new ContractAddress(attr.function, cAddr.chainId, cAddr.address);
-            TransactionResult transactionResult = attrIf.getFunctionResult(useAddress, attr, tokenId);
-            if (attrIf.resolveOptimisedAttr(useAddress, attr, transactionResult) || !transactionResult.needsUpdating()) //can we use wallet's known data or cached value?
-            {
-                return resultFromDatabase(transactionResult, attr);
-            }
-            else  //if value is old or there wasn't any previous value
-            {
-                //for function query, never need wallet address
-                return attr.function.fetchResultFromEthereum(useAddress, attr, tokenId, this)          // Fetch function result from blockchain
-                        .map(result -> restoreFromDBIfRequired(result, transactionResult))  // If network unavailable restore value from cache
-                        .map(attrIf::storeAuxData)                                          // store new data
-                        .map(result -> attr.function.parseFunctionResult(result, attr));    // write returned data into attribute
-            }
-        }
-    }
-
-    public Observable<TokenScriptResult.Attribute> resolveAttributes(BigInteger tokenId, AttributeInterface attrIf, ContractAddress cAddr)
-    {
-        context = new TokenscriptContext();
-        context.cAddr = cAddr;
-        context.attrInterface = attrIf;
-
-        return Observable.fromIterable(new ArrayList<>(attributeTypes.values()))
-                .flatMap(attr -> fetchAttrResult(attr.id, tokenId, cAddr, attrIf));
-    }
-
-    private Observable<TokenScriptResult.Attribute> staticAttribute(AttributeType attr, BigInteger tokenId)
-    {
-        return Observable.fromCallable(() -> {
-            try
-            {
-                BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
-                return new TokenScriptResult.Attribute(attr.id, attr.name, val, attr.getSyntaxVal(attr.toString(val)));
-            }
-            catch (Exception e)
-            {
-                return new TokenScriptResult.Attribute(attr.id, attr.name, tokenId, "unsupported encoding");
-            }
-        });
-    }
-
-    private Observable<TokenScriptResult.Attribute> resultFromDatabase(TransactionResult transactionResult, AttributeType attr)
-    {
-        return Observable.fromCallable(() -> attr.function.parseFunctionResult(transactionResult, attr));
-    }
-
-    /**
-     * Restore result from Database if required (eg connection failure), and if there was a database value to restore
-     * @param result
-     * @param transactionResult
-     * @return
-     */
-    private TransactionResult restoreFromDBIfRequired(TransactionResult result, TransactionResult transactionResult)
-    {
-        if (result.resultTime == 0 && transactionResult != null)
-        {
-            result.result = transactionResult.result;
-            result.resultTime = transactionResult.resultTime;
-        }
-
-        return result;
     }
 }

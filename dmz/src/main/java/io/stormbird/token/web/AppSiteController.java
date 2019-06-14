@@ -2,6 +2,7 @@ package io.stormbird.token.web;
 
 import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.token.web.Ethereum.TokenscriptFunction;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.*;
@@ -54,6 +55,7 @@ public class AppSiteController implements AttributeInterface
             "  }\n" +
             "}";
     private final MagicLinkData magicLinkData = new MagicLinkData();
+    private final TokenscriptFunction tokenscriptFunction = new TokenscriptFunction() { };
 
     @GetMapping(value = "/apple-app-site-association", produces = "application/json")
     @ResponseBody
@@ -152,7 +154,7 @@ public class AppSiteController implements AttributeInterface
             e.printStackTrace();
         }
 
-        definition.resolveAttributes(firstTokenId, this, cAddr)
+        tokenscriptFunction.resolveAttributes(firstTokenId, this, cAddr, definition)
                 .forEach(attr -> TokenScriptResult.addPair(tokenData, attr.id, attr.text))
                 .isDisposed();
 

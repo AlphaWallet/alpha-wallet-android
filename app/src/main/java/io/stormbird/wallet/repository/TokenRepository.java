@@ -325,14 +325,6 @@ public class TokenRepository implements TokenRepositoryType {
                 newToken);
     }
 
-    @Override
-    public String generateTransactionPayload(Token token, BigInteger tokenId, FunctionDefinition def, TokenDefinition td)
-    {
-        Function function = def.generateTransactionFunction(token.getWallet(), tokenId, td);// generateTransactionFunction(token, tokenId, def);
-        String encodedFunction = FunctionEncoder.encode(function);
-        return encodedFunction;
-    }
-
     private String callStringFunction(String method, String address, NetworkInfo network, BigInteger tokenId)
     {
         String result;

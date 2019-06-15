@@ -405,7 +405,8 @@ public class TokensService
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastUpdateDiff;
-            if (updateFactor > highestWeighting && lastUpdateDiff > 20*1000) // don't add to list if updated in the last 20 seconds
+            long cutoffCheck = check.isCurrency() ? 20*1000 : 40*1000;
+            if (updateFactor > highestWeighting && lastUpdateDiff > cutoffCheck) // don't add to list if updated in the last 20 seconds
             {
                 highestWeighting = updateFactor;
                 highestToken = check;

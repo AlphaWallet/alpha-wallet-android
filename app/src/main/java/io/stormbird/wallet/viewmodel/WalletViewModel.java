@@ -268,6 +268,7 @@ public class WalletViewModel extends BaseViewModel
         //add these tokens to the display
         tokens.postValue(receivedTokens);
         Token[] updatedTokens = tokensService.addTokens(receivedTokens);
+
         //now store the updated tokens
         if (updatedTokens.length > 0)
         {
@@ -523,7 +524,8 @@ public class WalletViewModel extends BaseViewModel
      */
     private void checkOpenSeaUpdate()
     {
-        if (openSeaCheckCounter > 0)
+        if (openSeaCheckCounter <= 4) openSeaCheckCounter++;
+        else if (openSeaCheckCounter > 5)
         {
             if (isVisible)
             {
@@ -543,7 +545,7 @@ public class WalletViewModel extends BaseViewModel
 
                 fetchFromOpensea(openSeaCheck);
             }
-            if ((openSeaCheckCounter - 6) % (CHECK_BLOCKSCOUT_INTERVAL_TIME * updateCorrection) == 0)
+            else if ((openSeaCheckCounter - 7) % (CHECK_BLOCKSCOUT_INTERVAL_TIME * updateCorrection) == 0)
             {
                 fetchFromBlockscout();
             }

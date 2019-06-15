@@ -130,12 +130,12 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
             return; //TODO: Display error message
 
         //For testing:
-        //GenerateSpawnLink(new ArrayList<BigInteger>(), contractAddress, expiry);
+        GenerateSpawnLink(new ArrayList<BigInteger>(), contractAddress, expiry);
         //GenerateDispensoryLink(expiry);
 
         //NB tradeBytes is the exact bytes the ERC875 contract builds to check the valid order.
         //This is what we must sign.
-        byte[] tradeBytes = parser.getTradeBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, expiry);
+        /*byte[] tradeBytes = parser.getTradeBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, expiry);
         try
         {
             linkMessage = ParseMagicLink.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, expiry);
@@ -148,7 +148,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         //sign this link
         disposable = createTransactionInteract
                 .sign(defaultWallet().getValue(), tradeBytes, token.tokenInfo.chainId)
-                .subscribe(this::gotSignature, this::onError);
+                .subscribe(this::gotSignature, this::onError);*/
     }
 
     //Generates a test dispenser link.
@@ -174,7 +174,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     //TODO: implement UI for spawnables if this is ever to be done from the app
     private void GenerateSpawnLink(List<BigInteger> tokenIdSpawn, String contractAddress, long expiry)
     {
-        BigInteger newToken = new BigInteger("0100", 16); //Simple ID for test spawnable
+        BigInteger newToken = new BigInteger("0101", 16); //Simple ID for test spawnable
         tokenIdSpawn.add(newToken);
 
         byte[] tradeBytes = parser.getSpawnableBytes(tokenIdSpawn, contractAddress, BigInteger.ZERO, expiry);

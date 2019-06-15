@@ -351,7 +351,7 @@ public class Token implements Parcelable
 
     public boolean isCurrency()
     {
-        return true;
+        return (contractType == ContractType.CURRENCY);
     }
 
     public boolean checkRealmBalanceChange(RealmToken realmToken)

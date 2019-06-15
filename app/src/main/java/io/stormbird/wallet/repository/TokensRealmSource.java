@@ -100,7 +100,8 @@ public class TokensRealmSource implements TokenLocalSource {
         });
     }
 
-    private void deleteRealmToken(int chainId, Wallet wallet, String address)
+    @Override
+    public void deleteRealmToken(int chainId, Wallet wallet, String address)
     {
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {

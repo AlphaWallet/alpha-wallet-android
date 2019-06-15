@@ -295,7 +295,7 @@ public class AppSiteController implements AttributeInterface
         addresses = new HashMap<Integer, Map<String, File>>();
         SpringApplication.run(AppSiteController.class, args);
         try (Stream<Path> dirStream = Files.walk(repoDir)) {
-            dirStream.filter(path -> path.toString().toLowerCase().endsWith(".xml"))
+            dirStream.filter(path -> path.toString().toLowerCase().endsWith(".tsml"))
                     .filter(Files::isRegularFile)
                     .filter(Files::isReadable)
                     .forEach(AppSiteController::addContractAddresses);

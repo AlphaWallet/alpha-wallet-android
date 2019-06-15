@@ -104,9 +104,4 @@ public class FetchTokensInteract {
         pair.balance = token.getArrayBalance();
         return pair;
     }
-
-    public String getTransactionBytes(Token token, BigInteger tokenId, FunctionDefinition def, TokenDefinition td)
-    {
-        return tokenRepository.generateTransactionPayload(token, tokenId, def, td);
-    }
 }

@@ -1,6 +1,5 @@
 package io.stormbird.token.entity;
 
-import io.reactivex.Observable;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.token.util.DateTime;
 import io.stormbird.token.util.DateTimeFactory;

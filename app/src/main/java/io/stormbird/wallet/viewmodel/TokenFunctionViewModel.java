@@ -124,8 +124,7 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     public String getTransactionBytes(Token token, BigInteger tokenId, FunctionDefinition def)
     {
-        TokenDefinition td = assetDefinitionService.getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
-        return fetchTokensInteract.getTransactionBytes(token, tokenId, def, td);
+        return assetDefinitionService.generateTransactionPayload(token, tokenId, def);
     }
 
     public TokenScriptResult getTokenScriptResult(Token token, BigInteger tokenId)

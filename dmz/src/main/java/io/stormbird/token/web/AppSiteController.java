@@ -89,7 +89,7 @@ public class AppSiteController implements AttributeInterface
 
             if (domain.contains("duckdns.org") || domain.contains("192.168"))
             {
-                data.chainId = 3;
+                data.chainId = 1;
             }
         }
         catch (SalesOrderMalformed e)
@@ -182,15 +182,25 @@ public class AppSiteController implements AttributeInterface
         String etherscanAccountLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "address/" + data.ownerAddress;
         String etherscanTokenLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "token/" + data.contractAddress;
 
-        return String.format(initHTML,
-                                        title, style, String.valueOf(data.ticketCount), nameWithSymbol, definition.getTokenName(data.ticketCount),
-                                        price, available,
-                                        data.ticketCount, definition.getTokenName(data.ticketCount),
-                                        tokenView, availableUntil,
-                                        action, originalLink,
-                                        etherscanAccountLink, data.ownerAddress,
-                                        etherscanTokenLink, data.contractAddress
-                                        );
+        return String.format(
+                initHTML,
+                title,
+                style,
+                String.valueOf(data.ticketCount),
+                nameWithSymbol,
+                definition.getTokenName(data.ticketCount),
+                price, available,
+                data.ticketCount,
+                definition.getTokenName(data.ticketCount),
+                tokenView,
+                availableUntil,
+                action,
+                originalLink,
+                etherscanAccountLink,
+                data.ownerAddress,
+                etherscanTokenLink,
+                data.contractAddress
+        );
     }
 
     private String handleCurrencyLink(
@@ -295,7 +305,7 @@ public class AppSiteController implements AttributeInterface
         addresses = new HashMap<Integer, Map<String, File>>();
         SpringApplication.run(AppSiteController.class, args);
         try (Stream<Path> dirStream = Files.walk(repoDir)) {
-            dirStream.filter(path -> path.toString().toLowerCase().endsWith(".xml"))
+            dirStream.filter(path -> path.toString().toLowerCase().endsWith(".tsml"))
                     .filter(Files::isRegularFile)
                     .filter(Files::isReadable)
                     .forEach(AppSiteController::addContractAddresses);

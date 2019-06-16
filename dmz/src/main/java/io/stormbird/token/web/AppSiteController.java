@@ -197,7 +197,7 @@ public class AppSiteController implements AttributeInterface
     private String passThroughToken(MagicLinkData data, String universalLink)
     {
         //construct passthrough html
-        dsfdsf
+        return "index";
     }
 
     private String handleCurrencyLink(

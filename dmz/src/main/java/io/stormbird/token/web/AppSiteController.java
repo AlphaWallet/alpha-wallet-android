@@ -129,7 +129,8 @@ public class AppSiteController implements AttributeInterface
              * case that the tokens are redeemd is handled inside, not
              * as an exception */
             model.addAttribute("tokenAvailable", "unavailable");
-            return "index";
+            return passThroughToken(data, universalLink);
+            //return "index";
         }
 
         if (data.tokenIds != null && data.tokenIds.size() > 0)
@@ -193,6 +194,12 @@ public class AppSiteController implements AttributeInterface
                                         );
     }
 
+    private String passThroughToken(MagicLinkData data, String universalLink)
+    {
+        //construct passthrough html
+        dsfdsf
+    }
+
     private String handleCurrencyLink(
             MagicLinkData data,
             String agent,
@@ -228,7 +235,7 @@ public class AppSiteController implements AttributeInterface
     {
         File xml = null;
         TokenDefinition definition = null;
-        if (addresses.containsKey(chainId))
+        if (addresses.containsKey(chainId) && addresses.get(chainId).containsKey(contractAddress))
         {
             xml = addresses.get(chainId).get(contractAddress);
             if (xml == null) {

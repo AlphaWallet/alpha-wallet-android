@@ -113,6 +113,17 @@ public class TransactionsViewModel extends BaseViewModel
             eventTimer = Observable.interval(0, 1, TimeUnit.SECONDS)
                     .doOnNext(l -> checkEvents()).subscribe();
         }
+
+        //collect all unknown tokens
+        if (!parseTransactions && tokensService.checkHasLoaded())
+        {
+            parseTransactions = true;
+            //check transactions see if there are missing tokens
+            disposable = setupTokensInteract.getUnknownTokens(txMap.values().toArray(new Transaction[0]), tokensService)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .subscribe(this::addUnknownTokens);
+        }
     }
 
     private void checkEvents()
@@ -132,29 +143,19 @@ public class TransactionsViewModel extends BaseViewModel
             {
                 queryUnknownTokensDisposable = setupTokensInteract.addToken(t.address, t.chainId) //fetch tokenInfo
                         .flatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
+                        .filter(tokenInfo -> tokenInfo.name != null)
                         .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.chainId, tokenInfo.address), defaultWallet().getValue())) //add to database
-                        //.flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
                         .subscribe(this::updateTokenService, this::onError, this::reCheckUnknowns);
             }
-        }
-
-        if (!parseTransactions && tokensService.checkHasLoaded())
-        {
-            parseTransactions = true;
-            //check transactions see if there are missing tokens
-            disposable = setupTokensInteract.getUnknownTokens(txMap.values().toArray(new Transaction[0]), tokensService)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(Schedulers.io())
-                    .subscribe(this::addUnknownTokens);
         }
     }
 
     private void reCheckUnknowns()
     {
         queryUnknownTokensDisposable = null;
-        checkUnknownTokens();
+        //checkUnknownTokens();
     }
 
     private void checkTransactionQueue()

@@ -218,12 +218,6 @@ public class ERC721Token extends Token implements Parcelable
         return false;
     }
 
-    @Override
-    public void updateBalanceCheckPressure(boolean isVisible)
-    {
-
-    }
-
     /**
      * This is a list of legacy contracts which are known to use the old ERC721 source,
      * which only had 'transfer' as the transfer function.

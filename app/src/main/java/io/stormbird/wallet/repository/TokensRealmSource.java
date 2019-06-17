@@ -79,7 +79,29 @@ public class TokensRealmSource implements TokenLocalSource {
         });
     }
 
-    private void deleteRealmToken(int chainId, Wallet wallet, String address)
+    @Override
+    public Single<Token[]> saveERC20Tokens(Wallet wallet, Token[] tokens)
+    {
+        return Single.fromCallable(() -> {
+            try (Realm realm = realmManager.getRealmInstance(wallet))
+            {
+                realm.beginTransaction();
+                for (Token token : tokens)
+                {
+                    saveToken(realm, token);
+                }
+                realm.commitTransaction();
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
+            }
+            return tokens;
+        });
+    }
+
+    @Override
+    public void deleteRealmToken(int chainId, Wallet wallet, String address)
     {
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
@@ -479,63 +501,55 @@ public class TokensRealmSource implements TokenLocalSource {
                 });
     }
 
-    private void saveToken(Wallet wallet, Token token, Date currentTime) {
-        Realm realm = null;
-        try {
-            realm = realmManager.getRealmInstance(wallet);
-            String databaseKey = databaseKey(token);
+    private void saveToken(Realm realm, Token token) throws Exception
+    {
+        String databaseKey = databaseKey(token);
 
-            RealmToken realmToken = realm.where(RealmToken.class)
-                    .equalTo("address", databaseKey)
-                    .equalTo("chainId", token.tokenInfo.chainId)
-                    .findFirst();
-            if (realmToken == null)
+        RealmToken realmToken = realm.where(RealmToken.class)
+                .equalTo("address", databaseKey)
+                .equalTo("chainId", token.tokenInfo.chainId)
+                .findFirst();
+        if (realmToken == null)
+        {
+            Log.d(TAG, "Save New Token: " + token.getFullName() + " :" + token.tokenInfo.address);
+
+            realmToken = realm.createObject(RealmToken.class, databaseKey);
+            realmToken.setName(token.tokenInfo.name);
+            realmToken.setSymbol(token.tokenInfo.symbol);
+            realmToken.setDecimals(token.tokenInfo.decimals);
+            realmToken.setAddedTime(token.updateBlancaTime);
+            token.setRealmBalance(realmToken);
+            token.setRealmInterfaceSpec(realmToken);
+            token.setRealmLastBlock(realmToken);
+            realmToken.setEnabled(true);
+            realmToken.setChainId(token.tokenInfo.chainId);
+        }
+        else
+        {
+            Log.d(TAG, "Update Token: " + token.getFullName());
+            if (token.checkRealmBalanceChange(realmToken))
             {
-                TransactionsRealmCache.addRealm();
-                realm.beginTransaction();
-                Log.d(TAG, "Save New Token: " + token.getFullName() + " :" + token.tokenInfo.address);
-
-                realmToken = realm.createObject(RealmToken.class, databaseKey);
-                realmToken.setName(token.tokenInfo.name);
-                realmToken.setSymbol(token.tokenInfo.symbol);
-                realmToken.setDecimals(token.tokenInfo.decimals);
-                realmToken.setAddedTime(currentTime.getTime());
-                token.setRealmBalance(realmToken);
+                //has token changed?
+                realmToken.setAddedTime(token.updateBlancaTime);
                 token.setRealmInterfaceSpec(realmToken);
-                token.setRealmLastBlock(realmToken);
                 realmToken.setEnabled(true);
-                realmToken.setChainId(token.tokenInfo.chainId);
-                realm.commitTransaction();
-                TransactionsRealmCache.subRealm();
+                token.setRealmBalance(realmToken);
             }
-            else
-            {
-                Log.d(TAG, "Update Token: " + token.getFullName());
-                if (token.checkRealmBalanceChange(realmToken))
-                {
-                    //has token changed?
-                    TransactionsRealmCache.addRealm();
-                    realm.beginTransaction();
-//                    realmToken.setName(token.tokenInfo.name);
-//                    realmToken.setSymbol(token.tokenInfo.symbol);
-//                    realmToken.setDecimals(token.tokenInfo.decimals);
-                    realmToken.setAddedTime(currentTime.getTime());
-                    token.setRealmInterfaceSpec(realmToken);
-                    realmToken.setEnabled(true);
-                    realm.commitTransaction();
-                    token.setRealmBalance(realmToken);
-                    TransactionsRealmCache.subRealm();
-                }
-                //realmToken.setBalance(token.getFullBalance());
-            }
-        } catch (Exception ex) {
-            if (realm != null && realm.isInTransaction()) {
-                realm.cancelTransaction();
-            }
-        } finally {
-            if (realm != null) {
-                realm.close();
-            }
+        }
+    }
+
+    private void saveToken(Wallet wallet, Token token, Date currentTime) {
+        try (Realm realm = realmManager.getRealmInstance(wallet))
+        {
+            TransactionsRealmCache.addRealm();
+            realm.beginTransaction();
+            saveToken(realm, token);
+            realm.commitTransaction();
+            TransactionsRealmCache.subRealm();
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
         }
     }
 

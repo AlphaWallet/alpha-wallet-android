@@ -10,6 +10,7 @@ import android.os.Environment;
 import android.os.FileObserver;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.util.SparseArray;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
@@ -23,9 +24,11 @@ import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.entity.tokenscript.TokenscriptFunction;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
+import io.stormbird.wallet.repository.TokenLocalSource;
+import io.stormbird.wallet.repository.TokensRealmSource;
 import io.stormbird.wallet.repository.TransactionsRealmCache;
 import io.stormbird.wallet.repository.entity.RealmAuxData;
 import io.stormbird.wallet.ui.HomeActivity;
@@ -36,6 +39,7 @@ import org.web3j.abi.datatypes.Function;
 import org.xml.sax.SAXException;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.security.MessageDigest;
@@ -70,13 +74,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final RealmManager realmManager;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokensService tokensService;
+    private final TokenLocalSource tokenLocalSource;
     private TokenDefinition cachedDefinition = null;
     private SparseArray<Map<String, SparseArray<String>>> tokenTypeName;
     private SparseArray<Map<String, String>> issuerName;
 
     private final TokenscriptFunction tokenscriptUtility;
 
-    public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs, RealmManager rm, EthereumNetworkRepositoryType eth, TokensService tokensService)
+    public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs,
+                                  RealmManager rm, EthereumNetworkRepositoryType eth, TokensService tokensService,
+                                  TokenLocalSource trs)
     {
         context = ctx;
         okHttpClient = client;
@@ -89,6 +96,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         ethereumNetworkRepository = eth;
         this.tokensService = tokensService;
         tokenscriptUtility = new TokenscriptFunction() { }; //no overriden functions
+        tokenLocalSource = trs;
 
         loadLocalContracts();
     }
@@ -436,6 +444,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             addContractAddresses(newFile);
             context.sendBroadcast(new Intent(ADDED_TOKEN)); //inform walletview there is a new token
+
+            //TODO: check interface spec
         }
     }
 
@@ -890,6 +900,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                     Token token = tokensService.getToken(networkId, address);
                                     if (token != null)
                                     {
+                                        checkCorrectInterface(token, cInfo.contractInterface);
                                         Observable.fromIterable(token.getNonZeroArrayBalance())
                                                 .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
                                                 .filter(TransactionResult::needsUpdating)
@@ -918,6 +929,48 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             }
             return updatedTokens;
         });
+    }
+
+    private void checkCorrectInterface(Token token, String contractInterface)
+    {
+        ContractType cType;
+        switch (contractInterface.toLowerCase())
+        {
+            case "erc875":
+                cType = ContractType.ERC875;
+                break;
+            case "erc20":
+                cType = ContractType.ERC20;
+                break;
+            case "erc721":
+                cType = ContractType.ERC721;
+                break;
+            case "ethereum":
+                cType = ContractType.CURRENCY;
+                break;
+            default:
+                cType = ContractType.OTHER;
+                break;
+        }
+
+        if (cType == ContractType.OTHER) return;
+        if (cType == token.getInterfaceSpec()) return;
+
+        //contract mismatch, re-assign
+        //first delete from database
+        tokenLocalSource.deleteRealmToken(token.tokenInfo.chainId, new Wallet(token.getWallet()), token.tokenInfo.address);
+
+        //now store into database
+        //TODO: if erc20 refresh all values
+        TokenFactory tf = new TokenFactory();
+
+        Token newToken = tf.createToken(token.tokenInfo, BigDecimal.ZERO, null, 0, cType, token.getNetworkName(), 0);
+        newToken.setTokenWallet(token.getWallet());
+        newToken.walletUIUpdateRequired = true;
+
+        tokenLocalSource.saveToken(new Wallet(token.getWallet()), newToken)
+                .subscribeOn(Schedulers.io())
+                .subscribe(tokensService::addToken).isDisposed();
     }
 
 
@@ -1042,6 +1095,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenScriptResult.addPair(attrs, "contractAddress", token.tokenInfo.address);
         TokenScriptResult.addPair(attrs, "chainId", String.valueOf(token.tokenInfo.chainId));
         TokenScriptResult.addPair(attrs, "tokenId", tokenId);
+
 
         if (token.isEthereum())
         {

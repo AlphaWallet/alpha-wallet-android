@@ -192,6 +192,7 @@ public class TokensService
         tokenMap.clear();
         transactionUpdateQueue.clear();
         currencyCheckCount = 0;
+        for (Token t : getAllLiveTokens()) t.refreshCheck = false;  //no time cutoff for checking token balance; user is refreshing, wants to update balance for all tokens
     }
 
     public List<Token> getAllTokens()
@@ -406,15 +407,18 @@ public class TokensService
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastUpdateDiff;
             long cutoffCheck = check.isCurrency() ? 20*1000 : 40*1000;
-            if (updateFactor > highestWeighting && lastUpdateDiff > cutoffCheck) // don't add to list if updated in the last 20 seconds
+            if (updateFactor > highestWeighting && (updateFactor > (float)cutoffCheck || check.refreshCheck)) // don't add to list if updated in the last 20 seconds
             {
                 highestWeighting = updateFactor;
                 highestToken = check;
             }
         }
 
-        // Only update if token hasn't been updated within 20 seconds
-        if (highestToken != null) highestToken.updateBlancaTime = System.currentTimeMillis();
+        if (highestToken != null)
+        {
+            highestToken.updateBlancaTime = System.currentTimeMillis();
+            highestToken.refreshCheck = false;
+        }
 
         return highestToken;
     }

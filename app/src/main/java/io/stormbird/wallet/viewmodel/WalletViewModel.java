@@ -269,6 +269,11 @@ public class WalletViewModel extends BaseViewModel
         tokens.postValue(receivedTokens);
         Token[] updatedTokens = tokensService.addTokens(receivedTokens);
 
+        for (Token tt : receivedTokens)
+        {
+            Log.d("TOKEN", "Updating: " + tt.tokenInfo.name + " : " + tt.getAddress() + " [" + tt.updateBlancaTime + "]");
+        }
+
         //now store the updated tokens
         if (updatedTokens.length > 0)
         {

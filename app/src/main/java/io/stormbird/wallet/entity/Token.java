@@ -43,6 +43,7 @@ public class Token implements Parcelable
     public float balanceUpdateWeight;
     public boolean balanceChanged;
     public boolean walletUIUpdateRequired;
+    public boolean refreshCheck = true;
 
     public String getNetworkName() { return shortNetworkName; }
 
@@ -72,6 +73,7 @@ public class Token implements Parcelable
             lastBlockCheck = oldToken.lastBlockCheck;
             pendingBalance = oldToken.pendingBalance;
         }
+        refreshCheck = false;
     }
 
     protected Token(Parcel in) {
@@ -351,7 +353,7 @@ public class Token implements Parcelable
 
     public boolean isCurrency()
     {
-        return (contractType == ContractType.CURRENCY);
+        return (contractType == ContractType.ETHEREUM);
     }
 
     public boolean checkRealmBalanceChange(RealmToken realmToken)

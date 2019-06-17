@@ -56,6 +56,7 @@ public class AppSiteController implements AttributeInterface
             "}";
     private final MagicLinkData magicLinkData = new MagicLinkData();
     private final TokenscriptFunction tokenscriptFunction = new TokenscriptFunction() { };
+    private static Path repoDir;
 
     @GetMapping(value = "/apple-app-site-association", produces = "application/json")
     @ResponseBody
@@ -97,13 +98,7 @@ public class AppSiteController implements AttributeInterface
             return "error: " + e;
         }
         parser.getOwnerKey(data);
-        switch (data.contractType)
-        {
-            case currencyLink:
-                return handleCurrencyLink(data, agent, model);
-            default:
-                return handleTokenLink(data, agent, model, universalLink);
-        }
+        return handleTokenLink(data, agent, model, universalLink);
     }
 
     private String handleTokenLink(
@@ -203,37 +198,6 @@ public class AppSiteController implements AttributeInterface
         );
     }
 
-    private String handleCurrencyLink(
-            MagicLinkData data,
-            String agent,
-            Model model
-    )
-    {
-        String networkName = MagicLinkInfo.getNetworkNameById(data.chainId);
-        model.addAttribute("link", data);
-        model.addAttribute("linkValue", getEthStringSzabo(data.amount));
-        model.addAttribute("title", networkName + " Currency Drop");
-        model.addAttribute("currency", networkName);
-        model.addAttribute("domain", MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId));
-
-        try {
-            updateContractInfo(model, data);
-        } catch (Exception e) {
-            /* The link points to a non-existing contract - most
-             * likely from a different chainID. Now, if Ethereum node
-             * is offline, this may get triggered too. */
-            model.addAttribute("tokenAvailable", "unattainable");
-            return "currency";
-        }
-
-        if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000))){
-            model.addAttribute("tokenAvailable", "expired");
-        } else {
-            model.addAttribute("tokenAvailable", "available");
-        }
-        return "currency";
-    }
-
     private TokenDefinition getTokenDefinition(int chainId, String contractAddress) throws IOException, SAXException, NoHandlerFoundException
     {
         File xml = null;
@@ -253,15 +217,6 @@ public class AppSiteController implements AttributeInterface
         }
 
         return definition;
-    }
-
-    private void updateContractInfo(Model model, MagicLinkData data) {
-        //find out the contract name, symbol and balance
-        //have to use blocking gets here
-        //TODO: we should be able to update components here instead of waiting
-        TransactionHandler txHandler = new TransactionHandler(data.chainId);
-        String contractName = txHandler.getName(data.contractAddress);
-        model.addAttribute("contractName", contractName);
     }
 
     /**
@@ -293,8 +248,6 @@ public class AppSiteController implements AttributeInterface
         if (selection.size() != data.tickets.length)
             throw new Exception("Some or all non-fungible tokens are not owned by the claimed owner");
     }
-
-    private static Path repoDir;
 
     @Value("${repository.dir}")
     public void setRepoDir(String value) {

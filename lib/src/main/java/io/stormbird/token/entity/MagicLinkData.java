@@ -1,10 +1,5 @@
 package io.stormbird.token.entity;
 
-
-import io.stormbird.token.tools.Numeric;
-
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,5 +58,4 @@ public class MagicLinkData
 
         return (oldBalance.size() != 0 || newBalance.size() != 0);
     }
-
 }

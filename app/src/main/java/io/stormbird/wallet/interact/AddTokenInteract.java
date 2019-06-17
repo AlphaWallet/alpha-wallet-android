@@ -38,4 +38,9 @@ public class AddTokenInteract {
     {
         return tokenRepository.fetchLatestBlockNumber(chainId);
     }
+
+    public Single<Token[]> addERC20(Wallet wallet, Token[] tokens)
+    {
+        return tokenRepository.addERC20(wallet, tokens);
+    }
 }

@@ -34,6 +34,7 @@ public class WalletViewModel extends BaseViewModel
 {
     private static final int BALANCE_CHECK_INTERVAL_MILLIS = 500; //Balance check interval in milliseconds - should be integer divisible with 1000 (1 second)
     private static final int CHECK_OPENSEA_INTERVAL_TIME = 40; //Opensea refresh interval in seconds
+    private static final int CHECK_BLOCKSCOUT_INTERVAL_TIME = 30;
     private static final int OPENSEA_RINKEBY_CHECK = 6; //check Rinkeby opensea once per XX opensea checks (ie if interval time is 25 and rinkeby check is 1 in 6, rinkeby refresh time is once per 300 seconds).
 
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
@@ -60,6 +61,7 @@ public class WalletViewModel extends BaseViewModel
 
     private boolean isVisible = false;
     private int openSeaCheckCounter;
+    private int blockscoutCheckCounter;
     private Wallet currentWallet;
 
     private ConcurrentLinkedQueue<ContractResult> unknownAddresses;
@@ -153,6 +155,7 @@ public class WalletViewModel extends BaseViewModel
         if (currentWallet != null)
         {
             openSeaCheckCounter = 0;
+            blockscoutCheckCounter = 0;
             tokensService.setCurrentAddress(currentWallet.address);
             updateTokens = fetchTokensInteract.fetchStoredWithEth(currentWallet)
                     .subscribeOn(Schedulers.newThread())
@@ -168,7 +171,6 @@ public class WalletViewModel extends BaseViewModel
 
     private void onTokens(Token[] cachedTokens)
     {
-        tokensService.randomiseInitialPressure(cachedTokens);
         tokensService.addTokens(cachedTokens);
         tokens.postValue(tokensService.getAllLiveTokens().toArray(new Token[0]));
         fetchKnownContracts.postValue(true);
@@ -253,6 +255,30 @@ public class WalletViewModel extends BaseViewModel
         onFetchTokensCompletable();
     }
 
+    private void fetchFromBlockscout()
+    {
+        updateTokens = tokensService.getTokensAtAddress()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::receiveNetworkTokens, this::onError);
+    }
+
+    private void receiveNetworkTokens(Token[] receivedTokens)
+    {
+        //add these tokens to the display
+        tokens.postValue(receivedTokens);
+        Token[] updatedTokens = tokensService.addTokens(receivedTokens);
+
+        //now store the updated tokens
+        if (updatedTokens.length > 0)
+        {
+            addTokenInteract.addERC20(currentWallet, updatedTokens)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::storedTokens, this::onError).isDisposed();
+        }
+    }
+
     private void onFetchTokensCompletable()
     {
         progress.postValue(false);
@@ -286,7 +312,7 @@ public class WalletViewModel extends BaseViewModel
             balanceTimerDisposable.dispose();
             balanceTimerDisposable = null;
         }
-        tokensService.updateTokenPressure(isVisible);
+
         checkTokenUpdates();
         checkUnknownAddresses();
         checkOpenSeaUpdate();
@@ -498,7 +524,8 @@ public class WalletViewModel extends BaseViewModel
      */
     private void checkOpenSeaUpdate()
     {
-        if (openSeaCheckCounter > 0)
+        if (openSeaCheckCounter <= 4) openSeaCheckCounter++;
+        else if (openSeaCheckCounter > 5)
         {
             if (isVisible)
             {
@@ -517,6 +544,10 @@ public class WalletViewModel extends BaseViewModel
                 }
 
                 fetchFromOpensea(openSeaCheck);
+            }
+            else if ((openSeaCheckCounter - 7) % (CHECK_BLOCKSCOUT_INTERVAL_TIME * updateCorrection) == 0)
+            {
+                fetchFromBlockscout();
             }
         }
         else

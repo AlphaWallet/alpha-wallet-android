@@ -10,6 +10,7 @@ public class NetworkInfo {
     public final String backupNodeUrl;
     public final String etherscanTxUrl;
     public final String tickerId;
+    public final String blockscoutAPI;
 
     public NetworkInfo(
             String name,
@@ -18,7 +19,8 @@ public class NetworkInfo {
             String etherscanUrl,
             int chainId,
             boolean isMainNetwork,
-            String tickerId) {
+            String tickerId,
+            String blockscoutAPI) {
         this.name = name;
         this.symbol = symbol;
         this.rpcServerUrl = rpcServerUrl;
@@ -28,6 +30,7 @@ public class NetworkInfo {
         this.backupNodeUrl = null;
         this.etherscanTxUrl = null;
         this.tickerId = tickerId;
+        this.blockscoutAPI = blockscoutAPI;
     }
 
     public NetworkInfo(
@@ -39,7 +42,8 @@ public class NetworkInfo {
             boolean isMainNetwork,
             String backupNodeUrl,
             String etherscanTxUrl,
-            String tickerId) {
+            String tickerId,
+            String blockscoutAPI) {
         this.name = name;
         this.symbol = symbol;
         this.rpcServerUrl = rpcServerUrl;
@@ -49,6 +53,7 @@ public class NetworkInfo {
         this.backupNodeUrl = backupNodeUrl;
         this.etherscanTxUrl = etherscanTxUrl;
         this.tickerId = tickerId;
+        this.blockscoutAPI = blockscoutAPI;
     }
 
     public String getShortName()

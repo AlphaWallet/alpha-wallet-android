@@ -118,7 +118,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     {
         try
         {
-            attrs = viewModel.getAssetDefinitionService().getTokenAttrs(token, 1);
+            attrs = viewModel.getAssetDefinitionService().getTokenAttrs(token, tokenId, 1);
         }
         catch (Exception e)
         {

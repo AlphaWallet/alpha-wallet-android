@@ -66,40 +66,28 @@ public class TokenScriptResult
         attrs.append(",\n");
     }
 
-    public static void addPair(StringBuilder attrs, String attrId, String attrValue)
+    public static <T> void addPair(StringBuilder attrs, String attrId, T attrValue)
     {
         attrs.append(attrId);
         attrs.append(": ");
 
-//        if (attrId.equals("time"))
-//        {
-//            try
-//            {
-//                DateTime dt = DateTimeFactory.getDateTime(attrValue);
-//                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-//                SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
-//                String JSDate = dt.format(simpleDateFormat) + "T" + dt.format(simpleTimeFormat);
-//
-//                attrValue = "{ generalizedTime: \"" + attrValue + "\", date: new Date(\"" + JSDate + "\") }";// ((DateTime) dt).toString();
-//                attrs.append(attrValue);
-//            }
-//            catch (ParseException e)
-//            {
-//                attrs.append("\"");
-//                attrs.append(attrValue);
-//                attrs.append("\"");
-//            }
-//        }
-//        else
-//        {
-//            attrs.append("\"");
-//            attrs.append(attrValue);
-//            attrs.append("\"");
-//        }
-
-        if (attrValue != null && attrValue.charAt(0) != '{') attrs.append("\"");
-        attrs.append(attrValue);
-        if (attrValue != null && attrValue.charAt(0) != '{') attrs.append("\"");
+        if (attrValue == null)
+        {
+            attrs.append("\"\"");
+        }
+        else if (attrValue instanceof BigInteger)
+        {
+            attrs.append("\"");
+            attrs.append(((BigInteger)attrValue).toString(10));
+            attrs.append("\"");
+        }
+        else
+        {
+            String attrValueStr = (String) attrValue;
+            if (attrValueStr.charAt(0) != '{') attrs.append("\"");
+            attrs.append(attrValueStr);
+            if (attrValueStr.charAt(0) != '{') attrs.append("\"");
+        }
 
         attrs.append(",\n");
     }

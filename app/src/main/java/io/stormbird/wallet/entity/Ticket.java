@@ -395,10 +395,9 @@ public class Ticket extends Token implements Parcelable
         activity.findViewById(R.id.layout_legacy).setVisibility(View.GONE);
 
         waitSpinner.setVisibility(View.VISIBLE);
-
-        final StringBuilder attrs = assetService.getTokenAttrs(this, range.tokenIds.size());
-
         BigInteger tokenId = range.tokenIds.get(0);
+
+        final StringBuilder attrs = assetService.getTokenAttrs(this, tokenId, range.tokenIds.size());
 
         assetService.resolveAttrs(this, tokenId)
                 .subscribeOn(Schedulers.io())

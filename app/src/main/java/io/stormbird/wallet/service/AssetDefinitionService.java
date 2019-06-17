@@ -1085,7 +1085,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    public StringBuilder getTokenAttrs(Token token, int count)
+    public StringBuilder getTokenAttrs(Token token, BigInteger tokenId, int count)
     {
         StringBuilder attrs = new StringBuilder();
 
@@ -1094,6 +1094,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenScriptResult.addPair(attrs, "_count", String.valueOf(count));
         TokenScriptResult.addPair(attrs, "contractAddress", token.tokenInfo.address);
         TokenScriptResult.addPair(attrs, "chainId", String.valueOf(token.tokenInfo.chainId));
+        TokenScriptResult.addPair(attrs, "tokenId", tokenId);
+
 
         if (token.isEthereum())
         {

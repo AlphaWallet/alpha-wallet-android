@@ -884,7 +884,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     /**
      * When a Non Fungible Token contract which has a Tokenscript definition has new transactions
      * We need to update the cached values as they could have changed
-     * TODO: Once we support event listening this is triggered from specific events
+     * TODO: Once we support event liostening this is triggered from specific events
      * @param token
      * @return
      */

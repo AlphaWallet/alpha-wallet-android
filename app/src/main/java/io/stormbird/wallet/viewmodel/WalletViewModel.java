@@ -189,23 +189,8 @@ public class WalletViewModel extends BaseViewModel
     {
         fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.MAINNET_ID));
         updateTokenBalances();
-        resolveScriptFunctions();
-    }
-
-    private void resolveScriptFunctions()
-    {
         assetDefinitionService.checkTokenscriptEnabledTokens(tokensService);
-//        assetDefinitionService.checkEthereumFunctions(tokensService)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(this::onUpdatedTokens, this::onError);
     }
-
-    private void onUpdatedTokens(List<Token> tokens)
-    {
-        //update tokens as required after we've fetched the token data
-    }
-
 
     /**
      * Stage 2: Fetch opensea tokens
@@ -267,11 +252,6 @@ public class WalletViewModel extends BaseViewModel
         //add these tokens to the display
         tokens.postValue(receivedTokens);
         Token[] updatedTokens = tokensService.addTokens(receivedTokens);
-
-        for (Token tt : receivedTokens)
-        {
-            Log.d("TOKEN", "Updating: " + tt.tokenInfo.name + " : " + tt.getAddress() + " [" + tt.updateBlancaTime + "]");
-        }
 
         //now store the updated tokens
         if (updatedTokens.length > 0)

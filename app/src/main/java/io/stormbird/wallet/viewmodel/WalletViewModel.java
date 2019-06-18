@@ -189,16 +189,16 @@ public class WalletViewModel extends BaseViewModel
     {
         fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.MAINNET_ID));
         updateTokenBalances();
-        //tokensService.loadAuxData();
         resolveScriptFunctions();
     }
 
     private void resolveScriptFunctions()
     {
-        assetDefinitionService.checkEthereumFunctions(tokensService)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onUpdatedTokens, this::onError);
+        assetDefinitionService.checkTokenscriptEnabledTokens(tokensService);
+//        assetDefinitionService.checkEthereumFunctions(tokensService)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(this::onUpdatedTokens, this::onError);
     }
 
     private void onUpdatedTokens(List<Token> tokens)

@@ -90,6 +90,9 @@ public class Token implements Parcelable
         pendingBalance = new BigDecimal(in.readString());
         tokenWallet = in.readString();
         lastBlockCheck = in.readLong();
+        lastTxCheck = in.readLong();
+        int readTS = in.readByte();
+        hasTokenScript = readTS == 1;
         balanceChanged = false;
         if (readType <= ContractType.CREATION.ordinal())
         {
@@ -144,6 +147,8 @@ public class Token implements Parcelable
         dest.writeString(pendingBalance == null ? "0" : pendingBalance.toString());
         dest.writeString(tokenWallet);
         dest.writeLong(lastBlockCheck);
+        dest.writeLong(lastTxCheck);
+        dest.writeByte(hasTokenScript?(byte)1:(byte)0);
     }
 
     public void setRealmBalance(RealmToken realmToken)

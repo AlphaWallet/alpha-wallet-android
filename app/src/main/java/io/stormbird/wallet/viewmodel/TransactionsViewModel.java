@@ -281,6 +281,10 @@ public class TransactionsViewModel extends BaseViewModel
         if (transactions.length > 0)
         {
             token.lastBlockCheck = Long.parseLong(transactions[transactions.length - 1].blockNumber);
+
+            if (token.hasTokenScript) assetDefinitionService.updateEthereumResults(token)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io()).subscribe();
         }
 
         //Need to log that we scanned transactions for this token, even if there weren't any transactions.

@@ -394,10 +394,6 @@ public class TokensService
             long cutoffCheck = check.isEthereum() ? 20*1000 : 40*1000;
             if (updateFactor > highestWeighting && (updateFactor > (float)cutoffCheck || check.refreshCheck)) // don't add to list if updated in the last 20 seconds
             {
-                if (check.tokenInfo.name.equals("PlasmaCoin"))
-                {
-                    System.out.println("yoless");
-                }
                 highestWeighting = updateFactor;
                 highestToken = check;
             }

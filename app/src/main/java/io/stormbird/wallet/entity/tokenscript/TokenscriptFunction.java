@@ -100,9 +100,9 @@ public abstract class TokenscriptFunction
             long currentTime = System.currentTimeMillis();
             //try to interpret the value
             List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
+            result.resultTime = currentTime;
             if (response.size() > 0)
             {
-                result.resultTime = currentTime;
                 Type val = response.get(0);
                 switch (fd.syntax)
                 {
@@ -251,12 +251,12 @@ public abstract class TokenscriptFunction
     {
         if (definition != null && definition.attributeTypes.containsKey(arg.element.ref))
         {
-            arg.element.value = fetchAttrResult(arg.element.ref, tokenId, null, definition, attrIf).blockingSingle().text;
+            arg.element.value = fetchAttrResult(arg.element.ref, tokenId, null, definition, attrIf, 0).blockingSingle().text;
         }
     }
 
 
-    public Observable<TokenScriptResult.Attribute> fetchAttrResult(String attribute, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf)
+    public Observable<TokenScriptResult.Attribute> fetchAttrResult(String attribute, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf, long transactionUpdate)
     {
         AttributeType attr = td.attributeTypes.get(attribute);
         if (attr == null) return Observable.fromCallable(() -> null);
@@ -270,14 +270,14 @@ public abstract class TokenscriptFunction
             if (cAddr == null) useAddress = new ContractAddress(attr.function);
             else useAddress = new ContractAddress(attr.function, cAddr.chainId, cAddr.address);
             TransactionResult transactionResult = attrIf.getFunctionResult(useAddress, attr, tokenId);
-            if (attrIf.resolveOptimisedAttr(useAddress, attr, transactionResult) || !transactionResult.needsUpdating()) //can we use wallet's known data or cached value?
+            if (attrIf.resolveOptimisedAttr(useAddress, attr, transactionResult) || !transactionResult.needsUpdating(transactionUpdate)) //can we use wallet's known data or cached value?
             {
                 return resultFromDatabase(transactionResult, attr);
             }
             else  //if value is old or there wasn't any previous value
             {
                 //for function query, never need wallet address
-                return fetchResultFromEthereum(useAddress, attr, tokenId, td, attrIf)          // Fetch function result from blockchain
+                return fetchResultFromEthereum(useAddress, attr, tokenId, td, attrIf)       // Fetch function result from blockchain
                         .map(result -> restoreFromDBIfRequired(result, transactionResult))  // If network unavailable restore value from cache
                         .map(attrIf::storeAuxData)                                          // store new data
                         .map(result -> parseFunctionResult(result, attr));    // write returned data into attribute
@@ -285,14 +285,14 @@ public abstract class TokenscriptFunction
         }
     }
 
-    public Observable<TokenScriptResult.Attribute> resolveAttributes(BigInteger tokenId, AttributeInterface attrIf, ContractAddress cAddr, TokenDefinition td)
+    public Observable<TokenScriptResult.Attribute> resolveAttributes(BigInteger tokenId, AttributeInterface attrIf, ContractAddress cAddr, TokenDefinition td, long transactionUpdate)
     {
         td.context = new TokenscriptContext();
         td.context.cAddr = cAddr;
         td.context.attrInterface = attrIf;
 
         return Observable.fromIterable(new ArrayList<>(td.attributeTypes.values()))
-                .flatMap(attr -> fetchAttrResult(attr.id, tokenId, cAddr, td, attrIf));
+                .flatMap(attr -> fetchAttrResult(attr.id, tokenId, cAddr, td, attrIf, transactionUpdate));
     }
 
     private Observable<TokenScriptResult.Attribute> staticAttribute(AttributeType attr, BigInteger tokenId)

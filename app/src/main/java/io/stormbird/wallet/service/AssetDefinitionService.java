@@ -551,7 +551,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private Map<String, File> networkAddresses(List<String> strings, String path)
     {
         Map<String, File> addrMap = new HashMap<>();
-        strings.forEach(address -> addrMap.put(address, new File(path)));
+        for (String address : strings) addrMap.put(address, new File(path));
         return addrMap;
     }
 
@@ -868,64 +868,73 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return sb.toString();
     }
 
-    public Single<List<Token>> checkEthereumFunctions(TokensService tokensService)
+    public void checkTokenscriptEnabledTokens(TokensService tokensService)
+    {
+        for (int networkId : assetDefinitions.keySet())
+        {
+            Map<String, File> defMap = assetDefinitions.get(networkId);
+            for (String address : defMap.keySet())
+            {
+                Token token = tokensService.getToken(networkId, address);
+                if (token != null) token.hasTokenScript = true;
+            }
+        }
+    }
+
+    /**
+     * When a Non Fungible Token contract which has a Tokenscript definition has new transactions
+     * We need to update the cached values as they could have changed
+     * TODO: Once we support event listening this is triggered from specific events
+     * @param token
+     * @return
+     */
+    public Single<Token> updateEthereumResults(Token token)
     {
         return Single.fromCallable(() -> {
-            List<Token> updatedTokens = new ArrayList<>();
-            for (int networkId : assetDefinitions.keySet())
-            {
-                Map<String, File> defMap = assetDefinitions.get(networkId);
-                for (String tokenScriptAddress : defMap.keySet())
-                {
-                    //fetch all attr solutions
-                    TokenDefinition td = getDefinition(networkId, tokenScriptAddress);
-                    List<AttributeType> attrs = new ArrayList<>(td.attributeTypes.values());
-                    for (AttributeType attr : attrs)
-                    {
-                        if (attr.function == null) continue;
-                        FunctionDefinition fd = attr.function;
-                        ContractInfo cInfo = fd.contract;
-                        List<String> addresses = cInfo.addresses.get(networkId);
+            TokenDefinition td = getDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+            if (td == null) return token;
 
-                        if (addresses != null)
+            List<AttributeType> attrs = new ArrayList<>(td.attributeTypes.values());
+            for (AttributeType attr : attrs)
+            {
+                if (attr.function == null) continue;
+                FunctionDefinition fd = attr.function;
+                ContractInfo cInfo = fd.contract;
+                List<String> addresses = cInfo.addresses.get(token.tokenInfo.chainId);
+
+                if (addresses != null)
+                {
+                    for (String address : addresses)
+                    {
+                        ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, address);
+                        if (cInfo.contractInterface != null)
                         {
-                            for (String address : addresses)
+                            checkCorrectInterface(token, cInfo.contractInterface);
+                                Observable.fromIterable(token.getNonZeroArrayBalance())
+                                        .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
+                                        .filter(txResult -> txResult.needsUpdating(token.lastTxCheck))
+                                        .concatMap(result -> tokenscriptUtility.fetchAttrResult(attr.id, result.tokenId, cAddr, td, this, token.lastTxCheck))
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe();
+                        }
+                        else
+                        {
+                            //doesn't have a contract interface, so just fetch the function
+                            TransactionResult tr = getFunctionResult(cAddr, attr, BigInteger.ZERO);
+                            if (tr.needsUpdating(token.lastTxCheck))
                             {
-                                ContractAddress cAddr = new ContractAddress(networkId, address);
-                                if (cInfo.contractInterface != null)
-                                {
-                                    //do we have this token?
-                                    Token token = tokensService.getToken(networkId, address);
-                                    if (token != null)
-                                    {
-                                        checkCorrectInterface(token, cInfo.contractInterface);
-                                        Observable.fromIterable(token.getNonZeroArrayBalance())
-                                                .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
-                                                .filter(TransactionResult::needsUpdating)
-                                                .concatMap(result -> tokenscriptUtility.fetchAttrResult(attr.id, result.tokenId, cAddr, td, this))// td.fetchAttrResult(attr.id, result.tokenId, cAddr,this))
-                                                .subscribeOn(Schedulers.io())
-                                                .observeOn(AndroidSchedulers.mainThread())
-                                                .subscribe();
-                                    }
-                                }
-                                else
-                                {
-                                    //doesn't have a contract interface, so just fetch the function
-                                    TransactionResult tr = getFunctionResult(cAddr, attr, BigInteger.ZERO);
-                                    if (tr.needsUpdating())
-                                    {
-                                        tokenscriptUtility.fetchAttrResult(attr.id, tr.tokenId, cAddr, td, this)
-                                                .subscribeOn(Schedulers.io())
-                                                .observeOn(AndroidSchedulers.mainThread())
-                                                .subscribe();
-                                    }
-                                }
+                                tokenscriptUtility.fetchAttrResult(attr.id, tr.tokenId, cAddr, td, this, token.lastTxCheck)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe();
                             }
                         }
                     }
                 }
             }
-            return updatedTokens;
+
+            return token;
         });
     }
 
@@ -1013,7 +1022,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     @Override
                     public void onStart()
                     {
-                        if (tResult.result == null) return;
+                        if (tResult.result == null) tResult.result = "";
                         realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress());
                         ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
                         RealmAuxData realmToken = realm.where(RealmAuxData.class)
@@ -1133,7 +1142,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
         //return definition.resolveAttributes(tokenId, this, cAddr);
         //resolveAttributes(BigInteger tokenId, AttributeInterface attrIf, ContractAddress cAddr, TokenDefinition td)
-        return tokenscriptUtility.resolveAttributes(tokenId, this, cAddr, definition);
+        return tokenscriptUtility.resolveAttributes(tokenId, this, cAddr, definition, token.lastTxCheck);
     }
 
     private List<String> getCanonicalizedAssets()

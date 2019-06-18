@@ -87,8 +87,8 @@ public class TokenFactory
 
         }
 
-        //thisToken.restoreAuxDataFromRealm(realmItem);
         thisToken.lastBlockCheck = realmItem.getLastBlock();
+        thisToken.lastTxCheck = realmItem.getUpdatedTime();
 
         return thisToken;
     }

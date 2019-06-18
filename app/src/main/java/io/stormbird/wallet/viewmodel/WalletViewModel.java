@@ -61,7 +61,6 @@ public class WalletViewModel extends BaseViewModel
 
     private boolean isVisible = false;
     private int openSeaCheckCounter;
-    private int blockscoutCheckCounter;
     private Wallet currentWallet;
 
     private ConcurrentLinkedQueue<ContractResult> unknownAddresses;
@@ -155,7 +154,6 @@ public class WalletViewModel extends BaseViewModel
         if (currentWallet != null)
         {
             openSeaCheckCounter = 0;
-            blockscoutCheckCounter = 0;
             tokensService.setCurrentAddress(currentWallet.address);
             updateTokens = fetchTokensInteract.fetchStoredWithEth(currentWallet)
                     .subscribeOn(Schedulers.newThread())
@@ -172,6 +170,7 @@ public class WalletViewModel extends BaseViewModel
     private void onTokens(Token[] cachedTokens)
     {
         tokensService.addTokens(cachedTokens);
+        tokensService.requireTokensRefresh();
         tokens.postValue(tokensService.getAllLiveTokens().toArray(new Token[0]));
         fetchKnownContracts.postValue(true);
     }

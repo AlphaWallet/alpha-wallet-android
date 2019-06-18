@@ -560,7 +560,7 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public boolean isCurrency() {
+    public boolean isToken() {
         return false;
     }
 

@@ -4,11 +4,8 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
-import io.reactivex.Observable;
-import io.stormbird.token.entity.*;
-import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.interact.SetupTokensInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -19,7 +16,6 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,11 +35,13 @@ public class Token implements Parcelable
     private String tokenWallet;
     protected ContractType contractType;
     public long lastBlockCheck = 0;
+    public long lastTxCheck = 0;
     private final String shortNetworkName;
     public float balanceUpdateWeight;
     public boolean balanceChanged;
     public boolean walletUIUpdateRequired;
-    public boolean refreshCheck = true;
+    public boolean refreshCheck;
+    public boolean hasTokenScript;
 
     public String getNetworkName() { return shortNetworkName; }
 
@@ -60,10 +58,14 @@ public class Token implements Parcelable
         this.shortNetworkName = networkName;
         this.contractType = type;
         this.pendingBalance = balance;
+        this.lastBlockCheck = 0;
+        this.lastTxCheck = 0;
 
         balanceUpdateWeight = calculateBalanceUpdateWeight();
         balanceChanged = false;
         walletUIUpdateRequired = false;
+        hasTokenScript = false;
+        refreshCheck = false;
     }
 
     public void transferPreviousData(Token oldToken)
@@ -72,6 +74,9 @@ public class Token implements Parcelable
         {
             lastBlockCheck = oldToken.lastBlockCheck;
             pendingBalance = oldToken.pendingBalance;
+            lastTxCheck = oldToken.lastTxCheck;
+            balanceChanged = oldToken.balanceChanged;
+            hasTokenScript = oldToken.hasTokenScript;
         }
         refreshCheck = false;
     }
@@ -155,7 +160,7 @@ public class Token implements Parcelable
 
     public void setIsTerminated(RealmToken realmToken)
     {
-        realmToken.setUpdatedTime(-1);
+        realmToken.setAddedTime(-1);
         updateBlancaTime = -1;
     }
     public boolean isTerminated() { return (updateBlancaTime == -1); }
@@ -351,9 +356,9 @@ public class Token implements Parcelable
         return ourAddress.equalsIgnoreCase(checkAddress);
     }
 
-    public boolean isCurrency()
+    public boolean isToken()
     {
-        return (contractType == ContractType.ETHEREUM);
+        return (contractType != ContractType.ETHEREUM);
     }
 
     public boolean checkRealmBalanceChange(RealmToken realmToken)
@@ -411,6 +416,12 @@ public class Token implements Parcelable
         this.tokenWallet = address;
     }
 
+    public void setupRealmToken(RealmToken realmToken)
+    {
+        lastBlockCheck = realmToken.getLastBlock();
+        lastTxCheck = realmToken.getUpdatedTime();
+    }
+
     public boolean checkBalanceChange(Token token)
     {
         return token != null && !getFullBalance().equals(token.getFullBalance());
@@ -457,6 +468,7 @@ public class Token implements Parcelable
     public void setRealmLastBlock(RealmToken realmToken)
     {
         realmToken.setLastBlock(lastBlockCheck);
+        realmToken.setUpdatedTime(lastTxCheck);
     }
 
     /**
@@ -716,15 +728,23 @@ public class Token implements Parcelable
 
     public boolean requiresTransactionRefresh()
     {
-        boolean requiresTransactionRefresh = balanceChanged;
+        boolean requiresUpdate = balanceChanged;
         balanceChanged = false;
         if ((hasPositiveBalance() || isEthereum()) && lastBlockCheck == 0) //check transactions for native currency plus tokens with balance
         {
             lastBlockCheck = 1;
-            requiresTransactionRefresh = true;
         }
 
-        return requiresTransactionRefresh;
+        long currentTime = System.currentTimeMillis();
+
+        //ensure chain transactions fomr the wallet are checked on a regular basis.
+        if (isEthereum() && hasPositiveBalance() && (currentTime - lastTxCheck) > 60*1000) //need to check main chains once per minute
+        {
+            lastTxCheck = currentTime; //don't check again
+            requiresUpdate = true;
+        }
+
+        return requiresUpdate;
     }
 
     public boolean getIsSent(Transaction transaction)

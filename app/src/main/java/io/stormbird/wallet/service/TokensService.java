@@ -1,37 +1,22 @@
 package io.stormbird.wallet.service;
 
-import android.util.Log;
 import android.util.SparseArray;
-import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.DisposableCompletableObserver;
-import io.realm.Realm;
-import io.realm.RealmResults;
-import io.stormbird.token.entity.EthereumTransaction;
-import io.stormbird.token.entity.TransactionResult;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-import io.stormbird.wallet.repository.TransactionsRealmCache;
-import io.stormbird.wallet.repository.entity.RealmAuxData;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static io.stormbird.wallet.C.ETHER_DECIMALS;
 import static io.stormbird.wallet.repository.EthereumNetworkRepository.BLOCKSCOUT_API;
@@ -46,7 +31,6 @@ public class TokensService
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final RealmManager realmManager;
     private final List<Integer> networkFilter;
-    private final ConcurrentLinkedQueue<Token> transactionUpdateQueue = new ConcurrentLinkedQueue<>();
     private Token focusToken;
     private final OkHttpClient okHttpClient;
     private int currencyCheckCount;
@@ -75,11 +59,6 @@ public class TokensService
             {
                 t.balanceUpdateWeight = focusToken.balanceUpdateWeight;
                 focusToken = t;
-            }
-
-            if (t.requiresTransactionRefresh())
-            {
-                transactionUpdateQueue.add(t);
             }
 
             addToken(t.tokenInfo.chainId, t);
@@ -170,7 +149,15 @@ public class TokensService
 
     public Token getRequiresTransactionUpdate()
     {
-        return transactionUpdateQueue.poll();
+        for (Token check : getAllLiveTokens())
+        {
+            if (check.requiresTransactionRefresh())
+            {
+                return check;
+            }
+        }
+
+        return null;
     }
 
     public int getTokenDecimals(int chainId, String addr)
@@ -190,9 +177,7 @@ public class TokensService
     {
         currentAddress = "";
         tokenMap.clear();
-        transactionUpdateQueue.clear();
         currencyCheckCount = 0;
-        for (Token t : getAllLiveTokens()) t.refreshCheck = false;  //no time cutoff for checking token balance; user is refreshing, wants to update balance for all tokens
     }
 
     public List<Token> getAllTokens()
@@ -406,9 +391,13 @@ public class TokensService
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastUpdateDiff;
-            long cutoffCheck = check.isCurrency() ? 20*1000 : 40*1000;
+            long cutoffCheck = check.isEthereum() ? 20*1000 : 40*1000;
             if (updateFactor > highestWeighting && (updateFactor > (float)cutoffCheck || check.refreshCheck)) // don't add to list if updated in the last 20 seconds
             {
+                if (check.tokenInfo.name.equals("PlasmaCoin"))
+                {
+                    System.out.println("yoless");
+                }
                 highestWeighting = updateFactor;
                 highestToken = check;
             }
@@ -498,11 +487,9 @@ public class TokensService
 
             for (int i = 0; i < tokens.length(); i++)
             {
-                Token token;
                 JSONObject t = (JSONObject)tokens.get(i);
                 String balanceStr = t.getString("balance");
                 if (balanceStr.length() == 0 || balanceStr.equals("0")) continue;
-                //TokenInfo(String address, String name, String symbol, int decimals, boolean isEnabled, int chainId)
                 String decimalsStr = t.getString("decimals");
                 int decimals = (decimalsStr.length() > 0) ? Integer.parseInt(decimalsStr) : 0;
                 TokenInfo info = new TokenInfo(t.getString("contractAddress"), t.getString("name"), t.getString("symbol"), decimals, true, chainId);
@@ -510,9 +497,9 @@ public class TokensService
                 if (decimalsStr.length() > 0)
                 {
                     BigDecimal balance = new BigDecimal(balanceStr);
-                    //createToken(TokenInfo tokenInfo, BigDecimal balance, List<BigInteger> balances, long updateBlancaTime, ContractType type, String networkName, long lastBlockCheck)
                     Token newToken = tf.createToken(info, balance, null, System.currentTimeMillis(), ContractType.ERC20, network.getShortName(), System.currentTimeMillis());
                     newToken.setTokenWallet(currentAddress);
+                    newToken.refreshCheck = false;
                     tokenList.add(newToken);
                 }
             }
@@ -521,5 +508,10 @@ public class TokensService
         {
             e.printStackTrace();
         }
+    }
+
+    public void requireTokensRefresh()
+    {
+        for (Token t : getAllLiveTokens()) t.refreshCheck = true;
     }
 }

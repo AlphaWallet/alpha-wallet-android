@@ -3,6 +3,7 @@ package io.stormbird.wallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.content.Intent;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -15,8 +16,12 @@ import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
+import io.stormbird.wallet.ui.ImportTokenActivity;
+import io.stormbird.wallet.ui.SendActivity;
 
 import java.math.BigInteger;
+
+import static io.stormbird.wallet.C.IMPORT_STRING;
 
 public class SendViewModel extends BaseViewModel {
     private final MutableLiveData<String> ensResolve = new MutableLiveData<>();
@@ -73,5 +78,13 @@ public class SendViewModel extends BaseViewModel {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(ensResolve::postValue, throwable -> ensFail.postValue(""));
+    }
+
+    public void showImportLink(Context context, String importTxt)
+    {
+        Intent intent = new Intent(context, ImportTokenActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra(IMPORT_STRING, importTxt);
+        context.startActivity(intent);
     }
 }

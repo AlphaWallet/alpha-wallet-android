@@ -3,7 +3,6 @@ package io.stormbird.wallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-
 import android.content.Intent;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -14,15 +13,17 @@ import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenRepository;
-import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.AddTokenActivity;
+import io.stormbird.wallet.ui.ImportTokenActivity;
 import io.stormbird.wallet.ui.SendActivity;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.stormbird.wallet.C.IMPORT_STRING;
 
 public class AddTokenViewModel extends BaseViewModel {
 
@@ -251,5 +252,13 @@ public class AddTokenViewModel extends BaseViewModel {
             testAddress = null;
             update.postValue(false);
         }
+    }
+
+    public void showImportLink(Context context, String importTxt)
+    {
+        Intent intent = new Intent(context, ImportTokenActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra(IMPORT_STRING, importTxt);
+        context.startActivity(intent);
     }
 }

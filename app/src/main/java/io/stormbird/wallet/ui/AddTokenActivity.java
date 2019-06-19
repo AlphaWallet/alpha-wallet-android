@@ -1,11 +1,9 @@
 package io.stormbird.wallet.ui;
 
-import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -15,16 +13,12 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import javax.inject.Inject;
-
 import dagger.android.AndroidInjection;
+import io.stormbird.token.entity.SalesOrderMalformed;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.QrUrlResult;
-import io.stormbird.wallet.entity.TokenInfo;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.util.QRURLParser;
 import io.stormbird.wallet.util.Utils;
@@ -35,6 +29,7 @@ import io.stormbird.wallet.widget.InputAddressView;
 import io.stormbird.wallet.widget.InputView;
 import io.stormbird.wallet.widget.SelectNetworkDialog;
 
+import javax.inject.Inject;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -196,6 +191,24 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                                     break;
                                 default:
                                     break;
+                            }
+                        }
+                        else //try magiclink
+                        {
+                            ParseMagicLink magicParser = new ParseMagicLink(new CryptoFunctions());
+                            try
+                            {
+                                if (magicParser.parseUniversalLink(barcode).chainId > 0) //see if it's a valid link
+                                {
+                                    //let's try to import the link
+                                    viewModel.showImportLink(this, barcode);
+                                    finish();
+                                    return;
+                                }
+                            }
+                            catch (SalesOrderMalformed e)
+                            {
+                                e.printStackTrace();
                             }
                         }
 

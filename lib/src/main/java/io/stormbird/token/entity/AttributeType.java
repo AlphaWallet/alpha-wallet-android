@@ -201,6 +201,7 @@ public class AttributeType {
                     return data;
                 }
             case Boolean:
+                if (data.length() == 0) return "FALSE";
                 if (Character.isDigit(data.charAt(0)))
                 {
                     return (data.charAt(0) == '0') ? "FALSE" : "TRUE";

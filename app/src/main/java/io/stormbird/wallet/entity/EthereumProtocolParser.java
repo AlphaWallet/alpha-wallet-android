@@ -35,6 +35,7 @@ public class EthereumProtocolParser
             ParseState readState = ParseState.ADDRESS;
 
             String type = null;
+            boolean readError = false;
 
             for (DataItem item : stream)
             {
@@ -99,7 +100,11 @@ public class EthereumProtocolParser
                                 throw new Exception("Invalid QR code: " + data);
                         }
                         break;
+                    default:
+                        readError = true;
+                        break;
                 }
+                if (readError) break;
             }
             result.createFunctionPrototype(args);
         }

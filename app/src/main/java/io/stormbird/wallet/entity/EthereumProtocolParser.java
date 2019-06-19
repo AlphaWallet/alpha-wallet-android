@@ -101,10 +101,8 @@ public class EthereumProtocolParser
                         }
                         break;
                     default:
-                        readError = true;
                         break;
                 }
-                if (readError) break;
             }
             result.createFunctionPrototype(args);
         }

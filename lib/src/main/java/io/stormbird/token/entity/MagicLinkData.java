@@ -17,7 +17,7 @@ public class MagicLinkData
     public double price;
     public BigInteger priceWei;
     public List<BigInteger> tokenIds;
-    public int[] tickets;
+    public int[] indices;
     public BigInteger amount;
     public int ticketStart;
     public int ticketCount;

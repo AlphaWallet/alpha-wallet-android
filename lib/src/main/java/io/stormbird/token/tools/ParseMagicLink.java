@@ -109,8 +109,8 @@ public class ParseMagicLink
                 data.ticketCount = data.tokenIds.size();
                 break;
             default:
-                data.tickets = ds.readCompressedIndices(ds.available() - 65);
-                data.ticketCount = data.tickets.length;
+                data.indices = ds.readCompressedIndices(ds.available() - 65);
+                data.ticketCount = data.indices.length;
                 break;
         }
 
@@ -197,13 +197,13 @@ public class ParseMagicLink
             case unassigned:
             case normal:
             case customizable:
-                return getTradeBytes(data.tickets, data.contractAddress, data.priceWei, data.expiry);
+                return getTradeBytes(data.indices, data.contractAddress, data.priceWei, data.expiry);
             case spawnable:
                 return getSpawnableBytes(data.tokenIds, data.contractAddress, data.priceWei, data.expiry);
             case currencyLink:
                 return getCurrencyBytes(data.contractAddress, data.amount, data.expiry, data.nonce.longValue());//data.formCurrencyDropLinkMessage();
             default:
-                return getTradeBytes(data.tickets, data.contractAddress, data.priceWei, data.expiry);
+                return getTradeBytes(data.indices, data.contractAddress, data.priceWei, data.expiry);
         }
     }
 

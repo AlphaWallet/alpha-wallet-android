@@ -15,7 +15,6 @@ import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
-import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -149,9 +148,9 @@ public class UniversalLinkTest
                 Sign.SignatureData signature = sigFromByteArray(order.signature);
                 assertEquals(order.priceWei, data.price);
                 assertEquals(order.expiry, data.expiry);
-                assertEquals(order.tickets.length, data.count);
+                assertEquals(order.indices.length, data.count);
                 assertEquals(order.ticketCount, data.count);
-                assertArrayEquals(order.tickets, data.tickets);
+                assertArrayEquals(order.indices, data.tickets);
                 assertNotNull(order.contractAddress);
                 assertNotNull(order.ownerAddress);
                 assertEquals(ownerAddress, order.ownerAddress.toLowerCase());

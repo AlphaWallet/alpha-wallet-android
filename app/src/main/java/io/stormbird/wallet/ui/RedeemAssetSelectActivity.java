@@ -35,7 +35,7 @@ import static io.stormbird.wallet.C.Key.TICKET_RANGE;
  */
 
 /**
- * This is where we select tickets to redeem
+ * This is where we select indices to redeem
  */
 public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenClickListener
 {
@@ -185,7 +185,7 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
         //check params
         if (range != null && quantity > 0 && quantity <= range.tokenIds.size())
         {
-            //form a new Ticket Range with the required tickets to burn
+            //form a new Ticket Range with the required indices to burn
             range.selectSubRange(quantity);
             viewModel.showRedeemSignature(this, range, token);
         }

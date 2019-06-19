@@ -210,8 +210,8 @@ public class AppSiteController implements AttributeInterface
                 {
                     balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
                     //check indices
-                    for (BigInteger index : data.tokenIds)
-                        if (index.intValue() >= balanceArray.size() || balanceArray.get(index.intValue()).equals(BigInteger.ZERO)) available = "unavailable";
+                    for (int index : data.indices)
+                        if (index >= balanceArray.size() || balanceArray.get(index).equals(BigInteger.ZERO)) available = "unavailable";
                     firstTokenId = balanceArray.get(0);
                 }
                 catch (Exception e)
@@ -290,7 +290,7 @@ public class AppSiteController implements AttributeInterface
         List<BigInteger> balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
         data.tokenIds = new ArrayList<>();
 
-        List<NonFungibleToken> selection = Arrays.stream(data.tickets)
+        List<NonFungibleToken> selection = Arrays.stream(data.indices)
                 .mapToObj(i -> balanceArray.get(i))
                 .filter(tokenId -> !tokenId.equals(BigInteger.ZERO))
                 .map(tokenId -> {
@@ -299,7 +299,7 @@ public class AppSiteController implements AttributeInterface
                 })
                 .collect(Collectors.toList());
 
-        if (selection.size() != data.tickets.length)
+        if (selection.size() != data.indices.length)
             throw new Exception("Some or all non-fungible tokens are not owned by the claimed owner");
     }
 

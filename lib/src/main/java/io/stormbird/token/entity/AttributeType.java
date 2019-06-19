@@ -259,7 +259,7 @@ public class AttributeType {
                 // members might be null, but it is better to throw up ( NullPointerException )
                 // than silently ignore
                 // JB: Existing contracts and tokens throw this error. The wallet 'crashes' each time existing tokens are opened
-                // due to assumptions made with extra tickets (ie null member is assumed to return null and not display that element).
+                // due to assumptions made with extra indices (ie null member is assumed to return null and not display that element).
                 if (members.containsKey(data))
                 {
                     return members.get(data);
@@ -275,7 +275,7 @@ public class AttributeType {
                 else
                 {
                     return null; // have to revert to this behaviour due to values being zero when tokens are created
-                    //refer to 'AlphaWallet meetup tickets' where 'Match' mapping is null but for FIFA is not.
+                    //refer to 'AlphaWallet meetup indices' where 'Match' mapping is null but for FIFA is not.
                     //throw new NullPointerException("Key " + data.toString() + " can't be mapped.");
                 }
             default:

@@ -301,7 +301,7 @@ public class MarketQueueService {
                 data.message = cryptoFunctions.Base64Decode(base64Msg);
                 MessageData msgData = parser.readByteMessage(data.message, cryptoFunctions.Base64Decode(base64Sig), data.ticketCount);
                 data.priceWei = msgData.priceWei;
-                data.tickets = msgData.tickets;
+                data.indices = msgData.tickets;
                 System.arraycopy(msgData.signature, 0, data.signature, 0, 65);
                 trades[i] = data;
             }

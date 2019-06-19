@@ -593,7 +593,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     CryptoFunctions cryptoFunctions = new CryptoFunctions();
                     ParseMagicLink parser = new ParseMagicLink(cryptoFunctions);
                     MagicLinkData order = parser.parseUniversalLink(text.toString());
-                    if (isValidAddress(order.contractAddress) && order.tickets.length > 0)
+                    if (isValidAddress(order.contractAddress) && order.indices.length > 0)
                     {
                         magicLink = text.toString();
                         //now clear the clipboard - we only ever do this if it's definitely a magicLink in the clipboard

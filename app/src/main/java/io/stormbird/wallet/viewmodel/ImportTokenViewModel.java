@@ -8,24 +8,19 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import io.reactivex.Single;
-import io.stormbird.token.tools.Numeric;
-import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
-import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 
-import io.stormbird.wallet.ui.ImportTokenActivity;
 import org.web3j.crypto.Sign;
 import org.web3j.tx.Contract;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -40,7 +35,6 @@ import io.stormbird.token.tools.ParseMagicLink;
 
 import static io.stormbird.token.tools.ParseMagicLink.*;
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
-import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 import static io.stormbird.wallet.entity.MagicLinkParcel.generateReverseTradeData;
 
 /**
@@ -338,7 +332,7 @@ public class ImportTokenViewModel extends BaseViewModel
             case normal:
             case customizable:
                 List<BigInteger> newBalance = new ArrayList<>();
-                for (Integer index : importOrder.tickets) //SalesOrder tickets member contains the list of ticket indices we're importing
+                for (Integer index : importOrder.indices) //SalesOrder indices member contains the list of ticket indices we're importing
                 {
                     if (importToken.getArrayBalance().size() > index)
                     {
@@ -352,9 +346,9 @@ public class ImportTokenViewModel extends BaseViewModel
 
                 long validTime = checkExpiry();
 
-                if (newBalance.size() == 0 || newBalance.size() != importOrder.tickets.length)
+                if (newBalance.size() == 0 || newBalance.size() != importOrder.indices.length)
                 {
-                    //tickets already imported
+                    //indices already imported
                     invalidRange.setValue(newBalance.size());
                 }
                 else if (validTime < 0)

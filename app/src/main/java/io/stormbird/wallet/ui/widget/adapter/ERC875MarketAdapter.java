@@ -140,7 +140,7 @@ public class ERC875MarketAdapter extends RecyclerView.Adapter<BinderViewHolder> 
     //we received the balance from the blockchain
     public void updateContent(OrderContractAddressPair balanceUpdate)
     {
-        //we have sufficient information to update one of the tickets
+        //we have sufficient information to update one of the indices
         for (SalesOrderSortedItem thisItem : currentList)
         {
             MagicLinkData order = thisItem.value;

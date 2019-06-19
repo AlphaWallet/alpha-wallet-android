@@ -912,8 +912,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             checkCorrectInterface(token, cInfo.contractInterface);
                                 Observable.fromIterable(token.getNonZeroArrayBalance())
                                         .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
-                                        .filter(txResult -> txResult.needsUpdating(token.lastTxCheck))
-                                        .concatMap(result -> tokenscriptUtility.fetchAttrResult(attr.id, result.tokenId, cAddr, td, this, token.lastTxCheck))
+                                        .filter(txResult -> txResult.needsUpdating(token.lastTxUpdate))
+                                        .concatMap(result -> tokenscriptUtility.fetchAttrResult(attr.id, result.tokenId, cAddr, td, this, token.lastTxUpdate))
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe();
@@ -922,9 +922,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         {
                             //doesn't have a contract interface, so just fetch the function
                             TransactionResult tr = getFunctionResult(cAddr, attr, BigInteger.ZERO);
-                            if (tr.needsUpdating(token.lastTxCheck))
+                            if (tr.needsUpdating(token.lastTxUpdate))
                             {
-                                tokenscriptUtility.fetchAttrResult(attr.id, tr.tokenId, cAddr, td, this, token.lastTxCheck)
+                                tokenscriptUtility.fetchAttrResult(attr.id, tr.tokenId, cAddr, td, this, token.lastTxUpdate)
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe();
@@ -1142,7 +1142,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
         //return definition.resolveAttributes(tokenId, this, cAddr);
         //resolveAttributes(BigInteger tokenId, AttributeInterface attrIf, ContractAddress cAddr, TokenDefinition td)
-        return tokenscriptUtility.resolveAttributes(tokenId, this, cAddr, definition, token.lastTxCheck);
+        return tokenscriptUtility.resolveAttributes(tokenId, this, cAddr, definition, token.lastTxUpdate);
     }
 
     private List<String> getCanonicalizedAssets()

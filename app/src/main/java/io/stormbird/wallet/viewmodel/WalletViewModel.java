@@ -343,6 +343,7 @@ public class WalletViewModel extends BaseViewModel
 
     private void onTokenUpdate(Token token)
     {
+        balanceCheckDisposable = null;
         Token update = tokensService.addToken(token);
         if (update != null) tokenUpdate.postValue(update);
     }

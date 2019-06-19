@@ -21,9 +21,9 @@ public class FetchTransactionsInteract {
         this.tokenRepository = tokenRepositoryType;
     }
 
-    public Observable<Transaction[]> fetchCached(Wallet wallet) {
+    public Observable<Transaction[]> fetchCached(Wallet wallet, int maxTransactions) {
         return transactionRepository
-                .fetchCachedTransactions(wallet)
+                .fetchCachedTransactions(wallet, maxTransactions)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

@@ -238,6 +238,7 @@ public class TokensService
         List<Token> changedTokens = new ArrayList<>();
         for (Token t : tokens)
         {
+            if (t.isBad() || t.getInterfaceSpec() == ContractType.OTHER) continue;
             Token check = getToken(t.tokenInfo.chainId, t.tokenInfo.address);
             if (check == null || t.checkBalanceChange(check))
             {

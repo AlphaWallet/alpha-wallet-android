@@ -40,8 +40,9 @@ public class Token implements Parcelable
     public float balanceUpdateWeight;
     public boolean balanceChanged;
     public boolean walletUIUpdateRequired;
-    public boolean refreshCheck;
     public boolean hasTokenScript;
+    public boolean refreshCheck;
+    public long    lastTxUpdate = 0;
 
     public String getNetworkName() { return shortNetworkName; }
 
@@ -59,7 +60,8 @@ public class Token implements Parcelable
         this.contractType = type;
         this.pendingBalance = balance;
         this.lastBlockCheck = 0;
-        this.lastTxCheck = 0;
+        this.lastTxCheck = System.currentTimeMillis() - (long)((Math.random()*60*1000));
+        this.lastTxUpdate = 0;
 
         balanceUpdateWeight = calculateBalanceUpdateWeight();
         balanceChanged = false;
@@ -75,6 +77,7 @@ public class Token implements Parcelable
             lastBlockCheck = oldToken.lastBlockCheck;
             pendingBalance = oldToken.pendingBalance;
             lastTxCheck = oldToken.lastTxCheck;
+            lastTxUpdate = oldToken.lastTxUpdate;
             balanceChanged = oldToken.balanceChanged;
             hasTokenScript = oldToken.hasTokenScript;
         }
@@ -91,6 +94,7 @@ public class Token implements Parcelable
         tokenWallet = in.readString();
         lastBlockCheck = in.readLong();
         lastTxCheck = in.readLong();
+        lastTxUpdate = in.readLong();
         int readTS = in.readByte();
         hasTokenScript = readTS == 1;
         balanceChanged = false;
@@ -148,6 +152,7 @@ public class Token implements Parcelable
         dest.writeString(tokenWallet);
         dest.writeLong(lastBlockCheck);
         dest.writeLong(lastTxCheck);
+        dest.writeLong(lastTxUpdate);
         dest.writeByte(hasTokenScript?(byte)1:(byte)0);
     }
 
@@ -424,7 +429,7 @@ public class Token implements Parcelable
     public void setupRealmToken(RealmToken realmToken)
     {
         lastBlockCheck = realmToken.getLastBlock();
-        lastTxCheck = realmToken.getUpdatedTime();
+        lastTxUpdate = realmToken.getUpdatedTime();
     }
 
     public boolean checkBalanceChange(Token token)
@@ -473,7 +478,7 @@ public class Token implements Parcelable
     public void setRealmLastBlock(RealmToken realmToken)
     {
         realmToken.setLastBlock(lastBlockCheck);
-        realmToken.setUpdatedTime(lastTxCheck);
+        realmToken.setUpdatedTime(lastTxUpdate);
     }
 
     /**

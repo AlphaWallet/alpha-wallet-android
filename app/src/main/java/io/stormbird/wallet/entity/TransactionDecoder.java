@@ -148,21 +148,13 @@ public class TransactionDecoder
                         addArg(argData);
                         break;
                     case "bytes32[]":
-                        count = new BigInteger(argData, 16);
-                        for (int i = 0; i < count.intValue(); i++) {
-                            thisData.paramValues.add(new BigInteger(read256bits(input), 16));
-                        }
-                        break;
                     case "uint16[]":
-                        count = new BigInteger(argData, 16);
-                        for (int i = 0; i < count.intValue(); i++) {
-                            thisData.paramValues.add(new BigInteger(read256bits(input), 16));
-                        }
-                        break;
                     case "uint256[]":
                         count = new BigInteger(argData, 16);
                         for (int i = 0; i < count.intValue(); i++) {
-                            thisData.paramValues.add(new BigInteger(read256bits(input), 16));
+                            String inputData = read256bits(input);
+                            thisData.paramValues.add(new BigInteger(inputData, 16));
+                            if (inputData.equals("0")) break;
                         }
                         break;
                     case "uint256":

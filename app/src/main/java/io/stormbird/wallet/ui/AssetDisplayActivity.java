@@ -126,9 +126,12 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
         {
             Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
 
-            Button use = findViewById(R.id.button_use);
-            use.setVisibility(View.VISIBLE);
-            use.setText(functions.keySet().iterator().next());
+            if (functions.size() > 0)
+            {
+                Button use = findViewById(R.id.button_use);
+                use.setVisibility(View.VISIBLE);
+                use.setText(functions.keySet().iterator().next());
+            }
         }
     }
 

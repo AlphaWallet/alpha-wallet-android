@@ -8,7 +8,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 
 public interface TransactionRepositoryType {
-	Observable<Transaction[]> fetchCachedTransactions(Wallet wallet);
+	Observable<Transaction[]> fetchCachedTransactions(Wallet wallet, int maxTransactions);
 	Observable<Transaction[]> fetchNetworkTransaction(NetworkInfo network, String tokenAddress, long lastBlock, String userAddress);
 	Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password, int chainId);
 	Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password, int chainId);

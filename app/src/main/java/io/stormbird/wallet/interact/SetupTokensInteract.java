@@ -65,6 +65,8 @@ public class SetupTokensInteract {
                 {
                     unknownTokenMap.put(t.to, new UnknownToken(t.chainId, t.to));//only add token to scan if it wasn't an error transaction
                 }
+
+                if (unknownTokenMap.size() > 50) break;
             }
 
             return new ArrayList<>(unknownTokenMap.values());

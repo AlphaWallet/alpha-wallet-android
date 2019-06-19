@@ -29,13 +29,15 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
 	@Override
-	public Single<Transaction[]> fetchTransaction(Wallet wallet) {
+	public Single<Transaction[]> fetchTransaction(Wallet wallet, int maxTransactions) {
         return Single.fromCallable(() -> {
             try (Realm instance = realmManager.getRealmInstance(wallet))
             {
-                RealmResults<RealmTransaction> txs = instance.where(RealmTransaction.class).findAll();
+                RealmResults<RealmTransaction> txs = instance.where(RealmTransaction.class)
+                        .sort("timeStamp", Sort.DESCENDING)
+                        .findAll();
                 Log.d(TAG, "Found " + txs.size() + " TX Results");
-                return convert(txs);
+                return convertCount(txs, maxTransactions);
             }
             catch (Exception e)
             {
@@ -211,10 +213,19 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 
     private Transaction[] convert(RealmResults<RealmTransaction> items) {
 	    int len = items.size();
-	    System.gc();
+	    //System.gc();
 	    Transaction[] result = new Transaction[len];
 	    for (int i = 0; i < len; i++) {
 	        result[i] = convert(items.get(i));
+        }
+        return result;
+    }
+
+    private Transaction[] convertCount(RealmResults<RealmTransaction> items, int maxTransactions) {
+        int len = items.size() > maxTransactions ? maxTransactions : items.size();
+        Transaction[] result = new Transaction[len];
+        for (int i = 0; i < len; i++) {
+            result[i] = convert(items.get(i));
         }
         return result;
     }

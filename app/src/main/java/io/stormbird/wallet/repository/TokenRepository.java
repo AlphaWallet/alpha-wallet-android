@@ -7,10 +7,7 @@ import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.MagicLinkData;
-import io.stormbird.token.entity.TransactionResult;
-import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TickerService;
@@ -23,9 +20,7 @@ import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.crypto.WalletUtils;
-import org.web3j.ens.EnsResolver;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.web3j.protocol.core.methods.response.EthCall;
@@ -679,9 +674,9 @@ public class TokenRepository implements TokenRepositoryType {
                         eth.setTokenWallet(wallet.address);
                         //store token and balance
                         localSource.updateTokenBalance(network, wallet, eth);
-                        eth.balanceChanged = true;
                         eth.transferPreviousData(oldToken);
                         eth.pendingBalance = balance;
+                        eth.balanceChanged = true;
                         return eth;
                     }
                     else if (!balance.equals(oldToken.pendingBalance))

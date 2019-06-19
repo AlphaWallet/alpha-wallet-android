@@ -61,7 +61,6 @@ public class WalletViewModel extends BaseViewModel
 
     private boolean isVisible = false;
     private int openSeaCheckCounter;
-    private int blockscoutCheckCounter;
     private Wallet currentWallet;
 
     private ConcurrentLinkedQueue<ContractResult> unknownAddresses;
@@ -155,7 +154,6 @@ public class WalletViewModel extends BaseViewModel
         if (currentWallet != null)
         {
             openSeaCheckCounter = 0;
-            blockscoutCheckCounter = 0;
             tokensService.setCurrentAddress(currentWallet.address);
             updateTokens = fetchTokensInteract.fetchStoredWithEth(currentWallet)
                     .subscribeOn(Schedulers.newThread())
@@ -172,6 +170,7 @@ public class WalletViewModel extends BaseViewModel
     private void onTokens(Token[] cachedTokens)
     {
         tokensService.addTokens(cachedTokens);
+        tokensService.requireTokensRefresh();
         tokens.postValue(tokensService.getAllLiveTokens().toArray(new Token[0]));
         fetchKnownContracts.postValue(true);
     }
@@ -190,23 +189,8 @@ public class WalletViewModel extends BaseViewModel
     {
         fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.MAINNET_ID));
         updateTokenBalances();
-        //tokensService.loadAuxData();
-        resolveScriptFunctions();
+        assetDefinitionService.checkTokenscriptEnabledTokens(tokensService);
     }
-
-    private void resolveScriptFunctions()
-    {
-        assetDefinitionService.checkEthereumFunctions(tokensService)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onUpdatedTokens, this::onError);
-    }
-
-    private void onUpdatedTokens(List<Token> tokens)
-    {
-        //update tokens as required after we've fetched the token data
-    }
-
 
     /**
      * Stage 2: Fetch opensea tokens
@@ -359,6 +343,7 @@ public class WalletViewModel extends BaseViewModel
 
     private void onTokenUpdate(Token token)
     {
+        balanceCheckDisposable = null;
         Token update = tokensService.addToken(token);
         if (update != null) tokenUpdate.postValue(update);
     }

@@ -17,6 +17,8 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import dagger.android.AndroidInjection;
+import io.stormbird.token.entity.SalesOrderMalformed;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
@@ -247,6 +249,24 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                             }
 
                             toAddressEditText.setText(extracted_address);
+                        }
+                        else //try magiclink
+                        {
+                            ParseMagicLink magicParser = new ParseMagicLink(new CryptoFunctions());
+                            try
+                            {
+                                if (magicParser.parseUniversalLink(barcode).chainId > 0) //see if it's a valid link
+                                {
+                                    //let's try to import the link
+                                    viewModel.showImportLink(this, barcode);
+                                    finish();
+                                    return;
+                                }
+                            }
+                            catch (SalesOrderMalformed e)
+                            {
+                                e.printStackTrace();
+                            }
                         }
 
                         if (extracted_address == null)

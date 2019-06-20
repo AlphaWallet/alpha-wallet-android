@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -183,9 +184,11 @@ public class AttributeType {
                     return new BigInteger(data.getBytes()).toString();
                 }
             case GeneralizedTime:
-                //return data;
                 try
                 {
+                    //ensure data is alphanum
+                    data = checkAlphaNum(data);
+
                     DateTime dt = DateTimeFactory.getDateTime(data);
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
                     SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ssZ");
@@ -197,6 +200,7 @@ public class AttributeType {
                     return data;
                 }
             case Boolean:
+                if (data.length() == 0) return "FALSE";
                 if (Character.isDigit(data.charAt(0)))
                 {
                     return (data.charAt(0) == '0') ? "FALSE" : "TRUE";
@@ -223,6 +227,22 @@ public class AttributeType {
             default:
                 return data;
         }
+    }
+
+    private String checkAlphaNum(String data)
+    {
+        for (char ch : data.toCharArray())
+        {
+            if (!(Character.isAlphabetic(ch) || Character.isDigit(ch) || ch == '+' || ch == '-' || Character.isWhitespace(ch)))
+            {
+                //set to current time
+                SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmssZ", Locale.ENGLISH);
+                data = format.format(new Date(System.currentTimeMillis()));
+                break;
+            }
+        }
+
+        return data;
     }
 
     /**
@@ -259,8 +279,8 @@ public class AttributeType {
                 // members might be null, but it is better to throw up ( NullPointerException )
                 // than silently ignore
                 // JB: Existing contracts and tokens throw this error. The wallet 'crashes' each time existing tokens are opened
-                // due to assumptions made with extra indices (ie null member is assumed to return null and not display that element).
-                if (members.containsKey(data))
+                // due to assumptions made with extra tickets (ie null member is assumed to return null and not display that element).
+                if (members != null && members.containsKey(data))
                 {
                     return members.get(data);
                 }
@@ -268,9 +288,8 @@ public class AttributeType {
                 {
                     //This is a time entry but without a localised mapped entry. Return the EPOCH time.
                     Date date = new Date(data.multiply(BigInteger.valueOf(1000)).longValue());
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssZ");
                     return sdf.format(date);
-                    //return data.multiply(BigInteger.valueOf(1000)).toString(10);
                 }
                 else
                 {

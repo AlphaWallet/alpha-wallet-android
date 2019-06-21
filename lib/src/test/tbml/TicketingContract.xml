@@ -203,7 +203,7 @@ EPUQyp2aDrV1aug=
   <t:attribute-types>
     <!--
     There are 64 matches (1-64), each has up to 16 ticket classes,
-    within each class, there are less than 65536 tickets.  A compact
+    within each class, there are less than 65536 indices.  A compact
     format identifier would consist of 26 bits:
 
     [6] [4] [16]

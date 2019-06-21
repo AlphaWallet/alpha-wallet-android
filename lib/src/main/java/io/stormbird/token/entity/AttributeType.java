@@ -184,7 +184,6 @@ public class AttributeType {
                     return new BigInteger(data.getBytes()).toString();
                 }
             case GeneralizedTime:
-                //return data;
                 try
                 {
                     //ensure data is alphanum
@@ -237,8 +236,7 @@ public class AttributeType {
             if (!(Character.isAlphabetic(ch) || Character.isDigit(ch) || ch == '+' || ch == '-' || Character.isWhitespace(ch)))
             {
                 //set to current time
-                SimpleDateFormat format = new SimpleDateFormat("yyyymmddHHmmssZ", Locale.ENGLISH);
-                //data = "20180714170000+0300";
+                SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmssZ", Locale.ENGLISH);
                 data = format.format(new Date(System.currentTimeMillis()));
                 break;
             }
@@ -290,14 +288,13 @@ public class AttributeType {
                 {
                     //This is a time entry but without a localised mapped entry. Return the EPOCH time.
                     Date date = new Date(data.multiply(BigInteger.valueOf(1000)).longValue());
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssZ");
                     return sdf.format(date);
-                    //return data.multiply(BigInteger.valueOf(1000)).toString(10);
                 }
                 else
                 {
                     return null; // have to revert to this behaviour due to values being zero when tokens are created
-                    //refer to 'AlphaWallet meetup tickets' where 'Match' mapping is null but for FIFA is not.
+                    //refer to 'AlphaWallet meetup indices' where 'Match' mapping is null but for FIFA is not.
                     //throw new NullPointerException("Key " + data.toString() + " can't be mapped.");
                 }
             default:

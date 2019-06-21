@@ -50,7 +50,7 @@ import static io.stormbird.wallet.util.Utils.isAlNum;
  * the right to seat somewhere in the venue. Therefore, there
  * shouldn't be List<Ticket> To understand this, imagine that one says
  * "I have two cryptocurrencies: Ether and Bitcoin, each amounts to a
- * hundred", and he pauses and said, "I also have two tickets: FIFA
+ * hundred", and he pauses and said, "I also have two indices: FIFA
  * and Formuler-one, which, too, amounts to a hundred each".
  */
 
@@ -205,7 +205,7 @@ public class Ticket extends Token implements Parcelable
 
     /*************************************
      *
-     * Conversion functions used for manipulating tickets
+     * Conversion functions used for manipulating indices
      *
      */
 
@@ -240,7 +240,7 @@ public class Ticket extends Token implements Parcelable
     }
 
     /**
-     * Convert a list of TicketID's into an Index list corresponding to those tickets
+     * Convert a list of TicketID's into an Index list corresponding to those indices
      * @param ticketIds
      * @return
      */

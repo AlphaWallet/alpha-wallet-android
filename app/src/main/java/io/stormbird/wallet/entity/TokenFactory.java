@@ -22,6 +22,7 @@ public class TokenFactory
         {
             case ERC875:
             case ERC875LEGACY:
+                if (balances == null) balances = new ArrayList<>();
                 thisToken = new Ticket(tokenInfo, balances, updateBlancaTime, networkName, type);
                 break;
             case ERC721:
@@ -86,8 +87,8 @@ public class TokenFactory
 
         }
 
-        //thisToken.restoreAuxDataFromRealm(realmItem);
         thisToken.lastBlockCheck = realmItem.getLastBlock();
+        thisToken.lastTxCheck = realmItem.getUpdatedTime();
 
         return thisToken;
     }

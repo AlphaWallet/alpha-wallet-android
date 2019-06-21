@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 public class TransactionsViewModel extends BaseViewModel
 {
     private static final String TAG = "TVM";
+    private static final int MAX_DISPLAYABLE_TRANSACTIONS = 10000; //only display up to the last 10000 transactions
 
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> showEmpty = new MutableLiveData<>();
@@ -107,11 +108,23 @@ public class TransactionsViewModel extends BaseViewModel
 
     private void startEventTimer()
     {
+        fetchTransactionDisposable = null;
         //reset transaction timers
         if (eventTimer == null || eventTimer.isDisposed())
         {
             eventTimer = Observable.interval(0, 1, TimeUnit.SECONDS)
                     .doOnNext(l -> checkEvents()).subscribe();
+        }
+
+        //collect all unknown tokens
+        if (!parseTransactions && tokensService.checkHasLoaded())
+        {
+            parseTransactions = true;
+            //check transactions see if there are missing tokens
+            disposable = setupTokensInteract.getUnknownTokens(txMap.values().toArray(new Transaction[0]), tokensService)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .subscribe(this::addUnknownTokens);
         }
     }
 
@@ -132,45 +145,37 @@ public class TransactionsViewModel extends BaseViewModel
             {
                 queryUnknownTokensDisposable = setupTokensInteract.addToken(t.address, t.chainId) //fetch tokenInfo
                         .flatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
+                        .filter(tokenInfo -> tokenInfo.name != null)
                         .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.chainId, tokenInfo.address), defaultWallet().getValue())) //add to database
-                        //.flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
                         .subscribe(this::updateTokenService, this::onError, this::reCheckUnknowns);
             }
-        }
-
-        if (!parseTransactions && tokensService.checkHasLoaded())
-        {
-            parseTransactions = true;
-            //check transactions see if there are missing tokens
-            disposable = setupTokensInteract.getUnknownTokens(txMap.values().toArray(new Transaction[0]), tokensService)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(Schedulers.io())
-                    .subscribe(this::addUnknownTokens);
         }
     }
 
     private void reCheckUnknowns()
     {
         queryUnknownTokensDisposable = null;
-        checkUnknownTokens();
     }
 
     private void checkTransactionQueue()
     {
-        Token t = tokensService.getRequiresTransactionUpdate();
-
-        if (t != null)
+        if (fetchTransactionDisposable == null)
         {
-            Log.d(TAG, "Checking Tx for: " + t.getFullName());
-            NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(t.tokenInfo.chainId);
-            String userAddress = t.isEthereum() ? null : wallet.getValue().address; //only specify address if we're scanning token transactions - not all are relevant to us.
-            fetchTransactionDisposable =
-                    fetchTransactionsInteract.fetchNetworkTransactions(network, t.getAddress(), t.lastBlockCheck, userAddress)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
+            Token t = tokensService.getRequiresTransactionUpdate();
+
+            if (t != null)
+            {
+                Log.d(TAG, "Checking Tx for: " + t.getFullName());
+                NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(t.tokenInfo.chainId);
+                String userAddress = t.isEthereum() ? null : wallet.getValue().address; //only specify address if we're scanning token transactions - not all are relevant to us.
+                fetchTransactionDisposable =
+                        fetchTransactionsInteract.fetchNetworkTransactions(network, t.getAddress(), t.lastBlockCheck, userAddress)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
+            }
         }
     }
 
@@ -212,7 +217,7 @@ public class TransactionsViewModel extends BaseViewModel
             Log.d(TAG, "Fetch start");
 
             fetchTransactionDisposable =
-                    fetchTransactionsInteract.fetchCached(wallet)
+                    fetchTransactionsInteract.fetchCached(wallet, MAX_DISPLAYABLE_TRANSACTIONS)
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(this::onTransactions, this::onError, this::startEventTimer);
@@ -250,8 +255,10 @@ public class TransactionsViewModel extends BaseViewModel
 
     private void onUpdateTransactions(Transaction[] transactions, Token token)
     {
+        fetchTransactionDisposable = null;
         Log.d("TRANSACTION", "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
 
+        token.lastTxCheck = System.currentTimeMillis();
         List<Transaction> newTxs = new ArrayList<>();
 
         //NB: final transaction is block marker transaction, it's not used. If it is relevant, then it's a duplicate.
@@ -280,12 +287,16 @@ public class TransactionsViewModel extends BaseViewModel
         if (transactions.length > 0)
         {
             token.lastBlockCheck = Long.parseLong(transactions[transactions.length - 1].blockNumber);
+
+            if (token.hasTokenScript) assetDefinitionService.updateEthereumResults(token)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io()).subscribe();
+
+            token.lastTxUpdate = token.lastTxCheck;
         }
 
         //Need to log that we scanned transactions for this token, even if there weren't any transactions.
         addTokenInteract.updateBlockRead(token, defaultWallet().getValue());
-
-        fetchTransactionDisposable = null;
     }
 
     //run through the newly received tokens from a currency and see if there's any unknown tokens

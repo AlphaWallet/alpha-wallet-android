@@ -114,7 +114,7 @@ public class TokenscriptViewHolder extends BinderViewHolder<TicketRange> impleme
     private void getAttrs(TicketRange data) throws Exception
     {
         tokenId = data.tokenIds.get(0);
-        attrs = assetDefinitionService.getTokenAttrs(token, data.tokenIds.size());
+        attrs = assetDefinitionService.getTokenAttrs(token, tokenId, data.tokenIds.size());
         assetDefinitionService.resolveAttrs(token, tokenId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

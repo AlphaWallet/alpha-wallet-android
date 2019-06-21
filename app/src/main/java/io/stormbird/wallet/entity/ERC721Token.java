@@ -158,7 +158,7 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public boolean isCurrency() {
+    public boolean isToken() {
         return false;
     }
 
@@ -216,12 +216,6 @@ public class ERC721Token extends Token implements Parcelable
     public boolean requiresTransactionRefresh()
     {
         return false;
-    }
-
-    @Override
-    public void updateBalanceCheckPressure(boolean isVisible)
-    {
-
     }
 
     /**

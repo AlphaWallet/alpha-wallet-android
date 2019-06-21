@@ -41,6 +41,19 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	public static final int XDAI_ID = 100;
 	public static final int GOERLI_ID = 5;
 
+	public static final String BLOCKSCOUT_API = "https://blockscout.com/";
+	public static final String BLOCKSCOUT_TOKEN_ARGS = "/api?module=account&action=tokenlist&address=";
+
+	private static final String MAINNET_BLOCKSCOUT = "eth/mainnet";
+	private static final String CLASSIC_BLOCKSCOUT = "etc/mainnet";
+	private static final String XDAI_BLOCKSCOUT = "poa/dai";
+	private static final String POA_BLOCKSCOUT = "poa/core";
+	private static final String ROPSTEN_BLOCKSCOUT = "eth/ropsten";
+	private static final String RINKEBY_BLOCKSCOUT = "eth/rinkeby";
+	private static final String SOKOL_BLOCKSCOUT = "poa/sokol";
+	private static final String KOVAN_BLOCKSCOUT = "eth/kovan";
+	private static final String GOERLI_BLOCKSCOUT = "eth/goerli";
+
 	private final Map<Integer, NetworkInfo> networkMap;
 
 	private final NetworkInfo[] NETWORKS = new NetworkInfo[] {
@@ -49,10 +62,11 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
                     "https://etherscan.io/tx/",MAINNET_ID, true,
 							"https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
 							"https://api.etherscan.io/",
-							ETHEREUM_TICKER_NAME),
+							ETHEREUM_TICKER_NAME,
+							MAINNET_BLOCKSCOUT),
       new NetworkInfo(CLASSIC_NETWORK_NAME, ETC_SYMBOL,
                     CLASSIC_RPC_URL,
-					  "https://gastracker.io/tx/",CLASSIC_ID, true, CLASSIC_TICKER_NAME),
+					  "https://gastracker.io/tx/",CLASSIC_ID, true, CLASSIC_TICKER_NAME, CLASSIC_BLOCKSCOUT),
 			new NetworkInfo(XDAI_NETWORK_NAME,
 							xDAI_SYMBOL,
 							XDAI_RPC_URL,
@@ -60,30 +74,30 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 							XDAI_ID,
 							false,
 							"https://dai.poa.network",
-							"https://blockscout.com/poa/dai/", XDAI_TICKER_NAME),
+							"https://blockscout.com/poa/dai/", XDAI_TICKER_NAME, XDAI_BLOCKSCOUT),
       new NetworkInfo(POA_NETWORK_NAME, POA_SYMBOL,
                     POA_RPC_URL,
-                    "https://poaexplorer.com/txid/search/", POA_ID, false, ETHEREUM_TICKER_NAME),
+                    "https://poaexplorer.com/txid/search/", POA_ID, false, ETHEREUM_TICKER_NAME, POA_BLOCKSCOUT),
 			new NetworkInfo(KOVAN_NETWORK_NAME, ETH_SYMBOL, KOVAN_RPC_URL,
                     "https://kovan.etherscan.io/tx/", KOVAN_ID, false,
 							"https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
-							"https://api-kovan.etherscan.io/", ETHEREUM_TICKER_NAME),
+							"https://api-kovan.etherscan.io/", ETHEREUM_TICKER_NAME, KOVAN_BLOCKSCOUT),
 			new NetworkInfo(ROPSTEN_NETWORK_NAME, ETH_SYMBOL,
 							ROPSTEN_RPC_URL,
                     "https://ropsten.etherscan.io/tx/",ROPSTEN_ID, false,
 							"https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
-					"https://api-ropsten.etherscan.io/", ETHEREUM_TICKER_NAME),
+					"https://api-ropsten.etherscan.io/", ETHEREUM_TICKER_NAME, ROPSTEN_BLOCKSCOUT),
             new NetworkInfo(SOKOL_NETWORK_NAME, POA_SYMBOL,
                     SOKOL_RPC_URL,
-                    "https://sokol-explorer.poa.network/account/",SOKOL_ID, false, ETHEREUM_TICKER_NAME),
+                    "https://sokol-explorer.poa.network/account/",SOKOL_ID, false, ETHEREUM_TICKER_NAME, SOKOL_BLOCKSCOUT),
 			new NetworkInfo(RINKEBY_NETWORK_NAME, ETH_SYMBOL, RINKEBY_RPC_URL,
 							"https://rinkeby.etherscan.io/tx/",RINKEBY_ID, false,
 							"https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
-              "https://api-rinkeby.etherscan.io/", ETHEREUM_TICKER_NAME),
+              "https://api-rinkeby.etherscan.io/", ETHEREUM_TICKER_NAME, RINKEBY_BLOCKSCOUT),
 			new NetworkInfo(GOERLI_NETWORK_NAME, GOERLI_SYMBOL, GOERLI_RPC_URL,
 							"https://goerli.etherscan.io/tx/",GOERLI_ID, false,
 							GOERLI_RPC_URL,
-							"https://api-goerli.etherscan.io/", ETHEREUM_TICKER_NAME),
+							"https://api-goerli.etherscan.io/", ETHEREUM_TICKER_NAME, GOERLI_BLOCKSCOUT),
 	};
 
 	private final PreferenceRepositoryType preferences;

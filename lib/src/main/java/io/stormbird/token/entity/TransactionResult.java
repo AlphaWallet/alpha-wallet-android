@@ -27,8 +27,8 @@ public class TransactionResult
         resultTime = 0;
     }
 
-    public boolean needsUpdating()
+    public boolean needsUpdating(long lastTxCheck)
     {
-        return ((System.currentTimeMillis() - resultTime) > 60 * 1000 * 10); //10 minutes: TODO: determine this from function volatility hint
+        return ((resultTime - lastTxCheck) <= 0);
     }
 }

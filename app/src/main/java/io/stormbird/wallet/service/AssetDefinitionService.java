@@ -23,9 +23,10 @@ import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.entity.tokenscript.TokenscriptFunction;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
+import io.stormbird.wallet.repository.TokenLocalSource;
 import io.stormbird.wallet.repository.TransactionsRealmCache;
 import io.stormbird.wallet.repository.entity.RealmAuxData;
 import io.stormbird.wallet.ui.HomeActivity;
@@ -36,6 +37,7 @@ import org.web3j.abi.datatypes.Function;
 import org.xml.sax.SAXException;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.security.MessageDigest;
@@ -70,13 +72,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final RealmManager realmManager;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokensService tokensService;
+    private final TokenLocalSource tokenLocalSource;
     private TokenDefinition cachedDefinition = null;
     private SparseArray<Map<String, SparseArray<String>>> tokenTypeName;
     private SparseArray<Map<String, String>> issuerName;
 
     private final TokenscriptFunction tokenscriptUtility;
 
-    public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs, RealmManager rm, EthereumNetworkRepositoryType eth, TokensService tokensService)
+    public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs,
+                                  RealmManager rm, EthereumNetworkRepositoryType eth, TokensService tokensService,
+                                  TokenLocalSource trs)
     {
         context = ctx;
         okHttpClient = client;
@@ -89,6 +94,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         ethereumNetworkRepository = eth;
         this.tokensService = tokensService;
         tokenscriptUtility = new TokenscriptFunction() { }; //no overriden functions
+        tokenLocalSource = trs;
 
         loadLocalContracts();
     }
@@ -436,6 +442,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             addContractAddresses(newFile);
             context.sendBroadcast(new Intent(ADDED_TOKEN)); //inform walletview there is a new token
+
+            //TODO: check interface spec
         }
     }
 
@@ -543,7 +551,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private Map<String, File> networkAddresses(List<String> strings, String path)
     {
         Map<String, File> addrMap = new HashMap<>();
-        strings.forEach(address -> addrMap.put(address, new File(path)));
+        for (String address : strings) addrMap.put(address, new File(path));
         return addrMap;
     }
 
@@ -860,64 +868,116 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return sb.toString();
     }
 
-    public Single<List<Token>> checkEthereumFunctions(TokensService tokensService)
+    public void checkTokenscriptEnabledTokens(TokensService tokensService)
+    {
+        for (int networkId : assetDefinitions.keySet())
+        {
+            Map<String, File> defMap = assetDefinitions.get(networkId);
+            for (String address : defMap.keySet())
+            {
+                Token token = tokensService.getToken(networkId, address);
+                if (token != null) token.hasTokenScript = true;
+            }
+        }
+    }
+
+    /**
+     * When a Non Fungible Token contract which has a Tokenscript definition has new transactions
+     * We need to update the cached values as they could have changed
+     * TODO: Once we support event liostening this is triggered from specific events
+     * @param token
+     * @return
+     */
+    public Single<Token> updateEthereumResults(Token token)
     {
         return Single.fromCallable(() -> {
-            List<Token> updatedTokens = new ArrayList<>();
-            for (int networkId : assetDefinitions.keySet())
-            {
-                Map<String, File> defMap = assetDefinitions.get(networkId);
-                for (String tokenScriptAddress : defMap.keySet())
-                {
-                    //fetch all attr solutions
-                    TokenDefinition td = getDefinition(networkId, tokenScriptAddress);
-                    List<AttributeType> attrs = new ArrayList<>(td.attributeTypes.values());
-                    for (AttributeType attr : attrs)
-                    {
-                        if (attr.function == null) continue;
-                        FunctionDefinition fd = attr.function;
-                        ContractInfo cInfo = fd.contract;
-                        List<String> addresses = cInfo.addresses.get(networkId);
+            TokenDefinition td = getDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+            if (td == null) return token;
 
-                        if (addresses != null)
+            List<AttributeType> attrs = new ArrayList<>(td.attributeTypes.values());
+            for (AttributeType attr : attrs)
+            {
+                if (attr.function == null) continue;
+                FunctionDefinition fd = attr.function;
+                ContractInfo cInfo = fd.contract;
+                List<String> addresses = cInfo.addresses.get(token.tokenInfo.chainId);
+
+                if (addresses != null)
+                {
+                    for (String address : addresses)
+                    {
+                        ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, address);
+                        if (cInfo.contractInterface != null)
                         {
-                            for (String address : addresses)
+                            checkCorrectInterface(token, cInfo.contractInterface);
+                                Observable.fromIterable(token.getNonZeroArrayBalance())
+                                        .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
+                                        .filter(txResult -> txResult.needsUpdating(token.lastTxUpdate))
+                                        .concatMap(result -> tokenscriptUtility.fetchAttrResult(attr.id, result.tokenId, cAddr, td, this, token.lastTxUpdate))
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe();
+                        }
+                        else
+                        {
+                            //doesn't have a contract interface, so just fetch the function
+                            TransactionResult tr = getFunctionResult(cAddr, attr, BigInteger.ZERO);
+                            if (tr.needsUpdating(token.lastTxUpdate))
                             {
-                                ContractAddress cAddr = new ContractAddress(networkId, address);
-                                if (cInfo.contractInterface != null)
-                                {
-                                    //do we have this token?
-                                    Token token = tokensService.getToken(networkId, address);
-                                    if (token != null)
-                                    {
-                                        Observable.fromIterable(token.getNonZeroArrayBalance())
-                                                .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
-                                                .filter(TransactionResult::needsUpdating)
-                                                .concatMap(result -> tokenscriptUtility.fetchAttrResult(attr.id, result.tokenId, cAddr, td, this))// td.fetchAttrResult(attr.id, result.tokenId, cAddr,this))
-                                                .subscribeOn(Schedulers.io())
-                                                .observeOn(AndroidSchedulers.mainThread())
-                                                .subscribe();
-                                    }
-                                }
-                                else
-                                {
-                                    //doesn't have a contract interface, so just fetch the function
-                                    TransactionResult tr = getFunctionResult(cAddr, attr, BigInteger.ZERO);
-                                    if (tr.needsUpdating())
-                                    {
-                                        tokenscriptUtility.fetchAttrResult(attr.id, tr.tokenId, cAddr, td, this)
-                                                .subscribeOn(Schedulers.io())
-                                                .observeOn(AndroidSchedulers.mainThread())
-                                                .subscribe();
-                                    }
-                                }
+                                tokenscriptUtility.fetchAttrResult(attr.id, tr.tokenId, cAddr, td, this, token.lastTxUpdate)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe();
                             }
                         }
                     }
                 }
             }
-            return updatedTokens;
+
+            return token;
         });
+    }
+
+    private void checkCorrectInterface(Token token, String contractInterface)
+    {
+        ContractType cType;
+        switch (contractInterface.toLowerCase())
+        {
+            case "erc875":
+                cType = ContractType.ERC875;
+                break;
+            case "erc20":
+                cType = ContractType.ERC20;
+                break;
+            case "erc721":
+                cType = ContractType.ERC721;
+                break;
+            case "ethereum":
+                cType = ContractType.CURRENCY;
+                break;
+            default:
+                cType = ContractType.OTHER;
+                break;
+        }
+
+        if (cType == ContractType.OTHER) return;
+        if (cType == token.getInterfaceSpec()) return;
+
+        //contract mismatch, re-assign
+        //first delete from database
+        tokenLocalSource.deleteRealmToken(token.tokenInfo.chainId, new Wallet(token.getWallet()), token.tokenInfo.address);
+
+        //now store into database
+        //TODO: if erc20 refresh all values
+        TokenFactory tf = new TokenFactory();
+
+        Token newToken = tf.createToken(token.tokenInfo, BigDecimal.ZERO, null, 0, cType, token.getNetworkName(), 0);
+        newToken.setTokenWallet(token.getWallet());
+        newToken.walletUIUpdateRequired = true;
+
+        tokenLocalSource.saveToken(new Wallet(token.getWallet()), newToken)
+                .subscribeOn(Schedulers.io())
+                .subscribe(tokensService::addToken).isDisposed();
     }
 
 
@@ -962,7 +1022,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     @Override
                     public void onStart()
                     {
-                        if (tResult.result == null) return;
+                        if (tResult.result == null) tResult.result = "";
                         realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress());
                         ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
                         RealmAuxData realmToken = realm.where(RealmAuxData.class)
@@ -1032,13 +1092,17 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    public StringBuilder getTokenAttrs(Token token, int count)
+    public StringBuilder getTokenAttrs(Token token, BigInteger tokenId, int count)
     {
         StringBuilder attrs = new StringBuilder();
 
         TokenScriptResult.addPair(attrs, "name", token.getTokenTitle());
         TokenScriptResult.addPair(attrs, "symbol", token.tokenInfo.symbol);
         TokenScriptResult.addPair(attrs, "_count", String.valueOf(count));
+        TokenScriptResult.addPair(attrs, "contractAddress", token.tokenInfo.address);
+        TokenScriptResult.addPair(attrs, "chainId", String.valueOf(token.tokenInfo.chainId));
+        TokenScriptResult.addPair(attrs, "tokenId", tokenId);
+
 
         if (token.isEthereum())
         {
@@ -1078,7 +1142,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
         //return definition.resolveAttributes(tokenId, this, cAddr);
         //resolveAttributes(BigInteger tokenId, AttributeInterface attrIf, ContractAddress cAddr, TokenDefinition td)
-        return tokenscriptUtility.resolveAttributes(tokenId, this, cAddr, definition);
+        return tokenscriptUtility.resolveAttributes(tokenId, this, cAddr, definition, token.lastTxUpdate);
     }
 
     private List<String> getCanonicalizedAssets()

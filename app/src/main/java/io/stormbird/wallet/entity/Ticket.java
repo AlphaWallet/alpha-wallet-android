@@ -22,7 +22,10 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.ui.TokenFunctionActivity;
 import io.stormbird.wallet.web3.Web3TokenView;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -395,10 +398,9 @@ public class Ticket extends Token implements Parcelable
         activity.findViewById(R.id.layout_legacy).setVisibility(View.GONE);
 
         waitSpinner.setVisibility(View.VISIBLE);
-
-        final StringBuilder attrs = assetService.getTokenAttrs(this, range.tokenIds.size());
-
         BigInteger tokenId = range.tokenIds.get(0);
+
+        final StringBuilder attrs = assetService.getTokenAttrs(this, tokenId, range.tokenIds.size());
 
         assetService.resolveAttrs(this, tokenId)
                 .subscribeOn(Schedulers.io())
@@ -529,22 +531,50 @@ public class Ticket extends Token implements Parcelable
 
     private org.web3j.abi.datatypes.DynamicArray getDynArray(List<BigInteger> indices)
     {
-        org.web3j.abi.datatypes.DynamicArray dynArray;
+        DynamicArray dynArray;
 
         switch (contractType)
         {
             case ERC875LEGACY:
                 dynArray = new org.web3j.abi.datatypes.DynamicArray<>(
+                        org.web3j.abi.datatypes.generated.Uint16.class,
                         org.web3j.abi.Utils.typeMap(indices, org.web3j.abi.datatypes.generated.Uint16.class));
                 break;
             case ERC875:
             default:
                 dynArray = new org.web3j.abi.datatypes.DynamicArray<>(
+                        org.web3j.abi.datatypes.generated.Uint256.class,
                         org.web3j.abi.Utils.typeMap(indices, org.web3j.abi.datatypes.generated.Uint256.class));
                 break;
         }
 
         return dynArray;
+    }
+
+    /**
+     * Refresh transactions for TokenScript enabled tokens at startup, once per 5 minutes
+     * and finally if the user does a refresh
+     *
+     * TODO: This heuristic becomes redundant once we enable event support
+     * @return token requires a transaction refresh
+     */
+    @Override
+    public boolean requiresTransactionRefresh()
+    {
+        boolean requiresUpdate = balanceChanged;
+        balanceChanged = false;
+        if (hasTokenScript && hasPositiveBalance())
+        {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastTxCheck > 5*60*1000) //need to check transactions for function updates, at startup and every 5 minutes is good
+            {
+                lastTxCheck = currentTime;
+                refreshCheck = false;
+                requiresUpdate = true;
+            }
+        }
+
+        return requiresUpdate;
     }
 
     @Override
@@ -561,7 +591,7 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public boolean isCurrency() {
+    public boolean isToken() {
         return false;
     }
 

@@ -7,10 +7,7 @@ import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.MagicLinkData;
-import io.stormbird.token.entity.TransactionResult;
-import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TickerService;
@@ -23,9 +20,7 @@ import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.crypto.WalletUtils;
-import org.web3j.ens.EnsResolver;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.web3j.protocol.core.methods.response.EthCall;
@@ -199,10 +194,9 @@ public class TokenRepository implements TokenRepositoryType {
     {
         TokenInfo tokenInfo = new TokenInfo(wallet.address, network.name, network.symbol, 18, true, network.chainId);
         BigDecimal balance = BigDecimal.ZERO;
-        Token eth = new Token(tokenInfo, balance, System.currentTimeMillis(), network.getShortName(), ContractType.ETHEREUM);
+        Token eth = new Token(tokenInfo, balance, 0, network.getShortName(), ContractType.ETHEREUM); //create with zero time index to ensure it's updated immediately
         eth.setTokenWallet(wallet.address);
         eth.setIsEthereum();
-        eth.balanceUpdatePressure = 10.0f;
         eth.pendingBalance = balance;
         return eth;
     }
@@ -360,6 +354,14 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<Token[]> addERC721(Wallet wallet, Token[] tokens)
     {
         return localSource.saveERC721Tokens(
+                wallet,
+                tokens);
+    }
+
+    @Override
+    public Single<Token[]> addERC20(Wallet wallet, Token[] tokens)
+    {
+        return localSource.saveERC20Tokens(
                 wallet,
                 tokens);
     }
@@ -672,9 +674,9 @@ public class TokenRepository implements TokenRepositoryType {
                         eth.setTokenWallet(wallet.address);
                         //store token and balance
                         localSource.updateTokenBalance(network, wallet, eth);
-                        eth.balanceChanged = true;
                         eth.transferPreviousData(oldToken);
                         eth.pendingBalance = balance;
+                        eth.balanceChanged = true;
                         return eth;
                     }
                     else if (!balance.equals(oldToken.pendingBalance))

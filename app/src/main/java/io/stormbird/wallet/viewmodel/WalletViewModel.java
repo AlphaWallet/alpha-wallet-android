@@ -35,7 +35,7 @@ public class WalletViewModel extends BaseViewModel
     private static final int BALANCE_CHECK_INTERVAL_MILLIS = 500; //Balance check interval in milliseconds - should be integer divisible with 1000 (1 second)
     private static final int CHECK_OPENSEA_INTERVAL_TIME = 40; //Opensea refresh interval in seconds
     private static final int CHECK_BLOCKSCOUT_INTERVAL_TIME = 30;
-    private static final int OPENSEA_RINKEBY_CHECK = 6; //check Rinkeby opensea once per XX opensea checks (ie if interval time is 25 and rinkeby check is 1 in 6, rinkeby refresh time is once per 300 seconds).
+    private static final int OPENSEA_RINKEBY_CHECK = 3; //check Rinkeby opensea once per XX opensea checks (ie if interval time is 25 and rinkeby check is 1 in 6, rinkeby refresh time is once per 300 seconds).
 
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<BigDecimal> total = new MutableLiveData<>();
@@ -244,7 +244,7 @@ public class WalletViewModel extends BaseViewModel
         updateTokens = tokensService.getTokensAtAddress()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::receiveNetworkTokens, this::onError);
+                .subscribe(this::receiveNetworkTokens, this::onBlockscoutError);
     }
 
     private void receiveNetworkTokens(Token[] receivedTokens)
@@ -261,6 +261,11 @@ public class WalletViewModel extends BaseViewModel
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::storedTokens, this::onError).isDisposed();
         }
+    }
+
+    private void onBlockscoutError(Throwable throwable)
+    {
+        //unable to resolve blockscout - phone may be offline
     }
 
     private void onFetchTokensCompletable()

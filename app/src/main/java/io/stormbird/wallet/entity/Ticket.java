@@ -1,48 +1,36 @@
 package io.stormbird.wallet.entity;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v7.widget.AppCompatRadioButton;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.entity.*;
-import io.stormbird.token.tools.TokenDefinition;
-import io.stormbird.token.util.DateTime;
-import io.stormbird.token.util.DateTimeFactory;
-
-import io.stormbird.wallet.C;
-import io.stormbird.wallet.entity.opensea.Asset;
-import io.stormbird.wallet.ui.TokenFunctionActivity;
-import io.stormbird.wallet.web3.Web3TokenView;
-import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.utils.Numeric;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.TicketRange;
+import io.stormbird.token.entity.TokenScriptResult;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.BaseActivity;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
-
-import static io.stormbird.wallet.C.Key.TICKET;
-import static io.stormbird.wallet.util.Utils.isAlNum;
+import io.stormbird.wallet.web3.Web3TokenView;
 
 /**
  * Created by James on 27/01/2018.  It might seem counter intuitive

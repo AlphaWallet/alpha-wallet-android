@@ -106,7 +106,7 @@ public class TokenDefinition {
     }
 
     public enum As {  // always assume big endian
-        UTF8, Unsigned, Signed, Mapping, Boolean, UnsignedInput
+        UTF8, Unsigned, Signed, Mapping, Boolean, UnsignedInput, TokenId
     }
 
     /* for many occurance of the same tag, return the text content of the one in user's current language */
@@ -510,6 +510,9 @@ public class TokenDefinition {
                                 int chainId = Integer.parseInt(chainIdStr);
                                 ci.addresses.put(chainId, new ArrayList<>(Arrays.asList(ci.contractInterface)));
                                 contracts.put(name, ci);
+                                break;
+                            case "contract":
+                                handleAddresses(getFirstChildElement(element));
                                 break;
                             default:
                                 break;

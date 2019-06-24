@@ -707,7 +707,8 @@ public class DappBrowserFragment extends Fragment implements
 
     private boolean loadUrl(String urlText)
     {
-        if (!lastHomeTag.equals(DAPP_BROWSER)) lastHomeTag = currentFragment;
+        if (lastHomeTag == null) lastHomeTag = DAPP_BROWSER;
+        else if (!lastHomeTag.equals(DAPP_BROWSER)) lastHomeTag = currentFragment;
         detachFragments(true);
         this.currentFragment = DAPP_BROWSER;
         cancelSearchSession();

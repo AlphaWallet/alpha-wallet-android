@@ -339,7 +339,7 @@ public class ConfirmationActivity extends BaseActivity {
                 break;
 
             case TOKENSCRIPT:
-                viewModel.signTokenScriptTransaction(transactionHex, contractAddress, gasSettings.gasPrice, gasSettings.gasLimit, chainId);
+                viewModel.signTokenScriptTransaction(transactionHex, contractAddress, gasSettings.gasPrice, gasSettings.gasLimit, amount.toBigInteger(), chainId);
                 break;
 
             case MARKET:

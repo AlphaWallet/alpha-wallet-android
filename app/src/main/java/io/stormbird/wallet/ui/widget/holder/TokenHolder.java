@@ -226,7 +226,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public void onClick(View v) {
         if (onTokenClickListener != null) {
             tokenLayout.setBackgroundResource(R.drawable.background_token_selected);
-            onTokenClickListener.onTokenClick(v, token, null);
+            onTokenClickListener.onTokenClick(v, token, null, true);
         }
     }
 

@@ -30,6 +30,7 @@ import io.stormbird.wallet.ui.widget.entity.*;
 import io.stormbird.wallet.ui.widget.holder.*;
 import io.stormbird.wallet.web3.entity.FunctionCallback;
 import io.stormbird.wallet.web3.entity.ScriptFunction;
+import org.ethereum.geth.BigInt;
 
 /**
  * Created by James on 9/02/2018.
@@ -332,6 +333,102 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         if (requiresFullRedraw)
         {
             notifyDataSetChanged();
+        }
+    }
+
+    public List<BigInteger> getSelectedTokenIds(List<BigInteger> selection)
+    {
+        List<BigInteger> tokenIds = new ArrayList<>(selection);
+        for (int i = 0; i < items.size(); i++)
+        {
+            SortedItem si = items.get(i);
+            if (si.viewType == AssetInstanceSortedItem.VIEW_TYPE)
+            {
+                AssetInstanceSortedItem ais = (AssetInstanceSortedItem) si;
+                if (ais.value.isChecked)
+                {
+                    tokenIds.addAll(ais.value.tokenIds);
+                }
+            }
+            else if (si.viewType == OpenseaHolder.VIEW_TYPE)
+            {
+                AssetSortedItem asi = (AssetSortedItem) si;
+                if (asi.value.isChecked)
+                {
+                    BigInteger val = new BigInteger(asi.value.getTokenId());
+                    if (!tokenIds.contains(val)) tokenIds.add(val);
+                }
+            }
+        }
+
+        return tokenIds;
+    }
+
+    public void setRadioButton(List<BigInteger> selection)
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
+            SortedItem si = items.get(i);
+            if (si.viewType == AssetInstanceSortedItem.VIEW_TYPE)
+            {
+                AssetInstanceSortedItem ais = (AssetInstanceSortedItem) si;
+                int index = 0;
+                boolean match = true;
+                if (selection.size() != ais.value.tokenIds.size()) continue;
+                for (BigInteger id : ais.value.tokenIds)
+                {
+                    if (!id.equals(selection.get(index++))) { match = false; break; }
+                }
+
+                if (match)
+                {
+                    if (ais.view != null)
+                    {
+                        AppCompatRadioButton button = ais.view.itemView.findViewById(R.id.radioBox);
+                        if (button != null) button.setChecked(true);
+                    }
+                    ais.value.isChecked = true;
+                    ais.value.exposeRadio = true;
+                }
+                else
+                {
+                    if (ais.view != null)
+                    {
+                        AppCompatRadioButton button = ais.view.itemView.findViewById(R.id.radioBox);
+                        if (button != null && (button.isChecked() || ais.value.isChecked)) button.setChecked(false);
+                    }
+                    ais.value.isChecked = false;
+                    ais.value.exposeRadio = true;
+                }
+            }
+            else if (si.viewType == OpenseaHolder.VIEW_TYPE)
+            {
+                AssetSortedItem asi = (AssetSortedItem) si;
+                boolean match = true;
+                String check = selection.get(0).toString(10);
+                if (!check.equals(asi.value.getTokenId())) match = false;
+
+                if (match)
+                {
+                    if (asi.view != null)
+                    {
+                        AppCompatRadioButton button = asi.view.itemView.findViewById(R.id.radioBox);
+                        if (button != null) button.setChecked(true);
+                    }
+                    asi.value.isChecked = true;
+                    asi.value.exposeRadio = true;
+                }
+                else
+                {
+                    if (asi.view != null)
+                    {
+                        AppCompatRadioButton button = asi.view.itemView.findViewById(R.id.radioBox);
+                        if (button != null && (button.isChecked() || asi.value.isChecked)) button.setChecked(false);
+                    }
+                    asi.value.isChecked = false;
+                    asi.value.exposeRadio = true;
+                }
+            }
         }
     }
 }

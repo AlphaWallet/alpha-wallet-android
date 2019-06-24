@@ -127,9 +127,15 @@ public class OpenseaHolder extends BinderViewHolder<Asset> implements Runnable {
         {
             if (!asset.isChecked)
             {
-                tokenClickListener.onTokenClick(v, token, new ArrayList<>(Arrays.asList(new BigInteger(asset.getTokenId()))));
+                tokenClickListener.onTokenClick(v, token, new ArrayList<>(Arrays.asList(new BigInteger(asset.getTokenId()))), true);
                 asset.isChecked = true;
                 itemSelect.setChecked(true);
+            }
+            else
+            {
+                tokenClickListener.onTokenClick(v, token, new ArrayList<>(Arrays.asList(new BigInteger(asset.getTokenId()))), false);
+                asset.isChecked = false;
+                itemSelect.setChecked(false);
             }
         }
         else

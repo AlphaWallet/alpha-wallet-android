@@ -675,7 +675,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         //check all definitions in the download zone
         Disposable d = Observable.fromIterable(getScriptsInSecureZone())
-                //.concatMap(this::checkFileTime)
                 .concatMap(this::fetchXMLFromServer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -819,6 +818,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                 if (addContractAddresses(newTSFile))
                                 {
                                     notificationService.DisplayNotification("Definition Updated", s, NotificationCompat.PRIORITY_MAX);
+                                    cachedDefinition = null;
                                 }
                             }
                         }
@@ -1102,7 +1102,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenScriptResult.addPair(attrs, "contractAddress", token.tokenInfo.address);
         TokenScriptResult.addPair(attrs, "chainId", String.valueOf(token.tokenInfo.chainId));
         TokenScriptResult.addPair(attrs, "tokenId", tokenId);
-
 
         if (token.isEthereum())
         {

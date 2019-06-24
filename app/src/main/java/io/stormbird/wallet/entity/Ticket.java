@@ -210,36 +210,6 @@ public class Ticket extends Token implements Parcelable
      */
 
     /**
-     * Convert a CSV string of Hex values into a BigInteger List
-     * @param integerString CSV string of hex ticket id's
-     * @return
-     */
-    @Override
-    public List<BigInteger> stringHexToBigIntegerList(String integerString)
-    {
-        List<BigInteger> idList = new ArrayList<>();
-
-        try
-        {
-            String[] ids = integerString.split(",");
-
-            for (String id : ids)
-            {
-                //remove whitespace
-                String trim = id.trim();
-                BigInteger val = Numeric.toBigInt(trim);
-                idList.add(val);
-            }
-        }
-        catch (Exception e)
-        {
-            idList = new ArrayList<>();
-        }
-
-        return idList;
-    }
-
-    /**
      * Convert a list of TicketID's into an Index list corresponding to those tickets
      * @param ticketIds
      * @return

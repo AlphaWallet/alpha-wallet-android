@@ -244,7 +244,7 @@ public class WalletViewModel extends BaseViewModel
         updateTokens = tokensService.getTokensAtAddress()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::receiveNetworkTokens, this::onError);
+                .subscribe(this::receiveNetworkTokens, this::onBlockscoutError);
     }
 
     private void receiveNetworkTokens(Token[] receivedTokens)
@@ -261,6 +261,11 @@ public class WalletViewModel extends BaseViewModel
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::storedTokens, this::onError).isDisposed();
         }
+    }
+
+    private void onBlockscoutError(Throwable throwable)
+    {
+        //unable to resolve blockscout - phone may be offline
     }
 
     private void onFetchTokensCompletable()

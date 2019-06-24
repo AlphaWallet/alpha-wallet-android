@@ -106,8 +106,9 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             Utils.setChainColour(chainName, token.tokenInfo.chainId);
             String displayTxt = assetDefinition.getIssuerName(token);
             issuer.setText(displayTxt);
+            String symbolStr = token.tokenInfo.symbol != null ? token.tokenInfo.symbol.toUpperCase() : "";
             symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
-                        ? token.tokenInfo.symbol.toUpperCase()
+                        ? symbolStr
                         : token.getFullName());
 
             animateTextWhileWaiting();

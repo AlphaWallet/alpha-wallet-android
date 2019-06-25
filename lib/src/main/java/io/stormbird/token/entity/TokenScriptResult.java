@@ -84,9 +84,9 @@ public class TokenScriptResult
         else
         {
             String attrValueStr = (String) attrValue;
-            if (attrValueStr.charAt(0) != '{') attrs.append("\"");
+            if (attrValueStr.length() == 0 || (attrValueStr.charAt(0) != '{')) attrs.append("\"");
             attrs.append(attrValueStr);
-            if (attrValueStr.charAt(0) != '{') attrs.append("\"");
+            if (attrValueStr.length() == 0 || (attrValueStr.charAt(0) != '{')) attrs.append("\"");
         }
 
         attrs.append(",\n");

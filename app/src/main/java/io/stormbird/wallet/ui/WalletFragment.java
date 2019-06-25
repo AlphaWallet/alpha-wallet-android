@@ -220,7 +220,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     }
 
     @Override
-    public void onTokenClick(View view, Token token, List<BigInteger> ids) {
+    public void onTokenClick(View view, Token token, List<BigInteger> ids, boolean selected) {
         if (selectedToken == null)
         {
             selectedToken = view;

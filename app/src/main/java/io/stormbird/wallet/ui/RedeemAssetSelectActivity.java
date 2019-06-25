@@ -165,7 +165,7 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
         TicketRange range = adapter.getCheckedItem();
         if (range != null)
         {
-            onTokenClick(null, token, range.tokenIds);
+            onTokenClick(null, token, range.tokenIds, true);
 
             adapter.setRedeemTicketQuantity(range, token);
             RecyclerView list = findViewById(R.id.listTickets);
@@ -192,7 +192,7 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
     }
 
     @Override
-    public void onTokenClick(View v, Token token, List<BigInteger> ids) {
+    public void onTokenClick(View v, Token token, List<BigInteger> ids, boolean selected) {
         currentMenu = R.menu.redeem_menu;
         invalidateOptionsMenu();
     }

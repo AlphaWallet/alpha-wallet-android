@@ -128,4 +128,16 @@ public class RealmERC721Token extends RealmObject
     {
         this.contractType = contractType;
     }
+
+    public boolean isTokenId()
+    {
+        if (address.contains("-"))
+        {
+            String[] split = address.split("-");
+            //address:0x16baf0de678e52367adc69fd067e5edd1d33e3bf-4-6488
+            return split.length > 2 && Character.isDigit(split[2].charAt(0));
+        }
+
+        return false;
+    }
 }

@@ -291,7 +291,6 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
             if (arg.isTokenId() && index >= 0 && index < tokenIds.size())
             {
                 arg.element.value = tokenIds.get(index).toString();
-                arg.element.ref = "value";
             }
         }
     }

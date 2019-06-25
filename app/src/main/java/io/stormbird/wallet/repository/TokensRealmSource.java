@@ -743,6 +743,7 @@ public class TokensRealmSource implements TokenLocalSource {
         {
             TokenFactory tf = new TokenFactory();
             RealmERC721Token realmItem = realmItems.get(i);
+            if (realmItem.isTokenId()) continue;
             if (realmItem != null)
             {
                 //get all the assets for this ERC first

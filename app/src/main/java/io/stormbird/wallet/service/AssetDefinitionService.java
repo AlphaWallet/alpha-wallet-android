@@ -675,7 +675,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         //check all definitions in the download zone
         Disposable d = Observable.fromIterable(getScriptsInSecureZone())
-                //.concatMap(this::checkFileTime)
                 .concatMap(this::fetchXMLFromServer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -819,6 +818,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                 if (addContractAddresses(newTSFile))
                                 {
                                     notificationService.DisplayNotification("Definition Updated", s, NotificationCompat.PRIORITY_MAX);
+                                    cachedDefinition = null;
                                 }
                             }
                         }
@@ -876,7 +876,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             for (String address : defMap.keySet())
             {
                 Token token = tokensService.getToken(networkId, address);
-                if (token != null) token.hasTokenScript = true;
+                if (token != null)
+                {
+                    token.hasTokenScript = true;
+                    TokenDefinition td = getAssetDefinition(networkId, address);
+                    ContractInfo cInfo = td.contracts.get(td.holdingToken);
+                    if (cInfo != null) checkCorrectInterface(token, cInfo.contractInterface);
+                }
             }
         }
     }
@@ -974,6 +980,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         Token newToken = tf.createToken(token.tokenInfo, BigDecimal.ZERO, null, 0, cType, token.getNetworkName(), 0);
         newToken.setTokenWallet(token.getWallet());
         newToken.walletUIUpdateRequired = true;
+        newToken.updateBlancaTime = 0;
 
         tokenLocalSource.saveToken(new Wallet(token.getWallet()), newToken)
                 .subscribeOn(Schedulers.io())
@@ -1103,7 +1110,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenScriptResult.addPair(attrs, "chainId", String.valueOf(token.tokenInfo.chainId));
         TokenScriptResult.addPair(attrs, "tokenId", tokenId);
 
-
         if (token.isEthereum())
         {
             TokenScriptResult.addPair(attrs, "balance", token.balance.toString());
@@ -1140,9 +1146,26 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
+        updateTokenTime(token, tokenId);
         //return definition.resolveAttributes(tokenId, this, cAddr);
         //resolveAttributes(BigInteger tokenId, AttributeInterface attrIf, ContractAddress cAddr, TokenDefinition td)
         return tokenscriptUtility.resolveAttributes(tokenId, this, cAddr, definition, token.lastTxUpdate);
+    }
+
+    private void updateTokenTime(Token token, BigInteger tokenId)
+    {
+        if (token.getInterfaceSpec() == ContractType.ERC721 || token.getInterfaceSpec() == ContractType.ERC721_LEGACY)
+        {
+            token.lastTxUpdate = fetchTxUpdate(token, tokenId);
+            //needs updating?
+            long currentTime = System.currentTimeMillis();
+            if (token.lastTxUpdate == 0 || (currentTime - token.lastTxUpdate) > 1*60*1000)
+            {
+                token.lastTxUpdate = currentTime + 1*60*1000;
+                //update the time
+                storeTxUpdate(token, tokenId);
+            }
+        }
     }
 
     private List<String> getCanonicalizedAssets()
@@ -1176,5 +1199,101 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         Function function = tokenscriptUtility.generateTransactionFunction(token.getWallet(), tokenId, td, def, this);
         String encodedFunction = FunctionEncoder.encode(function);
         return encodedFunction;
+    }
+
+    private long fetchTxUpdate(Token token, BigInteger tokenId)
+    {
+        long updatedTime = 0;
+        try (Realm realm = realmManager.getERC721RealmInstance(new Wallet(token.getWallet())))
+        {
+            RealmERC721Token realmToken = realm.where(RealmERC721Token.class)
+                    .equalTo("address", erc721key(token, tokenId))
+                    .equalTo("chainId", token.tokenInfo.chainId)
+                    .findFirst();
+
+            if (realmToken != null)
+            {
+                updatedTime = realmToken.getUpdatedTime();
+            }
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+
+        return updatedTime;
+    }
+
+    private Disposable storeTxUpdate(Token token, BigInteger tokenId)
+    {
+        return Completable.complete()
+                .subscribeWith(new DisposableCompletableObserver()
+                {
+                    Realm realm;
+                    @Override
+                    public void onStart()
+                    {
+                        realm = realmManager.getERC721RealmInstance(new Wallet(token.getWallet()));
+                        RealmERC721Token realmToken = realm.where(RealmERC721Token.class)
+                                .equalTo("address", erc721key(token, tokenId))
+                                .equalTo("chainId", token.tokenInfo.chainId)
+                                .findFirst();
+
+                        if (realmToken != null)
+                        {
+                            TransactionsRealmCache.addRealm();
+                            realm.beginTransaction();
+                            realmToken.setUpdatedTime(token.lastTxUpdate);
+                        }
+                        else
+                        {
+                            createTokenStore(realm, token, tokenId);
+                        }
+                    }
+
+                    @Override
+                    public void onComplete()
+                    {
+                        if (realm.isInTransaction()) realm.commitTransaction();
+                        TransactionsRealmCache.subRealm();
+                        realm.close();
+                    }
+
+                    @Override
+                    public void onError(Throwable e)
+                    {
+                        if (realm != null && !realm.isClosed())
+                        {
+                            realm.close();
+                        }
+                    }
+                });
+    }
+
+    private String erc721key(Token token, BigInteger tokenId)
+    {
+        return token.getAddress() + "-" + token.tokenInfo.chainId + "-" + tokenId.toString();
+    }
+
+    private void createTokenStore(Realm realm, Token token, BigInteger tokenId)
+    {
+        String databaseKey = erc721key(token, tokenId);
+
+        realm.beginTransaction();
+
+        RealmERC721Token realmToken = realm.where(RealmERC721Token.class)
+                .equalTo("address", databaseKey)
+                .equalTo("chainId", token.tokenInfo.chainId)
+                .findFirst();
+
+        if (realmToken == null)
+        {
+            realmToken = realm.createObject(RealmERC721Token.class, databaseKey);
+            realmToken.setName(token.tokenInfo.name);
+            realmToken.setSymbol(token.tokenInfo.symbol);
+            realmToken.setAddedTime(token.updateBlancaTime);
+            realmToken.setUpdatedTime(token.lastTxUpdate);
+            realmToken.setChainId(token.tokenInfo.chainId);
+        }
     }
 }

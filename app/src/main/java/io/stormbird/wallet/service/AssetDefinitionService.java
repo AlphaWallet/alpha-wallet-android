@@ -895,7 +895,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     /**
      * When a Non Fungible Token contract which has a Tokenscript definition has new transactions
      * We need to update the cached values as they could have changed
-     * TODO: Once we support event liostening this is triggered from specific events
+     * TODO: Once we support event listening this is triggered from specific events
      * @param token
      * @return
      */
@@ -1157,19 +1157,46 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return tokenscriptUtility.resolveAttributes(tokenId, this, cAddr, definition, token.lastTxUpdate);
     }
 
+    public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, List<BigInteger> tokenIds)
+    {
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        //pre-fill tokenIds
+        for (AttributeType attrType : definition.attributeTypes.values())
+        {
+            resolveTokenIds(attrType, tokenIds);
+        }
+
+        return resolveAttrs(token, tokenIds.get(0));
+    }
+
+    private void resolveTokenIds(AttributeType attrType, List<BigInteger> tokenIds)
+    {
+        if (attrType.function == null) return;
+
+        for (MethodArg arg : attrType.function.parameters)
+        {
+            int index = arg.getTokenIndex();
+            if (arg.isTokenId() && index >= 0 && index < tokenIds.size())
+            {
+                arg.element.value = tokenIds.get(index).toString();
+            }
+        }
+    }
+
     private void updateTokenTime(Token token, BigInteger tokenId)
     {
         if (token.getInterfaceSpec() == ContractType.ERC721 || token.getInterfaceSpec() == ContractType.ERC721_LEGACY)
         {
-            token.lastTxUpdate = fetchTxUpdate(token, tokenId);
-            //needs updating?
-            long currentTime = System.currentTimeMillis();
-            if (token.lastTxUpdate == 0 || (currentTime - token.lastTxUpdate) > 1*60*1000)
-            {
-                token.lastTxUpdate = currentTime + 1*60*1000;
-                //update the time
-                storeTxUpdate(token, tokenId);
-            }
+            token.lastTxUpdate = 0;
+//            token.lastTxUpdate = fetchTxUpdate(token, tokenId);
+//            //needs updating?
+//            long currentTime = System.currentTimeMillis();
+//            if (token.lastTxUpdate == 0 || (currentTime - token.lastTxUpdate) > 1*60*1000)
+//            {
+//                token.lastTxUpdate = currentTime + 1*60*1000;
+//                //update the time
+//                storeTxUpdate(token, tokenId);
+//            }
         }
     }
 
@@ -1300,5 +1327,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             realmToken.setUpdatedTime(token.lastTxUpdate);
             realmToken.setChainId(token.tokenInfo.chainId);
         }
+    }
+
+    /**
+     * Clear the currently cached definition. This forces the service to reload the definition so it's clean for the next usage.
+     */
+    public void clearCache()
+    {
+        cachedDefinition = null;
     }
 }

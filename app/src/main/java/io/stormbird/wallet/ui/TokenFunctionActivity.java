@@ -117,8 +117,8 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
     private void setupFunctions()
     {
         Button[] buttons = new Button[3];
-        buttons[0] = findViewById(R.id.button_use);
-        buttons[1] = findViewById(R.id.button_sell);
+        buttons[1] = findViewById(R.id.button_use);
+        buttons[0] = findViewById(R.id.button_sell);
         buttons[2] = findViewById(R.id.button_transfer);
 
         for (Button b : buttons) { b.setOnClickListener(this); }
@@ -161,24 +161,38 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
     {
         switch (v.getId())
         {
+            //case R.id.button_sell:
             case R.id.button_use:
+            {
+                viewModel.selectRedeemToken(this, token, idList);
+//                Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+//                //this will be the user function
+//                if (functions == null || functions.size() == 0)
+//                {
+//                    viewModel.selectRedeemToken(this, token, idList);
+//                }
+//                else
+//                {
+//                    String buttonText = ((Button) v).getText().toString();
+//                    viewModel.showFunction(this, token, buttonText, idList);
+//                }
+            }
+            break;
+            //case R.id.button_use:
+            case R.id.button_sell:
             {
                 Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
                 //this will be the user function
                 if (functions == null || functions.size() == 0)
                 {
-                    viewModel.selectRedeemToken(this, token, idList);
+                    //viewModel.selectRedeemToken(this, token, idList);
+                    viewModel.openUniversalLink(this, token, token.intArrayToString(idList, false));
                 }
                 else
                 {
                     String buttonText = ((Button) v).getText().toString();
                     viewModel.showFunction(this, token, buttonText, idList);
                 }
-            }
-            break;
-            case R.id.button_sell:
-            {
-                viewModel.openUniversalLink(this, token, token.intArrayToString(idList, false));
             }
             break;
             case R.id.button_transfer:

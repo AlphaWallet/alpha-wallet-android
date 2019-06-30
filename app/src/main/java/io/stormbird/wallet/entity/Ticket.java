@@ -210,6 +210,7 @@ public class Ticket extends Token implements Parcelable
      */
 
     /**
+<<<<<<< HEAD
      * Convert a CSV string of Hex values into a BigInteger List
      * @param integerString CSV string of hex ticket id's
      * @return

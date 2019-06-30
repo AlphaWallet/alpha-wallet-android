@@ -346,7 +346,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
                     {
                         BigDecimal unsignedValue = new BigDecimal(valueFromInput);
                         //handle value
-                        functionEffect = unsignedValue.toString() + " " + token.tokenInfo.symbol;
+                        functionEffect = unsignedValue.toString();
                         if (attr.bitshift > 0)
                         {
                             unsignedValue = unsignedValue.movePointRight(attr.bitshift);
@@ -384,7 +384,8 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
             }
             else
             {
-                functionEffect = functionEffect + " to " + actionMethod;
+                functionEffect = functionEffect + " " + token.tokenInfo.symbol + " to " + actionMethod;
+                //functionEffect = functionEffect + " to " + actionMethod;
             }
 
             //function call may include some value

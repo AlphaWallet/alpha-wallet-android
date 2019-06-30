@@ -39,7 +39,7 @@
   {"name": "expo", "description": "Short/Leverage ETH", "url": "https://www.expotrading.com/trade", "category": "Finance"},
   {"name": "MakerDAO CDP Portal", "description": "Where you can interact with the Dai Credit System", "url": "https://cdp.makerdao.com/", "category": "Finance"},
   {"name": "Nexo", "description": "Instant Crypto Loans", "url": "https://nexo.io/", "category": "Finance"},
-  {"name": "AirSwap", "description": "Peer-to-Peer trading on Ethereum", "url": "https://airswap.io", "category": "Exchange"},
+  {"name": "AirSwap", "description": "Peer-to-Peer trading on Ethereum", "url": "https://instant.airswap.io", "category": "Exchange"},
   {"name": "Chibi Fighters", "description": "Chibi Fighters are fierce little warriors that know no mercy", "url": "https://chibifighters.io", "category": "Game"},
   {"name": "CryptoKitties", "description": "Collect and breed digital cats!", "url": "https://cryptokitties.co", "category": "Game"},
   {"name": "BTU Hotel", "description": "BTU Hotel is a hotel booking Dapp takes 0% commission. Dapp user earns 100% of the hotel commission directly in crypto into their preferred browser wallet", "url": "https://btu-hotel.com", "category": "Travel"},

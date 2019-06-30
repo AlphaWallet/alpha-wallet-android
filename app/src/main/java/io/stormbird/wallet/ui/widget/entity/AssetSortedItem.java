@@ -3,6 +3,10 @@ package io.stormbird.wallet.ui.widget.entity;
 import io.stormbird.wallet.entity.opensea.Asset;
 import io.stormbird.wallet.ui.widget.holder.OpenseaHolder;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by James on 3/10/2018.
  * Stormbird in Singapore
@@ -28,5 +32,31 @@ public class AssetSortedItem extends SortedItem<Asset>
     public boolean areItemsTheSame(SortedItem other) {
         return (other.viewType == viewType
                 && ((AssetSortedItem) other).value.getTokenId().equals(value.getTokenId()));
+    }
+
+    @Override
+    public boolean isRadioExposed()
+    {
+        return value.exposeRadio;
+    }
+
+    @Override
+    public boolean isItemChecked()
+    {
+        return value.isChecked;
+    }
+
+    @Override
+    public void setIsChecked(boolean b) { value.isChecked = b; };
+
+    @Override
+    public void setExposeRadio(boolean expose) { value.exposeRadio = expose; };
+
+    @Override
+    public List<BigInteger> getTokenIds()
+    {
+        List<BigInteger> test = new ArrayList<>();
+        test.add(new BigInteger(value.getTokenId()));
+        return test;
     }
 }

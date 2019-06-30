@@ -392,7 +392,8 @@ public class TokensService
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastUpdateDiff;
-            long cutoffCheck = check.isEthereum() ? 20*1000 : 40*1000;
+            //long cutoffCheck = check.isEthereum() ? 20*1000 : 40*1000;
+            long cutoffCheck = 20*1000;
             if (updateFactor > highestWeighting && (updateFactor > (float)cutoffCheck || check.refreshCheck)) // don't add to list if updated in the last 20 seconds
             {
                 highestWeighting = updateFactor;

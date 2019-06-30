@@ -124,8 +124,8 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
         findViewById(R.id.layoutButtons).setVisibility(View.GONE);
 
         final Button[] buttons = new Button[3];
-        buttons[0] = findViewById(R.id.button_use);
-        buttons[1] = findViewById(R.id.button_sell);
+        buttons[1] = findViewById(R.id.button_use);
+        buttons[0] = findViewById(R.id.button_sell);
 
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         if (functions != null && functions.size() > 0)
@@ -210,12 +210,33 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
                     viewModel.showTransferToken(this, token, selection);
                 }
                 break;
+
                 default:
                     Button b = findViewById(v.getId());
                     handleUseClick(b.getText().toString(), v.getId());
                     break;
             }
         }
+    }
+
+    private boolean hasCorrectTokens(TSAction action)
+    {
+        //get selected tokens
+        List<BigInteger> selected = adapter.getSelectedTokenIds(selection);
+        int groupings = adapter.getSelectedGroups();
+        if (action.function != null)
+        {
+            int requiredCount = action.function.getTokenRequirement();
+            if (requiredCount == 1 && selected.size() > 1 && groupings == 1)
+            {
+                BigInteger first = selected.get(0);
+                selected.clear();
+                selected.add(first);
+            }
+
+            return selected.size() == requiredCount;
+        }
+        return true;
     }
 
     private void handleUseClick(String function, int useId)
@@ -254,25 +275,13 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
                 case R.id.button_sell:
                     viewModel.sellTicketRouter(this, token, token.intArrayToString(selection, false));
                     break;
-                case R.id.button_redeem:
+                case R.id.button_use:
                     viewModel.selectRedeemTokens(this, token, selection);
                     break;
                 default:
                     break;
             }
         }
-    }
-
-    private boolean hasCorrectTokens(TSAction action)
-    {
-        //get selected tokens
-        List<BigInteger> selected = adapter.getSelectedTokenIds(selection);
-        if (action.function != null)
-        {
-            int requiredCount = action.function.getTokenRequirement();
-            return selected.size() == requiredCount;
-        }
-        return true;
     }
 
     @Override

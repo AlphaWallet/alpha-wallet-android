@@ -1,18 +1,30 @@
 package io.stormbird.token.web;
 
 import io.stormbird.token.entity.*;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.token.web.Ethereum.TokenscriptFunction;
+import io.stormbird.token.web.Ethereum.TransactionHandler;
+import io.stormbird.token.web.Service.CryptoFunctions;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.*;
-import org.springframework.boot.autoconfigure.*;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import java.io.*;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
+import org.xml.sax.SAXException;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -23,17 +35,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.stormbird.token.tools.ParseMagicLink;
-import io.stormbird.token.web.Ethereum.TransactionHandler;
-import io.stormbird.token.web.Service.CryptoFunctions;
-import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.view.RedirectView;
-import org.xml.sax.SAXException;
-import javax.servlet.http.HttpServletRequest;
 import static io.stormbird.token.tools.Convert.getEthString;
-import static io.stormbird.token.tools.Convert.getEthStringSzabo;
-import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
+import static io.stormbird.token.tools.ParseMagicLink.spawnable;
 
 @Controller
 @SpringBootApplication
@@ -56,6 +59,7 @@ public class AppSiteController implements AttributeInterface
             "}";
     private final MagicLinkData magicLinkData = new MagicLinkData();
     private final TokenscriptFunction tokenscriptFunction = new TokenscriptFunction() { };
+    private static Path repoDir;
 
     @GetMapping(value = "/apple-app-site-association", produces = "application/json")
     @ResponseBody
@@ -89,7 +93,7 @@ public class AppSiteController implements AttributeInterface
 
             if (domain.contains("duckdns.org") || domain.contains("192.168"))
             {
-                data.chainId = 3;
+                data.chainId = 4;
             }
         }
         catch (SalesOrderMalformed e)
@@ -97,13 +101,7 @@ public class AppSiteController implements AttributeInterface
             return "error: " + e;
         }
         parser.getOwnerKey(data);
-        switch (data.contractType)
-        {
-            case currencyLink:
-                return handleCurrencyLink(data, agent, model);
-            default:
-                return handleTokenLink(data, agent, model, universalLink);
-        }
+        return handleTokenLink(data, agent, model, universalLink);
     }
 
     private String handleTokenLink(
@@ -115,8 +113,10 @@ public class AppSiteController implements AttributeInterface
     {
         TokenDefinition definition = getTokenDefinition(data.chainId, data.contractAddress);
 
-        //get attributes
-        BigInteger firstTokenId = BigInteger.ZERO;
+        if (definition == null)
+        {
+            return passThroughToken(data, universalLink);
+        }
 
         try
         {
@@ -124,13 +124,11 @@ public class AppSiteController implements AttributeInterface
         }
         catch (Exception e)
         {
-            /* although contract is okay, we can't getting
-             * tokens. This could be caused by a wrong signature. The
-             * case that the tokens are redeemd is handled inside, not
-             * as an exception */
-            model.addAttribute("tokenAvailable", "unavailable");
-            return "index";
+            return passThroughToken(data, universalLink);
         }
+
+        //get attributes
+        BigInteger firstTokenId = BigInteger.ZERO;
 
         if (data.tokenIds != null && data.tokenIds.size() > 0)
             firstTokenId = data.tokenIds.get(0);
@@ -193,42 +191,72 @@ public class AppSiteController implements AttributeInterface
                                         );
     }
 
-    private String handleCurrencyLink(
-            MagicLinkData data,
-            String agent,
-            Model model
-    )
+    private String passThroughToken(MagicLinkData data, String universalLink)
     {
-        String networkName = MagicLinkInfo.getNetworkNameById(data.chainId);
-        model.addAttribute("link", data);
-        model.addAttribute("linkValue", getEthStringSzabo(data.amount));
-        model.addAttribute("title", networkName + " Currency Drop");
-        model.addAttribute("currency", networkName);
-        model.addAttribute("domain", MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId));
+        TransactionHandler txHandler = new TransactionHandler(data.chainId);
 
-        try {
-            updateContractInfo(model, data);
-        } catch (Exception e) {
-            /* The link points to a non-existing contract - most
-             * likely from a different chainID. Now, if Ethereum node
-             * is offline, this may get triggered too. */
-            model.addAttribute("tokenAvailable", "unattainable");
-            return "currency";
+        List<BigInteger> balanceArray;
+        BigInteger firstTokenId = BigInteger.ZERO;
+        String available = "available";
+        if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000))) available = "expired";
+
+        switch (data.contractType)
+        {
+            case spawnable:
+                firstTokenId = data.tokenIds.get(0);
+                break;
+            default:
+                try
+                {
+                    balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
+                    //check indices
+                    for (int index : data.indices)
+                        if (index >= balanceArray.size() || balanceArray.get(index).equals(BigInteger.ZERO)) available = "unavailable";
+                    firstTokenId = balanceArray.get(0);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+                break;
         }
 
-        if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000))){
-            model.addAttribute("tokenAvailable", "expired");
-        } else {
-            model.addAttribute("tokenAvailable", "available");
-        }
-        return "currency";
+        System.out.println(firstTokenId.toString(16));
+        String tokenName = txHandler.getNameOnly(data.contractAddress);
+        String symbol = txHandler.getSymbolOnly(data.contractAddress);
+        String nameWithSymbol = tokenName + "(" + symbol + ")";
+
+        String price = getEthString(data.price) + " " + MagicLinkInfo.getNetworkNameById(data.chainId);
+
+        String title = data.ticketCount + " Tokens " + available;
+
+        String initHTML = loadFile("templates/tokenscriptTemplate.html");
+
+        String expiry = new java.util.Date(data.expiry*1000).toString();
+
+        String availableUntil = "<span title=\"Unix Time is " + data.expiry + "\">" + expiry + "</span>";
+        String action = "\"" + universalLink + "\"";
+        String originalLink = "\"https://" + MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId) + "/" + universalLink + "\"";
+
+        String etherscanAccountLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "address/" + data.ownerAddress;
+        String etherscanTokenLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "token/" + data.contractAddress;
+
+        return String.format(initHTML,
+                             title, "", String.valueOf(data.ticketCount), nameWithSymbol, "Tokens",
+                             price, available,
+                             data.ticketCount, "Tokens",
+                             "", availableUntil,
+                             action, originalLink,
+                             etherscanAccountLink, data.ownerAddress,
+                             etherscanTokenLink, data.contractAddress
+        );
     }
 
     private TokenDefinition getTokenDefinition(int chainId, String contractAddress) throws IOException, SAXException, NoHandlerFoundException
     {
         File xml = null;
         TokenDefinition definition = null;
-        if (addresses.containsKey(chainId))
+        if (addresses.containsKey(chainId) && addresses.get(chainId).containsKey(contractAddress))
         {
             xml = addresses.get(chainId).get(contractAddress);
             if (xml == null) {
@@ -243,15 +271,6 @@ public class AppSiteController implements AttributeInterface
         }
 
         return definition;
-    }
-
-    private void updateContractInfo(Model model, MagicLinkData data) {
-        //find out the contract name, symbol and balance
-        //have to use blocking gets here
-        //TODO: we should be able to update components here instead of waiting
-        TransactionHandler txHandler = new TransactionHandler(data.chainId);
-        String contractName = txHandler.getName(data.contractAddress);
-        model.addAttribute("contractName", contractName);
     }
 
     /**
@@ -271,7 +290,7 @@ public class AppSiteController implements AttributeInterface
         List<BigInteger> balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
         data.tokenIds = new ArrayList<>();
 
-        List<NonFungibleToken> selection = Arrays.stream(data.tickets)
+        List<NonFungibleToken> selection = Arrays.stream(data.indices)
                 .mapToObj(i -> balanceArray.get(i))
                 .filter(tokenId -> !tokenId.equals(BigInteger.ZERO))
                 .map(tokenId -> {
@@ -280,11 +299,9 @@ public class AppSiteController implements AttributeInterface
                 })
                 .collect(Collectors.toList());
 
-        if (selection.size() != data.tickets.length)
+        if (selection.size() != data.indices.length)
             throw new Exception("Some or all non-fungible tokens are not owned by the claimed owner");
     }
-
-    private static Path repoDir;
 
     @Value("${repository.dir}")
     public void setRepoDir(String value) {

@@ -4,7 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Base64;
 
-import io.stormbird.token.tools.Numeric;
 import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
@@ -41,7 +40,7 @@ public class MagicLinkParcel implements Parcelable
         magicLink.contractAddress = contractAddress;
         MessageData data = parser.readByteMessage(magicLink.message, Base64.decode(sig, Base64.URL_SAFE), ticketCount);
         magicLink.priceWei = data.priceWei;
-        magicLink.tickets = data.tickets;
+        magicLink.indices = data.tickets;
         System.arraycopy(data.signature, 0, magicLink.signature, 0, 65);
     }
 
@@ -53,8 +52,8 @@ public class MagicLinkParcel implements Parcelable
         magicLink.ticketCount = in.readInt();
         magicLink.contractAddress = in.readString();
         int ticketLength = in.readInt();
-        magicLink.tickets = new int[ticketLength];
-        in.readIntArray(magicLink.tickets);
+        magicLink.indices = new int[ticketLength];
+        in.readIntArray(magicLink.indices);
 
         int sigLength = in.readInt();   // must not be higher than 65 bytes
         in.readByteArray(magicLink.signature);    // in my guess, it's always is 65 bytes so it should fit.
@@ -84,8 +83,8 @@ public class MagicLinkParcel implements Parcelable
         parcel.writeInt(magicLink.ticketStart);
         parcel.writeInt(magicLink.ticketCount);
         parcel.writeString(magicLink.contractAddress);
-        parcel.writeInt(magicLink.tickets.length);
-        parcel.writeIntArray(magicLink.tickets);
+        parcel.writeInt(magicLink.indices.length);
+        parcel.writeIntArray(magicLink.indices);
         parcel.writeInt(magicLink.signature.length);
         parcel.writeByteArray(magicLink.signature);
         parcel.writeInt(magicLink.message.length);
@@ -118,7 +117,7 @@ public class MagicLinkParcel implements Parcelable
                     data = TokenRepository.createDropCurrency(order, sellerSig.getV(), sellerSig.getR(), sellerSig.getS(), recipient);
                     break;
                 default:
-                    for (int ticketIndex : order.tickets) {
+                    for (int ticketIndex : order.indices) {
                         tokenElements.add(BigInteger.valueOf(ticketIndex));
                     }
                     data = TokenRepository.createTrade(token, expiry, tokenElements, sellerSig.getV(), sellerSig.getR(), sellerSig.getS());

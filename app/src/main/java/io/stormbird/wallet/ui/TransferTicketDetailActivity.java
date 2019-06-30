@@ -642,7 +642,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
     private void handleERC875Transfer(final String to)
     {
-        //how many tickets are we selling?
+        //how many indices are we selling?
         int quantity = token.stringHexToBigIntegerList(prunedIds).size();
         int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
 

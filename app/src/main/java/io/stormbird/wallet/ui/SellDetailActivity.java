@@ -490,7 +490,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     }
 
     private void linkReady(String universalLink) {
-        //how many tickets are we selling?
+        //how many indices are we selling?
         String currencySymbol = viewModel.getNetwork().symbol;
         int quantity = token.ticketIdStringToIndexList(prunedIds).size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
@@ -515,7 +515,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
 
     private void confirmPlaceMarketOrderDialog()
     {
-        //how many tickets are we selling?
+        //how many indices are we selling?
         int quantity = token.ticketIdStringToIndexList(prunedIds).size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         String qty = String.valueOf(quantity) + " " + unit + " @" + getEthString(sellPriceValue) + getString(R.string.eth_per_ticket);

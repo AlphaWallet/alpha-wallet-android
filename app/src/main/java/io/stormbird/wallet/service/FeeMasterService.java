@@ -62,7 +62,7 @@ public class FeeMasterService
             case currencyLink:
                 return sendFeemasterCurrencyTransaction(url, chainId, wallet.address, order);
             default:
-                return generateTicketString(order.tickets)
+                return generateTicketString(order.indices)
                         .flatMap(ticketStr -> sendFeemasterTransaction(url, chainId, wallet.address, order.expiry, ticketStr, order.signature))
                         .toObservable();
         }

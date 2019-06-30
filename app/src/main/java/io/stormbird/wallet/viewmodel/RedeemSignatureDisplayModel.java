@@ -137,7 +137,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         {
             boolean allBurned = true;
             List<BigInteger> balance = token.getArrayBalance();
-            //See if our tickets got burned
+            //See if our indices got burned
             if (balance != null)
             {
                 for (Integer index : this.ticketIndicies)

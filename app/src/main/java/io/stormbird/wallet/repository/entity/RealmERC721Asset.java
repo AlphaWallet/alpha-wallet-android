@@ -25,13 +25,9 @@ public class RealmERC721Asset extends RealmObject
     public String getTokenId()
     {
         String[] str = tokenIdAddr.split("-");
-        if (str.length > 2)
-        {
-            return str[2];
-        }
         if (str.length > 1)
         {
-            return str[1];
+            return str[str.length-1];
         }
         else
         {

@@ -335,4 +335,15 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
 
         return tokenIds;
     }
+
+    public int getSelectedGroups()
+    {
+        int selected = 0;
+        for (int i = 0; i < items.size(); i++)
+        {
+            if (items.get(i).isItemChecked()) selected++;
+        }
+
+        return selected;
+    }
 }

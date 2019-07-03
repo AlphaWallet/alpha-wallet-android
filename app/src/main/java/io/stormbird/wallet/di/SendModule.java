@@ -20,15 +20,15 @@ class SendModule {
     SendViewModelFactory provideSendViewModelFactory(ConfirmationRouter confirmationRouter,
                                                      MyAddressRouter myAddressRouter,
                                                      ENSInteract ensInteract,
-                                                     AssetDefinitionService assetDefinitionService,
                                                      EthereumNetworkRepositoryType networkRepositoryType,
-                                                     TokensService tokensService) {
+                                                     TokensService tokensService,
+                                                     FetchGasSettingsInteract fetchGasSettingsInteract) {
         return new SendViewModelFactory(confirmationRouter,
                 myAddressRouter,
                 ensInteract,
-                assetDefinitionService,
                 networkRepositoryType,
-                tokensService);
+                tokensService,
+                fetchGasSettingsInteract);
     }
 
     @Provides
@@ -44,5 +44,10 @@ class SendModule {
     @Provides
     ENSInteract provideENSInteract(TokenRepositoryType tokenRepository) {
         return new ENSInteract(tokenRepository);
+    }
+
+    @Provides
+    FetchGasSettingsInteract provideFetchGasSettingsInteract(GasSettingsRepositoryType gasSettingsRepository) {
+        return new FetchGasSettingsInteract(gasSettingsRepository);
     }
 }

@@ -11,6 +11,7 @@ import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.ENSInteract;
+import io.stormbird.wallet.interact.FetchGasSettingsInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
@@ -30,22 +31,22 @@ public class SendViewModel extends BaseViewModel {
     private final ConfirmationRouter confirmationRouter;
     private final MyAddressRouter myAddressRouter;
     private final ENSInteract ensInteract;
-    private final AssetDefinitionService assetDefinitionService;
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
+    private final FetchGasSettingsInteract fetchGasSettingsInteract;
 
     public SendViewModel(ConfirmationRouter confirmationRouter,
                          MyAddressRouter myAddressRouter,
                          ENSInteract ensInteract,
-                         AssetDefinitionService assetDefinitionService,
                          EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
-                         TokensService tokensService) {
+                         TokensService tokensService,
+                         FetchGasSettingsInteract fetchGasSettingsInteract) {
         this.confirmationRouter = confirmationRouter;
         this.myAddressRouter = myAddressRouter;
         this.ensInteract = ensInteract;
-        this.assetDefinitionService = assetDefinitionService;
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
+        this.fetchGasSettingsInteract = fetchGasSettingsInteract;
     }
 
     public LiveData<String> ensResolve() { return ensResolve; }
@@ -86,5 +87,15 @@ public class SendViewModel extends BaseViewModel {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra(IMPORT_STRING, importTxt);
         context.startActivity(intent);
+    }
+
+    public void startGasPriceChecker(int chainId)
+    {
+        fetchGasSettingsInteract.startGasSettingsFetch(chainId);
+    }
+
+    public void stopGasPriceChecker()
+    {
+        fetchGasSettingsInteract.stopGasSettingsFetch();
     }
 }

@@ -18,27 +18,27 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
     private final ConfirmationRouter confirmationRouter;
     private final MyAddressRouter myAddressRouter;
     private final ENSInteract ensInteract;
-    private final AssetDefinitionService assetDefinitionService;
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
+    private final FetchGasSettingsInteract fetchGasSettingsInteract;
 
     public SendViewModelFactory(ConfirmationRouter confirmationRouter,
                                 MyAddressRouter myAddressRouter,
                                 ENSInteract ensInteract,
-                                AssetDefinitionService assetDefinitionService,
                                 EthereumNetworkRepositoryType networkRepository,
-                                TokensService tokensService) {
+                                TokensService tokensService,
+                                FetchGasSettingsInteract fetchGasSettingsInteract) {
         this.confirmationRouter = confirmationRouter;
         this.myAddressRouter = myAddressRouter;
         this.ensInteract = ensInteract;
-        this.assetDefinitionService = assetDefinitionService;
         this.networkRepository = networkRepository;
         this.tokensService = tokensService;
+        this.fetchGasSettingsInteract = fetchGasSettingsInteract;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new SendViewModel(confirmationRouter, myAddressRouter, ensInteract, assetDefinitionService, networkRepository, tokensService);
+        return (T) new SendViewModel(confirmationRouter, myAddressRouter, ensInteract, networkRepository, tokensService, fetchGasSettingsInteract);
     }
 }

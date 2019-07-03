@@ -38,6 +38,10 @@ public class FetchGasSettingsInteract {
         return repository.getGasSettings(transactionBytes, isNonFungible, chainId);
     }
 
+    public GasSettings fetchImmediate(byte[] transactionBytes, boolean isNonFungible, int chainId) {
+        return repository.getGasSettingsImmediate(transactionBytes, isNonFungible, chainId);
+    }
+
     public MutableLiveData<BigInteger> gasPriceUpdate()
     {
         return repository.gasPriceUpdate();

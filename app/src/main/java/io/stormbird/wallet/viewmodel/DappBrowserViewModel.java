@@ -26,10 +26,7 @@ import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Ticker;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.interact.CreateTransactionInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
@@ -60,6 +57,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final FetchTokensInteract fetchTokensInteract;
     private final ConfirmationRouter confirmationRouter;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final FetchGasSettingsInteract fetchGasSettingsInteract;
 
     private double ethToUsd = 0;
     private ArrayList<String> bookmarks;
@@ -71,7 +69,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
             ConfirmationRouter confirmationRouter,
-            EthereumNetworkRepositoryType ethereumNetworkRepository) {
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            FetchGasSettingsInteract fetchGasSettingsInteract) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -79,6 +78,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         this.fetchTokensInteract = fetchTokensInteract;
         this.confirmationRouter = confirmationRouter;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.fetchGasSettingsInteract = fetchGasSettingsInteract;
     }
 
     public AssetDefinitionService getAssetDefinitionService() {
@@ -283,6 +283,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         {
             ethereumNetworkRepository.setDefaultNetworkInfo(info);
             onDefaultNetwork(info);
+            startGasPriceChecker();
         }
     }
 
@@ -292,5 +293,18 @@ public class DappBrowserViewModel extends BaseViewModel  {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra(IMPORT_STRING, qrCode);
         ctx.startActivity(intent);
+    }
+
+    public void startGasPriceChecker()
+    {
+        if (defaultNetwork.getValue() != null)
+        {
+            fetchGasSettingsInteract.startGasSettingsFetch(defaultNetwork.getValue().chainId);
+        }
+    }
+
+    public void stopGasPriceChecker()
+    {
+        fetchGasSettingsInteract.stopGasSettingsFetch();
     }
 }

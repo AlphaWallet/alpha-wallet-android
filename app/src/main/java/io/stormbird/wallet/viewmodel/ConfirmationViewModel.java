@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import io.stormbird.token.tools.Numeric;
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchGasSettingsInteract;
@@ -126,13 +127,16 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void calculateGasSettings(byte[] transaction, boolean isNonFungible, int chainId)
     {
-        //start listening for gas
+        //start listening for gas if necessary
         fetchGasSettingsInteract.startGasSettingsFetch(chainId);
         if (gasSettings.getValue() == null)
         {
-            disposable = fetchGasSettingsInteract
-                    .fetch(transaction, isNonFungible, chainId)
-                    .subscribe(this::onGasSettings, this::onError);
+            GasSettings gasSettings = fetchGasSettingsInteract.fetchImmediate(transaction, isNonFungible, chainId);
+            onGasSettings(gasSettings);
+
+//            disposable = fetchGasSettingsInteract
+//                    .fetch(transaction, isNonFungible, chainId)
+//                    .subscribe(this::onGasSettings, this::onError);
         }
     }
 
@@ -178,12 +182,18 @@ public class ConfirmationViewModel extends BaseViewModel {
      */
     private void onGasPrice(BigInteger currentGasPrice)
     {
-        if (this.gasSettings.getValue() != null //protect against race condition
-                && this.gasSettingsOverride == null) //only update if user hasn't overriden
+        BigInteger limit = BigInteger.ZERO;
+        BigInteger price = currentGasPrice;
+
+        if (gasSettingsOverride != null)
         {
-            GasSettings updateSettings = new GasSettings(currentGasPrice, gasSettings.getValue().gasLimit);
-            this.gasSettings.postValue(updateSettings);
+            if (!gasSettingsOverride.gasLimit.equals(BigInteger.ZERO)) limit = gasSettingsOverride.gasLimit;
+            if (!gasSettingsOverride.gasPrice.equals(BigInteger.ZERO)) price = gasSettingsOverride.gasPrice;
         }
+
+        if (limit.equals(BigInteger.ZERO) && gasSettings().getValue() != null) limit = gasSettings.getValue().gasLimit;
+        GasSettings updateSettings = new GasSettings(price, limit);
+        this.gasSettings.postValue(updateSettings);
     }
 
     public void generateSalesOrders(String indexSendList, String contractAddr, BigInteger price, String idList) {

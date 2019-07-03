@@ -25,6 +25,7 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
     private final EthereumNetworkRepositoryType networkRepository;
     private BigInteger cachedGasPrice;
     private Disposable gasSettingsDisposable;
+    private int currentChainId;
 
     private final MutableLiveData<BigInteger> gasPrice = new MutableLiveData<>();
 
@@ -32,18 +33,25 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
 
     public GasSettingsRepository(EthereumNetworkRepositoryType networkRepository) {
         this.networkRepository = networkRepository;
+        currentChainId = 0;
     }
 
-    public void startGasListener(final int chainId)
+    public void startGasListener(int chainId)
     {
-        setCachedPrice(chainId);
-        gasSettingsDisposable = Observable.interval(0, FETCH_GAS_PRICE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> fetchGasSettings(chainId)).subscribe();
+        //check if checker is already running and is on the correct chain
+        if (chainId != currentChainId || gasSettingsDisposable == null || gasSettingsDisposable.isDisposed())
+        {
+            currentChainId = chainId;
+            setCachedPrice(chainId);
+            gasSettingsDisposable = Observable.interval(0, FETCH_GAS_PRICE_INTERVAL, TimeUnit.SECONDS)
+                    .doOnNext(l -> fetchGasSettings(currentChainId)).subscribe();
+        }
     }
 
     public void stopGasListener()
     {
         if (gasSettingsDisposable != null && !gasSettingsDisposable.isDisposed()) gasSettingsDisposable.dispose();
+        currentChainId = 0;
     }
 
     private void setCachedPrice(int chainId)
@@ -73,7 +81,10 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
                 gasPrice.postValue(cachedGasPrice);
             }
         } catch (Exception ex) {
-            setCachedPrice(chainId);
+            if (cachedGasPrice == null)
+            {
+                setCachedPrice(chainId);
+            }
         }
     }
 
@@ -91,6 +102,25 @@ public class GasSettingsRepository implements GasSettingsRepositoryType
             }
             return new GasSettings(cachedGasPrice, gasLimit);
         });
+    }
+
+    public GasSettings getGasSettingsImmediate(byte[] transactionBytes, boolean isNonFungible, int chainId)
+    {
+        BigInteger gasLimit = new BigInteger(C.DEFAULT_GAS_LIMIT);
+        if (cachedGasPrice == null) setCachedPrice(chainId);
+        if (transactionBytes != null) {
+            if (isNonFungible)
+            {
+                gasLimit = new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS);
+            }
+            else
+            {
+                gasLimit = new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_TOKENS);
+            }
+            BigInteger estimate = estimateGasLimit(transactionBytes);
+            if (estimate.compareTo(gasLimit) > 0) gasLimit = estimate;
+        }
+        return new GasSettings(cachedGasPrice, gasLimit);
     }
 
     public Single<GasSettings> getGasSettings(byte[] transactionBytes, boolean isNonFungible, int chainId) {

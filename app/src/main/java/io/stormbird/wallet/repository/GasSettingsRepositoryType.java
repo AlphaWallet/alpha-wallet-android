@@ -14,4 +14,6 @@ public interface GasSettingsRepositoryType {
     MutableLiveData<BigInteger> gasPriceUpdate();
     void startGasListener(int chainId);
     void stopGasListener();
+
+    GasSettings getGasSettingsImmediate(byte[] transactionBytes, boolean isNonFungible, int chainId);
 }

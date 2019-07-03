@@ -2,15 +2,8 @@ package io.stormbird.wallet.di;
 
 import dagger.Module;
 import dagger.Provides;
-import io.stormbird.wallet.interact.CreateTransactionInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-import io.stormbird.wallet.repository.PasswordStore;
-import io.stormbird.wallet.repository.TokenRepositoryType;
-import io.stormbird.wallet.repository.TransactionRepositoryType;
-import io.stormbird.wallet.repository.WalletRepositoryType;
+import io.stormbird.wallet.interact.*;
+import io.stormbird.wallet.repository.*;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModelFactory;
@@ -25,7 +18,8 @@ public class DappBrowserModule {
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
             ConfirmationRouter confirmationRouter,
-            EthereumNetworkRepositoryType ethereumNetworkRepository) {
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            FetchGasSettingsInteract fetchGasSettingsInteract) {
         return new DappBrowserViewModelFactory(
                 findDefaultNetworkInteract,
                 findDefaultWalletInteract,
@@ -33,7 +27,8 @@ public class DappBrowserModule {
                 createTransactionInteract,
                 fetchTokensInteract,
                 confirmationRouter,
-                ethereumNetworkRepository);
+                ethereumNetworkRepository,
+                fetchGasSettingsInteract);
     }
 
     @Provides
@@ -61,5 +56,10 @@ public class DappBrowserModule {
     @Provides
     FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
         return new FetchTokensInteract(tokenRepository);
+    }
+
+    @Provides
+    FetchGasSettingsInteract provideFetchGasSettingsInteract(GasSettingsRepositoryType gasSettingsRepository) {
+        return new FetchGasSettingsInteract(gasSettingsRepository);
     }
 }

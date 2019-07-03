@@ -633,7 +633,11 @@ public class DappBrowserFragment extends Fragment implements
         resultDialog.setTitle(getString(R.string.invalid_transaction));
         resultDialog.setMessage(getString(R.string.contains_no_data));
         resultDialog.setProgressMode();
-        resultDialog.setCancelable(false);
+        resultDialog.setButtonText(R.string.button_ok);
+        resultDialog.setButtonListener(v -> {
+            resultDialog.dismiss();
+        });
+        resultDialog.setCancelable(true);
         resultDialog.show();
     }
 
@@ -843,6 +847,21 @@ public class DappBrowserFragment extends Fragment implements
         }
 
         return false;
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isResumed()) {
+            if (isVisibleToUser)
+            {
+                viewModel.startGasPriceChecker();
+            }
+            else
+            {
+                viewModel.stopGasPriceChecker();
+            }
+        }
     }
 
     private void DisplayAddressFound(String address, FragmentMessenger messenger)

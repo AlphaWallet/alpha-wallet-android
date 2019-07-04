@@ -89,6 +89,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         tokenView.setOnSignPersonalMessageListener(this);
         tokenView.setVisibility(View.GONE);
         waitSpinner.setVisibility(View.VISIBLE);
+        viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
 
         getAttrs();
     }
@@ -264,6 +265,13 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         }
 
         return resolved;
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        viewModel.stopGasSettingsFetch();
     }
 
     private boolean checkTokenScriptElement(TSAction action, TokenscriptElement e, boolean resolved)

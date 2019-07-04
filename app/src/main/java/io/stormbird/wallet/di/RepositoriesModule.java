@@ -7,8 +7,6 @@ import com.google.gson.Gson;
 import io.stormbird.wallet.interact.SetupTokensInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-import io.stormbird.wallet.repository.GasSettingsRepository;
-import io.stormbird.wallet.repository.GasSettingsRepositoryType;
 import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
 import io.stormbird.wallet.repository.SharedPreferenceRepository;
@@ -110,22 +108,14 @@ public class RepositoriesModule {
     @Provides
     TokenRepositoryType provideTokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            WalletRepositoryType walletRepository,
-            TokenExplorerClientType tokenExplorerClientType,
             TokenLocalSource tokenLocalSource,
-            TransactionLocalSource inDiskCache,
             TickerService tickerService,
-			AssetDefinitionService assetDefinitionService,
-			TransactionRepositoryType transactionRepository) {
+			GasService gasService) {
 	    return new TokenRepository(
 	            ethereumNetworkRepository,
-	            walletRepository,
-	            tokenExplorerClientType,
                 tokenLocalSource,
-                inDiskCache,
                 tickerService,
-				assetDefinitionService,
-				transactionRepository);
+				gasService);
     }
 
 	@Singleton
@@ -146,16 +136,16 @@ public class RepositoriesModule {
 		return new WalletDataRealmSource(realmManager);
 	}
 
-    @Singleton
-	@Provides
-	GasSettingsRepositoryType provideGasSettingsRepository(EthereumNetworkRepositoryType ethereumNetworkRepository) {
-		return new GasSettingsRepository(ethereumNetworkRepository);
-	}
-
 	@Singleton
 	@Provides
 	TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository, RealmManager realmManager, OkHttpClient okHttpClient) {
 		return new TokensService(ethereumNetworkRepository, realmManager, okHttpClient);
+	}
+
+	@Singleton
+	@Provides
+	GasService provideGasService(EthereumNetworkRepositoryType ethereumNetworkRepository) {
+		return new GasService(ethereumNetworkRepository);
 	}
 
 	@Singleton

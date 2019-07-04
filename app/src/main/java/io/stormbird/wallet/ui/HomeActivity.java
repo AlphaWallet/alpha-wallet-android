@@ -305,9 +305,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 showPage(SETTINGS);
                 return true;
             }
-            case MARKETPLACE: {
-                return true;
-            }
         }
         return false;
     }

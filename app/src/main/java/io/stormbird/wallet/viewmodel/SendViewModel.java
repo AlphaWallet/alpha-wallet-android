@@ -4,7 +4,6 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.NetworkInfo;
@@ -14,10 +13,9 @@ import io.stormbird.wallet.interact.ENSInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
-import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.ImportTokenActivity;
-import io.stormbird.wallet.ui.SendActivity;
 
 import java.math.BigInteger;
 
@@ -30,22 +28,22 @@ public class SendViewModel extends BaseViewModel {
     private final ConfirmationRouter confirmationRouter;
     private final MyAddressRouter myAddressRouter;
     private final ENSInteract ensInteract;
-    private final AssetDefinitionService assetDefinitionService;
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
+    private final GasService gasService;
 
     public SendViewModel(ConfirmationRouter confirmationRouter,
                          MyAddressRouter myAddressRouter,
                          ENSInteract ensInteract,
-                         AssetDefinitionService assetDefinitionService,
                          EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
-                         TokensService tokensService) {
+                         TokensService tokensService,
+                         GasService gasService) {
         this.confirmationRouter = confirmationRouter;
         this.myAddressRouter = myAddressRouter;
         this.ensInteract = ensInteract;
-        this.assetDefinitionService = assetDefinitionService;
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
+        this.gasService = gasService;
     }
 
     public LiveData<String> ensResolve() { return ensResolve; }
@@ -86,5 +84,15 @@ public class SendViewModel extends BaseViewModel {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra(IMPORT_STRING, importTxt);
         context.startActivity(intent);
+    }
+
+    public void startGasPriceChecker(int chainId)
+    {
+        gasService.startGasListener(chainId);
+    }
+
+    public void stopGasPriceChecker()
+    {
+        gasService.stopGasListener();
     }
 }

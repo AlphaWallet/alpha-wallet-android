@@ -516,6 +516,13 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     }
 
     @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        viewModel.stopGasPriceChecker();
+    }
+
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.import_ticket:

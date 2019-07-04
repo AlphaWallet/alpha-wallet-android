@@ -67,30 +67,6 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
         TicketRange data = new TicketRange(idList, token.tokenInfo.address, false);
 
         token.displayTicketHolder(data, frameLayout, viewModel.getAssetDefinitionService(), this, false);
-
-
-//        tokenView = findViewById(R.id.web3_tokenview);
-//        waitSpinner = findViewById(R.id.progress_element);
-//        if (token instanceof Ticket) //TODO: NFT flag
-//        {
-//            idList = token.stringHexToBigIntegerList(displayIds);
-//        }
-//
-//        tokenView.setChainId(token.tokenInfo.chainId);
-//        tokenView.setWalletAddress(new Address(token.getWallet()));
-//        tokenView.setRpcUrl(token.tokenInfo.chainId);
-//        tokenView.setOnReadyCallback(this);
-//
-//        try
-//        {
-//            waitSpinner.setVisibility(View.VISIBLE);
-//            tokenView.setVisibility(View.GONE);
-//            getAttrs(idList);
-//        }
-//        catch (Exception e)
-//        {
-//            fillEmpty();
-//        }
     }
 
     @Override
@@ -110,6 +86,7 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
         toolbar();
         setTitle(getString(R.string.token_function));
         setupFunctions();
+        viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
 
         handler = new Handler();
     }
@@ -187,6 +164,13 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
             }
             break;
         }
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        viewModel.stopGasSettingsFetch();
     }
 
     @Override

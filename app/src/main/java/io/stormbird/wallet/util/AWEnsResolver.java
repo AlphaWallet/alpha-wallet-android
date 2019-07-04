@@ -1,6 +1,6 @@
 package io.stormbird.wallet.util;
 
-import io.stormbird.wallet.entity.GasSettings;
+import io.stormbird.wallet.service.GasService;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.ens.Contracts;
 import org.web3j.ens.EnsResolutionException;
@@ -13,10 +13,10 @@ import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthSyncing;
 import org.web3j.protocol.core.methods.response.NetVersion;
 import org.web3j.tx.ClientTransactionManager;
-import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
-//import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Numeric;
+
+//import org.web3j.tx.gas.DefaultGasProvider;
 
 /**
  * Created by James on 29/05/2019.
@@ -30,16 +30,18 @@ public class AWEnsResolver
 
     private final Web3j web3j;
     private final TransactionManager transactionManager;
+    private final GasService gasService;
     private long syncThreshold;  // non-final in case this value needs to be tweaked
 
-    public AWEnsResolver(Web3j web3j, long syncThreshold) {
+    public AWEnsResolver(Web3j web3j, GasService gasService, long syncThreshold) {
         this.web3j = web3j;
         transactionManager = new ClientTransactionManager(web3j, null);  // don't use empty string
         this.syncThreshold = syncThreshold;
+        this.gasService = gasService;
     }
 
-    public AWEnsResolver(Web3j web3j) {
-        this(web3j, DEFAULT_SYNC_THRESHOLD);
+    public AWEnsResolver(Web3j web3j, GasService gasService) {
+        this(web3j, gasService, DEFAULT_SYNC_THRESHOLD);
     }
 
     public void setSyncThreshold(long syncThreshold) {
@@ -118,16 +120,14 @@ public class AWEnsResolver
 
         ENS ensRegistry = ENS.load(
                 registryContract, web3j, transactionManager,
-                Contract.GAS_PRICE, Contract.GAS_LIMIT);
-                //DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT);
+                gasService);
 
         byte[] nameHash = NameHash.nameHashAsBytes(ensName);
 
         String resolverAddress = ensRegistry.resolver(nameHash).send();
         PublicResolver resolver = PublicResolver.load(
                 resolverAddress, web3j, transactionManager,
-                Contract.GAS_PRICE, Contract.GAS_LIMIT);
-                //DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT);
+                gasService);
 
         return resolver;
     }

@@ -52,20 +52,8 @@ public abstract class BuildersModule {
 	abstract SellTicketActivity bindSellTicketActivity();
 
 	@ActivityScope
-	@ContributesAndroidInjector(modules = MarketBrowseModule.class)
-	abstract BrowseMarketActivity bindMarketBrowseActivity();
-
-	@ActivityScope
 	@ContributesAndroidInjector(modules = SellDetailModule.class)
 	abstract SellDetailActivity bindSellDetailsActivity();
-
-	@ActivityScope
-	@ContributesAndroidInjector(modules = PurchaseTicketsModule.class)
-	abstract PurchaseTicketsActivity bindPurchaseTicketsActivity();
-
-	@FragmentScope
-	@ContributesAndroidInjector(modules = MarketplaceModule.class)
-	abstract MarketplaceFragment bindMarketplaceFragment();
 
 	@FragmentScope
 	@ContributesAndroidInjector(modules = NewSettingsModule.class)

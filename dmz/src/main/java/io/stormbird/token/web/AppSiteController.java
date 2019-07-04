@@ -219,6 +219,8 @@ public class AppSiteController implements AttributeInterface
         );
     }
 
+
+
     private String passThroughToken(MagicLinkData data, String universalLink)
     {
         TransactionHandler txHandler = new TransactionHandler(data.chainId);

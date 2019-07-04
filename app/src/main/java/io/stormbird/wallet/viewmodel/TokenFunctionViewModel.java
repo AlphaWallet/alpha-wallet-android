@@ -2,26 +2,23 @@ package io.stormbird.wallet.viewmodel;
 
 import android.content.Context;
 import android.content.Intent;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.ContractAddress;
 import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.entity.TokenScriptResult;
-import io.stormbird.token.tools.TokenDefinition;
-import io.stormbird.wallet.entity.ConfirmationType;
-import io.stormbird.wallet.entity.Wallet;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
+import io.stormbird.wallet.entity.ConfirmationType;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
-import io.stormbird.wallet.router.TransferTicketRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.*;
 import io.stormbird.wallet.ui.widget.entity.TicketRangeParcel;
@@ -44,7 +41,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final SellTicketRouter sellTicketRouter;
     private final TransferTicketDetailRouter transferTicketRouter;
     private final CreateTransactionInteract createTransactionInteract;
-    private final FetchTokensInteract fetchTokensInteract;
+    private final GasService gasService;
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
@@ -53,14 +50,14 @@ public class TokenFunctionViewModel extends BaseViewModel
             SellTicketRouter sellTicketRouter,
             TransferTicketDetailRouter transferTicketRouter,
             CreateTransactionInteract createTransactionInteract,
-            FetchTokensInteract fetchTokensInteract,
+            GasService gasService,
             TokensService tokensService,
             EthereumNetworkRepositoryType ethereumNetworkRepository) {
         this.assetDefinitionService = assetDefinitionService;
         this.sellTicketRouter = sellTicketRouter;
         this.transferTicketRouter = transferTicketRouter;
         this.createTransactionInteract = createTransactionInteract;
-        this.fetchTokensInteract = fetchTokensInteract;
+        this.gasService = gasService;
         this.tokensService = tokensService;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
     }
@@ -70,7 +67,6 @@ public class TokenFunctionViewModel extends BaseViewModel
         return assetDefinitionService;
     }
 
-    //sellDetailRouter.openUniversalLink(context, ticket, selection, defaultWallet.getValue(), SET_A_PRICE, 0);
     public void openUniversalLink(Context context, Token token, String ticketIDs) {
         Intent intent = new Intent(context, SellDetailActivity.class);
         intent.putExtra(WALLET, new Wallet(token.getWallet()));
@@ -80,6 +76,11 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(EXTRA_PRICE, 0);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         context.startActivity(intent);
+    }
+
+    public void startGasPriceUpdate(int chainId)
+    {
+        gasService.startGasListener(chainId);
     }
 
     public void sellTicketRouter(Context ctx, Token token) {
@@ -176,5 +177,10 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(TICKET_RANGE, parcel);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         ctx.startActivity(intent);
+    }
+
+    public void stopGasSettingsFetch()
+    {
+        gasService.stopGasListener();
     }
 }

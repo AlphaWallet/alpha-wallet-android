@@ -3,16 +3,13 @@ package io.stormbird.token.tools;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.security.Key;
 import java.security.KeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.Principal;
-import java.security.Provider;
 import java.security.PublicKey;
 import java.security.Security;
-import java.security.SignatureException;
 import java.security.cert.CertPathValidator;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
@@ -22,7 +19,6 @@ import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -43,23 +39,32 @@ import javax.xml.crypto.dsig.keyinfo.KeyValue;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import io.stormbird.token.entity.TSMLValidationResult;
+import io.stormbird.token.entity.XMLDsigVerificationResult;
 
 /**
- * Created by James on 27/04/2019.
- * Stormbird in Sydney
+ * James Sangalli mans this project since July 2019.
+ * Stormbird Pte Ltd, in Sydney
  */
 
 /**
- * This is a simple example of validating an XML
- * Signature using the JSR 105 API. It assumes the key needed to
- * validate the signature is contained in a KeyValue KeyInfo.
+ * This verifiers an XML Signature using the JSR 105 API. It assumes
+ * the key needed to verify the signature is certified by one of the
+ * X.509 certificates in the KeyInfo, and that X.509 certificate,
+ * together with any other found in KeyInfo, form a chain of
+ * certificate to a top level certified by one of the trusted
+ * authorities of the installed JRE
+ *
+ * Out of scope:
+ * - Multi-signature XML file
+ * - Ignores any public key provided in KeyInfo
+ *
+ * See the test case for usage examples.
  */
-public class TokenScriptValidator {
+public class XMLDSigVerifier {
 
-    public TSMLValidationResult validateXML(InputStream fileStream)
+    public XMLDsigVerificationResult VerifyXMLDSig(InputStream fileStream)
     {
-        TSMLValidationResult result = new TSMLValidationResult();
+        XMLDsigVerificationResult result = new XMLDsigVerificationResult();
         try
         {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -175,7 +180,7 @@ public class TokenScriptValidator {
         return signer;
     }
 
-    private TSMLValidationResult validateSSLCertificateIssuer(XMLSignature signature, TSMLValidationResult result) {
+    private XMLDsigVerificationResult validateSSLCertificateIssuer(XMLSignature signature, XMLDsigVerificationResult result) {
         try
         {
             KeyInfo xmlKeyInfo = signature.getKeyInfo();

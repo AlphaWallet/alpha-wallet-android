@@ -53,12 +53,12 @@ import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.entity.MagicLinkInfo;
 import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.SalesOrderMalformed;
-import io.stormbird.token.entity.TSMLValidationResult;
+import io.stormbird.token.entity.XMLDsigVerificationResult;
 import io.stormbird.token.entity.TokenScriptResult;
 import io.stormbird.token.entity.TransactionResult;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.tools.TokenDefinition;
-import io.stormbird.token.tools.TokenScriptValidator;
+import io.stormbird.token.tools.XMLDSigVerifier;
 import io.stormbird.token.web.Ethereum.TokenscriptFunction;
 import io.stormbird.token.web.Ethereum.TransactionHandler;
 import io.stormbird.token.web.Service.CryptoFunctions;
@@ -512,27 +512,36 @@ public class AppSiteController implements AttributeInterface
         }
     }
 
-    @PostMapping("/api/checkSig")
+    @PostMapping("/api/v1/verifyXMLDSig")
     @ResponseBody
     @SuppressWarnings("unchecked")
     public ResponseEntity<String> validateSSLCertificate(@RequestParam("file") MultipartFile file) throws IOException {
         HttpStatus status = HttpStatus.ACCEPTED;
         JSONObject result = new JSONObject();
-        TSMLValidationResult tsmlValidationResult = new TokenScriptValidator().validateXML(file.getInputStream());
-        if (tsmlValidationResult.isValid)
+        XMLDsigVerificationResult XMLDsigVerificationResult = new XMLDSigVerifier().VerifyXMLDSig(file.getInputStream());
+        if (XMLDsigVerificationResult.isValid)
         {
             result.put("result", "pass");
-            result.put("issuer", tsmlValidationResult.issuerPrincipal);
-            result.put("subject", tsmlValidationResult.subjectPrincipal);
-            result.put("keyName", tsmlValidationResult.keyName);
-            result.put("keyType", tsmlValidationResult.keyType);
+            result.put("issuer", XMLDsigVerificationResult.issuerPrincipal);
+            result.put("subject", XMLDsigVerificationResult.subjectPrincipal);
+            result.put("keyName", XMLDsigVerificationResult.keyName);
+            result.put("keyType", XMLDsigVerificationResult.keyType);
         }
         else
         {
             result.put("result", "fail");
-            result.put("failureReason", tsmlValidationResult.failureReason);
+            result.put("failureReason", XMLDsigVerificationResult.failureReason);
             status = HttpStatus.BAD_REQUEST;
         }
+        /* Example return
+{
+  "timestamp": "2019-07-04T08:43:32.885+0000",
+  "status": 404,
+  "error": "Not Found",
+  "message": "No message available",
+  "path": "/api/checkSig"
+}
+         */
         return new ResponseEntity<String>(result.toString(), status);
     }
 }

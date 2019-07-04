@@ -4,7 +4,7 @@ package io.stormbird.token.entity;
  * Created by James on 19/04/2019.
  * Stormbird in Sydney
  */
-public class TSMLValidationResult
+public class XMLDsigVerificationResult
 {
     public boolean isValid;
     public String keyName;
@@ -13,7 +13,7 @@ public class TSMLValidationResult
     public String keyType;
     public String failureReason;
 
-    public TSMLValidationResult()
+    public XMLDsigVerificationResult()
     {
         isValid = false;
         keyName = "";

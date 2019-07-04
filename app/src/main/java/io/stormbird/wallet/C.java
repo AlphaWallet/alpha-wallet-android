@@ -94,8 +94,8 @@ public abstract class C {
 
     public static final String DEFAULT_GAS_PRICE = "30000000000";
     public static final String DEFAULT_XDAI_GAS_PRICE = "1000000000";
-    public static final String DEFAULT_GAS_LIMIT = "125000";
-    public static final String DEFAULT_GAS_LIMIT_FOR_TOKENS = "200000";
+    public static final String DEFAULT_GAS_LIMIT = "90000";
+    public static final String DEFAULT_GAS_LIMIT_FOR_TOKENS = "144000";
     public static final String DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS = "432000"; //NFT's typically require more gas
     public static final String DEFAULT_GAS_LIMIT_FOR_END_CONTRACT = "200000"; //TODO: determine appropriate gas limit for contract destruct
     public static final long GAS_PER_BYTE = 310; //from experimentation
@@ -107,9 +107,6 @@ public abstract class C {
 
     //FOR DEMOS ETC
     public static final boolean SHOW_NEW_ACCOUNT_PROMPT = false;   //this will switch off the splash screen 'please make a key' message
-    public static final boolean HARD_CODED_KEY = false;           //pre-loads a hard coded key in the app
-    public static final boolean HARD_CODED_CONTRACT = false;      //pre-loads the contract as specified below
-    public static final boolean OVERRIDE_DEFAULT_NETWORK = false;  //use the default network given below
 
     public static final String DEFAULT_NETWORK = ETHEREUM_NETWORK_NAME;
 

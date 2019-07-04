@@ -251,6 +251,10 @@
     <string name="dialog_marketplace_success">Your tickets have been put up for sale in the Marketplace</string>
     <string name="dialog_process_error">Trade not processed</string>
     <string name="dialog_ok">OK</string>
+    <string name="wallet_label">Wallet</string>
+    <string name="tx_label">Transactions</string>
+    <string name="browser_label">Browser</string>
+    <string name="settings_label">Settings</string>
     <string name="toolbar_header_importing_tickets">Importing Tokens</string>
     <string name="ticket">Ticket</string>
     <string name="tickets">Tickets</string>

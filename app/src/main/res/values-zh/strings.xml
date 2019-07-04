@@ -1,4 +1,8 @@
 <resources>
+    <string name="wallet_label">钱包</string>
+    <string name="tx_label">交易</string>
+    <string name="browser_label">浏览器</string>
+    <string name="settings_label">设置</string>
     <string name="app_name">AlphaWallet</string>
     <string name="all">全部</string>
     <string name="currency">币类</string>

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="wallet_label">billetera</string>
+    <string name="tx_label">Actas</string>
+    <string name="browser_label">Navegadora</string>
+    <string name="settings_label">Ajustes</string>
     <string name="app_name">AlphaWallet</string>
     <string name="all">Todos</string>
     <string name="currency">Monedas</string>

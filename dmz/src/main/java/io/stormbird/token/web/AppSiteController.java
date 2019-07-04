@@ -1,26 +1,29 @@
 package io.stormbird.token.web;
 
-import io.stormbird.token.entity.*;
-import io.stormbird.token.tools.ParseMagicLink;
-import io.stormbird.token.tools.TokenDefinition;
-import io.stormbird.token.web.Ethereum.TokenscriptFunction;
-import io.stormbird.token.web.Ethereum.TransactionHandler;
-import io.stormbird.token.web.Service.CryptoFunctions;
 import org.apache.commons.io.IOUtils;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import org.xml.sax.SAXException;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,11 +33,35 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+import javax.servlet.http.HttpServletRequest;
+import io.stormbird.token.entity.AttributeInterface;
+import io.stormbird.token.entity.AttributeType;
+import io.stormbird.token.entity.ContractAddress;
+import io.stormbird.token.entity.ContractInfo;
+import io.stormbird.token.entity.MagicLinkData;
+import io.stormbird.token.entity.MagicLinkInfo;
+import io.stormbird.token.entity.NonFungibleToken;
+import io.stormbird.token.entity.SalesOrderMalformed;
+import io.stormbird.token.entity.XMLDsigVerificationResult;
+import io.stormbird.token.entity.TokenScriptResult;
+import io.stormbird.token.entity.TransactionResult;
+import io.stormbird.token.tools.ParseMagicLink;
+import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.token.tools.XMLDSigVerifier;
+import io.stormbird.token.web.Ethereum.TokenscriptFunction;
+import io.stormbird.token.web.Ethereum.TransactionHandler;
+import io.stormbird.token.web.Service.CryptoFunctions;
 import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.token.tools.ParseMagicLink.spawnable;
 
@@ -180,15 +207,16 @@ public class AppSiteController implements AttributeInterface
         String etherscanAccountLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "address/" + data.ownerAddress;
         String etherscanTokenLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "token/" + data.contractAddress;
 
-        return String.format(initHTML,
-                                        title, style, String.valueOf(data.ticketCount), nameWithSymbol, definition.getTokenName(data.ticketCount),
-                                        price, available,
-                                        data.ticketCount, definition.getTokenName(data.ticketCount),
-                                        tokenView, availableUntil,
-                                        action, originalLink,
-                                        etherscanAccountLink, data.ownerAddress,
-                                        etherscanTokenLink, data.contractAddress
-                                        );
+        return String.format(
+                initHTML,
+                title, style, String.valueOf(data.ticketCount), nameWithSymbol, definition.getTokenName(data.ticketCount),
+                price, available,
+                data.ticketCount, definition.getTokenName(data.ticketCount),
+                tokenView, availableUntil,
+                action, originalLink,
+                etherscanAccountLink, data.ownerAddress,
+                etherscanTokenLink, data.contractAddress
+        );
     }
 
     private String passThroughToken(MagicLinkData data, String universalLink)
@@ -482,5 +510,38 @@ public class AppSiteController implements AttributeInterface
             resultTime = time;
             result = r;
         }
+    }
+
+    @PostMapping("/api/v1/verifyXMLDSig")
+    @ResponseBody
+    @SuppressWarnings("unchecked")
+    public ResponseEntity<String> validateSSLCertificate(@RequestParam("file") MultipartFile file) throws IOException {
+        HttpStatus status = HttpStatus.ACCEPTED;
+        JSONObject result = new JSONObject();
+        XMLDsigVerificationResult XMLDsigVerificationResult = new XMLDSigVerifier().VerifyXMLDSig(file.getInputStream());
+        if (XMLDsigVerificationResult.isValid)
+        {
+            result.put("result", "pass");
+            result.put("issuer", XMLDsigVerificationResult.issuerPrincipal);
+            result.put("subject", XMLDsigVerificationResult.subjectPrincipal);
+            result.put("keyName", XMLDsigVerificationResult.keyName);
+            result.put("keyType", XMLDsigVerificationResult.keyType);
+        }
+        else
+        {
+            result.put("result", "fail");
+            result.put("failureReason", XMLDsigVerificationResult.failureReason);
+            status = HttpStatus.BAD_REQUEST;
+        }
+        /* Example return
+{
+  "timestamp": "2019-07-04T08:43:32.885+0000",
+  "status": 404,
+  "error": "Not Found",
+  "message": "No message available",
+  "path": "/api/checkSig"
+}
+         */
+        return new ResponseEntity<String>(result.toString(), status);
     }
 }

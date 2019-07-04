@@ -6,6 +6,7 @@ import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.*;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
+import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;
 
 /**
@@ -17,7 +18,6 @@ public class ImportTokenModule {
 
     @Provides
     ImportTokenViewModelFactory importTokenViewModelFactory(
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
@@ -27,15 +27,9 @@ public class ImportTokenModule {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             AssetDefinitionService assetDefinitionService,
             FetchTransactionsInteract fetchTransactionsInteract,
-            FetchGasSettingsInteract fetchGasSettingsInteract) {
+            GasService gasService) {
         return new ImportTokenViewModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, fetchGasSettingsInteract);
-    }
-
-    @Provides
-    FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
-            EthereumNetworkRepositoryType ethereumNetworkRepository) {
-        return new FindDefaultNetworkInteract(ethereumNetworkRepository);
+                findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService);
     }
 
     @Provides
@@ -67,10 +61,5 @@ public class ImportTokenModule {
     @Provides
     FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository, TokenRepositoryType tokenRepositoryType) {
         return new FetchTransactionsInteract(transactionRepository, tokenRepositoryType);
-    }
-
-    @Provides
-    FetchGasSettingsInteract provideFetchGasSettingsInteract(GasSettingsRepositoryType gasSettingsRepository) {
-        return new FetchGasSettingsInteract(gasSettingsRepository);
     }
 }

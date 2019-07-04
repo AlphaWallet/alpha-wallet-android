@@ -4,22 +4,18 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import io.stormbird.token.tools.Numeric;
-import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
-import io.stormbird.wallet.interact.FetchGasSettingsInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.GasSettingsRouter;
-import io.stormbird.wallet.service.MarketQueueService;
+import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.ConfirmationActivity;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 
 import java.math.BigInteger;
-import java.util.List;
 
 public class ConfirmationViewModel extends BaseViewModel {
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
@@ -29,27 +25,22 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final MutableLiveData<GasSettings> sendGasSettings = new MutableLiveData<>();
 
     private final FindDefaultWalletInteract findDefaultWalletInteract;
-    private final FetchGasSettingsInteract fetchGasSettingsInteract;
+    private final GasService gasService;
     private final CreateTransactionInteract createTransactionInteract;
-    private final MarketQueueService marketQueueService;
     private final TokensService tokensService;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GasSettingsRouter gasSettingsRouter;
 
-    private GasSettings gasSettingsOverride = null;
-
     ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
-                                 FetchGasSettingsInteract fetchGasSettingsInteract,
+                                 GasService gasService,
                                  CreateTransactionInteract createTransactionInteract,
                                  GasSettingsRouter gasSettingsRouter,
-                                 MarketQueueService marketQueueService,
                                  TokensService tokensService,
                                  FindDefaultNetworkInteract findDefaultNetworkInteract) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
-        this.fetchGasSettingsInteract = fetchGasSettingsInteract;
+        this.gasService = gasService;
         this.createTransactionInteract = createTransactionInteract;
         this.gasSettingsRouter = gasSettingsRouter;
-        this.marketQueueService = marketQueueService;
         this.tokensService = tokensService;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
     }
@@ -99,21 +90,17 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void overrideGasSettings(GasSettings settings)
     {
-        gasSettingsOverride = settings;
+        gasService.setOverrideGasLimit(settings.gasLimit);
+        gasService.setOverrideGasPrice(settings.gasPrice);
         gasSettings.postValue(settings);
     }
 
     public void prepare(ConfirmationActivity ctx)
     {
-        fetchGasSettingsInteract.gasPriceUpdate().observe(ctx, this::onGasPrice);
+        gasService.gasPriceUpdateListener().observe(ctx, this::onGasPrice);
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
-    }
-
-    public void onClear()
-    {
-        fetchGasSettingsInteract.stopGasSettingsFetch();
     }
 
     private void onCreateTransaction(String transaction) {
@@ -128,15 +115,11 @@ public class ConfirmationViewModel extends BaseViewModel {
     public void calculateGasSettings(byte[] transaction, boolean isNonFungible, int chainId)
     {
         //start listening for gas if necessary
-        fetchGasSettingsInteract.startGasSettingsFetch(chainId);
+        gasService.startGasListener(chainId);
         if (gasSettings.getValue() == null)
         {
-            GasSettings gasSettings = fetchGasSettingsInteract.fetchImmediate(transaction, isNonFungible, chainId);
+            GasSettings gasSettings = gasService.getGasSettings(transaction, isNonFungible, chainId);
             onGasSettings(gasSettings);
-
-//            disposable = fetchGasSettingsInteract
-//                    .fetch(transaction, isNonFungible, chainId)
-//                    .subscribe(this::onGasSettings, this::onError);
         }
     }
 
@@ -144,26 +127,13 @@ public class ConfirmationViewModel extends BaseViewModel {
     {
         if (gasSettings.getValue() == null)
         {
-            //deal with problem where gas settings are still null
-            NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(chainId);
-            disposable = fetchGasSettingsInteract.fetchDefault(confirmationType != ConfirmationType.ETH, network)
-                    .subscribe(this::onSendGasSettings, throwable -> onGasError(throwable, context, chainId));
+            GasSettings settings = new GasSettings(gasService.getGasPrice(), gasService.getGasLimit(confirmationType != ConfirmationType.ETH));
+            sendGasSettings.postValue(settings);
         }
         else
         {
             sendGasSettings.postValue(gasSettings.getValue());
         }
-    }
-
-    private void onSendGasSettings(GasSettings gasSettings)
-    {
-        sendGasSettings.postValue(gasSettings);
-    }
-
-    private void onGasError(Throwable throwable, Activity context, int chainId)
-    {
-        //unknown problem. Has been observed once from crashlytics, send user to gas screen in this case
-        openGasSettings(context, chainId);
     }
 
     private void onGasSettings(GasSettings gasSettings) {
@@ -182,42 +152,8 @@ public class ConfirmationViewModel extends BaseViewModel {
      */
     private void onGasPrice(BigInteger currentGasPrice)
     {
-        BigInteger limit = BigInteger.ZERO;
-        BigInteger price = currentGasPrice;
-
-        if (gasSettingsOverride != null)
-        {
-            if (!gasSettingsOverride.gasLimit.equals(BigInteger.ZERO)) limit = gasSettingsOverride.gasLimit;
-            if (!gasSettingsOverride.gasPrice.equals(BigInteger.ZERO)) price = gasSettingsOverride.gasPrice;
-        }
-
-        if (limit.equals(BigInteger.ZERO) && gasSettings().getValue() != null) limit = gasSettings.getValue().gasLimit;
-        GasSettings updateSettings = new GasSettings(price, limit);
+        GasSettings updateSettings = new GasSettings(gasService.getGasPrice(), gasService.getGasLimit());
         this.gasSettings.postValue(updateSettings);
-    }
-
-    public void generateSalesOrders(String indexSendList, String contractAddr, BigInteger price, String idList) {
-        //generate a list of integers
-        Ticket t = new Ticket(null, "0", 0, "", ContractType.NOT_SET);
-        List<Integer> sends = t.stringIntsToIntegerList(indexSendList);
-        List<Integer> iDs = t.stringIntsToIntegerList(idList);
-
-        if (sends != null && sends.size() > 0)
-        {
-            int[] ticketIDs = new int[sends.size()];
-            int index = 0;
-
-            for (Integer i : sends)
-            {
-                ticketIDs[index++] = i;
-            }
-
-            int firstIndex = iDs.get(0);
-
-            price = price.multiply(BigInteger.valueOf(iDs.size()));
-
-            //marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIDs, contractAddr, firstIndex);
-        }
     }
 
     public void signWeb3DAppTransaction(Web3Transaction transaction, BigInteger gasPrice, BigInteger gasLimit, int chainId)

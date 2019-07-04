@@ -170,6 +170,7 @@ public class ConfirmationActivity extends BaseActivity {
 
                 networkName = getIntent().getStringExtra(C.EXTRA_NETWORK_NAME);
                 transactionHex = getIntent().getStringExtra(C.EXTRA_TRANSACTION_DATA);
+                if (transactionHex != null) transactionBytes = Numeric.hexStringToByteArray(transactionHex);
 
                 break;
             case WEB3TRANSACTION:
@@ -294,7 +295,6 @@ public class ConfirmationActivity extends BaseActivity {
         super.onDestroy();
         hideDialog();
         unregisterReceiver(finishReceiver);
-        viewModel.onClear();
     }
 
     private void onSend()
@@ -343,12 +343,6 @@ public class ConfirmationActivity extends BaseActivity {
 
             case TOKENSCRIPT:
                 viewModel.signTokenScriptTransaction(transactionHex, contractAddress, gasSettings.gasPrice, gasSettings.gasLimit, chainId);
-                break;
-
-            case MARKET:
-                //price in eth
-                BigInteger wei = Convert.toWei("2470", Convert.Unit.FINNEY).toBigInteger();
-                viewModel.generateSalesOrders(amountStr, contractAddress, wei, valueText.getText().toString());
                 break;
 
             case ERC721:
@@ -497,7 +491,6 @@ public class ConfirmationActivity extends BaseActivity {
                 BigInteger gasLimit = new BigInteger(intent.getStringExtra(C.EXTRA_GAS_LIMIT));
                 GasSettings settings = new GasSettings(gasPrice, gasLimit);
                 viewModel.overrideGasSettings(settings);
-                //viewModel.gasSettings().postValue(settings);
             }
         }
     }

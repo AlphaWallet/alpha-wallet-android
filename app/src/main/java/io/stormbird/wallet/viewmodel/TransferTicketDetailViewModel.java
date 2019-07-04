@@ -23,6 +23,7 @@ import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.service.TokensService;
 
@@ -37,7 +38,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final MutableLiveData<String> ensResolve = new MutableLiveData<>();
     private final MutableLiveData<String> ensFail = new MutableLiveData<>();
 
-    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final MarketQueueService marketQueueService;
     private final CreateTransactionInteract createTransactionInteract;
@@ -45,28 +45,25 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDisplayRouter assetDisplayRouter;
     private final AssetDefinitionService assetDefinitionService;
-    private final TokensService tokensService;
+    private final GasService gasService;
     private final ConfirmationRouter confirmationRouter;
     private final ENSInteract ensInteract;
 
-    private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
     private Token token;
 
     private byte[] linkMessage;
 
-    TransferTicketDetailViewModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
-                                  FindDefaultWalletInteract findDefaultWalletInteract,
+    TransferTicketDetailViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                                   MarketQueueService marketQueueService,
                                   CreateTransactionInteract createTransactionInteract,
                                   TransferTicketDetailRouter transferTicketDetailRouter,
                                   FetchTransactionsInteract fetchTransactionsInteract,
                                   AssetDisplayRouter assetDisplayRouter,
                                   AssetDefinitionService assetDefinitionService,
-                                  TokensService tokensService,
+                                  GasService gasService,
                                   ConfirmationRouter confirmationRouter,
                                   ENSInteract ensInteract) {
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
@@ -74,7 +71,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDisplayRouter = assetDisplayRouter;
         this.assetDefinitionService = assetDefinitionService;
-        this.tokensService = tokensService;
+        this.gasService = gasService;
         this.confirmationRouter = confirmationRouter;
         this.ensInteract = ensInteract;
     }
@@ -102,6 +99,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         disposable = findDefaultWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
+
+        gasService.startGasListener(token.tokenInfo.chainId);
     }
 
     private void onDefaultWallet(Wallet wallet) {
@@ -205,7 +204,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         transferTicketDetailRouter.openTransfer(context, token, ticketIds, defaultWallet.getValue(), transferStatus);
     }
 
-    public void createTicketTransfer(String to, Token token, String indexList, BigInteger gasPrice, BigInteger gasLimit)
+    public void createTicketTransfer(String to, Token token, String indexList)
     {
         if (token.unspecifiedSpec())
         {
@@ -213,22 +212,23 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
             disposable = fetchTransactionsInteract.queryInterfaceSpec(token.tokenInfo)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(spec -> onInterfaceSpec(spec, to, token, indexList, gasPrice, gasLimit), this::onError);
+                    .subscribe(spec -> onInterfaceSpec(spec, to, token, indexList), this::onError);
         }
         else
         {
             final byte[] data = TokenRepository.createTicketTransferData(to, indexList, token);
+            GasSettings settings = gasService.getGasSettings(data, true, token.tokenInfo.chainId);
             disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), gasPrice, gasLimit, data, token.tokenInfo.chainId)
+                    .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), settings.gasPrice, settings.gasLimit, data, token.tokenInfo.chainId)
                     .subscribe(this::onCreateTransaction, this::onError);
         }
     }
 
-    private void onInterfaceSpec(ContractType spec, String to, Token token, String indexList, BigInteger gasPrice, BigInteger gasLimit)
+    private void onInterfaceSpec(ContractType spec, String to, Token token, String indexList)
     {
         token.setInterfaceSpec(spec);
         TokensService.setInterfaceSpec(token.tokenInfo.chainId, token.getAddress(), spec);
-        createTicketTransfer(to, token, indexList, gasPrice, gasLimit);
+        createTicketTransfer(to, token, indexList);
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -266,5 +266,10 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(ensResolve::postValue, throwable -> ensFail.postValue(""));
+    }
+
+    public void stopGasSettingsFetch()
+    {
+        gasService.stopGasListener();
     }
 }

@@ -97,6 +97,7 @@ public abstract class C {
     public static final String DEFAULT_GAS_LIMIT = "125000";
     public static final String DEFAULT_GAS_LIMIT_FOR_TOKENS = "200000";
     public static final String DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS = "432000"; //NFT's typically require more gas
+    public static final String DEFAULT_GAS_LIMIT_FOR_END_CONTRACT = "200000"; //TODO: determine appropriate gas limit for contract destruct
     public static final long GAS_PER_BYTE = 310; //from experimentation
     public static final long GAS_LIMIT_MIN = 21000L;
     public static final long GAS_LIMIT_MAX = 900000L;

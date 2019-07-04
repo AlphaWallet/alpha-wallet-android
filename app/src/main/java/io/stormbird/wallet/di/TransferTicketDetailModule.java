@@ -1,15 +1,12 @@
 package io.stormbird.wallet.di;
 
 import io.stormbird.wallet.interact.*;
-import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-import io.stormbird.wallet.repository.PasswordStore;
-import io.stormbird.wallet.repository.TokenRepositoryType;
-import io.stormbird.wallet.repository.TransactionRepositoryType;
-import io.stormbird.wallet.repository.WalletRepositoryType;
+import io.stormbird.wallet.repository.*;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.viewmodel.TransferTicketDetailViewModelFactory;
@@ -26,7 +23,6 @@ public class TransferTicketDetailModule {
 
     @Provides
     TransferTicketDetailViewModelFactory transferTicketDetailViewModelFactory(
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
             FindDefaultWalletInteract findDefaultWalletInteract,
             MarketQueueService marketQueueService,
             CreateTransactionInteract createTransactionInteract,
@@ -34,18 +30,12 @@ public class TransferTicketDetailModule {
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDisplayRouter assetDisplayRouter,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService,
+            GasService gasService,
             ConfirmationRouter confirmationRouter,
             ENSInteract ensInteract) {
         return new TransferTicketDetailViewModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, fetchTransactionsInteract,
-                assetDisplayRouter, assetDefinitionService, tokensService, confirmationRouter, ensInteract);
-    }
-
-    @Provides
-    FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
-            EthereumNetworkRepositoryType networkRepository) {
-        return new FindDefaultNetworkInteract(networkRepository);
+                findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, fetchTransactionsInteract,
+                assetDisplayRouter, assetDefinitionService, gasService, confirmationRouter, ensInteract);
     }
 
     @Provides

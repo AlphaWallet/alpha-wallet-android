@@ -9,6 +9,7 @@ import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.GasService;
 
 public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -18,7 +19,7 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTokensInteract fetchTokensInteract;
     private final ConfirmationRouter confirmationRouter;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
-    private final FetchGasSettingsInteract fetchGasSettingsInteract;
+    private final GasService gasService;
 
     public DappBrowserViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -28,7 +29,7 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
             FetchTokensInteract fetchTokensInteract,
             ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            FetchGasSettingsInteract fetchGasSettingsInteract) {
+            GasService gasService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -36,7 +37,7 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
         this.fetchTokensInteract = fetchTokensInteract;
         this.confirmationRouter = confirmationRouter;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
-        this.fetchGasSettingsInteract = fetchGasSettingsInteract;
+        this.gasService = gasService;
     }
 
     @NonNull
@@ -50,6 +51,6 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
                 fetchTokensInteract,
                 confirmationRouter,
                 ethereumNetworkRepository,
-                fetchGasSettingsInteract);
+                gasService);
     }
 }

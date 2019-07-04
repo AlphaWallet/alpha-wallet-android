@@ -13,11 +13,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.FileData;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.interact.AddTokenInteract;
 import io.stormbird.wallet.interact.CreateWalletInteract;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
-import io.stormbird.wallet.interact.ImportWalletInteract;
-import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
 
@@ -32,9 +29,6 @@ import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_FILE_URL;
 
 public class SplashViewModel extends ViewModel {
     private final FetchWalletsInteract fetchWalletsInteract;
-    private final EthereumNetworkRepositoryType networkRepository;
-    private final ImportWalletInteract importWalletInteract;
-    private final AddTokenInteract addTokenInteract;
     private final CreateWalletInteract createWalletInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final LocaleRepositoryType localeRepository;
@@ -43,16 +37,10 @@ public class SplashViewModel extends ViewModel {
     private MutableLiveData<Wallet> createWallet = new MutableLiveData<>();
 
     SplashViewModel(FetchWalletsInteract fetchWalletsInteract,
-                    EthereumNetworkRepositoryType networkRepository,
-                    ImportWalletInteract importWalletInteract,
-                    AddTokenInteract addTokenInteract,
                     CreateWalletInteract createWalletInteract,
                     PreferenceRepositoryType preferenceRepository,
                     LocaleRepositoryType localeRepository) {
         this.fetchWalletsInteract = fetchWalletsInteract;
-        this.networkRepository = networkRepository;
-        this.importWalletInteract = importWalletInteract;
-        this.addTokenInteract = addTokenInteract;
         this.createWalletInteract = createWalletInteract;
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
@@ -62,7 +50,7 @@ public class SplashViewModel extends ViewModel {
         localeRepository.setDefaultLocale(context, preferenceRepository.getDefaultLocale());
     }
 
-    private void fetchWallets()
+    public void fetchWallets()
     {
         fetchWalletsInteract
                 .fetch()

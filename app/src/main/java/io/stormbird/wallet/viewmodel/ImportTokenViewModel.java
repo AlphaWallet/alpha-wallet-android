@@ -16,6 +16,7 @@ import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 
+import io.stormbird.wallet.service.GasService;
 import org.web3j.crypto.Sign;
 import org.web3j.tx.Contract;
 
@@ -46,7 +47,6 @@ public class ImportTokenViewModel extends BaseViewModel
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private static final String TAG = "ITVM";
 
-    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FindDefaultWalletInteract findDefaultWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
@@ -56,7 +56,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
-    private final FetchGasSettingsInteract fetchGasSettingsInteract;
+    private final GasService gasService;
 
     private ParseMagicLink parser;
 
@@ -83,11 +83,8 @@ public class ImportTokenViewModel extends BaseViewModel
 
     @Nullable
     private Disposable getBalanceDisposable;
-    @Nullable
-    private Disposable getTickerDisposable;
 
-    ImportTokenViewModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
-                         FindDefaultWalletInteract findDefaultWalletInteract,
+    ImportTokenViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
                          CreateTransactionInteract createTransactionInteract,
                          FetchTokensInteract fetchTokensInteract,
                          SetupTokensInteract setupTokensInteract,
@@ -96,8 +93,7 @@ public class ImportTokenViewModel extends BaseViewModel
                          EthereumNetworkRepositoryType ethereumNetworkRepository,
                          AssetDefinitionService assetDefinitionService,
                          FetchTransactionsInteract fetchTransactionsInteract,
-                         FetchGasSettingsInteract fetchGasSettingsInteract) {
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+                         GasService gasService) {
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
@@ -107,7 +103,7 @@ public class ImportTokenViewModel extends BaseViewModel
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.assetDefinitionService = assetDefinitionService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
-        this.fetchGasSettingsInteract = fetchGasSettingsInteract;
+        this.gasService = gasService;
     }
 
     private void initParser()
@@ -211,7 +207,8 @@ public class ImportTokenViewModel extends BaseViewModel
                 break;
         }
 
-        getEthereumTicker(network.getValue().chainId); //simultaneously fetch the current eth price
+        getEthereumTicker(importOrder.chainId); //simultaneously fetch the current eth price
+        gasService.startGasListener(importOrder.chainId); //start fetching gas price
     }
 
     //2. Fetch all cached tokens and get eth price
@@ -443,11 +440,10 @@ public class ImportTokenViewModel extends BaseViewModel
             MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
             //calculate gas settings
             final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
-            disposable = fetchGasSettingsInteract
-                    .fetch(tradeData, true, importOrder.chainId)
-                    .subscribe(this::performImportFinal, this::onTransactionError);
+            GasSettings settings = gasService.getGasSettings(tradeData, true, importOrder.chainId);
+            performImportFinal(settings);
         }
-        catch (SalesOrderMalformed e)
+        catch (Exception e)
         {
             e.printStackTrace(); // TODO: add user interface handling of the exception.
             error.postValue(new ErrorEnvelope(EMPTY_COLLECTION, "Import Error."));
@@ -529,7 +525,7 @@ public class ImportTokenViewModel extends BaseViewModel
 
     private void getEthereumTicker(int chainId)
     {
-        getTickerDisposable = fetchTokensInteract.getEthereumTicker(chainId)
+        disposable = fetchTokensInteract.getEthereumTicker(chainId)
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::onTicker, this::onError);
     }
@@ -667,5 +663,10 @@ public class ImportTokenViewModel extends BaseViewModel
     public NetworkInfo getNetwork()
     {
         return network.getValue();
+    }
+
+    public void stopGasPriceChecker()
+    {
+        gasService.stopGasListener();
     }
 }

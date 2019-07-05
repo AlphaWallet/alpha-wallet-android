@@ -4,7 +4,6 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.NetworkInfo;
@@ -15,10 +14,9 @@ import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
-import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.ImportTokenActivity;
-import io.stormbird.wallet.ui.SendActivity;
 
 import java.math.BigInteger;
 
@@ -38,6 +36,7 @@ public class SendViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AddTokenInteract addTokenInteract;
     private final FetchTokensInteract fetchTokensInteract;
+    private final GasService gasService;
 
     public SendViewModel(ConfirmationRouter confirmationRouter,
                          MyAddressRouter myAddressRouter,
@@ -47,7 +46,8 @@ public class SendViewModel extends BaseViewModel {
                          SetupTokensInteract setupTokensInteract,
                          FetchTransactionsInteract fetchTransactionsInteract,
                          AddTokenInteract addTokenInteract,
-                         FetchTokensInteract fetchTokensInteract) {
+                         FetchTokensInteract fetchTokensInteract,
+                         GasService gasService) {
         this.confirmationRouter = confirmationRouter;
         this.myAddressRouter = myAddressRouter;
         this.ensInteract = ensInteract;
@@ -57,6 +57,7 @@ public class SendViewModel extends BaseViewModel {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.addTokenInteract = addTokenInteract;
         this.fetchTokensInteract = fetchTokensInteract;
+        this.gasService = gasService;
     }
 
     public LiveData<String> ensResolve() { return ensResolve; }
@@ -116,5 +117,15 @@ public class SendViewModel extends BaseViewModel {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(finalisedToken::postValue, this::onError);
+    }
+
+    public void startGasPriceChecker(int chainId)
+    {
+        gasService.startGasListener(chainId);
+    }
+
+    public void stopGasPriceChecker()
+    {
+        gasService.stopGasListener();
     }
 }

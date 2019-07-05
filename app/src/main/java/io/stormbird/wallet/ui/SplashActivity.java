@@ -75,8 +75,8 @@ public class SplashActivity extends BaseActivity {
 
         long getAppUpdateTime = getAppLastUpdateTime();
 
+        splashViewModel.fetchWallets();
         splashViewModel.checkVersionUpdate(getBaseContext(), getAppUpdateTime);
-        splashViewModel.startOverridesChain();
     }
 
     //wallet created, now check if we need to import

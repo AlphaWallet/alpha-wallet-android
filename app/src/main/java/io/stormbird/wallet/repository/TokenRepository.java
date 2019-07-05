@@ -9,9 +9,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.TickerService;
-import io.stormbird.wallet.service.TokenExplorerClientType;
 import io.stormbird.wallet.util.AWEnsResolver;
 import okhttp3.OkHttpClient;
 import org.web3j.abi.*;
@@ -43,14 +42,10 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 public class TokenRepository implements TokenRepositoryType {
 
     private static final String TAG = "TRT";
-    private final TokenExplorerClientType tokenNetworkService;
-    private final WalletRepositoryType walletRepository;
     private final TokenLocalSource localSource;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
-    private final TransactionLocalSource transactionsLocalCache;
-    private final AssetDefinitionService assetDefinitionService;
     private final TickerService tickerService;
-    private final TransactionRepositoryType transactionRepository;
+    private final GasService gasService;
 
     public static final String INVALID_CONTRACT = "<invalid>";
 
@@ -62,22 +57,15 @@ public class TokenRepository implements TokenRepositoryType {
 
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            WalletRepositoryType walletRepository,
-            TokenExplorerClientType tokenNetworkService,
             TokenLocalSource localSource,
-            TransactionLocalSource transactionsLocalCache,
             TickerService tickerService,
-            AssetDefinitionService assetDefinitionService,
-            TransactionRepositoryType transactionRepository) {
+            GasService gasService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
-        this.walletRepository = walletRepository;
-        this.tokenNetworkService = tokenNetworkService;
         this.localSource = localSource;
-        this.transactionsLocalCache = transactionsLocalCache;
         this.tickerService = tickerService;
         this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
-        this.assetDefinitionService = assetDefinitionService;
-        this.transactionRepository = transactionRepository;
+        this.gasService = gasService;
+
         web3jNodeServers = new ConcurrentHashMap<>();
         okClient = new OkHttpClient.Builder()
                 .connectTimeout(5, TimeUnit.SECONDS)
@@ -392,7 +380,7 @@ public class TokenRepository implements TokenRepositoryType {
         int useChainId = chainId;
         if (!EthereumNetworkRepository.hasRealValue(useChainId)) useChainId = MAINNET_ID;
         Web3j service = getService(useChainId); //resolve ENS on mainnet unless this network has value
-        AWEnsResolver ensResolver = new AWEnsResolver(service);
+        AWEnsResolver ensResolver = new AWEnsResolver(service, gasService);
         String resolvedAddress = "";
         try
         {

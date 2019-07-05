@@ -8,6 +8,7 @@ import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.service.TokensService;
 
@@ -17,7 +18,6 @@ import io.stormbird.wallet.service.TokensService;
 
 public class TransferTicketDetailViewModelFactory implements ViewModelProvider.Factory {
 
-    private FindDefaultNetworkInteract findDefaultNetworkInteract;
     private FindDefaultWalletInteract findDefaultWalletInteract;
     private MarketQueueService marketQueueService;
     private CreateTransactionInteract createTransactionInteract;
@@ -25,23 +25,21 @@ public class TransferTicketDetailViewModelFactory implements ViewModelProvider.F
     private FetchTransactionsInteract fetchTransactionsInteract;
     private AssetDisplayRouter assetDisplayRouter;
     private AssetDefinitionService assetDefinitionService;
-    private TokensService tokensService;
+    private GasService gasService;
     private ConfirmationRouter confirmationRouter;
     private ENSInteract ensInteract;
 
 
-    public TransferTicketDetailViewModelFactory(FindDefaultNetworkInteract findDefaultNetworkInteract,
-                                                FindDefaultWalletInteract findDefaultWalletInteract,
+    public TransferTicketDetailViewModelFactory(FindDefaultWalletInteract findDefaultWalletInteract,
                                                 MarketQueueService marketQueueService,
                                                 CreateTransactionInteract createTransactionInteract,
                                                 TransferTicketDetailRouter transferTicketDetailRouter,
                                                 FetchTransactionsInteract fetchTransactionsInteract,
                                                 AssetDisplayRouter assetDisplayRouter,
                                                 AssetDefinitionService assetDefinitionService,
-                                                TokensService tokensService,
+                                                GasService gasService,
                                                 ConfirmationRouter confirmationRouter,
                                                 ENSInteract ensInteract) {
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
@@ -49,7 +47,7 @@ public class TransferTicketDetailViewModelFactory implements ViewModelProvider.F
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDisplayRouter = assetDisplayRouter;
         this.assetDefinitionService = assetDefinitionService;
-        this.tokensService = tokensService;
+        this.gasService = gasService;
         this.confirmationRouter = confirmationRouter;
         this.ensInteract = ensInteract;
     }
@@ -57,8 +55,8 @@ public class TransferTicketDetailViewModelFactory implements ViewModelProvider.F
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new TransferTicketDetailViewModel(findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, fetchTransactionsInteract,
-                                                     assetDisplayRouter, assetDefinitionService, tokensService, confirmationRouter, ensInteract);
+        return (T) new TransferTicketDetailViewModel(findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, fetchTransactionsInteract,
+                                                     assetDisplayRouter, assetDefinitionService, gasService, confirmationRouter, ensInteract);
     }
 }
 

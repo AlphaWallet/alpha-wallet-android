@@ -170,6 +170,7 @@ public class ConfirmationActivity extends BaseActivity {
 
                 networkName = getIntent().getStringExtra(C.EXTRA_NETWORK_NAME);
                 transactionHex = getIntent().getStringExtra(C.EXTRA_TRANSACTION_DATA);
+                if (transactionHex != null) transactionBytes = Numeric.hexStringToByteArray(transactionHex);
 
                 break;
             case WEB3TRANSACTION:
@@ -193,6 +194,7 @@ public class ConfirmationActivity extends BaseActivity {
                 String urlRequester = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);
                 networkName = getIntent().getStringExtra(C.EXTRA_NETWORK_NAME);
                 isMainNet = getIntent().getBooleanExtra(C.EXTRA_NETWORK_MAINNET, false);
+                checkTransactionGas();
 
                 if (urlRequester != null)
                 {
@@ -244,6 +246,8 @@ public class ConfirmationActivity extends BaseActivity {
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.sendGasSettings().observe(this, this::onSendGasSettings);
         finishReceiver = new FinishReceiver(this);
+
+        getGasSettings();
     }
 
     @Override
@@ -291,7 +295,6 @@ public class ConfirmationActivity extends BaseActivity {
         super.onDestroy();
         hideDialog();
         unregisterReceiver(finishReceiver);
-        viewModel.onClear();
     }
 
     private void onSend()
@@ -342,12 +345,6 @@ public class ConfirmationActivity extends BaseActivity {
                 viewModel.signTokenScriptTransaction(transactionHex, contractAddress, gasSettings.gasPrice, gasSettings.gasLimit, chainId);
                 break;
 
-            case MARKET:
-                //price in eth
-                BigInteger wei = Convert.toWei("2470", Convert.Unit.FINNEY).toBigInteger();
-                viewModel.generateSalesOrders(amountStr, contractAddress, wei, valueText.getText().toString());
-                break;
-
             case ERC721:
                 viewModel.createERC721Transfer(
                         toAddress,
@@ -365,16 +362,6 @@ public class ConfirmationActivity extends BaseActivity {
 
     private void onDefaultWallet(Wallet wallet) {
         fromAddressText.setText(wallet.address);
-        switch (confirmationType)
-        {
-            case ERC875:
-            case ERC721:
-                viewModel.calculateGasSettings(transactionBytes, true, chainId);
-                break;
-            default:
-                viewModel.calculateGasSettings(transactionBytes, false, chainId);
-                break;
-        }
     }
 
     private void onTransaction(String hash) {
@@ -421,6 +408,34 @@ public class ConfirmationActivity extends BaseActivity {
             finish();
         });
         dialog.show();
+    }
+
+    private void checkTransactionGas()
+    {
+        BigInteger limit = BigInteger.ZERO;
+        BigInteger price = BigInteger.ZERO;
+        if (transaction.gasLimit != null && transaction.gasLimit.compareTo(BigInteger.ZERO) > 0) limit = transaction.gasLimit;
+        if (transaction.gasPrice != null && transaction.gasPrice.compareTo(BigInteger.ZERO) > 0) price = transaction.gasPrice;
+
+        if (!price.equals(BigInteger.ZERO) || !limit.equals(BigInteger.ZERO))
+        {
+            GasSettings override = new GasSettings(price, limit);
+            viewModel.overrideGasSettings(override);
+        }
+    }
+
+    private void getGasSettings()
+    {
+        switch (confirmationType)
+        {
+            case ERC875:
+            case ERC721:
+                viewModel.calculateGasSettings(transactionBytes, true, chainId);
+                break;
+            default:
+                viewModel.calculateGasSettings(transactionBytes, false, chainId);
+                break;
+        }
     }
 
     private void onGasSettings(GasSettings gasSettings) {
@@ -476,7 +491,6 @@ public class ConfirmationActivity extends BaseActivity {
                 BigInteger gasLimit = new BigInteger(intent.getStringExtra(C.EXTRA_GAS_LIMIT));
                 GasSettings settings = new GasSettings(gasPrice, gasLimit);
                 viewModel.overrideGasSettings(settings);
-                //viewModel.gasSettings().postValue(settings);
             }
         }
     }

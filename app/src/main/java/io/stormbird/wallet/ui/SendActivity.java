@@ -355,6 +355,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             chainName.setText(viewModel.getChainName(result.chainId));
             currentChain = result.chainId;
             amountInput.onClear();
+            viewModel.startGasPriceChecker(result.chainId);
         }
 
         Token resultToken = viewModel.getToken(result.chainId, result.getAddress());
@@ -426,6 +427,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
     @Override
     protected void onDestroy() {
+        viewModel.stopGasPriceChecker();
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
         }
@@ -467,6 +469,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         {
             Utils.setChainColour(chainName, token.tokenInfo.chainId);
             chainName.setText(viewModel.getChainName(token.tokenInfo.chainId));
+            viewModel.startGasPriceChecker(token.tokenInfo.chainId);
         }
     }
 

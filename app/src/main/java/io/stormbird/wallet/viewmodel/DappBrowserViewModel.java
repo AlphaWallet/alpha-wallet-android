@@ -6,41 +6,32 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.C;
-import io.stormbird.wallet.entity.DApp;
-import io.stormbird.wallet.entity.DAppFunction;
-import io.stormbird.wallet.entity.GasSettings;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Ticker;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
 import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.ui.AddEditDappActivity;
-import io.stormbird.wallet.ui.DappBrowserFragment;
 import io.stormbird.wallet.ui.ImportTokenActivity;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.DappBrowserUtils;
 import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import static io.stormbird.wallet.C.DAPP_DEFAULT_URL;
 import static io.stormbird.wallet.C.IMPORT_STRING;
@@ -60,6 +51,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final FetchTokensInteract fetchTokensInteract;
     private final ConfirmationRouter confirmationRouter;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final GasService gasService;
 
     private double ethToUsd = 0;
     private ArrayList<String> bookmarks;
@@ -71,7 +63,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
             ConfirmationRouter confirmationRouter,
-            EthereumNetworkRepositoryType ethereumNetworkRepository) {
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            GasService gasService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.findDefaultWalletInteract = findDefaultWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -79,6 +72,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         this.fetchTokensInteract = fetchTokensInteract;
         this.confirmationRouter = confirmationRouter;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.gasService = gasService;
     }
 
     public AssetDefinitionService getAssetDefinitionService() {
@@ -283,6 +277,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         {
             ethereumNetworkRepository.setDefaultNetworkInfo(info);
             onDefaultNetwork(info);
+            startGasPriceChecker();
         }
     }
 
@@ -292,5 +287,18 @@ public class DappBrowserViewModel extends BaseViewModel  {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra(IMPORT_STRING, qrCode);
         ctx.startActivity(intent);
+    }
+
+    public void startGasPriceChecker()
+    {
+        if (defaultNetwork.getValue() != null)
+        {
+            gasService.startGasListener(defaultNetwork.getValue().chainId);
+        }
+    }
+
+    public void stopGasPriceChecker()
+    {
+        gasService.stopGasListener();
     }
 }

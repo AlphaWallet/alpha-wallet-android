@@ -67,30 +67,6 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
         TicketRange data = new TicketRange(idList, token.tokenInfo.address, false);
 
         token.displayTicketHolder(data, frameLayout, viewModel.getAssetDefinitionService(), this, false);
-
-
-//        tokenView = findViewById(R.id.web3_tokenview);
-//        waitSpinner = findViewById(R.id.progress_element);
-//        if (token instanceof Ticket) //TODO: NFT flag
-//        {
-//            idList = token.stringHexToBigIntegerList(displayIds);
-//        }
-//
-//        tokenView.setChainId(token.tokenInfo.chainId);
-//        tokenView.setWalletAddress(new Address(token.getWallet()));
-//        tokenView.setRpcUrl(token.tokenInfo.chainId);
-//        tokenView.setOnReadyCallback(this);
-//
-//        try
-//        {
-//            waitSpinner.setVisibility(View.VISIBLE);
-//            tokenView.setVisibility(View.GONE);
-//            getAttrs(idList);
-//        }
-//        catch (Exception e)
-//        {
-//            fillEmpty();
-//        }
     }
 
     @Override
@@ -161,31 +137,17 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
     {
         switch (v.getId())
         {
-            //case R.id.button_sell:
             case R.id.button_use:
             {
                 viewModel.selectRedeemToken(this, token, idList);
-//                Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
-//                //this will be the user function
-//                if (functions == null || functions.size() == 0)
-//                {
-//                    viewModel.selectRedeemToken(this, token, idList);
-//                }
-//                else
-//                {
-//                    String buttonText = ((Button) v).getText().toString();
-//                    viewModel.showFunction(this, token, buttonText, idList);
-//                }
             }
             break;
-            //case R.id.button_use:
             case R.id.button_sell:
             {
                 Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
                 //this will be the user function
                 if (functions == null || functions.size() == 0)
                 {
-                    //viewModel.selectRedeemToken(this, token, idList);
                     viewModel.openUniversalLink(this, token, token.intArrayToString(idList, false));
                 }
                 else
@@ -214,39 +176,4 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
     {
         tokenView.callToJS("refresh()");
     }
-
-//    private void getAttrs(List<BigInteger> tokenIds) throws Exception
-//    {
-//        BigInteger tokenId = tokenIds != null ? tokenIds.get(0) : BigInteger.ZERO;
-//        attrs = viewModel.getAssetDefinitionService().getTokenAttrs(token, tokenIds.size());
-//        viewModel.getAssetDefinitionService().resolveAttrs(token, tokenId)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(this::onAttr, this::onError, () -> displayFunction(attrs.toString()))
-//                .isDisposed();
-//    }
-//
-//    private void displayFunction(String tokenAttrs)
-//    {
-//        waitSpinner.setVisibility(View.GONE);
-//        tokenView.setVisibility(View.VISIBLE);
-//
-//        String view = viewModel.getAssetDefinitionService().getTokenView(token.tokenInfo.chainId, token.getAddress(), "view");
-//        String style = viewModel.getAssetDefinitionService().getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
-//        String viewData = tokenView.injectWeb3TokenInit(this, view, tokenAttrs);
-//        viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
-//
-//        tokenView.loadData(viewData, "text/html", "utf-8");
-//    }
-//
-//    private void onError(Throwable throwable)
-//    {
-//        throwable.printStackTrace();
-//    }
-//
-//    private void onAttr(TokenScriptResult.Attribute attribute)
-//    {
-//        //add to string
-//        TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
-//    }
 }

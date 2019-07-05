@@ -68,6 +68,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     private TextView currentNetwork;
     private RelativeLayout selectNetworkLayout;
     public TextView chainName;
+    private QrUrlResult currentResult;
 
     private AWalletAlertDialog aDialog;
 
@@ -109,6 +110,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         viewModel.error().observe(this, this::onError);
         viewModel.result().observe(this, this::onSaved);
         viewModel.update().observe(this, this::onChecked);
+        viewModel.tokenFinalised().observe(this, this::onFetchedToken);
         viewModel.switchNetwork().observe(this, this::setupNetwork);
         lastCheck = "";
 
@@ -141,6 +143,21 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         viewModel.prepare();
     }
 
+    private void onFetchedToken(Token token)
+    {
+        showProgress(false);
+        if (token != null)
+        {
+            //got it, launch send screen
+            viewModel.showSend(this, currentResult, token);
+            finish();
+        }
+        else
+        {
+            onNoContractFound();
+        }
+    }
+
     @Override
     public void onResume()
     {
@@ -170,23 +187,23 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                         String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
 
                         QRURLParser parser = QRURLParser.getInstance();
-                        QrUrlResult result = parser.parse(barcode);
+                        currentResult = parser.parse(barcode);
 
                         String extracted_address = null;
 
-                        if (result != null)
+                        if (currentResult != null)
                         {
-                            extracted_address = result.getAddress();
-                            switch (result.getProtocol())
+                            extracted_address = currentResult.getAddress();
+                            switch (currentResult.getProtocol())
                             {
                                 case "address":
                                     break;
                                 case "ethereum":
                                     //EIP681 protocol
-                                    if (result.chainId != 0 && extracted_address != null)
+                                    if (currentResult.chainId != 0 && extracted_address != null)
                                     {
                                         //this is a payment request
-                                        finishAndLaunchSend(result);
+                                        finishAndLaunchSend();
                                     }
                                     break;
                                 default:
@@ -246,11 +263,32 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         dialog.show();
     }
 
-    private void finishAndLaunchSend(QrUrlResult result)
+    private void finishAndLaunchSend()
     {
-        //launch send payment screen
-        viewModel.showSend(this, result);
-        finish();
+        //check if this is a token
+        if (currentResult.getFunction().length() > 0)
+        {
+            //check we have this token
+            Token token = viewModel.getToken(currentResult.chainId, currentResult.getAddress());
+            if (token == null)
+            {
+                showProgress(true);
+                //attempt to load the token and store to tokenService
+                viewModel.fetchToken(currentResult.chainId, currentResult.getAddress());
+                return;
+            }
+            else
+            {
+                viewModel.showSend(this, currentResult, token);
+                finish();
+            }
+        }
+        else
+        {
+            //launch send payment screen for eth transaction
+            viewModel.showSend(this, currentResult, viewModel.getToken(currentResult.chainId, viewModel.wallet().getValue().address));
+            finish();
+        }
     }
 
     private void onSaved(boolean result)

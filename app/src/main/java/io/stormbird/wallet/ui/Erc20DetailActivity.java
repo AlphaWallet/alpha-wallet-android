@@ -238,14 +238,7 @@ public class Erc20DetailActivity extends BaseActivity {
 
         sendBtn = findViewById(R.id.button_send);
         sendBtn.setOnClickListener(v -> {
-            if (sendingTokens)
-            {
-                viewModel.showSendToken(this, token);
-            }
-            else
-            {
-                viewModel.showSendToken(this, myAddress, token);
-            }
+            viewModel.showSendToken(this, myAddress, token);
         });
 
         receiveBtn = findViewById(R.id.button_receive);

@@ -2,12 +2,11 @@ package io.stormbird.wallet.di;
 
 import dagger.Module;
 import dagger.Provides;
-import io.stormbird.wallet.interact.ENSInteract;
-import io.stormbird.wallet.interact.FetchGasSettingsInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
+import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.GasSettingsRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
+import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -20,15 +19,21 @@ class SendModule {
     SendViewModelFactory provideSendViewModelFactory(ConfirmationRouter confirmationRouter,
                                                      MyAddressRouter myAddressRouter,
                                                      ENSInteract ensInteract,
-                                                     AssetDefinitionService assetDefinitionService,
                                                      EthereumNetworkRepositoryType networkRepositoryType,
-                                                     TokensService tokensService) {
+                                                     TokensService tokensService,
+                                                     SetupTokensInteract setupTokensInteract,
+                                                     FetchTransactionsInteract fetchTransactionsInteract,
+                                                     AddTokenInteract addTokenInteract,
+                                                     FetchTokensInteract fetchTokensInteract) {
         return new SendViewModelFactory(confirmationRouter,
                 myAddressRouter,
                 ensInteract,
-                assetDefinitionService,
                 networkRepositoryType,
-                tokensService);
+                tokensService,
+                                        setupTokensInteract,
+                                        fetchTransactionsInteract,
+                                        addTokenInteract,
+                                        fetchTokensInteract);
     }
 
     @Provides
@@ -44,5 +49,27 @@ class SendModule {
     @Provides
     ENSInteract provideENSInteract(TokenRepositoryType tokenRepository) {
         return new ENSInteract(tokenRepository);
+    }
+
+    @Provides
+    AddTokenInteract provideAddTokenInteract(
+            TokenRepositoryType tokenRepository) {
+        return new AddTokenInteract(tokenRepository);
+    }
+
+    @Provides
+    SetupTokensInteract provideSetupTokensInteract(TokenRepositoryType tokenRepository) {
+        return new SetupTokensInteract(tokenRepository);
+    }
+
+    @Provides
+    FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepository,
+                                                               TokenRepositoryType tokenRepositoryType) {
+        return new FetchTransactionsInteract(transactionRepository, tokenRepositoryType);
+    }
+
+    @Provides
+    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
+        return new FetchTokensInteract(tokenRepository);
     }
 }

@@ -78,4 +78,5 @@
     <string name="tokenscript_send_native">Send %1$s %2$s to %3$s (%4$s)</string>
     <string name="current_funds">Current funds: %1$s %2$s</string>
     <string name="invalid_address_explain">%1$s is not a valid ethereum address</string>
+    <string name="searching_for_token">Scanning for Token</string>
 </resources>

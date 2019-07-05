@@ -57,8 +57,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     @Inject
     protected TokenRepositoryType tokenRepository;
 
-    // In case we're sending tokens
-    private boolean sendingTokens = false;
     private String myAddress;
     private int decimals;
     private String symbol;
@@ -78,6 +76,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     private TextView pasteText;
     private Button nextBtn;
     private String currentAmount;
+    private QrUrlResult currentResult;
 
     private AmountEntryItem amountInput;
 
@@ -94,15 +93,17 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         handler = new Handler();
 
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
+
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, C.ETHER_DECIMALS);
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
-        sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
         QrUrlResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
+        currentChain = getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
         myAddress = wallet.address;
-        currentChain = token.tokenInfo.chainId;
+
+        if (!checkTokenValidity()) { return; }
 
         setupTokenContent();
         initViews();
@@ -120,6 +121,23 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             //restore payment request
             validateEIP681Request(result);
         }
+    }
+
+    private boolean checkTokenValidity()
+    {
+        if (token == null || token.tokenInfo == null)
+        {
+            //bad token - try to load from service
+            token = viewModel.getToken(currentChain, contractAddress);
+
+            if (token == null)
+            {
+                //TODO: possibly invoke token finder in tokensService
+                finish();
+            }
+        }
+
+        return (token != null);
     }
 
     private void initViews() {
@@ -166,6 +184,15 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         ensHandler = new ENSHandler(this, handler, adapterUrl, this, ensCallback);
         viewModel.ensResolve().observe(this, ensHandler::onENSSuccess);
         viewModel.ensFail().observe(this, ensHandler::hideENS);
+        viewModel.tokenFinalised().observe(this, this::resumeEIP681);
+    }
+
+    private void resumeEIP681(Token t)
+    {
+        token = t;
+        setupTokenContent();
+        validateEIP681Request(currentResult);
+        currentResult = null;
     }
 
     private void onNext() {
@@ -182,7 +209,8 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
         if (isValid) {
             BigInteger amountInSubunits = BalanceUtils.baseToSubunit(currentAmount, decimals);
-            viewModel.openConfirmation(this, to, amountInSubunits, contractAddress, decimals, symbol, sendingTokens, ensHandler.getEnsName(), currentChain);
+            boolean sendingTokens = !token.isEthereum();
+            viewModel.openConfirmation(this, to, amountInSubunits, token.getAddress(), token.tokenInfo.decimals, token.tokenInfo.symbol, sendingTokens, ensHandler.getEnsName(), currentChain);
         }
     }
 
@@ -239,6 +267,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                             switch (result.getProtocol())
                             {
                                 case "address":
+                                    toAddressEditText.setText(extracted_address);
                                     break;
                                 case "ethereum":
                                     //EIP681 protocol
@@ -247,8 +276,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                                 default:
                                     break;
                             }
-
-                            toAddressEditText.setText(extracted_address);
                         }
                         else //try magiclink
                         {
@@ -302,8 +329,20 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         dialog.show();
     }
 
+    private void showTokenFetch()
+    {
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.searching_for_token);
+        dialog.setIcon(AWalletAlertDialog.NONE);
+        dialog.setProgressMode();
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
+    private boolean doneonce = false;
     private void validateEIP681Request(QrUrlResult result)
     {
+        if (dialog != null) dialog.dismiss();
         //check chain
         if (result.chainId == 0)
         {
@@ -320,8 +359,19 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         }
 
         Token resultToken = viewModel.getToken(result.chainId, result.getAddress());
-
-        if (result.getFunction().length() == 0 && result.weiValue.compareTo(BigInteger.ZERO) > 0)
+        if (!doneonce)
+        {
+            resultToken = null;
+            doneonce = true;
+        }
+        if (resultToken == null)
+        {
+            currentResult = result;
+            //fetch token and re-try
+            showTokenFetch();
+            viewModel.fetchToken(result.chainId, result.getAddress(), wallet.address);
+        }
+        else if (result.getFunction().length() == 0 && result.weiValue.compareTo(BigInteger.ZERO) > 0)
         {
             //correct chain and asset type
             String ethAmount = BalanceUtils.weiToEth(new BigDecimal(result.weiValue)).setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
@@ -337,23 +387,24 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         }
         else if (result.getFunction().length() > 0 && resultToken != null && !resultToken.isEthereum())
         {
-            //sending ERC20 and we're on the correct asset
-            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, resultToken.tokenInfo.decimals));
-            BigDecimal sendAmount = new BigDecimal(result.weiValue);
-            BigDecimal erc20Amount = resultToken.tokenInfo.decimals > 0
-                    ? sendAmount.divide(decimalDivisor) : sendAmount;
-            String erc20AmountStr = erc20Amount.setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
-            amountInput = new AmountEntryItem(this, tokenRepository, resultToken.tokenInfo.symbol, false, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
-            amountInput.setAmount(erc20AmountStr);
+            if (resultToken.isERC20() && result.getFunction().startsWith("transfer"))
+            {
+                //ERC20 send request
+                amountInput = new AmountEntryItem(this, tokenRepository, resultToken.tokenInfo.symbol, false, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
+                amountInput.setAmountText(result.tokenAmount.toString());
+                toAddressEditText.setText(result.functionToAddress);
 
-            //show function which will be called:
-            TextView sendText = findViewById(R.id.text_payment_request);
-            sendText.setVisibility(View.VISIBLE);
-            sendText.setText(R.string.token_transfer_request);
-
-            TextView contractText = findViewById(R.id.text_contract_call);
-            contractText.setVisibility(View.VISIBLE);
-            contractText.setText(result.functionDetail);
+                TextView sendText = findViewById(R.id.text_payment_request);
+                sendText.setVisibility(View.VISIBLE);
+                sendText.setText(R.string.token_transfer_request);
+            }
+            else
+            {
+                //Generic function
+                amountInput = new AmountEntryItem(this, tokenRepository, "", false, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
+                amountInput.setAmountText(result.functionDetail);
+                if (result.functionToAddress != null) toAddressEditText.setText(result.functionToAddress);
+            }
         }
     }
 
@@ -399,7 +450,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         }
     }
 
-    public void setupTokenContent() {
+    private void setupTokenContent() {
         tokenBalanceText = findViewById(R.id.balance_eth);
         tokenSymbolText = findViewById(R.id.symbol);
         chainName = findViewById(R.id.text_chain_name);

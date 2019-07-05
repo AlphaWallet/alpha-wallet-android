@@ -2,8 +2,14 @@ package io.stormbird.wallet.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.generated.Uint256;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,7 +27,9 @@ public class QrUrlResult implements Parcelable
     public String functionDetail;
     public BigInteger gasLimit;
     public BigInteger gasPrice;
-    public byte[] function; //formed function bytes
+    public BigDecimal tokenAmount;
+    public String functionToAddress;
+    public String function; //formed function hex
 
     public QrUrlResult(String address)
     {
@@ -50,6 +58,8 @@ public class QrUrlResult implements Parcelable
         gasLimit = new BigInteger(in.readString(), 16);
         gasPrice = new BigInteger(in.readString(), 16);
         weiValue = new BigInteger(in.readString(), 16);
+        tokenAmount = new BigDecimal(in.readString());
+        functionToAddress = in.readString();
     }
 
     public static final Creator<QrUrlResult> CREATOR = new Creator<QrUrlResult>()
@@ -84,6 +94,8 @@ public class QrUrlResult implements Parcelable
         p.writeString(gasLimit.toString(16));
         p.writeString(gasPrice.toString(16));
         p.writeString(weiValue.toString(16));
+        p.writeString(tokenAmount.toString());
+        p.writeString(functionToAddress);
     }
 
     public String getProtocol() {
@@ -108,7 +120,11 @@ public class QrUrlResult implements Parcelable
         //TODO: Build function bytes
         StringBuilder sb = new StringBuilder();
         StringBuilder fd = new StringBuilder();
+
         if (functionStr != null) sb.append(functionStr);
+        tokenAmount = null;
+        functionToAddress = null;
+
         sb.append("(");
         fd.append(sb.toString());
         boolean first = true;
@@ -125,6 +141,20 @@ public class QrUrlResult implements Parcelable
             fd.append(param.value);
             fd.append("}");
             first = false;
+
+            //Shortcut for ERC20 sends
+            switch (param.type)
+            {
+                case "uint":
+                case "uint256":
+                    tokenAmount = new BigDecimal(param.value);
+                    break;
+                case "address":
+                    functionToAddress = param.value;
+                    break;
+                default:
+                    break;
+            }
         }
         sb.append(")");
         fd.append(")");

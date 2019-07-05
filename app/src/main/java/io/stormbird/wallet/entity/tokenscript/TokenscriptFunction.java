@@ -254,7 +254,6 @@ public abstract class TokenscriptFunction
         }
     }
 
-
     public Observable<TokenScriptResult.Attribute> fetchAttrResult(String attribute, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf, long transactionUpdate)
     {
         AttributeType attr = td.attributeTypes.get(attribute);
@@ -268,7 +267,7 @@ public abstract class TokenscriptFunction
             ContractAddress useAddress;
             if (cAddr == null) useAddress = new ContractAddress(attr.function);
             else useAddress = new ContractAddress(attr.function, cAddr.chainId, cAddr.address);
-            TransactionResult transactionResult = attrIf.getFunctionResult(useAddress, attr, tokenId);
+            TransactionResult transactionResult = attrIf.getFunctionResult(useAddress, attr, tokenId); //Needs to allow for multiple tokenIds
             if (attrIf.resolveOptimisedAttr(useAddress, attr, transactionResult) || !transactionResult.needsUpdating(transactionUpdate)) //can we use wallet's known data or cached value?
             {
                 return resultFromDatabase(transactionResult, attr);

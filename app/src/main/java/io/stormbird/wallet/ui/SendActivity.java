@@ -339,7 +339,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         dialog.show();
     }
 
-    private boolean doneonce = false;
     private void validateEIP681Request(QrUrlResult result)
     {
         if (dialog != null) dialog.dismiss();
@@ -359,11 +358,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         }
 
         Token resultToken = viewModel.getToken(result.chainId, result.getAddress());
-        if (!doneonce)
-        {
-            resultToken = null;
-            doneonce = true;
-        }
+
         if (resultToken == null)
         {
             currentResult = result;

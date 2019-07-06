@@ -288,7 +288,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     }
                     else
                     {
-                        //try asset directory
+                        //try asset directory - NB if no file here then expection thrown
                         is = context.getResources().getAssets().open(tokenScriptFile.getName());
                     }
 
@@ -325,6 +325,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public TokenDefinition getAssetDefinition(int chainId, String address)
     {
         TokenDefinition assetDef = null;
+        if (address == null) return null;
+
         if (address.equalsIgnoreCase(tokensService.getCurrentAddress()))
         {
             address = "ethereum";

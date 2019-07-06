@@ -375,9 +375,12 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     private void setupNetwork(int chainId)
     {
         networkInfo = viewModel.getNetworkInfo(chainId);
-        currentNetwork.setText(networkInfo.name);
-        Utils.setChainColour(networkIcon, networkInfo.chainId);
-        viewModel.setPrimaryChain(chainId);
+        if (networkInfo != null)
+        {
+            currentNetwork.setText(networkInfo.name);
+            Utils.setChainColour(networkIcon, networkInfo.chainId);
+            viewModel.setPrimaryChain(chainId);
+        }
     }
 
     private void selectNetwork() {

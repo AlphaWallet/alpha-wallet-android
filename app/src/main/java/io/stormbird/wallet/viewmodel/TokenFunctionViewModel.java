@@ -98,7 +98,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(TICKET, token);
         intent.putExtra(C.EXTRA_STATE, method);
         BigInteger firstId = tokenIds != null ? tokenIds.get(0) : BigInteger.ZERO;
-        intent.putExtra(C.EXTRA_TOKEN_ID, firstId.toString(Character.MAX_RADIX));
+        intent.putExtra(C.EXTRA_TOKEN_ID, firstId.toString(16));
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
     }
@@ -133,13 +133,14 @@ public class TokenFunctionViewModel extends BaseViewModel
         return assetDefinitionService.getTokenScriptResult(token, tokenId);
     }
 
-    public void confirmTransaction(Context ctx, int networkId, String functionData, String toAddress, String contractAddress, String additionalDetails, String functionName)
+    public void confirmTransaction(Context ctx, int networkId, String functionData, String toAddress,
+                                   String contractAddress, String additionalDetails, String functionName, String value)
     {
         Intent intent = new Intent(ctx, ConfirmationActivity.class);
         intent.putExtra(C.EXTRA_TRANSACTION_DATA, functionData);
         intent.putExtra(C.EXTRA_NETWORKID, networkId);
         intent.putExtra(C.EXTRA_NETWORK_NAME, ethereumNetworkRepository.getNetworkByChain(networkId).getShortName());
-        intent.putExtra(C.EXTRA_AMOUNT, "0"); //TODO: amount
+        intent.putExtra(C.EXTRA_AMOUNT, value);
         if (toAddress != null) intent.putExtra(C.EXTRA_TO_ADDRESS, toAddress);
         if (contractAddress != null) intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, contractAddress);
         intent.putExtra(C.EXTRA_CONTRACT_NAME, additionalDetails);

@@ -3,6 +3,10 @@ package io.stormbird.wallet.ui.widget.entity;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.ui.widget.holder.AssetInstanceScriptHolder;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by James on 26/03/2019.
  * Stormbird in Singapore
@@ -32,5 +36,29 @@ public class AssetInstanceSortedItem extends SortedItem<TicketRange>
     {
         return other.viewType == AssetInstanceScriptHolder.VIEW_TYPE && this.viewType == AssetInstanceScriptHolder.VIEW_TYPE
                 && ( value.equals(other.value));
+    }
+
+    @Override
+    public boolean isRadioExposed()
+    {
+        return value.exposeRadio;
+    }
+
+    @Override
+    public boolean isItemChecked()
+    {
+        return value.isChecked;
+    }
+
+    @Override
+    public void setIsChecked(boolean b) { value.isChecked = b; };
+
+    @Override
+    public void setExposeRadio(boolean expose) { value.exposeRadio = expose; };
+
+    @Override
+    public List<BigInteger> getTokenIds()
+    {
+        return value.tokenIds;
     }
 }

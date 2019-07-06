@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -88,6 +89,7 @@ public class DappBrowserFragment extends Fragment implements
     public static final String SEARCH = "SEARCH";
     public static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
     public static final String CURRENT_FRAGMENT = "currentFragment";
+    private static final String CURRENT_URL = "urlInBar";
 
     @Inject
     DappBrowserViewModelFactory dappBrowserViewModelFactory;
@@ -156,13 +158,28 @@ public class DappBrowserFragment extends Fragment implements
             String url = getArguments().getString("url");
             loadUrl(url);
         } else {
-            if (savedInstanceState != null) {
+            String prevFragment = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(CURRENT_FRAGMENT, null);
+            String prevUrl = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(CURRENT_URL, null);
+            if (savedInstanceState != null)
+            {
                 currentFragment = savedInstanceState.getString(CURRENT_FRAGMENT, "");
-                if (currentFragment.isEmpty()) {
+                String lastUrl = savedInstanceState.getString(CURRENT_URL, "");
+                if (currentFragment.isEmpty())
+                {
                     attachFragment(DAPP_HOME);
-                } else {
+                }
+                else
+                {
                     attachFragment(currentFragment);
                 }
+
+                if (lastUrl.length() > 0)
+                    loadUrl(lastUrl);
+            }
+            else if (prevFragment != null)
+            {
+                attachFragment(prevFragment);
+                if (prevUrl != null && prevFragment.equals(DAPP_BROWSER) && prevUrl.length() > 0) loadUrl(prevUrl);
             } else {
                 attachFragment(DAPP_HOME);
             }
@@ -653,6 +670,12 @@ public class DappBrowserFragment extends Fragment implements
             attachFragment(lastHomeTag);
             lastHomeTag = DAPP_HOME;
         }
+        else if (lastHomeTag == null)
+        {
+            detachFragments(true);
+            attachFragment(DAPP_HOME);
+            lastHomeTag = DAPP_HOME;
+        }
     }
 
     private void goToNextPage() {
@@ -711,7 +734,8 @@ public class DappBrowserFragment extends Fragment implements
 
     private boolean loadUrl(String urlText)
     {
-        if (!lastHomeTag.equals(DAPP_BROWSER)) lastHomeTag = currentFragment;
+        if (lastHomeTag == null) lastHomeTag = DAPP_BROWSER;
+        else if (!lastHomeTag.equals(DAPP_BROWSER)) lastHomeTag = currentFragment;
         detachFragments(true);
         this.currentFragment = DAPP_BROWSER;
         cancelSearchSession();
@@ -810,9 +834,9 @@ public class DappBrowserFragment extends Fragment implements
             qrCode = null;
         }
 
-        if (qrCode == null)
+        if (qrCode == null && getActivity() != null)
         {
-            Toast.makeText(getContext(), R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -887,5 +911,10 @@ public class DappBrowserFragment extends Fragment implements
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(CURRENT_FRAGMENT, currentFragment);
+        outState.putString(CURRENT_URL, urlTv.getText().toString());
+        PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
+                .putString(CURRENT_FRAGMENT, currentFragment)
+                .putString(CURRENT_URL, urlTv.getText().toString())
+                .apply();
     }
 }

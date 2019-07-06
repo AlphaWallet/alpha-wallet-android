@@ -528,7 +528,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     }
 
     @Override
-    public void onTokenClick(View view, Token token, List<BigInteger> ids) {
+    public void onTokenClick(View view, Token token, List<BigInteger> ids, boolean selection) {
         Context context = view.getContext();
         //TODO: what action should be performed when clicking on a range?
     }

@@ -27,4 +27,15 @@ public class FunctionDefinition
     public long resultTime = 0;
     public BigInteger tokenId;
     public EthereumTransaction tx;
+
+    public int getTokenRequirement()
+    {
+        int count = 0;
+        for (MethodArg arg : parameters)
+        {
+            if (arg.isTokenId()) count++;
+        }
+
+        return count;
+    }
 }

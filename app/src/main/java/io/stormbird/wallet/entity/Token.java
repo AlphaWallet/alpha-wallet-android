@@ -489,10 +489,6 @@ public class Token implements Parcelable
         contractType = type;
     }
     public ContractType getInterfaceSpec() { return contractType; }
-    public List<BigInteger> stringHexToBigIntegerList(String integerString)
-    {
-        return null;
-    }
     public int interfaceOrdinal()
     {
         return 0;
@@ -589,6 +585,35 @@ public class Token implements Parcelable
         {
             return "0";
         }
+    }
+
+    /**
+     * Convert a CSV string of Hex values into a BigInteger List
+     * @param integerString CSV string of hex ticket id's
+     * @return
+     */
+    public List<BigInteger> stringHexToBigIntegerList(String integerString)
+    {
+        List<BigInteger> idList = new ArrayList<>();
+
+        try
+        {
+            String[] ids = integerString.split(",");
+
+            for (String id : ids)
+            {
+                //remove whitespace
+                String trim = id.trim();
+                BigInteger val = Numeric.toBigInt(trim);
+                idList.add(val);
+            }
+        }
+        catch (Exception e)
+        {
+            idList = new ArrayList<>();
+        }
+
+        return idList;
     }
 
     public String getTransactionValue(Transaction transaction, Context context)

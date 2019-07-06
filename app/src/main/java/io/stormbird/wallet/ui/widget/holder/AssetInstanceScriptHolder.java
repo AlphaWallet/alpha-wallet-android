@@ -129,7 +129,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         {
             if (!data.isChecked)
             {
-                tokenClickListener.onTokenClick(v,token,data.tokenIds);
+                tokenClickListener.onTokenClick(v,token,data.tokenIds, true);
                 data.isChecked = true;
                 itemSelect.setChecked(true);
             }

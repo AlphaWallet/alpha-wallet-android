@@ -810,9 +810,9 @@ public class DappBrowserFragment extends Fragment implements
             qrCode = null;
         }
 
-        if (qrCode == null)
+        if (qrCode == null && getActivity() != null)
         {
-            Toast.makeText(getContext(), R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
         }
     }
 

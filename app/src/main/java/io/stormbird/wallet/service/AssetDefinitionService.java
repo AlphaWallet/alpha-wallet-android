@@ -283,7 +283,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     }
                     else
                     {
-                        //try asset directory - NB if 
+                        //try asset directory - NB if no file here then expection thrown
                         is = context.getResources().getAssets().open(tokenScriptFile.getName());
                     }
 

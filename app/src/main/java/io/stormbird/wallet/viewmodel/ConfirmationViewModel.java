@@ -178,12 +178,12 @@ public class ConfirmationViewModel extends BaseViewModel {
         }
     }
 
-    public void signTokenScriptTransaction(String transactionData, String contractAddress, BigInteger gasPrice, BigInteger gasLimit, int chainId)
+    public void signTokenScriptTransaction(String transactionData, String contractAddress, BigInteger gasPrice, BigInteger gasLimit, BigInteger value, int chainId)
     {
         progress.postValue(true);
         byte[] data = Numeric.hexStringToByteArray(transactionData);
             disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), contractAddress, BigInteger.ZERO, gasPrice, gasLimit, data, chainId)
+                    .create(defaultWallet.getValue(), contractAddress, value, gasPrice, gasLimit, data, chainId)
                     .subscribe(this::onCreateTransaction,
                                this::onError);
     }

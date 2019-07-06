@@ -29,6 +29,6 @@ public class TransactionResult
 
     public boolean needsUpdating(long lastTxCheck)
     {
-        return ((resultTime - lastTxCheck) <= 0);
+        return (lastTxCheck == 0 || (resultTime - lastTxCheck) <= 0);
     }
 }

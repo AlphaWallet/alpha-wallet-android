@@ -217,7 +217,6 @@ public abstract class TokenscriptFunction
             //now push the transaction
             String result = callSmartContractFunction(web3j, transaction, useAddress.address, ZERO_ADDRESS);
 
-            //attr.function.handleTransactionResult(transactionResult, transaction, result);
             handleTransactionResult(transactionResult, transaction, result, attr.function);
             return transactionResult;
         });
@@ -255,11 +254,10 @@ public abstract class TokenscriptFunction
         }
     }
 
-
     public Observable<TokenScriptResult.Attribute> fetchAttrResult(String attribute, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf, long transactionUpdate)
     {
         AttributeType attr = td.attributeTypes.get(attribute);
-        if (attr == null) return Observable.fromCallable(() -> null);
+        if (attr == null || isAttrIncomplete(attr)) return Observable.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));
         if (attr.function == null)  // static attribute from tokenId (eg city mapping from tokenId)
         {
             return staticAttribute(attr, tokenId);
@@ -269,7 +267,7 @@ public abstract class TokenscriptFunction
             ContractAddress useAddress;
             if (cAddr == null) useAddress = new ContractAddress(attr.function);
             else useAddress = new ContractAddress(attr.function, cAddr.chainId, cAddr.address);
-            TransactionResult transactionResult = attrIf.getFunctionResult(useAddress, attr, tokenId);
+            TransactionResult transactionResult = attrIf.getFunctionResult(useAddress, attr, tokenId); //Needs to allow for multiple tokenIds
             if (attrIf.resolveOptimisedAttr(useAddress, attr, transactionResult) || !transactionResult.needsUpdating(transactionUpdate)) //can we use wallet's known data or cached value?
             {
                 return resultFromDatabase(transactionResult, attr);
@@ -283,6 +281,22 @@ public abstract class TokenscriptFunction
                         .map(result -> parseFunctionResult(result, attr));    // write returned data into attribute
             }
         }
+    }
+
+    private boolean isAttrIncomplete(AttributeType attr)
+    {
+        if (attr.function == null) return false;
+
+        for (MethodArg arg : attr.function.parameters)
+        {
+            int index = arg.getTokenIndex();
+            if (arg.isTokenId() && index >= 0 && (arg.element.value == null || arg.element.value.length() == 0))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public Observable<TokenScriptResult.Attribute> resolveAttributes(BigInteger tokenId, AttributeInterface attrIf, ContractAddress cAddr, TokenDefinition td, long transactionUpdate)

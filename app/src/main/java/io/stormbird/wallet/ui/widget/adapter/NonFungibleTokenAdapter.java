@@ -30,6 +30,7 @@ import io.stormbird.wallet.ui.widget.entity.*;
 import io.stormbird.wallet.ui.widget.holder.*;
 import io.stormbird.wallet.web3.entity.FunctionCallback;
 import io.stormbird.wallet.web3.entity.ScriptFunction;
+import org.ethereum.geth.BigInt;
 
 /**
  * Created by James on 9/02/2018.
@@ -180,11 +181,11 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         int holderType = AssetInstanceSortedItem.VIEW_TYPE;
         containsScripted = true;
 
-//        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress()))
-//        {
-//            containsScripted = true;
-//            holderType = AssetInstanceSortedItem.VIEW_TYPE;
-//        }
+        //        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress()))
+        //        {
+        //            containsScripted = true;
+        //            holderType = AssetInstanceSortedItem.VIEW_TYPE;
+        //        }
 
         addSortedItems(sortedList, t, holderType);
     }
@@ -303,35 +304,46 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         for (int i = 0; i < items.size(); i++)
         {
             SortedItem si = items.get(i);
-            if (si.viewType == AssetInstanceSortedItem.VIEW_TYPE)
+            if (si.isRadioExposed() != expose) requiresFullRedraw = true;
+            if (si.view != null)
             {
-                AssetInstanceSortedItem ais = (AssetInstanceSortedItem) si;
-                if (ais.value.exposeRadio != expose) requiresFullRedraw = true;
-                if (ais.view != null)
-                {
-                    AppCompatRadioButton button = ais.view.itemView.findViewById(R.id.radioBox);
-                    if (button != null && (button.isChecked() || ais.value.isChecked)) button.setChecked(false);
-                }
-                ais.value.isChecked = false;
-                ais.value.exposeRadio = expose;
+                AppCompatRadioButton button = si.view.itemView.findViewById(R.id.radioBox);
+                if (button != null && (button.isChecked() || si.isItemChecked())) button.setChecked(false);
             }
-            else if (si.viewType == OpenseaHolder.VIEW_TYPE)
-            {
-                AssetSortedItem asi = (AssetSortedItem) si;
-                if (asi.value.exposeRadio != expose) requiresFullRedraw = true;
-                if (asi.view != null)
-                {
-                    AppCompatRadioButton button = asi.view.itemView.findViewById(R.id.radioBox);
-                    if (button != null && (button.isChecked() || asi.value.isChecked)) button.setChecked(false);
-                }
-                asi.value.isChecked = false;
-                asi.value.exposeRadio = expose;
-            }
+            si.setIsChecked(false);
+            si.setExposeRadio(expose);
         }
 
         if (requiresFullRedraw)
         {
             notifyDataSetChanged();
         }
+    }
+
+    public List<BigInteger> getSelectedTokenIds(List<BigInteger> selection)
+    {
+        List<BigInteger> tokenIds = new ArrayList<>(selection);
+        for (int i = 0; i < items.size(); i++)
+        {
+            SortedItem si = items.get(i);
+            if (si.isItemChecked())
+            {
+                List<BigInteger> rangeIds = si.getTokenIds();
+                for (BigInteger tokenId : rangeIds) if (!tokenIds.contains(tokenId)) tokenIds.add(tokenId);
+            }
+        }
+
+        return tokenIds;
+    }
+
+    public int getSelectedGroups()
+    {
+        int selected = 0;
+        for (int i = 0; i < items.size(); i++)
+        {
+            if (items.get(i).isItemChecked()) selected++;
+        }
+
+        return selected;
     }
 }

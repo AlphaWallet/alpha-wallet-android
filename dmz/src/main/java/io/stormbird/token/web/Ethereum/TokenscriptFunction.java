@@ -50,6 +50,8 @@ public abstract class TokenscriptFunction
                             params.add(new Uint256(tokenId));
                             break;
                         case "value":
+                            params.add(new Uint256(new BigInteger(arg.element.value)));
+                            break;
                         default:
                             params.add(new Uint256(new BigInteger(arg.element.value)));
                             break;

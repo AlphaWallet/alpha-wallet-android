@@ -238,7 +238,7 @@ public class TokensService
         List<Token> changedTokens = new ArrayList<>();
         for (Token t : tokens)
         {
-            if (t.isBad() || t.getInterfaceSpec() == ContractType.OTHER) continue;
+            if (t == null || t.isBad() || t.getInterfaceSpec() == ContractType.OTHER) continue;
             Token check = getToken(t.tokenInfo.chainId, t.tokenInfo.address);
             if (check == null || t.checkBalanceChange(check))
             {
@@ -392,7 +392,8 @@ public class TokensService
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastUpdateDiff;
-            long cutoffCheck = check.isEthereum() ? 20*1000 : 40*1000;
+            //long cutoffCheck = check.isEthereum() ? 20*1000 : 40*1000;
+            long cutoffCheck = 20*1000;
             if (updateFactor > highestWeighting && (updateFactor > (float)cutoffCheck || check.refreshCheck)) // don't add to list if updated in the last 20 seconds
             {
                 highestWeighting = updateFactor;

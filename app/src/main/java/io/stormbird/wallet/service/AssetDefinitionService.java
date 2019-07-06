@@ -10,6 +10,7 @@ import android.os.Environment;
 import android.os.FileObserver;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.util.SparseArray;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
@@ -19,6 +20,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+import io.realm.RealmResults;
 import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.TokenDefinition;
@@ -29,9 +31,12 @@ import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenLocalSource;
 import io.stormbird.wallet.repository.TransactionsRealmCache;
 import io.stormbird.wallet.repository.entity.RealmAuxData;
+import io.stormbird.wallet.repository.entity.RealmERC721Token;
+import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.ui.HomeActivity;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.ethereum.geth.BigInt;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Function;
 import org.xml.sax.SAXException;
@@ -677,7 +682,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         //check all definitions in the download zone
         Disposable d = Observable.fromIterable(getScriptsInSecureZone())
-                //.concatMap(this::checkFileTime)
                 .concatMap(this::fetchXMLFromServer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -821,6 +825,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                 if (addContractAddresses(newTSFile))
                                 {
                                     notificationService.DisplayNotification("Definition Updated", s, NotificationCompat.PRIORITY_MAX);
+                                    cachedDefinition = null;
                                 }
                             }
                         }
@@ -878,7 +883,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             for (String address : defMap.keySet())
             {
                 Token token = tokensService.getToken(networkId, address);
-                if (token != null) token.hasTokenScript = true;
+                if (token != null)
+                {
+                    token.hasTokenScript = true;
+                    TokenDefinition td = getAssetDefinition(networkId, address);
+                    ContractInfo cInfo = td.contracts.get(td.holdingToken);
+                    if (cInfo != null) checkCorrectInterface(token, cInfo.contractInterface);
+                }
             }
         }
     }
@@ -886,7 +897,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     /**
      * When a Non Fungible Token contract which has a Tokenscript definition has new transactions
      * We need to update the cached values as they could have changed
-     * TODO: Once we support event liostening this is triggered from specific events
+     * TODO: Once we support event listening this is triggered from specific events
      * @param token
      * @return
      */
@@ -976,6 +987,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         Token newToken = tf.createToken(token.tokenInfo, BigDecimal.ZERO, null, 0, cType, token.getNetworkName(), 0);
         newToken.setTokenWallet(token.getWallet());
         newToken.walletUIUpdateRequired = true;
+        newToken.updateBlancaTime = 0;
 
         tokenLocalSource.saveToken(new Wallet(token.getWallet()), newToken)
                 .subscribeOn(Schedulers.io())
@@ -1105,7 +1117,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenScriptResult.addPair(attrs, "chainId", String.valueOf(token.tokenInfo.chainId));
         TokenScriptResult.addPair(attrs, "tokenId", tokenId);
 
-
         if (token.isEthereum())
         {
             TokenScriptResult.addPair(attrs, "balance", token.balance.toString());
@@ -1147,6 +1158,34 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return tokenscriptUtility.resolveAttributes(tokenId, this, cAddr, definition, token.lastTxUpdate);
     }
 
+    public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, List<BigInteger> tokenIds)
+    {
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        //pre-fill tokenIds
+        for (AttributeType attrType : definition.attributeTypes.values())
+        {
+            resolveTokenIds(attrType, tokenIds);
+        }
+
+        //TODO: store transaction fetch time for multiple tokenIds
+
+        return resolveAttrs(token, tokenIds.get(0));
+    }
+
+    private void resolveTokenIds(AttributeType attrType, List<BigInteger> tokenIds)
+    {
+        if (attrType.function == null) return;
+
+        for (MethodArg arg : attrType.function.parameters)
+        {
+            int index = arg.getTokenIndex();
+            if (arg.isTokenId() && index >= 0 && index < tokenIds.size())
+            {
+                arg.element.value = tokenIds.get(index).toString();
+            }
+        }
+    }
+
     private List<String> getCanonicalizedAssets()
     {
         List<String> canonicalizedFilesStr = new ArrayList<>();
@@ -1176,7 +1215,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenDefinition td = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         if (td == null) return "";
         Function function = tokenscriptUtility.generateTransactionFunction(token.getWallet(), tokenId, td, def, this);
-        String encodedFunction = FunctionEncoder.encode(function);
-        return encodedFunction;
+        return FunctionEncoder.encode(function);
+    }
+
+    /**
+     * Clear the currently cached definition. This forces the service to reload the definition so it's clean for the next usage.
+     */
+    public void clearCache()
+    {
+        cachedDefinition = null;
     }
 }

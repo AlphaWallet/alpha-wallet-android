@@ -23,12 +23,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebHistoryItem;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.AutoCompleteTextView;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 import com.google.gson.Gson;
 
@@ -128,6 +123,8 @@ public class DappBrowserFragment extends Fragment implements
     private ImageView next;
     private ImageView clear;
     private TextView currentNetwork;
+    private ImageView currentNetworkCircle;
+    private LinearLayout currentNetworkClicker;
     private TextView balance;
     private TextView symbol;
 
@@ -357,8 +354,10 @@ public class DappBrowserFragment extends Fragment implements
             clearAddressBar();
         });
 
-        currentNetwork = view.findViewById(R.id.current_network);
-        currentNetwork.setOnClickListener(v -> selectNetwork());
+        currentNetworkClicker = view.findViewById(R.id.network_holder);
+        currentNetworkClicker.setOnClickListener(v -> selectNetwork());
+        currentNetwork = view.findViewById(R.id.network_text);
+        currentNetworkCircle = view.findViewById(R.id.network_colour);
         balance = view.findViewById(R.id.balance);
         symbol = view.findViewById(R.id.symbol);
     }
@@ -479,6 +478,8 @@ public class DappBrowserFragment extends Fragment implements
         int oldChain = this.networkInfo != null ? this.networkInfo.chainId : -1;
         this.networkInfo = networkInfo;
         currentNetwork.setText(networkInfo.getShortName());
+        //select resource
+        Utils.setChainCircle(currentNetworkCircle, networkInfo.chainId);
         //reset the pane if required
         if (oldChain > 0 && oldChain != this.networkInfo.chainId)
         {
@@ -781,7 +782,7 @@ public class DappBrowserFragment extends Fragment implements
 
     public void handleSelectNetwork(int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, -1);
+            int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, 1); //default to mainnet in case of trouble
             if (networkInfo.chainId != networkId) {
                 viewModel.setNetwork(networkId);
                 getActivity().sendBroadcast(new Intent(RESET_WALLET));

@@ -37,9 +37,9 @@ public class OpenseaService {
         context = ctx;
         balanceAccess.clear();
         httpClient = new OkHttpClient.Builder()
-                .connectTimeout(15, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build();
     }
@@ -125,6 +125,8 @@ public class OpenseaService {
                 if (jsonResult != null && jsonResult.length() > 10) {
                     result = new JSONObject(jsonResult);
                 }
+            } catch (java.net.SocketTimeoutException e) {
+                Log.i("Opensea", "Socket timeout");
             } catch (Exception e) {
                 e.printStackTrace();
             }

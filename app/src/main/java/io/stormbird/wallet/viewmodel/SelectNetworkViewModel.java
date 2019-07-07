@@ -2,9 +2,15 @@ package io.stormbird.wallet.viewmodel;
 
 import java.util.List;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.service.TokensService;
+import io.stormbird.wallet.ui.AddTokenActivity;
+import io.stormbird.wallet.ui.SelectNetworkActivity;
 
 public class SelectNetworkViewModel extends BaseViewModel {
     private final EthereumNetworkRepositoryType networkRepository;
@@ -40,5 +46,17 @@ public class SelectNetworkViewModel extends BaseViewModel {
         }
         networkRepository.setFilterNetworkList(selectedIds);
         tokensService.setupFilter();
+    }
+
+    public List<Integer> getActiveNetworks() {
+        return networkRepository.getFilterNetworkList();
+    }
+
+    public void openFilterSelect(Activity ctx)
+    {
+        Intent intent = new Intent(ctx, SelectNetworkActivity.class);
+        intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        ctx.startActivity(intent);
     }
 }

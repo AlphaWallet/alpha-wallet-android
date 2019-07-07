@@ -235,7 +235,6 @@ public class WalletViewModel extends BaseViewModel
 
     private void storedTokens(Token[] tokens)
     {
-        Log.d("WVM", "Stored " + tokens.length);
         onFetchTokensCompletable();
     }
 

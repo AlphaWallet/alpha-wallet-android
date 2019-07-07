@@ -102,9 +102,11 @@ public class NetworkListAdapter extends ArrayAdapter<NetworkItem> {
             });
 
             if (item.isSelected()) {
-                viewHolder.checkbox.setImageResource(R.drawable.ic_checkbox_active);
+                int resource = singleItem ? R.drawable.ic_checkbox_active : R.drawable.button_square_checked;
+                viewHolder.checkbox.setImageResource(resource);
             } else {
-                viewHolder.checkbox.setImageResource(R.drawable.ic_checkbox);
+                int resource = singleItem ? R.drawable.ic_checkbox : R.drawable.button_square_unchecked;
+                viewHolder.checkbox.setImageResource(resource);
             }
         }
 

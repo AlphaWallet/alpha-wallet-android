@@ -51,9 +51,9 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="5dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginRight="4dp"
                 android:layout_toEndOf="@id/next"
-                android:layout_toStartOf="@id/current_network"
+                android:layout_toStartOf="@id/network_holder"
                 android:animateLayoutChanges="true"
                 android:background="@drawable/background_address_bar"
                 android:completionThreshold="1"
@@ -78,18 +78,16 @@
                 android:tint="@color/light_gray"
                 android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/current_network"
+            <LinearLayout
+                android:id="@+id/network_holder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:ellipsize="end"
-                android:fontFamily="@font/font_regular"
-                android:singleLine="true"
-                android:text="@string/ethereum"
-                android:textColor="@color/white"
-                android:textSize="18sp" />
+                android:ellipsize="end">
+
+                <include layout="@layout/item_network_select"/>
+
+            </LinearLayout>
 
         </RelativeLayout>
     </android.support.v7.widget.Toolbar>

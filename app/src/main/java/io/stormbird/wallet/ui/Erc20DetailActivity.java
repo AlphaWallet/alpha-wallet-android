@@ -152,7 +152,7 @@ public class Erc20DetailActivity extends BaseActivity {
                     Intent intent = new Intent(this, FunctionActivity.class);
                     intent.putExtra(TICKET, token);
                     intent.putExtra(C.EXTRA_STATE, action);
-                    intent.putExtra(C.EXTRA_TOKEN_ID, BigInteger.ZERO.toString(Character.MAX_RADIX));
+                    intent.putExtra(C.EXTRA_TOKEN_ID, BigInteger.ZERO.toString(16));
                     intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
                     startActivity(intent);
                 });
@@ -238,14 +238,7 @@ public class Erc20DetailActivity extends BaseActivity {
 
         sendBtn = findViewById(R.id.button_send);
         sendBtn.setOnClickListener(v -> {
-            if (sendingTokens)
-            {
-                viewModel.showSendToken(this, token);
-            }
-            else
-            {
-                viewModel.showSendToken(this, myAddress, token);
-            }
+            viewModel.showSendToken(this, myAddress, token);
         });
 
         receiveBtn = findViewById(R.id.button_receive);

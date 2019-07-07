@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -210,6 +211,19 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     {
         super.onPause();
         hideDialog();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //16908332
+        switch (item.getItemId()) {
+            case android.R.id.home: {
+                new HomeRouter().open(this, true);
+                finish();
+                return true;
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void setTicket(boolean ticket, boolean progress, boolean invalid)
@@ -617,5 +631,11 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         }
 
         return magicLink;
+    }
+
+    @Override
+    public void onBackPressed() {
+        setResult(RESULT_CANCELED);
+        super.onBackPressed();
     }
 }

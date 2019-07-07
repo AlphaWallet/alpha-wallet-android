@@ -15,7 +15,6 @@ import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
-import io.stormbird.wallet.ui.AddTokenActivity;
 import io.stormbird.wallet.ui.ImportTokenActivity;
 import io.stormbird.wallet.ui.SendActivity;
 
@@ -30,6 +29,7 @@ public class AddTokenViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<TokenInfo> tokenInfo = new MutableLiveData<>();
     private final MutableLiveData<Integer> switchNetwork = new MutableLiveData<>();
+    private final MutableLiveData<Token> finalisedToken = new MutableLiveData<>();
 
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final SetupTokensInteract setupTokensInteract;
@@ -73,11 +73,13 @@ public class AddTokenViewModel extends BaseViewModel {
     public MutableLiveData<Wallet> wallet() {
         return wallet;
     }
+    public MutableLiveData<Token> tokenFinalised() { return finalisedToken; }
 
     public void save(String address, String symbol, int decimals, String name, int chainId) {
         TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, chainId);
         disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenInfo).toObservable()
                 .flatMap(contractType -> addTokenInteract.add(tokenInfo, contractType, wallet.getValue()))
+                .flatMap(token -> fetchTokensInteract.updateDefaultBalance(token, wallet.getValue()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onSaved, error -> onInterfaceCheckError(error, tokenInfo));
@@ -129,6 +131,30 @@ public class AddTokenViewModel extends BaseViewModel {
                 .subscribe(this::onTokensSetup, this::onError, this::onFetchTokensCompletable);
     }
 
+    public void fetchToken(int chainId, String addr)
+    {
+        setupTokensInteract.update(addr, chainId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::gotTokenUpdate, this::onError).isDisposed();
+    }
+
+    private void gotTokenUpdate(TokenInfo tokenInfo)
+    {
+        disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenInfo).toObservable()
+                .flatMap(contractType -> addTokenInteract.add(tokenInfo, contractType, wallet.getValue()))
+                .flatMap(token -> fetchTokensInteract.updateDefaultBalance(token, wallet.getValue()))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::resumeSend, this::onError);
+    }
+
+    private void resumeSend(Token token)
+    {
+        tokensService.addToken(token);
+        finalisedToken.postValue(token);
+    }
+
     public LiveData<Boolean> result() {
         return result;
     }
@@ -165,15 +191,25 @@ public class AddTokenViewModel extends BaseViewModel {
         testAddress = null;
     }
 
-    public void showSend(Context ctx, QrUrlResult result)
+    public void showSend(Context ctx, QrUrlResult result, Token token)
     {
         Intent intent = new Intent(ctx, SendActivity.class);
-        intent.putExtra(C.EXTRA_SENDING_TOKENS, false);
-        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, wallet.getValue().address);
+        boolean sendingTokens = (result.getFunction() != null && result.getFunction().length() > 0);
+        String address = wallet.getValue().address;
+        int decimals = 18;
+
+        if (sendingTokens)
+        {
+            address = result.getAddress();
+            decimals = token.tokenInfo.decimals;
+        }
+
+        intent.putExtra(C.EXTRA_SENDING_TOKENS, sendingTokens);
+        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
         intent.putExtra(C.EXTRA_SYMBOL, ethereumNetworkRepository.getNetworkByChain(result.chainId).symbol);
-        intent.putExtra(C.EXTRA_DECIMALS, 18);
+        intent.putExtra(C.EXTRA_DECIMALS, decimals);
         intent.putExtra(C.Key.WALLET, wallet.getValue());
-        intent.putExtra(C.EXTRA_TOKEN_ID, tokensService.getToken(result.chainId, wallet.getValue().address));
+        intent.putExtra(C.EXTRA_TOKEN_ID, token);
         intent.putExtra(C.EXTRA_AMOUNT, result);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
@@ -260,5 +296,10 @@ public class AddTokenViewModel extends BaseViewModel {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra(IMPORT_STRING, importTxt);
         context.startActivity(intent);
+    }
+
+    public Token getToken(int chainId, String address)
+    {
+        return tokensService.getToken(chainId, address);
     }
 }

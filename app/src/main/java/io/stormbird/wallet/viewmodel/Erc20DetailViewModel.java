@@ -113,15 +113,6 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return assetDefinitionService.hasAction(token.tokenInfo.chainId, token.getAddress());
     }
 
-    public String getActionText(Token token)
-    {
-        Map<String, TSAction> actions = assetDefinitionService.getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
-        for (String key : actions.keySet())
-            return key;
-
-        return null;
-    }
-
     public void fetchTransactions(Token token, int historyCount) {
         fetchTransactionDisposable =
                 fetchTransactionsInteract.fetchTransactionsFromStorage(wallet.getValue(), token, historyCount)
@@ -268,16 +259,13 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return tokenTicker;
     }
 
-    public void showSendToken(Context ctx, Token token)
-    {
-        new SendTokenRouter().open(ctx, token.getAddress(), token.tokenInfo.symbol, token.tokenInfo.decimals,
-                                   true, wallet.getValue(), token);
-    }
-
     public void showSendToken(Context ctx, String address, Token token)
     {
-        new SendTokenRouter().open(ctx, address, token.tokenInfo.symbol, token.tokenInfo.decimals,
-                                   false, wallet.getValue(), token);
+        if (token != null)
+        {
+            new SendTokenRouter().open(ctx, address, token.tokenInfo.symbol, token.tokenInfo.decimals,
+                                       wallet.getValue(), token, token.tokenInfo.chainId);
+        }
     }
 
     public String getActionData(Token token, String actionText)

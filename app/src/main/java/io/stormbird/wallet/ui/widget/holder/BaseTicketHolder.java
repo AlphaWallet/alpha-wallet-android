@@ -60,7 +60,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     @Override
     public void onClick(View v) {
         if (onTokenClickListener != null) {
-            onTokenClickListener.onTokenClick(v, token, thisData.tokenIds);
+            onTokenClickListener.onTokenClick(v, token, thisData.tokenIds, true);
         }
     }
 

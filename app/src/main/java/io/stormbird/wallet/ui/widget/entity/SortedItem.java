@@ -1,5 +1,6 @@
 package io.stormbird.wallet.ui.widget.entity;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,4 +25,23 @@ public abstract class SortedItem<T> {
     public abstract boolean areContentsTheSame(SortedItem newItem);
 
     public abstract boolean areItemsTheSame(SortedItem other);
+
+    public boolean isRadioExposed()
+    {
+        return false;
+    }
+
+    public boolean isItemChecked()
+    {
+        return false;
+    }
+
+    public void setIsChecked(boolean b) { };
+
+    public void setExposeRadio(boolean expose) { };
+
+    public List<BigInteger> getTokenIds()
+    {
+        return new ArrayList<>();
+    }
 }

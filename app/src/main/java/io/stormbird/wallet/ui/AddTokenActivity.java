@@ -68,6 +68,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     private TextView currentNetwork;
     private RelativeLayout selectNetworkLayout;
     public TextView chainName;
+    private QrUrlResult currentResult;
 
     private AWalletAlertDialog aDialog;
 
@@ -109,6 +110,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         viewModel.error().observe(this, this::onError);
         viewModel.result().observe(this, this::onSaved);
         viewModel.update().observe(this, this::onChecked);
+        viewModel.tokenFinalised().observe(this, this::onFetchedToken);
         viewModel.switchNetwork().observe(this, this::setupNetwork);
         lastCheck = "";
 
@@ -139,6 +141,21 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
         setupNetwork(1);
         viewModel.prepare();
+    }
+
+    private void onFetchedToken(Token token)
+    {
+        showProgress(false);
+        if (token != null)
+        {
+            //got it, launch send screen
+            viewModel.showSend(this, currentResult, token);
+            finish();
+        }
+        else
+        {
+            onNoContractFound();
+        }
     }
 
     @Override
@@ -173,11 +190,32 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         dialog.show();
     }
 
-    private void finishAndLaunchSend(QrUrlResult result)
+    private void finishAndLaunchSend()
     {
-        //launch send payment screen
-        viewModel.showSend(this, result);
-        finish();
+        //check if this is a token
+        if (currentResult.getFunction().length() > 0)
+        {
+            //check we have this token
+            Token token = viewModel.getToken(currentResult.chainId, currentResult.getAddress());
+            if (token == null)
+            {
+                showProgress(true);
+                //attempt to load the token and store to tokenService
+                viewModel.fetchToken(currentResult.chainId, currentResult.getAddress());
+                return;
+            }
+            else
+            {
+                viewModel.showSend(this, currentResult, token);
+                finish();
+            }
+        }
+        else
+        {
+            //launch send payment screen for eth transaction
+            viewModel.showSend(this, currentResult, viewModel.getToken(currentResult.chainId, viewModel.wallet().getValue().address));
+            finish();
+        }
     }
 
     private void onSaved(boolean result)
@@ -302,9 +340,12 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     private void setupNetwork(int chainId)
     {
         networkInfo = viewModel.getNetworkInfo(chainId);
-        currentNetwork.setText(networkInfo.name);
-        Utils.setChainColour(networkIcon, networkInfo.chainId);
-        viewModel.setPrimaryChain(chainId);
+        if (networkInfo != null)
+        {
+            currentNetwork.setText(networkInfo.name);
+            Utils.setChainColour(networkIcon, networkInfo.chainId);
+            viewModel.setPrimaryChain(chainId);
+        }
     }
 
     private void selectNetwork() {
@@ -324,27 +365,45 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                         String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
 
                         QRURLParser parser = QRURLParser.getInstance();
-                        QrUrlResult result = parser.parse(barcode);
+                        currentResult = parser.parse(barcode);
 
                         String extracted_address = null;
 
-                        if (result != null)
+                        if (currentResult != null)
                         {
-                            extracted_address = result.getAddress();
-                            switch (result.getProtocol())
+                            extracted_address = currentResult.getAddress();
+                            switch (currentResult.getProtocol())
                             {
                                 case "address":
                                     break;
                                 case "ethereum":
                                     //EIP681 protocol
-                                    if (result.chainId != 0 && extracted_address != null)
+                                    if (currentResult.chainId != 0 && extracted_address != null)
                                     {
                                         //this is a payment request
-                                        finishAndLaunchSend(result);
+                                        finishAndLaunchSend();
                                     }
                                     break;
                                 default:
                                     break;
+                            }
+                        }
+                        else //try magiclink
+                        {
+                            ParseMagicLink magicParser = new ParseMagicLink(new CryptoFunctions());
+                            try
+                            {
+                                if (magicParser.parseUniversalLink(barcode).chainId > 0) //see if it's a valid link
+                                {
+                                    //let's try to import the link
+                                    viewModel.showImportLink(this, barcode);
+                                    finish();
+                                    return;
+                                }
+                            }
+                            catch (SalesOrderMalformed e)
+                            {
+                                e.printStackTrace();
                             }
                         }
 
@@ -360,17 +419,9 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                     break;
                 default:
                     Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                            "Code: " + String.valueOf(resultCode)
+                                                "Code: " + String.valueOf(resultCode)
                     ));
                     break;
-            }
-        } else if (requestCode == C.REQUEST_SELECT_NETWORK) {
-            if (resultCode == RESULT_OK) {
-                int network = data.getIntExtra(C.EXTRA_CHAIN_ID, -1);
-                networkInfo = viewModel.getNetwork(network);
-                if (networkInfo != null) {
-                    setupNetwork(networkInfo.chainId);
-                }
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);

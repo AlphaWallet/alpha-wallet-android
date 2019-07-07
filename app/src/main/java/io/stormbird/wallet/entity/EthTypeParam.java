@@ -1,5 +1,8 @@
 package io.stormbird.wallet.entity;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 /**
  * Created by James on 23/02/2019.
  * Stormbird in Singapore
@@ -13,5 +16,20 @@ public class EthTypeParam
     {
         type = t;
         value = v;
+
+        if (t.contains("uint"))
+        {
+            //v is in exp form
+            try
+            {
+                String convStr = String.valueOf(Double.parseDouble(v));
+                BigDecimal bi = new BigDecimal(convStr);
+                value = bi.toPlainString();
+            }
+            catch (NumberFormatException e)
+            {
+                //do nothing
+            }
+        }
     }
 }

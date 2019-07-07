@@ -514,6 +514,31 @@ public class AppSiteController implements AttributeInterface
         }
     }
 
+    /* usage: (Weiwu documented after Sangalli's implementation)
+
+    1) for a test file whose root certificate isn't in the trusted CA list:
+
+    $ curl -F 'file=@lib/src/test/ts/EntryToken.tsml' localhost:8080/api/v1/verifyXMLDSig
+    {"result":"fail","failureReason":"Path does not chain with any of the trust anchors"}
+
+    2) for a test file which has valid certificates:
+
+    $ curl -F 'file=@lib/src/test/ts/DAI.tsml' localhost:8080/api/v1/verifyXMLDSig
+    {"result":"pass","subject":"CN=*.aw.app","keyName":"","keyType":"SHA256withRSA","issuer":"CN=Let's Encrypt Authority X3,O=Let's Encrypt,C=US"}
+
+    Client be-aware! Please handle return code 404 gracefully. It's content look like this:
+
+    {
+    "timestamp": "2019-07-04T08:43:32.885+0000",
+    "status": 404,
+    "error": "Not Found",
+    "message": "API v1 is no longer supported. Upgrade your software.",
+    "path": "/api/v1/verifyXMLDSig"
+    }
+
+    This message likely signify that version 1 of the api is no longer supported, i.e. the client is too old.
+    You can simply display the message to the end user (despite it's not multi-lingual).
+     */
     @PostMapping("/api/v1/verifyXMLDSig")
     @ResponseBody
     @SuppressWarnings("unchecked")
@@ -535,15 +560,6 @@ public class AppSiteController implements AttributeInterface
             result.put("failureReason", XMLDsigVerificationResult.failureReason);
             status = HttpStatus.BAD_REQUEST;
         }
-        /* Example return
-{
-  "timestamp": "2019-07-04T08:43:32.885+0000",
-  "status": 404,
-  "error": "Not Found",
-  "message": "No message available",
-  "path": "/api/checkSig"
-}
-         */
         return new ResponseEntity<String>(result.toString(), status);
     }
 }

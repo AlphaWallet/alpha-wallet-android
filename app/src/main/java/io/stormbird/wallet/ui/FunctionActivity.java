@@ -40,8 +40,10 @@ import javax.inject.Inject;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.security.SignatureException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.stormbird.wallet.C.Key.TICKET;
@@ -60,6 +62,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     private TokenFunctionViewModel viewModel;
 
     private Token token;
+    private List<BigInteger> tokenIds;
     private BigInteger tokenId;
     private String actionMethod;
     private SystemView systemView;
@@ -77,7 +80,8 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         actionMethod = getIntent().getStringExtra(C.EXTRA_STATE);
         String tokenIdStr = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
         if (tokenIdStr == null || tokenIdStr.length() == 0) tokenIdStr = "0";
-        tokenId = new BigInteger(tokenIdStr, Character.MAX_RADIX);
+        tokenIds = token.stringHexToBigIntegerList(tokenIdStr);
+        tokenId = tokenIds.get(0);
 
         tokenView = findViewById(R.id.web3_tokenview);
         waitSpinner = findViewById(R.id.progress_element);
@@ -120,17 +124,51 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         try
         {
             attrs = viewModel.getAssetDefinitionService().getTokenAttrs(token, tokenId, 1);
+            //add extra tokenIds if required
+            addMultipleTokenIds(attrs);
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
 
-        viewModel.getAssetDefinitionService().resolveAttrs(token, tokenId)
+        viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onAttr, this::onError, () -> displayFunction(attrs.toString()))
                 .isDisposed();
+    }
+
+    private void addMultipleTokenIds(StringBuilder sb)
+    {
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        TSAction action = functions.get(actionMethod);
+        boolean hasTokenIds = false;
+
+        for (MethodArg arg : action.function.parameters)
+        {
+            int index = arg.getTokenIndex();
+            if (arg.isTokenId() && index >= 0 && index < tokenIds.size())
+            {
+                if (!hasTokenIds)
+                {
+                    sb.append("tokenIds: [");
+                }
+                else
+                {
+                    sb.append(", ");
+                }
+                sb.append("\"");
+                sb.append(tokenIds.get(index));
+                sb.append("\"");
+                hasTokenIds = true;
+            }
+        }
+
+        if (hasTokenIds)
+        {
+            sb.append("],\n");
+        }
     }
 
     private void onError(Throwable throwable)
@@ -215,6 +253,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
             //get challenge from the source
             case R.id.button_use:
                 //Sign is default, if there's a transaction then push this
+                args.clear();
                 handleConfirmClick();
                 break;
             default:
@@ -233,6 +272,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
             //if there's input params, resolve them
             boolean resolved = checkNativeTransaction(action, true);
             resolved = checkFunctionArgs(action, resolved);
+            resolveTokenIds(action);
 
             if (resolved)
             {
@@ -242,6 +282,18 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         else
         {
             tokenView.callToJS("onConfirm" + "('sig')");
+        }
+    }
+
+    private void resolveTokenIds(TSAction action)
+    {
+        for (MethodArg arg : action.function.parameters)
+        {
+            int index = arg.getTokenIndex();
+            if (arg.isTokenId() && index >= 0 && index < tokenIds.size())
+            {
+                arg.element.value = tokenIds.get(index).toString();
+            }
         }
     }
 
@@ -276,7 +328,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
 
     private boolean checkTokenScriptElement(TSAction action, TokenscriptElement e, boolean resolved)
     {
-        if (e.ref != null && e.ref.length() > 0)
+        if (e.ref != null && e.ref.length() > 0 && action.attributeTypes != null)
         {
             AttributeType attr = action.attributeTypes.get(e.ref);
             if (attr == null) return true;
@@ -302,12 +354,12 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
                     {
                         BigDecimal unsignedValue = new BigDecimal(valueFromInput);
                         //handle value
+                        functionEffect = unsignedValue.toString();
                         if (attr.bitshift > 0)
                         {
-                            functionEffect = unsignedValue.toString();
                             unsignedValue = unsignedValue.movePointRight(attr.bitshift);
-                            args.put(e.ref, unsignedValue.toString());
                         }
+                        args.put(e.ref, unsignedValue.toString());
                         e.value = unsignedValue.toString();
                     }
                     break;
@@ -322,9 +374,9 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
 
     private void handleFunction(TSAction action)
     {
-        if (action.function.tx != null)
+        if (action.function.tx != null && (action.function.parameters == null || action.function.parameters.size() == 0))
         {
-            //this is a native style transaction
+            //no params, this is a native style transaction
             NativeSend(action);
         }
         else
@@ -334,9 +386,31 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
             //confirm the transaction
             ContractAddress cAddr = new ContractAddress(action.function, token.tokenInfo.chainId, token.tokenInfo.address); //viewModel.getAssetDefinitionService().getContractAddress(action.function, token);
 
-            functionEffect = functionEffect + " to " + actionMethod;
+            if (functionEffect == null)
+            {
+                functionEffect = actionMethod;
+            }
+            else
+            {
+                functionEffect = functionEffect + " " + token.tokenInfo.symbol + " to " + actionMethod;
+                //functionEffect = functionEffect + " to " + actionMethod;
+            }
 
-            viewModel.confirmTransaction(this, cAddr.chainId, functionData, null, cAddr.address, actionMethod, functionEffect);
+            //function call may include some value
+            String value = "0";
+            if (action.function.tx != null && action.function.tx.args.containsKey("value"))
+            {
+                //this is very specific but 'value' is a specifically handled param
+                value = action.function.tx.args.get("value").value;
+                BigDecimal valCorrected = getCorrectedBalance(value, 18);
+                functionEffect = valCorrected.toString() + " " + token.tokenInfo.symbol + " to " + actionMethod;
+            }
+
+            //finished resolving attributes, blank definition cache so definition is re-loaded when next needed
+            viewModel.getAssetDefinitionService().clearCache();
+
+            viewModel.confirmTransaction(this, cAddr.chainId, functionData, null,
+                                         cAddr.address, actionMethod, functionEffect, value);
         }
     }
 
@@ -347,7 +421,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         FunctionDefinition function = action.function;
 
         //check we have a 'to' and a 'value'
-        if (!(function.tx.args.containsKey("to") && function.tx.args.containsKey("value")))
+        if (!(function.tx.args.containsKey("value")))
         {
             isValid = false;
             //TODO: Display error
@@ -368,11 +442,13 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         {
             errorInvalidAddress(to);
             isValid = false;
-            return;
         }
 
         //eg Send 2(*1) ETH(*2) to Alex's Amazing Coffee House(*3) (0xdeadacec0ffee(*4))
         String extraInfo = String.format(getString(R.string.tokenscript_send_native), functionEffect, token.tokenInfo.symbol, actionMethod, to);
+
+        //Clear the cache to refresh any resolved values
+        viewModel.getAssetDefinitionService().clearCache();
 
         if (isValid) {
             viewModel.confirmNativeTransaction(this, to, value, token, extraInfo);
@@ -495,5 +571,22 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         {
             e.printStackTrace();
         }
+    }
+
+    public BigDecimal getCorrectedBalance(String value, int scale)
+    {
+        BigDecimal val = BigDecimal.ZERO;
+        try
+        {
+            val = new BigDecimal(value);
+            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, scale));
+            val = val.divide(decimalDivisor);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return val.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros();
     }
 }

@@ -30,6 +30,7 @@ public class QrUrlResult implements Parcelable
     public BigDecimal tokenAmount;
     public String functionToAddress;
     public String function; //formed function hex
+    public EIP681Type type;
 
     public QrUrlResult(String address)
     {
@@ -41,8 +42,11 @@ public class QrUrlResult implements Parcelable
         this.protocol = protocol;
         this.address = address;
         chainId = 1;
+        type = EIP681Type.ADDRESS;
         functionStr = "";
         functionDetail = "";
+        functionToAddress = "";
+        tokenAmount = BigDecimal.ZERO;
         gasLimit = BigInteger.ZERO;
         gasPrice = BigInteger.ZERO;
         weiValue = BigInteger.ZERO;
@@ -60,6 +64,8 @@ public class QrUrlResult implements Parcelable
         weiValue = new BigInteger(in.readString(), 16);
         tokenAmount = new BigDecimal(in.readString());
         functionToAddress = in.readString();
+        int resultType = in.readInt();
+        type = EIP681Type.values()[resultType];
     }
 
     public static final Creator<QrUrlResult> CREATOR = new Creator<QrUrlResult>()
@@ -96,6 +102,7 @@ public class QrUrlResult implements Parcelable
         p.writeString(weiValue.toString(16));
         p.writeString(tokenAmount.toString());
         p.writeString(functionToAddress);
+        p.writeInt(type.ordinal());
     }
 
     public String getProtocol() {
@@ -116,7 +123,12 @@ public class QrUrlResult implements Parcelable
 
     public void createFunctionPrototype(List<EthTypeParam> params)
     {
-        if (params.size() == 0) return;
+        if (params.size() == 0)
+        {
+            if (weiValue.compareTo(BigInteger.ZERO) > 0) type = EIP681Type.PAYMENT;
+            return;
+        }
+
         //TODO: Build function bytes
         StringBuilder sb = new StringBuilder();
         StringBuilder fd = new StringBuilder();
@@ -161,5 +173,18 @@ public class QrUrlResult implements Parcelable
 
         functionStr = sb.toString();
         functionDetail = fd.toString();
+
+        if (functionStr.startsWith("transfer"))
+        {
+            type = EIP681Type.TRANSFER;
+        }
+        else if (params.size() > 0)
+        {
+            type = EIP681Type.FUNCTION_CALL;
+        }
+        else
+        {
+            type = EIP681Type.OTHER;
+        }
     }
 }

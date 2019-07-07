@@ -343,7 +343,8 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     {
         if (dialog != null) dialog.dismiss();
         //check chain
-        if (result.chainId == 0)
+        NetworkInfo info = viewModel.getNetworkInfo(result.chainId);
+        if (info == null)
         {
             displayScanError();
             return;
@@ -352,55 +353,61 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         {
             //chain ID indicator
             Utils.setChainColour(chainName, result.chainId);
-            chainName.setText(viewModel.getChainName(result.chainId));
+            chainName.setText(info.name);
             currentChain = result.chainId;
             amountInput.onClear();
             viewModel.startGasPriceChecker(result.chainId);
         }
 
-        Token resultToken = viewModel.getToken(result.chainId, result.getAddress());
+        TextView sendText = findViewById(R.id.text_payment_request);
 
-        if (resultToken == null)
+        switch (result.type)
         {
-            currentResult = result;
-            //fetch token and re-try
-            showTokenFetch();
-            viewModel.fetchToken(result.chainId, result.getAddress(), wallet.address);
-        }
-        else if (result.getFunction().length() == 0 && result.weiValue.compareTo(BigInteger.ZERO) > 0)
-        {
-            //correct chain and asset type
-            String ethAmount = BalanceUtils.weiToEth(new BigDecimal(result.weiValue)).setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
-            TextView sendText = findViewById(R.id.text_payment_request);
-            sendText.setVisibility(View.VISIBLE);
-            sendText.setText(R.string.transfer_request);
-            token = viewModel.getToken(result.chainId, wallet.address);
-            toAddressEditText.setText(result.getAddress());
-            amountInput = new AmountEntryItem(this, tokenRepository, viewModel.getNetworkInfo(result.chainId).symbol, true, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
-            amountInput.setAmountText(ethAmount);
-            amountInput.setAmount(ethAmount);
-            setupTokenContent();
-        }
-        else if (result.getFunction().length() > 0 && resultToken != null && !resultToken.isEthereum())
-        {
-            if (resultToken.isERC20() && result.getFunction().startsWith("transfer"))
-            {
-                //ERC20 send request
-                amountInput = new AmountEntryItem(this, tokenRepository, resultToken.tokenInfo.symbol, false, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
-                amountInput.setAmountText(result.tokenAmount.toString());
-                toAddressEditText.setText(result.functionToAddress);
-
-                TextView sendText = findViewById(R.id.text_payment_request);
+            case PAYMENT:
+                //correct chain and asset type
+                String ethAmount = BalanceUtils.weiToEth(new BigDecimal(result.weiValue)).setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
                 sendText.setVisibility(View.VISIBLE);
-                sendText.setText(R.string.token_transfer_request);
-            }
-            else
-            {
+                sendText.setText(R.string.transfer_request);
+                token = viewModel.getToken(result.chainId, wallet.address);
+                toAddressEditText.setText(result.getAddress());
+                amountInput = new AmountEntryItem(this, tokenRepository, viewModel.getNetworkInfo(result.chainId).symbol, true, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
+                amountInput.setAmountText(ethAmount);
+                amountInput.setAmount(ethAmount);
+                setupTokenContent();
+                break;
+
+            case TRANSFER:
+                Token resultToken = viewModel.getToken(result.chainId, result.getAddress());
+                if (resultToken == null)
+                {
+                    currentResult = result;
+                    showTokenFetch();
+                    viewModel.fetchToken(result.chainId, result.getAddress(), wallet.address);
+                }
+                else if (resultToken.isERC20())
+                {
+                    //ERC20 send request
+                    amountInput = new AmountEntryItem(this, tokenRepository, resultToken.tokenInfo.symbol, false, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
+                    amountInput.setAmountText(result.tokenAmount.toString());
+                    toAddressEditText.setText(result.functionToAddress);
+                    sendText.setVisibility(View.VISIBLE);
+                    sendText.setText(R.string.token_transfer_request);
+                }
+                else
+                {
+                    //TODO: handle ERC875 & ERC721 transfer
+                }
+                break;
+
+            case FUNCTION_CALL:
                 //Generic function
                 amountInput = new AmountEntryItem(this, tokenRepository, "", false, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
                 amountInput.setAmountText(result.functionDetail);
                 if (result.functionToAddress != null) toAddressEditText.setText(result.functionToAddress);
-            }
+                break;
+
+            default:
+                break;
         }
     }
 

@@ -30,7 +30,7 @@ public class XMLDsigVerifierTest {
     public void testFifaTSML() throws Exception {
         InputStream EntryToken = new FileInputStream("src/test/ts/fifa.tsml");
         XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(EntryToken);
-        //Should not pass because shong.wang is signed by an authority which is not recognised (cacert.org)
+        //Fails because cert is expired
         assert(!result.isValid);
         assert(result.failureReason.equals("cannot find validation key"));
     }

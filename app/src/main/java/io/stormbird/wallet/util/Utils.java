@@ -104,6 +104,42 @@ public class Utils {
         }
     }
 
+    public static void setChainCircle(View view, int chainId)
+    {
+        switch (chainId)
+        {
+            case EthereumNetworkRepository.CLASSIC_ID:
+                view.setBackgroundResource(R.drawable.item_etc_circle);
+                break;
+            case EthereumNetworkRepository.POA_ID:
+                view.setBackgroundResource(R.drawable.item_poa_circle);
+                break;
+            case EthereumNetworkRepository.KOVAN_ID:
+                view.setBackgroundResource(R.drawable.item_kovan_circle);
+                break;
+            case EthereumNetworkRepository.ROPSTEN_ID:
+                view.setBackgroundResource(R.drawable.item_ropsten_circle);
+                break;
+            case EthereumNetworkRepository.SOKOL_ID:
+                view.setBackgroundResource(R.drawable.item_sokol_circle);
+                break;
+            case EthereumNetworkRepository.RINKEBY_ID:
+                view.setBackgroundResource(R.drawable.item_rinkeby_circle);
+                break;
+            case EthereumNetworkRepository.GOERLI_ID:
+                view.setBackgroundResource(R.drawable.item_goerli_circle);
+                break;
+            case EthereumNetworkRepository.XDAI_ID:
+                view.setBackgroundResource(R.drawable.item_xdai_circle);
+                break;
+            case EthereumNetworkRepository.MAINNET_ID:
+            default:
+                view.setBackgroundResource(R.drawable.item_eth_circle);
+                break;
+
+        }
+    }
+
     public static String getDomainName(String url) throws URISyntaxException {
         URI uri = new URI(url);
         String domain = uri.getHost();

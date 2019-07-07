@@ -5,6 +5,7 @@ public abstract class C {
     public static final int IMPORT_REQUEST_CODE = 1001;
     public static final int EXPORT_REQUEST_CODE = 1002;
     public static final int SHARE_REQUEST_CODE = 1003;
+    public static final int REQUEST_SELECT_NETWORK = 1010;
 
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";
@@ -66,6 +67,8 @@ public abstract class C {
     public static final String EXTRA_NETWORKID = "NET_ID";
     public static final String EXTRA_TRANSACTION_DATA = "TS_TRANSACTIONDATA";
     public static final String EXTRA_FUNCTION_NAME = "TS_FUNC_NAME";
+    public static final String EXTRA_SINGLE_ITEM = "SINGLE_ITEM";
+    public static final String EXTRA_CHAIN_ID = "CHAIN_ID";
 
     public static final String PRUNE_ACTIVITY =
             "io.stormbird.wallet.PRUNE_ACTIVITY";

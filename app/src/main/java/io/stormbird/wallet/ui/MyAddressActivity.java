@@ -10,7 +10,6 @@ import android.support.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -39,10 +38,8 @@ import io.stormbird.wallet.util.QRUtils;
 import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.MyAddressViewModel;
 import io.stormbird.wallet.viewmodel.MyAddressViewModelFactory;
-import io.stormbird.wallet.widget.SelectNetworkDialog;
 
 import static io.stormbird.wallet.C.Key.WALLET;
-import static io.stormbird.wallet.C.RESET_WALLET;
 
 public class MyAddressActivity extends BaseActivity implements View.OnClickListener, AmountUpdateCallback
 {
@@ -224,21 +221,31 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     }
 
     private void selectNetwork() {
-        SelectNetworkDialog dialog = new SelectNetworkDialog(this, viewModel.getNetworkList(), String.valueOf(networkInfo.chainId), true);
-        dialog.setOnClickListener(v1 -> {
-            NetworkInfo info = viewModel.setNetwork(dialog.getSelectedChainId());
+        Intent intent = new Intent(MyAddressActivity.this, SelectNetworkActivity.class);
+        intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
+        intent.putExtra(C.EXTRA_CHAIN_ID, String.valueOf(networkInfo.chainId));
+        startActivityForResult(intent, C.REQUEST_SELECT_NETWORK);
+    }
 
-            // restart activity
-            if (info != null && networkInfo.chainId != dialog.getSelectedChainId()) {
-                Intent intent = getIntent();
-                intent.putExtra(KEY_MODE, MODE_POS);
-                intent.putExtra(OVERRIDE_DEFAULT, info.chainId);
-                finish();
-                startActivity(intent);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == C.REQUEST_SELECT_NETWORK) {
+            if (resultCode == RESULT_OK) {
+                int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, -1);
+                NetworkInfo info = viewModel.setNetwork(networkId);
+
+                // restart activity
+                if (info != null && networkInfo.chainId != info.chainId) {
+                    Intent intent = getIntent();
+                    intent.putExtra(KEY_MODE, MODE_POS);
+                    intent.putExtra(OVERRIDE_DEFAULT, info.chainId);
+                    finish();
+                    startActivity(intent);
+                }
             }
-            dialog.dismiss();
-        });
-        dialog.show();
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     @Override

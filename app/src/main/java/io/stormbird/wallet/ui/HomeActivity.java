@@ -662,13 +662,16 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode)
         {
             case DAPP_BARCODE_READER_REQUEST_CODE:
                 dappBrowserFragment.handleQRCode(resultCode, data, this);
                 break;
+            case C.REQUEST_SELECT_NETWORK:
+                dappBrowserFragment.handleSelectNetwork(resultCode, data);
+                break;
             default:
+                super.onActivityResult(requestCode, resultCode, data);
                 break;
         }
     }

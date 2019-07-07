@@ -298,7 +298,6 @@ public class TokenRepository implements TokenRepositoryType {
         }
         Token newToken = tf.createToken(tokenInfo, balance, balanceArray, System.currentTimeMillis(), interfaceSpec, network.getShortName(), 0);
         newToken.setTokenWallet(wallet.address);
-        Log.d(TAG, "Create for store: " + tokenInfo.name);
 
         if (newToken.hasPositiveBalance()) newToken.walletUIUpdateRequired = true;
 

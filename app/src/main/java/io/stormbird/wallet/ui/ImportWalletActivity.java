@@ -10,6 +10,8 @@ import android.support.v4.util.Pair;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 
+import com.userexperior.UserExperior;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +67,7 @@ public class ImportWalletActivity extends BaseActivity {
         importWalletViewModel.wallet().observe(this, this::onWallet);
 
         TabUtils.changeTabsFont(this, tabLayout);
+        UserExperior.startRecording(getApplicationContext(), "b96f2b04-99a7-45e8-9354-006b9f9fe770");
     }
 
     @Override

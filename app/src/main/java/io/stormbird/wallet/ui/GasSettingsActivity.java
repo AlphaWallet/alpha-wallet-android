@@ -12,6 +12,8 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.userexperior.UserExperior;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -142,6 +144,7 @@ public class GasSettingsActivity extends BaseActivity {
 
         viewModel.gasPrice().setValue(gasPrice);
         viewModel.gasLimit().setValue(gasLimit);
+        UserExperior.startRecording(getApplicationContext(), "b96f2b04-99a7-45e8-9354-006b9f9fe770");
     }
 
     @Override

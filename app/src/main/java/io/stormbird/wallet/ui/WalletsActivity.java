@@ -18,6 +18,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.userexperior.UserExperior;
+
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -64,6 +66,7 @@ public class WalletsActivity extends BaseActivity implements
         toolbar();
         setTitle(R.string.empty);
         initViews();
+        UserExperior.startRecording(getApplicationContext(), "b96f2b04-99a7-45e8-9354-006b9f9fe770");
     }
 
     @Override

@@ -14,6 +14,9 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.userexperior.UserExperior;
+
 import io.stormbird.token.entity.MagicLinkInfo;
 import io.stormbird.token.tools.Convert;
 import io.stormbird.wallet.entity.*;
@@ -130,6 +133,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         ticketRange = null;
 
         Ticket.blankTicketHolder(R.string.loading,this);
+        UserExperior.startRecording(getApplicationContext(), "b96f2b04-99a7-45e8-9354-006b9f9fe770");
     }
 
     private void onError(ErrorEnvelope errorEnvelope)

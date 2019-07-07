@@ -11,6 +11,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.userexperior.UserExperior;
+
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
@@ -98,6 +100,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         {
             findViewById(R.id.transaction_name).setVisibility(View.GONE);
         }
+        UserExperior.startRecording(getApplicationContext(), "b96f2b04-99a7-45e8-9354-006b9f9fe770");
     }
 
     private void onDefaultWallet(Wallet wallet) {

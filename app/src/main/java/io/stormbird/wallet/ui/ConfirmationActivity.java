@@ -12,6 +12,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.userexperior.UserExperior;
+
 import dagger.android.AndroidInjection;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.tools.Numeric;
@@ -248,6 +251,7 @@ public class ConfirmationActivity extends BaseActivity {
         finishReceiver = new FinishReceiver(this);
 
         getGasSettings();
+        UserExperior.startRecording(getApplicationContext(), "b96f2b04-99a7-45e8-9354-006b9f9fe770");
     }
 
     @Override

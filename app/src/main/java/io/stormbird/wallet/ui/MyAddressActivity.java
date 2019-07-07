@@ -18,6 +18,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.userexperior.UserExperior;
+
 import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
@@ -87,6 +89,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         setupContractData();
 
         viewModel.prepare();
+        UserExperior.startRecording(getApplicationContext(), "b96f2b04-99a7-45e8-9354-006b9f9fe770");
     }
 
     private void getPreviousMode() {

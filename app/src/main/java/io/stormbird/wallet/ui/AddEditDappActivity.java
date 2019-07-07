@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.userexperior.UserExperior;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -93,6 +94,7 @@ public class AddEditDappActivity extends BaseActivity {
                 break;
             }
         }
+        UserExperior.startRecording(getApplicationContext(), "b96f2b04-99a7-45e8-9354-006b9f9fe770");
     }
 
     private void save(DApp dapp) {

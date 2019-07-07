@@ -165,6 +165,9 @@ dependencies {
     // PW
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':tn')
+
+    //UserExperior
+    implementation 'com.userexperior:userexperior-android:+'
 }
 
 // WARNING WARNING WARNING

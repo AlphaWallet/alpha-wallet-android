@@ -13,6 +13,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.userexperior.UserExperior;
+
 import dagger.android.AndroidInjection;
 import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.tools.ParseMagicLink;
@@ -141,6 +144,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
         setupNetwork(1);
         viewModel.prepare();
+        UserExperior.startRecording(getApplicationContext(), "b96f2b04-99a7-45e8-9354-006b9f9fe770");
     }
 
     private void onFetchedToken(Token token)

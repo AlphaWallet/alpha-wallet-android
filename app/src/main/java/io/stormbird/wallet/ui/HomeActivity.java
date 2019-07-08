@@ -24,6 +24,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -123,10 +124,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         setContentView(R.layout.activity_home);
 
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
         toolbar();
 
         viewPager = findViewById(R.id.view_pager);
-        viewPager.setInterface(this);
+        viewPager.setInterface(this, displayMetrics.widthPixels);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         viewPager.setOffscreenPageLimit(4);
@@ -459,6 +463,20 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public boolean isViewingDappBrowser()
     {
         return viewPager.getCurrentItem() == DAPP_BROWSER;
+    }
+
+    @Override
+    public void moveLeft()
+    {
+        int newPage = viewPager.getCurrentItem() - 1;
+        showPage(newPage);
+    }
+
+    @Override
+    public void moveRight()
+    {
+        int newPage = viewPager.getCurrentItem() + 1;
+        showPage(newPage);
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {

@@ -8,4 +8,6 @@ public interface ScrollControlInterface
 {
     int getCurrentPage();
     boolean isViewingDappBrowser();
+    void moveLeft();
+    void moveRight();
 }

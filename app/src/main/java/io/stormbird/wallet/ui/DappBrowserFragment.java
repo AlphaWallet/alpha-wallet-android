@@ -943,6 +943,17 @@ public class DappBrowserFragment extends Fragment implements
     @Override
     public void RefreshEvent()
     {
-        web3.reload();
+        //determine scroll position
+        Log.i("Touch", "SCROLL: " + web3.getScrollY());
+        if (web3.getScrollY() == 0)
+        {
+            web3.reload();
+        }
+    }
+
+    @Override
+    public int getCurrentScrollPosition()
+    {
+        return web3.getScrollY();
     }
 }

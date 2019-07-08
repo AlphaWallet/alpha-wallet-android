@@ -132,7 +132,7 @@
                 android:layout_marginRight="5dp"
                 android:fontFamily="@font/font_regular"
                 android:gravity="center_vertical"
-                android:text="1000.0000"
+                android:text="0.0"
                 android:textColor="@color/text_dark_gray"
                 android:textSize="15sp" />
 
@@ -143,7 +143,7 @@
                 android:layout_marginRight="10dp"
                 android:layout_toEndOf="@id/balance"
                 android:fontFamily="@font/font_semibold"
-                android:text="ETH"
+                android:text="@string/eth"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="15sp" />
         </RelativeLayout>

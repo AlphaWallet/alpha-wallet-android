@@ -35,6 +35,8 @@ import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.ui.widget.entity.ScrollControlInterface;
+import io.stormbird.wallet.ui.widget.entity.ScrollControlViewPager;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
@@ -50,7 +52,7 @@ import java.lang.reflect.Method;
 
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.*;
 
-public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, DownloadInterface, FragmentMessenger
+public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, DownloadInterface, FragmentMessenger, ScrollControlInterface
 {
     @Inject
     HomeViewModelFactory homeViewModelFactory;
@@ -58,7 +60,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private SystemView systemView;
     private Dialog dialog;
-    private ViewPager viewPager;
+    private ScrollControlViewPager viewPager;
     private PagerAdapter pagerAdapter;
     private DownloadReceiver downloadReceiver;
     private AWalletConfirmationDialog cDialog;
@@ -124,6 +126,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         toolbar();
 
         viewPager = findViewById(R.id.view_pager);
+        viewPager.setInterface(this);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         viewPager.setOffscreenPageLimit(4);
@@ -444,6 +447,18 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void AddToken(String address)
     {
         viewModel.showAddToken(this, address);
+    }
+
+    @Override
+    public int getCurrentPage()
+    {
+        return viewPager.getCurrentItem();
+    }
+
+    @Override
+    public boolean isViewingDappBrowser()
+    {
+        return viewPager.getCurrentItem() == DAPP_BROWSER;
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {

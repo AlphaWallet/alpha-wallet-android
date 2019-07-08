@@ -3,6 +3,7 @@ package io.stormbird.wallet.ui.widget.entity;
 import android.content.Context;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import static android.view.MotionEvent.*;
@@ -19,6 +20,9 @@ import static android.view.MotionEvent.*;
 public class DappBrowserSwipeLayout extends SwipeRefreshLayout
 {
     private float trackMove;
+    private boolean alwaysDown;
+    private float lastY;
+    private boolean canRefresh;
     private DappBrowserSwipeInterface refreshInterface;
 
     public DappBrowserSwipeLayout(Context context)
@@ -34,6 +38,9 @@ public class DappBrowserSwipeLayout extends SwipeRefreshLayout
     public void setRefreshInterface(DappBrowserSwipeInterface refresh)
     {
         refreshInterface = refresh;
+        alwaysDown = true;
+        trackMove = 0.0f;
+        canRefresh = true;
     }
 
     @Override
@@ -42,16 +49,21 @@ public class DappBrowserSwipeLayout extends SwipeRefreshLayout
         switch (ev.getAction())
         {
             case ACTION_DOWN:
-                trackMove = ev.getRawY();
+                trackMove = ev.getY();
+                canRefresh = (refreshInterface.getCurrentScrollPosition() == 0 && trackMove < 300);
+                lastY = trackMove;
+                alwaysDown = true;
                 break;
             case ACTION_UP:
-                float flingDistance = ev.getRawY() - trackMove;
-                if ((ev.getEventTime() - ev.getDownTime()) < 300 && flingDistance > 400) //User wants a swipe refresh
+                float flingDistance = ev.getY() - trackMove;
+                if (canRefresh && alwaysDown && flingDistance > 500 && (ev.getEventTime() - ev.getDownTime()) < 500) //User wants a swipe refresh
                 {
                     refreshInterface.RefreshEvent();
                 }
                 break;
             case ACTION_MOVE:
+                if ((ev.getY() - lastY) < 0) alwaysDown = false;
+                lastY = ev.getY();
                 break;
             default:
                 break;

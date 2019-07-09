@@ -490,6 +490,6 @@
     <string name="searching_for_token">Scanning for Token</string>
     <string name="token_selection">Token Selection</string>
     <string name="token_requirement">This function requires %1$s tokens</string>
-    <string name="contains_no_receipient">Transaction has no recipient</string>
+    <string name="contains_no_recipient">Transaction has no recipient</string>
     <string name="contains_no_value">DApp transaction contains no value.</string>
 </resources>

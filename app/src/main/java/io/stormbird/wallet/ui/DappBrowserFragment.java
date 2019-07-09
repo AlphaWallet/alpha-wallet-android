@@ -652,7 +652,7 @@ public class DappBrowserFragment extends Fragment implements
 
         if (transaction.recipient.equals(Address.EMPTY) && (transaction.payload == null || transaction.value != null))
         {
-            resultDialog.setMessage(getString(R.string.contains_no_receipient));
+            resultDialog.setMessage(getString(R.string.contains_no_recipient));
         }
         else if (transaction.payload == null && transaction.value == null)
         {

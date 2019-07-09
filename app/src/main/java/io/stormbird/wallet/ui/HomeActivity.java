@@ -24,6 +24,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,6 +36,8 @@ import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.ui.widget.entity.ScrollControlInterface;
+import io.stormbird.wallet.ui.widget.entity.ScrollControlViewPager;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
@@ -50,7 +53,7 @@ import java.lang.reflect.Method;
 
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.*;
 
-public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, DownloadInterface, FragmentMessenger
+public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, DownloadInterface, FragmentMessenger, ScrollControlInterface
 {
     @Inject
     HomeViewModelFactory homeViewModelFactory;
@@ -58,7 +61,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private SystemView systemView;
     private Dialog dialog;
-    private ViewPager viewPager;
+    private ScrollControlViewPager viewPager;
     private PagerAdapter pagerAdapter;
     private DownloadReceiver downloadReceiver;
     private AWalletConfirmationDialog cDialog;
@@ -121,9 +124,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         setContentView(R.layout.activity_home);
 
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
         toolbar();
 
         viewPager = findViewById(R.id.view_pager);
+        viewPager.setInterface(this, displayMetrics.widthPixels);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         viewPager.setOffscreenPageLimit(4);
@@ -444,6 +451,32 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void AddToken(String address)
     {
         viewModel.showAddToken(this, address);
+    }
+
+    @Override
+    public int getCurrentPage()
+    {
+        return viewPager.getCurrentItem();
+    }
+
+    @Override
+    public boolean isViewingDappBrowser()
+    {
+        return viewPager.getCurrentItem() == DAPP_BROWSER;
+    }
+
+    @Override
+    public void moveLeft()
+    {
+        int newPage = viewPager.getCurrentItem() - 1;
+        showPage(newPage);
+    }
+
+    @Override
+    public void moveRight()
+    {
+        int newPage = viewPager.getCurrentItem() + 1;
+        showPage(newPage);
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {

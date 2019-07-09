@@ -18,11 +18,16 @@
 
             <include layout="@layout/layout_simple_toolbar" />
 
-            <android.support.v4.view.ViewPager
-                android:id="@+id/view_pager"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </LinearLayout>
+<!--            <android.support.v4.view.ViewPager-->
+<!--                android:id="@+id/view_pager"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent" />-->
+
+                    <io.stormbird.wallet.ui.widget.entity.ScrollControlViewPager
+                        android:id="@+id/view_pager"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+                </LinearLayout>
 
     </FrameLayout>
 

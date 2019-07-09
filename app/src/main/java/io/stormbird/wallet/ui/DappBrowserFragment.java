@@ -28,6 +28,8 @@ import android.widget.*;
 
 import com.google.gson.Gson;
 
+import io.stormbird.wallet.ui.widget.entity.DappBrowserSwipeInterface;
+import io.stormbird.wallet.ui.widget.entity.DappBrowserSwipeLayout;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
@@ -87,7 +89,7 @@ import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 public class DappBrowserFragment extends Fragment implements
         OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
         URLLoadInterface, ItemClickListener, SignTransactionInterface, OnDappClickListener, OnDappHomeNavClickListener,
-        OnHistoryItemRemovedListener
+        OnHistoryItemRemovedListener, DappBrowserSwipeInterface
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
     private static final String DAPP_BROWSER = "DAPP_BROWSER";
@@ -104,7 +106,7 @@ public class DappBrowserFragment extends Fragment implements
     DappBrowserViewModelFactory dappBrowserViewModelFactory;
     private DappBrowserViewModel viewModel;
 
-    private SwipeRefreshLayout swipeRefreshLayout;
+    private DappBrowserSwipeLayout swipeRefreshLayout;
     private Web3View web3;
     private AutoCompleteTextView urlTv;
     private ProgressBar progressBar;
@@ -331,7 +333,7 @@ public class DappBrowserFragment extends Fragment implements
         progressBar = view.findViewById(R.id.progressBar);
         urlTv = view.findViewById(R.id.url_tv);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);
-        swipeRefreshLayout.setOnRefreshListener(() -> web3.reload());
+        swipeRefreshLayout.setRefreshInterface(this);
         toolbar = view.findViewById(R.id.address_bar);
         toolbar.inflateMenu(R.menu.menu_bookmarks);
         toolbar.getMenu().findItem(R.id.action_reload)
@@ -936,5 +938,22 @@ public class DappBrowserFragment extends Fragment implements
                 .putString(CURRENT_FRAGMENT, currentFragment)
                 .putString(CURRENT_URL, urlTv.getText().toString())
                 .apply();
+    }
+
+    @Override
+    public void RefreshEvent()
+    {
+        //determine scroll position
+        Log.i("Touch", "SCROLL: " + web3.getScrollY());
+        if (web3.getScrollY() == 0)
+        {
+            web3.reload();
+        }
+    }
+
+    @Override
+    public int getCurrentScrollPosition()
+    {
+        return web3.getScrollY();
     }
 }

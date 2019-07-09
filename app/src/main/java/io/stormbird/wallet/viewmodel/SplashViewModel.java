@@ -129,37 +129,57 @@ public class SplashViewModel extends ViewModel {
 
     private void checkWebsiteAPKFileData(long currentInstallDate, final Context baseContext)
     {
-        Disposable d = getFileDataFromURL(ALPHAWALLET_FILE_URL).toObservable()
+        getFileDataFromURL(ALPHAWALLET_FILE_URL)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result -> onUpdate(result, currentInstallDate, baseContext), this::onError);
+                .subscribe(result -> onUpdate(result, currentInstallDate, baseContext), this::onError).isDisposed();
     }
 
     private Single<FileData> getFileDataFromURL(final String location)
     {
-        return Single.fromCallable(() -> {
-            HttpURLConnection connection = null;
-            String stepLocation = location;
-            FileData fileData = new FileData();
-            for (;;) //crawl through the URL linkage until we get the base filename
+        return Single.fromCallable(() -> tryFileData(location));
+    }
+
+    private FileData tryFileData(String stepLocation)
+    {
+        FileData fileData = null;
+        HttpURLConnection connection = null;
+        String redirectLocation = null;
+        try
+        {
+            URL url = new URL(stepLocation);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setConnectTimeout(2000);
+            connection.setInstanceFollowRedirects(false);
+            redirectLocation = connection.getHeaderField("Location");
+            if (redirectLocation == null)
             {
-                URL url = new URL(stepLocation);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setConnectTimeout(2000);
-                connection.setInstanceFollowRedirects(false);
-                String redirectLocation = connection.getHeaderField("Location");
-                if (redirectLocation == null)
-                {
-                    fileData.fileDate = connection.getLastModified();
-                    fileData.fileName = stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
-                    break;
-                }
-                stepLocation = redirectLocation;
-                connection.disconnect();
+                fileData = new FileData();
+                fileData.fileDate = connection.getLastModified();
+                fileData.fileName = stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
             }
-            connection.disconnect();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            if (connection != null) connection.disconnect();
+        }
+
+        if (fileData != null)
+        {
             return fileData;
-        });
+        }
+        else if (redirectLocation != null)
+        {
+            return tryFileData(redirectLocation);
+        }
+        else
+        {
+            return new FileData();
+        }
     }
 
     private void onUpdate(FileData data, long currentInstallDate, Context baseContext)

@@ -630,10 +630,11 @@ public class DappBrowserFragment extends Fragment implements
     @Override
     public void onSignTransaction(Web3Transaction transaction, String url)
     {
-        if (transaction.payload == null || transaction.payload.length() < 1)
+        //minimum for transaction to be valid: to and value or payload
+        if (transaction.recipient == null || ((transaction.payload == null || transaction.payload.length() < 1) && transaction.value == null))
         {
             //display transaction error
-            onInvalidTransaction();
+            onInvalidTransaction(transaction);
             web3.onSignCancel(transaction);
         }
         else
@@ -652,11 +653,18 @@ public class DappBrowserFragment extends Fragment implements
         resultDialog.show();
     }
 
-    private void onInvalidTransaction() {
+    private void onInvalidTransaction(Web3Transaction transaction) {
         resultDialog = new AWalletAlertDialog(getActivity());
         resultDialog.setIcon(AWalletAlertDialog.ERROR);
         resultDialog.setTitle(getString(R.string.invalid_transaction));
-        resultDialog.setMessage(getString(R.string.contains_no_data));
+        if (transaction.recipient == null)
+        {
+            resultDialog.setMessage(getString(R.string.contains_no_receipient));
+        }
+        else
+        {
+            resultDialog.setMessage(getString(R.string.contains_no_data));
+        }
         resultDialog.setProgressMode();
         resultDialog.setButtonText(R.string.button_ok);
         resultDialog.setButtonListener(v -> {

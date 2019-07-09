@@ -3,6 +3,10 @@ package io.stormbird.wallet.viewmodel;
 import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Intent;
+import android.net.Uri;
+import android.text.TextUtils;
+import io.stormbird.token.entity.MagicLinkInfo;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
@@ -217,5 +221,17 @@ public class ConfirmationViewModel extends BaseViewModel {
     public String getNetworkName(int chainId)
     {
         return findDefaultNetworkInteract.getNetworkName(chainId);
+    }
+
+    public void showMoreDetails(Activity ctx, String toAddress, int chainId)
+    {
+        Uri etherscanLink = Uri.parse(MagicLinkInfo.getEtherscanURLbyNetwork(chainId))
+                .buildUpon()
+                .appendEncodedPath("address")
+                .appendEncodedPath(toAddress)
+                .build();
+
+        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, etherscanLink);
+        ctx.startActivity(launchBrowser);
     }
 }

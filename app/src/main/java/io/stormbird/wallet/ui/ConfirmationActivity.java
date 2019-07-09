@@ -62,6 +62,7 @@ public class ConfirmationActivity extends BaseActivity {
     private TextView websiteLabel;
     private TextView websiteText;
     private Button sendButton;
+    private Button moreDetail;
     private TextView title;
     private TextView chainName;
 
@@ -101,6 +102,7 @@ public class ConfirmationActivity extends BaseActivity {
         gasLimitText = findViewById(R.id.text_gas_limit);
         networkFeeText = findViewById(R.id.text_network_fee);
         sendButton = findViewById(R.id.send_button);
+        moreDetail = findViewById(R.id.more_detail);
         contractAddrText = findViewById(R.id.text_contract);
         contractAddrLabel = findViewById(R.id.label_contract);
         websiteLabel = findViewById(R.id.label_website);
@@ -181,22 +183,19 @@ public class ConfirmationActivity extends BaseActivity {
                 if (transaction.payload == null) //pure ETH transaction
                 {
                     confirmationType = ETH;
-                    symbolText.setText(symbol);
                     transactionBytes = null;
                 }
-                else if (transaction.contract != null) //transaction function call
-                {
-                    contractAddrText.setVisibility(View.VISIBLE);
-                    contractAddrLabel.setVisibility(View.VISIBLE);
-                    contractAddrText.setText(transaction.contract.toString());
-                    transactionBytes = Numeric.hexStringToByteArray(transaction.payload);
-                }
-                else //constructor call
+                else
                 {
                     BigInteger addr = Numeric.toBigInt(transaction.recipient.toString());
                     if (addr.equals(BigInteger.ZERO)) //constructor
                     {
                         toAddress = getString(R.string.ticket_contract_constructor);
+                    }
+                    else //function call to contract
+                    {
+                        moreDetail.setVisibility(View.VISIBLE);
+                        moreDetail.setOnClickListener(v -> { viewModel.showMoreDetails(this, toAddress, chainId); }); // allow user to check out contract
                     }
                     transactionBytes = Numeric.hexStringToByteArray(transaction.payload);
                 }

@@ -630,42 +630,38 @@ public class DappBrowserFragment extends Fragment implements
     @Override
     public void onSignTransaction(Web3Transaction transaction, String url)
     {
-        //minimum for transaction to be valid: to and value or payload
-        if (transaction.recipient == null || ((transaction.payload == null || transaction.payload.length() < 1) && transaction.value == null))
+        //minimum for transaction to be valid: recipient and value or payload
+        if ((transaction.recipient.equals(Address.EMPTY) && transaction.payload != null) // Constructor
+            || (!transaction.recipient.equals(Address.EMPTY) && (transaction.payload != null || transaction.value != null))) // Raw or Function TX
+        {
+            viewModel.openConfirmation(getContext(), transaction, url, networkInfo);
+        }
+        else
         {
             //display transaction error
             onInvalidTransaction(transaction);
             web3.onSignCancel(transaction);
         }
-        else
-        {
-            viewModel.openConfirmation(getContext(), transaction, url, networkInfo);
-        }
-    }
-
-    private void onProgress() {
-        resultDialog = new AWalletAlertDialog(getActivity());
-        resultDialog.setIcon(AWalletAlertDialog.NONE);
-        resultDialog.setTitle(R.string.title_dialog_sending);
-        resultDialog.setMessage(R.string.transfer);
-        resultDialog.setProgressMode();
-        resultDialog.setCancelable(false);
-        resultDialog.show();
     }
 
     private void onInvalidTransaction(Web3Transaction transaction) {
+        if (getActivity() == null) return;
         resultDialog = new AWalletAlertDialog(getActivity());
         resultDialog.setIcon(AWalletAlertDialog.ERROR);
         resultDialog.setTitle(getString(R.string.invalid_transaction));
-        if (transaction.recipient == null)
+
+        if (transaction.recipient.equals(Address.EMPTY) && (transaction.payload == null || transaction.value != null))
         {
             resultDialog.setMessage(getString(R.string.contains_no_receipient));
+        }
+        else if (transaction.payload == null && transaction.value == null)
+        {
+            resultDialog.setMessage(getString(R.string.contains_no_value));
         }
         else
         {
             resultDialog.setMessage(getString(R.string.contains_no_data));
         }
-        resultDialog.setProgressMode();
         resultDialog.setButtonText(R.string.button_ok);
         resultDialog.setButtonListener(v -> {
             resultDialog.dismiss();
@@ -813,6 +809,7 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     public void handleSelectNetwork(int resultCode, Intent data) {
+        if (getActivity() == null) return;
         if (resultCode == RESULT_OK) {
             int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, 1); //default to mainnet in case of trouble
             if (networkInfo.chainId != networkId) {
@@ -870,6 +867,7 @@ public class DappBrowserFragment extends Fragment implements
 
     private void showCameraDenied()
     {
+        if (getActivity() == null) return;
         resultDialog = new AWalletAlertDialog(getActivity());
         resultDialog.setTitle(R.string.title_dialog_error);
         resultDialog.setMessage(R.string.error_camera_permission_denied);
@@ -918,6 +916,7 @@ public class DappBrowserFragment extends Fragment implements
 
     private void DisplayAddressFound(String address, FragmentMessenger messenger)
     {
+        if (getActivity() == null) return;
         resultDialog = new AWalletAlertDialog(getActivity());
         resultDialog.setIcon(AWalletAlertDialog.ERROR);
         resultDialog.setTitle(getString(R.string.address_found));

@@ -117,15 +117,44 @@
                         android:textIsSelectable="true"
                         android:textSize="14sp" />
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="5dp"
                         android:layout_marginTop="20dp"
-                        android:fontFamily="@font/font_regular"
-                        android:text="@string/label_to"
-                        android:textColor="@color/text_dark_gray"
-                        android:textSize="18sp" />
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginEnd="50dp"
+                            android:fontFamily="@font/font_regular"
+                            android:text="@string/label_to"
+                            android:textColor="@color/text_dark_gray"
+                            android:textSize="18sp" />
+
+                        <Button
+                            android:id="@+id/more_detail"
+                            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_vertical"
+                            android:autoLink="web"
+                            android:background="@drawable/background_round_primary"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:fontFamily="@font/font_regular"
+                            android:linksClickable="true"
+                            android:paddingLeft="50dp"
+                            android:paddingRight="50dp"
+                            android:text="@string/action_more_details"
+                            android:textAllCaps="false"
+                            android:textColor="@color/white"
+                            android:textSize="18sp"
+                            android:visibility="gone" />
+
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/text_to"

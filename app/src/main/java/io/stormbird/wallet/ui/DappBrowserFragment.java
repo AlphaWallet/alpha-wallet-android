@@ -150,6 +150,7 @@ public class DappBrowserFragment extends Fragment implements
     @Override
     public void onResume() {
         super.onResume();
+        if (currentFragment == null) currentFragment = DAPP_HOME;
         attachFragment(currentFragment);
     }
 
@@ -242,7 +243,7 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void attachFragment(String tag) {
-        if (getChildFragmentManager().findFragmentByTag(tag) == null) {
+        if (tag != null && getChildFragmentManager().findFragmentByTag(tag) == null) {
             if (tag.equals(DAPP_HOME)) {
                 DappHomeFragment f = new DappHomeFragment();
                 showFragment(f, tag);
@@ -344,7 +345,7 @@ public class DappBrowserFragment extends Fragment implements
         toolbar.getMenu().findItem(R.id.action_share)
                 .setOnMenuItemClickListener(menuItem -> {
                     if (web3.getUrl() != null) {
-                        viewModel.share(getContext(), web3.getUrl());
+                        if (getContext() != null) viewModel.share(getContext(), web3.getUrl());
                     }
                     return true;
                 });
@@ -385,7 +386,7 @@ public class DappBrowserFragment extends Fragment implements
         Intent intent = new Intent(getContext(), SelectNetworkActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
         intent.putExtra(C.EXTRA_CHAIN_ID, String.valueOf(networkInfo.chainId));
-        getActivity().startActivityForResult(intent, C.REQUEST_SELECT_NETWORK);
+        if (getActivity() != null) getActivity().startActivityForResult(intent, C.REQUEST_SELECT_NETWORK);
     }
 
     private void clearAddressBar() {
@@ -571,12 +572,19 @@ public class DappBrowserFragment extends Fragment implements
         dialog.setAddress(wallet.address);
         dialog.setOnApproveListener(v -> {
             //ensure we generate the signature correctly:
-            byte[] signRequest = message.value.getBytes();
-            if (message.value.substring(0, 2).equals("0x"))
+            if (message.value != null)
             {
-                signRequest = Numeric.hexStringToByteArray(message.value);
+                byte[] signRequest = message.value.getBytes();
+                if (message.value.substring(0, 2).equals("0x"))
+                {
+                    signRequest = Numeric.hexStringToByteArray(message.value);
+                }
+                viewModel.signMessage(signRequest, dAppFunction, message);
             }
-            viewModel.signMessage(signRequest, dAppFunction, message);
+            else
+            {
+                onSignError();
+            }
         });
         dialog.setOnRejectListener(v -> {
             web3.onSignCancel(message);
@@ -644,17 +652,24 @@ public class DappBrowserFragment extends Fragment implements
         }
     }
 
-    private void onProgress() {
+    private void onSignError()
+    {
+        if (getActivity() == null) return;
         resultDialog = new AWalletAlertDialog(getActivity());
-        resultDialog.setIcon(AWalletAlertDialog.NONE);
-        resultDialog.setTitle(R.string.title_dialog_sending);
-        resultDialog.setMessage(R.string.transfer);
+        resultDialog.setIcon(AWalletAlertDialog.ERROR);
+        resultDialog.setTitle(getString(R.string.dialog_title_sign_message));
+        resultDialog.setMessage(getString(R.string.contains_no_data));
         resultDialog.setProgressMode();
-        resultDialog.setCancelable(false);
+        resultDialog.setButtonText(R.string.button_ok);
+        resultDialog.setButtonListener(v -> {
+            resultDialog.dismiss();
+        });
+        resultDialog.setCancelable(true);
         resultDialog.show();
     }
 
     private void onInvalidTransaction() {
+        if (getActivity() == null) return;
         resultDialog = new AWalletAlertDialog(getActivity());
         resultDialog.setIcon(AWalletAlertDialog.ERROR);
         resultDialog.setTitle(getString(R.string.invalid_transaction));
@@ -811,7 +826,7 @@ public class DappBrowserFragment extends Fragment implements
             int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, 1); //default to mainnet in case of trouble
             if (networkInfo.chainId != networkId) {
                 viewModel.setNetwork(networkId);
-                getActivity().sendBroadcast(new Intent(RESET_WALLET));
+                if (getActivity() != null) getActivity().sendBroadcast(new Intent(RESET_WALLET));
                 balance.setVisibility(View.GONE);
                 symbol.setVisibility(View.GONE);
             }
@@ -864,6 +879,7 @@ public class DappBrowserFragment extends Fragment implements
 
     private void showCameraDenied()
     {
+        if (getActivity() == null) return;
         resultDialog = new AWalletAlertDialog(getActivity());
         resultDialog.setTitle(R.string.title_dialog_error);
         resultDialog.setMessage(R.string.error_camera_permission_denied);
@@ -912,6 +928,7 @@ public class DappBrowserFragment extends Fragment implements
 
     private void DisplayAddressFound(String address, FragmentMessenger messenger)
     {
+        if (getActivity() == null) return;
         resultDialog = new AWalletAlertDialog(getActivity());
         resultDialog.setIcon(AWalletAlertDialog.ERROR);
         resultDialog.setTitle(getString(R.string.address_found));

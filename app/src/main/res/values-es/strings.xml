@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="wallet_label">billetera</string>
+    <string name="wallet_label">Billetera</string>
     <string name="tx_label">Actas</string>
     <string name="browser_label">Navegadora</string>
     <string name="settings_label">Ajustes</string>
@@ -19,6 +19,7 @@
     <string name="unconfirmed">Unconfirmed</string>
     <string name="no_recent_transactions">You have no transactions yet</string>
     <string name="paste">Paste</string>
+    <string name="label_contract">Contrato</string>
     <string name="no_recent_transactions_subtext">When you send or receive %1$s,\n your transactions will appear here</string>
     <string name="no_recent_transactions_subtext_ether">ether</string>
     <string name="no_recent_transactions_subtext_tokens">tokens</string>
@@ -86,4 +87,6 @@
     <string name="searching_for_token">Scanning for Token</string>
     <string name="token_selection">Token Selection</string>
     <string name="token_requirement">This function requires %1$s tokens</string>
+    <string name="contains_no_recipient">Transaction has no recipient</string>
+    <string name="contains_no_value">DApp transaction contains no value.</string>
 </resources>

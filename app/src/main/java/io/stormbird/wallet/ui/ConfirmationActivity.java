@@ -37,6 +37,7 @@ import java.util.List;
 import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.wallet.C.ETH_SYMBOL;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
+import static io.stormbird.wallet.entity.ConfirmationType.ETH;
 import static io.stormbird.wallet.entity.ConfirmationType.WEB3TRANSACTION;
 import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 
@@ -61,6 +62,7 @@ public class ConfirmationActivity extends BaseActivity {
     private TextView websiteLabel;
     private TextView websiteText;
     private Button sendButton;
+    private Button moreDetail;
     private TextView title;
     private TextView chainName;
 
@@ -100,6 +102,7 @@ public class ConfirmationActivity extends BaseActivity {
         gasLimitText = findViewById(R.id.text_gas_limit);
         networkFeeText = findViewById(R.id.text_network_fee);
         sendButton = findViewById(R.id.send_button);
+        moreDetail = findViewById(R.id.more_detail);
         contractAddrText = findViewById(R.id.text_contract);
         contractAddrLabel = findViewById(R.id.label_contract);
         websiteLabel = findViewById(R.id.label_website);
@@ -177,11 +180,10 @@ public class ConfirmationActivity extends BaseActivity {
                 title.setVisibility(View.VISIBLE);
                 title.setText(R.string.confirm_dapp_transaction);
                 toAddress = transaction.recipient.toString();
-                if (transaction.contract != null)
+                if (transaction.payload == null) //pure ETH transaction
                 {
-                    contractAddrText.setVisibility(View.VISIBLE);
-                    contractAddrLabel.setVisibility(View.VISIBLE);
-                    contractAddrText.setText(transaction.contract.toString());
+                    confirmationType = ETH;
+                    transactionBytes = null;
                 }
                 else
                 {
@@ -190,6 +192,12 @@ public class ConfirmationActivity extends BaseActivity {
                     {
                         toAddress = getString(R.string.ticket_contract_constructor);
                     }
+                    else //function call to contract
+                    {
+                        moreDetail.setVisibility(View.VISIBLE);
+                        moreDetail.setOnClickListener(v -> { viewModel.showMoreDetails(this, toAddress, chainId); }); // allow user to check out contract
+                    }
+                    transactionBytes = Numeric.hexStringToByteArray(transaction.payload);
                 }
                 String urlRequester = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);
                 networkName = getIntent().getStringExtra(C.EXTRA_NETWORK_NAME);
@@ -206,7 +214,6 @@ public class ConfirmationActivity extends BaseActivity {
                 BigDecimal ethAmount = Convert.fromWei(transaction.value.toString(10), Convert.Unit.ETHER);
                 amountString = getEthString(ethAmount.doubleValue());
                 symbolText.setText(ETH_SYMBOL);
-                transactionBytes = Numeric.hexStringToByteArray(transaction.payload);
                 break;
             case ERC721:
                 String contractName = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);

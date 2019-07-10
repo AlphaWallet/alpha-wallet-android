@@ -101,7 +101,7 @@ public class XMLDSigVerifier {
         }
     }
 
-    private void validateSSLCertificateBasedOnTrustedCA(List<X509Certificate> certList) throws Exception {
+    private void validateCertificateChain(List<X509Certificate> certList) throws Exception {
         // By default on Oracle JRE, algorithm is PKIX
         TrustManagerFactory tmf = TrustManagerFactory
                 .getInstance(TrustManagerFactory.getDefaultAlgorithm());
@@ -125,7 +125,7 @@ public class XMLDSigVerifier {
     private X509Certificate findRootCert(List<X509Certificate> certificates) {
         X509Certificate rootCert = null;
         for (X509Certificate cert : certificates) {
-            X509Certificate signer = this.findSigner(cert, certificates);
+            X509Certificate signer = this.findSignerCertificate(cert, certificates);
             if (signer == null || signer.equals(cert)) {
                 rootCert = cert;
                 break;
@@ -162,12 +162,11 @@ public class XMLDSigVerifier {
                 break;
             }
         }
-
         return signed;
     }
 
 
-    private X509Certificate findSigner(X509Certificate signedCert, List<X509Certificate> certificates) {
+    private X509Certificate findSignerCertificate(X509Certificate signedCert, List<X509Certificate> certificates) {
         X509Certificate signer = null;
         for (X509Certificate cert : certificates) {
             Principal certSubjectDN = cert.getSubjectDN();
@@ -188,7 +187,7 @@ public class XMLDSigVerifier {
             List<X509Certificate> orderedCerts = reorderCertificateChain(certList);
             X509Certificate signingCert = selectSigningKeyFromXML(xmlKeyInfo.getContent());
             //Throws if invalid
-            validateSSLCertificateBasedOnTrustedCA(orderedCerts);
+            validateCertificateChain(orderedCerts);
             if (result.isValid)
             {
                 result.issuerPrincipal = signingCert.getIssuerX500Principal().getName();

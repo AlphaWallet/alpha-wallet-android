@@ -1,4 +1,5 @@
 <resources>
+    <string name="input_address">以太坊地址或ENS名称</string>
     <string name="wallet_label">钱包</string>
     <string name="tx_label">交易</string>
     <string name="browser_label">浏览器</string>

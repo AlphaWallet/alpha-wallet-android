@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><ts:token xmlns:ts="http://tokenscript.org/2019/05/tokenscript" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" custodian="false" xsi:schemaLocation="http://tokenscript.org/2019/05/tokenscript ../../schema/tokenscript.xsd">
+    <ts:name>
+        <ts:string xml:lang="en">DAI</ts:string>
+    </ts:name>
+    <ts:contract interface="erc20" name="dai">
+        <ts:address network="1">0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359</ts:address>
+    </ts:contract>
+    <ts:origins>
+        <ts:ethereum contract="dai">
+        </ts:ethereum>
+    </ts:origins>
+    <ts:cards>
+        <ts:token-card>
+            <ts:view-iconified/>
+            <ts:view>
+            </ts:view>
+        </ts:token-card>
+        <ts:action>
+            <ts:name>
+                <ts:string xml:lang="en">Convert to xDAI</ts:string>
+            </ts:name>
+            <ts:attribute-type id="amount" syntax="1.3.6.1.4.1.1466.115.121.1.36">
+                <ts:name>
+                    <ts:string xml:lang="en">Amount in DAI</ts:string>
+                    <ts:string xml:lang="zh">代幣金額</ts:string>
+                </ts:name>
+                <ts:origins>
+                    <!-- e18 is a hard coded multiplier.
+                    rationale for hardcoding: avoiding over-design  -->
+                    <ts:user-entry as="e18"/>
+                </ts:origins>
+            </ts:attribute-type>
+            <ts:transaction>
+                <ts:ethereum contract="dai" function="transfer">
+                    <ts:data>
+                        <!-- to convert erc20 DAI to native xDAI, transfer to this address -->
+                        <ts:address>0x4aa42145Aa6Ebf72e164C9bBC74fbD3788045016</ts:address>
+                        <ts:uint256 ref="amount"/>
+                    </ts:data>
+                </ts:ethereum>
+            </ts:transaction>
+            <style type="text/css">html,
+body {
+  height: 100%;
+}
+html {
+  font-size: 14px;
+}
+body {
+  margin: 0px;
+  padding: 0px;
+  overflow-x: hidden;
+  min-width: 320px;
+  background: #FFFFFF;
+  font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1.4285em;
+  color: rgba(0, 0, 0, 0.87);
+  font-smoothing: antialiased;
+}
+.ui.container {
+  display: block;
+  max-width: 100% !important;
+}
+@media only screen and (max-width: 767px) {
+  .ui.container {
+    width: auto !important;
+    margin-left: 1em !important;
+    margin-right: 1em !important;
+  }
+}
+@media only screen and (min-width: 768px) and (max-width: 991px) {
+  .ui.container {
+    width: 723px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+@media only screen and (min-width: 992px) and (max-width: 1199px) {
+  .ui.container {
+    width: 933px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+@media only screen and (min-width: 1200px) {
+  .ui.container {
+    width: 1127px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+.ui.segment {
+  position: relative;
+  background: #FFFFFF;
+  -webkit-box-shadow: 0px 1px 2px 0 rgba(34, 36, 38, 0.15);
+  box-shadow: 0px 1px 2px 0 rgba(34, 36, 38, 0.15);
+  margin: 1rem 0em;
+  padding: 1em 1em;
+  border-radius: 0.28571429rem;
+  border: 1px solid rgba(34, 36, 38, 0.15);
+}
+.ui.segment:first-child {
+  margin-top: 0em;
+}
+.ui.segment:last-child {
+  margin-bottom: 0em;
+}
+input {
+  position: relative;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 12px;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  color: rgba(0, 0, 0, 0.87);
+  padding: 9.5px 14px;
+  width: 300px;
+  border-color: #D8D8D8;
+}
+input[type=text]:focus {
+  border-color: #D8D8D8;
+  background: #FAFAFA;
+  color: rgba(0, 0, 0, 0.87);
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+label {
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 6px;
+}</style>
+            <ts:view><script type="text/javascript" xml:base="file:///Users/sangalli/Documents/projects/TokenScript/examples/erc20/dai-bridge.en.shtml"><![CDATA[
+class Token {
+    constructor(tokenInstance) {
+        this.props = tokenInstance
+    }
+
+    render() {
+        return `
+        <div class="ui container">
+              <div class="ui segment">
+                <span>DAI Balance: <b>${(this.props.balance / 1e+18).toFixed(2)}</b><br></span>
+              </div>
+              <label>Amount to Convert</label>
+              <input type="number" id="amount" placeholder="0"/>
+              <img
+              src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAoCAYAAACfKfiZAAAABGdBTUEAALGPC/xhBQAAAcNJREFUWAntl71KxEAQx03OyuJSiIKtCIIfT+ATiOnEsxMld6X2Fgo2PoBgdXfJNT5BtNM7BLGysvQZvM5CuFzifwJzjHf5uLBbbiDszO7M/H87bGBjLZQ8vu9vxXEcWpb14HnedUl4utzpdB6TJDmQsch/ajabrpwj256ekH6v19sej8cDFFsHxBUK38r1AnszYy1rLh+AxEejUR+FVrkYQC4rQHBa4ZjZAYjsRFE0kOJcRTfEDACJQ6wPoRUWnR51QvwDCIJgt0ycYXRBTABIHAfupWjnLM6jDogUIAzDpariEqLb7XrsVx0XKcF13V987/fY0bIo4MA+EX5q4nv+RNwrz9u2ncD+YL/qmAKgaIzEG5mMw7gBoRkAEm+1WhcyVsWenAGVIiq5BsB0wHTAdMB0wHTAdMB0wHTAdCC9FatcKtvt9jHy92QN3JxnfutoDrF3Mg638XdlABQ5QvFDWTjHpv+Mc7mGvDXlM1Cv108B8SYLz2NTjuM4Z8oAjUbjBxD7VSAolnIoVxmAdlsFQopTrhaAeSGmxbUClEFkiWsHyIPIEy8EqNVq30gcUhA/8BO8X+znjXwmsP5MLx+4rPg/qL3E8KLnDDoAAAAASUVORK5CYII="
+              width="20px">
+              </img>
+        </div>`;
+    }
+}
+
+web3.tokens.dataChanged = (oldTokens, updatedTokens) => {
+    const currentTokenInstance = web3.tokens.data.currentInstance;
+    document.getElementById('root').innerHTML = new Token(currentTokenInstance).render();
+};
+
+]]></script>
+<div id="root" xml:base="file:///Users/sangalli/Documents/projects/TokenScript/examples/erc20/dai-bridge.en.shtml"/>
+</ts:view>
+        </ts:action>
+    </ts:cards>
+    <ts:attribute-types>
+        <ts:attribute-type id="balance" syntax="1.3.6.1.4.1.1466.115.121.1.36">
+            <ts:name>
+                <ts:string xml:lang="en">DAI-Balance</ts:string>
+            </ts:name>
+            <ts:origins>
+                <ts:ethereum as="uint" contract="dai" function="balanceOf">
+                    <ts:data>
+                        <ts:address ref="ownerAddress"/>
+                    </ts:data>
+                </ts:ethereum>
+            </ts:origins>
+        </ts:attribute-type>
+    </ts:attribute-types>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+<ds:SignedInfo>
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256"/>
+<ds:Reference URI="">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+<ds:DigestValue>X0FONQ5A2nKYEK9Kh7nZhkXCOwKiUFc2CX7PzRTRZIg=</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue>
+T3QNYxDZGUi3S3hLZQW5gd4xOdLK05lqIiFKS+G4BQXc19dtMKw2ZcUAzkpKk9rHlcwaDe71mXNP
+09+un7VGGg==
+</ds:SignatureValue>
+<ds:KeyInfo>
+<ds:X509Data>
+<ds:X509Certificate>
+MIIEkjCCA3qgAwIBAgIQCgFBQgAAAVOFc2oLheynCDANBgkqhkiG9w0BAQsFADA/MSQwIgYDVQQK
+ExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMTDkRTVCBSb290IENBIFgzMB4X
+DTE2MDMxNzE2NDA0NloXDTIxMDMxNzE2NDA0NlowSjELMAkGA1UEBhMCVVMxFjAUBgNVBAoTDUxl
+dCdzIEVuY3J5cHQxIzAhBgNVBAMTGkxldCdzIEVuY3J5cHQgQXV0aG9yaXR5IFgzMIIBIjANBgkq
+hkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnNMM8FrlLke3cl03g7NoYzDq1zUmGSXhvb418XCSL7e4
+S0EFq6meNQhY7LEqxGiHC6PjdeTm86dicbp5gWAf15Gan/PQeGdxyGkOlZHP/uaZ6WA8SMx+yk13
+EiSdRxta67nsHjcAHJyse6cF6s5K671B5TaYucv9bTyWaN8jKkKQDIZ0Z8h/pZq4UmEUEz9l6YKH
+y9v6Dlb2honzhT+Xhq+w3Brvaw2VFn3EK6BlspkENnWAa6xK8xuQSXgvopZPKiAlKQTGdMDQMc2P
+MTiVFrqoM7hD8bEfwzB/onkxEz0tNvjj/PIzark5McWvxI0NHWQWM6r6hCm21AvA2H3DkwIDAQAB
+o4IBfTCCAXkwEgYDVR0TAQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAYYwfwYIKwYBBQUHAQEE
+czBxMDIGCCsGAQUFBzABhiZodHRwOi8vaXNyZy50cnVzdGlkLm9jc3AuaWRlbnRydXN0LmNvbTA7
+BggrBgEFBQcwAoYvaHR0cDovL2FwcHMuaWRlbnRydXN0LmNvbS9yb290cy9kc3Ryb290Y2F4My5w
+N2MwHwYDVR0jBBgwFoAUxKexpHsscfrb4UuQdf/EFWCFiRAwVAYDVR0gBE0wSzAIBgZngQwBAgEw
+PwYLKwYBBAGC3xMBAQEwMDAuBggrBgEFBQcCARYiaHR0cDovL2Nwcy5yb290LXgxLmxldHNlbmNy
+eXB0Lm9yZzA8BgNVHR8ENTAzMDGgL6AthitodHRwOi8vY3JsLmlkZW50cnVzdC5jb20vRFNUUk9P
+VENBWDNDUkwuY3JsMB0GA1UdDgQWBBSoSmpjBH3duubRObemRWXv86jsoTANBgkqhkiG9w0BAQsF
+AAOCAQEA3TPXEfNjWDjdGBX7CVW+dla5cEilaUcne8IkCJLxWh9KEik3JHRRHGJouM2VcGfl96S8
+TihRzZvoroed6ti6WqEBmtzw3Wodatg+VyOeph4EYpr/1wXKtx8/wApIvJSwtmVi4MFU5aMqrSDE
+6ea73Mj2tcMyo5jMd6jmeWUHK8so/joWUoHOUgwuX4Po1QYz+3dszkDqMp4fklxBwXRsW10KXzPM
+TZ+sOPAveyxindmjkW8lGy+QsRlGPfZ+G6Z6h7mjem0Y+iWlkYcV4PIWL1iwBi8saCbGS5jN2p8M
++X+Q7UNKEkROb3N6KOqkqm57TH2H3eDJAkSnh6/DNFu0Qg==
+</ds:X509Certificate>
+<ds:X509Certificate>
+MIIEnTCCA4WgAwIBAgISA4eHru2g9b47E+GGv5IhZBdxMA0GCSqGSIb3DQEBCwUAMEoxCzAJBgNV
+BAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MSMwIQYDVQQDExpMZXQncyBFbmNyeXB0IEF1
+dGhvcml0eSBYMzAeFw0xOTA1MTAwNzQwMzNaFw0xOTA4MDgwNzQwMzNaMBMxETAPBgNVBAMMCCou
+YXcuYXBwMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAENkPeytqd1S4FxsPfCRCHNmI/7uDcPVL4
+TvjF6s+zHfB1evO76ssakyy0BXg/uJWsGrtGzGYhvjd3444H4gf8XaOCAn0wggJ5MA4GA1UdDwEB
+/wQEAwIHgDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDAYDVR0TAQH/BAIwADAdBgNV
+HQ4EFgQUyjoV3pdAeichjdQFBT8kA05t0ScwHwYDVR0jBBgwFoAUqEpqYwR93brm0Tm3pkVl7/Oo
+7KEwbwYIKwYBBQUHAQEEYzBhMC4GCCsGAQUFBzABhiJodHRwOi8vb2NzcC5pbnQteDMubGV0c2Vu
+Y3J5cHQub3JnMC8GCCsGAQUFBzAChiNodHRwOi8vY2VydC5pbnQteDMubGV0c2VuY3J5cHQub3Jn
+LzAzBgNVHREELDAqgggqLmF3LmFwcIIGYXcuYXBwghZwYXltYXN0ZXIuc3Rvcm1iaXJkLnNnMEwG
+A1UdIARFMEMwCAYGZ4EMAQIBMDcGCysGAQQBgt8TAQEBMCgwJgYIKwYBBQUHAgEWGmh0dHA6Ly9j
+cHMubGV0c2VuY3J5cHQub3JnMIIBBAYKKwYBBAHWeQIEAgSB9QSB8gDwAHYAdH7agzGtMxCRIZzO
+JU9CcMK//V5CIAjGNzV55hB7zFYAAAFqoOauPQAABAMARzBFAiApHLwIHu5CA7kwyQAGQrK8PwwJ
+sVoRZxeuQCJdMB+UUAIhAP6W/YOl2/5N5bQooLHGa4rGa3+JOoCFTmiRqnVvFgq0AHYAY/Lbzeg7
+zCzPC3KEJ1drM6SNYXePvXWmOLHHaFRL2I0AAAFqoOauLQAABAMARzBFAiA6FEMR75e3R38smygH
+jfixJI9qSBRuxThdnsgyWz2nWAIhAKLUQC2pZkdCJLTiy8dk8WUeUdiLjgzejYWuI0V0phZkMA0G
+CSqGSIb3DQEBCwUAA4IBAQAmrLYQDsnzwzXfyuZ/Ig6JyDeBk8Yxz+htyS6Ez7LpBEJy9N1e0BjD
++krmI8+7fllr/yNcGh6ulBG6yMQvgXYoRGmDDipDJh8Sf7zqY3dVByri0IxHxS0JeXiYCsxZSJ3Q
+4RkTD+Wqu1p92lv/F0oLeBcgdL/gfeCTaCcLw+/V/yav8wF6Ro3zBkJ/3Gx/qqn57g7+r5eF/4mK
+Ed9k40t1QsbxZD6S0LQ1G0ubtJXClQXfxvq4OZWhBJFX+GlSz3/bDwRD4txq0wbDp3Vx2L05ck1D
+qRN41nXqnHsy+MTEVwr8uPceit1UgIZQmWkeHvWJPHEafPluNR+y00DegDZx
+</ds:X509Certificate>
+</ds:X509Data>
+</ds:KeyInfo>
+</ds:Signature></ts:token>

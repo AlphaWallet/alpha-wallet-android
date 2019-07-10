@@ -94,7 +94,8 @@ public class XMLDSigVerifier {
             //check that the tsml file is signed by a valid certificate
             return validateSSLCertificateIssuer(signature, result);
         }
-        catch(Exception e) {
+        catch(Exception e)
+        {
             result.isValid = false;
             result.failureReason = e.getMessage();
             return result;
@@ -112,7 +113,8 @@ public class XMLDSigVerifier {
         X509TrustManager tm = (X509TrustManager) tmf.getTrustManagers()[0];
         CertPathValidator cpv = CertPathValidator.getInstance("PKIX");
         Set<TrustAnchor> anch = new HashSet<>();
-        for (X509Certificate cert : tm.getAcceptedIssuers()) {
+        for (X509Certificate cert : tm.getAcceptedIssuers())
+        {
             anch.add(new TrustAnchor(cert, null));
         }
         PKIXParameters params = new PKIXParameters(anch);
@@ -183,7 +185,7 @@ public class XMLDSigVerifier {
         try
         {
             KeyInfo xmlKeyInfo = signature.getKeyInfo();
-            List certList = getCertificateChainFromXML(xmlKeyInfo.getContent());
+            List<X509Certificate> certList = getCertificateChainFromXML(xmlKeyInfo.getContent());
             List<X509Certificate> orderedCerts = reorderCertificateChain(certList);
             X509Certificate signingCert = selectSigningKeyFromXML(xmlKeyInfo.getContent());
             //Throws if invalid
@@ -262,7 +264,8 @@ public class XMLDSigVerifier {
             CertificateExpiredException
     {
         PublicKey recovered = recoverPublicKeyFromXML(xmlElements);
-        List<X509Certificate> certList = getCertificateChainFromXML(xmlElements);
+        //Certificates from the XML might be in the wrong order
+        List<X509Certificate> certList = reorderCertificateChain(getCertificateChainFromXML(xmlElements));
         if(certList == null) return null;
         for (X509Certificate crt : certList)
         {
@@ -293,9 +296,7 @@ public class XMLDSigVerifier {
                 XMLCryptoContext context
         ) throws KeySelectorException
         {
-            if (keyInfo == null) {
-                throw new KeySelectorException("Null KeyInfo object!");
-            }
+            if (keyInfo == null) throw new KeySelectorException("Null KeyInfo object!");
             PublicKey signer = null;
             List list = keyInfo.getContent();
             boolean found = false;

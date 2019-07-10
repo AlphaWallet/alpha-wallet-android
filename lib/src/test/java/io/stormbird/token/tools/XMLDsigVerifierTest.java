@@ -27,11 +27,31 @@ public class XMLDsigVerifierTest {
     }
 
     @Test
-    public void testFifaTSML() throws Exception {
+    public void testFifaTSMLECDSA() throws Exception {
         InputStream EntryToken = new FileInputStream("src/test/ts/fifa.tsml");
         XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(EntryToken);
         //Fails because cert is expired
         assert(!result.isValid);
         assert(result.failureReason.equals("cannot find validation key"));
+    }
+
+    @Test
+    public void testDuplicateKeyInfo() throws Exception {
+        InputStream EntryToken = new FileInputStream("src/test/ts/EntryToken-duplicate-Values.tsml");
+        XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(EntryToken);
+        assert(!result.isValid);
+        assert(result.failureReason.equals("Invalid element name: KeyInfo, expected KeyInfo or Object"));
+    }
+
+    @Test
+    public void testWrongOrderCertChain() throws Exception {
+        InputStream EntryToken = new FileInputStream("src/test/ts/DAI-wrong-chain-order.tsml");
+        XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(EntryToken);
+        assert(result.isValid);
+    }
+
+    @Test
+    public void testNotYetValidCertificate() throws Exception {
+
     }
 }

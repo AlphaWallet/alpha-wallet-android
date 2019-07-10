@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="input_address">Dirección de Ethereum o nombre ENS</string>
     <string name="wallet_label">Billetera</string>
     <string name="tx_label">Actas</string>
     <string name="browser_label">Navegadora</string>

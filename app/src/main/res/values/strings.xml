@@ -358,6 +358,7 @@
     <string name="action_save">Save</string>
     <string name="action_contract_info">Contract Info</string>
     <string name="contract_address">Contract Address</string>
+    <string name="input_address">Ethereum address or ENS name</string>
     <string name="ticket_range_expired">Magiclink Expired</string>
     <string name="verified_contract">Verified by Stormbird</string>
     <string name="unverified_contract">Unverified Contract</string>

@@ -10,10 +10,9 @@ import io.stormbird.token.entity.XMLDsigVerificationResult;
 public class XMLDsigVerifierTest {
 
     @Test
-    public void verifyRSAxmldsig() throws Exception {
+    public void testRSACertSignedByInvalidAuthority() throws Exception {
         InputStream EntryToken = new FileInputStream("src/test/ts/EntryToken.tsml");
         XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(EntryToken);
-        //Should not pass because shong.wang is signed by an authority which is not recognised (cacert.org)
         assert(!result.isValid);
         assert(result.failureReason.equals("Path does not chain with any of the trust anchors"));
     }
@@ -24,6 +23,11 @@ public class XMLDsigVerifierTest {
         XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(DAIToken);
         assert(result.isValid);
         assert(result.subjectPrincipal.equals("CN=*.aw.app"));
+    }
+
+    @Test
+    public void verifyRSAxmldsig() throws Exception {
+
     }
 
     @Test
@@ -52,6 +56,9 @@ public class XMLDsigVerifierTest {
 
     @Test
     public void testNotYetValidCertificate() throws Exception {
-
+        InputStream EntryToken = new FileInputStream("src/test/ts/EntryToken-future-cert-self-signed.tsml");
+        XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(EntryToken);
+        assert(!result.isValid);
+        assert(result.failureReason.contains("NotBefore"));
     }
 }

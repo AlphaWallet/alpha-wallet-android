@@ -27,7 +27,10 @@ public class XMLDsigVerifierTest {
 
     @Test
     public void verifyRSAxmldsig() throws Exception {
-
+        InputStream DAIToken = new FileInputStream("src/test/ts/EntryToken-valid-RSA.tsml");
+        XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(DAIToken);
+        assert(result.isValid);
+        assert(result.subjectPrincipal.equals("CN=aw.app"));
     }
 
     @Test

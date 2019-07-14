@@ -92,7 +92,7 @@ public class XMLDSigVerifier {
             result.isValid = signature.validate(valContext);
 
             //check that the tsml file is signed by a valid certificate
-            return validateSSLCertificateIssuer(signature, result);
+            return validateCertificateIssuer(signature, result);
         }
         catch(Exception e)
         {
@@ -181,7 +181,7 @@ public class XMLDSigVerifier {
         return signer;
     }
 
-    private XMLDsigVerificationResult validateSSLCertificateIssuer(XMLSignature signature, XMLDsigVerificationResult result) {
+    private XMLDsigVerificationResult validateCertificateIssuer(XMLSignature signature, XMLDsigVerificationResult result) {
         try
         {
             KeyInfo xmlKeyInfo = signature.getKeyInfo();

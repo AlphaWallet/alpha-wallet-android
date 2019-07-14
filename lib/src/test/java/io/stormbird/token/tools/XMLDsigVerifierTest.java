@@ -39,7 +39,7 @@ public class XMLDsigVerifierTest {
         XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(EntryToken);
         //Fails because cert is expired
         assert(!result.isValid);
-        assert(result.failureReason.equals("cannot find validation key"));
+        assert(result.failureReason.equals("cannot find validation key")); // that's the error for expired certs
     }
 
     @Test
@@ -62,6 +62,6 @@ public class XMLDsigVerifierTest {
         InputStream EntryToken = new FileInputStream("src/test/ts/EntryToken-future-cert-self-signed.tsml");
         XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(EntryToken);
         assert(!result.isValid);
-        assert(result.failureReason.contains("NotBefore"));
+        assert(result.failureReason.contains("NotBefore")); // save travis from misreporting thanks to timezone
     }
 }

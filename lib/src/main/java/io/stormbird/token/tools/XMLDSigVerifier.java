@@ -92,16 +92,17 @@ public class XMLDSigVerifier {
             result.isValid = signature.validate(valContext);
 
             //check that the tsml file is signed by a valid certificate
-            return validateSSLCertificateIssuer(signature, result);
+            return validateCertificateIssuer(signature, result);
         }
-        catch(Exception e) {
+        catch(Exception e)
+        {
             result.isValid = false;
             result.failureReason = e.getMessage();
             return result;
         }
     }
 
-    private void validateSSLCertificateBasedOnTrustedCA(List<X509Certificate> certList) throws Exception {
+    private void validateCertificateChain(List<X509Certificate> certList) throws Exception {
         // By default on Oracle JRE, algorithm is PKIX
         TrustManagerFactory tmf = TrustManagerFactory
                 .getInstance(TrustManagerFactory.getDefaultAlgorithm());
@@ -112,7 +113,8 @@ public class XMLDSigVerifier {
         X509TrustManager tm = (X509TrustManager) tmf.getTrustManagers()[0];
         CertPathValidator cpv = CertPathValidator.getInstance("PKIX");
         Set<TrustAnchor> anch = new HashSet<>();
-        for (X509Certificate cert : tm.getAcceptedIssuers()) {
+        for (X509Certificate cert : tm.getAcceptedIssuers())
+        {
             anch.add(new TrustAnchor(cert, null));
         }
         PKIXParameters params = new PKIXParameters(anch);
@@ -125,7 +127,7 @@ public class XMLDSigVerifier {
     private X509Certificate findRootCert(List<X509Certificate> certificates) {
         X509Certificate rootCert = null;
         for (X509Certificate cert : certificates) {
-            X509Certificate signer = this.findSigner(cert, certificates);
+            X509Certificate signer = this.findSignerCertificate(cert, certificates);
             if (signer == null || signer.equals(cert)) {
                 rootCert = cert;
                 break;
@@ -162,12 +164,11 @@ public class XMLDSigVerifier {
                 break;
             }
         }
-
         return signed;
     }
 
 
-    private X509Certificate findSigner(X509Certificate signedCert, List<X509Certificate> certificates) {
+    private X509Certificate findSignerCertificate(X509Certificate signedCert, List<X509Certificate> certificates) {
         X509Certificate signer = null;
         for (X509Certificate cert : certificates) {
             Principal certSubjectDN = cert.getSubjectDN();
@@ -180,15 +181,15 @@ public class XMLDSigVerifier {
         return signer;
     }
 
-    private XMLDsigVerificationResult validateSSLCertificateIssuer(XMLSignature signature, XMLDsigVerificationResult result) {
+    private XMLDsigVerificationResult validateCertificateIssuer(XMLSignature signature, XMLDsigVerificationResult result) {
         try
         {
             KeyInfo xmlKeyInfo = signature.getKeyInfo();
-            List certList = getCertificateChainFromXML(xmlKeyInfo.getContent());
+            List<X509Certificate> certList = getCertificateChainFromXML(xmlKeyInfo.getContent());
             List<X509Certificate> orderedCerts = reorderCertificateChain(certList);
             X509Certificate signingCert = selectSigningKeyFromXML(xmlKeyInfo.getContent());
             //Throws if invalid
-            validateSSLCertificateBasedOnTrustedCA(orderedCerts);
+            validateCertificateChain(orderedCerts);
             if (result.isValid)
             {
                 result.issuerPrincipal = signingCert.getIssuerX500Principal().getName();
@@ -263,7 +264,8 @@ public class XMLDSigVerifier {
             CertificateExpiredException
     {
         PublicKey recovered = recoverPublicKeyFromXML(xmlElements);
-        List<X509Certificate> certList = getCertificateChainFromXML(xmlElements);
+        //Certificates from the XML might be in the wrong order
+        List<X509Certificate> certList = reorderCertificateChain(getCertificateChainFromXML(xmlElements));
         if(certList == null) return null;
         for (X509Certificate crt : certList)
         {
@@ -294,9 +296,7 @@ public class XMLDSigVerifier {
                 XMLCryptoContext context
         ) throws KeySelectorException
         {
-            if (keyInfo == null) {
-                throw new KeySelectorException("Null KeyInfo object!");
-            }
+            if (keyInfo == null) throw new KeySelectorException("Null KeyInfo object!");
             PublicKey signer = null;
             List list = keyInfo.getContent();
             boolean found = false;

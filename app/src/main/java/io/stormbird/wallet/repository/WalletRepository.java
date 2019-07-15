@@ -126,7 +126,7 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<Integer> storeWallet(Wallet wallet)
+	public Single<Wallet> storeWallet(Wallet wallet)
 	{
 		return walletDataRealmSource.storeWallet(wallet);
 	}

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical">
+
+    <include layout="@layout/layout_simple_toolbar" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/background_card">
+
+        <ImageView
+            android:id="@+id/seed_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerInParent="true"
+            android:background="@drawable/seed_graphic" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:fontFamily="@font/font_light"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@id/seed_image"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="50dp"
+            android:text="Back up your wallet\nwith seed phrase"
+            android:textColor="@color/black"
+            android:textSize="28sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/seed_image"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:gravity="center_horizontal"
+            android:text="Making backup is very simple and safe:\njust write down 12 words and\nkeep them in a safe place, offline." />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/nasty_green"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="25dp"
+            android:text="back up my wallet"
+            android:textStyle="normal"
+            android:textColor="@color/white"
+            android:letterSpacing="0.04"
+            android:layout_alignParentBottom="true"
+            android:textSize="16sp"
+            android:textAllCaps="true" />
+
+
+        <io.stormbird.wallet.widget.ProgressView
+            android:id="@+id/progress_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            tools:visibility="gone" />
+
+    </RelativeLayout>
+
+    <io.stormbird.wallet.widget.SystemView
+        android:id="@+id/system_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?actionBarSize"
+        android:background="@color/white"
+        tools:visibility="gone" />
+
+</LinearLayout>

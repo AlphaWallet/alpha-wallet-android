@@ -492,4 +492,8 @@
     <string name="token_requirement">This function requires %1$s tokens</string>
     <string name="contains_no_recipient">Transaction has no recipient</string>
     <string name="contains_no_value">DApp transaction contains no value.</string>
+    <string name="wallet_not_backed_up">Your Wallet is not backed up!</string>
+    <string name="not_backed_up_detail">You have not backed up your wallet yet. You have $1,000 USD net. Act now.</string>
+    <string name="back_up_wallet_action">BACK UP WALLET →</string>
+    <string name="backup_seed_phrase">Backup Seed Phrase</string>
 </resources>

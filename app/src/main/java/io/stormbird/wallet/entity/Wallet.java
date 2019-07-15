@@ -13,12 +13,14 @@ public class Wallet implements Parcelable {
     public String balance;
     public String ENSname;
     public String name;
+    public WalletType type;
 
 	public Wallet(String address) {
 		this.address = address;
 		this.balance = "-";
 		this.ENSname = "";
 		this.name = "";
+		this.type = WalletType.NOT_DEFINED;
 		//this.publicKey = padLeft(Numeric.cleanHexPrefix(address.toLowerCase()), 128);  //TODO: Get this from ecrecover
 	}
 
@@ -27,7 +29,14 @@ public class Wallet implements Parcelable {
 		balance = in.readString();
 		ENSname = in.readString();
 		name = in.readString();
+		int t = in.readInt();
+		type = WalletType.values()[t];
 		//this.publicKey = padLeft(address, 128);
+	}
+
+	public void setWalletType(WalletType wType)
+	{
+		type = wType;
 	}
 
 	public static final Creator<Wallet> CREATOR = new Creator<Wallet>() {
@@ -58,6 +67,7 @@ public class Wallet implements Parcelable {
 		parcel.writeString(balance);
 		parcel.writeString(ENSname);
 		parcel.writeString(name);
+		parcel.writeInt(type.ordinal());
 	}
 
 	public void setWalletBalance(BigDecimal balanceBD)
@@ -65,5 +75,12 @@ public class Wallet implements Parcelable {
 		 balance = weiToEth(balanceBD)
 				.setScale(4, RoundingMode.HALF_DOWN)
 				.stripTrailingZeros().toPlainString();
+	}
+
+	public enum WalletType
+	{
+		NOT_DEFINED,
+		KEYSTORE,
+		HDKEY
 	}
 }

@@ -1,5 +1,6 @@
 package io.stormbird.wallet.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
@@ -69,11 +70,11 @@ public class SplashViewModel extends ViewModel {
         return createWallet;
     }
 
-    public void createNewWallet()
+    public void createNewWallet(Activity ctx)
     {
         //create a new wallet for the user
         createWalletInteract
-                .create()
+                .create(ctx)
                 .subscribe(account -> {
                     fetchWallets();
                     createWallet.postValue(account);

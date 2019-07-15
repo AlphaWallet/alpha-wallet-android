@@ -28,6 +28,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.ui.widget.adapter.WalletsAdapter;
 import io.stormbird.wallet.viewmodel.WalletsViewModel;
 import io.stormbird.wallet.viewmodel.WalletsViewModelFactory;
@@ -201,7 +202,7 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     public void onNewWallet(View view) {
         hideDialog();
-        viewModel.newWallet();
+        viewModel.newWallet(this);
     }
 
     @Override

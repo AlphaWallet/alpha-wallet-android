@@ -42,6 +42,9 @@
 	<color name="disabled_color">#888888</color>
 	<color name="cancel_red">#db393a</color>
 	<color name="dark_yellow">#e1b706</color>
+	<color name="warning_red">#c34840</color>
+	<color name="warning_dark_red">#7f342f</color>
+	<color name="nasty_green">#75b943</color>
 
 	<color name="viewfinder_mask">#60000000</color>
 	<color name="viewfinder_laser">#ffcc0000</color>

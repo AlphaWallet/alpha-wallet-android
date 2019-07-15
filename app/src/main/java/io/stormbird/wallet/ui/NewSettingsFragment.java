@@ -4,14 +4,17 @@ package io.stormbird.wallet.ui;
 import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,7 +35,9 @@ import io.stormbird.wallet.viewmodel.NewSettingsViewModelFactory;
 import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.SelectLocaleDialog;
 
-import static io.stormbird.wallet.C.CHANGED_LOCALE;
+import java.util.Set;
+
+import static io.stormbird.wallet.C.*;
 import static io.stormbird.wallet.ui.HomeActivity.RC_ASSET_EXTERNAL_WRITE_PERM;
 
 public class NewSettingsFragment extends Fragment {
@@ -40,7 +45,6 @@ public class NewSettingsFragment extends Fragment {
     NewSettingsViewModelFactory newSettingsViewModelFactory;
 
     private NewSettingsViewModel viewModel;
-    private Wallet wallet;
 
     private TextView walletsSubtext;
     private TextView localeSubtext;
@@ -144,6 +148,21 @@ public class NewSettingsFragment extends Fragment {
             updateNotificationState();
         });
 
+        final LinearLayout layoutBackup = view.findViewById(R.id.layout_backup_text);
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        Set<String> notBackedUp = pref.getStringSet ("notbackedup", new ArraySet<>());
+        if (notBackedUp.size() > 0)
+        {
+            layoutBackup.setVisibility(View.VISIBLE);
+            layoutBackup.setOnClickListener(v -> {
+                Intent intent = new Intent(getContext(), BackupSeedPhrase.class);
+                String addr = notBackedUp.iterator().next();
+                intent.putExtra("ADDRESS", addr);
+                intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                getActivity().startActivity(intent);
+            });
+        }
+
         LinearLayout layoutFacebook = view.findViewById(R.id.layout_facebook);
         layoutFacebook.setOnClickListener(v -> {
             Intent intent;
@@ -184,7 +203,6 @@ public class NewSettingsFragment extends Fragment {
     }
 
     private void onDefaultWallet(Wallet wallet) {
-        this.wallet = wallet;
         walletsSubtext.setText(wallet.address);
     }
 

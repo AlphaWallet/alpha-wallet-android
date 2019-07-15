@@ -39,7 +39,7 @@ public class FetchWalletsInteract {
         return accountRepository.storeWallets(wallets, isMainNet);
     }
 
-    public Single<Integer> storeWallet(Wallet wallet) {
+    public Single<Wallet> storeWallet(Wallet wallet) {
         return accountRepository.storeWallet(wallet);
     }
 }

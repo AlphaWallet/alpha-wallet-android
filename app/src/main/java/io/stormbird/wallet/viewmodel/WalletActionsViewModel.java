@@ -112,10 +112,10 @@ public class WalletActionsViewModel extends BaseViewModel {
                 .subscribe(this::onStored, this::onError);
     }
 
-    private void onStored(Integer count) {
+    private void onStored(Wallet wallet) {
         isTaskRunning.postValue(false);
-        Log.d(TAG, "Stored " + count + " Wallets");
-        saved.postValue(count);
+        Log.d(TAG, "Stored " + wallet.address);
+        saved.postValue(1);
     }
 
     @Override

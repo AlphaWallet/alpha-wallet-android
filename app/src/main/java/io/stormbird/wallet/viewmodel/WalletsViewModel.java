@@ -188,15 +188,16 @@ public class WalletsViewModel extends BaseViewModel
         findNetwork();
     }
 
-    public void newWallet()
+    public void newWallet(Activity ctx)
     {
         progress.setValue(true);
         createWalletInteract
-                .create()
+                .create(ctx)
+                .flatMap(fetchWalletsInteract::storeWallet)
                 .subscribe(account -> {
                     fetchWallets();
                     createdWallet.postValue(account);
-                }, this::onCreateWalletError);
+                }, this::onCreateWalletError).isDisposed();
     }
 
     /**
@@ -243,11 +244,14 @@ public class WalletsViewModel extends BaseViewModel
         //update names for wallets
         //got names?
         //preserve order
-        for (Wallet w : wallets.getValue())
+        if (wallets.getValue() != null)
         {
-            if (update.wallets.containsKey(w.address))
+            for (Wallet w : wallets.getValue())
             {
-                w.ENSname = update.wallets.get(w.address).ENSname;
+                if (update.wallets.containsKey(w.address))
+                {
+                    w.ENSname = update.wallets.get(w.address).ENSname;
+                }
             }
         }
 

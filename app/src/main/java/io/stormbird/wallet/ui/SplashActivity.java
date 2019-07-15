@@ -130,7 +130,7 @@ public class SplashActivity extends BaseActivity {
             }
             else
             {
-                splashViewModel.createNewWallet();
+                splashViewModel.createNewWallet(this);
             }
         }
         else

@@ -274,7 +274,7 @@ public class WalletsViewModel extends BaseViewModel
     private void onStored(Integer count)
     {
         Log.d(TAG, "Stored " + count + " Wallets");
-    }c
+    }
 
     private Observable<List<Wallet>> fetchWalletList(Wallet[] wallets)
     {

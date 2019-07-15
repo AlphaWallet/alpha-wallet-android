@@ -90,4 +90,6 @@
     <string name="token_requirement">This function requires %1$s tokens</string>
     <string name="contains_no_recipient">Transaction has no recipient</string>
     <string name="contains_no_value">DApp transaction contains no value.</string>
+    <string name="nothing_to_share">Nothing to share</string>
+    <string name="nothing_to_share_message">Browse to a DApp to share it.</string>
 </resources>

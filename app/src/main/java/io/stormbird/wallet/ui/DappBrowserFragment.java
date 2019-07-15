@@ -344,8 +344,12 @@ public class DappBrowserFragment extends Fragment implements
                 });
         toolbar.getMenu().findItem(R.id.action_share)
                 .setOnMenuItemClickListener(menuItem -> {
-                    if (web3.getUrl() != null) {
+                    if (web3.getUrl() != null && currentFragment != null && currentFragment.equals(DAPP_BROWSER)) {
                         if (getContext() != null) viewModel.share(getContext(), web3.getUrl());
+                    }
+                    else
+                    {
+                        displayNothingToShare();
                     }
                     return true;
                 });
@@ -380,6 +384,20 @@ public class DappBrowserFragment extends Fragment implements
         currentNetworkCircle = view.findViewById(R.id.network_colour);
         balance = view.findViewById(R.id.balance);
         symbol = view.findViewById(R.id.symbol);
+    }
+
+    private void displayNothingToShare()
+    {
+        if (getActivity() == null) return;
+        resultDialog = new AWalletAlertDialog(getActivity());
+        resultDialog.setTitle(getString(R.string.nothing_to_share));
+        resultDialog.setMessage(getString(R.string.nothing_to_share_message));
+        resultDialog.setButtonText(R.string.button_ok);
+        resultDialog.setButtonListener(v -> {
+            resultDialog.dismiss();
+        });
+        resultDialog.setCancelable(true);
+        resultDialog.show();
     }
 
     private void selectNetwork() {
@@ -661,7 +679,6 @@ public class DappBrowserFragment extends Fragment implements
         resultDialog.setIcon(AWalletAlertDialog.ERROR);
         resultDialog.setTitle(getString(R.string.dialog_title_sign_message));
         resultDialog.setMessage(getString(R.string.contains_no_data));
-        resultDialog.setProgressMode();
         resultDialog.setButtonText(R.string.button_ok);
         resultDialog.setButtonListener(v -> {
             resultDialog.dismiss();

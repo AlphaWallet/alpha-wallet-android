@@ -231,6 +231,7 @@ public class ERC721Token extends Token implements Parcelable
             case "0xabc7e6c01237e8eef355bba2bf925a730b714d5f":
             case "0x71c118b00759b0851785642541ceb0f4ceea0bd5":
             case "0x16baf0de678e52367adc69fd067e5edd1d33e3bf":
+            case "0x7fdcd2a1e52f10c28cb7732f46393e297ecadda1":
                 return true;
 
             default:

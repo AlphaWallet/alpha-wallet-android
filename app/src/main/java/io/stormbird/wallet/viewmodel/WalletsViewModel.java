@@ -113,7 +113,7 @@ public class WalletsViewModel extends BaseViewModel
     }
 
     private Wallet addWalletToMap(Wallet wallet) {
-        if (!walletBalances.containsKey(wallet.address)) walletBalances.put(wallet.address, wallet);
+        if (wallet.address != null && !walletBalances.containsKey(wallet.address)) walletBalances.put(wallet.address, wallet);
         return wallet;
     }
 
@@ -196,7 +196,7 @@ public class WalletsViewModel extends BaseViewModel
                 .subscribe(account -> {
                     fetchWallets();
                     createdWallet.postValue(account);
-                }, this::onCreateWalletError);
+                }, this::onCreateWalletError).isDisposed();
     }
 
     /**
@@ -222,9 +222,12 @@ public class WalletsViewModel extends BaseViewModel
         if (walletBalances.containsKey(token.getAddress()))
         {
             Wallet wallet = walletBalances.get(token.getAddress());
-            wallet.setWalletBalance(token.balance);
-            //update wallet balance
-            updateBalance.postValue(wallet);
+            if (wallet != null)
+            {
+                wallet.setWalletBalance(token.balance);
+                //update wallet balance
+                updateBalance.postValue(wallet);
+            }
         }
     }
 
@@ -243,11 +246,14 @@ public class WalletsViewModel extends BaseViewModel
         //update names for wallets
         //got names?
         //preserve order
-        for (Wallet w : wallets.getValue())
+        if (wallets.getValue() != null)
         {
-            if (update.wallets.containsKey(w.address))
+            for (Wallet w : wallets.getValue())
             {
-                w.ENSname = update.wallets.get(w.address).ENSname;
+                if (update.wallets.containsKey(w.address))
+                {
+                    w.ENSname = update.wallets.get(w.address).ENSname;
+                }
             }
         }
 

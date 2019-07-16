@@ -86,7 +86,7 @@ public class Erc20DetailActivity extends BaseActivity {
 
     private void onTokenTicker(Ticker ticker)
     {
-        if (token != null)
+        if (token != null && tokenViewAdapter != null) //might be a delayed return after user closed screen
         {
             token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), token.getAddress(), ticker.price_usd, ticker.percentChange24h, null);
             Token[] tokens = {token};

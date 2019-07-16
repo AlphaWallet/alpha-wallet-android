@@ -3,13 +3,21 @@ package io.stormbird.wallet.service;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.security.keystore.*;
+import android.util.ArraySet;
 import android.util.Log;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.AuthenticationCallback;
+import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
 import io.stormbird.wallet.entity.ServiceErrorException;
+import io.stormbird.wallet.ui.BackupSeedPhrase;
+import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.SignTransactionDialog;
 import org.web3j.crypto.Hash;
 import wallet.core.jni.CoinType;
@@ -23,8 +31,13 @@ import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.spec.ECGenParameterSpec;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Set;
 
+import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 import static io.stormbird.wallet.entity.ServiceErrorException.*;
+import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 
 @TargetApi(23)
 public class HDKeyService implements AuthenticationCallback
@@ -35,11 +48,11 @@ public class HDKeyService implements AuthenticationCallback
     private static final String BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC;
     private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7;
     private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
-    private static final int AUTHENTICATION_DURATION_SECONDS = 30;
+    private static final int AUTHENTICATION_DURATION_SECONDS = 300;
 
     private enum Operation
     {
-        CREATE_HD_KEY, UNLOCK_HD_KEY
+        CREATE_HD_KEY, UNLOCK_HD_KEY, FETCH_MNEMONIC
     }
 
     private static final int DEFAULT_KEY_STRENGTH = 128;
@@ -48,6 +61,7 @@ public class HDKeyService implements AuthenticationCallback
     private HDWallet currentWallet;
     private String currentKey;
     private SignTransactionDialog signDialog;
+    private CreateWalletCallbackInterface callbackInterface;
 
     public HDKeyService(Activity ctx)
     {
@@ -55,19 +69,31 @@ public class HDKeyService implements AuthenticationCallback
         context = ctx;
     }
 
-    //Create HDkey
-    public String createNewHDKey()
+    public String createNewHDKey(CreateWalletCallbackInterface callback)
     {
         currentWallet = new HDWallet(DEFAULT_KEY_STRENGTH, "key1");
         String mnemonic = currentWallet.mnemonic();
-        checkAuthentication(Operation.CREATE_HD_KEY);
         PrivateKey pk = currentWallet.getKeyForCoin(CoinType.ETHEREUM);
-        return CoinType.ETHEREUM.deriveAddress(pk);
+        currentKey =  CoinType.ETHEREUM.deriveAddress(pk);
+        callbackInterface = callback;
+        checkAuthentication(Operation.CREATE_HD_KEY);
+        return currentKey;
     }
 
     private void createHDKey2()
     {
-        storeHDWallet(currentWallet);
+        boolean success = storeHDWallet(currentWallet);
+        PrivateKey pk = currentWallet.getKeyForCoin(CoinType.ETHEREUM);
+        String address = CoinType.ETHEREUM.deriveAddress(pk);
+        if (!success) address = ZERO_ADDRESS;
+        callbackInterface.HDKeyCreated(address, context);
+    }
+
+    public void getMnemonic(String address, CreateWalletCallbackInterface callback)
+    {
+        currentKey = address;
+        callbackInterface = callback;
+        checkAuthentication(Operation.FETCH_MNEMONIC);
     }
 
     public byte[] signData(String key, byte[] data)
@@ -112,7 +138,6 @@ public class HDKeyService implements AuthenticationCallback
             CipherInputStream cipherInputStream = new CipherInputStream(new FileInputStream(encryptedDataFilePath), outCipher);
             byte[] mnemonicBytes = readBytesFromStream(cipherInputStream);
             String mnemonic = new String(mnemonicBytes);
-            System.out.println(mnemonic);
             return null;
         }
         catch (InvalidKeyException e)
@@ -130,6 +155,65 @@ public class HDKeyService implements AuthenticationCallback
         catch (IOException | CertificateException | KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException e)
         {
             throw new ServiceErrorException(KEY_STORE_ERROR);
+        }
+    }
+
+    private synchronized void unpackMnemonic()
+    {
+        KeyStore keyStore;
+        try
+        {
+            keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
+            keyStore.load(null);
+            Enumeration<String> ksList = keyStore.aliases();
+            if (!keyStore.containsAlias(currentKey)) { callbackInterface.tryAgain(); return; }
+            String encryptedDataFilePath = getFilePath(context, currentKey + "hd");
+            SecretKey secretKey = (SecretKey) keyStore.getKey(currentKey, null);
+            if (secretKey == null)
+            {
+                /* no such key, the key is just simply not there */
+                boolean fileExists = new File(encryptedDataFilePath).exists();
+                if (!fileExists)
+                {
+                    callbackInterface.tryAgain();
+                    return;
+                }
+            }
+
+            boolean ivExists = new File(getFilePath(context, currentKey + "iv")).exists();
+            byte[] iv =  null;
+
+            if (ivExists) iv = readBytesFromFile(getFilePath(context, currentKey + "iv"));
+            if (iv == null || iv.length == 0)
+            {
+                callbackInterface.tryAgain();
+                return;
+                //throw new NullPointerException("iv is missing for " + currentKey + "iv");
+            }
+            Cipher outCipher = Cipher.getInstance(CIPHER_ALGORITHM);
+            outCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
+            CipherInputStream cipherInputStream = new CipherInputStream(new FileInputStream(encryptedDataFilePath), outCipher);
+            byte[] mnemonicBytes = readBytesFromStream(cipherInputStream);
+            String mnemonic = new String(mnemonicBytes);
+            callbackInterface.FetchMnemonic(mnemonic);
+            return;
+        }
+        catch (InvalidKeyException e)
+        {
+            if (e instanceof UserNotAuthenticatedException)
+            {
+                callbackInterface.tryAgain();
+            }
+            else
+            {
+                callbackInterface.tryAgain();
+                //throw new ServiceErrorException(INVALID_KEY);
+            }
+        }
+        catch (IOException | CertificateException | KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException e)
+        {
+            callbackInterface.tryAgain();
+            //throw new ServiceErrorException(KEY_STORE_ERROR);
         }
     }
 
@@ -295,7 +379,7 @@ public class HDKeyService implements AuthenticationCallback
         signDialog.setSecondaryButtonText(R.string.action_cancel);
         signDialog.setPrimaryButtonText(R.string.dialog_title_sign_message);
         signDialog.setCanceledOnTouchOutside(true);
-        signDialog.setOnCancelListener(v -> { authenticateFail("Cancelled"); });
+        signDialog.setOnCancelListener(v -> { authenticateFail("Cancelled", false); });
         signDialog.show();
         signDialog.getFingerprintAuthorisation(this);
     }
@@ -386,15 +470,77 @@ public class HDKeyService implements AuthenticationCallback
                 break;
             case UNLOCK_HD_KEY:
                 break;
+            case FETCH_MNEMONIC:
+                unpackMnemonic();
+                break;
             default:
                 break;
         }
     }
 
     @Override
-    public void authenticateFail(String fail)
+    public void authenticateFail(String fail, boolean systemFail)
     {
         signDialog.dismiss();
-        //TODO: display fail dialog
+        if (context == null || context.isDestroyed())
+        {
+            callbackInterface.cancelAuthentication();
+            return;
+        }
+
+        int title = R.string.authentication_cancelled;
+        if (systemFail)
+        {
+            Vibrator vb = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+            if (vb != null && vb.hasVibrator())
+            {
+                VibrationEffect vibe = VibrationEffect.createOneShot(200, DEFAULT_AMPLITUDE);
+                vb.vibrate(vibe);
+            }
+            title = R.string.authentication_failed;
+        }
+
+        AWalletAlertDialog dialog = new AWalletAlertDialog(context);
+        dialog.setIcon(AWalletAlertDialog.WARNING);
+        dialog.setTitle(title);
+        dialog.setMessage(R.string.authentication_failed_message);
+        dialog.setButtonText(R.string.action_try_again);
+        dialog.setButtonListener(v -> {
+            callbackInterface.tryAgain();
+            dialog.dismiss();
+        });
+        dialog.setSecondaryButtonText(R.string.action_cancel);
+        dialog.setSecondaryButtonListener(v -> {
+            callbackInterface.cancelAuthentication();
+            dialog.dismiss();
+        });
+        dialog.setOnCancelListener(v -> {
+            callbackInterface.cancelAuthentication();
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    public static void flagAsNotBackedUp(Context ctx, String walletAddr) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
+        Set<String> notBackedUp = pref.getStringSet ("notbackedup", new ArraySet<>());
+        //Set<String> notBackedUp = new ArraySet<>();
+        notBackedUp.add(walletAddr);
+        PreferenceManager
+                .getDefaultSharedPreferences(ctx)
+                .edit()
+                .putStringSet("notbackedup", notBackedUp)
+                .apply();
+    }
+
+    public static void flagAsBackedUp(Context ctx, String walletAddr) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
+        Set<String> notBackedUp = pref.getStringSet ("notbackedup", new ArraySet<>());
+        notBackedUp.remove(walletAddr);
+        PreferenceManager
+                .getDefaultSharedPreferences(ctx)
+                .edit()
+                .putStringSet("notbackedup", notBackedUp)
+                .apply();
     }
 }

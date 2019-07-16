@@ -6,6 +6,7 @@ public abstract class C {
     public static final int EXPORT_REQUEST_CODE = 1002;
     public static final int SHARE_REQUEST_CODE = 1003;
     public static final int REQUEST_SELECT_NETWORK = 1010;
+    public static final int REQUEST_BACKUP_SEED = 1011;
 
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";

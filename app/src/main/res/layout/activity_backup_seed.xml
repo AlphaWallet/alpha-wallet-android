@@ -14,44 +14,88 @@
         android:layout_height="match_parent"
         android:background="@drawable/background_card">
 
-        <ImageView
-            android:id="@+id/seed_image"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/layout_center_holder"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="59dp"
+            android:orientation="vertical"
             android:layout_centerInParent="true"
-            android:background="@drawable/seed_graphic" />
+            android:layout_marginEnd="26dp"
+            android:layout_marginStart="26dp">
+
+            <TextView
+                android:id="@+id/text_verify"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="110dp"
+                android:textColor="@color/greyaa"
+                android:background="@drawable/background_verify_window"
+                android:visibility="gone"
+                android:padding="14dp"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:id="@+id/text_invalid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/invalid_phrase"
+                android:textSize="14sp"
+                android:visibility="gone"
+                android:layout_marginBottom="50dp"
+                android:textColor="@color/dark_seed_danger"
+                android:layout_gravity="center_horizontal" />
+
+            <ImageView
+                android:id="@+id/seed_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/seed_graphic" />
+
+            <LinearLayout
+                android:id="@+id/layout_word_holder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
 
         <TextView
+            android:id="@+id/text_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:fontFamily="@font/font_light"
             android:layout_centerHorizontal="true"
-            android:layout_above="@id/seed_image"
+            android:layout_above="@id/layout_center_holder"
             android:gravity="center_horizontal"
             android:layout_marginBottom="50dp"
-            android:text="Back up your wallet\nwith seed phrase"
+            android:text="@string/backup_with_seed_phrase"
             android:textColor="@color/black"
             android:textSize="28sp" />
 
         <TextView
+            android:id="@+id/text_detail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/seed_image"
+            android:layout_below="@id/layout_center_holder"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
             android:gravity="center_horizontal"
-            android:text="Making backup is very simple and safe:\njust write down 12 words and\nkeep them in a safe place, offline." />
+            android:text="@string/backup_seed_phrase_detail" />
 
         <Button
+            android:id="@+id/button_next"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/nasty_green"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginBottom="25dp"
-            android:text="back up my wallet"
+            android:text="@string/action_back_up_my_wallet"
             android:textStyle="normal"
             android:textColor="@color/white"
             android:letterSpacing="0.04"

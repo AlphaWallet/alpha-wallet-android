@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.ArraySet;
 import com.google.gson.Gson;
+import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
 import io.stormbird.wallet.entity.DApp;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.rx.operator.Operators;
@@ -21,7 +22,7 @@ import java.util.Set;
 
 import static io.stormbird.wallet.interact.rx.operator.Operators.completableErrorProxy;
 
-public class CreateWalletInteract implements KeyStoreInterface {
+public class CreateWalletInteract {
 
 	private final WalletRepositoryType walletRepository;
 	private final PasswordStore passwordStore;
@@ -32,31 +33,16 @@ public class CreateWalletInteract implements KeyStoreInterface {
 	}
 
 	//TODO: handle errors, don't return until key is created
-	public Single<Wallet> create(Activity ctx) {
-		return Single.fromCallable(() -> {
-			HDKeyService hdService = new HDKeyService(ctx);
-			String addr = hdService.createNewHDKey();
-			Wallet wallet = new Wallet(addr);
-			wallet.setWalletType(Wallet.WalletType.HDKEY);
-			flagAsNotBackedUp(ctx, addr);
-			return wallet;
-		});
+	public void create(Activity ctx, CreateWalletCallbackInterface callback) {
+		HDKeyService hdService = new HDKeyService(ctx);
+		String addr = hdService.createNewHDKey(callback);
+		Wallet wallet = new Wallet(addr);
+		wallet.setWalletType(Wallet.WalletType.HDKEY);
 //		return passwordStore.generatePassword()
 //				.flatMap(masterPassword -> walletRepository
 //						.createWallet(masterPassword)
 //						.compose(Operators.savePassword(passwordStore, walletRepository, masterPassword))
 //                        .flatMap(wallet -> passwordVerification(wallet, masterPassword)));
-	}
-
-	public void flagAsNotBackedUp(Context context, String walletAddr) {
-		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-		Set<String> notBackedUp = pref.getStringSet ("notbackedup", new ArraySet<>());
-		notBackedUp.add(walletAddr);
-		PreferenceManager
-				.getDefaultSharedPreferences(context)
-				.edit()
-				.putStringSet("notbackedup", notBackedUp)
-				.apply();
 	}
 
 	private Single<Wallet> passwordVerification(Wallet wallet, String masterPassword) {

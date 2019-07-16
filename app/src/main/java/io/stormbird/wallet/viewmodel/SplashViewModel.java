@@ -12,12 +12,14 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
 import io.stormbird.wallet.entity.FileData;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.CreateWalletInteract;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
+import io.stormbird.wallet.service.HDKeyService;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -26,9 +28,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import static io.stormbird.wallet.C.DOWNLOAD_READY;
+import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_FILE_URL;
 
-public class SplashViewModel extends ViewModel {
+public class SplashViewModel extends ViewModel implements CreateWalletCallbackInterface
+{
     private final FetchWalletsInteract fetchWalletsInteract;
     private final CreateWalletInteract createWalletInteract;
     private final PreferenceRepositoryType preferenceRepository;
@@ -73,12 +77,7 @@ public class SplashViewModel extends ViewModel {
     public void createNewWallet(Activity ctx)
     {
         //create a new wallet for the user
-        createWalletInteract
-                .create(ctx)
-                .subscribe(account -> {
-                    fetchWallets();
-                    createWallet.postValue(account);
-                }, this::onError);
+        createWalletInteract.create(ctx, this);
     }
 
     public void checkVersionUpdate(Context ctx, long updateTime)
@@ -193,5 +192,43 @@ public class SplashViewModel extends ViewModel {
             intent.putExtra("Version", newVersion);
             baseContext.sendBroadcast(intent);
         }
+    }
+
+    @Override
+    public void HDKeyCreated(String address, Context ctx)
+    {
+        if (!address.equals(ZERO_ADDRESS))
+        {
+            HDKeyService.flagAsNotBackedUp(ctx, address);
+            Wallet wallet = new Wallet(address);
+            fetchWalletsInteract.storeWallet(wallet)
+                    .subscribe(account -> {
+                        fetchWallets();
+                        createWallet.postValue(account);
+                    }, this::onError).isDisposed();
+        }
+        else
+        {
+            //TODO: Relax key creation slightly to ensure a key is always created
+            wallets.postValue(new Wallet[0]);
+        }
+    }
+
+    @Override
+    public void tryAgain()
+    {
+        //TODO: Try again to create a key, this time perhaps without Authentication
+    }
+
+    @Override
+    public void cancelAuthentication()
+    {
+        //TODO: create key without Authentication
+    }
+
+    @Override
+    public void FetchMnemonic(String mnemonic)
+    {
+
     }
 }

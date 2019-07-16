@@ -14,12 +14,14 @@ import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
+import io.stormbird.wallet.service.HDKeyService;
 
 import java.util.*;
 
 import static io.stormbird.wallet.C.IMPORT_REQUEST_CODE;
+import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 
-public class WalletsViewModel extends BaseViewModel
+public class WalletsViewModel extends BaseViewModel implements CreateWalletCallbackInterface
 {
     private final static String TAG = WalletsViewModel.class.getSimpleName();
 
@@ -113,7 +115,7 @@ public class WalletsViewModel extends BaseViewModel
     }
 
     private Wallet addWalletToMap(Wallet wallet) {
-        if (!walletBalances.containsKey(wallet.address)) walletBalances.put(wallet.address, wallet);
+        if (!walletBalances.containsKey(wallet.address.toLowerCase())) walletBalances.put(wallet.address.toLowerCase(), wallet);
         return wallet;
     }
 
@@ -191,13 +193,7 @@ public class WalletsViewModel extends BaseViewModel
     public void newWallet(Activity ctx)
     {
         progress.setValue(true);
-        createWalletInteract
-                .create(ctx)
-                .flatMap(fetchWalletsInteract::storeWallet)
-                .subscribe(account -> {
-                    fetchWallets();
-                    createdWallet.postValue(account);
-                }, this::onCreateWalletError).isDisposed();
+        createWalletInteract.create(ctx, this);
     }
 
     /**
@@ -305,5 +301,39 @@ public class WalletsViewModel extends BaseViewModel
     public NetworkInfo getNetwork()
     {
         return currentNetwork;
+    }
+
+    @Override
+    public void HDKeyCreated(String address, Context ctx)
+    {
+        if (!address.equals(ZERO_ADDRESS))
+        {
+            HDKeyService.flagAsNotBackedUp(ctx, address);
+            Wallet wallet = new Wallet(address);
+            fetchWalletsInteract.storeWallet(wallet)
+                .subscribe(account -> {
+                    fetchWallets();
+                    createdWallet.postValue(account);
+                }, this::onCreateWalletError).isDisposed();
+        }
+    }
+
+    @Override
+    public void tryAgain()
+    {
+        //TODO: handle user wants to try creating a wallet again
+
+    }
+
+    @Override
+    public void cancelAuthentication()
+    {
+        //cancelled
+    }
+
+    @Override
+    public void FetchMnemonic(String mnemonic)
+    {
+
     }
 }

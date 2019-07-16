@@ -703,6 +703,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case C.REQUEST_SELECT_NETWORK:
                 dappBrowserFragment.handleSelectNetwork(resultCode, data);
                 break;
+            case C.REQUEST_BACKUP_SEED:
+                if (resultCode == RESULT_OK) settingsFragment.backupSeedSuccess();
+                break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
                 break;

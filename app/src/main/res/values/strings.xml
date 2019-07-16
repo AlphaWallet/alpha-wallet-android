@@ -494,6 +494,25 @@
     <string name="contains_no_value">DApp transaction contains no value.</string>
     <string name="wallet_not_backed_up">Your Wallet is not backed up!</string>
     <string name="not_backed_up_detail">You have not backed up your wallet yet. You have $1,000 USD net. Act now.</string>
-    <string name="back_up_wallet_action">BACK UP WALLET →</string>
+    <string name="back_up_wallet_action">BACK UP WALLET %1$s →</string>
     <string name="backup_seed_phrase">Backup Seed Phrase</string>
+    <string name="authentication_cancelled">Authentication Cancelled</string>
+    <string name="authentication_failed">Authentication Failed</string>
+    <string name="authentication_failed_message">User Authentication failed, try again?</string>
+    <string name="action_try_again">Try Again</string>
+    <string name="backup_with_seed_phrase">Back up your wallet with seed phrase</string>
+    <string name="backup_seed_phrase_detail">Making backup is very simple and safe: just write down 12 words and keep them in a safe place, offline.</string>
+    <string name="action_back_up_my_wallet">back up my wallet</string>
+    <string name="write_down_seed_phrase">Write down seed phrase\non paper</string>
+    <string name="wrote_down_seed_phrase">OK, I wrote this down</string>
+    <string name="verify_seed_phrase">Verify Seed Phrase</string>
+    <string name="action_continue">Continue</string>
+    <string name="invalid_phrase">Invalid recovery phrase. Please check and try again.</string>
+    <string name="manage_wallet">Manage Wallet</string>
+    <string name="show_seed_phrase">Show Seed Phrase</string>
+    <string name="lose_this_wallet">Lose this Wallet</string>
+    <string name="seed_phrase_loss_warning">If you lose access to this device, your funds will be lost, unless you back up!</string>
+    <string name="delete_lose_funds_warning">Be careful with deleting your wallet. If you have not backed up your wallet, you might lose all your funds.</string>
+    <string name="export_keystore_json">Export Keystore JSON</string>
+    <string name="export_keystore_detail">A Keystore is a text file. You can copy its content and place when you want to import your wallet.</string>
 </resources>

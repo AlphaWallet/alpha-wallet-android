@@ -21,6 +21,7 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.viewmodel.WalletActionsViewModel;
 import io.stormbird.wallet.viewmodel.WalletActionsViewModelFactory;
@@ -56,7 +57,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wallet_actions);
         toolbar();
-        setTitle(R.string.empty);
+        setTitle(getString(R.string.manage_wallet));
 
         if (getIntent() != null) {
             wallet = (Wallet) getIntent().getExtras().get("wallet");
@@ -65,6 +66,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
             walletCount++;
             isNewWallet = getIntent().getBooleanExtra("isNewWallet", false);
             initViews();
+            //HDKeyService.flagAsNotBackedUp(this, wallet.address);
         } else {
             finish();
         }
@@ -188,6 +190,13 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
 
         backUp = findViewById(R.id.backup);
         backUp.setOnClickListener(this);
+
+        if (wallet.type == Wallet.WalletType.KEYSTORE)
+        {
+            backUp.setText(R.string.export_keystore_json);
+            TextView backupDetail = findViewById(R.id.backup_text);
+            backupDetail.setText(R.string.export_keystore_detail);
+        }
     }
 
     @Override

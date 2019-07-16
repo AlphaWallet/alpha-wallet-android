@@ -77,7 +77,7 @@ public class SignTransactionDialog extends AWalletConfirmationDialog
             public void onAuthenticationError(int errorCode, CharSequence errString) {
                 super.onAuthenticationError(errorCode, errString);
                 Toast.makeText(context, errString, Toast.LENGTH_SHORT).show();
-                authCallback.authenticateFail(errString.toString());
+                authCallback.authenticateFail(errString.toString(), true);
             }
 
             @Override
@@ -95,7 +95,7 @@ public class SignTransactionDialog extends AWalletConfirmationDialog
             @Override
             public void onAuthenticationFailed() {
                 super.onAuthenticationFailed();
-                authCallback.authenticateFail("Authentication Failure");
+                authCallback.authenticateFail("Authentication Failure", true);
             }
         }, null);
     }

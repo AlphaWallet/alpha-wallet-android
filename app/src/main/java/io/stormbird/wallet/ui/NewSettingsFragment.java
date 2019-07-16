@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -40,7 +42,7 @@ import java.util.Set;
 import static io.stormbird.wallet.C.*;
 import static io.stormbird.wallet.ui.HomeActivity.RC_ASSET_EXTERNAL_WRITE_PERM;
 
-public class NewSettingsFragment extends Fragment {
+public class NewSettingsFragment extends Fragment implements Runnable {
     @Inject
     NewSettingsViewModelFactory newSettingsViewModelFactory;
 
@@ -50,6 +52,10 @@ public class NewSettingsFragment extends Fragment {
     private TextView localeSubtext;
     private Switch notificationState;
     private LinearLayout layoutEnableXML;
+    private LinearLayout layoutBackup;
+    private Button backupButton;
+    private LinearLayout successOverlay;
+    private Handler handler;
 
     @Nullable
     @Override
@@ -148,20 +154,10 @@ public class NewSettingsFragment extends Fragment {
             updateNotificationState();
         });
 
-        final LinearLayout layoutBackup = view.findViewById(R.id.layout_backup_text);
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        Set<String> notBackedUp = pref.getStringSet ("notbackedup", new ArraySet<>());
-        if (notBackedUp.size() > 0)
-        {
-            layoutBackup.setVisibility(View.VISIBLE);
-            layoutBackup.setOnClickListener(v -> {
-                Intent intent = new Intent(getContext(), BackupSeedPhrase.class);
-                String addr = notBackedUp.iterator().next();
-                intent.putExtra("ADDRESS", addr);
-                intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                getActivity().startActivity(intent);
-            });
-        }
+        layoutBackup = view.findViewById(R.id.layout_backup_text);
+        backupButton = view.findViewById(R.id.button_backup);
+        successOverlay = view.findViewById(R.id.layout_success_overlay);
+        setupBackupWarning();
 
         LinearLayout layoutFacebook = view.findViewById(R.id.layout_facebook);
         layoutFacebook.setOnClickListener(v -> {
@@ -187,6 +183,34 @@ public class NewSettingsFragment extends Fragment {
         return view;
     }
 
+    private void setupBackupWarning()
+    {
+        if (getActivity() == null || layoutBackup == null || backupButton == null) return;
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        Set<String> notBackedUp = pref.getStringSet ("notbackedup", new ArraySet<>());
+        if (notBackedUp.size() > 0)
+        {
+            final String addr = notBackedUp.iterator().next();
+            layoutBackup.setVisibility(View.VISIBLE);
+            backupButton.setText(getString(R.string.back_up_wallet_action, addr.substring(0, 5)));
+            layoutBackup.setOnClickListener(v -> openBackupActivity(addr));
+            backupButton.setOnClickListener(v -> openBackupActivity(addr));
+        }
+        else
+        {
+            layoutBackup.setVisibility(View.GONE);
+        }
+    }
+
+    private void openBackupActivity(String addr)
+    {
+        Intent intent = new Intent(getContext(), BackupSeedPhrase.class);
+        intent.putExtra("ADDRESS", addr);
+        intent.putExtra("TYPE", "HDKEY");
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_SEED);
+    }
+
     private boolean isAppAvailable(String packageName) {
         PackageManager pm = getActivity().getPackageManager();
         try {
@@ -210,6 +234,7 @@ public class NewSettingsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         viewModel.prepare();
+        setupBackupWarning();
     }
 
     private void showXMLOverrideDialog() {
@@ -246,8 +271,27 @@ public class NewSettingsFragment extends Fragment {
     }
 
     private void askWritePermission() {
-        final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        Log.w("SettingsFragment", "Folder write permission is not granted. Requesting permission");
-        ActivityCompat.requestPermissions(getActivity(), permissions, RC_ASSET_EXTERNAL_WRITE_PERM);
+        if (getActivity() != null)
+        {
+            final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            Log.w("SettingsFragment", "Folder write permission is not granted. Requesting permission");
+            ActivityCompat.requestPermissions(getActivity(), permissions, RC_ASSET_EXTERNAL_WRITE_PERM);
+        }
+    }
+
+    public void backupSeedSuccess()
+    {
+        setupBackupWarning();
+        successOverlay.setVisibility(View.VISIBLE);
+        handler = new Handler();
+        handler.postDelayed(this, 1000);
+    }
+
+    @Override
+    public void run()
+    {
+        successOverlay.animate().alpha(0.0f).setDuration(500);
+        //successOverlay.setVisibility(View.GONE);
+        handler = null;
     }
 }

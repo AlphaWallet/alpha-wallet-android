@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -13,6 +14,27 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/background_card">
+
+        <io.stormbird.wallet.widget.PasswordInputView
+            android:id="@+id/input_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:visibility="gone"
+            custom:inputType="textPassword"
+            custom:label="@string/prompt_password" />
+
+        <TextView
+            android:id="@+id/text_detail_password"
+            android:layout_below="@id/input_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="42dp"
+            android:layout_marginTop="20dp"
+            android:visibility="gone"
+            android:textSize="14sp"
+            android:textColor="@color/text_dark_gray"/>
 
         <LinearLayout
             android:id="@+id/layout_center_holder"
@@ -72,6 +94,8 @@
             android:layout_centerHorizontal="true"
             android:layout_above="@id/layout_center_holder"
             android:gravity="center_horizontal"
+            android:layout_marginStart="18dp"
+            android:layout_marginEnd="20dp"
             android:layout_marginBottom="50dp"
             android:text="@string/backup_with_seed_phrase"
             android:textColor="@color/black"
@@ -84,6 +108,8 @@
             android:layout_below="@id/layout_center_holder"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
+            android:layout_marginStart="18dp"
+            android:layout_marginEnd="20dp"
             android:gravity="center_horizontal"
             android:text="@string/backup_seed_phrase_detail" />
 

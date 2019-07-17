@@ -42,6 +42,8 @@
 	<color name="greyc2">#c2c2c2</color>
 	<color name="greyf9">#f9f9f9</color>
 	<color name="grey_faint">#332a2a2a</color>
+	<color name="grey2">#2a2a2a</color>
+
 
 	<color name="onboarding_indicator_unselected">#d8d8d8</color>
 	<color name="onboarding_indicator_selected">#b7b7b7</color>

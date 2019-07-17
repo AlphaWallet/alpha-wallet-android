@@ -112,4 +112,12 @@
     <string name="delete_lose_funds_warning">Be careful with deleting your wallet. If you have not backed up your wallet, you might lose all your funds.</string>
     <string name="export_keystore_json">Export Keystore JSON</string>
     <string name="export_keystore_detail">A Keystore is a text file. You can copy its content and place when you want to import your wallet.</string>
+    <string name="seed_phrase">Seed Phrase</string>
+    <string name="test_seed_phrase">Test my seed phrase</string>
+    <string name="make_a_backup">Making backup is very simple and safe just write down %1$s words and keep them in a safe place, offline.</string>
+    <string name="keystore_detail_text">A KeyStore is a text file. You can copy its content and place when you want to import your wallet. This is a safe way to back up a wallet.</string>
+    <string name="set_keystore_password">Set Keystore Password</string>
+    <string name="keystore_loss_warning">NOTE: You must remember your password. We do not store your password elsewhere. KeyStore is always encrypted, otherwise whoever has it can gain the money.</string>
+    <string name="share_keystore">Share Keystore</string>
+    <string name="tab_seed">Seed</string>
 </resources>

@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -42,7 +41,7 @@ import java.util.Set;
 import static io.stormbird.wallet.C.*;
 import static io.stormbird.wallet.ui.HomeActivity.RC_ASSET_EXTERNAL_WRITE_PERM;
 
-public class NewSettingsFragment extends Fragment implements Runnable {
+public class NewSettingsFragment extends Fragment {
     @Inject
     NewSettingsViewModelFactory newSettingsViewModelFactory;
 
@@ -54,8 +53,6 @@ public class NewSettingsFragment extends Fragment implements Runnable {
     private LinearLayout layoutEnableXML;
     private LinearLayout layoutBackup;
     private Button backupButton;
-    private LinearLayout successOverlay;
-    private Handler handler;
 
     @Nullable
     @Override
@@ -156,7 +153,6 @@ public class NewSettingsFragment extends Fragment implements Runnable {
 
         layoutBackup = view.findViewById(R.id.layout_backup_text);
         backupButton = view.findViewById(R.id.button_backup);
-        successOverlay = view.findViewById(R.id.layout_success_overlay);
         setupBackupWarning();
 
         LinearLayout layoutFacebook = view.findViewById(R.id.layout_facebook);
@@ -204,7 +200,7 @@ public class NewSettingsFragment extends Fragment implements Runnable {
 
     private void openBackupActivity(String addr)
     {
-        Intent intent = new Intent(getContext(), BackupSeedPhrase.class);
+        Intent intent = new Intent(getContext(), BackupKeyActivity.class);
         intent.putExtra("ADDRESS", addr);
         intent.putExtra("TYPE", "HDKEY");
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
@@ -270,6 +266,11 @@ public class NewSettingsFragment extends Fragment implements Runnable {
         }
     }
 
+    public void backupSeedSuccess()
+    {
+        setupBackupWarning();
+    }
+
     private void askWritePermission() {
         if (getActivity() != null)
         {
@@ -277,21 +278,5 @@ public class NewSettingsFragment extends Fragment implements Runnable {
             Log.w("SettingsFragment", "Folder write permission is not granted. Requesting permission");
             ActivityCompat.requestPermissions(getActivity(), permissions, RC_ASSET_EXTERNAL_WRITE_PERM);
         }
-    }
-
-    public void backupSeedSuccess()
-    {
-        setupBackupWarning();
-        successOverlay.setVisibility(View.VISIBLE);
-        handler = new Handler();
-        handler.postDelayed(this, 1000);
-    }
-
-    @Override
-    public void run()
-    {
-        successOverlay.animate().alpha(0.0f).setDuration(500);
-        //successOverlay.setVisibility(View.GONE);
-        handler = null;
     }
 }

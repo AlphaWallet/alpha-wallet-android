@@ -11,28 +11,22 @@ import android.preference.PreferenceManager;
 import android.security.keystore.*;
 import android.util.ArraySet;
 import android.util.Log;
-import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.AuthenticationCallback;
 import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
 import io.stormbird.wallet.entity.ServiceErrorException;
-import io.stormbird.wallet.ui.BackupSeedPhrase;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.SignTransactionDialog;
-import org.web3j.crypto.Hash;
 import wallet.core.jni.CoinType;
 import wallet.core.jni.HDWallet;
 import wallet.core.jni.PrivateKey;
-import wallet.core.jni.PublicKey;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.security.spec.ECGenParameterSpec;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Set;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;

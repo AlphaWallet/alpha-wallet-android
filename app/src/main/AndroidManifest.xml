@@ -225,7 +225,7 @@
             android:label="Select Network Filters" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.BackupSeedPhrase"
+            android:name="io.stormbird.wallet.ui.BackupKeyActivity"
             android:label="Backup Seed Phrase" />
     </application>
 

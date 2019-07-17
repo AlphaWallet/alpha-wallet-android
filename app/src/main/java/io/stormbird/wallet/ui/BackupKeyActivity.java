@@ -1,5 +1,6 @@
 package io.stormbird.wallet.ui;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,26 +9,40 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.*;
+import dagger.android.AndroidInjection;
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
 import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.util.KeyboardUtils;
+import io.stormbird.wallet.viewmodel.BackupKeyViewModel;
+import io.stormbird.wallet.viewmodel.BackupKeyViewModelFactory;
+import io.stormbird.wallet.widget.AWalletAlertDialog;
+import io.stormbird.wallet.widget.PasswordInputView;
 import io.stormbird.wallet.widget.ProgressView;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BackupSeedPhrase extends BaseActivity implements View.OnClickListener, CreateWalletCallbackInterface
+import static io.stormbird.wallet.C.SHARE_REQUEST_CODE;
+
+public class BackupKeyActivity extends BaseActivity implements View.OnClickListener, CreateWalletCallbackInterface
 {
+    @Inject
+    BackupKeyViewModelFactory backupKeyViewModelFactory;
+    BackupKeyViewModel viewModel;
+
     private BackupState state;
     private String keyBackup;
     private TextView title;
     private TextView detail;
+    private TextView passwordDetail;
     private LinearLayout layoutHolder;
     private LinearLayout layoutWordHolder;
+    private PasswordInputView inputView;
+    private ImageView backupImage;
     private Button nextButton;
     private TextView verifyTextBox;
     private String[] mnemonicArray;
@@ -38,6 +53,7 @@ public class BackupSeedPhrase extends BaseActivity implements View.OnClickListen
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
+        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_backup_seed);
@@ -48,17 +64,45 @@ public class BackupSeedPhrase extends BaseActivity implements View.OnClickListen
 
         String type = getIntent().getStringExtra("TYPE");
         keyBackup = getIntent().getStringExtra("ADDRESS");
+        initViews();
+
         switch (type)
         {
             case "HDKEY":
                 state = BackupState.ENTER_BACKUP_STATE_HD;
+                setTitle(R.string.backup_seed_phrase);
                 break;
             case "JSON":
                 state = BackupState.ENTER_JSON_BACKUP;
+                setTitle(getString(R.string.export_keystore_json));
+                setupJSONExport();
+                break;
+            case "TEST_SEED":
+                state = BackupState.TEST_SEED_PHRASE;
+                setTitle(getString(R.string.seed_phrase));
+                setupTestSeed();
                 break;
         }
 
-        setTitle(R.string.backup_seed_phrase);
+        initViewModel();
+    }
+
+    private void setupJSONExport()
+    {
+        title.setText(R.string.export_keystore_json);
+        backupImage.setImageResource(R.drawable.json_graphic);
+        detail.setVisibility(View.VISIBLE);
+        detail.setText(R.string.keystore_detail_text);
+        nextButton.setText(R.string.export_keystore_json);
+    }
+
+    private void setupTestSeed()
+    {
+        title.setText(getString(R.string.make_a_backup, "12"));
+        backupImage.setVisibility(View.GONE);
+        detail.setVisibility(View.GONE);
+        nextButton.setText(R.string.test_seed_phrase);
+        DisplaySeed();
     }
 
     @Override
@@ -76,18 +120,25 @@ public class BackupSeedPhrase extends BaseActivity implements View.OnClickListen
     public void onResume()
     {
         super.onResume();
+        initViews();
+    }
+
+    private void initViews()
+    {
         title = findViewById(R.id.text_title);
         detail = findViewById(R.id.text_detail);
+        passwordDetail = findViewById(R.id.text_detail_password);
         layoutHolder = findViewById(R.id.layout_center_holder);
         layoutWordHolder = findViewById(R.id.layout_word_holder);
         nextButton = findViewById(R.id.button_next);
         verifyTextBox = findViewById(R.id.text_verify);
+        backupImage = findViewById(R.id.seed_image);
+        inputView = findViewById(R.id.input_password);
         nextButton.setOnClickListener(this);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        //16908332
         switch (item.getItemId()) {
             case android.R.id.home: {
                 tryAgain();
@@ -112,10 +163,34 @@ public class BackupSeedPhrase extends BaseActivity implements View.OnClickListen
                 TestSeedPhrase();
                 break;
             case ENTER_JSON_BACKUP:
+                JSONBackup();
                 break;
             case SET_JSON_PASSWORD:
+                ShareEncryptedKeystore();
+                break;
+            case TEST_SEED_PHRASE:
+                VerifySeedPhrase();
                 break;
         }
+    }
+
+    private void ShareEncryptedKeystore()
+    {
+        viewModel.exportWallet(keyBackup, inputView.getText().toString());
+        KeyboardUtils.hideKeyboard(inputView);
+    }
+
+    private void JSONBackup()
+    {
+        setTitle(getString(R.string.set_keystore_password));
+        inputView.setVisibility(View.VISIBLE);
+        passwordDetail.setVisibility(View.VISIBLE);
+        state = BackupState.SET_JSON_PASSWORD;
+        title.setVisibility(View.GONE);
+        backupImage.setVisibility(View.GONE);
+        detail.setVisibility(View.GONE);
+        passwordDetail.setText(R.string.keystore_loss_warning);
+        nextButton.setText(R.string.share_keystore);
     }
 
     private void TestSeedPhrase()
@@ -211,11 +286,16 @@ public class BackupSeedPhrase extends BaseActivity implements View.OnClickListen
     private void WriteDownSeedPhrase()
     {
         state = BackupState.WRITE_DOWN_SEED_PHRASE;
-        ImageView backupImage = findViewById(R.id.seed_image);
         backupImage.setVisibility(View.GONE);
         title.setText(R.string.write_down_seed_phrase);
         detail.setVisibility(View.GONE);
         nextButton.setText(R.string.wrote_down_seed_phrase);
+
+        DisplaySeed();
+    }
+
+    private void DisplaySeed()
+    {
         layoutWordHolder.setVisibility(View.VISIBLE);
         layoutWordHolder.removeAllViews();
 
@@ -300,9 +380,39 @@ public class BackupSeedPhrase extends BaseActivity implements View.OnClickListen
         }
     }
 
+    private void initViewModel()
+    {
+        viewModel = ViewModelProviders.of(this, backupKeyViewModelFactory)
+                .get(BackupKeyViewModel.class);
+        viewModel.exportedStore().observe(this, this::onExportKeystore);
+    }
+
+    private void onExportKeystore(String keystore)
+    {
+        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+        sharingIntent.setType("text/plain");
+        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Keystore");
+        sharingIntent.putExtra(Intent.EXTRA_TEXT, keystore);
+        startActivityForResult(
+                Intent.createChooser(sharingIntent, "Share via"),
+                SHARE_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == SHARE_REQUEST_CODE)
+        {
+            Intent intent = new Intent();
+            setResult(RESULT_OK, intent);
+            finish();
+        }
+    }
+
     private enum BackupState
     {
         ENTER_BACKUP_STATE_HD, WRITE_DOWN_SEED_PHRASE, VERIFY_SEED_PHRASE,
-        ENTER_JSON_BACKUP, SET_JSON_PASSWORD
+        ENTER_JSON_BACKUP, SET_JSON_PASSWORD, TEST_SEED_PHRASE
     }
 }

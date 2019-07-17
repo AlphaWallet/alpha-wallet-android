@@ -10,18 +10,15 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.viewmodel.WalletActionsViewModel;
 import io.stormbird.wallet.viewmodel.WalletActionsViewModelFactory;
@@ -30,7 +27,7 @@ import io.stormbird.wallet.widget.BackupView;
 
 import static io.stormbird.wallet.C.SHARE_REQUEST_CODE;
 
-public class WalletActionsActivity extends BaseActivity implements View.OnClickListener {
+public class WalletActionsActivity extends BaseActivity implements View.OnClickListener, Runnable {
     @Inject
     WalletActionsViewModelFactory walletActionsViewModelFactory;
     WalletActionsViewModel viewModel;
@@ -38,6 +35,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
     private TextView walletTitle;
     private TextView walletBalance;
     private TextView walletAddress;
+    private LinearLayout successOverlay;
     private Button save;
     private EditText walletName;
     private TextView delete;
@@ -77,6 +75,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
     @Override
     protected void onResume() {
         super.onResume();
+        successOverlay = findViewById(R.id.layout_success_overlay);
     }
 
     private void initViewModel() {
@@ -207,7 +206,15 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
                 break;
             }
             case R.id.backup: {
-                startExport(wallet);
+                if (wallet.type == Wallet.WalletType.HDKEY)
+                {
+                    testSeedPhrase(wallet);
+                }
+                else
+                {
+                    exportJSON(wallet);
+                    //startExport(wallet);
+                }
                 break;
             }
             case R.id.button_save: {
@@ -222,6 +229,15 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
                 break;
             }
         }
+    }
+
+    private void testSeedPhrase(Wallet wallet)
+    {
+        Intent intent = new Intent(this, BackupKeyActivity.class);
+        intent.putExtra("ADDRESS", wallet.address);
+        intent.putExtra("TYPE", "TEST_SEED");
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        startActivityForResult(intent, C.REQUEST_BACKUP_SEED);
     }
 
     private void showWalletsActivity()
@@ -275,6 +291,15 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
         handler.postDelayed(() -> KeyboardUtils.showKeyboard(view.findViewById(R.id.password)), 500);
     }
 
+    private void exportJSON(Wallet wallet)
+    {
+        Intent intent = new Intent(this, BackupKeyActivity.class);
+        intent.putExtra("ADDRESS", wallet.address);
+        intent.putExtra("TYPE", "JSON");
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        startActivityForResult(intent, C.REQUEST_BACKUP_SEED);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -301,6 +326,11 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
                 aDialog.show();
             }
         }
+        else if (requestCode == C.REQUEST_BACKUP_SEED && resultCode == RESULT_OK)
+        {
+            successOverlay.setVisibility(View.VISIBLE);
+            handler.postDelayed(this, 1000);
+        }
     }
 
     private void hideDialog() {
@@ -316,6 +346,21 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
             viewModel.showHome(this);
         } else {
             finish();
+        }
+    }
+
+    @Override
+    public void run()
+    {
+        if (successOverlay.getAlpha() > 0)
+        {
+            successOverlay.animate().alpha(0.0f).setDuration(500);
+            handler.postDelayed(this, 750);
+        }
+        else
+        {
+            successOverlay.setVisibility(View.GONE);
+            successOverlay.setAlpha(1.0f);
         }
     }
 }

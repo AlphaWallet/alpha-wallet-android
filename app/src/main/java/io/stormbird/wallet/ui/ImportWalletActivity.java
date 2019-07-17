@@ -31,8 +31,9 @@ import static io.stormbird.wallet.C.RESET_WALLET;
 
 public class ImportWalletActivity extends BaseActivity {
 
-    private static final int KEYSTORE_FORM_INDEX = 0;
-    private static final int PRIVATE_KEY_FORM_INDEX = 1;
+    private static final int SEED_FORM_INDEX = 0;
+    private static final int KEYSTORE_FORM_INDEX = 1;
+    private static final int PRIVATE_KEY_FORM_INDEX = 2;
 
     private final List<Pair<String, Fragment>> pages = new ArrayList<>();
 
@@ -51,6 +52,7 @@ public class ImportWalletActivity extends BaseActivity {
         toolbar();
         setTitle(R.string.empty);
 
+        pages.add(SEED_FORM_INDEX, new Pair<>(getString(R.string.tab_seed), ImportKeystoreFragment.create()));
         pages.add(KEYSTORE_FORM_INDEX, new Pair<>(getString(R.string.tab_keystore), ImportKeystoreFragment.create()));
         pages.add(PRIVATE_KEY_FORM_INDEX, new Pair<>(getString(R.string.tab_private_key), ImportPrivateKeyFragment.create()));
         ViewPager viewPager = findViewById(R.id.viewPager);
@@ -71,6 +73,8 @@ public class ImportWalletActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
 
+        ((ImportKeystoreFragment) pages.get(SEED_FORM_INDEX).second)
+                .setOnImportKeystoreListener(importWalletViewModel);
         ((ImportKeystoreFragment) pages.get(KEYSTORE_FORM_INDEX).second)
                 .setOnImportKeystoreListener(importWalletViewModel);
         ((ImportPrivateKeyFragment) pages.get(PRIVATE_KEY_FORM_INDEX).second)

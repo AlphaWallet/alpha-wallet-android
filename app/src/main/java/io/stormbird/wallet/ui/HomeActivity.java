@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -29,6 +30,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import dagger.android.AndroidInjection;
 import io.stormbird.token.tools.ParseMagicLink;
@@ -53,7 +55,7 @@ import java.lang.reflect.Method;
 
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.*;
 
-public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, DownloadInterface, FragmentMessenger, ScrollControlInterface
+public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, DownloadInterface, FragmentMessenger, ScrollControlInterface, Runnable
 {
     @Inject
     HomeViewModelFactory homeViewModelFactory;
@@ -63,6 +65,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private Dialog dialog;
     private ScrollControlViewPager viewPager;
     private PagerAdapter pagerAdapter;
+    private LinearLayout successOverlay;
+    private Handler handler;
     private DownloadReceiver downloadReceiver;
     private AWalletConfirmationDialog cDialog;
     private String buildVersion;
@@ -216,6 +220,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.prepare();
         viewModel.getWalletName();
         checkRoot();
+        successOverlay = findViewById(R.id.layout_success_overlay);
         //check clipboard
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         try
@@ -479,6 +484,30 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         showPage(newPage);
     }
 
+    private void backupSeedSuccess()
+    {
+        settingsFragment.backupSeedSuccess();
+        successOverlay.setVisibility(View.VISIBLE);
+        handler = new Handler();
+        handler.postDelayed(this, 1000);
+    }
+
+    @Override
+    public void run()
+    {
+        if (successOverlay.getAlpha() > 0)
+        {
+            successOverlay.animate().alpha(0.0f).setDuration(500);
+            handler.postDelayed(this, 750);
+        }
+        else
+        {
+            successOverlay.setVisibility(View.GONE);
+            successOverlay.setAlpha(1.0f);
+            handler = null;
+        }
+    }
+
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
         public ScreenSlidePagerAdapter(FragmentManager fm) {
             super(fm);
@@ -704,7 +733,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 dappBrowserFragment.handleSelectNetwork(resultCode, data);
                 break;
             case C.REQUEST_BACKUP_SEED:
-                if (resultCode == RESULT_OK) settingsFragment.backupSeedSuccess();
+                if (resultCode == RESULT_OK) backupSeedSuccess();
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);

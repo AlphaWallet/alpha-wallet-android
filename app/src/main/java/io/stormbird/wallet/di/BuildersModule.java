@@ -1,34 +1,6 @@
 package io.stormbird.wallet.di;
 
-import io.stormbird.wallet.ui.AddTokenActivity;
-import io.stormbird.wallet.ui.AssetDisplayActivity;
-import io.stormbird.wallet.ui.ConfirmationActivity;
-import io.stormbird.wallet.ui.DappBrowserFragment;
-import io.stormbird.wallet.ui.Erc20DetailActivity;
-import io.stormbird.wallet.ui.FunctionActivity;
-import io.stormbird.wallet.ui.GasSettingsActivity;
-import io.stormbird.wallet.ui.HelpActivity;
-import io.stormbird.wallet.ui.HelpFragment;
-import io.stormbird.wallet.ui.HomeActivity;
-import io.stormbird.wallet.ui.ImportTokenActivity;
-import io.stormbird.wallet.ui.ImportWalletActivity;
-import io.stormbird.wallet.ui.NewSettingsFragment;
-import io.stormbird.wallet.ui.RedeemAssetSelectActivity;
-import io.stormbird.wallet.ui.RedeemSignatureDisplayActivity;
-import io.stormbird.wallet.ui.MyAddressActivity;
-import io.stormbird.wallet.ui.SelectNetworkActivity;
-import io.stormbird.wallet.ui.SellDetailActivity;
-import io.stormbird.wallet.ui.SellTicketActivity;
-import io.stormbird.wallet.ui.SendActivity;
-import io.stormbird.wallet.ui.SplashActivity;
-import io.stormbird.wallet.ui.TokenFunctionActivity;
-import io.stormbird.wallet.ui.TransactionDetailActivity;
-import io.stormbird.wallet.ui.TransactionsFragment;
-import io.stormbird.wallet.ui.TransferTicketActivity;
-import io.stormbird.wallet.ui.TransferTicketDetailActivity;
-import io.stormbird.wallet.ui.WalletActionsActivity;
-import io.stormbird.wallet.ui.WalletFragment;
-import io.stormbird.wallet.ui.WalletsActivity;
+import io.stormbird.wallet.ui.*;
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
 
@@ -133,6 +105,10 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = WalletActionsModule.class)
 	abstract WalletActionsActivity bindWalletActionsActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = BackupKeyModule.class)
+	abstract BackupKeyActivity bindBackupKeyActivity();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = MyAddressModule.class)

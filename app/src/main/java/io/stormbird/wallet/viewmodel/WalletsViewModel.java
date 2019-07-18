@@ -115,7 +115,7 @@ public class WalletsViewModel extends BaseViewModel implements CreateWalletCallb
     }
 
     private Wallet addWalletToMap(Wallet wallet) {
-        if (!walletBalances.containsKey(wallet.address.toLowerCase())) walletBalances.put(wallet.address.toLowerCase(), wallet);
+        if (wallet.address != null && !walletBalances.containsKey(wallet.address.toLowerCase())) walletBalances.put(wallet.address.toLowerCase(), wallet);
         return wallet;
     }
 
@@ -219,9 +219,12 @@ public class WalletsViewModel extends BaseViewModel implements CreateWalletCallb
         if (walletBalances.containsKey(token.getAddress()))
         {
             Wallet wallet = walletBalances.get(token.getAddress());
-            wallet.setWalletBalance(token.balance);
-            //update wallet balance
-            updateBalance.postValue(wallet);
+            if (wallet != null)
+            {
+                wallet.setWalletBalance(token.balance);
+                //update wallet balance
+                updateBalance.postValue(wallet);
+            }
         }
     }
 

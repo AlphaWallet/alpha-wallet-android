@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="input_address">Dirección de Ethereum o nombre ENS</string>
     <string name="wallet_label">Billetera</string>
     <string name="tx_label">Actas</string>
     <string name="browser_label">Navegadora</string>
@@ -127,5 +128,7 @@
     <string name="enter_private_key">Enter private key</string>
     <string name="hint_keystore">Enter Keystore JSON</string>
     <string name="remember_your_password">NOTE: You must remember your password. We do not store your password elsewhere. KeyStore is always encrypted, otherwise whoever has it can gain the money.</string>
-    <string name="private_key_check">Private key is hex only: use a-f A-F and 0-9</string>
+    <string name="private_key_check">Private key is hex only: use a–f A–F and 0–9</string>
+    <string name="nothing_to_share">Nothing to share</string>
+    <string name="nothing_to_share_message">Browse to a DApp to share it.</string>
 </resources>

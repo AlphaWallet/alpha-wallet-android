@@ -1,4 +1,10 @@
 <resources>
+    <string name="ask_user_about_xml_override">是否启用 TokenScript 配置覆盖目录？</string>
+    <string name="explain_xml_override">启用 XML 覆盖将会在您的手机存储中创建一个本地目录 \'AlphaWallet\'， TokenScript 配置文件 (XML) 将被存入此目录，该目录将会覆盖默认或者网络 Token 配置。</string>
+    <string name="enable_xml_override_dir">启用 XML 覆盖</string>
+    <string name="dialog_message">请输入密码来加密你的钱包</string>
+    <string name="suggestion_empty_password_available">密码可以留空。</string>
+    <string name="input_address">以太坊地址或ENS名称</string>
     <string name="wallet_label">钱包</string>
     <string name="tx_label">交易</string>
     <string name="browser_label">浏览器</string>
@@ -388,5 +394,7 @@
     <string name="import_from_cloud">IMPORT FROM ICLOUD/DROPBOX/GOOGLE DRIVE</string>
     <string name="enter_private_key">Enter private key</string>
     <string name="remember_your_password">NOTE: You must remember your password. We do not store your password elsewhere. KeyStore is always encrypted, otherwise whoever has it can gain the money.</string>
-    <string name="private_key_check">Private key is hex only: use a-f A-F and 0-9</string>
+    <string name="private_key_check">Private key is hex only: use a–f A–F and 0–9</string>
+    <string name="nothing_to_share">Nothing to share</string>
+    <string name="nothing_to_share_message">Browse to a DApp to share it.</string>
 </resources>

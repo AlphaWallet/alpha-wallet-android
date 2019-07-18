@@ -27,7 +27,7 @@
             android:background="@drawable/background_round_blue_9dp"
             android:completionThreshold="1"
             android:fontFamily="@font/font_regular"
-            android:hint="@string/contract_address"
+            android:hint="@string/input_address"
             android:imeOptions="actionDone"
             android:inputType="text"
             android:lines="1"

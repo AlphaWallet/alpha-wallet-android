@@ -20,6 +20,7 @@
             android:layout_gravity="center_horizontal"
             android:src="@drawable/ic_wallet" />
         <TextView
+            android:id="@+id/nav_wallet_text"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_horizontal"
@@ -42,6 +43,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_transactions" />
         <TextView
+            android:id="@+id/nav_transactions_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp"
@@ -64,6 +66,7 @@
             android:src="@drawable/ic_browser" />
 
         <TextView
+            android:id="@+id/nav_browser_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp"
@@ -85,6 +88,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_settings" />
         <TextView
+            android:id="@+id/nav_settings_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp"

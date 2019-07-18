@@ -359,6 +359,7 @@
     <string name="action_save">Save</string>
     <string name="action_contract_info">Contract Info</string>
     <string name="contract_address">Contract Address</string>
+    <string name="input_address">Ethereum address or ENS name</string>
     <string name="ticket_range_expired">Magiclink Expired</string>
     <string name="verified_contract">Verified by Stormbird</string>
     <string name="unverified_contract">Unverified Contract</string>
@@ -529,5 +530,7 @@
     <string name="import_from_cloud">IMPORT FROM ICLOUD/DROPBOX/GOOGLE DRIVE</string>
     <string name="enter_private_key">Enter private key</string>
     <string name="remember_your_password">NOTE: You must remember your password. We do not store your password elsewhere. KeyStore is always encrypted, otherwise whoever has it can gain the money.</string>
-    <string name="private_key_check">Private key is hex only: use a-f A-F and 0-9</string>
+    <string name="private_key_check">Private key is hex only: use a–f A–F and 0–9</string>
+    <string name="nothing_to_share">Nothing to share</string>
+    <string name="nothing_to_share_message">Browse to a DApp to share it.</string>
 </resources>

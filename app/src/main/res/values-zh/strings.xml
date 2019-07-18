@@ -388,4 +388,5 @@
     <string name="import_from_cloud">IMPORT FROM ICLOUD/DROPBOX/GOOGLE DRIVE</string>
     <string name="enter_private_key">Enter private key</string>
     <string name="remember_your_password">NOTE: You must remember your password. We do not store your password elsewhere. KeyStore is always encrypted, otherwise whoever has it can gain the money.</string>
+    <string name="private_key_check">Private key is hex only: use a-f A-F and 0-9</string>
 </resources>

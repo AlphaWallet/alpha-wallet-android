@@ -4,21 +4,30 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.ui.widget.OnImportPrivateKeyListener;
 import io.stormbird.wallet.widget.PasswordInputView;
 
-public class ImportPrivateKeyFragment extends Fragment implements View.OnClickListener {
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+public class ImportPrivateKeyFragment extends Fragment implements View.OnClickListener, TextWatcher
+{
     private static final OnImportPrivateKeyListener dummyOnImportPrivateKeyListener = key -> { };
+    private static final String validator = "[^a-f^A-F^0-9]";
 
     private PasswordInputView privateKey;
+    private Button importButton;
     private OnImportPrivateKeyListener onImportPrivateKeyListener = dummyOnImportPrivateKeyListener;
+    private Pattern pattern;
 
     public static ImportPrivateKeyFragment create() {
         return new ImportPrivateKeyFragment();
@@ -36,7 +45,11 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
         super.onViewCreated(view, savedInstanceState);
 
         privateKey = view.findViewById(R.id.input_private_key);
-        view.findViewById(R.id.import_action).setOnClickListener(this);
+        importButton = view.findViewById(R.id.import_action);
+        importButton.setOnClickListener(this);
+        privateKey.getEditText().addTextChangedListener(this);
+        updateButtonState(false);
+        pattern = Pattern.compile(validator, Pattern.MULTILINE);
     }
 
     @Override
@@ -52,14 +65,60 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
                 onImportPrivateKeyListener.onPrivateKey(value);
                 return;
             }
+            else
+            {
+                privateKey.setError(getString(R.string.suggestion_private_key));
+                return;
+            }
         }
 
         privateKey.setError(getString(R.string.error_field_required));
+    }
+
+    private void updateButtonState(boolean enabled)
+    {
+        importButton.setActivated(enabled);
+        importButton.setClickable(enabled);
+        int colorId = enabled ? R.color.nasty_green : R.color.inactive_green;
+        if (getContext() != null) importButton.setBackgroundColor(getContext().getColor(colorId));
     }
 
     public void setOnImportPrivateKeyListener(OnImportPrivateKeyListener onImportPrivateKeyListener) {
         this.onImportPrivateKeyListener = onImportPrivateKeyListener == null
                 ? dummyOnImportPrivateKeyListener
                 : onImportPrivateKeyListener;
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
+    {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+    {
+
+    }
+
+    @Override
+    public void afterTextChanged(Editable editable)
+    {
+        if (privateKey.isErrorState()) privateKey.setError(null);
+        String value = privateKey.getText().toString();
+        final Matcher matcher = pattern.matcher(value);
+        if (matcher.find())
+        {
+            updateButtonState(false);
+            privateKey.setError(R.string.private_key_check);
+        }
+        else if (value.length() > 10)
+        {
+            updateButtonState(true);
+        }
+        else
+        {
+            updateButtonState(false);
+        }
     }
 }

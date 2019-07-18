@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 public class ImportKeystoreFragment extends Fragment implements View.OnClickListener, TextWatcher
 {
     private static final OnImportKeystoreListener dummyOnImportKeystoreListener = (k, p) -> {};
-    private static final String validator = "[^a-z^0-9^{^}^\"^:^,^-]";
+    private static final String validator = "[^a-z^A-Z^0-9^{^}^\"^:^,^-]";
 
     private PasswordInputView keystore;
     private PasswordInputView password;
@@ -55,7 +55,7 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
         passwordText = view.findViewById(R.id.text_password_notice);
         passwordText.setVisibility(View.GONE);
         password.setVisibility(View.GONE);
-        importButton = view.findViewById(R.id.import_action);//.setOnClickListener(this);
+        importButton = view.findViewById(R.id.import_action);
         importButton.setOnClickListener(this);
         updateButtonState(false);
         keystore.getEditText().addTextChangedListener(this);

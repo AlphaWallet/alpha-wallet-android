@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
 <ScrollView
     android:layout_width="match_parent"
@@ -62,10 +63,7 @@
         <LinearLayout
             android:id="@+id/layout_wallet_address"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="70dp"
             android:background="@drawable/selector_settings_item"
             android:clickable="true"
             android:focusable="true">
@@ -94,12 +92,16 @@
         </LinearLayout>
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/greye5"/>
+
+        <LinearLayout
             android:id="@+id/layout_manage_wallets"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="70dp"
             android:background="@drawable/selector_settings_item">
 
             <RelativeLayout
@@ -147,12 +149,16 @@
         </LinearLayout>
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/greye5"/>
+
+        <LinearLayout
             android:id="@+id/layout_switch_network"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="70dp"
             android:background="@drawable/selector_settings_item">
 
             <RelativeLayout
@@ -188,12 +194,16 @@
         </LinearLayout>
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/greye5"/>
+
+        <LinearLayout
             android:id="@+id/layout_locale_lang"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="70dp"
             android:background="@drawable/selector_settings_item">
 
             <RelativeLayout
@@ -236,12 +246,16 @@
         </LinearLayout>
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/greye5"/>
+
+        <LinearLayout
             android:id="@+id/layout_notification_settings"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="70dp"
             android:background="@drawable/selector_settings_item">
 
             <RelativeLayout
@@ -284,12 +298,16 @@
         </LinearLayout>
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/greye5"/>
+
+        <LinearLayout
             android:id="@+id/layout_help_faq"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="70dp"
             android:background="@drawable/selector_settings_item">
 
             <RelativeLayout
@@ -333,12 +351,16 @@
         </LinearLayout>
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/greye5"/>
+
+        <LinearLayout
             android:id="@+id/layout_telegram"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="70dp"
             android:background="@drawable/selector_settings_item">
 
             <RelativeLayout
@@ -365,12 +387,16 @@
         </LinearLayout>
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/greye5"/>
+
+        <LinearLayout
             android:id="@+id/layout_twitter"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="70dp"
             android:background="@drawable/selector_settings_item">
 
             <RelativeLayout
@@ -397,12 +423,16 @@
         </LinearLayout>
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/greye5"/>
+
+        <LinearLayout
             android:id="@+id/layout_facebook"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="70dp"
             android:background="@drawable/selector_settings_item">
 
             <RelativeLayout
@@ -429,12 +459,16 @@
         </LinearLayout>
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/greye5"/>
+
+        <LinearLayout
             android:id="@+id/layout_xml_override"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="70dp"
             android:visibility="gone"
             android:background="@drawable/selector_settings_item">
 
@@ -463,10 +497,14 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/greye5"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
             android:visibility="gone"
             android:background="@drawable/selector_settings_item">
 

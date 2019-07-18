@@ -22,6 +22,7 @@ import dagger.android.support.AndroidSupportInjection;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
+import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
@@ -61,7 +62,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     private View selectedToken;
     private Handler handler;
 
-    private int tempt = 0;
+    private boolean checkWalletBackup;
 
     private boolean isVisible;
 
@@ -123,6 +124,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
     private void refreshList()
     {
+        checkWalletBackup = true;
         adapter.setClear();
         viewModel.reloadTokens();
     }
@@ -247,15 +249,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         selectedToken = null;
         viewModel.setVisibility(isVisible);
         viewModel.prepare();
-
-        WarningData wData = new WarningData(this);
-        wData.title = "Your Wallet is at risk!";
-        wData.detail = "You have not backed up your wallet yet. You have $200.000 USD net. Act now. " + tempt++;
-        wData.buttonText = "Back up Wallet";
-        wData.colour = ContextCompat.getColor(getContext(), R.color.slate_grey);
-        wData.buttonColour = ContextCompat.getColor(getContext(), R.color.backup_grey);
-        wData.address = "0x007";
-        adapter.addWarning(wData);
     }
 
     private void onTokens(Token[] tokens)
@@ -263,6 +256,43 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         if (tokens != null)
         {
             adapter.setTokens(tokens);
+            if (checkWalletBackup && viewModel.getWalletAddr() != null)
+            {
+                checkNeedsBackup();
+            }
+        }
+    }
+
+    private void checkNeedsBackup()
+    {
+        checkWalletBackup = false;
+        //is this wallet on the backup schedule?
+        HDKeyService.BackupLevel backupLevel = HDKeyService.checkNeedsBackUp(getActivity(), viewModel.getWalletAddr());
+        WarningData wData;
+        switch (backupLevel)
+        {
+            case BACKUP_NOT_REQUIRED:
+                break;
+            case PERIODIC_BACKUP:
+                wData = new WarningData(this);
+                wData.title = getString(R.string.time_to_backup_wallet);
+                wData.detail = getString(R.string.recommend_monthly_backup);
+                wData.buttonText = getString(R.string.back_up_wallet_action, viewModel.getWalletAddr().substring(0, 5));
+                wData.colour = ContextCompat.getColor(getContext(), R.color.slate_grey);
+                wData.buttonColour = ContextCompat.getColor(getContext(), R.color.backup_grey);
+                wData.address = viewModel.getWalletAddr();
+                adapter.addWarning(wData);
+                break;
+            case WALLET_NEVER_BACKED_UP:
+                wData = new WarningData(this);
+                wData.title = getString(R.string.wallet_not_backed_up);
+                wData.detail = getString(R.string.not_backed_up_detail);
+                wData.buttonText = getString(R.string.back_up_wallet_action, viewModel.getWalletAddr().substring(0, 5));
+                wData.colour = ContextCompat.getColor(getContext(), R.color.warning_red);
+                wData.buttonColour = ContextCompat.getColor(getContext(), R.color.warning_dark_red);
+                wData.address = viewModel.getWalletAddr();
+                adapter.addWarning(wData);
+                break;
         }
     }
 

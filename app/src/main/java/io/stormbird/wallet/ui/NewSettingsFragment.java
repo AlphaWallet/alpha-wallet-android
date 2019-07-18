@@ -30,6 +30,7 @@ import dagger.android.support.AndroidSupportInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.util.LocaleUtils;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModel;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModelFactory;
@@ -182,15 +183,12 @@ public class NewSettingsFragment extends Fragment {
     private void setupBackupWarning()
     {
         if (getActivity() == null || layoutBackup == null || backupButton == null) return;
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        Set<String> notBackedUp = pref.getStringSet ("notbackedup", new ArraySet<>());
-        if (notBackedUp.size() > 0)
+        String walletToBackUp = HDKeyService.getWalletNeedsBackup(getActivity());
+        if (walletToBackUp != null)
         {
-            final String addr = notBackedUp.iterator().next();
             layoutBackup.setVisibility(View.VISIBLE);
-            backupButton.setText(getString(R.string.back_up_wallet_action, addr.substring(0, 5)));
-            layoutBackup.setOnClickListener(v -> openBackupActivity(addr));
-            backupButton.setOnClickListener(v -> openBackupActivity(addr));
+            backupButton.setText(getString(R.string.back_up_wallet_action, walletToBackUp.substring(0, 5)));
+            backupButton.setOnClickListener(v -> openBackupActivity(walletToBackUp));
         }
         else
         {

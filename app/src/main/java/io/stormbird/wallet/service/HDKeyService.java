@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.security.keystore.*;
 import android.util.ArraySet;
 import android.util.Log;
+import android.view.View;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.AuthenticationCallback;
 import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
@@ -43,7 +44,8 @@ public class HDKeyService implements AuthenticationCallback
     private static final String BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC;
     private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7;
     private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
-    private static final int AUTHENTICATION_DURATION_SECONDS = 300;
+    private static final int AUTHENTICATION_DURATION_SECONDS = 30;
+    private static final int TIME_BETWEEN_BACKUP_MILLIS = 1000*60*10; //TODO: RESTORE 30 DAYS. TESTING: 10 minutes  //1000 * 60 * 60 * 24 * 30; //30 days
 
     private enum Operation
     {
@@ -545,6 +547,7 @@ public class HDKeyService implements AuthenticationCallback
     public static void flagAsNotBackedUp(Context ctx, String walletAddr) {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
         Set<String> notBackedUp = pref.getStringSet ("notbackedup", new ArraySet<>());
+        for (String entry : notBackedUp) if (entry.contains(walletAddr)) { notBackedUp.remove(entry); break; } //remove any old entry
         //Set<String> notBackedUp = new ArraySet<>();
         notBackedUp.add(walletAddr);
         PreferenceManager
@@ -554,14 +557,68 @@ public class HDKeyService implements AuthenticationCallback
                 .apply();
     }
 
+    /**
+     * Called when wallet created. Notice that the wallet is defined with no backup date.
+     * This signals wallet was never backed up
+     * @param ctx
+     * @param walletAddr
+     */
     public static void flagAsBackedUp(Context ctx, String walletAddr) {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
         Set<String> notBackedUp = pref.getStringSet ("notbackedup", new ArraySet<>());
-        notBackedUp.remove(walletAddr);
+        for (String entry : notBackedUp) if (entry.contains(walletAddr)) { notBackedUp.remove(entry); break; }
+        long nextCheckTime = System.currentTimeMillis() + TIME_BETWEEN_BACKUP_MILLIS;
+        notBackedUp.add(walletAddr + "," + nextCheckTime);
         PreferenceManager
                 .getDefaultSharedPreferences(ctx)
                 .edit()
                 .putStringSet("notbackedup", notBackedUp)
                 .apply();
+    }
+
+    /**
+     * Check if a wallet needs to be backed up.
+     * @param ctx
+     * @param walletAddr
+     * @return
+     */
+    public static BackupLevel checkNeedsBackUp(Context ctx, String walletAddr)
+    {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
+        Set<String> notBackedUp = pref.getStringSet ("notbackedup", new ArraySet<>());
+        for (String entry : notBackedUp)
+        {
+            if (entry.contains(walletAddr))
+            {
+                if (!entry.contains(",")) return BackupLevel.WALLET_NEVER_BACKED_UP;
+                long nextUpdate = System.currentTimeMillis() - 1;
+                String[] values = entry.split(",");
+                if (values.length == 2)
+                {
+                    nextUpdate = Long.parseLong(values[1]);
+                }
+
+                if (System.currentTimeMillis() > nextUpdate) return BackupLevel.PERIODIC_BACKUP;
+            }
+        }
+
+        return BackupLevel.BACKUP_NOT_REQUIRED;
+    }
+
+    public static String getWalletNeedsBackup(Context ctx)
+    {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
+        Set<String> notBackedUp = pref.getStringSet ("notbackedup", new ArraySet<>());
+        for (String entry : notBackedUp)
+        {
+            if (!entry.contains(",")) return entry;
+        }
+
+        return null;
+    }
+
+    public enum BackupLevel
+    {
+        BACKUP_NOT_REQUIRED, PERIODIC_BACKUP, WALLET_NEVER_BACKED_UP
     }
 }

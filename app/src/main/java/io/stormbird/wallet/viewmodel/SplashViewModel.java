@@ -209,7 +209,7 @@ public class SplashViewModel extends ViewModel implements CreateWalletCallbackIn
         }
         else
         {
-            //TODO: Relax key creation slightly to ensure a key is always created
+            //TODO: Relax key creation params (ie authentication) slightly to ensure a key is always created
             wallets.postValue(new Wallet[0]);
         }
     }

@@ -112,6 +112,8 @@ public class WalletViewModel extends BaseViewModel
     public LiveData<Boolean> tokensReady() { return tokensReady; }
     public LiveData<Boolean> fetchKnownContracts() { return fetchKnownContracts; }
 
+    public String getWalletAddr() { return currentWallet.address; }
+
     @Override
     protected void onCleared() {
         super.onCleared();

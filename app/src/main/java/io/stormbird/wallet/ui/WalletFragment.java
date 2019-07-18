@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,6 +25,7 @@ import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
+import io.stormbird.wallet.ui.widget.entity.WarningData;
 import io.stormbird.wallet.util.TabUtils;
 import io.stormbird.wallet.viewmodel.WalletViewModel;
 import io.stormbird.wallet.viewmodel.WalletViewModelFactory;
@@ -41,7 +43,7 @@ import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
  * Created by justindeguzman on 2/28/18.
  */
 
-public class WalletFragment extends Fragment implements OnTokenClickListener, View.OnClickListener, TokenInterface, Runnable
+public class WalletFragment extends Fragment implements OnTokenClickListener, View.OnClickListener, TokenInterface, Runnable, BackupTokenCallback
 {
     private static final String TAG = "WFRAG";
 
@@ -58,6 +60,8 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     private FragmentMessenger homeMessager;
     private View selectedToken;
     private Handler handler;
+
+    private int tempt = 0;
 
     private boolean isVisible;
 
@@ -243,6 +247,15 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         selectedToken = null;
         viewModel.setVisibility(isVisible);
         viewModel.prepare();
+
+        WarningData wData = new WarningData(this);
+        wData.title = "Your Wallet is at risk!";
+        wData.detail = "You have not backed up your wallet yet. You have $200.000 USD net. Act now. " + tempt++;
+        wData.buttonText = "Back up Wallet";
+        wData.colour = ContextCompat.getColor(getContext(), R.color.slate_grey);
+        wData.buttonColour = ContextCompat.getColor(getContext(), R.color.backup_grey);
+        wData.address = "0x007";
+        adapter.addWarning(wData);
     }
 
     private void onTokens(Token[] tokens)
@@ -386,5 +399,17 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
             selectedToken.findViewById(R.id.token_layout).setBackgroundResource(R.drawable.background_marketplace_event);
         }
         selectedToken = null;
+    }
+
+    @Override
+    public void BackupClick(String address)
+    {
+        System.out.println(address);
+    }
+
+    @Override
+    public void remindMeLater()
+    {
+        System.out.println("yoless");
     }
 }

@@ -44,6 +44,8 @@
 	<color name="grey_faint">#332a2a2a</color>
 	<color name="grey2">#2a2a2a</color>
 	<color name="greyfivef">#de5f5f5f</color>
+	<color name="slate_grey">#60677d</color>
+	<color name="backup_grey">#40475b</color>
 
 
 	<color name="onboarding_indicator_unselected">#d8d8d8</color>

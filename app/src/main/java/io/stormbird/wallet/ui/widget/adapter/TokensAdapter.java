@@ -14,14 +14,8 @@ import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
-import io.stormbird.wallet.ui.widget.entity.SortedItem;
-import io.stormbird.wallet.ui.widget.entity.TokenBalanceSortedItem;
-import io.stormbird.wallet.ui.widget.entity.TokenSortedItem;
-import io.stormbird.wallet.ui.widget.entity.TotalBalanceSortedItem;
-import io.stormbird.wallet.ui.widget.holder.AssetInstanceScriptHolder;
-import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
-import io.stormbird.wallet.ui.widget.holder.TokenHolder;
-import io.stormbird.wallet.ui.widget.holder.TotalBalanceHolder;
+import io.stormbird.wallet.ui.widget.entity.*;
+import io.stormbird.wallet.ui.widget.holder.*;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -110,6 +104,9 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 holder = tokenHolder;
             }
             break;
+            case WarningHolder.VIEW_TYPE:
+                holder = new WarningHolder(R.layout.item_warning, parent);
+                break;
             case AssetInstanceScriptHolder.VIEW_TYPE:
                 holder = new AssetInstanceScriptHolder(R.layout.item_ticket, parent, null, assetService, false);
                 break;
@@ -143,6 +140,20 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         boolean refresh = needsRefresh;
         needsRefresh = false;
         return refresh;
+    }
+
+    public void addWarning(WarningData data)
+    {
+//        for (int i = 0; i < items.size(); i++)
+//        {
+//            if (items.get(i).viewType == WarningHolder.VIEW_TYPE)
+//            {
+//                items.removeItemAt(i);
+//                break;
+//            }
+//        }
+
+        items.add(new WarningSortedItem(data, 0));
     }
 
     public void setTokens(Token[] tokens)

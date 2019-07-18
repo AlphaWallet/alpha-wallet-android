@@ -14,6 +14,7 @@ import android.util.Log;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.AuthenticationCallback;
 import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
+import io.stormbird.wallet.entity.ImportWalletCallback;
 import io.stormbird.wallet.entity.ServiceErrorException;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.SignTransactionDialog;
@@ -46,7 +47,7 @@ public class HDKeyService implements AuthenticationCallback
 
     private enum Operation
     {
-        CREATE_HD_KEY, UNLOCK_HD_KEY, FETCH_MNEMONIC
+        CREATE_HD_KEY, UNLOCK_HD_KEY, FETCH_MNEMONIC, IMPORT_HD_KEY
     }
 
     private static final int DEFAULT_KEY_STRENGTH = 128;
@@ -56,6 +57,7 @@ public class HDKeyService implements AuthenticationCallback
     private String currentKey;
     private SignTransactionDialog signDialog;
     private CreateWalletCallbackInterface callbackInterface;
+    private ImportWalletCallback importCallback;
 
     public HDKeyService(Activity ctx)
     {
@@ -88,6 +90,28 @@ public class HDKeyService implements AuthenticationCallback
         currentKey = address;
         callbackInterface = callback;
         checkAuthentication(Operation.FETCH_MNEMONIC);
+    }
+
+    public void importHDKey(String seedPhrase, ImportWalletCallback callback)
+    {
+        //cursory check for valid key import
+        if (!HDWallet.isValid(seedPhrase))
+        {
+            callback.WalletValidated(null);
+        }
+        else
+        {
+            currentWallet = new HDWallet(seedPhrase, "key1");
+            PrivateKey pk = currentWallet.getKeyForCoin(CoinType.ETHEREUM);
+            currentKey = CoinType.ETHEREUM.deriveAddress(pk);
+            importCallback = callback;
+            checkAuthentication(Operation.IMPORT_HD_KEY);
+        }
+    }
+
+    private void importHDKey2()
+    {
+        //TODO: Store wallet
     }
 
     public byte[] signData(String key, byte[] data)
@@ -466,6 +490,9 @@ public class HDKeyService implements AuthenticationCallback
                 break;
             case FETCH_MNEMONIC:
                 unpackMnemonic();
+                break;
+            case IMPORT_HD_KEY:
+                importHDKey2();
                 break;
             default:
                 break;

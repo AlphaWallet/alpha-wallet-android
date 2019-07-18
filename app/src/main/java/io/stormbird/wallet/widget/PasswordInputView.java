@@ -1,10 +1,13 @@
 package io.stormbird.wallet.widget;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.support.v4.content.ContextCompat;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -27,6 +30,8 @@ public class PasswordInputView extends LinearLayout
     private int labelResId;
     private int lines;
     private String inputType;
+    private int minHeight;
+    private int innerPadding;
     private int buttonSrc;
     private String imeOptions;
 
@@ -43,6 +48,12 @@ public class PasswordInputView extends LinearLayout
         setImeOptions();
 
         setInputType();
+        setMinHeight();
+    }
+
+    public EditText getEditText()
+    {
+        return editText;
     }
 
     private void bindViews() {
@@ -76,8 +87,19 @@ public class PasswordInputView extends LinearLayout
             lines = a.getInt(R.styleable.InputView_lines, 1);
             inputType = a.getString(R.styleable.InputView_inputType);
             imeOptions = a.getString(R.styleable.InputView_imeOptions);
+            minHeight = a.getInteger(R.styleable.InputView_minHeight, 0);
+            innerPadding = a.getInteger(R.styleable.InputView_innerPadding, 0);
         } finally {
             a.recycle();
+        }
+    }
+
+    private void setMinHeight() {
+        Resources r = getResources();
+        if (minHeight > 0)
+        {
+            int px = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, minHeight, r.getDisplayMetrics());
+            editText.setMinHeight(px);
         }
     }
 
@@ -123,14 +145,14 @@ public class PasswordInputView extends LinearLayout
         if (lines > 1) {
             editText.setGravity(Gravity.TOP);
             editText.setPadding(
-                    Utils.dp2px(context, 15),
-                    Utils.dp2px(context, 10),
-                    Utils.dp2px(context, 15),
-                    Utils.dp2px(context, 10)
+                    Utils.dp2px(context, 20),
+                    Utils.dp2px(context, 16),
+                    Utils.dp2px(context, 20),
+                    Utils.dp2px(context, 16)
             );
         }
 
-        editText.setLines(lines);
+        editText.setMinLines(lines);
     }
 
     public CharSequence getText() {
@@ -145,22 +167,37 @@ public class PasswordInputView extends LinearLayout
         if (resId == R.string.empty) {
             error.setText(resId);
             error.setVisibility(View.GONE);
+            editText.setBackgroundResource(R.drawable.background_password_entry);
+            label.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
         } else {
             error.setText(resId);
             error.setVisibility(View.VISIBLE);
+            editText.setBackgroundResource(R.drawable.background_password_error);
+            label.setTextColor(ContextCompat.getColor(getContext(), R.color.warning_red));
         }
     }
 
     public void setError(CharSequence message) {
         if (message == null) {
             error.setVisibility(View.GONE);
+            editText.setBackgroundResource(R.drawable.background_password_entry);
+            label.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
         } else if (message.toString().isEmpty()) {
             error.setText(message);
             error.setVisibility(View.GONE);
+            editText.setBackgroundResource(R.drawable.background_password_entry);
+            label.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
         } else {
             error.setText(message);
             error.setVisibility(View.VISIBLE);
+            editText.setBackgroundResource(R.drawable.background_password_error);
+            label.setTextColor(ContextCompat.getColor(getContext(), R.color.warning_red));
         }
+    }
+
+    public boolean isErrorState()
+    {
+        return error.getVisibility() == View.VISIBLE;
     }
 }
 

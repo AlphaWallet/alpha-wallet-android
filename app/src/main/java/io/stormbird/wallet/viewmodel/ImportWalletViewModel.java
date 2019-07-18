@@ -1,20 +1,27 @@
 package io.stormbird.wallet.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.ErrorEnvelope;
+import io.stormbird.wallet.entity.ImportWalletCallback;
 import io.stormbird.wallet.entity.ServiceErrorException;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.ImportWalletInteract;
+import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.ui.widget.OnImportKeystoreListener;
 import io.stormbird.wallet.ui.widget.OnImportPrivateKeyListener;
+import io.stormbird.wallet.ui.widget.OnImportSeedListener;
+import wallet.core.jni.HDWallet;
 
-public class ImportWalletViewModel extends BaseViewModel implements OnImportKeystoreListener, OnImportPrivateKeyListener {
+public class ImportWalletViewModel extends BaseViewModel implements OnImportKeystoreListener, OnImportPrivateKeyListener, OnImportSeedListener
+{
 
     private final ImportWalletInteract importWalletInteract;
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> badSeed = new MutableLiveData<>();
 
     ImportWalletViewModel(ImportWalletInteract importWalletInteract) {
         this.importWalletInteract = importWalletInteract;
@@ -39,6 +46,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnImportKeys
     public LiveData<Wallet> wallet() {
         return wallet;
     }
+    public LiveData<Boolean> badSeed() { return badSeed; }
 
     private void onWallet(Wallet wallet) {
         progress.postValue(false);
@@ -53,5 +61,24 @@ public class ImportWalletViewModel extends BaseViewModel implements OnImportKeys
         } else {
             error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
         }
+    }
+
+    @Override
+    public void onSeed(String seedPhrase, Activity ctx)
+    {
+        //validate seed
+        ImportWalletCallback callback = address -> {
+            if (address == null)
+            {
+                System.out.println("ERROR");
+                badSeed.postValue(true);
+            }
+            else
+            {
+                System.out.println("PASS");
+            }
+        };
+        HDKeyService hdKeyService = new HDKeyService(ctx);
+        hdKeyService.importHDKey(seedPhrase, callback);
     }
 }

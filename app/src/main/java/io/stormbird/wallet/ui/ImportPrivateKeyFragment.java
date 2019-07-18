@@ -8,17 +8,16 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.ui.widget.OnImportPrivateKeyListener;
-import io.stormbird.wallet.widget.InputView;
+import io.stormbird.wallet.widget.PasswordInputView;
 
 public class ImportPrivateKeyFragment extends Fragment implements View.OnClickListener {
 
     private static final OnImportPrivateKeyListener dummyOnImportPrivateKeyListener = key -> { };
 
-    private InputView privateKey;
+    private PasswordInputView privateKey;
     private OnImportPrivateKeyListener onImportPrivateKeyListener = dummyOnImportPrivateKeyListener;
 
     public static ImportPrivateKeyFragment create() {

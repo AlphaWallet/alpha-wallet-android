@@ -52,7 +52,7 @@ public class ImportWalletActivity extends BaseActivity {
         toolbar();
         setTitle(R.string.empty);
 
-        pages.add(SEED_FORM_INDEX, new Pair<>(getString(R.string.tab_seed), ImportKeystoreFragment.create()));
+        pages.add(SEED_FORM_INDEX, new Pair<>(getString(R.string.tab_seed), ImportSeedFragment.create()));
         pages.add(KEYSTORE_FORM_INDEX, new Pair<>(getString(R.string.tab_keystore), ImportKeystoreFragment.create()));
         pages.add(PRIVATE_KEY_FORM_INDEX, new Pair<>(getString(R.string.tab_private_key), ImportPrivateKeyFragment.create()));
         ViewPager viewPager = findViewById(R.id.viewPager);
@@ -65,20 +65,35 @@ public class ImportWalletActivity extends BaseActivity {
         importWalletViewModel.progress().observe(this, this::onProgress);
         importWalletViewModel.error().observe(this, this::onError);
         importWalletViewModel.wallet().observe(this, this::onWallet);
+        importWalletViewModel.badSeed().observe(this, this::onBadSeed);
 
         TabUtils.changeTabsFont(this, tabLayout);
+    }
+
+    private void onBadSeed(Boolean aBoolean)
+    {
+        ((ImportSeedFragment) pages.get(SEED_FORM_INDEX).second).onBadSeed();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        ((ImportKeystoreFragment) pages.get(SEED_FORM_INDEX).second)
-                .setOnImportKeystoreListener(importWalletViewModel);
+        ((ImportSeedFragment) pages.get(SEED_FORM_INDEX).second)
+                .setOnImportSeedListener(importWalletViewModel);
         ((ImportKeystoreFragment) pages.get(KEYSTORE_FORM_INDEX).second)
                 .setOnImportKeystoreListener(importWalletViewModel);
         ((ImportPrivateKeyFragment) pages.get(PRIVATE_KEY_FORM_INDEX).second)
                 .setOnImportPrivateKeyListener(importWalletViewModel);
+    }
+
+    private void resetFragments()
+    {
+        if (pages.get(KEYSTORE_FORM_INDEX) != null)
+        {
+            ((ImportKeystoreFragment) pages.get(KEYSTORE_FORM_INDEX).second)
+                    .reset();
+        }
     }
 
     @Override
@@ -115,6 +130,8 @@ public class ImportWalletActivity extends BaseActivity {
         dialog.setButtonText(R.string.dialog_ok);
         dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
+
+        resetFragments();
     }
 
     private void onProgress(boolean shouldShowProgress) {

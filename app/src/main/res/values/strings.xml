@@ -326,7 +326,7 @@
     <string name="action_import">Import</string>
     <string name="prompt_password">Password</string>
     <string name="hint_private_key_field">Private key *</string>
-    <string name="hint_keystore">Keystore *</string>
+    <string name="hint_keystore">Enter Keystore JSON</string>
     <string name="tab_seed">Seed</string>
     <string name="tab_keystore">Keystore</string>
     <string name="tab_private_key">Private key</string>
@@ -523,4 +523,10 @@
     <string name="set_keystore_password">Set Keystore Password</string>
     <string name="keystore_loss_warning">NOTE: You must remember your password. We do not store your password elsewhere. KeyStore is always encrypted, otherwise whoever has it can gain the money.</string>
     <string name="share_keystore">Share Keystore</string>
+    <string name="enter_seed_phrase">Enter seed phrase</string>
+    <string name="seed_phrase_conversion_message">If your seed phrase is not in English, please convert it to English on your own using tools like this https://iancoleman.io/bip39/</string>
+    <string name="bad_seed_phrase">Invalid recovery phrase. Please check and try again.</string>
+    <string name="import_from_cloud">IMPORT FROM ICLOUD/DROPBOX/GOOGLE DRIVE</string>
+    <string name="enter_private_key">Enter private key</string>
+    <string name="remember_your_password">NOTE: You must remember your password. We do not store your password elsewhere. KeyStore is always encrypted, otherwise whoever has it can gain the money.</string>
 </resources>

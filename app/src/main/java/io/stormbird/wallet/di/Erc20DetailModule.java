@@ -20,7 +20,7 @@ class Erc20DetailModule {
                                                                    FetchTokensInteract fetchTokensInteract,
                                                                    FetchTransactionsInteract fetchTransactionsInteract,
                                                                    FindDefaultNetworkInteract findDefaultNetworkInteract,
-                                                                   FindDefaultWalletInteract findDefaultWalletInteract,
+                                                                   GenericWalletInteract genericWalletInteract,
                                                                    TransactionDetailRouter transactionDetailRouter,
                                                                    AssetDefinitionService assetDefinitionService,
                                                                    TokensService tokensService,
@@ -29,7 +29,7 @@ class Erc20DetailModule {
                 fetchTokensInteract,
                 fetchTransactionsInteract,
                 findDefaultNetworkInteract,
-                findDefaultWalletInteract,
+                                               genericWalletInteract,
                 transactionDetailRouter,
                 assetDefinitionService,
                 tokensService, addTokenInteract);
@@ -52,8 +52,8 @@ class Erc20DetailModule {
     }
 
     @Provides
-    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new FindDefaultWalletInteract(walletRepository);
+    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides

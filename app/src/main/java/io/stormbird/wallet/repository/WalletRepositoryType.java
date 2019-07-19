@@ -5,6 +5,7 @@ import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
+import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletUpdate;
@@ -37,4 +38,10 @@ public interface WalletRepositoryType {
     Single<Wallet> storeWallet(Wallet wallet);
 
     Single<String> getName(String address);
+
+    Disposable updateBackupTime(String walletAddr);
+
+    Single<Long> getWalletBackupTime(String walletAddr);
+
+    Single<String> getWalletRequiresBackup();
 }

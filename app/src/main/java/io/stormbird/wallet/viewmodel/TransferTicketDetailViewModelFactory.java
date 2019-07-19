@@ -10,7 +10,6 @@ import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.MarketQueueService;
-import io.stormbird.wallet.service.TokensService;
 
 /**
  * Created by James on 21/02/2018.
@@ -18,7 +17,7 @@ import io.stormbird.wallet.service.TokensService;
 
 public class TransferTicketDetailViewModelFactory implements ViewModelProvider.Factory {
 
-    private FindDefaultWalletInteract findDefaultWalletInteract;
+    private GenericWalletInteract genericWalletInteract;
     private MarketQueueService marketQueueService;
     private CreateTransactionInteract createTransactionInteract;
     private TransferTicketDetailRouter transferTicketDetailRouter;
@@ -30,7 +29,7 @@ public class TransferTicketDetailViewModelFactory implements ViewModelProvider.F
     private ENSInteract ensInteract;
 
 
-    public TransferTicketDetailViewModelFactory(FindDefaultWalletInteract findDefaultWalletInteract,
+    public TransferTicketDetailViewModelFactory(GenericWalletInteract genericWalletInteract,
                                                 MarketQueueService marketQueueService,
                                                 CreateTransactionInteract createTransactionInteract,
                                                 TransferTicketDetailRouter transferTicketDetailRouter,
@@ -40,7 +39,7 @@ public class TransferTicketDetailViewModelFactory implements ViewModelProvider.F
                                                 GasService gasService,
                                                 ConfirmationRouter confirmationRouter,
                                                 ENSInteract ensInteract) {
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
         this.transferTicketDetailRouter = transferTicketDetailRouter;
@@ -55,7 +54,7 @@ public class TransferTicketDetailViewModelFactory implements ViewModelProvider.F
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new TransferTicketDetailViewModel(findDefaultWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, fetchTransactionsInteract,
+        return (T) new TransferTicketDetailViewModel(genericWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, fetchTransactionsInteract,
                                                      assetDisplayRouter, assetDefinitionService, gasService, confirmationRouter, ensInteract);
     }
 }

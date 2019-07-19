@@ -27,6 +27,9 @@ import android.widget.TextView;
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Wallet;
@@ -182,13 +185,20 @@ public class NewSettingsFragment extends Fragment {
 
     private void setupBackupWarning()
     {
-        if (getActivity() == null || layoutBackup == null || backupButton == null) return;
-        String walletToBackUp = HDKeyService.getWalletNeedsBackup(getActivity());
-        if (walletToBackUp != null)
+        if (layoutBackup == null || backupButton == null) return;
+        viewModel.getWalletNotBackedUp()
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::updateUIForBackup).isDisposed();
+    }
+
+    private void updateUIForBackup(String walletAddr)
+    {
+        if (walletAddr.length() > 0)
         {
             layoutBackup.setVisibility(View.VISIBLE);
-            backupButton.setText(getString(R.string.back_up_wallet_action, walletToBackUp.substring(0, 5)));
-            backupButton.setOnClickListener(v -> openBackupActivity(walletToBackUp));
+            backupButton.setText(getString(R.string.back_up_wallet_action, walletAddr.substring(0, 5)));
+            backupButton.setOnClickListener(v -> openBackupActivity(walletAddr));
         }
         else
         {
@@ -266,7 +276,7 @@ public class NewSettingsFragment extends Fragment {
 
     public void backupSeedSuccess()
     {
-        setupBackupWarning();
+        layoutBackup.setVisibility(View.GONE);
     }
 
     private void askWritePermission() {

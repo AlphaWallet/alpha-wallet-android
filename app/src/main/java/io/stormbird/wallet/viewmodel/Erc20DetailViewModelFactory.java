@@ -16,7 +16,7 @@ public class Erc20DetailViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTokensInteract fetchTokensInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final TransactionDetailRouter transactionDetailRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
@@ -26,7 +26,7 @@ public class Erc20DetailViewModelFactory implements ViewModelProvider.Factory {
                                        FetchTokensInteract fetchTokensInteract,
                                        FetchTransactionsInteract fetchTransactionsInteract,
                                        FindDefaultNetworkInteract findDefaultNetworkInteract,
-                                       FindDefaultWalletInteract findDefaultWalletInteract,
+                                       GenericWalletInteract genericWalletInteract,
                                        TransactionDetailRouter transactionDetailRouter,
                                        AssetDefinitionService assetDefinitionService,
                                        TokensService tokensService,
@@ -35,7 +35,7 @@ public class Erc20DetailViewModelFactory implements ViewModelProvider.Factory {
         this.fetchTokensInteract = fetchTokensInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.transactionDetailRouter = transactionDetailRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.addTokenInteract = addTokenInteract;
@@ -45,6 +45,6 @@ public class Erc20DetailViewModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new Erc20DetailViewModel(myAddressRouter, fetchTokensInteract, fetchTransactionsInteract, findDefaultNetworkInteract, findDefaultWalletInteract, transactionDetailRouter, assetDefinitionService, tokensService, addTokenInteract);
+        return (T) new Erc20DetailViewModel(myAddressRouter, fetchTokensInteract, fetchTransactionsInteract, findDefaultNetworkInteract, genericWalletInteract, transactionDetailRouter, assetDefinitionService, tokensService, addTokenInteract);
     }
 }

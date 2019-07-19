@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -50,7 +51,7 @@ public class WalletViewModel extends BaseViewModel
     private final AssetDisplayRouter assetDisplayRouter;
     private final AddTokenInteract addTokenInteract;
     private final SetupTokensInteract setupTokensInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final OpenseaService openseaService;
     private final TokensService tokensService;
@@ -78,7 +79,7 @@ public class WalletViewModel extends BaseViewModel
             SendTokenRouter sendTokenRouter,
             Erc20DetailRouter erc20DetailRouter,
             AssetDisplayRouter assetDisplayRouter,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             AddTokenInteract addTokenInteract,
             SetupTokensInteract setupTokensInteract,
             AssetDefinitionService assetDefinitionService,
@@ -92,7 +93,7 @@ public class WalletViewModel extends BaseViewModel
         this.sendTokenRouter = sendTokenRouter;
         this.erc20DetailRouter = erc20DetailRouter;
         this.assetDisplayRouter = assetDisplayRouter;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.addTokenInteract = addTokenInteract;
         this.setupTokensInteract = setupTokensInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -113,6 +114,7 @@ public class WalletViewModel extends BaseViewModel
     public LiveData<Boolean> fetchKnownContracts() { return fetchKnownContracts; }
 
     public String getWalletAddr() { return currentWallet != null ? currentWallet.address : null; }
+    public Wallet.WalletType getWalletType() { return currentWallet != null ? currentWallet.type : Wallet.WalletType.KEYSTORE; }
 
     @Override
     protected void onCleared() {
@@ -406,7 +408,7 @@ public class WalletViewModel extends BaseViewModel
         if (currentWallet == null)
         {
             progress.postValue(true);
-            disposable = findDefaultWalletInteract
+            disposable = genericWalletInteract
                     .find()
                     .subscribe(this::onDefaultWallet, this::onError);
         }
@@ -503,6 +505,11 @@ public class WalletViewModel extends BaseViewModel
         fetchTokens();
     }
 
+    public Single<GenericWalletInteract.BackupLevel> getBackupRequirement(String wallet)
+    {
+        return genericWalletInteract.getBackupLevel(wallet);
+    }
+
     /**
      * Check if we need to update opensea: See params in class header
      */
@@ -542,5 +549,10 @@ public class WalletViewModel extends BaseViewModel
             if (ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
                 fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.RINKEBY_ID));
         }
+    }
+
+    public Disposable setKeyBackupTime(String walletAddr)
+    {
+        return genericWalletInteract.updateBackupTime(walletAddr);
     }
 }

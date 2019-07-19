@@ -31,15 +31,26 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     @Override
     public BinderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         BinderViewHolder binderViewHolder = null;
+        WalletHolder h;
         switch (viewType) {
-            case WalletHolder.VIEW_TYPE: {
-                WalletHolder h = new WalletHolder(R.layout.item_wallet_manage, parent);
+            case WalletHolder.VIEW_TYPE:
+                h = new WalletHolder(R.layout.item_wallet_manage, parent);
                 h.setOnSetWalletDefaultListener(onSetWalletDefaultListener);
                 if (network != null) {
                     h.setCurrencySymbol(network.symbol);
                 }
                 binderViewHolder = h;
-            }
+            break;
+            case WalletHolder.HD_VIEW_TYPE:
+                h = new WalletHolder(R.layout.item_hd_wallet_manage, parent);
+                h.setOnSetWalletDefaultListener(onSetWalletDefaultListener);
+                if (network != null) {
+                    h.setCurrencySymbol(network.symbol);
+                }
+                binderViewHolder = h;
+                break;
+            default:
+                break;
         }
         return binderViewHolder;
     }
@@ -47,7 +58,8 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     @Override
     public void onBindViewHolder(BinderViewHolder holder, int position) {
         switch (getItemViewType(position)) {
-            case WalletHolder.VIEW_TYPE: {
+            case WalletHolder.HD_VIEW_TYPE:
+            case WalletHolder.VIEW_TYPE:
                 Wallet wallet = wallets.get(position);
                 Bundle bundle = new Bundle();
                 bundle.putBoolean(
@@ -55,8 +67,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                         defaultWallet != null && defaultWallet.sameAddress(wallet.address));
                 bundle.putBoolean(WalletHolder.IS_LAST_ITEM, getItemCount() == 1);
                 holder.bind(wallet, bundle);
-            }
-            break;
+                break;
         }
     }
 
@@ -67,7 +78,14 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return WalletHolder.VIEW_TYPE;
+        switch (wallets.get(position).type)
+        {
+            default:
+            case KEYSTORE:
+                return WalletHolder.VIEW_TYPE;
+            case HDKEY:
+                return WalletHolder.HD_VIEW_TYPE;
+        }
     }
 
     public void setNetwork(NetworkInfo network) {
@@ -114,6 +132,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 w.name = wallet.name;
                 w.ENSname = wallet.ENSname;
                 w.balance = wallet.balance;
+                w.lastBackupTime = wallet.lastBackupTime;
                 found = true;
                 break;
             }

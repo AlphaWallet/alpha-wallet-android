@@ -8,12 +8,8 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
-import io.stormbird.wallet.interact.CreateTransactionInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.interact.MemPoolInteract;
-import io.stormbird.wallet.interact.SignatureGenerateInteract;
+import io.stormbird.wallet.interact.*;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 
@@ -23,7 +19,7 @@ import io.stormbird.wallet.service.AssetDefinitionService;
 
 public class RedeemSignatureDisplayModelFactory implements ViewModelProvider.Factory {
 
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final SignatureGenerateInteract signatureGenerateInteract;
     private final CreateTransactionInteract createTransactionInteract;
@@ -33,7 +29,7 @@ public class RedeemSignatureDisplayModelFactory implements ViewModelProvider.Fac
     private final AssetDefinitionService assetDefinitionService;
 
     public RedeemSignatureDisplayModelFactory(
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             CreateTransactionInteract createTransactionInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -41,7 +37,7 @@ public class RedeemSignatureDisplayModelFactory implements ViewModelProvider.Fac
             MemPoolInteract memPoolInteract,
             AssetDisplayRouter assetDisplayRouter,
             AssetDefinitionService assetDefinitionService) {
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.signatureGenerateInteract = signatureGenerateInteract;
         this.createTransactionInteract = createTransactionInteract;
@@ -54,6 +50,6 @@ public class RedeemSignatureDisplayModelFactory implements ViewModelProvider.Fac
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new RedeemSignatureDisplayModel(findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract, memPoolInteract, assetDisplayRouter, assetDefinitionService);
+        return (T) new RedeemSignatureDisplayModel(genericWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract, memPoolInteract, assetDisplayRouter, assetDefinitionService);
     }
 }

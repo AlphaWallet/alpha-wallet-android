@@ -6,12 +6,8 @@ import android.support.annotation.NonNull;
 
 import javax.inject.Inject;
 
-import io.stormbird.wallet.interact.CreateWalletInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FetchWalletsInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.interact.SetDefaultWalletInteract;
+import io.stormbird.wallet.interact.*;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
 
@@ -19,7 +15,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
     private final CreateWalletInteract createWalletInteract;
     private final SetDefaultWalletInteract setDefaultWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final ImportWalletRouter importWalletRouter;
@@ -30,7 +26,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
             CreateWalletInteract createWalletInteract,
             SetDefaultWalletInteract setDefaultWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             ImportWalletRouter importWalletRouter,
             HomeRouter homeRouter,
             FetchTokensInteract fetchTokensInteract,
@@ -38,7 +34,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
         this.createWalletInteract = createWalletInteract;
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.importWalletRouter = importWalletRouter;
         this.homeRouter = homeRouter;
         this.fetchTokensInteract = fetchTokensInteract;
@@ -52,7 +48,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
                 createWalletInteract,
                 setDefaultWalletInteract,
                 fetchWalletsInteract,
-                findDefaultWalletInteract,
+                genericWalletInteract,
                 importWalletRouter,
                 homeRouter,
                 fetchTokensInteract,

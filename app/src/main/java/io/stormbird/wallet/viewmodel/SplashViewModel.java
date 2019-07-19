@@ -199,7 +199,6 @@ public class SplashViewModel extends ViewModel implements CreateWalletCallbackIn
     {
         if (!address.equals(ZERO_ADDRESS))
         {
-            HDKeyService.flagAsNotBackedUp(ctx, address);
             Wallet wallet = new Wallet(address);
             fetchWalletsInteract.storeWallet(wallet)
                     .subscribe(account -> {

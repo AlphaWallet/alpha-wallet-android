@@ -6,14 +6,13 @@ import android.support.annotation.NonNull;
 
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
 
 public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
 
     private final AddTokenInteract addTokenInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final SetupTokensInteract setupTokensInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -23,7 +22,7 @@ public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
 
     public AddTokenViewModelFactory(
             AddTokenInteract addTokenInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             FetchTokensInteract fetchTokensInteract,
             SetupTokensInteract setupTokensInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -31,7 +30,7 @@ public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService) {
         this.addTokenInteract = addTokenInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.setupTokensInteract = setupTokensInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
@@ -43,6 +42,6 @@ public class AddTokenViewModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new AddTokenViewModel(addTokenInteract, findDefaultWalletInteract, fetchTokensInteract, setupTokensInteract, ethereumNetworkRepository, fetchTransactionsInteract, assetDefinitionService, tokensService);
+        return (T) new AddTokenViewModel(addTokenInteract, genericWalletInteract, fetchTokensInteract, setupTokensInteract, ethereumNetworkRepository, fetchTransactionsInteract, assetDefinitionService, tokensService);
     }
 }

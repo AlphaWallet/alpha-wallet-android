@@ -484,9 +484,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         showPage(newPage);
     }
 
-    private void backupSeedSuccess()
+    private void backupSeedSuccess(String keyBackup)
     {
         settingsFragment.backupSeedSuccess();
+        walletFragment.storeWalletBackupTime(keyBackup);
         successOverlay.setVisibility(View.VISIBLE);
         handler = new Handler();
         handler.postDelayed(this, 1000);
@@ -733,7 +734,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 dappBrowserFragment.handleSelectNetwork(resultCode, data);
                 break;
             case C.REQUEST_BACKUP_SEED:
-                if (resultCode == RESULT_OK) backupSeedSuccess();
+                String keyBackup = null;
+                if (data != null) keyBackup = data.getStringExtra("Key");
+                if (resultCode == RESULT_OK) backupSeedSuccess(keyBackup);
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);

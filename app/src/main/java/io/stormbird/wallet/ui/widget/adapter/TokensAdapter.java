@@ -144,16 +144,21 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public void addWarning(WarningData data)
     {
-//        for (int i = 0; i < items.size(); i++)
-//        {
-//            if (items.get(i).viewType == WarningHolder.VIEW_TYPE)
-//            {
-//                items.removeItemAt(i);
-//                break;
-//            }
-//        }
-
         items.add(new WarningSortedItem(data, 0));
+    }
+
+    public void removeBackupWarning()
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
+            if (items.get(i).viewType == WarningHolder.VIEW_TYPE)
+            {
+                items.removeItemAt(i);
+                notifyItemRemoved(i);
+                notifyDataSetChanged();
+                break;
+            }
+        }
     }
 
     public void setTokens(Token[] tokens)

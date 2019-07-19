@@ -6,7 +6,6 @@ import android.content.Context;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -38,7 +37,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final MutableLiveData<String> ensResolve = new MutableLiveData<>();
     private final MutableLiveData<String> ensFail = new MutableLiveData<>();
 
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final MarketQueueService marketQueueService;
     private final CreateTransactionInteract createTransactionInteract;
     private final TransferTicketDetailRouter transferTicketDetailRouter;
@@ -54,7 +53,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     private byte[] linkMessage;
 
-    TransferTicketDetailViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
+    TransferTicketDetailViewModel(GenericWalletInteract genericWalletInteract,
                                   MarketQueueService marketQueueService,
                                   CreateTransactionInteract createTransactionInteract,
                                   TransferTicketDetailRouter transferTicketDetailRouter,
@@ -64,7 +63,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                                   GasService gasService,
                                   ConfirmationRouter confirmationRouter,
                                   ENSInteract ensInteract) {
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
         this.transferTicketDetailRouter = transferTicketDetailRouter;
@@ -96,7 +95,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public void prepare(Token token)
     {
         this.token = token;
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
 

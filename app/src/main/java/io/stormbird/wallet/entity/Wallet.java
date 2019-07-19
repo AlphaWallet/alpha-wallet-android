@@ -14,6 +14,7 @@ public class Wallet implements Parcelable {
     public String ENSname;
     public String name;
     public WalletType type;
+    public long lastBackupTime;
 
 	public Wallet(String address) {
 		this.address = address;
@@ -21,7 +22,7 @@ public class Wallet implements Parcelable {
 		this.ENSname = "";
 		this.name = "";
 		this.type = WalletType.NOT_DEFINED;
-		//this.publicKey = padLeft(Numeric.cleanHexPrefix(address.toLowerCase()), 128);  //TODO: Get this from ecrecover
+		this.lastBackupTime = 0;
 	}
 
 	private Wallet(Parcel in) {
@@ -31,7 +32,7 @@ public class Wallet implements Parcelable {
 		name = in.readString();
 		int t = in.readInt();
 		type = WalletType.values()[t];
-		//this.publicKey = padLeft(address, 128);
+		lastBackupTime = in.readLong();
 	}
 
 	public void setWalletType(WalletType wType)
@@ -68,6 +69,7 @@ public class Wallet implements Parcelable {
 		parcel.writeString(ENSname);
 		parcel.writeString(name);
 		parcel.writeInt(type.ordinal());
+		parcel.writeLong(lastBackupTime);
 	}
 
 	public void setWalletBalance(BigDecimal balanceBD)

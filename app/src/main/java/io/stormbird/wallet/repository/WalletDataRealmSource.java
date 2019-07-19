@@ -2,12 +2,13 @@ package io.stormbird.wallet.repository;
 
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableCompletableObserver;
+import io.reactivex.observers.DisposableSingleObserver;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.stormbird.wallet.entity.Wallet;
@@ -55,6 +56,7 @@ public class WalletDataRealmSource {
                         wallet.ENSname = d.getENSName();
                         wallet.balance = balance(d);
                         wallet.name = d.getName();
+                        wallet.lastBackupTime = d.getLastBackup();
                         walletList.add(wallet);
                     }
                 }
@@ -165,6 +167,7 @@ public class WalletDataRealmSource {
                 realmWallet.setENSName(wallet.ENSname);
                 realmWallet.setBalance(wallet.balance);
                 realmWallet.setType(wallet.type);
+                realmWallet.setLastBackup(wallet.lastBackupTime);
 
                 realm.commitTransaction();
             } catch (Exception e) {
@@ -186,6 +189,83 @@ public class WalletDataRealmSource {
                 Log.e(TAG, "getName: " + e.getMessage(), e);
             }
             return name;
+        });
+    }
+
+    public Disposable updateBackupTime(String walletAddr)
+    {
+        return Completable.complete()
+                .subscribeWith(new DisposableCompletableObserver()
+                {
+                    Realm realm;
+                    @Override
+                    public void onStart()
+                    {
+                        realm = realmManager.getWalletDataRealmInstance();
+                        RealmWalletData realmWallet = realm.where(RealmWalletData.class)
+                                .equalTo("address", walletAddr)
+                                .findFirst();
+
+                        if (realmWallet != null)
+                        {
+                            realm.beginTransaction();
+                            realmWallet.setLastBackup(System.currentTimeMillis());
+                        }
+                    }
+
+                    @Override
+                    public void onComplete()
+                    {
+                        if (realm.isInTransaction()) realm.commitTransaction();
+                        realm.close();
+                    }
+
+                    @Override
+                    public void onError(Throwable e)
+                    {
+                        if (realm != null && !realm.isClosed())
+                        {
+                            realm.close();
+                        }
+                    }
+                });
+    }
+
+    public Single<Long> getWalletBackupTime(String walletAddr)
+    {
+        return Single.fromCallable(() -> {
+            long backupTime = 0L;
+            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
+                RealmWalletData realmWallet = realm.where(RealmWalletData.class)
+                        .equalTo("address", walletAddr)
+                        .findFirst();
+                if (realmWallet != null) backupTime = realmWallet.getLastBackup();
+            } catch (Exception e) {
+                Log.e(TAG, "getLastBackup: " + e.getMessage(), e);
+            }
+            return backupTime;
+        });
+    }
+
+    public Single<String> getWalletRequiresBackup()
+    {
+        return Single.fromCallable(() -> {
+            String wallet = "";
+            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
+                RealmResults<RealmWalletData> realmItems = realm.where(RealmWalletData.class)
+                        .findAll();
+
+                for (RealmWalletData data : realmItems) {
+                    if (data.getLastBackup() == 0 && data.getType() == Wallet.WalletType.HDKEY) //TODO: Check requirement
+                    {
+                        wallet = data.getAddress();
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return wallet;
         });
     }
 }

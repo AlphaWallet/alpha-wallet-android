@@ -1,13 +1,7 @@
 package io.stormbird.wallet.di;
 
-import io.stormbird.wallet.interact.CreateWalletInteract;
-import io.stormbird.wallet.interact.DeleteWalletInteract;
-import io.stormbird.wallet.interact.ExportWalletInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FetchWalletsInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.interact.SetDefaultWalletInteract;
+import io.stormbird.wallet.interact.*;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TokenRepositoryType;
@@ -27,7 +21,7 @@ class AccountsManageModule {
 			CreateWalletInteract createWalletInteract,
 			SetDefaultWalletInteract setDefaultWalletInteract,
 			FetchWalletsInteract fetchWalletsInteract,
-			FindDefaultWalletInteract findDefaultWalletInteract,
+			GenericWalletInteract genericWalletInteract,
 			ImportWalletRouter importWalletRouter,
 			HomeRouter homeRouter,
 			FetchTokensInteract fetchTokensInteract,
@@ -35,7 +29,7 @@ class AccountsManageModule {
 		return new WalletsViewModelFactory(createWalletInteract,
                 setDefaultWalletInteract,
                 fetchWalletsInteract,
-                findDefaultWalletInteract,
+                                           genericWalletInteract,
                 importWalletRouter,
                 homeRouter,
 				fetchTokensInteract,
@@ -59,8 +53,8 @@ class AccountsManageModule {
 	}
 
 	@Provides
-    FindDefaultWalletInteract provideFindDefaultAccountInteract(WalletRepositoryType accountRepository) {
-		return new FindDefaultWalletInteract(accountRepository);
+    GenericWalletInteract provideFindDefaultAccountInteract(WalletRepositoryType accountRepository) {
+		return new GenericWalletInteract(accountRepository);
 	}
 
 	@Provides

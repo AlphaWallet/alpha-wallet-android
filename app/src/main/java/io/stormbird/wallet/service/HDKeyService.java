@@ -45,7 +45,8 @@ public class HDKeyService implements AuthenticationCallback
     private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7;
     private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
     private static final int AUTHENTICATION_DURATION_SECONDS = 30;
-    private static final int TIME_BETWEEN_BACKUP_MILLIS = 1000*60*10; //TODO: RESTORE 30 DAYS. TESTING: 10 minutes  //1000 * 60 * 60 * 24 * 30; //30 days
+
+    public static final int TIME_BETWEEN_BACKUP_MILLIS = 1000*60*1; //TODO: RESTORE 30 DAYS. TESTING: 10 minutes  //1000 * 60 * 60 * 24 * 30; //30 days
 
     private enum Operation
     {
@@ -113,7 +114,14 @@ public class HDKeyService implements AuthenticationCallback
 
     private void importHDKey2()
     {
-        //TODO: Store wallet
+        if (storeHDWallet(currentWallet))
+        {
+            importCallback.WalletValidated(currentKey);
+        }
+        else
+        {
+            importCallback.WalletValidated(null);
+        }
     }
 
     public byte[] signData(String key, byte[] data)
@@ -237,6 +245,18 @@ public class HDKeyService implements AuthenticationCallback
         }
     }
 
+    private synchronized void deleteKey(KeyStore keyStore, String keyAddr) {
+        try {
+            File encrypted = new File(getFilePath(context, keyAddr + "hd"));
+            File iv = new File(getFilePath(context, keyAddr + "iv"));
+            if (encrypted.exists()) encrypted.delete();
+            if (iv.exists()) iv.delete();
+            keyStore.deleteEntry(keyAddr);
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+    }
+
     private synchronized boolean storeHDWallet(HDWallet wallet)
     {
         KeyStore keyStore;
@@ -247,7 +267,10 @@ public class HDKeyService implements AuthenticationCallback
             PrivateKey pk = currentWallet.getKeyForCoin(CoinType.ETHEREUM);
             currentKey = CoinType.ETHEREUM.deriveAddress(pk);
 
-            if (keyStore.containsAlias(currentKey)) { keyStore.deleteEntry(currentKey); } //TODO: Don't allow this
+            if (keyStore.containsAlias(currentKey)) //re-import existing key.
+            {
+                deleteKey(keyStore, currentKey);
+            }
 
             KeyGenerator keyGenerator = getMaxSecurityKeyGenerator();
 
@@ -286,6 +309,7 @@ public class HDKeyService implements AuthenticationCallback
             SecretKeyFactory factory = SecretKeyFactory.getInstance(secretKey.getAlgorithm(), ANDROID_KEY_STORE);
             KeyInfo keyInfo = (KeyInfo)factory.getKeySpec(secretKey, KeyInfo.class);
 
+            //TODO: store this in the key itself
             if (keyInfo.isInsideSecureHardware())
             {
                 System.out.println("Using hardware protected key");
@@ -542,83 +566,5 @@ public class HDKeyService implements AuthenticationCallback
             dialog.dismiss();
         });
         dialog.show();
-    }
-
-    public static void flagAsNotBackedUp(Context ctx, String walletAddr) {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
-        Set<String> notBackedUp = pref.getStringSet ("notbackedup", new ArraySet<>());
-        for (String entry : notBackedUp) if (entry.contains(walletAddr)) { notBackedUp.remove(entry); break; } //remove any old entry
-        //Set<String> notBackedUp = new ArraySet<>();
-        notBackedUp.add(walletAddr);
-        PreferenceManager
-                .getDefaultSharedPreferences(ctx)
-                .edit()
-                .putStringSet("notbackedup", notBackedUp)
-                .apply();
-    }
-
-    /**
-     * Called when wallet created. Notice that the wallet is defined with no backup date.
-     * This signals wallet was never backed up
-     * @param ctx
-     * @param walletAddr
-     */
-    public static void flagAsBackedUp(Context ctx, String walletAddr) {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
-        Set<String> notBackedUp = pref.getStringSet ("notbackedup", new ArraySet<>());
-        for (String entry : notBackedUp) if (entry.contains(walletAddr)) { notBackedUp.remove(entry); break; }
-        long nextCheckTime = System.currentTimeMillis() + TIME_BETWEEN_BACKUP_MILLIS;
-        notBackedUp.add(walletAddr + "," + nextCheckTime);
-        PreferenceManager
-                .getDefaultSharedPreferences(ctx)
-                .edit()
-                .putStringSet("notbackedup", notBackedUp)
-                .apply();
-    }
-
-    /**
-     * Check if a wallet needs to be backed up.
-     * @param ctx
-     * @param walletAddr
-     * @return
-     */
-    public static BackupLevel checkNeedsBackUp(Context ctx, String walletAddr)
-    {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
-        Set<String> notBackedUp = pref.getStringSet ("notbackedup", new ArraySet<>());
-        for (String entry : notBackedUp)
-        {
-            if (entry.contains(walletAddr))
-            {
-                if (!entry.contains(",")) return BackupLevel.WALLET_NEVER_BACKED_UP;
-                long nextUpdate = System.currentTimeMillis() - 1;
-                String[] values = entry.split(",");
-                if (values.length == 2)
-                {
-                    nextUpdate = Long.parseLong(values[1]);
-                }
-
-                if (System.currentTimeMillis() > nextUpdate) return BackupLevel.PERIODIC_BACKUP;
-            }
-        }
-
-        return BackupLevel.BACKUP_NOT_REQUIRED;
-    }
-
-    public static String getWalletNeedsBackup(Context ctx)
-    {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
-        Set<String> notBackedUp = pref.getStringSet ("notbackedup", new ArraySet<>());
-        for (String entry : notBackedUp)
-        {
-            if (!entry.contains(",")) return entry;
-        }
-
-        return null;
-    }
-
-    public enum BackupLevel
-    {
-        BACKUP_NOT_REQUIRED, PERIODIC_BACKUP, WALLET_NEVER_BACKED_UP
     }
 }

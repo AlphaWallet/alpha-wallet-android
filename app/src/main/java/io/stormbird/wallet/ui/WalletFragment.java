@@ -3,6 +3,7 @@ package io.stormbird.wallet.ui;
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -18,9 +19,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 import dagger.android.support.AndroidSupportInjection;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.service.TokensService;
@@ -113,6 +119,8 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         isVisible = true;
 
         viewModel.clearProcess();
+
+        checkWalletBackup = true;
 
         return view;
     }
@@ -256,7 +264,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         if (tokens != null)
         {
             adapter.setTokens(tokens);
-            if (checkWalletBackup && viewModel.getWalletAddr() != null)
+            if (checkWalletBackup && viewModel.getWalletType() == Wallet.WalletType.HDKEY && viewModel.getWalletAddr() != null)
             {
                 checkNeedsBackup();
             }
@@ -266,8 +274,14 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     private void checkNeedsBackup()
     {
         checkWalletBackup = false;
-        //is this wallet on the backup schedule?
-        HDKeyService.BackupLevel backupLevel = HDKeyService.checkNeedsBackUp(getActivity(), viewModel.getWalletAddr());
+        viewModel.getBackupRequirement(viewModel.getWalletAddr())
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::addWarningIfRequired).isDisposed();
+    }
+
+    private void addWarningIfRequired(GenericWalletInteract.BackupLevel backupLevel)
+    {
         WarningData wData;
         switch (backupLevel)
         {
@@ -434,12 +448,26 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     @Override
     public void BackupClick(String address)
     {
-        System.out.println(address);
+        //start backup of wallet here
+        Intent intent = new Intent(getContext(), BackupKeyActivity.class);
+        intent.putExtra("ADDRESS", address);
+        intent.putExtra("TYPE", "HDKEY");
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_SEED);
     }
 
     @Override
-    public void remindMeLater()
+    public void remindMeLater(String walletAddress)
     {
-        System.out.println("yoless");
+        if (getActivity() != null) { Toast.makeText(getActivity(), "TODO: Placeholder for remind me later message", Toast.LENGTH_LONG).show(); }
+        storeWalletBackupTime(walletAddress);
+    }
+
+    public void storeWalletBackupTime(String backedUpKey)
+    {
+        viewModel.setKeyBackupTime(backedUpKey)
+                .isDisposed();
+
+        adapter.removeBackupWarning();
     }
 }

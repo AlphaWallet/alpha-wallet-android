@@ -34,7 +34,7 @@ public class WarningHolder extends BinderViewHolder<WarningData>
         backupButton.setText(data.buttonText);
         backupButton.setBackgroundColor(data.buttonColour);
         backupButton.setOnClickListener(v -> { data.callback.BackupClick(data.address); });
-        menuButton.setOnClickListener(v -> { data.callback.remindMeLater(); });
+        menuButton.setOnClickListener(v -> { data.callback.remindMeLater(data.address); });
     }
 
     public WarningHolder(int res_id, ViewGroup parent)

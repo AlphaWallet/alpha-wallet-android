@@ -9,16 +9,16 @@ import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.Completable;
+import io.reactivex.Single;
 import io.stormbird.wallet.entity.LocaleItem;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.interact.GetDefaultWalletBalance;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
@@ -30,7 +30,6 @@ import io.stormbird.wallet.router.MyAddressRouter;
 import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.util.LocaleUtils;
-import io.stormbird.wallet.util.Utils;
 
 public class NewSettingsViewModel extends BaseViewModel {
     private static final long GET_BALANCE_INTERVAL = 10 * DateUtils.SECOND_IN_MILLIS;
@@ -38,7 +37,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Map<String, String>> defaultWalletBalance = new MutableLiveData<>();
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final MyAddressRouter myAddressRouter;
     private final HelpRouter helpRouter;
@@ -56,7 +55,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     private Handler handler = new Handler();
 
     NewSettingsViewModel(
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             MyAddressRouter myAddressRouter,
             HelpRouter helpRouter,
@@ -66,7 +65,7 @@ public class NewSettingsViewModel extends BaseViewModel {
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             TokensService tokensService) {
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.myAddressRouter = myAddressRouter;
         this.helpRouter = helpRouter;
@@ -160,7 +159,7 @@ public class NewSettingsViewModel extends BaseViewModel {
 
     public void prepare() {
         progress.postValue(true);
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }
@@ -199,5 +198,10 @@ public class NewSettingsViewModel extends BaseViewModel {
         //get the current locale
         String currentLocale = localeRepository.getDefaultLocale();
         LocaleUtils.setLocale(activity, currentLocale);
+    }
+
+    public Single<String> getWalletNotBackedUp()
+    {
+        return genericWalletInteract.getWalletNeedsBackup();
     }
 }

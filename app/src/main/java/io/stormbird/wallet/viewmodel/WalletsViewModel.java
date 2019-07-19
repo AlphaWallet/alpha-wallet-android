@@ -28,7 +28,7 @@ public class WalletsViewModel extends BaseViewModel implements CreateWalletCallb
     private final CreateWalletInteract createWalletInteract;
     private final SetDefaultWalletInteract setDefaultWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
 
@@ -51,7 +51,7 @@ public class WalletsViewModel extends BaseViewModel implements CreateWalletCallb
             CreateWalletInteract createWalletInteract,
             SetDefaultWalletInteract setDefaultWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             ImportWalletRouter importWalletRouter,
             HomeRouter homeRouter,
             FetchTokensInteract fetchTokensInteract,
@@ -60,7 +60,7 @@ public class WalletsViewModel extends BaseViewModel implements CreateWalletCallb
         this.createWalletInteract = createWalletInteract;
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.importWalletRouter = importWalletRouter;
         this.homeRouter = homeRouter;
         this.fetchTokensInteract = fetchTokensInteract;
@@ -133,7 +133,7 @@ public class WalletsViewModel extends BaseViewModel implements CreateWalletCallb
         defaultNetwork.postValue(networkInfo);
         currentNetwork = networkInfo;
 
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWalletChanged, t -> {
                 });
@@ -311,7 +311,6 @@ public class WalletsViewModel extends BaseViewModel implements CreateWalletCallb
     {
         if (!address.equals(ZERO_ADDRESS))
         {
-            HDKeyService.flagAsNotBackedUp(ctx, address);
             Wallet wallet = new Wallet(address);
             fetchWalletsInteract.storeWallet(wallet)
                 .subscribe(account -> {

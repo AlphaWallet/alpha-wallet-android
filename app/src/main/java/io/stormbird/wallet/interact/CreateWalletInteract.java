@@ -38,11 +38,6 @@ public class CreateWalletInteract {
 		String addr = hdService.createNewHDKey(callback);
 		Wallet wallet = new Wallet(addr);
 		wallet.setWalletType(Wallet.WalletType.HDKEY);
-//		return passwordStore.generatePassword()
-//				.flatMap(masterPassword -> walletRepository
-//						.createWallet(masterPassword)
-//						.compose(Operators.savePassword(passwordStore, walletRepository, masterPassword))
-//                        .flatMap(wallet -> passwordVerification(wallet, masterPassword)));
 	}
 
 	private Single<Wallet> passwordVerification(Wallet wallet, String masterPassword) {

@@ -4,7 +4,7 @@ import dagger.Module;
 import dagger.Provides;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.interact.SignatureGenerateInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
@@ -26,7 +26,7 @@ public class AssetDisplayModule {
     @Provides
     AssetDisplayViewModelFactory redeemTokenViewModelFactory(
             FetchTokensInteract fetchTokensInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             TransferTicketRouter transferTicketRouter,
             RedeemAssetSelectRouter redeemAssetSelectRouter,
@@ -36,7 +36,7 @@ public class AssetDisplayModule {
             AssetDefinitionService assetDefinitionService,
             OpenseaService openseaService) {
         return new AssetDisplayViewModelFactory(
-                fetchTokensInteract, findDefaultWalletInteract, signatureGenerateInteract, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, myAddressRouter, assetDefinitionService, openseaService);
+                fetchTokensInteract, genericWalletInteract, signatureGenerateInteract, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, sellTicketRouter, myAddressRouter, assetDefinitionService, openseaService);
     }
 
     @Provides
@@ -52,8 +52,8 @@ public class AssetDisplayModule {
     }
 
     @Provides
-    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new FindDefaultWalletInteract(walletRepository);
+    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides

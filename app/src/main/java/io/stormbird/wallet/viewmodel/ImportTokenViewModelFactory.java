@@ -15,7 +15,7 @@ import io.stormbird.wallet.service.GasService;
 
 public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
 
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final SetupTokensInteract setupTokensInteract;
@@ -26,7 +26,7 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final GasService gasService;
 
-    public ImportTokenViewModelFactory(FindDefaultWalletInteract findDefaultWalletInteract,
+    public ImportTokenViewModelFactory(GenericWalletInteract genericWalletInteract,
                                        CreateTransactionInteract createTransactionInteract,
                                        FetchTokensInteract fetchTokensInteract,
                                        SetupTokensInteract setupTokensInteract,
@@ -36,7 +36,7 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
                                        AssetDefinitionService assetDefinitionService,
                                        FetchTransactionsInteract fetchTransactionsInteract,
                                        GasService gasService) {
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.setupTokensInteract = setupTokensInteract;
@@ -51,7 +51,7 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new ImportTokenViewModel(findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService);
+        return (T) new ImportTokenViewModel(genericWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService);
     }
 }
 

@@ -5,7 +5,6 @@ import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
-import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.viewmodel.AddTokenViewModelFactory;
@@ -19,7 +18,7 @@ public class AddTokenModule {
     @Provides
     AddTokenViewModelFactory addTokenViewModelFactory(
             AddTokenInteract addTokenInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             FetchTokensInteract fetchTokensInteract,
             SetupTokensInteract setupTokensInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -27,7 +26,7 @@ public class AddTokenModule {
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService) {
         return new AddTokenViewModelFactory(
-                addTokenInteract, findDefaultWalletInteract, fetchTokensInteract, setupTokensInteract, ethereumNetworkRepository, fetchTransactionsInteract, assetDefinitionService, tokensService);
+                addTokenInteract, genericWalletInteract, fetchTokensInteract, setupTokensInteract, ethereumNetworkRepository, fetchTransactionsInteract, assetDefinitionService, tokensService);
     }
 
     @Provides
@@ -43,8 +42,8 @@ public class AddTokenModule {
     }
 
     @Provides
-    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new FindDefaultWalletInteract(walletRepository);
+    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides

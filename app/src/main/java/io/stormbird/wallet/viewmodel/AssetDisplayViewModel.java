@@ -10,9 +10,8 @@ import android.util.Log;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.interact.SignatureGenerateInteract;
-import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.MyAddressRouter;
 import io.stormbird.wallet.router.RedeemAssetSelectRouter;
 import io.stormbird.wallet.router.SellTicketRouter;
@@ -29,7 +28,6 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
-import io.stormbird.wallet.ui.AssetDisplayActivity;
 import io.stormbird.wallet.ui.RedeemAssetSelectActivity;
 import io.stormbird.wallet.ui.SellDetailActivity;
 import io.stormbird.wallet.ui.TransferTicketDetailActivity;
@@ -49,7 +47,7 @@ public class AssetDisplayViewModel extends BaseViewModel
     private static final String TAG = "ADVM";
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final TransferTicketRouter transferTicketRouter;
     private final RedeemAssetSelectRouter redeemAssetSelectRouter;
     private final SellTicketRouter sellTicketRouter;
@@ -68,7 +66,7 @@ public class AssetDisplayViewModel extends BaseViewModel
 
     AssetDisplayViewModel(
             FetchTokensInteract fetchTokensInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             TransferTicketRouter transferTicketRouter,
             RedeemAssetSelectRouter redeemAssetSelectRouter,
@@ -78,7 +76,7 @@ public class AssetDisplayViewModel extends BaseViewModel
             AssetDefinitionService assetDefinitionService,
             OpenseaService openseaService) {
         this.fetchTokensInteract = fetchTokensInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.redeemAssetSelectRouter = redeemAssetSelectRouter;
         this.transferTicketRouter = transferTicketRouter;
@@ -153,7 +151,7 @@ public class AssetDisplayViewModel extends BaseViewModel
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         defaultNetwork.postValue(networkInfo);
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }

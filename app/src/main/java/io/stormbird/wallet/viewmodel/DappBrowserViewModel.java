@@ -17,7 +17,7 @@ import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -45,7 +45,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final MutableLiveData<Token> token = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
@@ -58,7 +58,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     DappBrowserViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
@@ -66,7 +66,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             GasService gasService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
@@ -135,7 +135,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         defaultNetwork.postValue(networkInfo);
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }
@@ -165,7 +165,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
             return Observable.fromCallable(() -> defaultWallet().getValue());
         } else
             return findDefaultNetworkInteract.find()
-                    .flatMap(networkInfo -> findDefaultWalletInteract
+                    .flatMap(networkInfo -> genericWalletInteract
                             .find()).toObservable();
     }
 

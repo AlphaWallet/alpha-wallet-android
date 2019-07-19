@@ -8,9 +8,7 @@ import android.support.annotation.Nullable;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import android.util.Log;
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -36,7 +34,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final FetchTokensInteract fetchTokensInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final TransactionDetailRouter transactionDetailRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
@@ -54,7 +52,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
                                 FetchTokensInteract fetchTokensInteract,
                                 FetchTransactionsInteract fetchTransactionsInteract,
                                 FindDefaultNetworkInteract findDefaultNetworkInteract,
-                                FindDefaultWalletInteract findDefaultWalletInteract,
+                                GenericWalletInteract genericWalletInteract,
                                 TransactionDetailRouter transactionDetailRouter,
                                 AssetDefinitionService assetDefinitionService,
                                 TokensService tokensService,
@@ -63,7 +61,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
         this.fetchTokensInteract = fetchTokensInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.transactionDetailRouter = transactionDetailRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
@@ -224,7 +222,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     {
         tokensService.setFocusToken(token);
         progress.postValue(true);
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }

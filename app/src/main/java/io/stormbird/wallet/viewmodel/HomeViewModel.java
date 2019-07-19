@@ -6,17 +6,14 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.*;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.annotation.Nullable;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
@@ -28,8 +25,6 @@ import io.stormbird.wallet.util.LocaleUtils;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
@@ -50,7 +45,7 @@ public class HomeViewModel extends BaseViewModel {
     private final AddTokenRouter addTokenRouter;
     private final LocaleRepositoryType localeRepository;
     private final AssetDefinitionService assetDefinitionService;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
 
     private CryptoFunctions cryptoFunctions;
@@ -66,7 +61,7 @@ public class HomeViewModel extends BaseViewModel {
             ExternalBrowserRouter externalBrowserRouter,
             AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             FetchWalletsInteract fetchWalletsInteract) {
         this.preferenceRepository = preferenceRepository;
         this.externalBrowserRouter = externalBrowserRouter;
@@ -74,7 +69,7 @@ public class HomeViewModel extends BaseViewModel {
         this.addTokenRouter = addTokenRouter;
         this.localeRepository = localeRepository;
         this.assetDefinitionService = assetDefinitionService;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
     }
 
@@ -109,7 +104,7 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     public void showImportLink(Context context, String importData) {
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find().toObservable()
                 .filter(wallet -> checkWalletNotEqual(wallet, importData))
                 .subscribeOn(Schedulers.io())

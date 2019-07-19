@@ -17,7 +17,7 @@ class TransactionsModule {
     @Provides
     TransactionsViewModelFactory provideTransactionsViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             FetchTransactionsInteract fetchTransactionsInteract,
             SetupTokensInteract setupTokensInteract,
             AddTokenInteract addTokenInteract,
@@ -26,7 +26,7 @@ class TransactionsModule {
             TokensService tokensService) {
         return new TransactionsViewModelFactory(
                 findDefaultNetworkInteract,
-                findDefaultWalletInteract,
+                genericWalletInteract,
                 fetchTransactionsInteract,
                 setupTokensInteract,
                 addTokenInteract,
@@ -42,8 +42,8 @@ class TransactionsModule {
     }
 
     @Provides
-    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new FindDefaultWalletInteract(walletRepository);
+    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides

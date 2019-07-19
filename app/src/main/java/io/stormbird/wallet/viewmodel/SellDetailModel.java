@@ -7,7 +7,7 @@ import android.content.Context;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.SellDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -32,7 +32,7 @@ public class SellDetailModel extends BaseViewModel {
     private ParseMagicLink parser;
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final MarketQueueService marketQueueService;
     private final CreateTransactionInteract createTransactionInteract;
     private final SellDetailRouter sellDetailRouter;
@@ -42,14 +42,14 @@ public class SellDetailModel extends BaseViewModel {
     private byte[] linkMessage;
 
     SellDetailModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
                           MarketQueueService marketQueueService,
                     CreateTransactionInteract createTransactionInteract,
                     SellDetailRouter sellDetailRouter,
                     AssetDisplayRouter assetDisplayRouter,
                     AssetDefinitionService assetDefinitionService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
         this.sellDetailRouter = sellDetailRouter;

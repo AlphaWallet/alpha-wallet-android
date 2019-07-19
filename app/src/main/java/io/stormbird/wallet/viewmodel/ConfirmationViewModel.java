@@ -5,13 +5,12 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Intent;
 import android.net.Uri;
-import android.text.TextUtils;
 import io.stormbird.token.entity.MagicLinkInfo;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.GasSettingsRouter;
 import io.stormbird.wallet.service.GasService;
@@ -28,20 +27,20 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final MutableLiveData<TransactionData> newDappTransaction = new MutableLiveData<>();
     private final MutableLiveData<GasSettings> sendGasSettings = new MutableLiveData<>();
 
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final GasService gasService;
     private final CreateTransactionInteract createTransactionInteract;
     private final TokensService tokensService;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GasSettingsRouter gasSettingsRouter;
 
-    ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
-                                 GasService gasService,
-                                 CreateTransactionInteract createTransactionInteract,
-                                 GasSettingsRouter gasSettingsRouter,
-                                 TokensService tokensService,
-                                 FindDefaultNetworkInteract findDefaultNetworkInteract) {
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+    ConfirmationViewModel(GenericWalletInteract genericWalletInteract,
+                          GasService gasService,
+                          CreateTransactionInteract createTransactionInteract,
+                          GasSettingsRouter gasSettingsRouter,
+                          TokensService tokensService,
+                          FindDefaultNetworkInteract findDefaultNetworkInteract) {
+        this.genericWalletInteract = genericWalletInteract;
         this.gasService = gasService;
         this.createTransactionInteract = createTransactionInteract;
         this.gasSettingsRouter = gasSettingsRouter;
@@ -102,7 +101,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     public void prepare(ConfirmationActivity ctx)
     {
         gasService.gasPriceUpdateListener().observe(ctx, this::onGasPrice);
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }

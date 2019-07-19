@@ -15,7 +15,6 @@ import io.stormbird.wallet.router.TransactionDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.TokensService;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +35,7 @@ public class TransactionsViewModel extends BaseViewModel
     private final MutableLiveData<Transaction[]> newTransactions = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AddTokenInteract addTokenInteract;
     private final SetupTokensInteract setupTokensInteract;
@@ -59,7 +58,7 @@ public class TransactionsViewModel extends BaseViewModel
 
     TransactionsViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             FetchTransactionsInteract fetchTransactionsInteract,
             SetupTokensInteract setupTokensInteract,
             AddTokenInteract addTokenInteract,
@@ -67,7 +66,7 @@ public class TransactionsViewModel extends BaseViewModel
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.transactionDetailRouter = transactionDetailRouter;
         this.addTokenInteract = addTokenInteract;
@@ -199,7 +198,7 @@ public class TransactionsViewModel extends BaseViewModel
     public void prepare()
     {
         progress.postValue(true);
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }

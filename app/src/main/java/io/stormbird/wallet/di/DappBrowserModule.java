@@ -14,7 +14,7 @@ public class DappBrowserModule {
     @Provides
     DappBrowserViewModelFactory provideWalletViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
@@ -23,7 +23,7 @@ public class DappBrowserModule {
             GasService gasService) {
         return new DappBrowserViewModelFactory(
                 findDefaultNetworkInteract,
-                findDefaultWalletInteract,
+                genericWalletInteract,
                 assetDefinitionService,
                 createTransactionInteract,
                 fetchTokensInteract,
@@ -44,9 +44,9 @@ public class DappBrowserModule {
     }
 
     @Provides
-    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository)
+    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository)
     {
-        return new FindDefaultWalletInteract(walletRepository);
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides

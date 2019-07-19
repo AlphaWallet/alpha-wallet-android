@@ -7,5 +7,5 @@ package io.stormbird.wallet.entity;
 public interface BackupTokenCallback
 {
     void BackupClick(String address);
-    void remindMeLater();
+    void remindMeLater(String address);
 }

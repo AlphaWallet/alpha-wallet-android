@@ -5,7 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
@@ -19,19 +19,19 @@ import io.stormbird.wallet.viewmodel.ConfirmationViewModelFactory;
 public class ConfirmationModule {
     @Provides
     public ConfirmationViewModelFactory provideConfirmationViewModelFactory(
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             GasService gasService,
             CreateTransactionInteract createTransactionInteract,
             GasSettingsRouter gasSettingsRouter,
             TokensService tokensService,
             FindDefaultNetworkInteract findDefaultNetworkInteract
     ) {
-        return new ConfirmationViewModelFactory(findDefaultWalletInteract, gasService, createTransactionInteract, gasSettingsRouter, tokensService, findDefaultNetworkInteract);
+        return new ConfirmationViewModelFactory(genericWalletInteract, gasService, createTransactionInteract, gasSettingsRouter, tokensService, findDefaultNetworkInteract);
     }
 
     @Provides
-    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new FindDefaultWalletInteract(walletRepository);
+    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides

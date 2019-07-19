@@ -2,6 +2,7 @@ package io.stormbird.wallet.repository;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
@@ -93,6 +94,24 @@ public class WalletRepository implements WalletRepositoryType
 	@Override
 	public Completable setDefaultWallet(Wallet wallet) {
 		return Completable.fromAction(() -> preferenceRepositoryType.setCurrentWalletAddress(wallet.address));
+	}
+
+	@Override
+	public Disposable updateBackupTime(String walletAddr)
+	{
+		return walletDataRealmSource.updateBackupTime(walletAddr);
+	}
+
+	@Override
+	public Single<Long> getWalletBackupTime(String walletAddr)
+	{
+		return walletDataRealmSource.getWalletBackupTime(walletAddr);
+	}
+
+	@Override
+	public Single<String> getWalletRequiresBackup()
+	{
+		return walletDataRealmSource.getWalletRequiresBackup();
 	}
 
 	@Override

@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.ImportWalletCallback;
@@ -75,7 +77,11 @@ public class ImportWalletViewModel extends BaseViewModel implements OnImportKeys
             }
             else
             {
-                System.out.println("PASS");
+                //begin key storage process
+                disposable = importWalletInteract.storeHDWallet(address)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(wallet::postValue, this::onError); //signal to UI wallet import complete
             }
         };
         HDKeyService hdKeyService = new HDKeyService(ctx);

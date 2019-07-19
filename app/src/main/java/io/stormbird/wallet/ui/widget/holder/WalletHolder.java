@@ -22,6 +22,7 @@ import io.stormbird.wallet.ui.widget.adapter.WalletsAdapter;
 public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnClickListener {
 
 	public static final int VIEW_TYPE = 1001;
+	public static final int HD_VIEW_TYPE = 1021;
 	public final static String IS_DEFAULT_ADDITION = "is_default";
     public static final String IS_LAST_ITEM = "is_last";
 

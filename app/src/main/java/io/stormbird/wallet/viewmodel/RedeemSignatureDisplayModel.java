@@ -7,12 +7,8 @@ import android.os.NetworkOnMainThreadException;
 import android.support.annotation.Nullable;
 
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.interact.CreateTransactionInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.interact.MemPoolInteract;
-import io.stormbird.wallet.interact.SignatureGenerateInteract;
+import io.stormbird.wallet.interact.*;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 
 import org.web3j.abi.datatypes.generated.Uint16;
@@ -40,7 +36,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private static final long CHECK_BALANCE_INTERVAL = 10;
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final SignatureGenerateInteract signatureGenerateInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
@@ -67,7 +63,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private String address;
 
     RedeemSignatureDisplayModel(
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             CreateTransactionInteract createTransactionInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -75,7 +71,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
             MemPoolInteract memoryPoolInteract,
             AssetDisplayRouter assetDisplayRouter,
             AssetDefinitionService assetDefinitionService) {
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.signatureGenerateInteract = signatureGenerateInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.createTransactionInteract = createTransactionInteract;
@@ -192,7 +188,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         this.address = address;
         token = ticket;
         this.ticketIndicies = ((Ticket)ticket).ticketIdListToIndexList(ticketRange.tokenIds);
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }

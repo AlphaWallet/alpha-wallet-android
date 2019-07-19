@@ -5,8 +5,7 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.interact.GetDefaultWalletBalance;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
@@ -19,7 +18,7 @@ import io.stormbird.wallet.service.TokensService;
 
 public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
     private final MyAddressRouter myAddressRouter;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final HelpRouter helpRouter;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -30,7 +29,7 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
     private final TokensService tokensService;
 
     public NewSettingsViewModelFactory(
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             MyAddressRouter myAddressRouter,
             HelpRouter helpRouter,
@@ -40,7 +39,7 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             TokensService tokensService) {
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.myAddressRouter = myAddressRouter;
         this.helpRouter = helpRouter;
@@ -56,7 +55,7 @@ public class NewSettingsViewModelFactory implements ViewModelProvider.Factory {
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new NewSettingsViewModel(
-                findDefaultWalletInteract,
+                genericWalletInteract,
                 getDefaultWalletBalance,
                 myAddressRouter,
                 helpRouter,

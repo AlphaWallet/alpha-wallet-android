@@ -34,7 +34,7 @@ public class AddTokenViewModel extends BaseViewModel {
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final SetupTokensInteract setupTokensInteract;
     private final AddTokenInteract addTokenInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
@@ -53,7 +53,7 @@ public class AddTokenViewModel extends BaseViewModel {
 
     AddTokenViewModel(
             AddTokenInteract addTokenInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             FetchTokensInteract fetchTokensInteract,
             SetupTokensInteract setupTokenInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -61,7 +61,7 @@ public class AddTokenViewModel extends BaseViewModel {
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService) {
         this.addTokenInteract = addTokenInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.setupTokensInteract = setupTokenInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
@@ -169,7 +169,7 @@ public class AddTokenViewModel extends BaseViewModel {
 
     private void findWallet()
     {
-        disposable = findDefaultWalletInteract.find()
+        disposable = genericWalletInteract.find()
                 .subscribe(wallet::setValue, this::onError);
     }
 

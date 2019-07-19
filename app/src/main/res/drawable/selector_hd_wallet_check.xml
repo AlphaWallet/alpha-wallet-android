@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:state_checked="true">
+        <bitmap android:src="@drawable/ic_checkbox_active" android:tint="@color/golden_yellow" />
+    </item>
+
+    <item android:state_checked="false">
+        <bitmap android:src="@drawable/ic_checkbox" android:tint="@color/golden_yellow" />
+    </item>
+</selector>

@@ -16,6 +16,7 @@ public class RealmWalletData extends RealmObject
     private String balance;
     private String name;
     private int type;
+    private long lastBackup;
 
     public String getAddress()
     {
@@ -57,4 +58,13 @@ public class RealmWalletData extends RealmObject
 
     public Wallet.WalletType getType() { return Wallet.WalletType.values()[type]; }
     public void setType(Wallet.WalletType type) { this.type = type.ordinal(); }
+
+    public long getLastBackup()
+    {
+        return lastBackup;
+    }
+    public void setLastBackup(long lastBackup)
+    {
+        this.lastBackup = lastBackup;
+    }
 }

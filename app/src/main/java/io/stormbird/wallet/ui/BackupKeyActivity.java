@@ -111,7 +111,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     {
         super.onPause();
         //hide seed phrase and any visible words
-        mnemonicArray = null;
         layoutWordHolder.setVisibility(View.GONE);
         layoutWordHolder.removeAllViews();
         verifyTextBox.setText("");
@@ -227,8 +226,9 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void backupTestPassed()
     {
-        HDKeyService.flagAsBackedUp(this, keyBackup);
+        //HDKeyService.flagAsBackedUp(this, keyBackup);
         Intent intent = new Intent();
+        intent.putExtra("Key", keyBackup);
         setResult(RESULT_OK, intent);
         finish();
     }

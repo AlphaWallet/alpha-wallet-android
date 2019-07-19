@@ -1,7 +1,7 @@
 package io.stormbird.wallet.di;
 
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.RedeemSignatureDisplayRouter;
@@ -21,12 +21,12 @@ public class RedeemAssetSelectModule
     @Provides
     RedeemAssetSelectViewModelFactory redeemTokenSelectViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             RedeemSignatureDisplayRouter redeemSignatureDisplayRouter,
             AssetDefinitionService assetDefinitionService) {
 
         return new RedeemAssetSelectViewModelFactory(
-                findDefaultWalletInteract, findDefaultNetworkInteract, redeemSignatureDisplayRouter, assetDefinitionService);
+                genericWalletInteract, findDefaultNetworkInteract, redeemSignatureDisplayRouter, assetDefinitionService);
     }
 
     @Provides
@@ -36,8 +36,8 @@ public class RedeemAssetSelectModule
     }
 
     @Provides
-    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new FindDefaultWalletInteract(walletRepository);
+    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides

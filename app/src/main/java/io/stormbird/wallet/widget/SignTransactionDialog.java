@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.AuthenticationCallback;
@@ -57,7 +58,7 @@ public class SignTransactionDialog extends AWalletConfirmationDialog
             //remove fingerprint
             ImageView fingerPrint = findViewById(R.id.image_fingerprint);
             fingerPrint.setVisibility(View.GONE);
-            Button pin = findViewById(R.id.dialog_button1_container);
+            LinearLayout pin = findViewById(R.id.dialog_button1_container);
             pin.setVisibility(View.VISIBLE);
         }
         //        Intent intent = km.createConfirmDeviceCredentialIntent(null, null);

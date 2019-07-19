@@ -460,7 +460,8 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     public void remindMeLater(String walletAddress)
     {
         if (getActivity() != null) { Toast.makeText(getActivity(), "TODO: Placeholder for remind me later message", Toast.LENGTH_LONG).show(); }
-        storeWalletBackupTime(walletAddress);
+        viewModel.setKeyWarningDismissTime(walletAddress).isDisposed();
+        adapter.removeBackupWarning();
     }
 
     public void storeWalletBackupTime(String backedUpKey)

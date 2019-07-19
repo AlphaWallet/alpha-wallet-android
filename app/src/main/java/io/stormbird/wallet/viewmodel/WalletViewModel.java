@@ -555,4 +555,9 @@ public class WalletViewModel extends BaseViewModel
     {
         return genericWalletInteract.updateBackupTime(walletAddr);
     }
+
+    public Disposable setKeyWarningDismissTime(String walletAddr)
+    {
+        return genericWalletInteract.updateWarningTime(walletAddr);
+    }
 }

@@ -7,6 +7,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletUpdate;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.service.AccountKeystoreService;
 import io.stormbird.wallet.service.TransactionsNetworkClientType;
 import okhttp3.OkHttpClient;
@@ -103,9 +104,15 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<Long> getWalletBackupTime(String walletAddr)
+	public Disposable updateWarningTime(String walletAddr)
 	{
-		return walletDataRealmSource.getWalletBackupTime(walletAddr);
+		return walletDataRealmSource.updateWarningTime(walletAddr);
+	}
+
+	@Override
+	public Single<GenericWalletInteract.BackupLevel> getWalletBackupLevel(String walletAddr)
+	{
+		return walletDataRealmSource.getWalletBackupLevel(walletAddr);
 	}
 
 	@Override

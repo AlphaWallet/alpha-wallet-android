@@ -12,8 +12,10 @@ import io.reactivex.observers.DisposableSingleObserver;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.repository.entity.RealmWalletData;
+import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.service.RealmManager;
 
 /**
@@ -192,7 +194,7 @@ public class WalletDataRealmSource {
         });
     }
 
-    public Disposable updateBackupTime(String walletAddr)
+    private Disposable updateTimeInternal(String walletAddr, boolean isBackupTime)
     {
         return Completable.complete()
                 .subscribeWith(new DisposableCompletableObserver()
@@ -209,7 +211,9 @@ public class WalletDataRealmSource {
                         if (realmWallet != null)
                         {
                             realm.beginTransaction();
-                            realmWallet.setLastBackup(System.currentTimeMillis());
+                            //Always update warning time but only update backup time if a backup was made
+                            if (isBackupTime) realmWallet.setLastBackup(System.currentTimeMillis());
+                            realmWallet.setLastWarning(System.currentTimeMillis());
                         }
                     }
 
@@ -231,7 +235,17 @@ public class WalletDataRealmSource {
                 });
     }
 
-    public Single<Long> getWalletBackupTime(String walletAddr)
+    public Disposable updateBackupTime(String walletAddr)
+    {
+        return updateTimeInternal(walletAddr, true);
+    }
+
+    public Disposable updateWarningTime(String walletAddr)
+    {
+        return updateTimeInternal(walletAddr, false);
+    }
+
+    private Single<Long> getWalletTime(String walletAddr, boolean isBackupTime)
     {
         return Single.fromCallable(() -> {
             long backupTime = 0L;
@@ -239,7 +253,11 @@ public class WalletDataRealmSource {
                 RealmWalletData realmWallet = realm.where(RealmWalletData.class)
                         .equalTo("address", walletAddr)
                         .findFirst();
-                if (realmWallet != null) backupTime = realmWallet.getLastBackup();
+                if (realmWallet != null)
+                {
+                    if (isBackupTime) backupTime = realmWallet.getLastBackup();
+                    else backupTime = realmWallet.getLastWarning();
+                }
             } catch (Exception e) {
                 Log.e(TAG, "getLastBackup: " + e.getMessage(), e);
             }
@@ -255,8 +273,12 @@ public class WalletDataRealmSource {
                 RealmResults<RealmWalletData> realmItems = realm.where(RealmWalletData.class)
                         .findAll();
 
+                // This checks if there's an HD wallet that has never been backed up,
+                // and the warning for which hasn't been dismissed within the last dismiss period
                 for (RealmWalletData data : realmItems) {
-                    if (data.getLastBackup() == 0 && data.getType() == Wallet.WalletType.HDKEY) //TODO: Check requirement
+                    if (data.getType() == Wallet.WalletType.HDKEY &&
+                            (data.getLastBackup() == 0 &&
+                                    System.currentTimeMillis() > (data.getLastWarning() + HDKeyService.TIME_BETWEEN_BACKUP_MILLIS)))
                     {
                         wallet = data.getAddress();
                         break;
@@ -268,4 +290,51 @@ public class WalletDataRealmSource {
             return wallet;
         });
     }
+
+    public Single<GenericWalletInteract.BackupLevel> getWalletBackupLevel(String walletAddr)
+    {
+        return Single.fromCallable(() -> {
+            long backupTime = 0L;
+            long warningTime = 0L;
+            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
+                RealmWalletData realmWallet = realm.where(RealmWalletData.class)
+                        .equalTo("address", walletAddr)
+                        .findFirst();
+                if (realmWallet != null)
+                {
+                    backupTime = realmWallet.getLastBackup();
+                    warningTime = realmWallet.getLastWarning();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "getLastBackup: " + e.getMessage(), e);
+            }
+            return calcBackupLevel(backupTime, warningTime);
+        });
+    }
+
+    private GenericWalletInteract.BackupLevel calcBackupLevel(Long backupTime, Long warningTime)
+    {
+        boolean warningDismissed = false;
+        if (System.currentTimeMillis() < (warningTime + HDKeyService.TIME_BETWEEN_BACKUP_WARNING_MILLIS))
+        {
+            warningDismissed = true;
+        }
+
+        if (!warningDismissed && backupTime == 0) // wallet never backed up but backup warning may have been swiped away
+        {
+            return GenericWalletInteract.BackupLevel.WALLET_NEVER_BACKED_UP;
+        }
+        else if (!warningDismissed && System.currentTimeMillis() > (backupTime + HDKeyService.TIME_BETWEEN_BACKUP_MILLIS)) //wallet has been backed up but may be due for backup check
+        {
+            return GenericWalletInteract.BackupLevel.PERIODIC_BACKUP;
+        }
+        else
+        {
+            long diff = (warningTime + HDKeyService.TIME_BETWEEN_BACKUP_MILLIS) - System.currentTimeMillis();
+            System.out.println("TIME TO BACKUP: " + diff/1000);
+            return GenericWalletInteract.BackupLevel.BACKUP_NOT_REQUIRED;
+        }
+    }
+
+
 }

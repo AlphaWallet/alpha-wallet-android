@@ -43,6 +43,17 @@ public class GenericWalletInteract
 		return walletRepository.updateBackupTime(walletAddr);
 	}
 
+	/**
+	 * Called when wallet has had its backup warning dismissed
+	 * Update the wallet date
+	 *
+	 * @param walletAddr
+	 */
+	public Disposable updateWarningTime(String walletAddr)
+	{
+		return walletRepository.updateWarningTime(walletAddr);
+	}
+
 	public Single<String> getWalletNeedsBackup()
 	{
 		return walletRepository.getWalletRequiresBackup();
@@ -55,26 +66,7 @@ public class GenericWalletInteract
 	 */
 	public Single<BackupLevel> getBackupLevel(String walletAddr)
 	{
-		return walletRepository.getWalletBackupTime(walletAddr)
-				.map(this::calcBackupLevel);
-	}
-
-	private BackupLevel calcBackupLevel(Long backupTime)
-	{
-		if (backupTime == 0)
-		{
-			return BackupLevel.WALLET_NEVER_BACKED_UP;
-		}
-		else if (System.currentTimeMillis() > (backupTime + HDKeyService.TIME_BETWEEN_BACKUP_MILLIS))
-		{
-			return BackupLevel.PERIODIC_BACKUP;
-		}
-		else
-		{
-			long diff = (backupTime + HDKeyService.TIME_BETWEEN_BACKUP_MILLIS) - System.currentTimeMillis();
-			System.out.println("TIME TO BACKUP: " + diff/1000);
-			return BackupLevel.BACKUP_NOT_REQUIRED;
-		}
+		return walletRepository.getWalletBackupLevel(walletAddr);
 	}
 
 	public enum BackupLevel

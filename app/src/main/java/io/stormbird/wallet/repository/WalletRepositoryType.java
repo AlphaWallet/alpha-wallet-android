@@ -9,6 +9,7 @@ import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletUpdate;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 
 public interface WalletRepositoryType {
     Single<Wallet[]> fetchWallets();
@@ -40,8 +41,9 @@ public interface WalletRepositoryType {
     Single<String> getName(String address);
 
     Disposable updateBackupTime(String walletAddr);
+    Disposable updateWarningTime(String walletAddr);
 
-    Single<Long> getWalletBackupTime(String walletAddr);
+    Single<GenericWalletInteract.BackupLevel> getWalletBackupLevel(String walletAddr);
 
     Single<String> getWalletRequiresBackup();
 }

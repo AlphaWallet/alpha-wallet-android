@@ -17,6 +17,7 @@ public class RealmWalletData extends RealmObject
     private String name;
     private int type;
     private long lastBackup;
+    private long lastWarning;
 
     public String getAddress()
     {
@@ -66,5 +67,14 @@ public class RealmWalletData extends RealmObject
     public void setLastBackup(long lastBackup)
     {
         this.lastBackup = lastBackup;
+    }
+
+    public long getLastWarning()
+    {
+        return lastWarning;
+    }
+    public void setLastWarning(long lastWarning)
+    {
+        this.lastWarning = lastWarning;
     }
 }

@@ -162,6 +162,10 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             case VERIFY_SEED_PHRASE:
                 TestSeedPhrase();
                 break;
+            case SEED_PHRASE_INVALID:
+                ResetInputBox();
+                VerifySeedPhrase();
+                break;
             case ENTER_JSON_BACKUP:
                 JSONBackup();
                 break;
@@ -172,6 +176,17 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                 VerifySeedPhrase();
                 break;
         }
+    }
+
+    private void ResetInputBox()
+    {
+        verifyTextBox.setBackgroundResource(R.drawable.background_verify_window);
+        verifyTextBox.setTextColor(getColor(R.color.greyaa));
+        verifyTextBox.setText(R.string.empty);
+        TextView invalid = findViewById(R.id.text_invalid);
+        invalid.setVisibility(View.GONE);
+
+        nextButton.setText(R.string.action_continue);
     }
 
     private void ShareEncryptedKeystore()
@@ -222,6 +237,9 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         verifyTextBox.setTextColor(getColor(R.color.grey_faint));
         TextView invalid = findViewById(R.id.text_invalid);
         invalid.setVisibility(View.VISIBLE);
+
+        nextButton.setText(R.string.try_again);
+        state = BackupState.SEED_PHRASE_INVALID;
     }
 
     private void backupTestPassed()
@@ -413,7 +431,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private enum BackupState
     {
-        ENTER_BACKUP_STATE_HD, WRITE_DOWN_SEED_PHRASE, VERIFY_SEED_PHRASE,
+        ENTER_BACKUP_STATE_HD, WRITE_DOWN_SEED_PHRASE, VERIFY_SEED_PHRASE, SEED_PHRASE_INVALID,
         ENTER_JSON_BACKUP, SET_JSON_PASSWORD, TEST_SEED_PHRASE
     }
 }

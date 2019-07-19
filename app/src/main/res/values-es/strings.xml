@@ -133,4 +133,5 @@
     <string name="nothing_to_share_message">Browse to a DApp to share it.</string>
     <string name="time_to_backup_wallet">Time to back up your Wallet</string>
     <string name="recommend_monthly_backup">We highly recommend to back up your wallet every month.</string>
+    <string name="action_remind_later">Remind me later</string>
 </resources>

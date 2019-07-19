@@ -14,6 +14,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,6 +34,7 @@ import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
 import io.stormbird.wallet.ui.widget.entity.WarningData;
+import io.stormbird.wallet.ui.widget.holder.WarningHolder;
 import io.stormbird.wallet.util.TabUtils;
 import io.stormbird.wallet.viewmodel.WalletViewModel;
 import io.stormbird.wallet.viewmodel.WalletViewModelFactory;
@@ -109,6 +111,9 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         adapter.setHasStableIds(true);
         list.setLayoutManager(new LinearLayoutManager(getContext()));
         list.setAdapter(adapter);
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeCallback(adapter));
+        itemTouchHelper.attachToRecyclerView(list);
 
         refreshLayout.setOnRefreshListener(this::refreshList);
 
@@ -470,5 +475,33 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 .isDisposed();
 
         adapter.removeBackupWarning();
+    }
+
+    public class SwipeCallback extends ItemTouchHelper.SimpleCallback {
+        private TokensAdapter mAdapter;
+
+        public SwipeCallback(TokensAdapter adapter) {
+            super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+            mAdapter = adapter;
+        }
+
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder viewHolder1) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
+            remindMeLater(viewModel.getWalletAddr());
+        }
+
+        @Override
+        public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+            if (viewHolder instanceof WarningHolder) {
+                return super.getSwipeDirs(recyclerView, viewHolder);
+            } else {
+                return 0;
+            }
+        }
     }
 }

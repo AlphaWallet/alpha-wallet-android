@@ -392,6 +392,8 @@ public class HDKeyService implements AuthenticationCallback
                                       .setRandomizedEncryptionRequired(true)
                                       .setEncryptionPaddings(PADDING)
                                       .build());
+
+            keyGenerator.generateKey();
         }
         catch (StrongBoxUnavailableException e)
         {

@@ -47,6 +47,7 @@ public class HDKeyService implements AuthenticationCallback
     private static final int AUTHENTICATION_DURATION_SECONDS = 30;
 
     public static final int TIME_BETWEEN_BACKUP_MILLIS = 1000*60*1; //TODO: RESTORE 30 DAYS. TESTING: 10 minutes  //1000 * 60 * 60 * 24 * 30; //30 days
+    public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000*60*1; //TODO: RESTORE 30 DAYS. TESTING: 10 minutes  //1000 * 60 * 60 * 24 * 30; //30 days
 
     private enum Operation
     {

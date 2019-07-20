@@ -154,4 +154,7 @@ public abstract class C {
 
     public static final String GOOGLE_SEARCH_PREFIX = "https://www.google.com/search?q=";
     public static final String HTTPS_PREFIX = "https://";
+
+    // Settings Badge Keys
+    public static final String KEY_NEEDS_BACKUP = "needsBackup";
 }

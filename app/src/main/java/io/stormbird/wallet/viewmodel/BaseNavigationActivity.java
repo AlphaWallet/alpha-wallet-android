@@ -25,4 +25,16 @@ public class BaseNavigationActivity extends BaseActivity implements AWalletBotto
     protected int getSelectedItem() {
         return nav.getSelectedItem();
     }
+
+    public void setSettingsBadgeCount(int count) {
+        nav.setSettingsBadgeCount(count);
+    }
+
+    public void addSettingsBadgeKey(String key) {
+        nav.addSettingsBadgeKey(key);
+    }
+
+    public void removeSettingsBadgeKey(String key) {
+        nav.removeSettingsBadgeKey(key);
+    }
 }

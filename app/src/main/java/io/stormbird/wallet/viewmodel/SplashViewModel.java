@@ -14,6 +14,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
 import io.stormbird.wallet.entity.FileData;
+import io.stormbird.wallet.entity.PinAuthenticationCallbackInterface;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.CreateWalletInteract;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
@@ -229,5 +230,11 @@ public class SplashViewModel extends ViewModel implements CreateWalletCallbackIn
     public void FetchMnemonic(String mnemonic)
     {
 
+    }
+
+    @Override
+    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+    {
+        //TODO: PIN callback
     }
 }

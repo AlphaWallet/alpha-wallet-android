@@ -12,11 +12,9 @@ import android.security.keystore.*;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.AuthenticationCallback;
-import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
-import io.stormbird.wallet.entity.ImportWalletCallback;
-import io.stormbird.wallet.entity.ServiceErrorException;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.SignTransactionDialog;
 import wallet.core.jni.CoinType;
@@ -36,7 +34,7 @@ import static io.stormbird.wallet.entity.ServiceErrorException.*;
 import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 
 @TargetApi(23)
-public class HDKeyService implements AuthenticationCallback
+public class HDKeyService implements AuthenticationCallback, PinAuthenticationCallbackInterface
 {
     private static final String TAG = "HDWallet";
     private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
@@ -76,6 +74,7 @@ public class HDKeyService implements AuthenticationCallback
         PrivateKey pk = currentWallet.getKeyForCoin(CoinType.ETHEREUM);
         currentKey =  CoinType.ETHEREUM.deriveAddress(pk);
         callbackInterface = callback;
+        callback.setupAuthenticationCallback(this);
         checkAuthentication(Operation.CREATE_HD_KEY);
         return currentKey;
     }
@@ -93,6 +92,7 @@ public class HDKeyService implements AuthenticationCallback
     {
         currentKey = address;
         callbackInterface = callback;
+        callback.setupAuthenticationCallback(this);
         checkAuthentication(Operation.FETCH_MNEMONIC);
     }
 
@@ -217,7 +217,6 @@ public class HDKeyService implements AuthenticationCallback
             {
                 callbackInterface.tryAgain();
                 return;
-                //throw new NullPointerException("iv is missing for " + currentKey + "iv");
             }
             Cipher outCipher = Cipher.getInstance(CIPHER_ALGORITHM);
             outCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
@@ -418,15 +417,11 @@ public class HDKeyService implements AuthenticationCallback
                                   .build());
     }
 
-
     private void checkAuthentication(Operation operation)
     {
         signDialog = new SignTransactionDialog(context, operation.ordinal());
-        signDialog.setBigText("Authenticate Credentials");
-        signDialog.setSecondaryButtonText(R.string.action_cancel);
-        signDialog.setPrimaryButtonText(R.string.dialog_title_sign_message);
-        signDialog.setCanceledOnTouchOutside(true);
-        signDialog.setOnCancelListener(v -> { authenticateFail("Cancelled", false); });
+        signDialog.setCanceledOnTouchOutside(false);
+        signDialog.setCancelListener(v -> { authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation.ordinal()); });
         signDialog.show();
         signDialog.getFingerprintAuthorisation(this);
     }
@@ -505,6 +500,18 @@ public class HDKeyService implements AuthenticationCallback
     }
 
     @Override
+    public void CompleteAuthentication(int callbackId)
+    {
+        authenticatePass(callbackId);
+    }
+
+    @Override
+    public void FailedAuthentication(int taskCode)
+    {
+        authenticateFail("Authentication fail", AuthenticationFailType.PIN_FAILED, taskCode);
+    }
+
+    @Override
     public void authenticatePass(int callbackId)
     {
         signDialog.dismiss();
@@ -529,34 +536,56 @@ public class HDKeyService implements AuthenticationCallback
     }
 
     @Override
-    public void authenticateFail(String fail, boolean systemFail)
+    public void authenticateFail(String fail, AuthenticationFailType failType, int callbackId)
     {
-        signDialog.dismiss();
+        System.out.println("AUTH FAIL: " + failType.ordinal());
+        Vibrator vb;
+
+        switch (failType)
+        {
+            case AUTHENTICATION_DIALOG_CANCELLED:
+                callbackInterface.cancelAuthentication();
+                if (signDialog != null && signDialog.isShowing()) signDialog.dismiss();
+                break;
+            case FINGERPRINT_NOT_VALIDATED:
+                vb = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+                if (vb != null && vb.hasVibrator())
+                {
+                    VibrationEffect vibe = VibrationEffect.createOneShot(200, DEFAULT_AMPLITUDE);
+                    vb.vibrate(vibe);
+                }
+                Toast.makeText(context, "Fingerprint authentication failed", Toast.LENGTH_SHORT).show();
+                break;
+            case PIN_FAILED:
+                vb = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+                if (vb != null && vb.hasVibrator())
+                {
+                    VibrationEffect vibe = VibrationEffect.createOneShot(200, DEFAULT_AMPLITUDE);
+                    vb.vibrate(vibe);
+                }
+                showTryAgain(callbackId);
+                break;
+            case DEVICE_NOT_SECURE:
+                showInsecure(callbackId);
+                if (signDialog != null && signDialog.isShowing()) signDialog.dismiss();
+                break;
+        }
+
         if (context == null || context.isDestroyed())
         {
             callbackInterface.cancelAuthentication();
-            return;
         }
+    }
 
-        int title = R.string.authentication_cancelled;
-        if (systemFail)
-        {
-            Vibrator vb = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-            if (vb != null && vb.hasVibrator())
-            {
-                VibrationEffect vibe = VibrationEffect.createOneShot(200, DEFAULT_AMPLITUDE);
-                vb.vibrate(vibe);
-            }
-            title = R.string.authentication_failed;
-        }
-
+    private void showTryAgain(int callbackId)
+    {
         AWalletAlertDialog dialog = new AWalletAlertDialog(context);
         dialog.setIcon(AWalletAlertDialog.WARNING);
-        dialog.setTitle(title);
+        dialog.setTitle(R.string.authentication_failed);
         dialog.setMessage(R.string.authentication_failed_message);
         dialog.setButtonText(R.string.action_try_again);
         dialog.setButtonListener(v -> {
-            callbackInterface.tryAgain();
+            checkAuthentication(Operation.values()[callbackId]);
             dialog.dismiss();
         });
         dialog.setSecondaryButtonText(R.string.action_cancel);
@@ -565,6 +594,29 @@ public class HDKeyService implements AuthenticationCallback
             dialog.dismiss();
         });
         dialog.setOnCancelListener(v -> {
+            callbackInterface.cancelAuthentication();
+            dialog.dismiss();
+        });
+        dialog.setOnDismissListener(v-> {
+            callbackInterface.cancelAuthentication();
+        });
+        dialog.show();
+    }
+
+    /**
+     * Current behaviour: Don't allow users to create a private key unless the device is secure
+     *
+     * @param callbackId
+     */
+    private void showInsecure(int callbackId)
+    {
+        AWalletAlertDialog dialog = new AWalletAlertDialog(context);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.device_insecure);
+        dialog.setMessage(R.string.device_not_secure_warning);
+        dialog.setButtonText(R.string.action_continue);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setButtonListener(v -> {
             callbackInterface.cancelAuthentication();
             dialog.dismiss();
         });

@@ -59,6 +59,7 @@
 	<color name="dark_seed_danger">#cb1b1b</color>
 	<color name="nasty_green">#75b943</color>
 	<color name="inactive_green">#d7ebc8</color>
+	<color name="material_green">#009688</color>
 
 	<color name="viewfinder_mask">#60000000</color>
 	<color name="viewfinder_laser">#ffcc0000</color>

@@ -13,6 +13,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
+import io.stormbird.wallet.ui.widget.holder.TextHolder;
 import io.stormbird.wallet.ui.widget.holder.WalletHolder;
 
 public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
@@ -41,13 +42,8 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 }
                 binderViewHolder = h;
             break;
-            case WalletHolder.HD_VIEW_TYPE:
-                h = new WalletHolder(R.layout.item_hd_wallet_manage, parent);
-                h.setOnSetWalletDefaultListener(onSetWalletDefaultListener);
-                if (network != null) {
-                    h.setCurrencySymbol(network.symbol);
-                }
-                binderViewHolder = h;
+            case TextHolder.VIEW_TYPE:
+                binderViewHolder = new TextHolder(R.layout.item_text_view, parent);
                 break;
             default:
                 break;
@@ -58,7 +54,6 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     @Override
     public void onBindViewHolder(BinderViewHolder holder, int position) {
         switch (getItemViewType(position)) {
-            case WalletHolder.HD_VIEW_TYPE:
             case WalletHolder.VIEW_TYPE:
                 Wallet wallet = wallets.get(position);
                 Bundle bundle = new Bundle();
@@ -67,6 +62,10 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                         defaultWallet != null && defaultWallet.sameAddress(wallet.address));
                 bundle.putBoolean(WalletHolder.IS_LAST_ITEM, getItemCount() == 1);
                 holder.bind(wallet, bundle);
+                break;
+            case TextHolder.VIEW_TYPE:
+                wallet = wallets.get(position);
+                holder.bind(wallet.address);
                 break;
         }
     }
@@ -82,9 +81,10 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         {
             default:
             case KEYSTORE:
-                return WalletHolder.VIEW_TYPE;
             case HDKEY:
-                return WalletHolder.HD_VIEW_TYPE;
+                return WalletHolder.VIEW_TYPE;
+            case NOT_DEFINED:
+                return TextHolder.VIEW_TYPE;
         }
     }
 
@@ -100,9 +100,36 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public void setWallets(Wallet[] wallets) {
         this.wallets.clear();
-        if (wallets != null) {
-            List<Wallet> walletList = Arrays.asList(wallets);
-            this.wallets.addAll(walletList);
+        if (wallets != null)
+        {
+            int walletsRemaining = wallets.length;
+            //Add HD Wallets
+            for (Wallet w : wallets)
+            {
+                if (w.type == Wallet.WalletType.HDKEY)
+                {
+                    this.wallets.add(w);
+                    walletsRemaining--;
+                }
+            }
+
+            if (walletsRemaining > 0)
+            {
+                Wallet legacyText = new Wallet("Legacy Wallets");
+                legacyText.type = Wallet.WalletType.NOT_DEFINED;
+                this.wallets.add(legacyText);
+
+                for (Wallet w : wallets)
+                {
+                    if (w.type == Wallet.WalletType.KEYSTORE)
+                    {
+                        this.wallets.add(w);
+                    }
+                }
+            }
+
+            //List<Wallet> walletList = Arrays.asList(wallets);
+            //this.wallets.addAll(walletList);
         }
         notifyDataSetChanged();
     }

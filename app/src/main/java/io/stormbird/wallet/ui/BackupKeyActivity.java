@@ -144,7 +144,18 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home: {
-                tryAgain();
+                switch (state)
+                {
+                    case VERIFY_SEED_PHRASE:
+                    case SEED_PHRASE_INVALID:
+                        //if we're currently verifying seed or we made a mistake copying the seed down then allow user to restart
+                        state = BackupState.WRITE_DOWN_SEED_PHRASE;
+                        VerifySeedPhrase();
+                        break;
+                    default:
+                        tryAgain();
+                        break;
+                }
                 return true;
             }
         }

@@ -17,24 +17,21 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-
-import java.util.Map;
-
-import javax.inject.Inject;
-
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.ui.widget.adapter.WalletsAdapter;
 import io.stormbird.wallet.viewmodel.WalletsViewModel;
 import io.stormbird.wallet.viewmodel.WalletsViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.AddWalletView;
 import io.stormbird.wallet.widget.SystemView;
+
+import javax.inject.Inject;
+import java.util.Map;
 
 public class WalletsActivity extends BaseActivity implements
         View.OnClickListener,
@@ -63,7 +60,7 @@ public class WalletsActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wallets);
         toolbar();
-        setTitle(R.string.empty);
+        setTitle(getString(R.string.title_change_wallet));
         initViews();
     }
 

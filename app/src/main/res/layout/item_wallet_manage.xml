@@ -5,7 +5,8 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/selector_round_green"
+    android:minHeight="72dp"
+    android:background="@drawable/wallet_background_card"
     android:descendantFocusability="blocksDescendants"
     android:orientation="horizontal"
     android:paddingBottom="15dp"
@@ -20,10 +21,11 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="15dp"
-        android:background="@drawable/selector_radio_check"
+        android:background="@drawable/selector_wallet_check"
         android:buttonTint="@color/transparent" />
 
     <LinearLayout
+        android:id="@+id/text_wrapper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
@@ -47,7 +49,7 @@
                 android:text=""
                 android:textColor="@color/text_black"
                 android:textIsSelectable="true"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 tools:text="3.2345" />
 
             <TextView
@@ -83,36 +85,26 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/click_layer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@id/text_wrapper"
+        android:layout_alignTop="@id/text_wrapper"
+        android:layout_alignBottom="@id/text_wrapper"
+        android:orientation="horizontal"
+        android:background="@color/transparent"/>
+
     <ImageView
         android:id="@+id/btn_more"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_margin="@dimen/normal_margin"
+        android:layout_marginBottom="@dimen/normal_margin"
+        android:layout_marginTop="@dimen/normal_margin"
         android:contentDescription="@string/empty"
-        android:enabled="false"
+        android:padding="2dp"
         android:src="@drawable/ic_more_vert" />
-
-    <ImageView
-        android:id="@+id/delete_action"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_margin="@dimen/normal_margin"
-        android:layout_toStartOf="@+id/export_action"
-        android:contentDescription="@string/empty"
-        android:visibility="gone"
-        app:srcCompat="@drawable/ic_trash" />
-
-    <ImageView
-        android:id="@+id/export_action"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:layout_margin="@dimen/normal_margin"
-        android:contentDescription="@string/empty"
-        android:visibility="gone"
-        app:srcCompat="@drawable/ic_backup" />
 </RelativeLayout>

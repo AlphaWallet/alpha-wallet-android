@@ -70,7 +70,6 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     public String createNewHDKey(CreateWalletCallbackInterface callback)
     {
         currentWallet = new HDWallet(DEFAULT_KEY_STRENGTH, "key1");
-        String mnemonic = currentWallet.mnemonic();
         PrivateKey pk = currentWallet.getKeyForCoin(CoinType.ETHEREUM);
         currentKey =  CoinType.ETHEREUM.deriveAddress(pk);
         callbackInterface = callback;
@@ -224,7 +223,6 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             byte[] mnemonicBytes = readBytesFromStream(cipherInputStream);
             String mnemonic = new String(mnemonicBytes);
             callbackInterface.FetchMnemonic(mnemonic);
-            return;
         }
         catch (InvalidKeyException e)
         {

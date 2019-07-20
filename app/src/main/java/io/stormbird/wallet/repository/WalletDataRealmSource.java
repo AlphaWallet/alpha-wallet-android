@@ -291,7 +291,7 @@ public class WalletDataRealmSource {
         });
     }
 
-    public Single<GenericWalletInteract.BackupLevel> getWalletBackupLevel(String walletAddr)
+    public Single<Boolean> getWalletBackupWarning(String walletAddr)
     {
         return Single.fromCallable(() -> {
             long backupTime = 0L;
@@ -308,11 +308,11 @@ public class WalletDataRealmSource {
             } catch (Exception e) {
                 Log.e(TAG, "getLastBackup: " + e.getMessage(), e);
             }
-            return calcBackupLevel(backupTime, warningTime);
+            return requiresBackup(backupTime, warningTime);
         });
     }
 
-    private GenericWalletInteract.BackupLevel calcBackupLevel(Long backupTime, Long warningTime)
+    private Boolean requiresBackup(Long backupTime, Long warningTime)
     {
         boolean warningDismissed = false;
         if (System.currentTimeMillis() < (warningTime + HDKeyService.TIME_BETWEEN_BACKUP_WARNING_MILLIS))
@@ -322,17 +322,17 @@ public class WalletDataRealmSource {
 
         if (!warningDismissed && backupTime == 0) // wallet never backed up but backup warning may have been swiped away
         {
-            return GenericWalletInteract.BackupLevel.WALLET_NEVER_BACKED_UP;
+            return true;
         }
-        else if (!warningDismissed && System.currentTimeMillis() > (backupTime + HDKeyService.TIME_BETWEEN_BACKUP_MILLIS)) //wallet has been backed up but may be due for backup check
+        /*else if (!warningDismissed && System.currentTimeMillis() > (backupTime + HDKeyService.TIME_BETWEEN_BACKUP_MILLIS)) //wallet has been backed up but may be due for backup check
         {
-            return GenericWalletInteract.BackupLevel.PERIODIC_BACKUP;
-        }
+            return true;
+        }*/
         else
         {
             long diff = (warningTime + HDKeyService.TIME_BETWEEN_BACKUP_MILLIS) - System.currentTimeMillis();
             System.out.println("TIME TO BACKUP: " + diff/1000);
-            return GenericWalletInteract.BackupLevel.BACKUP_NOT_REQUIRED;
+            return false;
         }
     }
 

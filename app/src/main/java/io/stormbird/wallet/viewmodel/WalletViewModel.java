@@ -24,8 +24,10 @@ import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
 import io.stormbird.wallet.service.TokensService;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -43,6 +45,7 @@ public class WalletViewModel extends BaseViewModel
     private final MutableLiveData<Token> tokenUpdate = new MutableLiveData<>();
     private final MutableLiveData<Boolean> tokensReady = new MutableLiveData<>();
     private final MutableLiveData<Boolean> fetchKnownContracts = new MutableLiveData<>();
+    private final MutableLiveData<GenericWalletInteract.BackupLevel> backupEvent = new MutableLiveData<>();
 
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
@@ -112,6 +115,7 @@ public class WalletViewModel extends BaseViewModel
     public LiveData<Token> tokenUpdate() { return tokenUpdate; }
     public LiveData<Boolean> tokensReady() { return tokensReady; }
     public LiveData<Boolean> fetchKnownContracts() { return fetchKnownContracts; }
+    public LiveData<GenericWalletInteract.BackupLevel> backupEvent() { return backupEvent; }
 
     public String getWalletAddr() { return currentWallet != null ? currentWallet.address : null; }
     public Wallet.WalletType getWalletType() { return currentWallet != null ? currentWallet.type : Wallet.WalletType.KEYSTORE; }
@@ -387,7 +391,7 @@ public class WalletViewModel extends BaseViewModel
     }
 
     @Override
-    public void showErc20TokenDetail(Context context, String address, String symbol, int decimals, Token token) {
+    public void showErc20TokenDetail(Context context, @NotNull String address, String symbol, int decimals, @NotNull Token token) {
         boolean isToken = !address.equalsIgnoreCase(currentWallet.address);
         boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
         erc20DetailRouter.open(context, address, symbol, decimals, isToken, currentWallet, token, hasDefinition);
@@ -423,7 +427,7 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
-    private void onDefaultWallet(Wallet wallet) {
+    private void onDefaultWallet(@NotNull Wallet wallet) {
         tokensService.setCurrentAddress(wallet.address);
         currentWallet = wallet;
         fetchTokens();
@@ -485,7 +489,7 @@ public class WalletViewModel extends BaseViewModel
         Log.d("WVM", "Wait for internet");
     }
 
-    public Token getTokenFromService(Token token)
+    public Token getTokenFromService(@NotNull Token token)
     {
         Token serviceToken = tokensService.getToken(token.tokenInfo.chainId, token.getAddress());
         return (serviceToken != null) ? serviceToken : token;
@@ -505,9 +509,41 @@ public class WalletViewModel extends BaseViewModel
         fetchTokens();
     }
 
-    public Single<GenericWalletInteract.BackupLevel> getBackupRequirement(String wallet)
+    private void checkBackup()
     {
-        return genericWalletInteract.getBackupLevel(wallet);
+        if (getWalletAddr() == null) return;
+        BigDecimal value = BigDecimal.ZERO;
+        //first see if wallet has any value
+        for (Token t : tokensService.getAllTokens())
+        {
+            if (/*t.hasRealValue() &&*/ t.ticker != null && t.hasPositiveBalance())
+            {
+                BigDecimal balance = t.balance.divide(new BigDecimal(Math.pow(10, t.tokenInfo.decimals)));
+                value = value.add(balance.multiply(new BigDecimal(t.ticker.price)));
+            }
+        }
+
+        if (value.compareTo(BigDecimal.ZERO) > 0)
+        {
+            final BigDecimal calcValue = value;
+            genericWalletInteract.getBackupWarning(getWalletAddr())
+                    .map(needsBackup -> calculateBackupWarning(needsBackup, calcValue))
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(backupEvent::postValue, this::onBlockscoutError).isDisposed();
+        }
+    }
+
+    private GenericWalletInteract.BackupLevel calculateBackupWarning(Boolean needsBackup, @NotNull BigDecimal value)
+    {
+        if (value.compareTo(BigDecimal.valueOf(1000)) >= 0)
+        {
+            return GenericWalletInteract.BackupLevel.WALLET_HAS_HIGH_VALUE;
+        }
+        else
+        {
+            return GenericWalletInteract.BackupLevel.WALLET_HAS_LOW_VALUE;
+        }
     }
 
     /**
@@ -535,6 +571,7 @@ public class WalletViewModel extends BaseViewModel
                 }
 
                 fetchFromOpensea(openSeaCheck);
+                checkBackup(); //TODO: optimise
             }
             else if ((openSeaCheckCounter - 7) % (CHECK_BLOCKSCOUT_INTERVAL_TIME * updateCorrection) == 0)
             {

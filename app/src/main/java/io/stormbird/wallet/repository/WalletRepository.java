@@ -4,10 +4,8 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletUpdate;
-import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.service.AccountKeystoreService;
 import io.stormbird.wallet.service.TransactionsNetworkClientType;
 import okhttp3.OkHttpClient;
@@ -17,10 +15,6 @@ import org.web3j.protocol.http.HttpService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class WalletRepository implements WalletRepositoryType
 {
@@ -110,9 +104,9 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<GenericWalletInteract.BackupLevel> getWalletBackupLevel(String walletAddr)
+	public Single<Boolean> getWalletBackupWarning(String walletAddr)
 	{
-		return walletDataRealmSource.getWalletBackupLevel(walletAddr);
+		return walletDataRealmSource.getWalletBackupWarning(walletAddr);
 	}
 
 	@Override

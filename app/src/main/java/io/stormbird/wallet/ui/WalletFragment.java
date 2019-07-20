@@ -106,6 +106,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         viewModel.tokenUpdate().observe(this, this::onToken);
         viewModel.tokensReady().observe(this, this::tokensReady);
         viewModel.fetchKnownContracts().observe(this, this::fetchKnownContracts);
+        viewModel.backupEvent().observe(this, this::backupEvent);
 
         adapter = new TokensAdapter(getActivity(),this, viewModel.getAssetDefinitionService());
         adapter.setHasStableIds(true);
@@ -269,31 +270,18 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         if (tokens != null)
         {
             adapter.setTokens(tokens);
-            if (checkWalletBackup && viewModel.getWalletType() == Wallet.WalletType.HDKEY && viewModel.getWalletAddr() != null)
-            {
-                checkNeedsBackup();
-            }
         }
     }
 
-    private void checkNeedsBackup()
-    {
-        checkWalletBackup = false;
-        viewModel.getBackupRequirement(viewModel.getWalletAddr())
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::addWarningIfRequired).isDisposed();
-    }
-
-    private void addWarningIfRequired(GenericWalletInteract.BackupLevel backupLevel)
+    private void backupEvent(GenericWalletInteract.BackupLevel backupLevel)
     {
         WarningData wData;
         switch (backupLevel)
         {
             case BACKUP_NOT_REQUIRED:
-                ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+                if (getActivity() != null) ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
                 break;
-            case PERIODIC_BACKUP:
+            case WALLET_HAS_LOW_VALUE:
                 wData = new WarningData(this);
                 wData.title = getString(R.string.time_to_backup_wallet);
                 wData.detail = getString(R.string.recommend_monthly_backup);
@@ -302,9 +290,9 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 wData.buttonColour = ContextCompat.getColor(getContext(), R.color.backup_grey);
                 wData.address = viewModel.getWalletAddr();
                 adapter.addWarning(wData);
-                ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+                if (getActivity() != null) ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
                 break;
-            case WALLET_NEVER_BACKED_UP:
+            case WALLET_HAS_HIGH_VALUE:
                 wData = new WarningData(this);
                 wData.title = getString(R.string.wallet_not_backed_up);
                 wData.detail = getString(R.string.not_backed_up_detail);
@@ -313,7 +301,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 wData.buttonColour = ContextCompat.getColor(getContext(), R.color.warning_dark_red);
                 wData.address = viewModel.getWalletAddr();
                 adapter.addWarning(wData);
-                ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+                if (getActivity() != null) ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
                 break;
         }
     }
@@ -456,10 +444,19 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     @Override
     public void BackupClick(String address)
     {
-        //start backup of wallet here
         Intent intent = new Intent(getContext(), BackupKeyActivity.class);
         intent.putExtra("ADDRESS", address);
-        intent.putExtra("TYPE", "HDKEY");
+
+        switch (viewModel.getWalletType())
+        {
+            case HDKEY:
+                intent.putExtra("TYPE", "HDKEY");
+                break;
+            case KEYSTORE:
+                intent.putExtra("TYPE", "JSON");
+                break;
+        }
+
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_SEED);
     }

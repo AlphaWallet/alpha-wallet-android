@@ -1,16 +1,12 @@
 package io.stormbird.wallet.interact;
 
-import io.reactivex.Completable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.DisposableCompletableObserver;
-import io.realm.Realm;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.stormbird.wallet.service.HDKeyService;
 
 public class GenericWalletInteract
 {
@@ -64,13 +60,13 @@ public class GenericWalletInteract
 	 * @param walletAddr
 	 * @return
 	 */
-	public Single<BackupLevel> getBackupLevel(String walletAddr)
+	public Single<Boolean> getBackupWarning(String walletAddr)
 	{
-		return walletRepository.getWalletBackupLevel(walletAddr);
+		return walletRepository.getWalletBackupWarning(walletAddr);
 	}
 
 	public enum BackupLevel
 	{
-		BACKUP_NOT_REQUIRED, PERIODIC_BACKUP, WALLET_NEVER_BACKED_UP
+		BACKUP_NOT_REQUIRED, WALLET_HAS_LOW_VALUE, WALLET_HAS_HIGH_VALUE
 	}
 }

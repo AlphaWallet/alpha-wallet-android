@@ -43,7 +43,7 @@ public interface WalletRepositoryType {
     Disposable updateBackupTime(String walletAddr);
     Disposable updateWarningTime(String walletAddr);
 
-    Single<GenericWalletInteract.BackupLevel> getWalletBackupLevel(String walletAddr);
+    Single<Boolean> getWalletBackupWarning(String walletAddr);
 
     Single<String> getWalletRequiresBackup();
 }

@@ -338,4 +338,10 @@ public class WalletsViewModel extends BaseViewModel implements CreateWalletCallb
     {
 
     }
+
+    @Override
+    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+    {
+        //TODO:
+    }
 }

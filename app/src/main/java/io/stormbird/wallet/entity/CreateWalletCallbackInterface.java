@@ -8,4 +8,5 @@ public interface CreateWalletCallbackInterface
     void tryAgain();
     void cancelAuthentication();
     void FetchMnemonic(String mnemonic);
+    void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback);
 }

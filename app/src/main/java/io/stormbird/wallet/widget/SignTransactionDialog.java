@@ -2,44 +2,62 @@ package io.stormbird.wallet.widget;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetDialog;
+import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Toast;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.*;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.AuthenticationCallback;
+import io.stormbird.wallet.entity.AuthenticationFailType;
+
+import static android.hardware.fingerprint.FingerprintManager.*;
 
 /**
  * Created by James on 7/06/2019.
  * Stormbird in Sydney
  */
-public class SignTransactionDialog extends AWalletConfirmationDialog
+public class SignTransactionDialog extends BottomSheetDialog
 {
+    public static final int REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 123;
+
+    protected Activity context;
     private int callBackId;
+    private ImageView fingerprint;
+    private TextView cancel;
+    private TextView usePin;
+    private TextView fingerprintError;
+
     public SignTransactionDialog(@NonNull Activity activity, int callBackId)
     {
         super(activity);
-        //display fingerprint
-        ImageView fingerPrint = findViewById(R.id.image_fingerprint);
-        fingerPrint.setVisibility(View.VISIBLE);
-        findViewById(R.id.dialog_button1_container).setVisibility(View.GONE);
-        this.callBackId = callBackId;
-    }
+        context = activity;
+        setContentView(R.layout.dialog_unlock_private_key);
+        fingerprint = findViewById(R.id.image_fingerprint);
+        cancel = findViewById(R.id.text_cancel);
+        usePin = findViewById(R.id.text_use_pin);
+        fingerprintError = findViewById(R.id.text_fingerprint_error);
+        fingerprint.setVisibility(View.VISIBLE);
 
-    //TODO: Needs to be 'use PIN'
-    @Override
-    public void setPrimaryButtonText(int resId)
-    {
-        btnPrimary.setText(context.getResources().getString(resId));
+        this.callBackId = callBackId;
+        getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        setCanceledOnTouchOutside(true);
+
+        getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        usePin.setOnClickListener(v -> { showAuthenticationScreen(); });
     }
 
     //get fingerprint or PIN
@@ -55,17 +73,30 @@ public class SignTransactionDialog extends AWalletConfirmationDialog
         }
         else
         {
-            //remove fingerprint
-            ImageView fingerPrint = findViewById(R.id.image_fingerprint);
-            fingerPrint.setVisibility(View.GONE);
-            LinearLayout pin = findViewById(R.id.dialog_button1_container);
-            pin.setVisibility(View.VISIBLE);
+            removeFingerprintGraphic();
         }
-        //        Intent intent = km.createConfirmDeviceCredentialIntent(null, null);
-        //        if (intent != null) {
-        //            Activity app = (Activity) context;
-        //            app.startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS);
-        //        }
+
+        if (!hasPINLockSetup())
+        {
+            authCallback.authenticateFail("Device unlocked", AuthenticationFailType.DEVICE_NOT_SECURE, callBackId);
+        }
+    }
+
+    private void removeFingerprintGraphic()
+    {
+        //remove fingerprint
+        fingerprint.setVisibility(View.GONE);
+        TextView fingerPrintText = findViewById(R.id.fingerprint_text);
+        fingerPrintText.setVisibility(View.GONE);
+    }
+
+    private void showAuthenticationScreen()
+    {
+        KeyguardManager mKeyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+        Intent intent = mKeyguardManager.createConfirmDeviceCredentialIntent(context.getString(R.string.unlock_private_key), null);
+        if (intent != null) {
+            context.startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + callBackId);
+        }
     }
 
     private void authenticate(FingerprintManager fpManager, Context context, AuthenticationCallback authCallback) {
@@ -77,14 +108,41 @@ public class SignTransactionDialog extends AWalletConfirmationDialog
             @Override
             public void onAuthenticationError(int errorCode, CharSequence errString) {
                 super.onAuthenticationError(errorCode, errString);
-                Toast.makeText(context, errString, Toast.LENGTH_SHORT).show();
-                authCallback.authenticateFail(errString.toString(), true);
+                switch (errorCode)
+                {
+                    case FINGERPRINT_ERROR_CANCELED:
+                        //No action, safe to ignore this return code
+                        break;
+                    case FINGERPRINT_ERROR_HW_NOT_PRESENT:
+                    case FINGERPRINT_ERROR_HW_UNAVAILABLE:
+                        //remove the fingerprint graphic
+                        removeFingerprintGraphic();
+                        break;
+                    case FINGERPRINT_ERROR_LOCKOUT:
+                        fingerprintError.setText("Too many fingerprint fails. Use PIN or wait 30 seconds");
+                        fingerprintError.setVisibility(View.VISIBLE);
+                        break;
+                    case FINGERPRINT_ERROR_LOCKOUT_PERMANENT:
+                        fingerprintError.setText("Too many fingerprint fails. Use PIN or wait 30 seconds");
+                        fingerprintError.setVisibility(View.VISIBLE);
+                        break;
+                    case FINGERPRINT_ERROR_NO_FINGERPRINTS:
+                        fingerprintError.setText("No fingerprints Enrolled. Use PIN");
+                        fingerprintError.setVisibility(View.VISIBLE);
+                        break;
+                    case FINGERPRINT_ERROR_TIMEOUT:
+                        //safe to ignore
+                        break;
+                    case FINGERPRINT_ERROR_UNABLE_TO_PROCESS:
+                        fingerprintError.setText("Unable to process fingerprint. Use PIN");
+                        fingerprintError.setVisibility(View.VISIBLE);
+                        break;
+                }
             }
 
             @Override
             public void onAuthenticationHelp(int helpCode, CharSequence helpString) {
                 super.onAuthenticationHelp(helpCode, helpString);
-                //Toast.makeText(context, helpString.toString(), Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -93,10 +151,11 @@ public class SignTransactionDialog extends AWalletConfirmationDialog
                 authCallback.authenticatePass(callBackId);
             }
 
+            //This is called when fingerprint is invalid
             @Override
             public void onAuthenticationFailed() {
                 super.onAuthenticationFailed();
-                authCallback.authenticateFail("Authentication Failure", true);
+                authCallback.authenticateFail("Authentication Failure", AuthenticationFailType.FINGERPRINT_NOT_VALIDATED, callBackId);
             }
         }, null);
     }
@@ -118,4 +177,13 @@ public class SignTransactionDialog extends AWalletConfirmationDialog
         return fpManager;
     }
 
+    private boolean hasPINLockSetup()
+    {
+        KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+        return (keyguardManager == null || keyguardManager.isDeviceSecure());
+    }
+
+    public void setCancelListener(View.OnClickListener listener) {
+        cancel.setOnClickListener(listener);
+    }
 }

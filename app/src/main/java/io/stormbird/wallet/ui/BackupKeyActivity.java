@@ -14,14 +14,17 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import dagger.android.AndroidInjection;
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
+import io.stormbird.wallet.entity.PinAuthenticationCallbackInterface;
 import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.viewmodel.BackupKeyViewModel;
 import io.stormbird.wallet.viewmodel.BackupKeyViewModelFactory;
 import io.stormbird.wallet.widget.PasswordInputView;
 import io.stormbird.wallet.widget.ProgressView;
+import io.stormbird.wallet.widget.SignTransactionDialog;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -47,6 +50,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     private Button nextButton;
     private TextView verifyTextBox;
     private String[] mnemonicArray;
+    private PinAuthenticationCallbackInterface authInterface;
 
     private LinearLayout currentHolder;
     private int currentEdge;
@@ -111,7 +115,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     {
         super.onPause();
         //hide seed phrase and any visible words
-        layoutWordHolder.setVisibility(View.GONE);
         layoutWordHolder.removeAllViews();
         verifyTextBox.setText("");
     }
@@ -318,8 +321,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         layoutWordHolder.setVisibility(View.VISIBLE);
         layoutWordHolder.removeAllViews();
 
-        addNewLayoutLine();
-
         //fetch Mnemonic
         HDKeyService svs = new HDKeyService(this);
         svs.getMnemonic(keyBackup, this);
@@ -391,12 +392,19 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     @Override
     public void FetchMnemonic(String mnemonic)
     {
+        addNewLayoutLine();
         mnemonicArray = mnemonic.split(" ");
         //start adding words to layout
         for (String word : mnemonicArray)
         {
             addWordToLayout(word);
         }
+    }
+
+    @Override
+    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+    {
+        authInterface = authCallback;
     }
 
     private void initViewModel()
@@ -421,11 +429,35 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == SHARE_REQUEST_CODE)
+        int taskCode = 0;
+
+        //Interpret the return code; if it's within the range of values possible to return from PIN confirmation then separate out
+        //the task code from the return value. We have to do it this way because there's no way to send a bundle across the PIN dialog
+        //and out through the PIN dialog's return back to here
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            Intent intent = new Intent();
-            setResult(RESULT_OK, intent);
-            finish();
+            taskCode = requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
+            requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
+        }
+
+        switch (requestCode)
+        {
+            case SHARE_REQUEST_CODE:
+                Intent intent = new Intent();
+                setResult(RESULT_OK, intent);
+                finish();
+                break;
+
+            case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
+                if (resultCode == RESULT_OK)
+                {
+                    authInterface.CompleteAuthentication(taskCode);
+                }
+                else
+                {
+                    authInterface.FailedAuthentication(taskCode);
+                }
+                break;
         }
     }
 

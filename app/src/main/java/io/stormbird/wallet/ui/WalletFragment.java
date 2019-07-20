@@ -291,6 +291,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         switch (backupLevel)
         {
             case BACKUP_NOT_REQUIRED:
+                ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
                 break;
             case PERIODIC_BACKUP:
                 wData = new WarningData(this);
@@ -301,6 +302,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 wData.buttonColour = ContextCompat.getColor(getContext(), R.color.backup_grey);
                 wData.address = viewModel.getWalletAddr();
                 adapter.addWarning(wData);
+                ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
                 break;
             case WALLET_NEVER_BACKED_UP:
                 wData = new WarningData(this);
@@ -311,6 +313,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 wData.buttonColour = ContextCompat.getColor(getContext(), R.color.warning_dark_red);
                 wData.address = viewModel.getWalletAddr();
                 adapter.addWarning(wData);
+                ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
                 break;
         }
     }

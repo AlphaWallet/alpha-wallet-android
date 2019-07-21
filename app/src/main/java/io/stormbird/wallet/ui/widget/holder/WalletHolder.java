@@ -18,6 +18,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.ui.WalletActionsActivity;
 import io.stormbird.wallet.ui.widget.adapter.WalletsAdapter;
+import io.stormbird.wallet.ui.widget.entity.WalletClickCallback;
 
 public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnClickListener {
 
@@ -31,14 +32,14 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	private final TextView balance;
 	private final TextView currency;
     private final LinearLayout clickLayout;
-    private WalletsAdapter.OnSetWalletDefaultListener onSetWalletDefaultListener;
+    private final WalletClickCallback clickCallback;
 	private Wallet wallet;
 	private String currencySymbol;
 	private TextView walletName;
 
 	private final ImageView more;
 
-	public WalletHolder(int resId, ViewGroup parent) {
+	public WalletHolder(int resId, ViewGroup parent, WalletClickCallback callback) {
 		super(resId, parent);
 
 		container = findViewById(R.id.container);
@@ -49,7 +50,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		walletName = findViewById(R.id.wallet_name);
 		more = findViewById(R.id.btn_more);
 		clickLayout = findViewById(R.id.click_layer);
-
+		clickCallback = callback;
 		clickLayout.setOnClickListener(this);
 		more.setOnClickListener(this);
 	}
@@ -83,17 +84,11 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		currency.setText(currencySymbol);
 	}
 
-	public void setOnSetWalletDefaultListener(WalletsAdapter.OnSetWalletDefaultListener onSetWalletDefaultListener) {
-		this.onSetWalletDefaultListener = onSetWalletDefaultListener;
-	}
-
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
             case R.id.click_layer:
-				if (onSetWalletDefaultListener != null) {
-					onSetWalletDefaultListener.onSetDefault(wallet);
-				}
+				clickCallback.onWalletClicked(wallet);
 				break;
 
 			case R.id.btn_more:

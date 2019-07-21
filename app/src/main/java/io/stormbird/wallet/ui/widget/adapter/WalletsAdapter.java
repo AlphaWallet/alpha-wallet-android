@@ -12,12 +12,13 @@ import java.util.Map;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.ui.widget.entity.WalletClickCallback;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.ui.widget.holder.TextHolder;
 import io.stormbird.wallet.ui.widget.holder.WalletHolder;
 
-public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
-
+public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> implements WalletClickCallback
+{
     private final OnSetWalletDefaultListener onSetWalletDefaultListener;
     private ArrayList<Wallet> wallets;
     private Wallet defaultWallet = null;
@@ -35,8 +36,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         WalletHolder h;
         switch (viewType) {
             case WalletHolder.VIEW_TYPE:
-                h = new WalletHolder(R.layout.item_wallet_manage, parent);
-                h.setOnSetWalletDefaultListener(onSetWalletDefaultListener);
+                h = new WalletHolder(R.layout.item_wallet_manage, parent, this);
                 if (network != null) {
                     h.setCurrencySymbol(network.symbol);
                 }
@@ -127,9 +127,6 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                     }
                 }
             }
-
-            //List<Wallet> walletList = Arrays.asList(wallets);
-            //this.wallets.addAll(walletList);
         }
         notifyDataSetChanged();
     }
@@ -181,15 +178,13 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         notifyDataSetChanged();
     }
 
+    @Override
+    public void onWalletClicked(Wallet wallet)
+    {
+        onSetWalletDefaultListener.onSetDefault(wallet);
+    }
+
     public interface OnSetWalletDefaultListener {
         void onSetDefault(Wallet wallet);
-    }
-
-    public interface OnWalletDeleteListener {
-        void onDelete(Wallet delete);
-    }
-
-    public interface OnExportWalletListener {
-        void onExport(Wallet wallet);
     }
 }

@@ -28,6 +28,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import dagger.android.AndroidInjection;
@@ -36,6 +37,7 @@ import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.ui.widget.entity.ScrollControlInterface;
 import io.stormbird.wallet.ui.widget.entity.ScrollControlViewPager;
 import io.stormbird.wallet.util.RootUtil;
@@ -64,6 +66,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private ScrollControlViewPager viewPager;
     private PagerAdapter pagerAdapter;
     private LinearLayout successOverlay;
+    private ImageView successImage;
     private Handler handler;
     private DownloadReceiver downloadReceiver;
     private AWalletConfirmationDialog cDialog;
@@ -219,6 +222,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.getWalletName();
         checkRoot();
         successOverlay = findViewById(R.id.layout_success_overlay);
+        successImage = findViewById(R.id.success_image);
         //check clipboard
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         try
@@ -482,10 +486,25 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         showPage(newPage);
     }
 
+    private void backupSeedFail(String keyBackup)
+    {
+        //postpone backup until later
+        settingsFragment.backupSeedSuccess();
+        walletFragment.remindMeLater(keyBackup);
+        removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+
+        successImage.setImageResource(R.drawable.ic_error);
+        successOverlay.setVisibility(View.VISIBLE);
+        handler = new Handler();
+        handler.postDelayed(this, 1000);
+    }
+
     private void backupSeedSuccess(String keyBackup)
     {
         settingsFragment.backupSeedSuccess();
         walletFragment.storeWalletBackupTime(keyBackup);
+        removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+        successImage.setImageResource(R.drawable.big_green_tick);
         successOverlay.setVisibility(View.VISIBLE);
         handler = new Handler();
         handler.postDelayed(this, 1000);
@@ -735,6 +754,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 String keyBackup = null;
                 if (data != null) keyBackup = data.getStringExtra("Key");
                 if (resultCode == RESULT_OK) backupSeedSuccess(keyBackup);
+                else backupSeedFail(keyBackup);
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
@@ -790,5 +810,20 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         //TODO: periodically check this value (eg during page flipping)
         //Set alert to user to update their app
         updatePrompt = true;
+    }
+
+    public void notifyCancelBackup()
+    {
+        settingsFragment.backupSeedSuccess();
+    }
+
+    public void postponeWalletBackupWarning(String walletAddress)
+    {
+        walletFragment.remindMeLater(walletAddress);
+    }
+
+    public void notifyBackup(GenericWalletInteract.BackupLevel walletValue)
+    {
+        settingsFragment.addBackupNotice(walletValue);
     }
 }

@@ -150,7 +150,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                     case SEED_PHRASE_INVALID:
                         //if we're currently verifying seed or we made a mistake copying the seed down then allow user to restart
                         state = BackupState.WRITE_DOWN_SEED_PHRASE;
-                        VerifySeedPhrase();
+                        WriteDownSeedPhrase();
                         break;
                     default:
                         tryAgain();
@@ -258,9 +258,9 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void backupTestPassed()
     {
-        //HDKeyService.flagAsBackedUp(this, keyBackup);
         Intent intent = new Intent();
         intent.putExtra("Key", keyBackup);
+        intent.putExtra("TYPE", "HDKEY");
         setResult(RESULT_OK, intent);
         finish();
     }
@@ -318,6 +318,9 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void WriteDownSeedPhrase()
     {
+        ResetInputBox();
+        verifyTextBox.setVisibility(View.GONE);
+
         state = BackupState.WRITE_DOWN_SEED_PHRASE;
         backupImage.setVisibility(View.GONE);
         title.setText(R.string.write_down_seed_phrase);
@@ -455,7 +458,9 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         {
             case SHARE_REQUEST_CODE:
                 Intent intent = new Intent();
-                setResult(RESULT_OK, intent);
+                intent.putExtra("Key", keyBackup);
+                intent.putExtra("TYPE", "JSON");
+                setResult(resultCode, intent);
                 finish();
                 break;
 

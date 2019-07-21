@@ -26,6 +26,6 @@ public class TextHolder extends BinderViewHolder<String>
     @Override
     public void bind(@Nullable String data, @NonNull Bundle addition)
     {
-        text.setText(data);
+        if (data != null && data.length() > 0) text.setText(data);
     }
 }

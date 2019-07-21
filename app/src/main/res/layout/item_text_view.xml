@@ -6,8 +6,8 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:paddingLeft="15dp"
-    android:layout_marginTop="20dp"
-    android:layout_marginBottom="20dp"
+    android:layout_marginTop="25dp"
+    android:layout_marginBottom="25dp"
     android:paddingRight="15dp">
 
     <TextView
@@ -15,11 +15,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:fontFamily="@font/font_bold"
+        android:fontFamily="@font/font_semibold"
         android:gravity="center_horizontal"
         android:shadowColor="@color/greyf6"
         android:shadowDx="1"
         android:shadowDy="1"
+        android:text="@string/legacy_wallets"
         android:textColor="@color/text_dark_gray"
         android:textSize="20sp" />
 

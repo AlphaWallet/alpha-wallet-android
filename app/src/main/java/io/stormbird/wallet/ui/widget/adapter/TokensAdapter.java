@@ -388,4 +388,9 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         needsRefresh = true;
     }
+
+    public boolean hasBackupWarning()
+    {
+        return items.size() > 0 && items.get(0).viewType == WarningHolder.VIEW_TYPE;
+    }
 }

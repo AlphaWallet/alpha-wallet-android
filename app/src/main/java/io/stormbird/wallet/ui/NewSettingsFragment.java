@@ -19,10 +19,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.Switch;
-import android.widget.TextView;
+import android.widget.*;
 
 import javax.inject.Inject;
 
@@ -33,6 +30,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.util.LocaleUtils;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModel;
@@ -57,6 +55,11 @@ public class NewSettingsFragment extends Fragment {
     private LinearLayout layoutEnableXML;
     private LinearLayout layoutBackup;
     private Button backupButton;
+    private TextView backupTitle;
+    private TextView backupDetail;
+    private RelativeLayout backupLayoutBackground;
+    private ImageView backupMenuButton;
+    private View backupPopupAnchor;
 
     @Nullable
     @Override
@@ -155,9 +158,14 @@ public class NewSettingsFragment extends Fragment {
             updateNotificationState();
         });
 
-        layoutBackup = view.findViewById(R.id.layout_backup_text);
+        layoutBackup = view.findViewById(R.id.layout_item_warning);
+        backupTitle = view.findViewById(R.id.text_title);
+        backupDetail = view.findViewById(R.id.text_detail);
+        backupLayoutBackground = view.findViewById(R.id.layout_backup_text);
         backupButton = view.findViewById(R.id.button_backup);
-        setupBackupWarning();
+        backupMenuButton = view.findViewById(R.id.btn_menu);
+        backupPopupAnchor = view.findViewById(R.id.popup_anchor);
+        layoutBackup.setVisibility(View.GONE);
 
         LinearLayout layoutFacebook = view.findViewById(R.id.layout_facebook);
         layoutFacebook.setOnClickListener(v -> {
@@ -183,34 +191,21 @@ public class NewSettingsFragment extends Fragment {
         return view;
     }
 
-    private void setupBackupWarning()
-    {
-        if (layoutBackup == null || backupButton == null) return;
-        viewModel.getWalletNotBackedUp()
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::updateUIForBackup).isDisposed();
-    }
-
-    private void updateUIForBackup(String walletAddr)
-    {
-        if (walletAddr.length() > 0)
-        {
-            layoutBackup.setVisibility(View.VISIBLE);
-            backupButton.setText(getString(R.string.back_up_wallet_action, walletAddr.substring(0, 5)));
-            backupButton.setOnClickListener(v -> openBackupActivity(walletAddr));
-        }
-        else
-        {
-            layoutBackup.setVisibility(View.GONE);
-        }
-    }
-
-    private void openBackupActivity(String addr)
+    private void openBackupActivity(Wallet wallet)
     {
         Intent intent = new Intent(getContext(), BackupKeyActivity.class);
-        intent.putExtra("ADDRESS", addr);
-        intent.putExtra("TYPE", "HDKEY");
+        intent.putExtra("ADDRESS", wallet.address);
+
+        switch (wallet.type)
+        {
+            case HDKEY:
+                intent.putExtra("TYPE", "HDKEY");
+                break;
+            case KEYSTORE:
+                intent.putExtra("TYPE", "JSON");
+                break;
+        }
+
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_SEED);
     }
@@ -238,7 +233,6 @@ public class NewSettingsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         viewModel.prepare();
-        setupBackupWarning();
     }
 
     private void showXMLOverrideDialog() {
@@ -286,5 +280,49 @@ public class NewSettingsFragment extends Fragment {
             Log.w("SettingsFragment", "Folder write permission is not granted. Requesting permission");
             ActivityCompat.requestPermissions(getActivity(), permissions, RC_ASSET_EXTERNAL_WRITE_PERM);
         }
+    }
+
+    public void addBackupNotice(GenericWalletInteract.BackupLevel walletValue)
+    {
+        layoutBackup.setVisibility(View.VISIBLE);
+        //current Wallet only
+        Wallet wallet = viewModel.defaultWallet().getValue();
+        if (wallet != null)
+        {
+            backupButton.setText(getString(R.string.back_up_wallet_action, wallet.address.substring(0, 5)));
+            backupButton.setOnClickListener(v -> openBackupActivity(wallet));
+            backupMenuButton.setOnClickListener(v -> {
+                showPopup(backupPopupAnchor, wallet.address);
+            });
+
+            switch (walletValue)
+            {
+                case WALLET_HAS_LOW_VALUE:
+                    backupTitle.setText(getString(R.string.time_to_backup_wallet));
+                    backupDetail.setText(getString(R.string.recommend_monthly_backup));
+                    backupLayoutBackground.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.slate_grey));
+                    backupButton.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.backup_grey));
+                    break;
+                case WALLET_HAS_HIGH_VALUE:
+                    backupTitle.setText(getString(R.string.wallet_not_backed_up));
+                    backupDetail.setText(getString(R.string.not_backed_up_detail));
+                    backupLayoutBackground.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.warning_red));
+                    backupButton.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.warning_dark_red));
+                    break;
+            }
+        }
+    }
+
+    private void showPopup(View view, String walletAddress) {
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        View popupView = inflater.inflate(R.layout.popup_remind_later, null);
+        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, true);
+        popupView.setOnClickListener(v -> {
+            if (getActivity() != null) ((HomeActivity)getActivity()).postponeWalletBackupWarning(walletAddress);
+            popupWindow.dismiss();
+        });
+        popupWindow.showAsDropDown(view, 0, 20);
     }
 }

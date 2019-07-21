@@ -16,6 +16,7 @@ import io.stormbird.wallet.ui.widget.entity.WalletClickCallback;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.ui.widget.holder.TextHolder;
 import io.stormbird.wallet.ui.widget.holder.WalletHolder;
+import org.jetbrains.annotations.NotNull;
 
 public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> implements WalletClickCallback
 {
@@ -30,8 +31,9 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
         this.wallets = new ArrayList<>();
     }
 
+    @NotNull
     @Override
-    public BinderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public BinderViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
         BinderViewHolder binderViewHolder = null;
         WalletHolder h;
         switch (viewType) {
@@ -52,7 +54,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
     }
 
     @Override
-    public void onBindViewHolder(BinderViewHolder holder, int position) {
+    public void onBindViewHolder(@NotNull BinderViewHolder holder, int position) {
         switch (getItemViewType(position)) {
             case WalletHolder.VIEW_TYPE:
                 Wallet wallet = wallets.get(position);
@@ -115,7 +117,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
 
             if (walletsRemaining > 0)
             {
-                Wallet legacyText = new Wallet("Legacy Wallets");
+                Wallet legacyText = new Wallet("");
                 legacyText.type = Wallet.WalletType.NOT_DEFINED;
                 this.wallets.add(legacyText);
 
@@ -134,18 +136,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
     public Wallet getDefaultWallet() {
         return defaultWallet;
     }
-
-    public void updateWalletBalances(Map<String, Wallet> balances) {
-        for (Wallet wallet : wallets) {
-            if (balances.containsKey(wallet.address)) {
-                wallet.balance = balances.get(wallet.address).balance;
-                wallet.ENSname = balances.get(wallet.address).ENSname;
-                wallet.name = balances.get(wallet.address).name;
-            }
-        }
-        notifyDataSetChanged();
-    }
-
+    
     public void updateWalletbalance(Wallet wallet)
     {
         boolean found = false;

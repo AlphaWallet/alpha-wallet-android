@@ -34,7 +34,6 @@ public class WarningHolder extends BinderViewHolder<WarningData>
     @Override
     public void bind(@Nullable WarningData data, @NonNull Bundle addition)
     {
-
         title.setText(data.title);
         detail.setText(data.detail);
         layoutBackground.setBackgroundColor(data.colour);

@@ -46,6 +46,7 @@ public class WalletViewModel extends BaseViewModel
     private final MutableLiveData<Boolean> tokensReady = new MutableLiveData<>();
     private final MutableLiveData<Boolean> fetchKnownContracts = new MutableLiveData<>();
     private final MutableLiveData<GenericWalletInteract.BackupLevel> backupEvent = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> checkAdapterCount = new MutableLiveData<>();
 
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
@@ -66,6 +67,7 @@ public class WalletViewModel extends BaseViewModel
     private boolean isVisible = false;
     private int openSeaCheckCounter;
     private Wallet currentWallet;
+    private int backupCheckVal;
 
     private ConcurrentLinkedQueue<ContractResult> unknownAddresses;
 
@@ -114,6 +116,7 @@ public class WalletViewModel extends BaseViewModel
     }
     public LiveData<Token> tokenUpdate() { return tokenUpdate; }
     public LiveData<Boolean> tokensReady() { return tokensReady; }
+    public LiveData<Boolean> checkAdapterCount() { return checkAdapterCount; }
     public LiveData<Boolean> fetchKnownContracts() { return fetchKnownContracts; }
     public LiveData<GenericWalletInteract.BackupLevel> backupEvent() { return backupEvent; }
 
@@ -162,6 +165,7 @@ public class WalletViewModel extends BaseViewModel
         if (currentWallet != null)
         {
             openSeaCheckCounter = 0;
+            backupCheckVal = 0;
             tokensService.setCurrentAddress(currentWallet.address);
             updateTokens = fetchTokensInteract.fetchStoredWithEth(currentWallet)
                     .subscribeOn(Schedulers.newThread())
@@ -267,6 +271,9 @@ public class WalletViewModel extends BaseViewModel
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::storedTokens, this::onError).isDisposed();
+
+            //TODO: Once we start receiving ERC20 tickers check backup requirement if ERC20 received
+            //checkBackup();
         }
     }
 
@@ -302,6 +309,7 @@ public class WalletViewModel extends BaseViewModel
 
     private void checkBalances()
     {
+        // This checks for an old thread running. Terminate if it is. Possibly destroy the fragment and re-create on wallet change
         if (!currentWallet.address.equals(tokensService.getCurrentAddress())
                 && balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed())
         {
@@ -316,19 +324,15 @@ public class WalletViewModel extends BaseViewModel
 
     private void checkTokenUpdates()
     {
-        //if (balanceCheckDisposable == null || balanceCheckDisposable.isDisposed())
-        {
-            Token t = tokensService.getNextInBalanceUpdateQueue();
+        Token t = tokensService.getNextInBalanceUpdateQueue();
 
-            if (t != null)
-            {
-                Log.d("TOKEN", "Updating: " + t.tokenInfo.name + " : " + t.getAddress() + " [" + t.balanceUpdateWeight + "]");
-                balanceCheckDisposable = fetchTokensInteract.updateDefaultBalance(t, currentWallet)
-                        //.flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onTokenUpdate, this::balanceUpdateError, this::checkComplete);
-            }
+        if (t != null)
+        {
+            Log.d("TOKEN", "Updating: " + t.tokenInfo.name + " : " + t.getAddress() + " [" + t.balanceUpdateWeight + "]");
+            balanceCheckDisposable = fetchTokensInteract.updateDefaultBalance(t, currentWallet)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onTokenUpdate, this::balanceUpdateError, this::checkComplete);
         }
     }
 
@@ -355,9 +359,17 @@ public class WalletViewModel extends BaseViewModel
 
     private void onTokenUpdate(Token token)
     {
+        if (backupCheckVal == 0 && token != null && token.hasRealValue() && token.isEthereum() && token.ticker != null)
+        {
+            backupCheckVal = openSeaCheckCounter + 5;
+        }
         balanceCheckDisposable = null;
+        if (token == null) return;
         Token update = tokensService.addToken(token);
-        if (update != null) tokenUpdate.postValue(update);
+        if (update != null)
+        {
+            tokenUpdate.postValue(update);
+        }
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -472,7 +484,6 @@ public class WalletViewModel extends BaseViewModel
     {
         disposable = fetchTransactionsInteract.queryInterfaceSpecForService(info)
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.chainId, tokenInfo.address), currentWallet))
-                //.flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::finishedImport, this::onTokenAddError);
@@ -516,7 +527,7 @@ public class WalletViewModel extends BaseViewModel
         //first see if wallet has any value
         for (Token t : tokensService.getAllTokens())
         {
-            if (/*t.hasRealValue() &&*/ t.ticker != null && t.hasPositiveBalance())
+            if (t.hasRealValue() && t.ticker != null && t.hasPositiveBalance())
             {
                 BigDecimal balance = t.balance.divide(new BigDecimal(Math.pow(10, t.tokenInfo.decimals)));
                 value = value.add(balance.multiply(new BigDecimal(t.ticker.price)));
@@ -536,7 +547,11 @@ public class WalletViewModel extends BaseViewModel
 
     private GenericWalletInteract.BackupLevel calculateBackupWarning(Boolean needsBackup, @NotNull BigDecimal value)
     {
-        if (value.compareTo(BigDecimal.valueOf(1000)) >= 0)
+        if (!needsBackup)
+        {
+            return GenericWalletInteract.BackupLevel.BACKUP_NOT_REQUIRED;
+        }
+        else if (value.compareTo(BigDecimal.valueOf(1000)) >= 0)
         {
             return GenericWalletInteract.BackupLevel.WALLET_HAS_HIGH_VALUE;
         }
@@ -551,40 +566,40 @@ public class WalletViewModel extends BaseViewModel
      */
     private void checkOpenSeaUpdate()
     {
-        if (openSeaCheckCounter <= 4) openSeaCheckCounter++;
-        else if (openSeaCheckCounter > 5)
+        if (isVisible)
         {
-            if (isVisible)
-            {
-                openSeaCheckCounter += 1;
-            }
-
-            int updateCorrection = 1000 / BALANCE_CHECK_INTERVAL_MILLIS;
-
-            if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * updateCorrection) == 0)
-            {
-                NetworkInfo openSeaCheck = ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.MAINNET_ID);
-
-                if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * updateCorrection * OPENSEA_RINKEBY_CHECK) == 0 && ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
-                {
-                    openSeaCheck = ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.RINKEBY_ID);
-                }
-
-                fetchFromOpensea(openSeaCheck);
-                checkBackup(); //TODO: optimise
-            }
-            else if ((openSeaCheckCounter - 7) % (CHECK_BLOCKSCOUT_INTERVAL_TIME * updateCorrection) == 0)
-            {
-                fetchFromBlockscout();
-            }
-        }
-        else
-        {
-            //On user refresh and startup check rinkeby
             openSeaCheckCounter += 1;
-            //check rinkeby opensea if not filtered out
-            if (ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
-                fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.RINKEBY_ID));
+        }
+
+        //init events
+        switch (openSeaCheckCounter)
+        {
+            case 3:
+                if (ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
+                    fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.RINKEBY_ID));
+                break;
+            default:
+                break;
+        }
+
+        if (openSeaCheckCounter == backupCheckVal) checkBackup();
+
+        int updateCorrection = 1000 / BALANCE_CHECK_INTERVAL_MILLIS;
+
+        if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * updateCorrection) == 0)
+        {
+            NetworkInfo openSeaCheck = ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.MAINNET_ID);
+
+            if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * updateCorrection * OPENSEA_RINKEBY_CHECK) == 0 && ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
+            {
+                openSeaCheck = ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.RINKEBY_ID);
+            }
+
+            fetchFromOpensea(openSeaCheck);
+        }
+        else if ((openSeaCheckCounter - 7) % (CHECK_BLOCKSCOUT_INTERVAL_TIME * updateCorrection) == 0)
+        {
+            fetchFromBlockscout();
         }
     }
 

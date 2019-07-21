@@ -16,49 +16,7 @@
         android:orientation="vertical"
         android:paddingBottom="15dp">
 
-        <LinearLayout
-            android:id="@+id/layout_backup_text"
-            android:layout_width="match_parent"
-            android:layout_height="167dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
-            android:paddingStart="21dp"
-            android:paddingTop="20dp"
-            android:background="@drawable/backup_warning_red"
-            android:clickable="true"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:focusable="true">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
-                android:text="@string/wallet_not_backed_up"
-                android:textColor="@color/white"
-                android:textSize="22sp" />
-
-            <TextView
-                android:layout_marginTop="9dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
-                android:text="@string/not_backed_up_detail"
-                android:textColor="@color/white"
-                android:textSize="12sp" />
-
-            <Button
-                android:id="@+id/button_backup"
-                android:layout_marginTop="19dp"
-                android:layout_width="185dp"
-                android:layout_height="37dp"
-                android:fontFamily="@font/font_regular"
-                android:background="@color/warning_dark_red"
-                android:textColor="@color/white"
-                android:textSize="16sp" />
-
-        </LinearLayout>
+        <include layout="@layout/item_warning" />
 
         <LinearLayout
             android:id="@+id/layout_wallet_address"

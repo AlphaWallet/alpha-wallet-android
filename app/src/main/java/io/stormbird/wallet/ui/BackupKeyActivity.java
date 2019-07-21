@@ -275,9 +275,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         invalid.setVisibility(View.INVISIBLE);
         layoutWordHolder.setVisibility(View.VISIBLE);
         layoutWordHolder.removeAllViews();
-        nextButton.setClickable(false);
-        nextButton.setActivated(false);
-        nextButton.setBackgroundColor(getColor(R.color.inactive_green));
+        setBottomButtonActive(false);
 
         if (mnemonicArray == null) return;
 
@@ -310,10 +308,15 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         String[] currentTest = currentText.split(" ");
         if (currentTest.length == mnemonicArray.length)
         {
-            nextButton.setClickable(true);
-            nextButton.setActivated(true);
-            nextButton.setBackgroundColor(getColor(R.color.nasty_green));
+            setBottomButtonActive(true);
         }
+    }
+
+    private void setBottomButtonActive(boolean active)
+    {
+        nextButton.setClickable(active);
+        nextButton.setActivated(active);
+        nextButton.setBackgroundColor(getColor(active ? R.color.nasty_green : R.color.inactive_green));
     }
 
     private void WriteDownSeedPhrase()
@@ -326,6 +329,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         title.setText(R.string.write_down_seed_phrase);
         detail.setVisibility(View.GONE);
         nextButton.setText(R.string.wrote_down_seed_phrase);
+        setBottomButtonActive(true);
 
         DisplaySeed();
     }

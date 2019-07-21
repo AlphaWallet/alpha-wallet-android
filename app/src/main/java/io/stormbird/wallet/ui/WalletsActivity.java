@@ -2,6 +2,7 @@ package io.stormbird.wallet.ui;
 
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,14 +21,13 @@ import android.view.View;
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.NetworkInfo;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.ui.widget.adapter.WalletsAdapter;
 import io.stormbird.wallet.viewmodel.WalletsViewModel;
 import io.stormbird.wallet.viewmodel.WalletsViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.AddWalletView;
+import io.stormbird.wallet.widget.SignTransactionDialog;
 import io.stormbird.wallet.widget.SystemView;
 
 import javax.inject.Inject;
@@ -36,8 +36,9 @@ import java.util.Map;
 public class WalletsActivity extends BaseActivity implements
         View.OnClickListener,
         AddWalletView.OnNewWalletClickListener,
-        AddWalletView.OnImportWalletClickListener {
-
+        AddWalletView.OnImportWalletClickListener,
+        CreateWalletCallbackInterface
+{
     @Inject
     WalletsViewModelFactory walletsViewModelFactory;
     WalletsViewModel viewModel;
@@ -53,6 +54,7 @@ public class WalletsActivity extends BaseActivity implements
     private boolean isSetDefault;
     private boolean isNewWalletCreated;
     private NetworkInfo networkInfo;
+    private PinAuthenticationCallbackInterface authInterface;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -169,7 +171,20 @@ public class WalletsActivity extends BaseActivity implements
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == C.IMPORT_REQUEST_CODE) {
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            int taskCode = requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
+            if (resultCode == RESULT_OK)
+            {
+                authInterface.CompleteAuthentication(taskCode);
+            }
+            else
+            {
+                authInterface.FailedAuthentication(taskCode);
+            }
+        }
+        else if (requestCode == C.IMPORT_REQUEST_CODE)
+        {
             showToolbar();
             if (resultCode == RESULT_OK) {
                 Snackbar.make(systemView, getString(R.string.toast_message_wallet_imported), Snackbar.LENGTH_SHORT)
@@ -199,7 +214,7 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     public void onNewWallet(View view) {
         hideDialog();
-        viewModel.newWallet(this);
+        viewModel.newWallet(this, this);
     }
 
     @Override
@@ -301,5 +316,35 @@ public class WalletsActivity extends BaseActivity implements
             aDialog.dismiss();
             aDialog = null;
         }
+    }
+
+    @Override
+    public void HDKeyCreated(String address, Context ctx)
+    {
+        viewModel.StoreHDWallet(address);
+    }
+
+    @Override
+    public void tryAgain()
+    {
+
+    }
+
+    @Override
+    public void cancelAuthentication()
+    {
+
+    }
+
+    @Override
+    public void FetchMnemonic(String mnemonic)
+    {
+
+    }
+
+    @Override
+    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+    {
+        authInterface = authCallback;
     }
 }

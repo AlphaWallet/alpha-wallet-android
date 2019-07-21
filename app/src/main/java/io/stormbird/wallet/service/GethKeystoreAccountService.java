@@ -134,10 +134,23 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
                     data);
 
             BigInt chain = new BigInt(chainId); // Chain identifier of the main net
-            org.ethereum.geth.Account gethAccount = findAccount(signer.address);
-            keyStore.unlock(gethAccount, signerPassword);
-            Transaction signed = keyStore.signTx(gethAccount, tx, chain);
-            keyStore.lock(gethAccount.getAddress());
+            Transaction signed;
+            switch (signer.type)
+            {
+                default:
+                case NOT_DEFINED:
+                case KEYSTORE:
+                    org.ethereum.geth.Account gethAccount = findAccount(signer.address);
+                    keyStore.unlock(gethAccount, signerPassword);
+                    signed = keyStore.signTx(gethAccount, tx, chain);
+                    keyStore.lock(gethAccount.getAddress());
+                    break;
+                case HDKEY:
+                    signed = null;
+                    break;
+            }
+
+
 
             return signed.encodeRLP();
         })
@@ -174,11 +187,26 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
     {
         return Single.fromCallable(() -> {
             byte[] messageHash = Hash.sha3(message);
-            BigInt chain = new BigInt(chainId); // Chain identifier of the main net
-            org.ethereum.geth.Account gethAccount = findAccount(signer.address);
-            keyStore.unlock(gethAccount, signerPassword);
-            byte[] signed = keyStore.signHash(gethAccount.getAddress(), messageHash);
-            keyStore.lock(gethAccount.getAddress());
+            //BigInt chain = new BigInt(chainId); // Chain identifier of the main net
+            byte[] signed;
+            switch (signer.type)
+            {
+                default:
+                case NOT_DEFINED:
+                    signed = new byte[64];
+                    break;
+                case KEYSTORE:
+                    org.ethereum.geth.Account gethAccount = findAccount(signer.address);
+                    keyStore.unlock(gethAccount, signerPassword);
+                    signed = keyStore.signHash(gethAccount.getAddress(), messageHash);
+                    keyStore.lock(gethAccount.getAddress());
+                    break;
+                case HDKEY:
+                    HDKeyService svs = new HDKeyService(null); //use topmost activity
+                    signed = svs.signData(signer.address, messageHash);
+                    break;
+            }
+
             signed = patchSignatureVComponent(signed);
             return signed;
         }).subscribeOn(Schedulers.io());

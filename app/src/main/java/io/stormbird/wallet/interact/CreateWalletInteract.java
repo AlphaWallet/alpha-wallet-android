@@ -35,9 +35,7 @@ public class CreateWalletInteract {
 	//TODO: handle errors, don't return until key is created
 	public void create(Activity ctx, CreateWalletCallbackInterface callback) {
 		HDKeyService hdService = new HDKeyService(ctx);
-		String addr = hdService.createNewHDKey(callback);
-		Wallet wallet = new Wallet(addr);
-		wallet.setWalletType(Wallet.WalletType.HDKEY);
+		hdService.createNewHDKey(callback);
 	}
 
 	private Single<Wallet> passwordVerification(Wallet wallet, String masterPassword) {

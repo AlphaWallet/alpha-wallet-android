@@ -19,22 +19,27 @@ import com.crashlytics.android.core.CrashlyticsCore;
 import dagger.android.AndroidInjection;
 import io.fabric.sdk.android.Fabric;
 import io.stormbird.wallet.BuildConfig;
+import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
+import io.stormbird.wallet.entity.PinAuthenticationCallbackInterface;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
 import io.stormbird.wallet.router.ManageWalletsRouter;
 import io.stormbird.wallet.viewmodel.SplashViewModel;
 import io.stormbird.wallet.viewmodel.SplashViewModelFactory;
+import io.stormbird.wallet.widget.SignTransactionDialog;
 
 import static io.stormbird.wallet.C.SHOW_NEW_ACCOUNT_PROMPT;
 
-public class SplashActivity extends BaseActivity {
+public class SplashActivity extends BaseActivity implements CreateWalletCallbackInterface
+{
 
     @Inject
     SplashViewModelFactory splashViewModelFactory;
     SplashViewModel splashViewModel;
 
     private String importData;
+    private PinAuthenticationCallbackInterface authInterface;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -130,7 +135,7 @@ public class SplashActivity extends BaseActivity {
             }
             else
             {
-                splashViewModel.createNewWallet(this);
+                splashViewModel.createNewWallet(this, this);
             }
         }
         else
@@ -147,5 +152,53 @@ public class SplashActivity extends BaseActivity {
                 finish();
             }
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            int taskCode = requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
+            if (resultCode == RESULT_OK)
+            {
+                authInterface.CompleteAuthentication(taskCode);
+            }
+            else
+            {
+                authInterface.FailedAuthentication(taskCode);
+            }
+        }
+    }
+
+    @Override
+    public void HDKeyCreated(String address, Context ctx)
+    {
+        splashViewModel.StoreHDKey(address);
+    }
+
+    @Override
+    public void tryAgain()
+    {
+
+    }
+
+    @Override
+    public void cancelAuthentication()
+    {
+
+    }
+
+    @Override
+    public void FetchMnemonic(String mnemonic)
+    {
+
+    }
+
+    @Override
+    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+    {
+        authInterface = authCallback;
     }
 }

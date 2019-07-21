@@ -20,6 +20,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.HomeRouter;
+import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.ConfirmationViewModel;
@@ -27,6 +28,7 @@ import io.stormbird.wallet.viewmodel.ConfirmationViewModelFactory;
 import io.stormbird.wallet.viewmodel.GasSettingsViewModel;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
+import io.stormbird.wallet.widget.SignTransactionDialog;
 import org.web3j.utils.Convert;
 
 import javax.inject.Inject;
@@ -41,7 +43,7 @@ import static io.stormbird.wallet.entity.ConfirmationType.ETH;
 import static io.stormbird.wallet.entity.ConfirmationType.WEB3TRANSACTION;
 import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 
-public class ConfirmationActivity extends BaseActivity {
+public class ConfirmationActivity extends BaseActivity implements SignAuthenticationCallback {
     AWalletAlertDialog dialog;
 
     @Inject
@@ -65,6 +67,7 @@ public class ConfirmationActivity extends BaseActivity {
     private Button moreDetail;
     private TextView title;
     private TextView chainName;
+    private GasSettings localGasSettings;
 
     private BigDecimal amount;
     private int decimals;
@@ -278,6 +281,7 @@ public class ConfirmationActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         viewModel.prepare(this);
+        HDKeyService.setTopmostActivity(this);
     }
 
     private void onProgress(boolean shouldShowProgress) {
@@ -311,14 +315,29 @@ public class ConfirmationActivity extends BaseActivity {
 
     private void onSendGasSettings(GasSettings gasSettings)
     {
+        localGasSettings = gasSettings;
+        //get authorisation if using an HD Key
+        if (viewModel.defaultWallet().getValue() != null && viewModel.defaultWallet().getValue().type == Wallet.WalletType.HDKEY)
+        {
+            HDKeyService svs = new HDKeyService(this);
+            svs.getAuthenticationForSignature(viewModel.defaultWallet().getValue().address, this);
+        }
+        else
+        {
+            finaliseTransaction();
+        }
+    }
+
+    private void finaliseTransaction()
+    {
         switch (confirmationType) {
             case ETH:
                 viewModel.createTransaction(
                         fromAddressText.getText().toString(),
                         toAddress,
                         amount.toBigInteger(),
-                        gasSettings.gasPrice,
-                        gasSettings.gasLimit,
+                        localGasSettings.gasPrice,
+                        localGasSettings.gasLimit,
                         chainId);
                 break;
 
@@ -328,8 +347,8 @@ public class ConfirmationActivity extends BaseActivity {
                         toAddress,
                         contractAddress,
                         amount.toBigInteger(),
-                        gasSettings.gasPrice,
-                        gasSettings.gasLimit,
+                        localGasSettings.gasPrice,
+                        localGasSettings.gasLimit,
                         chainId);
                 break;
 
@@ -339,17 +358,17 @@ public class ConfirmationActivity extends BaseActivity {
                         toAddress,
                         contractAddress,
                         amountStr,
-                        gasSettings.gasPrice,
-                        gasSettings.gasLimit,
+                        localGasSettings.gasPrice,
+                        localGasSettings.gasLimit,
                         chainId);
                 break;
 
             case WEB3TRANSACTION:
-                viewModel.signWeb3DAppTransaction(transaction, gasSettings.gasPrice, gasSettings.gasLimit, chainId);
+                viewModel.signWeb3DAppTransaction(transaction, localGasSettings.gasPrice, localGasSettings.gasLimit, chainId);
                 break;
 
             case TOKENSCRIPT:
-                viewModel.signTokenScriptTransaction(transactionHex, contractAddress, gasSettings.gasPrice, gasSettings.gasLimit, amount.toBigInteger(), chainId);
+                viewModel.signTokenScriptTransaction(transactionHex, contractAddress, localGasSettings.gasPrice, localGasSettings.gasLimit, amount.toBigInteger(), chainId);
                 break;
 
             case ERC721:
@@ -357,8 +376,8 @@ public class ConfirmationActivity extends BaseActivity {
                         toAddress,
                         contractAddress,
                         amountStr,
-                        gasSettings.gasPrice,
-                        gasSettings.gasLimit,
+                        localGasSettings.gasPrice,
+                        localGasSettings.gasLimit,
                         chainId);
                 break;
 
@@ -500,5 +519,16 @@ public class ConfirmationActivity extends BaseActivity {
                 viewModel.overrideGasSettings(settings);
             }
         }
+        else if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            GotAuthorisation(resultCode == RESULT_OK);
+        }
+    }
+
+    @Override
+    public void GotAuthorisation(boolean gotAuth)
+    {
+        //got authorisation, continue with transaction
+        if (gotAuth) finaliseTransaction();
     }
 }

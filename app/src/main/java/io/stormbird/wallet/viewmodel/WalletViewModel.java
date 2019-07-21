@@ -310,7 +310,7 @@ public class WalletViewModel extends BaseViewModel
     private void checkBalances()
     {
         // This checks for an old thread running. Terminate if it is. Possibly destroy the fragment and re-create on wallet change
-        if (!currentWallet.address.equals(tokensService.getCurrentAddress())
+        if (!currentWallet.address.equalsIgnoreCase(tokensService.getCurrentAddress())
                 && balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed())
         {
             balanceTimerDisposable.dispose();

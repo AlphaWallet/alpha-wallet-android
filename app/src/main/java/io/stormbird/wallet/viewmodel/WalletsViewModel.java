@@ -21,7 +21,7 @@ import java.util.*;
 import static io.stormbird.wallet.C.IMPORT_REQUEST_CODE;
 import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 
-public class WalletsViewModel extends BaseViewModel implements CreateWalletCallbackInterface
+public class WalletsViewModel extends BaseViewModel
 {
     private final static String TAG = WalletsViewModel.class.getSimpleName();
 
@@ -190,10 +190,9 @@ public class WalletsViewModel extends BaseViewModel implements CreateWalletCallb
         findNetwork();
     }
 
-    public void newWallet(Activity ctx)
+    public void newWallet(Activity ctx, CreateWalletCallbackInterface createCallback)
     {
-        progress.setValue(true);
-        createWalletInteract.create(ctx, this);
+        createWalletInteract.create(ctx, createCallback);
     }
 
     /**
@@ -306,42 +305,17 @@ public class WalletsViewModel extends BaseViewModel implements CreateWalletCallb
         return currentNetwork;
     }
 
-    @Override
-    public void HDKeyCreated(String address, Context ctx)
+    public void StoreHDWallet(String address)
     {
         if (!address.equals(ZERO_ADDRESS))
         {
             Wallet wallet = new Wallet(address);
+            wallet.type = Wallet.WalletType.HDKEY;
             fetchWalletsInteract.storeWallet(wallet)
-                .subscribe(account -> {
-                    fetchWallets();
-                    createdWallet.postValue(account);
-                }, this::onCreateWalletError).isDisposed();
+                    .subscribe(account -> {
+                        fetchWallets();
+                        createdWallet.postValue(account);
+                    }, this::onCreateWalletError).isDisposed();
         }
-    }
-
-    @Override
-    public void tryAgain()
-    {
-        //TODO: handle user wants to try creating a wallet again
-
-    }
-
-    @Override
-    public void cancelAuthentication()
-    {
-        //cancelled
-    }
-
-    @Override
-    public void FetchMnemonic(String mnemonic)
-    {
-
-    }
-
-    @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-    {
-        //TODO:
     }
 }

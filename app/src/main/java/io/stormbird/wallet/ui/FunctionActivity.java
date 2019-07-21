@@ -18,6 +18,7 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.TokenFunctionViewModel;
@@ -233,6 +234,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     public void onResume() {
         super.onResume();
         handler.postDelayed(this, 1000);
+        HDKeyService.setTopmostActivity(this);
     }
 
     @Override

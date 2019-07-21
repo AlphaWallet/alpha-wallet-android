@@ -32,7 +32,7 @@ import static io.stormbird.wallet.C.DOWNLOAD_READY;
 import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_FILE_URL;
 
-public class SplashViewModel extends ViewModel implements CreateWalletCallbackInterface
+public class SplashViewModel extends ViewModel
 {
     private final FetchWalletsInteract fetchWalletsInteract;
     private final CreateWalletInteract createWalletInteract;
@@ -75,10 +75,10 @@ public class SplashViewModel extends ViewModel implements CreateWalletCallbackIn
         return createWallet;
     }
 
-    public void createNewWallet(Activity ctx)
+    public void createNewWallet(Activity ctx, CreateWalletCallbackInterface createCallback)
     {
         //create a new wallet for the user
-        createWalletInteract.create(ctx, this);
+        createWalletInteract.create(ctx, createCallback);
     }
 
     public void checkVersionUpdate(Context ctx, long updateTime)
@@ -195,12 +195,12 @@ public class SplashViewModel extends ViewModel implements CreateWalletCallbackIn
         }
     }
 
-    @Override
-    public void HDKeyCreated(String address, Context ctx)
+    public void StoreHDKey(String address)
     {
         if (!address.equals(ZERO_ADDRESS))
         {
             Wallet wallet = new Wallet(address);
+            wallet.type = Wallet.WalletType.HDKEY;
             fetchWalletsInteract.storeWallet(wallet)
                     .subscribe(account -> {
                         fetchWallets();
@@ -212,29 +212,5 @@ public class SplashViewModel extends ViewModel implements CreateWalletCallbackIn
             //TODO: Relax key creation params (ie authentication) slightly to ensure a key is always created
             wallets.postValue(new Wallet[0]);
         }
-    }
-
-    @Override
-    public void tryAgain()
-    {
-        //TODO: Try again to create a key, this time perhaps without Authentication
-    }
-
-    @Override
-    public void cancelAuthentication()
-    {
-        //TODO: create key without Authentication
-    }
-
-    @Override
-    public void FetchMnemonic(String mnemonic)
-    {
-
-    }
-
-    @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-    {
-        //TODO: PIN callback
     }
 }

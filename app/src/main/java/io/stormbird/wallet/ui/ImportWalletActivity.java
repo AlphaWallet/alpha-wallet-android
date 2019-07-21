@@ -1,5 +1,6 @@
 package io.stormbird.wallet.ui;
 
+import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,17 +20,23 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
+import io.stormbird.wallet.entity.ImportWalletCallback;
+import io.stormbird.wallet.entity.PinAuthenticationCallbackInterface;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.ui.widget.OnImportSeedListener;
 import io.stormbird.wallet.ui.widget.adapter.TabPagerAdapter;
 import io.stormbird.wallet.util.TabUtils;
 import io.stormbird.wallet.viewmodel.ImportWalletViewModel;
 import io.stormbird.wallet.viewmodel.ImportWalletViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
+import io.stormbird.wallet.widget.SignTransactionDialog;
 
 import static io.stormbird.wallet.C.ErrorCode.ALREADY_ADDED;
 import static io.stormbird.wallet.C.RESET_WALLET;
 
-public class ImportWalletActivity extends BaseActivity {
+public class ImportWalletActivity extends BaseActivity implements OnImportSeedListener, ImportWalletCallback
+{
 
     private static final int SEED_FORM_INDEX = 0;
     private static final int KEYSTORE_FORM_INDEX = 1;
@@ -41,6 +48,7 @@ public class ImportWalletActivity extends BaseActivity {
     ImportWalletViewModelFactory importWalletViewModelFactory;
     ImportWalletViewModel importWalletViewModel;
     private AWalletAlertDialog dialog;
+    private PinAuthenticationCallbackInterface authInterface;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,7 +88,7 @@ public class ImportWalletActivity extends BaseActivity {
         super.onResume();
 
         ((ImportSeedFragment) pages.get(SEED_FORM_INDEX).second)
-                .setOnImportSeedListener(importWalletViewModel);
+                .setOnImportSeedListener(this);
         ((ImportKeystoreFragment) pages.get(KEYSTORE_FORM_INDEX).second)
                 .setOnImportKeystoreListener(importWalletViewModel);
         ((ImportPrivateKeyFragment) pages.get(PRIVATE_KEY_FORM_INDEX).second)
@@ -151,6 +159,43 @@ public class ImportWalletActivity extends BaseActivity {
     private void hideDialog() {
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
+        }
+    }
+
+    @Override
+    public void onSeed(String seedPhrase, Activity ctx)
+    {
+        HDKeyService hdKeyService = new HDKeyService(ctx);
+        hdKeyService.importHDKey(seedPhrase, this);
+    }
+
+    @Override
+    public void WalletValidated(String address)
+    {
+        importWalletViewModel.onSeed(address);
+    }
+
+    @Override
+    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+    {
+        authInterface = authCallback;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            int taskCode = requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
+            if (resultCode == RESULT_OK)
+            {
+                authInterface.CompleteAuthentication(taskCode);
+            }
+            else
+            {
+                authInterface.FailedAuthentication(taskCode);
+            }
         }
     }
 }

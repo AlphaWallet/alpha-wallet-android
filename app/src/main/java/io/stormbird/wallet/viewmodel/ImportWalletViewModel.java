@@ -18,7 +18,7 @@ import io.stormbird.wallet.ui.widget.OnImportPrivateKeyListener;
 import io.stormbird.wallet.ui.widget.OnImportSeedListener;
 import wallet.core.jni.HDWallet;
 
-public class ImportWalletViewModel extends BaseViewModel implements OnImportKeystoreListener, OnImportPrivateKeyListener, OnImportSeedListener
+public class ImportWalletViewModel extends BaseViewModel implements OnImportKeystoreListener, OnImportPrivateKeyListener
 {
 
     private final ImportWalletInteract importWalletInteract;
@@ -65,26 +65,20 @@ public class ImportWalletViewModel extends BaseViewModel implements OnImportKeys
         }
     }
 
-    @Override
-    public void onSeed(String seedPhrase, Activity ctx)
+    public void onSeed(String walletAddress)
     {
-        //validate seed
-        ImportWalletCallback callback = address -> {
-            if (address == null)
-            {
-                System.out.println("ERROR");
-                badSeed.postValue(true);
-            }
-            else
-            {
-                //begin key storage process
-                disposable = importWalletInteract.storeHDWallet(address)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(wallet::postValue, this::onError); //signal to UI wallet import complete
-            }
-        };
-        HDKeyService hdKeyService = new HDKeyService(ctx);
-        hdKeyService.importHDKey(seedPhrase, callback);
+        if (walletAddress == null)
+        {
+            System.out.println("ERROR");
+            badSeed.postValue(true);
+        }
+        else
+        {
+            //begin key storage process
+            disposable = importWalletInteract.storeHDWallet(walletAddress)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(wallet::postValue, this::onError); //signal to UI wallet import complete
+        }
     }
 }

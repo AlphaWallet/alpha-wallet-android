@@ -24,6 +24,7 @@ public class CreateTransactionInteract
 
     public Single<SignaturePair> sign(Wallet wallet, MessagePair messagePair, int chainId)
     {
+        //TODO: type of key
         return passwordStore.getPassword(wallet)
                 .flatMap(password -> transactionRepository.getSignature(wallet, messagePair.message.getBytes(), password, chainId))
                 .map(sig -> new SignaturePair(messagePair.selection, sig, messagePair.message));
@@ -31,6 +32,7 @@ public class CreateTransactionInteract
 
     public Single<byte[]> sign(Wallet wallet, byte[] message, int chainId)
     {
+        //TODO: Type of key
         return passwordStore.getPassword(wallet)
                 .flatMap(password -> transactionRepository.getSignature(wallet, message, password, chainId)
                         .subscribeOn(Schedulers.computation())
@@ -39,6 +41,8 @@ public class CreateTransactionInteract
 
     public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
     {
+        //fgh
+
         return passwordStore.getPassword(from)
                 .flatMap(password ->
                         transactionRepository.createTransaction(from, to, subunitAmount, gasPrice, gasLimit, data, password, chainId)
@@ -48,6 +52,7 @@ public class CreateTransactionInteract
 
     public Single<String> create(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId)
     {
+        //TODO: Branch depending on type of key
         return passwordStore.getPassword(from)
                 .flatMap(password ->
                                  transactionRepository.createTransaction(from, gasPrice, gasLimit, data, password, chainId)
@@ -57,6 +62,7 @@ public class CreateTransactionInteract
 
     public Single<TransactionData> createWithSig(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
     {
+        //TODO: Branch depending on type of key
         return passwordStore.getPassword(from)
                 .flatMap(password ->
                                  transactionRepository.createTransactionWithSig(from, to, subunitAmount, gasPrice, gasLimit, data, password, chainId)
@@ -66,6 +72,7 @@ public class CreateTransactionInteract
 
     public Single<TransactionData> createWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId)
     {
+        //TODO: Branch depending on type of key
         return passwordStore.getPassword(from)
                 .flatMap(password ->
                                  transactionRepository.createTransactionWithSig(from, gasPrice, gasLimit, data, password, chainId)

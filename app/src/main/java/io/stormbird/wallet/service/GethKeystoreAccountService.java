@@ -15,19 +15,25 @@ import org.ethereum.geth.KeyStore;
 import org.ethereum.geth.Transaction;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.web3j.crypto.ECKeyPair;
-import org.web3j.crypto.Hash;
-import org.web3j.crypto.WalletFile;
+import org.web3j.crypto.*;
+import org.web3j.rlp.RlpEncoder;
+import org.web3j.rlp.RlpList;
+import org.web3j.rlp.RlpString;
+import org.web3j.rlp.RlpType;
+import org.web3j.utils.Bytes;
 import org.web3j.utils.Numeric;
 
 import java.io.File;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 
+import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
 import static org.web3j.crypto.Wallet.create;
 
 public class GethKeystoreAccountService implements AccountKeystoreService {
@@ -133,8 +139,19 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
                     gasPriceBI,
                     data);
 
+            String dataStr = data != null ? Numeric.toHexString(data) : "";
+
+            RawTransaction rtx = RawTransaction.createTransaction(
+                    BigInteger.valueOf(nonce),
+                    gasPrice,
+                    gasLimit,
+                    toAddress,
+                    amount,
+                    dataStr
+                    );
+
             BigInt chain = new BigInt(chainId); // Chain identifier of the main net
-            Transaction signed;
+            byte[] encodedTx;
             switch (signer.type)
             {
                 default:
@@ -142,19 +159,70 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
                 case KEYSTORE:
                     org.ethereum.geth.Account gethAccount = findAccount(signer.address);
                     keyStore.unlock(gethAccount, signerPassword);
-                    signed = keyStore.signTx(gethAccount, tx, chain);
+                    Transaction signed = keyStore.signTx(gethAccount, tx, chain);
                     keyStore.lock(gethAccount.getAddress());
+                    encodedTx = signed.encodeRLP();
                     break;
                 case HDKEY:
-                    signed = null;
+                    //we have already unlocked the auth here, if required
+                    byte[] signData = TransactionEncoder.encode(rtx);
+                    HDKeyService svs = new HDKeyService(null);
+                    byte[] signatureBytes = svs.signData(signer.address, signData);
+                    Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
+                    encodedTx = encode(rtx, sigData);
                     break;
             }
 
-
-
-            return signed.encodeRLP();
+            return encodedTx;
         })
         .subscribeOn(Schedulers.io());
+    }
+
+    private static byte[] encode(RawTransaction rawTransaction, Sign.SignatureData signatureData) {
+        List<RlpType> values = asRlpValues(rawTransaction, signatureData);
+        RlpList rlpList = new RlpList(values);
+        return RlpEncoder.encode(rlpList);
+    }
+
+    static List<RlpType> asRlpValues(
+            RawTransaction rawTransaction, Sign.SignatureData signatureData) {
+        List<RlpType> result = new ArrayList<>();
+
+        result.add(RlpString.create(rawTransaction.getNonce()));
+        result.add(RlpString.create(rawTransaction.getGasPrice()));
+        result.add(RlpString.create(rawTransaction.getGasLimit()));
+
+        // an empty to address (contract creation) should not be encoded as a numeric 0 value
+        String to = rawTransaction.getTo();
+        if (to != null && to.length() > 0) {
+            // addresses that start with zeros should be encoded with the zeros included, not
+            // as numeric values
+            result.add(RlpString.create(Numeric.hexStringToByteArray(to)));
+        } else {
+            result.add(RlpString.create(""));
+        }
+
+        result.add(RlpString.create(rawTransaction.getValue()));
+
+        // value field will already be hex encoded, so we need to convert into binary first
+        byte[] data = Numeric.hexStringToByteArray(rawTransaction.getData());
+        result.add(RlpString.create(data));
+
+        if (signatureData != null) {
+            result.add(RlpString.create(signatureData.getV()));
+            result.add(RlpString.create(Bytes.trimLeadingZeroes(signatureData.getR())));
+            result.add(RlpString.create(Bytes.trimLeadingZeroes(signatureData.getS())));
+        }
+
+        return result;
+    }
+
+    private Single<byte[]> encodeTransaction(byte[] signatureBytes, RawTransaction rtx)
+    {
+        return Single.fromCallable(() -> {
+            Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
+            return encode(rtx, sigData);
+        });
     }
 
     @Override
@@ -193,8 +261,6 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
             {
                 default:
                 case NOT_DEFINED:
-                    signed = new byte[64];
-                    break;
                 case KEYSTORE:
                     org.ethereum.geth.Account gethAccount = findAccount(signer.address);
                     keyStore.unlock(gethAccount, signerPassword);
@@ -202,7 +268,7 @@ public class GethKeystoreAccountService implements AccountKeystoreService {
                     keyStore.lock(gethAccount.getAddress());
                     break;
                 case HDKEY:
-                    HDKeyService svs = new HDKeyService(null); //use topmost activity
+                    HDKeyService svs = new HDKeyService(null); //sign should already be unlocked
                     signed = svs.signData(signer.address, messageHash);
                     break;
             }

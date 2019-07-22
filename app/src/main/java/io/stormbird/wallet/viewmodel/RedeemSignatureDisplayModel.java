@@ -49,6 +49,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
 
     private final MutableLiveData<String> selection = new MutableLiveData<>();
     private final MutableLiveData<Boolean> burnNotice = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> signRequest = new MutableLiveData<>();
 
     private Disposable memPoolSubscription;
     private List<Integer> ticketIndicies;
@@ -92,6 +93,9 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     }
     public LiveData<Boolean> burnNotice() {
         return burnNotice;
+    }
+    public LiveData<Boolean> signRequest() {
+        return signRequest;
     }
 
     @Override
@@ -195,10 +199,15 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
 
     private void startCycleSignature() {
         cycleSignatureDisposable = Observable.interval(0, CYCLE_SIGNATURE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> signatureGenerateInteract
-                        .getMessage(ticketIndicies, token.getAddress())
-                        .subscribe(this::onSignMessage, this::onError))
+                .doOnNext(l -> signRequest.postValue(true))
                 .subscribe(l -> {}, t -> {});
+    }
+
+    public void updateSignature(Wallet wallet)
+    {
+        signatureGenerateInteract
+                .getMessage(ticketIndicies, token.getAddress())
+                .subscribe(pair -> onSignMessage(pair, wallet), this::onError);
     }
 
     private void startMemoryPoolListener() {
@@ -225,11 +234,11 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         startMemoryPoolListener();
     }
 
-    private void onSignMessage(MessagePair pair) {
+    private void onSignMessage(MessagePair pair, Wallet wallet) {
         //now run this guy through the signed message system
         if (pair != null)
         disposable = createTransactionInteract
-                .sign(defaultWallet.getValue(), pair, token.tokenInfo.chainId)
+                .sign(wallet, pair, token.tokenInfo.chainId)
                 .subscribe(this::onSignedMessage, this::onError);
     }
 
@@ -263,11 +272,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         if (ticketIndicies.size() == 0)
         {
             ticketsBurned();
-        }
-        else {
-            disposable = signatureGenerateInteract
-                    .getMessage(ticketIndicies, token.getAddress())
-                    .subscribe(this::onSignMessage, this::onError);
         }
     }
 

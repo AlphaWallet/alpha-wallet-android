@@ -41,6 +41,7 @@ import java.util.Map;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 import static io.stormbird.wallet.C.Key.TICKET;
+import static io.stormbird.wallet.C.Key.WALLET;
 
 /**
  * Created by James on 22/01/2018.
@@ -262,6 +263,7 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
                 //handle TS function
                 Intent intent = new Intent(this, FunctionActivity.class);
                 intent.putExtra(TICKET, token);
+                intent.putExtra(WALLET, viewModel.defaultWallet().getValue());
                 intent.putExtra(C.EXTRA_STATE, function);
                 intent.putExtra(C.EXTRA_TOKEN_ID, token.intArrayToString(adapter.getSelectedTokenIds(selection), true));
                 intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);

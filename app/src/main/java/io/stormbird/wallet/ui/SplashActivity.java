@@ -179,7 +179,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     }
 
     @Override
-    public void tryAgain()
+    public void keyFailure(String message)
     {
 
     }

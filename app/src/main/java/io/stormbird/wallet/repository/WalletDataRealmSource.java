@@ -8,12 +8,10 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
-import io.reactivex.observers.DisposableSingleObserver;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.interact.GenericWalletInteract;
-import io.stormbird.wallet.repository.entity.RealmToken;
+import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.repository.entity.RealmWalletData;
 import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.service.RealmManager;
@@ -49,11 +47,11 @@ public class WalletDataRealmSource {
                         Wallet wallet = new Wallet(d.getAddress());
                         if (wMap.containsKey(d.getAddress()))
                         {
-                            wallet.setWalletType(Wallet.WalletType.KEYSTORE);
+                            wallet.setWalletType(WalletType.KEYSTORE);
                         }
                         else
                         {
-                            wallet.setWalletType(Wallet.WalletType.HDKEY);
+                            wallet.setWalletType(WalletType.HDKEY);
                         }
                         wallet.ENSname = d.getENSName();
                         wallet.balance = balance(d);
@@ -75,7 +73,7 @@ public class WalletDataRealmSource {
                 }
                 if (!found)
                 {
-                    w.setWalletType(Wallet.WalletType.KEYSTORE);
+                    w.setWalletType(WalletType.KEYSTORE);
                     walletList.add(w);
                 }
             }
@@ -276,7 +274,7 @@ public class WalletDataRealmSource {
                 // This checks if there's an HD wallet that has never been backed up,
                 // and the warning for which hasn't been dismissed within the last dismiss period
                 for (RealmWalletData data : realmItems) {
-                    if (data.getType() == Wallet.WalletType.HDKEY &&
+                    if (data.getType() == WalletType.HDKEY &&
                             (data.getLastBackup() == 0 &&
                                     System.currentTimeMillis() > (data.getLastWarning() + HDKeyService.TIME_BETWEEN_BACKUP_MILLIS)))
                     {

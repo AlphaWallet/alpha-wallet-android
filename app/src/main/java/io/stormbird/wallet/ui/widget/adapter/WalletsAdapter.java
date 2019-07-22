@@ -5,13 +5,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.ui.widget.entity.WalletClickCallback;
 import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
 import io.stormbird.wallet.ui.widget.holder.TextHolder;
@@ -108,7 +107,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
             //Add HD Wallets
             for (Wallet w : wallets)
             {
-                if (w.type == Wallet.WalletType.HDKEY)
+                if (w.type == WalletType.HDKEY)
                 {
                     this.wallets.add(w);
                     walletsRemaining--;
@@ -118,12 +117,12 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
             if (walletsRemaining > 0)
             {
                 Wallet legacyText = new Wallet("");
-                legacyText.type = Wallet.WalletType.NOT_DEFINED;
+                legacyText.type = WalletType.NOT_DEFINED;
                 this.wallets.add(legacyText);
 
                 for (Wallet w : wallets)
                 {
-                    if (w.type == Wallet.WalletType.KEYSTORE)
+                    if (w.type == WalletType.KEYSTORE)
                     {
                         this.wallets.add(w);
                     }

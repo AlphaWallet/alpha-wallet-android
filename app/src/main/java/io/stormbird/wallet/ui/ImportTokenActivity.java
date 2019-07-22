@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
@@ -28,22 +29,25 @@ import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.router.HomeRouter;
+import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModel;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.AWalletConfirmationDialog;
+import io.stormbird.wallet.widget.SignTransactionDialog;
 import io.stormbird.wallet.widget.SystemView;
 import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
 import static io.stormbird.token.tools.ParseMagicLink.spawnable;
 import static io.stormbird.wallet.C.IMPORT_STRING;
+import static io.stormbird.wallet.service.HDKeyService.Operation.SIGN_DATA;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
  * Created by James on 9/03/2018.
  */
 
-public class ImportTokenActivity extends BaseActivity implements View.OnClickListener {
+public class ImportTokenActivity extends BaseActivity implements View.OnClickListener, SignAuthenticationCallback {
 
     @Inject
     protected ImportTokenViewModelFactory importTokenViewModelFactory;
@@ -72,6 +76,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private boolean usingFeeMaster = false;
     private String paymasterUrlPrefix = "https://paymaster.stormbird.sg/api";
     private final String TAG = "ITA";
+    private PinAuthenticationCallbackInterface authInterface;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -484,13 +489,27 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         cDialog.setPrimaryButtonText(R.string.confirm_purchase_button_text);
         cDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         cDialog.setPrimaryButtonListener(v -> {
-            viewModel.performImport();
+            authoriseKey();
             cDialog.dismiss();
-            onProgress(true);
         });
         cDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         cDialog.setSecondaryButtonListener(v -> cDialog.dismiss());
         cDialog.show();
+    }
+
+    private void authoriseKey()
+    {
+        Wallet wallet = viewModel.wallet().getValue();
+        if (wallet != null && wallet.isHDWallet())
+        {
+            //get authorisation to use HD key before signing
+            HDKeyService svs = new HDKeyService(this);
+            svs.getAuthenticationForSignature(wallet.address, this);
+        }
+        else
+        {
+            GotAuthorisation(true);
+        }
     }
 
     private void onTransaction(String hash) {
@@ -634,8 +653,37 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode,resultCode,intent);
+
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            GotAuthorisation(resultCode == RESULT_OK);
+        }
+    }
+
+    @Override
     public void onBackPressed() {
         setResult(RESULT_CANCELED);
         super.onBackPressed();
+    }
+
+    /**
+     * Return from key authorisation either through activity result (for PIN) or directly through the callback from fingerprint unlock
+     * @param gotAuth authorisation was successful
+     */
+    @Override
+    public void GotAuthorisation(boolean gotAuth)
+    {
+        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
+        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+        viewModel.performImport();
+        onProgress(true);
+    }
+
+    @Override
+    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+    {
+        authInterface = authCallback;
     }
 }

@@ -405,6 +405,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 selectNavigationItem(TRANSACTIONS);
                 enableDisplayHomeAsHome(false);
                 invalidateOptionsMenu();
+                transactionsFragment.transactionsShowing();
                 break;
             }
             default:

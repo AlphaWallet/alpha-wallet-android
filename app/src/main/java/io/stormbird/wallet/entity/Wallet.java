@@ -1,8 +1,10 @@
 package io.stormbird.wallet.entity;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -38,6 +40,22 @@ public class Wallet implements Parcelable {
 	public void setWalletType(WalletType wType)
 	{
 		type = wType;
+	}
+
+	public boolean isHDWallet()
+	{
+		return type == WalletType.HDKEY;
+	}
+	public void checkWalletType(Context ctx)
+	{
+		if (new File(ctx.getFilesDir(), address+"hd").exists())
+		{
+			type = WalletType.HDKEY;
+		}
+		else
+		{
+			type = WalletType.KEYSTORE;
+		}
 	}
 
 	public static final Creator<Wallet> CREATOR = new Creator<Wallet>() {
@@ -77,12 +95,5 @@ public class Wallet implements Parcelable {
 		 balance = weiToEth(balanceBD)
 				.setScale(4, RoundingMode.HALF_DOWN)
 				.stripTrailingZeros().toPlainString();
-	}
-
-	public enum WalletType
-	{
-		NOT_DEFINED,
-		KEYSTORE,
-		HDKEY
 	}
 }

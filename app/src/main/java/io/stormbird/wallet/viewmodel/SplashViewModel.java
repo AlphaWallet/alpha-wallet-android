@@ -10,17 +10,12 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
-import io.stormbird.wallet.entity.FileData;
-import io.stormbird.wallet.entity.PinAuthenticationCallbackInterface;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.CreateWalletInteract;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
-import io.stormbird.wallet.service.HDKeyService;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -200,7 +195,7 @@ public class SplashViewModel extends ViewModel
         if (!address.equals(ZERO_ADDRESS))
         {
             Wallet wallet = new Wallet(address);
-            wallet.type = Wallet.WalletType.HDKEY;
+            wallet.type = WalletType.HDKEY;
             fetchWalletsInteract.storeWallet(wallet)
                     .subscribe(account -> {
                         fetchWallets();

@@ -1,7 +1,7 @@
 package io.stormbird.wallet.interact;
 
-import android.arch.lifecycle.MutableLiveData;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.interact.rx.operator.Operators;
 import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.WalletRepositoryType;
@@ -40,7 +40,7 @@ public class ImportWalletInteract {
     public Single<Wallet> storeHDWallet(String walletAddress)
     {
         Wallet wallet = new Wallet(walletAddress);
-        wallet.type = Wallet.WalletType.HDKEY;
+        wallet.type = WalletType.HDKEY;
         wallet.lastBackupTime = System.currentTimeMillis();
         return walletRepository.storeWallet(wallet);
     }

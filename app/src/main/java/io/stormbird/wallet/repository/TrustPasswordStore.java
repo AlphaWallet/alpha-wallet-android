@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import io.stormbird.wallet.entity.ServiceErrorException;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.util.KS;
 import com.wallet.pwd.trustapp.PasswordManager;
 
@@ -50,7 +51,12 @@ public class TrustPasswordStore implements PasswordStore {
     @Override
 	public Single<String> getPassword(Wallet wallet) {
 		return Single.fromCallable(() -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+		    wallet.checkWalletType(context);
+		    if (wallet.type == WalletType.HDKEY)
+            {
+                return "";
+            }
+            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 try {
                     return new String(KS.get(context, wallet.address));
                 } catch (Exception ex) {

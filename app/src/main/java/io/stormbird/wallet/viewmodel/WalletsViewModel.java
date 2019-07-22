@@ -14,7 +14,6 @@ import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
-import io.stormbird.wallet.service.HDKeyService;
 
 import java.util.*;
 
@@ -310,7 +309,7 @@ public class WalletsViewModel extends BaseViewModel
         if (!address.equals(ZERO_ADDRESS))
         {
             Wallet wallet = new Wallet(address);
-            wallet.type = Wallet.WalletType.HDKEY;
+            wallet.type = WalletType.HDKEY;
             fetchWalletsInteract.storeWallet(wallet)
                     .subscribe(account -> {
                         fetchWallets();

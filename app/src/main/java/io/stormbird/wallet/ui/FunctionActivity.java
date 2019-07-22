@@ -1,6 +1,7 @@
 package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -16,8 +17,7 @@ import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.DAppFunction;
-import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.util.Utils;
@@ -29,10 +29,7 @@ import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.FunctionCallback;
 import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.PageReadyCallback;
-import io.stormbird.wallet.widget.AWalletAlertDialog;
-import io.stormbird.wallet.widget.ProgressView;
-import io.stormbird.wallet.widget.SignMessageDialog;
-import io.stormbird.wallet.widget.SystemView;
+import io.stormbird.wallet.widget.*;
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
@@ -48,7 +45,9 @@ import java.util.List;
 import java.util.Map;
 
 import static io.stormbird.wallet.C.Key.TICKET;
+import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
+import static io.stormbird.wallet.service.HDKeyService.Operation.SIGN_DATA;
 import static io.stormbird.wallet.ui.DappBrowserFragment.PERSONAL_MESSAGE_PREFIX;
 
 /**
@@ -56,7 +55,7 @@ import static io.stormbird.wallet.ui.DappBrowserFragment.PERSONAL_MESSAGE_PREFIX
  * Stormbird in Singapore
  */
 public class FunctionActivity extends BaseActivity implements View.OnClickListener, FunctionCallback,
-        Runnable, PageReadyCallback, OnSignPersonalMessageListener
+        Runnable, PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback
 {
     @Inject
     protected TokenFunctionViewModelFactory viewModelFactory;
@@ -75,6 +74,8 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     private Map<String, String> args = new HashMap<>();
     private StringBuilder attrs;
     private AWalletAlertDialog alertDialog;
+    private Message<String> messageToSign;
+    private PinAuthenticationCallbackInterface authInterface;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
@@ -496,7 +497,9 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void signMessage(byte[] sign, DAppFunction dAppFunction, Message<String> message)
     {
-        viewModel.signMessage(sign, dAppFunction, message, token.tokenInfo.chainId, token.getWallet());
+        Wallet signingWallet = new Wallet(token.getWallet());
+        signingWallet.checkWalletType(this);
+        viewModel.signMessage(sign, dAppFunction, message, token.tokenInfo.chainId, signingWallet);
     }
 
     @Override
@@ -514,32 +517,13 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onSignPersonalMessage(Message<String> message)
     {
-        DAppFunction dAppFunction = new DAppFunction() {
-            @Override
-            public void DAppError(Throwable error, Message<String> message) {
-                tokenView.onSignCancel(message);
-                dialog.dismiss();
-            }
-
-            @Override
-            public void DAppReturn(byte[] data, Message<String> message) {
-                String signHex = Numeric.toHexString(data);
-                signHex = Numeric.cleanHexPrefix(signHex);
-                tokenView.onSignPersonalMessageSuccessful(message, signHex);
-                testRecoverAddressFromSignature(message.value, signHex);
-                dialog.dismiss();
-            }
-        };
-
         dialog = new SignMessageDialog(this, message);
         dialog.setAddress(token.getAddress());
         dialog.setMessage(message.value);
         dialog.setOnApproveListener(v -> {
-            String convertedMessage = message.value;
-            String signMessage = PERSONAL_MESSAGE_PREFIX
-                    + convertedMessage.length()
-                    + convertedMessage;
-            signMessage(signMessage.getBytes(), dAppFunction, message);
+            messageToSign = message;
+            HDKeyService svs = new HDKeyService(this);
+            svs.getAuthenticationForSignature(token.getWallet(), this);
         });
         dialog.setOnRejectListener(v -> {
             tokenView.onSignCancel(message);
@@ -590,5 +574,57 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         }
 
         return val.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode,resultCode,intent);
+
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            GotAuthorisation(resultCode == RESULT_OK);
+        }
+    }
+
+    @Override
+    public void GotAuthorisation(boolean gotAuth)
+    {
+        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
+        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+
+        if (gotAuth)
+        {
+            DAppFunction dAppFunction = new DAppFunction()
+            {
+                @Override
+                public void DAppError(Throwable error, Message<String> message)
+                {
+                    tokenView.onSignCancel(message);
+                    dialog.dismiss();
+                }
+
+                @Override
+                public void DAppReturn(byte[] data, Message<String> message)
+                {
+                    String signHex = Numeric.toHexString(data);
+                    signHex = Numeric.cleanHexPrefix(signHex);
+                    tokenView.onSignPersonalMessageSuccessful(message, signHex);
+                    testRecoverAddressFromSignature(message.value, signHex);
+                    dialog.dismiss();
+                }
+            };
+
+            String convertedMessage = messageToSign.value;
+            String signMessage = PERSONAL_MESSAGE_PREFIX
+                    + convertedMessage.length()
+                    + convertedMessage;
+            signMessage(signMessage.getBytes(), dAppFunction, messageToSign);
+        }
+    }
+
+    @Override
+    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+    {
+        authInterface = authCallback;
     }
 }

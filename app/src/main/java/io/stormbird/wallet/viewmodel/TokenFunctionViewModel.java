@@ -114,8 +114,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         ctx.startActivity(intent);
     }
 
-    public void signMessage(byte[] signRequest, DAppFunction dAppFunction, Message<String> message, int chainId, String walletAddress) {
-        Wallet wallet = new Wallet(walletAddress);
+    public void signMessage(byte[] signRequest, DAppFunction dAppFunction, Message<String> message, int chainId, Wallet wallet) {
         disposable = createTransactionInteract.sign(wallet, signRequest, chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())

@@ -23,7 +23,7 @@ import static io.stormbird.wallet.ui.SellDetailActivity.SET_EXPIRY;
  * Created by James on 21/02/2018.
  */
 
-public class SellDetailModel extends BaseViewModel {
+public class SellDetailViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Double> ethereumPrice = new MutableLiveData<>();
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
@@ -41,13 +41,13 @@ public class SellDetailModel extends BaseViewModel {
 
     private byte[] linkMessage;
 
-    SellDetailModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
-            GenericWalletInteract genericWalletInteract,
-                          MarketQueueService marketQueueService,
-                    CreateTransactionInteract createTransactionInteract,
-                    SellDetailRouter sellDetailRouter,
-                    AssetDisplayRouter assetDisplayRouter,
-                    AssetDefinitionService assetDefinitionService) {
+    SellDetailViewModel(FindDefaultNetworkInteract findDefaultNetworkInteract,
+                        GenericWalletInteract genericWalletInteract,
+                        MarketQueueService marketQueueService,
+                        CreateTransactionInteract createTransactionInteract,
+                        SellDetailRouter sellDetailRouter,
+                        AssetDisplayRouter assetDisplayRouter,
+                        AssetDefinitionService assetDefinitionService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.marketQueueService = marketQueueService;

@@ -28,6 +28,7 @@ import java.math.BigInteger;
 import java.text.ParseException;
 
 import static io.stormbird.wallet.C.Key.TICKET;
+import static io.stormbird.wallet.C.Key.WALLET;
 
 /**
  * Created by James on 31/05/2019.

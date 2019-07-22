@@ -20,7 +20,6 @@ import wallet.core.jni.HDWallet;
 
 public class ImportWalletViewModel extends BaseViewModel implements OnImportKeystoreListener, OnImportPrivateKeyListener
 {
-
     private final ImportWalletInteract importWalletInteract;
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> badSeed = new MutableLiveData<>();

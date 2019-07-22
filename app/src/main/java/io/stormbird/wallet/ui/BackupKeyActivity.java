@@ -153,7 +153,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                         WriteDownSeedPhrase();
                         break;
                     default:
-                        tryAgain();
+                        keyFailure("");
                         break;
                 }
                 return true;
@@ -391,7 +391,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     }
 
     @Override
-    public void tryAgain()
+    public void keyFailure(String message)
     {
         //TODO: Error trying to retrieve the key, display error dialog box here
         Intent intent = new Intent();

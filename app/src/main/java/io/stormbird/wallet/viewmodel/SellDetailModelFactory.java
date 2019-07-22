@@ -45,7 +45,7 @@ public class SellDetailModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new SellDetailModel(findDefaultNetworkInteract, genericWalletInteract, marketQueueService, createTransactionInteract, sellDetailRouter, assetDisplayRouter, assetDefinitionService);
+        return (T) new SellDetailViewModel(findDefaultNetworkInteract, genericWalletInteract, marketQueueService, createTransactionInteract, sellDetailRouter, assetDisplayRouter, assetDefinitionService);
     }
 }
 

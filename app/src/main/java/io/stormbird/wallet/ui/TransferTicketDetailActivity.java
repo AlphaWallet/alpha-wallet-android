@@ -25,6 +25,7 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.router.HomeRouter;
+import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
 import io.stormbird.wallet.ui.widget.adapter.NonFungibleTokenAdapter;
@@ -37,10 +38,7 @@ import io.stormbird.wallet.util.QRURLParser;
 import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.TransferTicketDetailViewModel;
 import io.stormbird.wallet.viewmodel.TransferTicketDetailViewModelFactory;
-import io.stormbird.wallet.widget.AWalletAlertDialog;
-import io.stormbird.wallet.widget.AWalletConfirmationDialog;
-import io.stormbird.wallet.widget.ProgressView;
-import io.stormbird.wallet.widget.SystemView;
+import io.stormbird.wallet.widget.*;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.tx.Contract;
 
@@ -56,6 +54,7 @@ import java.util.Locale;
 import static io.stormbird.wallet.C.*;
 import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.C.Key.WALLET;
+import static io.stormbird.wallet.service.HDKeyService.Operation.SIGN_DATA;
 import static io.stormbird.wallet.ui.zxing.QRScanningActivity.DENY_PERMISSION;
 import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 
@@ -63,7 +62,7 @@ import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
  * Created by James on 21/02/2018.
  */
 
-public class TransferTicketDetailActivity extends BaseActivity implements Runnable, ItemClickListener, OnTokenClickListener
+public class TransferTicketDetailActivity extends BaseActivity implements Runnable, ItemClickListener, OnTokenClickListener, SignAuthenticationCallback
 {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
     private static final int SEND_INTENT_REQUEST_CODE = 2;
@@ -114,6 +113,8 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private EditText expiryTimeEditText;
     private DatePickerDialog datePickerDialog;
     private TimePickerDialog timePickerDialog;
+
+    private PinAuthenticationCallbackInterface authInterface;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -505,6 +506,22 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
                 token.integerListToString(token.ticketIdStringToIndexList(prunedIds), true));
     }
 
+    private void transferTicketAuth()
+    {
+        Wallet wallet = viewModel.defaultWallet().getValue();
+        if (wallet != null) wallet.checkWalletType(this);
+        if (wallet != null && wallet.isHDWallet())
+        {
+            //get authorisation to use HD key before signing
+            HDKeyService svs = new HDKeyService(this);
+            svs.getAuthenticationForSignature(wallet.address, this);
+        }
+        else
+        {
+            transferTicketFinal();
+        }
+    }
+
     @Override
     protected void onResume()
     {
@@ -542,6 +559,11 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
+        }
+
         switch (requestCode)
         {
             case BARCODE_READER_REQUEST_CODE:
@@ -582,6 +604,10 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
             case SEND_INTENT_REQUEST_CODE:
                 sendBroadcast(new Intent(PRUNE_ACTIVITY));
+                break;
+
+            case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
+                GotAuthorisation(resultCode == RESULT_OK);
                 break;
 
             default:
@@ -658,7 +684,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         confirmationDialog.setMediumText(qty);
         confirmationDialog.setPrimaryButtonText(R.string.transfer_tickets);
         confirmationDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
-        confirmationDialog.setPrimaryButtonListener(v1 -> transferTicketFinal());
+        confirmationDialog.setPrimaryButtonListener(v1 -> transferTicketAuth());
         confirmationDialog.setSecondaryButtonListener(v1 -> confirmationDialog.dismiss());
         confirmationDialog.show();
     }
@@ -728,6 +754,21 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     public void onItemClick(String url)
     {
         ensHandler.handleHistoryItemClick(url);
+    }
+
+    @Override
+    public void GotAuthorisation(boolean gotAuth)
+    {
+        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
+        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+
+        if (gotAuth) transferTicketFinal();
+    }
+
+    @Override
+    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+    {
+        authInterface = authCallback;
     }
 }
 

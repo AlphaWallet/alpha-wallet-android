@@ -9,13 +9,11 @@ import android.os.Vibrator;
 import android.security.keystore.*;
 import android.util.Log;
 import android.widget.Toast;
-import io.reactivex.Single;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.SignTransactionDialog;
-import wallet.core.jni.CoinType;
-import wallet.core.jni.HDWallet;
+import wallet.core.jni.*;
 import wallet.core.jni.PrivateKey;
 
 import javax.crypto.*;
@@ -23,10 +21,8 @@ import javax.crypto.spec.IvParameterSpec;
 import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.util.Enumeration;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
-import static io.stormbird.wallet.entity.ServiceErrorException.*;
 import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 
 @TargetApi(23)
@@ -40,19 +36,24 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
     private static final int AUTHENTICATION_DURATION_SECONDS = 30;
 
-    public static final int TIME_BETWEEN_BACKUP_MILLIS = 1000*60*1; //TODO: RESTORE 30 DAYS. TESTING: 10 minutes  //1000 * 60 * 60 * 24 * 30; //30 days
-    public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000*60*1; //TODO: RESTORE 30 DAYS. TESTING: 10 minutes  //1000 * 60 * 60 * 24 * 30; //30 days
+    public static final int TIME_BETWEEN_BACKUP_MILLIS = 1000*60*1; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
+    public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000*60*1; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
 
-    private enum Operation
+    public enum Operation
     {
-        CREATE_HD_KEY, FETCH_MNEMONIC, IMPORT_HD_KEY, SIGN_WITH_KEY, CHECK_AUTHENTICATION;
+        CREATE_HD_KEY, FETCH_MNEMONIC, IMPORT_HD_KEY, SIGN_WITH_KEY, CHECK_AUTHENTICATION, SIGN_DATA
+    }
+
+    public enum AuthenticationLevel
+    {
+        NO_AUTHENTICATION, HARDWARE_AUTHENTICATION, STRONGBOX_AUTHENTICATION
     }
 
     private static final int DEFAULT_KEY_STRENGTH = 128;
     private final Activity context;
 
+    private AuthenticationLevel authLevel;
     private String currentKey;
-    private byte[] signData;
     private SignTransactionDialog signDialog;
     private CreateWalletCallbackInterface callbackInterface;
     private ImportWalletCallback importCallback;
@@ -70,6 +71,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         else
         {
             context = ctx;
+            topmostActivity = ctx;
         }
     }
 
@@ -91,7 +93,8 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     public void importHDKey(String seedPhrase, ImportWalletCallback callback)
     {
         importCallback = callback;
-        //TODO: PIN Callback
+        callback.setupAuthenticationCallback(this);
+
         //cursory check for valid key import
         if (!HDWallet.isValid(seedPhrase))
         {
@@ -107,6 +110,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     public void getAuthenticationForSignature(String walletAddr, SignAuthenticationCallback callback)
     {
         signCallback = callback;
+        callback.setupAuthenticationCallback(this);
         currentKey = walletAddr;
         getAuthenticationForSignature();
     }
@@ -119,10 +123,18 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
             SecretKey secretKey = (SecretKey) keyStore.getKey(currentKey, null);
+            String encryptedHDKeyPath = getFilePath(context, currentKey + "hd");
+            boolean fileExists = new File(encryptedHDKeyPath).exists();
+            if (!fileExists || secretKey == null)
+            {
+                signCallback.GotAuthorisation(false);
+                return;
+            }
             byte[] iv = readBytesFromFile(getFilePath(context, currentKey + "iv"));
             Cipher outCipher = Cipher.getInstance(CIPHER_ALGORITHM);
             outCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
             signCallback.GotAuthorisation(true);
+            return;
         }
         catch (UserNotAuthenticatedException e)
         {
@@ -138,51 +150,40 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         signCallback.GotAuthorisation(false);
     }
 
-    public byte[] signData(String key, byte[] data)
+    //Auth must be unlocked
+    synchronized byte[] signData(String key, byte[] transactionBytes)
     {
-        signData = data;
         currentKey = key;
-        //signData();
-        return null;
+        String mnemonic = unpackMnemonic(Operation.SIGN_DATA);
+        if (mnemonic.length() == 0) return new String("0000").getBytes();
+        HDWallet newWallet = new HDWallet(mnemonic, "key1");
+        PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
+        byte[] digest = Hash.keccak256(transactionBytes);
+        byte[] signature = pk.sign(digest, Curve.SECP256K1);
+        return signature;
     }
 
-    private synchronized byte[] signData(String data, String keyAddress) throws ServiceErrorException
-    {
-        return null;
-    }
-
-    private synchronized void unpackMnemonic(Operation operation)
+    private synchronized String unpackMnemonic(Operation operation)
     {
         try
         {
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
-            if (!keyStore.containsAlias(currentKey)) { callbackInterface.tryAgain(); return; }
-            String encryptedDataFilePath = getFilePath(context, currentKey + "hd");
+            if (!keyStore.containsAlias(currentKey)) { keyFailure("Key not found in keystore. Re-import key."); return ""; }
+            String encryptedHDKeyPath = getFilePath(context, currentKey + "hd");
             SecretKey secretKey = (SecretKey) keyStore.getKey(currentKey, null);
-            if (secretKey == null)
-            {
-                /* no such key, the key is just simply not there */
-                boolean fileExists = new File(encryptedDataFilePath).exists();
-                if (!fileExists)
-                {
-                    callbackInterface.tryAgain();
-                    return;
-                }
-            }
-
             boolean ivExists = new File(getFilePath(context, currentKey + "iv")).exists();
             byte[] iv =  null;
 
             if (ivExists) iv = readBytesFromFile(getFilePath(context, currentKey + "iv"));
             if (iv == null || iv.length == 0)
             {
-                callbackInterface.tryAgain();
-                return;
+                keyFailure("Cannot setup wallet seed.");
+                return "";
             }
             Cipher outCipher = Cipher.getInstance(CIPHER_ALGORITHM);
             outCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
-            CipherInputStream cipherInputStream = new CipherInputStream(new FileInputStream(encryptedDataFilePath), outCipher);
+            CipherInputStream cipherInputStream = new CipherInputStream(new FileInputStream(encryptedHDKeyPath), outCipher);
             byte[] mnemonicBytes = readBytesFromStream(cipherInputStream);
             String mnemonic = new String(mnemonicBytes);
 
@@ -191,6 +192,8 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
                 case FETCH_MNEMONIC:
                     callbackInterface.FetchMnemonic(mnemonic);
                     break;
+                case SIGN_DATA:
+                    return mnemonic;
                 default:
                     break;
             }
@@ -203,13 +206,25 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             }
             else
             {
-                callbackInterface.tryAgain();
+                keyFailure(e.getMessage());
             }
         }
-        catch (IOException | CertificateException | KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException e)
+        catch (UnrecoverableKeyException e)
         {
-            callbackInterface.tryAgain();
+            //TODO: Display error; user needs to re-import key created at a different Auth level
+            e.printStackTrace();
         }
+        catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException e)
+        {
+            e.printStackTrace();
+            keyFailure(e.getMessage());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return "";
     }
 
     private synchronized void deleteKey(KeyStore keyStore, String keyAddr) {
@@ -246,20 +261,17 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
 
-            if (keyStore.containsAlias(address)) //re-import existing key.
+            if (keyStore.containsAlias(address)) //re-import existing key - no harm done as address is generated from mnemonic
             {
                 deleteKey(keyStore, address);
             }
 
             KeyGenerator keyGenerator = getMaxSecurityKeyGenerator(address);
 
-            // Set the alias of the entry in Android KeyStore where the key will appear
-            // and the constrains (purposes) in the constructor of the Builder
-
             final SecretKey secretKey = keyGenerator.generateKey();
             final Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            String path = getFilePath(context, address + "hd");
+            String encryptedHDKeyPath = getFilePath(context, address + "hd");
             Cipher inCipher = Cipher.getInstance(CIPHER_ALGORITHM);
             inCipher.init(Cipher.ENCRYPT_MODE, secretKey);
             byte[] iv = inCipher.getIV();
@@ -274,7 +286,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             }
 
             try (CipherOutputStream cipherOutputStream = new CipherOutputStream(
-                    new FileOutputStream(path),
+                    new FileOutputStream(encryptedHDKeyPath),
                     inCipher))
             {
                 cipherOutputStream.write(newWallet.mnemonic().getBytes());
@@ -290,26 +302,13 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             //blank class var
             currentKey = null;
 
-            SecretKeyFactory factory = SecretKeyFactory.getInstance(secretKey.getAlgorithm(), ANDROID_KEY_STORE);
-            KeyInfo keyInfo = (KeyInfo)factory.getKeySpec(secretKey, KeyInfo.class);
-
-            //TODO: store this in the key itself
-            if (keyInfo.isInsideSecureHardware())
-            {
-                System.out.println("Using hardware protected key");
-            }
-            else
-            {
-                System.out.println("Not using hardware protected key");
-            }
-
             switch (operation)
             {
                 case CREATE_HD_KEY:
                     callbackInterface.HDKeyCreated(address, context);
                     break;
                 case IMPORT_HD_KEY:
-                    importCallback.WalletValidated(currentKey);
+                    importCallback.WalletValidated(address);
                     break;
             }
             return;
@@ -362,17 +361,31 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && tryInitStrongBoxKey(keyGenerator, keyAddress))
             {
                 Log.d(TAG, "Using Strongbox");
+                authLevel = AuthenticationLevel.STRONGBOX_AUTHENTICATION;
             }
             else
             {
-                //fallback to non Strongbox
                 tryInitUserAuthenticatedKey(keyGenerator, keyAddress);
+                //fallback to non Strongbox
+                Log.d(TAG, "Using Hardware security TEE");
+                authLevel = AuthenticationLevel.HARDWARE_AUTHENTICATION;
             }
         }
         catch (InvalidAlgorithmParameterException e)
         {
+            if (tryInitZeroAuthenticationKey(keyGenerator, keyAddress))
+            {
+                authLevel = AuthenticationLevel.NO_AUTHENTICATION;
+            }
+            else
+            {
+                e.printStackTrace();
+                keyGenerator = null;
+            }
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
-            keyGenerator = null;
         }
 
         return keyGenerator;
@@ -405,18 +418,50 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         return true;
     }
 
-    private void tryInitUserAuthenticatedKey(KeyGenerator keyGenerator, String keyAddress) throws InvalidAlgorithmParameterException
+    private boolean tryInitUserAuthenticatedKey(KeyGenerator keyGenerator, String keyAddress) throws InvalidAlgorithmParameterException
     {
-        keyGenerator.init(new KeyGenParameterSpec.Builder(
-                keyAddress,
-                KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                                  .setBlockModes(BLOCK_MODE)
-                                  .setKeySize(256)
-                                  .setUserAuthenticationRequired(true)
-                                  .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
-                                  .setRandomizedEncryptionRequired(true)
-                                  .setEncryptionPaddings(PADDING)
-                                  .build());
+        try
+        {
+            keyGenerator.init(new KeyGenParameterSpec.Builder(
+                    keyAddress,
+                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                                      .setBlockModes(BLOCK_MODE)
+                                      .setKeySize(256)
+                                      .setUserAuthenticationRequired(true)
+                                      .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
+                                      .setRandomizedEncryptionRequired(true)
+                                      .setEncryptionPaddings(PADDING)
+                                      .build());
+        }
+        catch (IllegalStateException|InvalidAlgorithmParameterException e)
+        {
+            //couldn't create the key because of no lock
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean tryInitZeroAuthenticationKey(KeyGenerator keyGenerator, String keyAddress)
+    {
+        try
+        {
+            keyGenerator.init(new KeyGenParameterSpec.Builder(
+                    keyAddress,
+                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                                      .setBlockModes(BLOCK_MODE)
+                                      .setKeySize(256)
+                                      .setUserAuthenticationRequired(false)
+                                      .setRandomizedEncryptionRequired(true)
+                                      .setEncryptionPaddings(PADDING)
+                                      .build());
+        }
+        catch (InvalidAlgorithmParameterException e)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     private void checkAuthentication(Operation operation)
@@ -516,7 +561,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     @Override
     public void authenticatePass(int callbackId)
     {
-        signDialog.dismiss();
+        if (signDialog != null && signDialog.isShowing()) signDialog.dismiss();
         //resume key operation
         Operation operation = Operation.values()[callbackId];
         switch (operation)
@@ -529,9 +574,6 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
                 break;
             case IMPORT_HD_KEY:
                 importHDKey();
-                break;
-            case SIGN_WITH_KEY:
-                //signData();
                 break;
             case CHECK_AUTHENTICATION:
                 getAuthenticationForSignature();
@@ -550,7 +592,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         switch (failType)
         {
             case AUTHENTICATION_DIALOG_CANCELLED:
-                callbackInterface.cancelAuthentication();
+                cancelAuthentication();
                 if (signDialog != null && signDialog.isShowing()) signDialog.dismiss();
                 break;
             case FINGERPRINT_NOT_VALIDATED:
@@ -569,44 +611,35 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
                     VibrationEffect vibe = VibrationEffect.createOneShot(200, DEFAULT_AMPLITUDE);
                     vb.vibrate(vibe);
                 }
-                showTryAgain(callbackId);
                 break;
             case DEVICE_NOT_SECURE:
+                //Note:- allowing user to create a key with no auth-unlock ensures we should never get here
+                //Handle some sort of edge condition where the user gets here.
                 showInsecure(callbackId);
-                if (signDialog != null && signDialog.isShowing()) signDialog.dismiss();
                 break;
         }
 
         if (context == null || context.isDestroyed())
         {
-            callbackInterface.cancelAuthentication();
+            cancelAuthentication();
         }
     }
 
-    private void showTryAgain(int callbackId)
+    private void keyFailure(String message)
     {
-        AWalletAlertDialog dialog = new AWalletAlertDialog(context);
-        dialog.setIcon(AWalletAlertDialog.WARNING);
-        dialog.setTitle(R.string.authentication_failed);
-        dialog.setMessage(R.string.authentication_failed_message);
-        dialog.setButtonText(R.string.action_try_again);
-        dialog.setButtonListener(v -> {
-            checkAuthentication(Operation.values()[callbackId]);
-            dialog.dismiss();
-        });
-        dialog.setSecondaryButtonText(R.string.action_cancel);
-        dialog.setSecondaryButtonListener(v -> {
-            callbackInterface.cancelAuthentication();
-            dialog.dismiss();
-        });
-        dialog.setOnCancelListener(v -> {
-            callbackInterface.cancelAuthentication();
-            dialog.dismiss();
-        });
-        dialog.setOnDismissListener(v-> {
-            callbackInterface.cancelAuthentication();
-        });
-        dialog.show();
+        if (callbackInterface != null) callbackInterface.keyFailure(message);
+        else if (signCallback != null) signCallback.GotAuthorisation(false);
+    }
+
+    private void cancelAuthentication()
+    {
+        if (callbackInterface != null) callbackInterface.cancelAuthentication();
+        else if (signCallback != null) signCallback.GotAuthorisation(false);
+    }
+
+    public boolean isChecking()
+    {
+        return (signDialog != null && signDialog.isShowing());
     }
 
     /**
@@ -623,7 +656,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         dialog.setButtonText(R.string.action_continue);
         dialog.setCanceledOnTouchOutside(false);
         dialog.setButtonListener(v -> {
-            callbackInterface.cancelAuthentication();
+            cancelAuthentication();
             dialog.dismiss();
         });
         dialog.show();

@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -27,7 +26,6 @@ import io.stormbird.wallet.service.TokensService;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -121,7 +119,7 @@ public class WalletViewModel extends BaseViewModel
     public LiveData<GenericWalletInteract.BackupLevel> backupEvent() { return backupEvent; }
 
     public String getWalletAddr() { return currentWallet != null ? currentWallet.address : null; }
-    public Wallet.WalletType getWalletType() { return currentWallet != null ? currentWallet.type : Wallet.WalletType.KEYSTORE; }
+    public WalletType getWalletType() { return currentWallet != null ? currentWallet.type : WalletType.KEYSTORE; }
 
     @Override
     protected void onCleared() {
@@ -566,15 +564,19 @@ public class WalletViewModel extends BaseViewModel
      */
     private void checkOpenSeaUpdate()
     {
-        if (isVisible)
+        if (isVisible) //update at half speed if not visible
         {
-            openSeaCheckCounter += 1;
+            openSeaCheckCounter++;
+        }
+        else
+        {
+            openSeaCheckCounter += 2;
         }
 
         //init events
         switch (openSeaCheckCounter)
         {
-            case 3:
+            case 4:
                 if (ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
                     fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.RINKEBY_ID));
                 break;
@@ -597,7 +599,7 @@ public class WalletViewModel extends BaseViewModel
 
             fetchFromOpensea(openSeaCheck);
         }
-        else if ((openSeaCheckCounter - 7) % (CHECK_BLOCKSCOUT_INTERVAL_TIME * updateCorrection) == 0)
+        else if ((openSeaCheckCounter - 8) % (CHECK_BLOCKSCOUT_INTERVAL_TIME * updateCorrection) == 0)
         {
             fetchFromBlockscout();
         }

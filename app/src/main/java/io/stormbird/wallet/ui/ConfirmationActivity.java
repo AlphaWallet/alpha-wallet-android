@@ -13,7 +13,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import dagger.android.AndroidInjection;
-import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
@@ -34,13 +33,13 @@ import org.web3j.utils.Convert;
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.List;
 
 import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.wallet.C.ETH_SYMBOL;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
 import static io.stormbird.wallet.entity.ConfirmationType.ETH;
 import static io.stormbird.wallet.entity.ConfirmationType.WEB3TRANSACTION;
+import static io.stormbird.wallet.service.HDKeyService.Operation.SIGN_DATA;
 import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 
 public class ConfirmationActivity extends BaseActivity implements SignAuthenticationCallback {
@@ -77,14 +76,12 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private String transactionHex;
     private Token token;
     private int chainId;
+    private Wallet sendingWallet;
 
     private ConfirmationType confirmationType;
     private byte[] transactionBytes = null;
     private Web3Transaction transaction;
-    private boolean isMainNet;
-    private String networkName;
-
-    private List<TicketRange> salesOrderRange = null;
+    private PinAuthenticationCallbackInterface authInterface;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -174,7 +171,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 amountString = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);
                 symbolText.setVisibility(View.GONE);
 
-                networkName = getIntent().getStringExtra(C.EXTRA_NETWORK_NAME);
                 transactionHex = getIntent().getStringExtra(C.EXTRA_TRANSACTION_DATA);
                 if (transactionHex != null) transactionBytes = Numeric.hexStringToByteArray(transactionHex);
 
@@ -203,8 +199,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                     transactionBytes = Numeric.hexStringToByteArray(transaction.payload);
                 }
                 String urlRequester = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);
-                networkName = getIntent().getStringExtra(C.EXTRA_NETWORK_NAME);
-                isMainNet = getIntent().getBooleanExtra(C.EXTRA_NETWORK_MAINNET, false);
                 checkTransactionGas();
 
                 if (urlRequester != null)
@@ -281,7 +275,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     protected void onResume() {
         super.onResume();
         viewModel.prepare(this);
-        HDKeyService.setTopmostActivity(this);
     }
 
     private void onProgress(boolean shouldShowProgress) {
@@ -317,7 +310,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     {
         localGasSettings = gasSettings;
         //get authorisation if using an HD Key
-        if (viewModel.defaultWallet().getValue() != null && viewModel.defaultWallet().getValue().type == Wallet.WalletType.HDKEY)
+        if (sendingWallet != null && sendingWallet.isHDWallet())
         {
             HDKeyService svs = new HDKeyService(this);
             svs.getAuthenticationForSignature(viewModel.defaultWallet().getValue().address, this);
@@ -333,7 +326,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         switch (confirmationType) {
             case ETH:
                 viewModel.createTransaction(
-                        fromAddressText.getText().toString(),
+                        sendingWallet,
                         toAddress,
                         amount.toBigInteger(),
                         localGasSettings.gasPrice,
@@ -343,7 +336,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
             case ERC20:
                 viewModel.createTokenTransfer(
-                        fromAddressText.getText().toString(),
+                        sendingWallet,
                         toAddress,
                         contractAddress,
                         amount.toBigInteger(),
@@ -354,7 +347,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
             case ERC875:
                 viewModel.createTicketTransfer(
-                        fromAddressText.getText().toString(),
+                        sendingWallet,
                         toAddress,
                         contractAddress,
                         amountStr,
@@ -388,6 +381,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
     private void onDefaultWallet(Wallet wallet) {
         fromAddressText.setText(wallet.address);
+        sendingWallet = wallet;
     }
 
     private void onTransaction(String hash) {
@@ -511,6 +505,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode,resultCode,intent);
+
         if (requestCode == GasSettingsViewModel.SET_GAS_SETTINGS) {
             if (resultCode == RESULT_OK) {
                 BigInteger gasPrice = new BigInteger(intent.getStringExtra(C.EXTRA_GAS_PRICE));
@@ -528,7 +524,15 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
+        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
+        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
         //got authorisation, continue with transaction
         if (gotAuth) finaliseTransaction();
+    }
+
+    @Override
+    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+    {
+        authInterface = authCallback;
     }
 }

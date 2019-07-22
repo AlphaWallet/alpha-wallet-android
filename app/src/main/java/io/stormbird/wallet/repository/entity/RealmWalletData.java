@@ -2,7 +2,7 @@ package io.stormbird.wallet.repository.entity;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletType;
 
 /**
  * Created by James on 8/11/2018.
@@ -57,8 +57,8 @@ public class RealmWalletData extends RealmObject
         this.name = name;
     }
 
-    public Wallet.WalletType getType() { return Wallet.WalletType.values()[type]; }
-    public void setType(Wallet.WalletType type) { this.type = type.ordinal(); }
+    public WalletType getType() { return WalletType.values()[type]; }
+    public void setType(WalletType type) { this.type = type.ordinal(); }
 
     public long getLastBackup()
     {

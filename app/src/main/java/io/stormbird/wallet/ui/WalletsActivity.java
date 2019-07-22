@@ -325,7 +325,7 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
-    public void tryAgain()
+    public void keyFailure(String message)
     {
 
     }

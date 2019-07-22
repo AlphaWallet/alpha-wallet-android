@@ -19,6 +19,7 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.viewmodel.WalletActionsViewModel;
 import io.stormbird.wallet.viewmodel.WalletActionsViewModelFactory;
@@ -190,7 +191,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
         backUp = findViewById(R.id.backup);
         backUp.setOnClickListener(this);
 
-        if (wallet.type == Wallet.WalletType.KEYSTORE)
+        if (wallet.type == WalletType.KEYSTORE)
         {
             backUp.setText(R.string.export_keystore_json);
             TextView backupDetail = findViewById(R.id.backup_text);
@@ -206,7 +207,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
                 break;
             }
             case R.id.backup: {
-                if (wallet.type == Wallet.WalletType.HDKEY)
+                if (wallet.type == WalletType.HDKEY)
                 {
                     testSeedPhrase(wallet);
                 }

@@ -346,7 +346,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
     private void tokensReady(Boolean dummy)
     {
-        if (getActivity() != null) ((HomeActivity)getActivity()).TokensReady();
+        //if (getActivity() != null) ((HomeActivity)getActivity()).TokensReady();
     }
 
     private List<ContractResult> getAllKnownContractsOnNetwork(int chainId)

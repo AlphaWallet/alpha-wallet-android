@@ -151,6 +151,7 @@ public class Erc20DetailActivity extends BaseActivity {
                     //open function page
                     Intent intent = new Intent(this, FunctionActivity.class);
                     intent.putExtra(TICKET, token);
+                    intent.putExtra(WALLET, wallet);
                     intent.putExtra(C.EXTRA_STATE, action);
                     intent.putExtra(C.EXTRA_TOKEN_ID, BigInteger.ZERO.toString(16));
                     intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);

@@ -48,26 +48,26 @@ public class ConfirmationViewModel extends BaseViewModel {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
     }
 
-    public void createTransaction(String from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
+    public void createTransaction(Wallet from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
         progress.postValue(true);
         disposable = createTransactionInteract
-                .create(new Wallet(from), to, amount, gasPrice, gasLimit, null, chainId)
+                .create(from, to, amount, gasPrice, gasLimit, null, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
-    public void createTokenTransfer(String from, String to, String contractAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
+    public void createTokenTransfer(Wallet from, String to, String contractAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
         progress.postValue(true);
         final byte[] data = TokenRepository.createTokenTransferData(to, amount);
         disposable = createTransactionInteract
-                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
+                .create(from, contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
-    public void createTicketTransfer(String from, String to, String contractAddress, String ids, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
+    public void createTicketTransfer(Wallet from, String to, String contractAddress, String ids, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
         progress.postValue(true);
         final byte[] data = getERC875TransferBytes(to, contractAddress, ids, chainId);
         disposable = createTransactionInteract
-                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
+                .create(from, contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 

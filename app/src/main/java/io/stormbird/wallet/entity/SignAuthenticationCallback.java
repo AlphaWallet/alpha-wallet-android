@@ -7,4 +7,5 @@ package io.stormbird.wallet.entity;
 public interface SignAuthenticationCallback
 {
     void GotAuthorisation(boolean gotAuth);
+    void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback);
 }

@@ -211,7 +211,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         }
         catch (UnrecoverableKeyException e)
         {
-            //TODO: Display error; user needs to re-import key created at a different Auth level
+            keyFailure("Key created at different security level. Please re-import key");
             e.printStackTrace();
         }
         catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException e)

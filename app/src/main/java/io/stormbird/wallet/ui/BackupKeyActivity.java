@@ -3,18 +3,17 @@ package io.stormbird.wallet.ui;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.*;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import dagger.android.AndroidInjection;
-import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
 import io.stormbird.wallet.entity.PinAuthenticationCallbackInterface;
@@ -22,6 +21,7 @@ import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.viewmodel.BackupKeyViewModel;
 import io.stormbird.wallet.viewmodel.BackupKeyViewModelFactory;
+import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.PasswordInputView;
 import io.stormbird.wallet.widget.ProgressView;
 import io.stormbird.wallet.widget.SignTransactionDialog;
@@ -52,14 +52,18 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     private String[] mnemonicArray;
     private PinAuthenticationCallbackInterface authInterface;
 
+    private AWalletAlertDialog alertDialog;
+
     private LinearLayout currentHolder;
     private int currentEdge;
+    private int layoutHolderWidth;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
+        alertDialog = null;
 
         setContentView(R.layout.activity_backup_seed);
 
@@ -69,6 +73,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
         String type = getIntent().getStringExtra("TYPE");
         keyBackup = getIntent().getStringExtra("ADDRESS");
+        layoutHolderWidth = 0;
         initViews();
 
         switch (type)
@@ -85,7 +90,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             case "TEST_SEED":
                 state = BackupState.TEST_SEED_PHRASE;
                 setTitle(getString(R.string.seed_phrase));
-                setupTestSeed();
                 break;
         }
 
@@ -138,6 +142,20 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         backupImage = findViewById(R.id.seed_image);
         inputView = findViewById(R.id.input_password);
         nextButton.setOnClickListener(this);
+
+        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
+
+        ViewTreeObserver vto = layoutHolder.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener (() -> {
+            if (state == BackupState.TEST_SEED_PHRASE && layoutHolderWidth == 0)
+            {
+                layoutHolderWidth = layoutHolder.getMeasuredWidth();
+                if (layoutHolderWidth != 0)
+                {
+                    setupTestSeed();
+                }
+            }
+        });
     }
 
     @Override
@@ -348,7 +366,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     {
         currentEdge = 0;
         currentHolder = new LinearLayout(this);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(0,0,0,8);
         currentHolder.setLayoutParams(params);
         currentHolder.setOrientation(LinearLayout.HORIZONTAL);
@@ -357,8 +375,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private TextView addWordToLayout(String word)
     {
-        int width = layoutHolder.getWidth();
-
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(0,0,8,0);
 
@@ -373,7 +389,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
         seedWord.measure(0, 0);
         int measuredWidth = seedWord.getMeasuredWidth();
-        if ((currentEdge + measuredWidth + 8) > width)
+        if ((currentEdge + measuredWidth + 8) > layoutHolderWidth)
         {
             addNewLayoutLine();
         }
@@ -393,10 +409,36 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     @Override
     public void keyFailure(String message)
     {
-        //TODO: Error trying to retrieve the key, display error dialog box here
-        Intent intent = new Intent();
-        setResult(RESULT_CANCELED, intent);
-        finish();
+        if (message != null && message.length() > 0)
+        {
+            DisplayKeyFailureDialog(message);
+        }
+        else
+        {
+            Intent intent = new Intent();
+            setResult(RESULT_CANCELED, intent);
+            finish();
+        }
+    }
+
+    private void DisplayKeyFailureDialog(String message)
+    {
+        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
+
+        alertDialog = new AWalletAlertDialog(this);
+        alertDialog.setIcon(AWalletAlertDialog.ERROR);
+        alertDialog.setTitle(R.string.key_error);
+        alertDialog.setMessage(message);
+        alertDialog.setButtonText(R.string.action_continue);
+        alertDialog.setCanceledOnTouchOutside(true);
+        alertDialog.setButtonListener(v -> {
+            cancelAuthentication();
+            alertDialog.dismiss();
+        });
+        alertDialog.setOnCancelListener(v -> {
+            cancelAuthentication();
+        });
+        alertDialog.show();
     }
 
     @Override

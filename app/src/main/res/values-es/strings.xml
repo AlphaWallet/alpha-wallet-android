@@ -143,4 +143,5 @@
     <string name="title_change_wallet">Change Wallet</string>
     <string name="legacy_wallets">Legacy Wallets</string>
     <string name="postponed_backup_warning">Backup warning postponed.</string>
+    <string name="key_error">Key Error</string>
 </resources>

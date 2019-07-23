@@ -329,6 +329,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         String[] currentTest = currentText.split(" ");
         if (currentTest.length == mnemonicArray.length)
         {
+            TestSeedPhrase();
             setBottomButtonActive(true);
         }
     }

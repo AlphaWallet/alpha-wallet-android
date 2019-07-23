@@ -10,11 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.multidex.MultiDex;
-
 import com.crashlytics.android.Crashlytics;
-
-import javax.inject.Inject;
-
 import com.crashlytics.android.core.CrashlyticsCore;
 import dagger.android.AndroidInjection;
 import io.fabric.sdk.android.Fabric;
@@ -29,11 +25,12 @@ import io.stormbird.wallet.viewmodel.SplashViewModel;
 import io.stormbird.wallet.viewmodel.SplashViewModelFactory;
 import io.stormbird.wallet.widget.SignTransactionDialog;
 
+import javax.inject.Inject;
+
 import static io.stormbird.wallet.C.SHOW_NEW_ACCOUNT_PROMPT;
 
 public class SplashActivity extends BaseActivity implements CreateWalletCallbackInterface
 {
-
     @Inject
     SplashViewModelFactory splashViewModelFactory;
     SplashViewModel splashViewModel;

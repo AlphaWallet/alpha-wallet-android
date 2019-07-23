@@ -21,6 +21,7 @@ import javax.crypto.spec.IvParameterSpec;
 import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.Enumeration;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
@@ -34,7 +35,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     private static final String BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC;
     private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7;
     private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
-    private static final int AUTHENTICATION_DURATION_SECONDS = 30;
+    private static final int AUTHENTICATION_DURATION_SECONDS = 40;
 
     public static final int TIME_BETWEEN_BACKUP_MILLIS = 1000*60*1; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
     public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000*60*1; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
@@ -55,6 +56,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     private AuthenticationLevel authLevel;
     private String currentKey;
     private SignTransactionDialog signDialog;
+    private AWalletAlertDialog alertDialog;
     private CreateWalletCallbackInterface callbackInterface;
     private ImportWalletCallback importCallback;
     private SignAuthenticationCallback signCallback;
@@ -140,6 +142,11 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         {
             checkAuthentication(Operation.CHECK_AUTHENTICATION);
             return;
+        }
+        catch (UnrecoverableKeyException e)
+        {
+            keyFailure("Key created at different security level. Please re-import key");
+            e.printStackTrace();
         }
         catch (Exception e)
         {
@@ -233,7 +240,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             File iv = new File(getFilePath(context, keyAddr + "iv"));
             if (encrypted.exists()) encrypted.delete();
             if (iv.exists()) iv.delete();
-            keyStore.deleteEntry(keyAddr);
+            if (keyStore != null && keyStore.containsAlias(keyAddr)) keyStore.deleteEntry(keyAddr);
         } catch (KeyStoreException e) {
             e.printStackTrace();
         }
@@ -253,13 +260,22 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
 
     private synchronized void storeHDKey(HDWallet newWallet, Operation operation)
     {
+        String address = "";
+        KeyStore keyStore = null;
         try
         {
             PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
-            String address = CoinType.ETHEREUM.deriveAddress(pk);
+            address = CoinType.ETHEREUM.deriveAddress(pk);
 
-            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
+            keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
+
+            Enumeration<String> keys = keyStore.aliases();
+
+            while (keys.hasMoreElements())
+            {
+                System.out.println("Key: " + keys.nextElement());
+            }
 
             if (keyStore.containsAlias(address)) //re-import existing key - no harm done as address is generated from mnemonic
             {
@@ -293,6 +309,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             }
             catch (Exception ex)
             {
+                deleteKey(keyStore, address);
                 failToStore(operation);
                 throw new ServiceErrorException(
                         ServiceErrorException.KEY_STORE_ERROR,
@@ -315,12 +332,15 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         }
         catch (UserNotAuthenticatedException e)
         {
+            //delete keys if created
+            deleteKey(keyStore, address);
             //User isn't authenticated, get authentication and start again
             checkAuthentication(operation);
             return;
         }
         catch (Exception ex)
         {
+            deleteKey(keyStore, address);
             Log.d(TAG, "Key store error", ex);
         }
 
@@ -627,8 +647,11 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
 
     private void keyFailure(String message)
     {
-        if (callbackInterface != null) callbackInterface.keyFailure(message);
-        else if (signCallback != null) signCallback.GotAuthorisation(false);
+        if (message == null || message.length() == 0 || !AuthorisationFailMessage(message))
+        {
+            if (callbackInterface != null) callbackInterface.keyFailure(message);
+            else if (signCallback != null) signCallback.GotAuthorisation(false);
+        }
     }
 
     private void cancelAuthentication()
@@ -640,6 +663,30 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     public boolean isChecking()
     {
         return (signDialog != null && signDialog.isShowing());
+    }
+
+    private boolean AuthorisationFailMessage(String message)
+    {
+        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
+        if (context == null || context.isDestroyed()) return false;
+
+        alertDialog = new AWalletAlertDialog(context);
+        alertDialog.setIcon(AWalletAlertDialog.ERROR);
+        alertDialog.setTitle(R.string.key_error);
+        alertDialog.setMessage(message);
+        alertDialog.setButtonText(R.string.action_continue);
+        alertDialog.setCanceledOnTouchOutside(true);
+        alertDialog.setButtonListener(v -> {
+            keyFailure("");
+            alertDialog.dismiss();
+        });
+        alertDialog.setOnCancelListener(v -> {
+            keyFailure("");
+            cancelAuthentication();
+        });
+        alertDialog.show();
+
+        return true;
     }
 
     /**

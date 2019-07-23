@@ -3,12 +3,13 @@ package io.stormbird.wallet.ui;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.view.*;
+import android.view.Gravity;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -145,6 +146,8 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
         if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
 
+        // Note: The seed display requires the holder view to be drawn so it can measure how much
+        // space is left on each line.
         ViewTreeObserver vto = layoutHolder.getViewTreeObserver();
         vto.addOnGlobalLayoutListener (() -> {
             if (state == BackupState.TEST_SEED_PHRASE && layoutHolderWidth == 0)

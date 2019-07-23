@@ -3,6 +3,7 @@ package io.stormbird.wallet.entity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import io.stormbird.wallet.service.HDKeyService;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ public class Wallet implements Parcelable {
     public String name;
     public WalletType type;
     public long lastBackupTime;
+    public HDKeyService.AuthenticationLevel authLevel;
 
 	public Wallet(String address) {
 		this.address = address;
@@ -25,9 +27,11 @@ public class Wallet implements Parcelable {
 		this.name = "";
 		this.type = WalletType.NOT_DEFINED;
 		this.lastBackupTime = 0;
+		this.authLevel = HDKeyService.AuthenticationLevel.NO_AUTHENTICATION;
 	}
 
-	private Wallet(Parcel in) {
+	private Wallet(Parcel in)
+	{
 		address = in.readString();
 		balance = in.readString();
 		ENSname = in.readString();
@@ -35,6 +39,8 @@ public class Wallet implements Parcelable {
 		int t = in.readInt();
 		type = WalletType.values()[t];
 		lastBackupTime = in.readLong();
+		t = in.readInt();
+		authLevel = HDKeyService.AuthenticationLevel.values()[t];
 	}
 
 	public void setWalletType(WalletType wType)
@@ -88,6 +94,7 @@ public class Wallet implements Parcelable {
 		parcel.writeString(name);
 		parcel.writeInt(type.ordinal());
 		parcel.writeLong(lastBackupTime);
+		parcel.writeInt(authLevel.ordinal());
 	}
 
 	public void setWalletBalance(BigDecimal balanceBD)

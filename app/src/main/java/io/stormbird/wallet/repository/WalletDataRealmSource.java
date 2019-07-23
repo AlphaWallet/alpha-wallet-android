@@ -57,6 +57,7 @@ public class WalletDataRealmSource {
                         wallet.balance = balance(d);
                         wallet.name = d.getName();
                         wallet.lastBackupTime = d.getLastBackup();
+                        wallet.authLevel = d.getAuthLevel();
                         walletList.add(wallet);
                     }
                 }
@@ -168,6 +169,7 @@ public class WalletDataRealmSource {
                 realmWallet.setBalance(wallet.balance);
                 realmWallet.setType(wallet.type);
                 realmWallet.setLastBackup(wallet.lastBackupTime);
+                realmWallet.setAuthLevel(wallet.authLevel);
 
                 realm.commitTransaction();
             } catch (Exception e) {

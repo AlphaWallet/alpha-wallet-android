@@ -8,6 +8,7 @@ import io.stormbird.wallet.repository.WalletRepositoryType;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.stormbird.wallet.service.HDKeyService;
 
 public class ImportWalletInteract {
 
@@ -37,10 +38,11 @@ public class ImportWalletInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<Wallet> storeHDWallet(String walletAddress)
+    public Single<Wallet> storeHDWallet(String walletAddress, HDKeyService.AuthenticationLevel authLevel)
     {
         Wallet wallet = new Wallet(walletAddress);
         wallet.type = WalletType.HDKEY;
+        wallet.authLevel = authLevel;
         wallet.lastBackupTime = System.currentTimeMillis();
         return walletRepository.storeWallet(wallet);
     }

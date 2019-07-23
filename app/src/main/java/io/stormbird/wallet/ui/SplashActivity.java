@@ -21,6 +21,7 @@ import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
 import io.stormbird.wallet.router.ManageWalletsRouter;
+import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.viewmodel.SplashViewModel;
 import io.stormbird.wallet.viewmodel.SplashViewModelFactory;
 import io.stormbird.wallet.widget.SignTransactionDialog;
@@ -170,9 +171,9 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     }
 
     @Override
-    public void HDKeyCreated(String address, Context ctx)
+    public void HDKeyCreated(String address, Context ctx, HDKeyService.AuthenticationLevel level)
     {
-        splashViewModel.StoreHDKey(address);
+        splashViewModel.StoreHDKey(address, level);
     }
 
     @Override

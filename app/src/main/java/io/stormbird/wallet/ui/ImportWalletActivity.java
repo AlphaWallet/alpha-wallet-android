@@ -170,9 +170,9 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     }
 
     @Override
-    public void WalletValidated(String address)
+    public void WalletValidated(String address, HDKeyService.AuthenticationLevel level)
     {
-        importWalletViewModel.onSeed(address);
+        importWalletViewModel.onSeed(address, level);
     }
 
     @Override

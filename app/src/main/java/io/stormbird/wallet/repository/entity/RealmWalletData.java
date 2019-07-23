@@ -3,6 +3,7 @@ package io.stormbird.wallet.repository.entity;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 import io.stormbird.wallet.entity.WalletType;
+import io.stormbird.wallet.service.HDKeyService;
 
 /**
  * Created by James on 8/11/2018.
@@ -18,6 +19,7 @@ public class RealmWalletData extends RealmObject
     private int type;
     private long lastBackup;
     private long lastWarning;
+    private int authLevel;
 
     public String getAddress()
     {
@@ -76,5 +78,15 @@ public class RealmWalletData extends RealmObject
     public void setLastWarning(long lastWarning)
     {
         this.lastWarning = lastWarning;
+    }
+
+    public HDKeyService.AuthenticationLevel getAuthLevel()
+    {
+        return HDKeyService.AuthenticationLevel.values()[authLevel];
+    }
+
+    public void setAuthLevel(HDKeyService.AuthenticationLevel authLevel)
+    {
+        this.authLevel = authLevel.ordinal();
     }
 }

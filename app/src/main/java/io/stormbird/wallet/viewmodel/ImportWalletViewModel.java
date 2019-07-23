@@ -64,7 +64,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnImportKeys
         }
     }
 
-    public void onSeed(String walletAddress)
+    public void onSeed(String walletAddress, HDKeyService.AuthenticationLevel level)
     {
         if (walletAddress == null)
         {
@@ -74,7 +74,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnImportKeys
         else
         {
             //begin key storage process
-            disposable = importWalletInteract.storeHDWallet(walletAddress)
+            disposable = importWalletInteract.storeHDWallet(walletAddress, level)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(wallet::postValue, this::onError); //signal to UI wallet import complete

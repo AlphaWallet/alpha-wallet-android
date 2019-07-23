@@ -22,6 +22,7 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.ui.widget.adapter.WalletsAdapter;
 import io.stormbird.wallet.viewmodel.WalletsViewModel;
 import io.stormbird.wallet.viewmodel.WalletsViewModelFactory;
@@ -319,9 +320,9 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
-    public void HDKeyCreated(String address, Context ctx)
+    public void HDKeyCreated(String address, Context ctx, HDKeyService.AuthenticationLevel level)
     {
-        viewModel.StoreHDWallet(address);
+        viewModel.StoreHDWallet(address, level);
     }
 
     @Override

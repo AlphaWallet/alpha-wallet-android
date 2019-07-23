@@ -35,7 +35,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     private static final String BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC;
     private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7;
     private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
-    private static final int AUTHENTICATION_DURATION_SECONDS = 40;
+    private static final int AUTHENTICATION_DURATION_SECONDS = 30;
 
     public static final int TIME_BETWEEN_BACKUP_MILLIS = 1000*60*1; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
     public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000*60*1; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
@@ -47,7 +47,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
 
     public enum AuthenticationLevel
     {
-        NO_AUTHENTICATION, HARDWARE_AUTHENTICATION, STRONGBOX_AUTHENTICATION
+        NOT_SET, NO_AUTHENTICATION, HARDWARE_AUTHENTICATION, STRONGBOX_AUTHENTICATION
     }
 
     private static final int DEFAULT_KEY_STRENGTH = 128;
@@ -100,7 +100,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         //cursory check for valid key import
         if (!HDWallet.isValid(seedPhrase))
         {
-            callback.WalletValidated(null);
+            callback.WalletValidated(null, AuthenticationLevel.NOT_SET);
         }
         else
         {
@@ -143,7 +143,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             checkAuthentication(Operation.CHECK_AUTHENTICATION);
             return;
         }
-        catch (UnrecoverableKeyException e)
+        catch (KeyPermanentlyInvalidatedException | UnrecoverableKeyException e)
         {
             keyFailure("Key created at different security level. Please re-import key");
             e.printStackTrace();
@@ -322,10 +322,10 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             switch (operation)
             {
                 case CREATE_HD_KEY:
-                    callbackInterface.HDKeyCreated(address, context);
+                    callbackInterface.HDKeyCreated(address, context, authLevel);
                     break;
                 case IMPORT_HD_KEY:
-                    importCallback.WalletValidated(address);
+                    importCallback.WalletValidated(address, authLevel);
                     break;
             }
             return;
@@ -352,10 +352,10 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         switch (operation)
         {
             case CREATE_HD_KEY:
-                callbackInterface.HDKeyCreated(ZERO_ADDRESS, context);
+                callbackInterface.HDKeyCreated(ZERO_ADDRESS, context, AuthenticationLevel.NOT_SET);
                 break;
             case IMPORT_HD_KEY:
-                importCallback.WalletValidated(null);
+                importCallback.WalletValidated(null, AuthenticationLevel.NOT_SET);
                 break;
         }
     }
@@ -690,7 +690,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     }
 
     /**
-     * Current behaviour: Don't allow users to create a private key unless the device is secure
+     * Current behaviour: Allow user to create unsecured key
      *
      * @param callbackId
      */

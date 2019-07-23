@@ -16,6 +16,7 @@ import io.stormbird.wallet.interact.CreateWalletInteract;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
+import io.stormbird.wallet.service.HDKeyService;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -190,12 +191,13 @@ public class SplashViewModel extends ViewModel
         }
     }
 
-    public void StoreHDKey(String address)
+    public void StoreHDKey(String address, HDKeyService.AuthenticationLevel authLevel)
     {
         if (!address.equals(ZERO_ADDRESS))
         {
             Wallet wallet = new Wallet(address);
             wallet.type = WalletType.HDKEY;
+            wallet.authLevel = authLevel;
             fetchWalletsInteract.storeWallet(wallet)
                     .subscribe(account -> {
                         fetchWallets();

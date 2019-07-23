@@ -405,7 +405,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     }
 
     @Override
-    public void HDKeyCreated(String address, Context ctx)
+    public void HDKeyCreated(String address, Context ctx, HDKeyService.AuthenticationLevel level)
     {
         //empty, doesn't get called
     }

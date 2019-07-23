@@ -14,6 +14,7 @@ import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
+import io.stormbird.wallet.service.HDKeyService;
 
 import java.util.*;
 
@@ -304,7 +305,7 @@ public class WalletsViewModel extends BaseViewModel
         return currentNetwork;
     }
 
-    public void StoreHDWallet(String address)
+    public void StoreHDWallet(String address, HDKeyService.AuthenticationLevel authLevel)
     {
         if (!address.equals(ZERO_ADDRESS))
         {

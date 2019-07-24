@@ -13,10 +13,11 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.SignTransactionDialog;
-import wallet.core.jni.*;
 import wallet.core.jni.PrivateKey;
+import wallet.core.jni.*;
 
 import javax.crypto.*;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import java.io.*;
 import java.security.*;
@@ -31,14 +32,13 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
 {
     private static final String TAG = "HDWallet";
     private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
-    private static final String UNLOCK_KEY = "unlock_key";
-    private static final String BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC;
-    private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7;
-    private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS7Padding";
+    private static final String BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM;
+    private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_NONE;
+    private static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding";
     private static final int AUTHENTICATION_DURATION_SECONDS = 30;
 
-    public static final int TIME_BETWEEN_BACKUP_MILLIS = 1000*60*1; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
-    public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000*60*1; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
+    public static final int TIME_BETWEEN_BACKUP_MILLIS = 1000 * 60 * 1; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
+    public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000 * 60 * 1; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
 
     public enum Operation
     {
@@ -162,7 +162,8 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     {
         currentKey = key;
         String mnemonic = unpackMnemonic(Operation.SIGN_DATA);
-        if (mnemonic.length() == 0) return new String("0000").getBytes();
+        if (mnemonic.length() == 0)
+            return "0000".getBytes();
         HDWallet newWallet = new HDWallet(mnemonic, "key1");
         PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
         byte[] digest = Hash.keccak256(transactionBytes);
@@ -176,20 +177,26 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         {
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
-            if (!keyStore.containsAlias(currentKey)) { keyFailure("Key not found in keystore. Re-import key."); return ""; }
+            if (!keyStore.containsAlias(currentKey))
+            {
+                keyFailure("Key not found in keystore. Re-import key.");
+                return "";
+            }
             String encryptedHDKeyPath = getFilePath(context, currentKey + "hd");
             SecretKey secretKey = (SecretKey) keyStore.getKey(currentKey, null);
             boolean ivExists = new File(getFilePath(context, currentKey + "iv")).exists();
-            byte[] iv =  null;
+            byte[] iv = null;
 
-            if (ivExists) iv = readBytesFromFile(getFilePath(context, currentKey + "iv"));
+            if (ivExists)
+                iv = readBytesFromFile(getFilePath(context, currentKey + "iv"));
             if (iv == null || iv.length == 0)
             {
                 keyFailure("Cannot setup wallet seed.");
                 return "";
             }
             Cipher outCipher = Cipher.getInstance(CIPHER_ALGORITHM);
-            outCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
+            final GCMParameterSpec spec = new GCMParameterSpec(128, iv);
+            outCipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
             CipherInputStream cipherInputStream = new CipherInputStream(new FileInputStream(encryptedHDKeyPath), outCipher);
             byte[] mnemonicBytes = readBytesFromStream(cipherInputStream);
             String mnemonic = new String(mnemonicBytes);
@@ -234,14 +241,21 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         return "";
     }
 
-    private synchronized void deleteKey(KeyStore keyStore, String keyAddr) {
-        try {
+    private synchronized void deleteKey(KeyStore keyStore, String keyAddr)
+    {
+        try
+        {
             File encrypted = new File(getFilePath(context, keyAddr + "hd"));
             File iv = new File(getFilePath(context, keyAddr + "iv"));
-            if (encrypted.exists()) encrypted.delete();
-            if (iv.exists()) iv.delete();
-            if (keyStore != null && keyStore.containsAlias(keyAddr)) keyStore.deleteEntry(keyAddr);
-        } catch (KeyStoreException e) {
+            if (encrypted.exists())
+                encrypted.delete();
+            if (iv.exists())
+                iv.delete();
+            if (keyStore != null && keyStore.containsAlias(keyAddr))
+                keyStore.deleteEntry(keyAddr);
+        }
+        catch (KeyStoreException e)
+        {
             e.printStackTrace();
         }
     }
@@ -288,13 +302,12 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             final Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             String encryptedHDKeyPath = getFilePath(context, address + "hd");
-            Cipher inCipher = Cipher.getInstance(CIPHER_ALGORITHM);
-            inCipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            byte[] iv = inCipher.getIV();
+            byte[] iv = cipher.getIV();
             String ivPath = getFilePath(context, address + "iv");
             boolean success = writeBytesToFile(ivPath, iv);
-            if (!success) {
-                keyStore.deleteEntry(address + "iv");
+            if (!success)
+            {
+                deleteKey(keyStore, address);
                 failToStore(operation);
                 throw new ServiceErrorException(
                         ServiceErrorException.FAIL_TO_SAVE_IV_FILE,
@@ -303,7 +316,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
 
             try (CipherOutputStream cipherOutputStream = new CipherOutputStream(
                     new FileOutputStream(encryptedHDKeyPath),
-                    inCipher))
+                    cipher))
             {
                 cipherOutputStream.write(newWallet.mnemonic().getBytes());
             }
@@ -370,7 +383,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
                     KeyProperties.KEY_ALGORITHM_AES,
                     ANDROID_KEY_STORE);
         }
-        catch (NoSuchAlgorithmException|NoSuchProviderException ex)
+        catch (NoSuchAlgorithmException | NoSuchProviderException ex)
         {
             ex.printStackTrace();
             return null;
@@ -453,7 +466,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
                                       .setEncryptionPaddings(PADDING)
                                       .build());
         }
-        catch (IllegalStateException|InvalidAlgorithmParameterException e)
+        catch (IllegalStateException | InvalidAlgorithmParameterException e)
         {
             //couldn't create the key because of no lock
             return false;
@@ -488,55 +501,75 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     {
         signDialog = new SignTransactionDialog(context, operation.ordinal());
         signDialog.setCanceledOnTouchOutside(false);
-        signDialog.setCancelListener(v -> { authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation.ordinal()); });
+        signDialog.setCancelListener(v -> {
+            authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation.ordinal());
+        });
         signDialog.show();
         signDialog.getFingerprintAuthorisation(this);
     }
 
-    private synchronized static String getFilePath(Context context, String fileName) {
+    private synchronized static String getFilePath(Context context, String fileName)
+    {
         return new File(context.getFilesDir(), fileName).getAbsolutePath();
     }
 
-    private static boolean writeBytesToFile(String path, byte[] data) {
+    private static boolean writeBytesToFile(String path, byte[] data)
+    {
         FileOutputStream fos = null;
-        try {
+        try
+        {
             File file = new File(path);
             fos = new FileOutputStream(file);
             // Writes bytes from the specified byte array to this file output stream
             fos.write(data);
             return true;
-        } catch (FileNotFoundException e) {
+        }
+        catch (FileNotFoundException e)
+        {
             System.out.println("File not found" + e);
-        } catch (IOException ioe) {
+        }
+        catch (IOException ioe)
+        {
             System.out.println("Exception while writing file " + ioe);
-        } finally {
+        }
+        finally
+        {
             // close the streams using close method
-            try {
-                if (fos != null) {
+            try
+            {
+                if (fos != null)
+                {
                     fos.close();
                 }
-            } catch (IOException ioe) {
+            }
+            catch (IOException ioe)
+            {
                 System.out.println("Error while closing stream: " + ioe);
             }
         }
         return false;
     }
 
-    private static byte[] readBytesFromFile(String path) {
+    private static byte[] readBytesFromFile(String path)
+    {
         byte[] bytes = null;
         FileInputStream fin;
-        try {
+        try
+        {
             File file = new File(path);
             fin = new FileInputStream(file);
             bytes = readBytesFromStream(fin);
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             e.printStackTrace();
         }
         return bytes;
     }
 
 
-    private static byte[] readBytesFromStream(InputStream in) {
+    private static byte[] readBytesFromStream(InputStream in)
+    {
         // this dynamically extends to take the bytes you read
         ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
         // this is storage overwritten on each iteration with bytes
@@ -544,23 +577,36 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         byte[] buffer = new byte[bufferSize];
         // we need to know how may bytes were read to write them to the byteBuffer
         int len;
-        try {
-            while ((len = in.read(buffer)) != -1) {
+        try
+        {
+            while ((len = in.read(buffer)) != -1)
+            {
                 byteBuffer.write(buffer, 0, len);
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             e.printStackTrace();
-        } finally {
-            try {
+        }
+        finally
+        {
+            try
+            {
                 byteBuffer.close();
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 e.printStackTrace();
             }
-            if (in != null) try {
-                in.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            if (in != null)
+                try
+                {
+                    in.close();
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
         }
         // and then we can return your byte array.
         return byteBuffer.toByteArray();
@@ -581,7 +627,8 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     @Override
     public void authenticatePass(int callbackId)
     {
-        if (signDialog != null && signDialog.isShowing()) signDialog.dismiss();
+        if (signDialog != null && signDialog.isShowing())
+            signDialog.dismiss();
         //resume key operation
         Operation operation = Operation.values()[callbackId];
         switch (operation)
@@ -613,7 +660,8 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         {
             case AUTHENTICATION_DIALOG_CANCELLED:
                 cancelAuthentication();
-                if (signDialog != null && signDialog.isShowing()) signDialog.dismiss();
+                if (signDialog != null && signDialog.isShowing())
+                    signDialog.dismiss();
                 break;
             case FINGERPRINT_NOT_VALIDATED:
                 vb = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
@@ -649,15 +697,19 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     {
         if (message == null || message.length() == 0 || !AuthorisationFailMessage(message))
         {
-            if (callbackInterface != null) callbackInterface.keyFailure(message);
-            else if (signCallback != null) signCallback.GotAuthorisation(false);
+            if (callbackInterface != null)
+                callbackInterface.keyFailure(message);
+            else if (signCallback != null)
+                signCallback.GotAuthorisation(false);
         }
     }
 
     private void cancelAuthentication()
     {
-        if (callbackInterface != null) callbackInterface.cancelAuthentication();
-        else if (signCallback != null) signCallback.GotAuthorisation(false);
+        if (callbackInterface != null)
+            callbackInterface.cancelAuthentication();
+        else if (signCallback != null)
+            signCallback.GotAuthorisation(false);
     }
 
     public boolean isChecking()
@@ -667,8 +719,10 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
 
     private boolean AuthorisationFailMessage(String message)
     {
-        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
-        if (context == null || context.isDestroyed()) return false;
+        if (alertDialog != null && alertDialog.isShowing())
+            alertDialog.dismiss();
+        if (context == null || context.isDestroyed())
+            return false;
 
         alertDialog = new AWalletAlertDialog(context);
         alertDialog.setIcon(AWalletAlertDialog.ERROR);

@@ -233,7 +233,6 @@
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="@dimen/normal_margin"
                 android:layout_marginStart="@dimen/big_margin"
-                android:layout_toEndOf="@+id/icon"
                 android:layout_toStartOf="@+id/balance_container"
                 android:textAllCaps="true"
                 android:textAppearance="?attr/textAppearanceListItem"

@@ -84,7 +84,6 @@ project.ext {
     picassoVersion = "2.71828"
     supportVersion = "28.0.0"
     web3jVersion = "4.2.0-android"
-    gethVersion = "1.8.11"
     gsonVersion = "2.8.5"
     rxJavaVersion = "2.2.10"
     rxAndroidVersion = "2.1.1"
@@ -103,7 +102,6 @@ dependencies {
 
     // Ethereum client
     implementation "org.web3j:core:$project.web3jVersion"
-    implementation "org.ethereum:geth:$project.gethVersion"
 
     // Http client
     implementation "com.squareup.retrofit2:retrofit:$project.retrofitVersion"

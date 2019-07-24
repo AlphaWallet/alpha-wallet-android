@@ -222,7 +222,6 @@ public class MarketQueueService {
         return Single.fromCallable(() ->
         {
             long initialExpiry = (System.currentTimeMillis() / 1000L) + MARKET_INTERVAL;
-            transactionRepository.unlockAccount(wallet, password);
             //Recover public key
             BigInteger recoveredKey = ecRecoverPublicKey(wallet, password, chainId);
 
@@ -235,7 +234,6 @@ public class MarketQueueService {
                 float upd = ((float)i/TRADE_AMOUNT)*100.0f;
                 messageCallback.queueUpdate((int)upd);
             }
-            transactionRepository.lockAccount(wallet, password);
             trade.expiry = BigInteger.valueOf(initialExpiry); //ensure expiry of first order is correct
             return trade;
         });

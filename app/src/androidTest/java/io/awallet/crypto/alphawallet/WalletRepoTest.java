@@ -17,7 +17,7 @@ public class WalletRepoTest {
 //	public void setUp() {
 //		Context context = InstrumentationRegistry.getTargetContext();
 //		PreferenceRepositoryType preferenceRepositoryType = new SharedPreferenceRepository(context);
-//		AccountKeystoreService accountKeystoreService = new GethKeystoreAccountService(new File(context.getFilesDir(), "store"));
+//		AccountKeystoreService accountKeystoreService = new KeystoreAccountService(new File(context.getFilesDir(), "store"));
 //		EthereumNetworkRepositoryType networkRepository = new EthereumNetworkRepository(preferenceRepositoryType);
 //		accountRepository = new WalletRepository(preferenceRepositoryType, accountKeystoreService, networkRepository);
 //	}

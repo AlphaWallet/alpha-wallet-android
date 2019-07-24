@@ -7,7 +7,7 @@ import android.util.Log;
 
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.service.AccountKeystoreService;
-import io.stormbird.wallet.service.GethKeystoreAccountService;
+import io.stormbird.wallet.service.KeystoreAccountService;
 
 import org.json.JSONObject;
 import org.junit.Before;
@@ -34,7 +34,7 @@ public class GetKeystoreWalletRepoTest {
 	@Before
 	public void setUp() {
 		Context context = InstrumentationRegistry.getTargetContext();
-		accountKeystoreService = new GethKeystoreAccountService(new File(context.getFilesDir(), "store"));
+		accountKeystoreService = new KeystoreAccountService(new File(context.getFilesDir(), "store"));
 	}
 
 //	Single<byte[]> signTransaction(

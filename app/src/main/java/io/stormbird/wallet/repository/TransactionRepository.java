@@ -182,18 +182,6 @@ public class TransactionRepository implements TransactionRepositoryType {
 		return accountKeystoreService.signTransactionFast(wallet, password, message, chainId);
 	}
 
-	@Override
-	public void unlockAccount(Wallet signer, String signerPassword) throws Exception
-	{
-		accountKeystoreService.unlockAccount(signer, signerPassword);
-	}
-
-	@Override
-	public void lockAccount(Wallet signer, String signerPassword) throws Exception
-	{
-		accountKeystoreService.lockAccount(signer, signerPassword);
-	}
-
 	private Single<Transaction[]> fetchFromCache(Wallet wallet, int maxTransactions) {
 	    return inDiskCache.fetchTransaction(wallet, maxTransactions);
     }

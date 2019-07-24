@@ -65,8 +65,6 @@ public interface AccountKeystoreService {
 			byte[] message,
 			long chainId);
 
-	void unlockAccount(Wallet signer, String signerPassword) throws Exception;
-	void lockAccount(Wallet signer, String signerPassword) throws Exception;
 	Single<byte[]> signTransactionFast(
 			Wallet signer,
 			String signerPassword,

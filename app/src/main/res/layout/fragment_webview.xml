@@ -120,7 +120,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_toEndOf="@id/select_network_layout"
             android:gravity="end"
             android:paddingBottom="5dp"
             android:paddingTop="5dp">

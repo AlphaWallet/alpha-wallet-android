@@ -165,16 +165,6 @@ public class MarketOrderTest
             }
 
             @Override
-            public void unlockAccount(Wallet signer, String signerPassword) {
-
-            }
-
-            @Override
-            public void lockAccount(Wallet signer, String signerPassword) {
-
-            }
-
-            @Override
             public Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList)
             {
                 return null;

@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 
-import io.stormbird.wallet.interact.SetupTokensInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.PasswordStore;
@@ -43,7 +42,7 @@ public class RepositoriesModule {
 	@Provides
 	AccountKeystoreService provideAccountKeyStoreService(Context context) {
         File file = new File(context.getFilesDir(), "keystore/keystore");
-		return new GethKeystoreAccountService(file);
+		return new KeystoreAccountService(file);
 	}
 
 	@Singleton

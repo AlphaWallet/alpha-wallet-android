@@ -59,6 +59,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         Intent intent = getIntent();
         Uri data = intent.getData();
         ImportTokenActivity importTokenActivity = new ImportTokenActivity();
+        HDKeyService.setTopmostActivity(this);
 
         if (data != null)
         {

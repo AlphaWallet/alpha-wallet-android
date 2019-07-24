@@ -5,6 +5,7 @@ import android.util.Log;
 import java.util.*;
 
 import io.reactivex.Completable;
+import io.reactivex.CompletableObserver;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
@@ -33,54 +34,48 @@ public class WalletDataRealmSource {
     public Single<Wallet[]> populateWalletData(Wallet[] wallets) {
         return Single.fromCallable(() -> {
             List<Wallet> walletList = new ArrayList<>();
-            Map<String, Wallet> wMap = new HashMap<>();
-            for (Wallet w : wallets) if (w.address != null) wMap.put(w.address, w);
+            for (Wallet w : wallets) if (w != null && w.address != null) { w.type = WalletType.KEYSTORE; };
 
-            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
-                RealmResults<RealmWalletData> data = realm.where(RealmWalletData.class)
-                        .findAll();
+            //Fetch all the HD wallets from keystore
+            HDKeyService svs = new HDKeyService(null);
 
-                for (RealmWalletData d : data)
-                {
-                    if (d != null)
-                    {
-                        Wallet wallet = new Wallet(d.getAddress());
-                        if (wMap.containsKey(d.getAddress()))
-                        {
-                            wallet.setWalletType(WalletType.KEYSTORE);
-                        }
-                        else
-                        {
-                            wallet.setWalletType(WalletType.HDKEY);
-                        }
-                        wallet.ENSname = d.getENSName();
-                        wallet.balance = balance(d);
-                        wallet.name = d.getName();
-                        wallet.lastBackupTime = d.getLastBackup();
-                        wallet.authLevel = d.getAuthLevel();
-                        walletList.add(wallet);
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            //now add types from legacy store
-            for (Wallet w : wallets)
+            try (Realm realm = realmManager.getWalletDataRealmInstance())
             {
-                boolean found = false;
-                for (Wallet wl : walletList)
+                for (Wallet hdWallet : svs.getAllHDWallets())
                 {
-                    if (wl.address.equals(w.address)) { found = true; break; }
+                    RealmWalletData data = realm.where(RealmWalletData.class)
+                            .equalTo("address", hdWallet.address)
+                            .findFirst();
+
+                    composeWallet(hdWallet, data);
+                    walletList.add(hdWallet);
                 }
-                if (!found)
+
+                for (Wallet keyStoreWallet : wallets)
                 {
-                    w.setWalletType(WalletType.KEYSTORE);
-                    walletList.add(w);
+                    RealmWalletData data = realm.where(RealmWalletData.class)
+                            .equalTo("address", keyStoreWallet.address)
+                            .findFirst();
+
+                    composeWallet(keyStoreWallet, data);
+                    walletList.add(keyStoreWallet);
                 }
             }
 
             return walletList.toArray(new Wallet[0]);
         });
+    }
+
+    private void composeWallet(Wallet wallet, RealmWalletData d)
+    {
+        if (d != null)
+        {
+            wallet.ENSname = d.getENSName();
+            wallet.balance = balance(d);
+            wallet.name = d.getName();
+            wallet.lastBackupTime = d.getLastBackup();
+            wallet.authLevel = d.getAuthLevel();
+        }
     }
 
     private String balance(RealmWalletData data)
@@ -336,5 +331,22 @@ public class WalletDataRealmSource {
         }
     }
 
+    public Single<String> deleteWallet(String walletAddr)
+    {
+        return Single.fromCallable(() -> {
+            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
+                RealmWalletData realmWallet = realm.where(RealmWalletData.class)
+                        .equalTo("address", walletAddr)
+                        .findFirst();
 
+                if (realmWallet != null)
+                {
+                    realm.beginTransaction();
+                    realmWallet.deleteFromRealm();
+                    realm.commitTransaction();
+                }
+            }
+            return walletAddr;
+        });
+    }
 }

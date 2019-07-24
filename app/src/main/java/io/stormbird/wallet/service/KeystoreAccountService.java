@@ -1,11 +1,15 @@
 package io.stormbird.wallet.service;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.ServiceErrorException;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletType;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.crypto.*;
@@ -18,35 +22,51 @@ import org.web3j.utils.Numeric;
 
 import java.io.File;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
 
-public class KeystoreAccountService implements AccountKeystoreService {
+public class KeystoreAccountService implements AccountKeystoreService
+{
     private static final int PRIVATE_KEY_RADIX = 16;
 
     private final File keyFolder;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public KeystoreAccountService(File keyStoreFile) {
         keyFolder = keyStoreFile;
+        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        //ensure keystore Folder is created
+        if (!keyStoreFile.exists())
+        {
+            keyStoreFile.mkdirs();
+        }
     }
 
     /**
-     * TODO: remove create, we only create HD keys now
+     * No longer used; keep for testing
      * @param password account password
      * @return
      */
     @Override
     public Single<Wallet> createAccount(String password) {
-        //return Single.fromCallable(() -> new Wallet(keyStore.newAccount(password).getAddress().getHex().toLowerCase()))
-        return Single.fromCallable(() -> new Wallet("0x000"))
+        return Single.fromCallable(() -> {
+            ECKeyPair ecKeyPair = Keys.createEcKeyPair();
+            WalletFile walletFile = org.web3j.crypto.Wallet.createLight(password, ecKeyPair);
+            return objectMapper.writeValueAsString(walletFile);
+        }).compose(upstream -> importKeystore(upstream.blockingGet(), password, password))
         .subscribeOn(Schedulers.io());
     }
 
     /**
-     * TODO: handle import keystore
+     * Import Keystore
      * @param store store to include
      * @param password store password
      * @param newPassword
@@ -56,20 +76,30 @@ public class KeystoreAccountService implements AccountKeystoreService {
     public Single<Wallet> importKeystore(String store, String password, String newPassword) {
         return Single.fromCallable(() -> {
             String address = extractAddressFromStore(store);
+            Wallet wallet = null;
             if (hasAccount(address)) {
                 throw new ServiceErrorException(C.ErrorCode.ALREADY_ADDED, "Already added");
             }
 
             try {
-                //account = keyStore
-                //        .importKey(store.getBytes(Charset.forName("UTF-8")), password, newPassword);
+                WalletFile walletFile = objectMapper.readValue(store, WalletFile.class);
+                ECKeyPair kp = org.web3j.crypto.Wallet.decrypt(password, walletFile);
+                Credentials credentials = Credentials.create(kp);
+                WalletFile wFile = org.web3j.crypto.Wallet.createLight(newPassword, credentials.getEcKeyPair());
+                String fileName = "UTC--" + Instant.now().toString().replace(":", "-") + "--" + Numeric.cleanHexPrefix(credentials.getAddress());
+                //write new keystore to file
+                File destination = new File(keyFolder, fileName);
+                objectMapper.writeValue(destination, wFile);
+
+                wallet = new Wallet(credentials.getAddress());
+                wallet.setWalletType(WalletType.KEYSTORE);
             } catch (Exception ex) {
                 // We need to make sure that we do not have a broken account
                 deleteAccount(address, newPassword).subscribe(() -> {}, t -> {});
                 throw ex;
             }
-            //return new Wallet(account.getAddress().getHex().toLowerCase());
-            return new Wallet("0x000");
+
+            return wallet;
         }).subscribeOn(Schedulers.io());
     }
 
@@ -91,20 +121,19 @@ public class KeystoreAccountService implements AccountKeystoreService {
     @Override
     public Single<Wallet> importPrivateKey(String privateKey, String newPassword) {
         return Single.fromCallable(() -> {
-                                       BigInteger key = new BigInteger(privateKey, PRIVATE_KEY_RADIX);
-                                       ECKeyPair keypair = ECKeyPair.create(key);
-                                       return new Wallet("0x000");
-                                   });
-            //WalletFile walletFile = create(newPassword, keypair, N, P);
-            //return new ObjectMapper().writeValueAsString(walletFile);
-        //}).compose(upstream -> importKeystore(upstream.blockingGet(), newPassword, newPassword));
+            BigInteger key = new BigInteger(privateKey, PRIVATE_KEY_RADIX);
+            ECKeyPair keypair = ECKeyPair.create(key);
+            WalletFile wFile = org.web3j.crypto.Wallet.createLight(newPassword, keypair);
+            return objectMapper.writeValueAsString(wFile);
+        }).compose(upstream -> importKeystore(upstream.blockingGet(), newPassword, newPassword));
     }
 
     @Override
     public Single<String> exportAccount(Wallet wallet, String password, String newPassword) {
         return Single
                 .fromCallable(() -> getCredentials(wallet.address, password))
-                .map(credentials -> WalletUtils.generateWalletFile(password, credentials.getEcKeyPair(), null, true))
+                .map(credentials -> org.web3j.crypto.Wallet.createLight(newPassword, credentials.getEcKeyPair()))
+                .map(objectMapper::writeValueAsString)
                 .subscribeOn(Schedulers.io());
     }
 
@@ -116,11 +145,21 @@ public class KeystoreAccountService implements AccountKeystoreService {
      */
     @Override
     public Completable deleteAccount(String address, String password) {
-        return Completable.fromAction(() -> { int i = 0; } );
-//        return Single.fromCallable(() -> address + password
-//                //.flatMapCompletable(account -> Completable.fromAction(
-//                        //() -> keyStore.deleteAccount(account, password)))
-//                .subscribeOn(Schedulers.io());
+        return Completable.fromAction(() -> {
+            String cleanedAddr = Numeric.cleanHexPrefix(address);
+            File[] contents = keyFolder.listFiles();
+            if (contents != null)
+            {
+                for (File f : contents)
+                {
+                    if (f.getName().contains(cleanedAddr))
+                    {
+                        f.delete();
+                        break;
+                    }
+                }
+            }
+        } );
     }
 
     @Override
@@ -285,6 +324,7 @@ public class KeystoreAccountService implements AccountKeystoreService {
     public boolean hasAccount(String address) {
         address = Numeric.cleanHexPrefix(address);
         File[] contents = keyFolder.listFiles();
+        if (contents == null) return false;
         for (File f : contents)
         {
             if (f.getName().contains(address))
@@ -300,9 +340,11 @@ public class KeystoreAccountService implements AccountKeystoreService {
     public Single<Wallet[]> fetchAccounts() {
         return Single.fromCallable(() -> {
             File[] contents = keyFolder.listFiles();
-            //UTC--2019-04-01T00-34-39.241050147Z--981d04a70689b9a47975bb86bb61568bb9b4bac0
-            Wallet[] result = new Wallet[contents.length];
-            int i = 0;
+            List<Date> fileDates = new ArrayList<>();
+            Map<Date, String> walletMap = new HashMap<>();
+            List<Wallet> wallets = new ArrayList<>();
+            if (contents == null || contents.length == 0) return new Wallet[0];
+            //Wallet[] result = new Wallet[contents.length];
             for (File f : contents)
             {
                 String fName = f.getName();
@@ -310,12 +352,27 @@ public class KeystoreAccountService implements AccountKeystoreService {
                 String address = "0x" + fName.substring(index + 1);
                 if (WalletUtils.isValidAddress(address))
                 {
-                    result[i] = new Wallet(address);
-                    i++;
+                    String d = fName.substring(5, index-1).replace("T", " ").substring(0, 23);
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss.SSS");
+                    LocalDateTime dateTime = LocalDateTime.parse(d, formatter);
+                    Date date = java.util.Date.from(dateTime.toInstant(ZoneOffset.UTC));
+                    fileDates.add(date);
+                    walletMap.put(date, address);
                 }
             }
 
-            return result;
+            Collections.sort(fileDates);
+
+            //now build a date sorted array:
+            for (Date d : fileDates)
+            {
+                String address = walletMap.get(d);
+                Wallet wallet = new Wallet(address);
+                wallet.type = WalletType.KEYSTORE;
+                wallets.add(wallet);
+            }
+
+            return wallets.toArray(new Wallet[0]);
         })
         .subscribeOn(Schedulers.io());
     }

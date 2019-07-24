@@ -1,5 +1,6 @@
 package io.stormbird.wallet.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
@@ -66,10 +67,10 @@ public class WalletActionsViewModel extends BaseViewModel {
         return isTaskRunning;
     }
 
-    public void deleteWallet(Wallet wallet) {
+    public void deleteWallet(Wallet wallet, Activity activity) {
         isTaskRunning.postValue(true);
         disposable = deleteWalletInteract
-                .delete(wallet)
+                .delete(wallet, activity)
                 .subscribe(this::onDelete, this::onDeleteWalletError);
     }
 

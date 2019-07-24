@@ -54,12 +54,6 @@ public class BackupKeyViewModel extends BaseViewModel {
         return exportedStore;
     }
 
-    public void deleteWallet(Wallet wallet) {
-        disposable = deleteWalletInteract
-                .delete(wallet)
-                .subscribe(this::onDelete, this::onDeleteWalletError);
-    }
-
     private void onDeleteWalletError(Throwable throwable) {
         deleteWalletError.postValue(
                 new ErrorEnvelope(C.ErrorCode.UNKNOWN, TextUtils.isEmpty(throwable.getLocalizedMessage())

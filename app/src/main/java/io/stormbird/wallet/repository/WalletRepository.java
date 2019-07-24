@@ -87,6 +87,12 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
+	public Single<String> deleteWalletFromRealm(String address)
+	{
+		return walletDataRealmSource.deleteWallet(address);
+	}
+
+	@Override
 	public Completable setDefaultWallet(Wallet wallet) {
 		return Completable.fromAction(() -> preferenceRepositoryType.setCurrentWalletAddress(wallet.address));
 	}

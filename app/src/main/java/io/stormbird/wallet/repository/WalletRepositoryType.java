@@ -25,6 +25,7 @@ public interface WalletRepositoryType {
     Single<String> exportWallet(Wallet wallet, String password, String newPassword);
 
     Completable deleteWallet(String address, String password);
+    Single<String> deleteWalletFromRealm(String address);
 
     Completable setDefaultWallet(Wallet wallet);
 

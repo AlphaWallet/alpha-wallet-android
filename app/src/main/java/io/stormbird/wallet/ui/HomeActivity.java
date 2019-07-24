@@ -38,6 +38,7 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.GenericWalletInteract;
+import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.ui.widget.entity.ScrollControlInterface;
 import io.stormbird.wallet.ui.widget.entity.ScrollControlViewPager;
 import io.stormbird.wallet.util.RootUtil;
@@ -223,6 +224,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         checkRoot();
         successOverlay = findViewById(R.id.layout_success_overlay);
         successImage = findViewById(R.id.success_image);
+        HDKeyService.setTopmostActivity(this);
         //check clipboard
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         try

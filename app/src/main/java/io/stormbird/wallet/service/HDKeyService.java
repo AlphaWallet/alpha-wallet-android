@@ -22,7 +22,10 @@ import javax.crypto.spec.IvParameterSpec;
 import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
@@ -241,6 +244,26 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         return "";
     }
 
+    public boolean deleteHDKey(String walletAddr)
+    {
+        try
+        {
+            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
+            keyStore.load(null);
+            File hdEncryptedBytes = new File(getFilePath(context, walletAddr + "hd"));
+            if (hdEncryptedBytes.exists() && keyStore.containsAlias(walletAddr))
+            {
+                deleteKey(keyStore, walletAddr);
+            }
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private synchronized void deleteKey(KeyStore keyStore, String keyAddr)
     {
         try
@@ -283,13 +306,6 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
 
             keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
-
-            Enumeration<String> keys = keyStore.aliases();
-
-            while (keys.hasMoreElements())
-            {
-                System.out.println("Key: " + keys.nextElement());
-            }
 
             if (keyStore.containsAlias(address)) //re-import existing key - no harm done as address is generated from mnemonic
             {
@@ -761,6 +777,37 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             dialog.dismiss();
         });
         dialog.show();
+    }
+
+    public List<Wallet> getAllHDWallets()
+    {
+        List<Wallet> wallets = new ArrayList<>();
+        try
+        {
+            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
+            keyStore.load(null);
+            Enumeration<String> keys = keyStore.aliases();
+
+            while (keys.hasMoreElements())
+            {
+                String alias = keys.nextElement();
+                File hdEncryptedBytes = new File(getFilePath(context, alias + "hd"));
+                if (hdEncryptedBytes.exists())
+                {
+                    if (!alias.startsWith("0x")) alias = "0x" + alias;
+                    Wallet hdKey = new Wallet(alias);
+                    hdKey.type = WalletType.HDKEY;
+                    System.out.println("Key: " + keys.nextElement());
+                    wallets.add(hdKey);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return wallets;
     }
 
     public static void setTopmostActivity(Activity activity)

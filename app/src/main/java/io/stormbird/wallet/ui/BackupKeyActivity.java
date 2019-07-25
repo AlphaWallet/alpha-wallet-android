@@ -23,7 +23,6 @@ import io.stormbird.wallet.viewmodel.BackupKeyViewModel;
 import io.stormbird.wallet.viewmodel.BackupKeyViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.PasswordInputView;
-import io.stormbird.wallet.widget.ProgressView;
 import io.stormbird.wallet.widget.SignTransactionDialog;
 
 import javax.inject.Inject;
@@ -145,8 +144,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         inputView.getEditText().addTextChangedListener(this);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
-        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
-
         // Note: The seed display requires the holder view to be drawn so it can measure how much
         // space is left on each line.
         ViewTreeObserver vto = layoutHolder.getViewTreeObserver();
@@ -267,7 +264,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         }
 
         //terminate and display tick
-        backupTestPassed();
+        backupKeySuccess("HDKEY");
     }
 
     private void seedIncorrect()
@@ -281,11 +278,11 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         state = BackupState.SEED_PHRASE_INVALID;
     }
 
-    private void backupTestPassed()
+    private void backupKeySuccess(String keyType)
     {
         Intent intent = new Intent();
         intent.putExtra("Key", keyBackup);
-        intent.putExtra("TYPE", "HDKEY");
+        intent.putExtra("TYPE", keyType);
         setResult(RESULT_OK, intent);
         finish();
     }
@@ -431,7 +428,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void DisplayKeyFailureDialog(String message)
     {
-        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
+        hideDialog();
 
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(AWalletAlertDialog.ERROR);
@@ -511,11 +508,14 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         switch (requestCode)
         {
             case SHARE_REQUEST_CODE:
-                Intent intent = new Intent();
-                intent.putExtra("Key", keyBackup);
-                intent.putExtra("TYPE", "JSON");
-                setResult(resultCode, intent);
-                finish();
+                if (resultCode == RESULT_OK)
+                {
+                    backupKeySuccess("JSON");
+                }
+                else
+                {
+                    AskUserSuccess();
+                }
                 break;
 
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
@@ -528,6 +528,32 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                     authInterface.FailedAuthentication(taskCode);
                 }
                 break;
+        }
+    }
+
+    private void AskUserSuccess()
+    {
+        //hideDialog();
+        alertDialog = new AWalletAlertDialog(this);
+        alertDialog.setIcon(AWalletAlertDialog.SUCCESS);
+        alertDialog.setTitle(R.string.do_manage_make_backup);
+        alertDialog.setButtonText(R.string.yes_continue);
+        alertDialog.setButtonListener(v -> {
+            hideDialog();
+            backupKeySuccess("JSON");
+        });
+        alertDialog.setSecondaryButtonText(R.string.no_repeat);
+        alertDialog.setSecondaryButtonListener(v -> {
+            hideDialog();
+            cancelAuthentication();
+        });
+        alertDialog.show();
+    }
+
+    private void hideDialog() {
+        if (alertDialog != null && alertDialog.isShowing()) {
+            alertDialog.dismiss();
+            alertDialog = null;
         }
     }
 

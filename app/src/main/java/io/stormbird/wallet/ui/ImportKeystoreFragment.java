@@ -8,6 +8,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -88,6 +89,7 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
             keystore.setVisibility(View.GONE);
             password.setVisibility(View.VISIBLE);
             passwordText.setVisibility(View.VISIBLE);
+            password.requestFocus();
             updateButtonState(false);
         }
         else
@@ -95,6 +97,23 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
             String keystore = this.keystore.getText().toString();
             String password = this.password.getText().toString();
             onImportKeystoreListener.onKeystore(keystore, password);
+        }
+    }
+
+    public boolean backPressed()
+    {
+        if (password.getVisibility() == View.VISIBLE)
+        {
+            keystore.setVisibility(View.VISIBLE);
+            password.setVisibility(View.GONE);
+            passwordText.setVisibility(View.GONE);
+            keystore.requestFocus();
+            updateButtonState(true);
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 
@@ -119,7 +138,8 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
     @Override
     public void afterTextChanged(Editable editable)
     {
-        this.keystore.setError(null);
+        if (keystore.isErrorState()) keystore.setError(null);
+        if (password.isErrorState()) password.setError(null);
         if (password.getVisibility() == View.GONE)
         {
             String txt = keystore.getText().toString();
@@ -146,7 +166,7 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
         else
         {
             String txt = password.getText().toString();
-            if (txt.length() >= 6)
+            if (txt.length() >= 1)
             {
                 updateButtonState(true);
             }

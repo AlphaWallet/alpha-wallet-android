@@ -16,6 +16,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import android.view.MenuItem;
+import android.view.View;
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
@@ -49,6 +51,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     ImportWalletViewModel importWalletViewModel;
     private AWalletAlertDialog dialog;
     private PinAuthenticationCallbackInterface authInterface;
+    private int currentPage;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,12 +62,25 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         setContentView(R.layout.activity_import_wallet);
         toolbar();
         setTitle(R.string.empty);
+        currentPage = SEED_FORM_INDEX;
 
         pages.add(SEED_FORM_INDEX, new Pair<>(getString(R.string.tab_seed), ImportSeedFragment.create()));
         pages.add(KEYSTORE_FORM_INDEX, new Pair<>(getString(R.string.tab_keystore), ImportKeystoreFragment.create()));
         pages.add(PRIVATE_KEY_FORM_INDEX, new Pair<>(getString(R.string.tab_private_key), ImportPrivateKeyFragment.create()));
         ViewPager viewPager = findViewById(R.id.viewPager);
         viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
+
+            @Override
+            public void onPageSelected(int position) {
+                currentPage = position;
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) { }
+        });
         TabLayout tabLayout = findViewById(R.id.tabLayout);
         tabLayout.setupWithViewPager(viewPager);
 
@@ -160,6 +176,21 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home: {
+                if (currentPage == KEYSTORE_FORM_INDEX)
+                {
+                    if (((ImportKeystoreFragment) pages.get(KEYSTORE_FORM_INDEX).second).backPressed()) return true;
+                }
+                break;
+            }
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

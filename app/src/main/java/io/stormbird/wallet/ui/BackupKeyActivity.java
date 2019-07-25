@@ -5,11 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewTreeObserver;
+import android.view.*;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -33,7 +32,7 @@ import java.util.List;
 
 import static io.stormbird.wallet.C.SHARE_REQUEST_CODE;
 
-public class BackupKeyActivity extends BaseActivity implements View.OnClickListener, CreateWalletCallbackInterface
+public class BackupKeyActivity extends BaseActivity implements View.OnClickListener, CreateWalletCallbackInterface, TextWatcher
 {
     @Inject
     BackupKeyViewModelFactory backupKeyViewModelFactory;
@@ -44,6 +43,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     private TextView title;
     private TextView detail;
     private TextView passwordDetail;
+    private TextView passwordLengthNote;
     private LinearLayout layoutHolder;
     private LinearLayout layoutWordHolder;
     private PasswordInputView inputView;
@@ -69,8 +69,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         setContentView(R.layout.activity_backup_seed);
 
         toolbar();
-        ProgressView progressView = findViewById(R.id.progress_view);
-        progressView.hide();
 
         String type = getIntent().getStringExtra("TYPE");
         keyBackup = getIntent().getStringExtra("ADDRESS");
@@ -136,6 +134,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         title = findViewById(R.id.text_title);
         detail = findViewById(R.id.text_detail);
         passwordDetail = findViewById(R.id.text_detail_password);
+        passwordLengthNote = findViewById(R.id.text_password_length);
         layoutHolder = findViewById(R.id.layout_center_holder);
         layoutWordHolder = findViewById(R.id.layout_word_holder);
         nextButton = findViewById(R.id.button_next);
@@ -143,6 +142,8 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         backupImage = findViewById(R.id.seed_image);
         inputView = findViewById(R.id.input_password);
         nextButton.setOnClickListener(this);
+        inputView.getEditText().addTextChangedListener(this);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
 
@@ -240,7 +241,10 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         backupImage.setVisibility(View.GONE);
         detail.setVisibility(View.GONE);
         passwordDetail.setText(R.string.keystore_loss_warning);
+        passwordLengthNote.setVisibility(View.VISIBLE);
+        inputView.getEditText().addTextChangedListener(this);
         nextButton.setText(R.string.share_keystore);
+        updateButtonState(false);
     }
 
     private void TestSeedPhrase()
@@ -523,6 +527,57 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                 {
                     authInterface.FailedAuthentication(taskCode);
                 }
+                break;
+        }
+    }
+
+    private void updateButtonState(boolean enabled)
+    {
+        nextButton.setActivated(enabled);
+        nextButton.setClickable(enabled);
+        int colorId = enabled ? R.color.nasty_green : R.color.inactive_green;
+        if (getApplicationContext() != null) nextButton.setBackgroundColor(getColor(colorId));
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
+    {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+    {
+
+    }
+
+    @Override
+    public void afterTextChanged(Editable editable)
+    {
+        switch (state)
+        {
+            case ENTER_BACKUP_STATE_HD:
+                break;
+            case WRITE_DOWN_SEED_PHRASE:
+                break;
+            case VERIFY_SEED_PHRASE:
+                break;
+            case SEED_PHRASE_INVALID:
+                break;
+            case ENTER_JSON_BACKUP:
+                break;
+            case SET_JSON_PASSWORD:
+                String txt = inputView.getText().toString();
+                if (txt.length() >= 6) //password length minimum 6
+                {
+                    updateButtonState(true);
+                }
+                else
+                {
+                    updateButtonState(false);
+                }
+                break;
+            case TEST_SEED_PHRASE:
                 break;
         }
     }

@@ -15,6 +15,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.ui.widget.OnImportSeedListener;
 import io.stormbird.wallet.widget.PasswordInputView;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,6 +53,12 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         seedPhrase.getEditText().addTextChangedListener(this);
         updateButtonState(false);
         pattern = Pattern.compile(validator, Pattern.MULTILINE);
+
+        Locale locale = Locale.getDefault();
+        if (locale.toString().startsWith("en_")) //remove language hint for English locale
+        {
+            view.findViewById(R.id.text_non_english_hint).setVisibility(View.GONE);
+        }
     }
 
     @Override

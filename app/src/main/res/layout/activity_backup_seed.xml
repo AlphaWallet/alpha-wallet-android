@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:background="@color/colorPrimaryDark"
     android:orientation="vertical">
 
@@ -13,6 +14,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:background="@drawable/background_card">
 
         <io.stormbird.wallet.widget.PasswordInputView
@@ -25,8 +28,20 @@
             custom:label="@string/prompt_password" />
 
         <TextView
-            android:id="@+id/text_detail_password"
+            android:id="@+id/text_password_length"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@id/input_password"
             android:layout_below="@id/input_password"
+            android:layout_marginEnd="17dp"
+            android:text="@string/password_6_characters_or_more"
+            android:textColor="@color/text_dark_gray"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/text_detail_password"
+            android:layout_below="@id/text_password_length"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -130,22 +145,6 @@
             android:textAllCaps="true" />
 
 
-        <io.stormbird.wallet.widget.ProgressView
-            android:id="@+id/progress_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            tools:visibility="gone" />
-
     </RelativeLayout>
-
-    <io.stormbird.wallet.widget.SystemView
-        android:id="@+id/system_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?actionBarSize"
-        android:background="@color/white"
-        tools:visibility="gone" />
 
 </LinearLayout>

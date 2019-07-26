@@ -4,13 +4,9 @@ import android.content.Context;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ContractType;
-import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
@@ -32,7 +28,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public static final int FILTER_COLLECTIBLES = 3;
 
     private int filterType;
-    private Context context;
     private boolean needsRefresh;
     protected final AssetDefinitionService assetService;
 
@@ -77,7 +72,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
     public TokensAdapter(Context context, OnTokenClickListener onTokenClickListener, AssetDefinitionService aService) {
-        this.context = context;
         this.onTokenClickListener = onTokenClickListener;
         needsRefresh = true;
         this.assetService = aService;

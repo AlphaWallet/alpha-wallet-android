@@ -533,7 +533,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void AskUserSuccess()
     {
-        //hideDialog();
+        hideDialog();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(AWalletAlertDialog.SUCCESS);
         alertDialog.setTitle(R.string.do_manage_make_backup);

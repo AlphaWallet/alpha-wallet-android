@@ -10,7 +10,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
-import org.ethereum.crypto.HashUtil;
+import org.web3j.crypto.Hash;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,7 +70,7 @@ public class TrustAddressGenerator {
     private BigInteger generateDigestFromData(String contractAddress, String data, String status) {
         String digest = convertHexToBase64String(data);
         byte[] target = String.format("%s%s%s", contractAddress, status, digest).getBytes(UTF_8);
-        byte[] h_digest = HashUtil.sha3(target);
+        byte[] h_digest = Hash.sha3(target);
         return new BigInteger(Numeric.toHexStringNoPrefix(h_digest), 16);
     }
 
@@ -128,7 +128,8 @@ public class TrustAddressGenerator {
     }
 
     private byte[] computeAddress(byte[] pubBytes) {
-        return HashUtil.sha3omit12(Arrays.copyOfRange(pubBytes, 1, pubBytes.length));
+        byte[] addressBytes = Hash.sha3(Arrays.copyOfRange(pubBytes, 1, pubBytes.length));
+        return Arrays.copyOfRange(addressBytes, 0, 20);
     }
 
     private byte[] computeAddress(ECPoint pubPoint) {

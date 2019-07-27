@@ -16,7 +16,7 @@ public class TrustAddressGeneratorTest {
                 "0x63cCEF733a093E5Bd773b41C96D3eCE361464942",
                 "TRUST"
         );
-        assert(trustAddress.equals("0x061dd8ee9440094c57202278207b63860e027747"));
+        assert(trustAddress.equals("0x2e02934b4ed1bee0defa7a58061dd8ee9440094c"));
     }
 
     @Test
@@ -28,7 +28,7 @@ public class TrustAddressGeneratorTest {
                 "0x63cCEF733a093E5Bd773b41C96D3eCE361464942",
                 "REVOKE"
         );
-        assert(revokeAddress.equals("0xe5a25da518dba447faaeb8ef20588da303056f2d"));
+        assert(revokeAddress.equals("0x6b4c50938caef365fa3e04bfe5a25da518dba447"));
     }
 
 }

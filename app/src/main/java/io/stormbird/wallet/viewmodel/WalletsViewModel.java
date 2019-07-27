@@ -15,6 +15,7 @@ import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
 import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.ui.WalletsActivity;
 
 import java.util.*;
 
@@ -317,5 +318,10 @@ public class WalletsViewModel extends BaseViewModel
                         createdWallet.postValue(account);
                     }, this::onCreateWalletError).isDisposed();
         }
+    }
+
+    public void watchWallet(Activity activity)
+    {
+        importWalletRouter.openWatchCreate(activity, IMPORT_REQUEST_CODE);
     }
 }

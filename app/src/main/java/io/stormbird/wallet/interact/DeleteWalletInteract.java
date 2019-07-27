@@ -36,6 +36,13 @@ public class DeleteWalletInteract {
 					.andThen(walletRepository.fetchWallets())
 			  .observeOn(AndroidSchedulers.mainThread());
 		}
+		else if (wallet.type == WalletType.WATCH)
+		{
+			return walletRepository.deleteWalletFromRealm(wallet.address)
+					.flatMapCompletable(addr -> walletRepository.deleteWallet(addr, ""))
+					.andThen(walletRepository.fetchWallets())
+					.observeOn(AndroidSchedulers.mainThread());
+		}
 		else
 		{
 			return passwordStore.getPassword(wallet)

@@ -10,16 +10,22 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.multidex.MultiDex;
+import android.view.View;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 import dagger.android.AndroidInjection;
 import io.fabric.sdk.android.Fabric;
+import io.stormbird.token.entity.SalesOrderMalformed;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.BuildConfig;
+import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
+import io.stormbird.wallet.entity.CryptoFunctions;
 import io.stormbird.wallet.entity.PinAuthenticationCallbackInterface;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
+import io.stormbird.wallet.router.ImportWalletRouter;
 import io.stormbird.wallet.router.ManageWalletsRouter;
 import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.viewmodel.SplashViewModel;
@@ -28,6 +34,7 @@ import io.stormbird.wallet.widget.SignTransactionDialog;
 
 import javax.inject.Inject;
 
+import static io.stormbird.wallet.C.IMPORT_REQUEST_CODE;
 import static io.stormbird.wallet.C.SHOW_NEW_ACCOUNT_PROMPT;
 
 public class SplashActivity extends BaseActivity implements CreateWalletCallbackInterface
@@ -48,6 +55,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AndroidInjection.inject(this);
+        setContentView(R.layout.activity_splash);
         super.onCreate(savedInstanceState);
         if (!BuildConfig.DEBUG)
         {
@@ -125,31 +133,39 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         //      - no - proceed to home activity
         if (wallets.length == 0)
         {
-            if (SHOW_NEW_ACCOUNT_PROMPT) //We always set this to false
-            {
-                //NB if SHOW_NEW_ACCOUNT_PROMPT is true and user is trying to import, this will fail
-                //However our model is that user doesn't ever go to the backup page at first
-                //So no action need be taken at the moment
-                new ManageWalletsRouter().open(this, true);
-            }
-            else
-            {
+            findViewById(R.id.layout_new_wallet).setVisibility(View.VISIBLE);
+            findViewById(R.id.button_create).setOnClickListener(v -> {
                 splashViewModel.createNewWallet(this, this);
-            }
+            });
+            findViewById(R.id.button_watch).setOnClickListener(v -> {
+                new ImportWalletRouter().openWatchCreate(this, IMPORT_REQUEST_CODE);
+            });
+            findViewById(R.id.button_import).setOnClickListener(v -> {
+                new ImportWalletRouter().openForResult(this, IMPORT_REQUEST_CODE);
+            });
         }
         else
         {
             //there is at least one account here
-            if (importData != null)
+
+            //See if this is a valid import magiclink
+            if (importData != null && importData.length() > 60 && importData.contains("aw.app") )
             {
-                new ImportTokenRouter().open(this, importData);
-                finish();
+                try
+                {
+                    ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
+                    if (parser.parseUniversalLink(importData).chainId > 0)
+                    {
+                        new ImportTokenRouter().open(this, importData);
+                        finish();
+                        return;
+                    }
+                }
+                catch (SalesOrderMalformed ignored) { }
             }
-            else
-            {
-                new HomeRouter().open(this, true);
-                finish();
-            }
+
+            new HomeRouter().open(this, true);
+            finish();
         }
     }
 
@@ -168,6 +184,10 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
             {
                 authInterface.FailedAuthentication(taskCode);
             }
+        }
+        else if (requestCode == IMPORT_REQUEST_CODE)
+        {
+            splashViewModel.fetchWallets();
         }
     }
 

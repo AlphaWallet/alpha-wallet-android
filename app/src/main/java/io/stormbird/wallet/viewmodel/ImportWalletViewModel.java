@@ -16,9 +16,10 @@ import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.ui.widget.OnImportKeystoreListener;
 import io.stormbird.wallet.ui.widget.OnImportPrivateKeyListener;
 import io.stormbird.wallet.ui.widget.OnImportSeedListener;
+import io.stormbird.wallet.ui.widget.OnSetWatchWalletListener;
 import wallet.core.jni.HDWallet;
 
-public class ImportWalletViewModel extends BaseViewModel implements OnImportKeystoreListener, OnImportPrivateKeyListener
+public class ImportWalletViewModel extends BaseViewModel implements OnImportKeystoreListener, OnImportPrivateKeyListener, OnSetWatchWalletListener
 {
     private final ImportWalletInteract importWalletInteract;
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
@@ -42,6 +43,16 @@ public class ImportWalletViewModel extends BaseViewModel implements OnImportKeys
         importWalletInteract
                 .importPrivateKey(key)
                 .subscribe(this::onWallet, this::onError);
+    }
+
+    @Override
+    public void onWatchWallet(String address)
+    {
+        //user just asked for a watch wallet
+        disposable = importWalletInteract.storeWatchWallet(address)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(wallet::postValue, this::onError); //signal to UI wallet import complete
     }
 
     public LiveData<Wallet> wallet() {

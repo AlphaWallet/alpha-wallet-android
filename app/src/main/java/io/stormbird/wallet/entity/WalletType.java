@@ -8,5 +8,7 @@ public enum WalletType
 {
     NOT_DEFINED,
     KEYSTORE,
-    HDKEY
+    HDKEY,
+    WATCH,
+    TEXT_MARKER // used as a separator in wallet view
 }

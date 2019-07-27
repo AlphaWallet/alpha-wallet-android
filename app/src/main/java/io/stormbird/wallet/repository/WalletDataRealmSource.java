@@ -11,6 +11,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import io.realm.Sort;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.repository.entity.RealmWalletData;
@@ -47,7 +48,7 @@ public class WalletDataRealmSource {
                             .equalTo("address", hdWallet.address)
                             .findFirst();
 
-                    composeWallet(hdWallet, data);
+                    composeWallet(hdWallet, data, WalletType.HDKEY);
                     walletList.add(hdWallet);
                 }
 
@@ -57,8 +58,19 @@ public class WalletDataRealmSource {
                             .equalTo("address", keyStoreWallet.address)
                             .findFirst();
 
-                    composeWallet(keyStoreWallet, data);
+                    composeWallet(keyStoreWallet, data, WalletType.KEYSTORE);
                     walletList.add(keyStoreWallet);
+                }
+
+                //finally add watch wallets
+                RealmResults<RealmWalletData> realmItems = realm.where(RealmWalletData.class)
+                        .sort("lastBackup", Sort.ASCENDING)
+                        .equalTo("type", WalletType.WATCH.ordinal())
+                        .findAll();
+
+                for (RealmWalletData walletData : realmItems)
+                {
+                    walletList.add(convertWallet(walletData));
                 }
             }
 
@@ -66,7 +78,7 @@ public class WalletDataRealmSource {
         });
     }
 
-    private void composeWallet(Wallet wallet, RealmWalletData d)
+    private void composeWallet(Wallet wallet, RealmWalletData d, WalletType type)
     {
         if (d != null)
         {
@@ -75,6 +87,7 @@ public class WalletDataRealmSource {
             wallet.name = d.getName();
             wallet.lastBackupTime = d.getLastBackup();
             wallet.authLevel = d.getAuthLevel();
+            wallet.type = type;
         }
     }
 
@@ -107,6 +120,9 @@ public class WalletDataRealmSource {
         Wallet wallet = new Wallet(data.getAddress());
         wallet.ENSname = data.getENSName();
         wallet.balance = data.getBalance();
+        wallet.lastBackupTime = data.getLastBackup();
+        wallet.authLevel = data.getAuthLevel();
+        wallet.type = data.getType();
         wallet.name = data.getName();
         return wallet;
     }
@@ -127,6 +143,7 @@ public class WalletDataRealmSource {
                         realmWallet.setENSName(wallet.ENSname);
                         if (mainNet) realmWallet.setBalance(wallet.balance);
                         realmWallet.setName(wallet.name);
+                        realmWallet.setType(wallet.type);
                         updated++;
                     } else {
                         if (mainNet && (realmWallet.getBalance() == null || !wallet.balance.equals(realmWallet.getENSName())))
@@ -134,6 +151,7 @@ public class WalletDataRealmSource {
                         if (wallet.ENSname != null && (realmWallet.getENSName() == null || !wallet.ENSname.equals(realmWallet.getENSName())))
                             realmWallet.setENSName(wallet.ENSname);
                         realmWallet.setName(wallet.name);
+                        realmWallet.setType(wallet.type);
                         updated++;
                     }
                 }

@@ -80,8 +80,6 @@ public class Erc20DetailActivity extends BaseActivity {
         viewModel.token().observe(this, this::onTokenData);
         viewModel.tokenTicker().observe(this, this::onTokenTicker);
         viewModel.transactionUpdate().observe(this, this::newTransactions);
-
-        initViews();
     }
 
     private void onTokenTicker(Ticker ticker)
@@ -223,7 +221,7 @@ public class Erc20DetailActivity extends BaseActivity {
         }
     }
 
-    private void initViews() {
+    private void initViews(Wallet wallet) {
         noTransactionsLayout = findViewById(R.id.layout_no_recent_transactions);
         noTransactionsSubText = findViewById(R.id.no_recent_transactions_subtext);
 
@@ -247,7 +245,12 @@ public class Erc20DetailActivity extends BaseActivity {
             viewModel.showMyAddress(this, wallet, token);
         });
 
-        if (hasDefinition)
+        if (wallet.type == WalletType.WATCH)
+        {
+            sendBtn.setVisibility(View.GONE);
+            receiveBtn.setVisibility(View.GONE);
+        }
+        else if (hasDefinition)
         {
             findViewById(R.id.text_confirmed).setVisibility(View.VISIBLE);
             findViewById(R.id.text_unconfirmed).setVisibility(View.GONE);
@@ -296,6 +299,7 @@ public class Erc20DetailActivity extends BaseActivity {
     }
 
     private void onDefaultWallet(Wallet wallet) {
+        initViews(wallet);
         setUpTokenView();
         setUpRecentTransactionsView();
         recentTransactionsAdapter.setDefaultWallet(wallet);

@@ -1,5 +1,6 @@
 package io.stormbird.wallet.interact;
 
+import io.reactivex.Completable;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.interact.rx.operator.Operators;
@@ -43,6 +44,14 @@ public class ImportWalletInteract {
         Wallet wallet = new Wallet(walletAddress);
         wallet.type = WalletType.HDKEY;
         wallet.authLevel = authLevel;
+        wallet.lastBackupTime = System.currentTimeMillis();
+        return walletRepository.storeWallet(wallet);
+    }
+
+    public Single<Wallet> storeWatchWallet(String address)
+    {
+        Wallet wallet = new Wallet(address);
+        wallet.type = WalletType.WATCH;
         wallet.lastBackupTime = System.currentTimeMillis();
         return walletRepository.storeWallet(wallet);
     }

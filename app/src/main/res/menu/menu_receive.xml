@@ -7,7 +7,7 @@
         android:id="@+id/action_receive_payment"
         android:icon="@drawable/ic_action_generate_request"
         android:orderInCategory="20"
-        android:title="Receive Payment"
+        android:title="@string/receive_payment"
         app:showAsAction="always"
         />
 </menu>

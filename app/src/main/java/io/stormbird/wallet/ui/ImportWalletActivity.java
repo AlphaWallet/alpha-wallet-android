@@ -9,6 +9,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -16,18 +17,23 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import dagger.android.AndroidInjection;
+import io.stormbird.token.entity.SalesOrderMalformed;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.ImportWalletCallback;
-import io.stormbird.wallet.entity.PinAuthenticationCallbackInterface;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.ui.widget.OnImportSeedListener;
+import io.stormbird.wallet.ui.widget.OnSetWatchWalletListener;
 import io.stormbird.wallet.ui.widget.adapter.TabPagerAdapter;
+import io.stormbird.wallet.ui.zxing.FullScannerFragment;
+import io.stormbird.wallet.ui.zxing.QRScanningActivity;
+import io.stormbird.wallet.util.QRURLParser;
 import io.stormbird.wallet.util.TabUtils;
 import io.stormbird.wallet.viewmodel.ImportWalletViewModel;
 import io.stormbird.wallet.viewmodel.ImportWalletViewModelFactory;
@@ -36,13 +42,17 @@ import io.stormbird.wallet.widget.SignTransactionDialog;
 
 import static io.stormbird.wallet.C.ErrorCode.ALREADY_ADDED;
 import static io.stormbird.wallet.C.RESET_WALLET;
+import static io.stormbird.wallet.ui.zxing.QRScanningActivity.DENY_PERMISSION;
+import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
+import static io.stormbird.wallet.widget.AWalletBottomNavigationView.WALLET;
+import static io.stormbird.wallet.widget.InputAddressView.BARCODE_READER_REQUEST_CODE;
 
 public class ImportWalletActivity extends BaseActivity implements OnImportSeedListener, ImportWalletCallback
 {
-
-    private static final int SEED_FORM_INDEX = 0;
-    private static final int KEYSTORE_FORM_INDEX = 1;
-    private static final int PRIVATE_KEY_FORM_INDEX = 2;
+    private static enum ImportType
+    {
+        SEED_FORM_INDEX, KEYSTORE_FORM_INDEX, PRIVATE_KEY_FORM_INDEX, WATCH_FORM_INDEX
+    }
 
     private final List<Pair<String, Fragment>> pages = new ArrayList<>();
 
@@ -51,7 +61,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     ImportWalletViewModel importWalletViewModel;
     private AWalletAlertDialog dialog;
     private PinAuthenticationCallbackInterface authInterface;
-    private int currentPage;
+    private ImportType currentPage;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,13 +70,18 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_import_wallet);
-        toolbar();
-        setTitle(R.string.empty);
-        currentPage = SEED_FORM_INDEX;
 
-        pages.add(SEED_FORM_INDEX, new Pair<>(getString(R.string.tab_seed), ImportSeedFragment.create()));
-        pages.add(KEYSTORE_FORM_INDEX, new Pair<>(getString(R.string.tab_keystore), ImportKeystoreFragment.create()));
-        pages.add(PRIVATE_KEY_FORM_INDEX, new Pair<>(getString(R.string.tab_private_key), ImportPrivateKeyFragment.create()));
+        toolbar();
+
+        currentPage = ImportType.SEED_FORM_INDEX;
+        String receivedState = getIntent().getStringExtra(C.EXTRA_STATE);
+        boolean isWatch = receivedState != null && receivedState.equals("watch");
+
+        pages.add(ImportType.SEED_FORM_INDEX.ordinal(), new Pair<>(getString(R.string.tab_seed), ImportSeedFragment.create()));
+        pages.add(ImportType.KEYSTORE_FORM_INDEX.ordinal(), new Pair<>(getString(R.string.tab_keystore), ImportKeystoreFragment.create()));
+        pages.add(ImportType.PRIVATE_KEY_FORM_INDEX.ordinal(), new Pair<>(getString(R.string.tab_private_key), ImportPrivateKeyFragment.create()));
+        if (isWatch) pages.add(ImportType.WATCH_FORM_INDEX.ordinal(), new Pair<>(getString(R.string.watch_wallet), SetWatchWalletFragment.create()));
+
         ViewPager viewPager = findViewById(R.id.viewPager);
         viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -75,7 +90,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
 
             @Override
             public void onPageSelected(int position) {
-                currentPage = position;
+                currentPage = ImportType.values()[position];
             }
 
             @Override
@@ -83,6 +98,17 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         });
         TabLayout tabLayout = findViewById(R.id.tabLayout);
         tabLayout.setupWithViewPager(viewPager);
+
+        if (isWatch)
+        {
+            tabLayout.setVisibility(View.GONE);
+            viewPager.setCurrentItem(ImportType.WATCH_FORM_INDEX.ordinal());
+            setTitle(getString(R.string.watch_wallet));
+        }
+        else
+        {
+            setTitle(R.string.empty);
+        }
 
         importWalletViewModel = ViewModelProviders.of(this, importWalletViewModelFactory)
                 .get(ImportWalletViewModel.class);
@@ -94,28 +120,48 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         TabUtils.changeTabsFont(this, tabLayout);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        switch (currentPage)
+        {
+            default:
+                break;
+            case WATCH_FORM_INDEX:
+                getMenuInflater().inflate(R.menu.menu_scan, menu);
+                break;
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
     private void onBadSeed(Boolean aBoolean)
     {
-        ((ImportSeedFragment) pages.get(SEED_FORM_INDEX).second).onBadSeed();
+        ((ImportSeedFragment) pages.get(ImportType.SEED_FORM_INDEX.ordinal()).second).onBadSeed();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        ((ImportSeedFragment) pages.get(SEED_FORM_INDEX).second)
+        ((ImportSeedFragment) pages.get(ImportType.SEED_FORM_INDEX.ordinal()).second)
                 .setOnImportSeedListener(this);
-        ((ImportKeystoreFragment) pages.get(KEYSTORE_FORM_INDEX).second)
+        ((ImportKeystoreFragment) pages.get(ImportType.KEYSTORE_FORM_INDEX.ordinal()).second)
                 .setOnImportKeystoreListener(importWalletViewModel);
-        ((ImportPrivateKeyFragment) pages.get(PRIVATE_KEY_FORM_INDEX).second)
+        ((ImportPrivateKeyFragment) pages.get(ImportType.PRIVATE_KEY_FORM_INDEX.ordinal()).second)
                 .setOnImportPrivateKeyListener(importWalletViewModel);
+
+        if (pages.get(ImportType.WATCH_FORM_INDEX.ordinal()) != null)
+        {
+            ((SetWatchWalletFragment) pages.get(ImportType.WATCH_FORM_INDEX.ordinal()).second)
+                    .setOnSetWatchWalletListener(importWalletViewModel);
+        }
     }
 
     private void resetFragments()
     {
-        if (pages.get(KEYSTORE_FORM_INDEX) != null)
+        if (pages.get(ImportType.KEYSTORE_FORM_INDEX.ordinal()) != null)
         {
-            ((ImportKeystoreFragment) pages.get(KEYSTORE_FORM_INDEX).second)
+            ((ImportKeystoreFragment) pages.get(ImportType.KEYSTORE_FORM_INDEX.ordinal()).second)
                     .reset();
         }
     }
@@ -182,12 +228,18 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home: {
-                if (currentPage == KEYSTORE_FORM_INDEX)
+                if (currentPage ==ImportType.KEYSTORE_FORM_INDEX)
                 {
-                    if (((ImportKeystoreFragment) pages.get(KEYSTORE_FORM_INDEX).second).backPressed()) return true;
+                    if (((ImportKeystoreFragment) pages.get(ImportType.KEYSTORE_FORM_INDEX.ordinal()).second).backPressed()) return true;
                 }
                 break;
             }
+            case R.id.action_scan: {
+                //scan QR address
+                Intent intent = new Intent(this, QRScanningActivity.class);
+                startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
+            }
+            break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -228,5 +280,72 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
                 authInterface.FailedAuthentication(taskCode);
             }
         }
+        else if (requestCode == BARCODE_READER_REQUEST_CODE)
+        {
+            //return code from scanning QR
+            handleScanQR(resultCode, data);
+        }
+    }
+
+    private void handleScanQR(int resultCode, Intent data)
+    {
+        switch (resultCode)
+        {
+            case FullScannerFragment.SUCCESS:
+                if (data != null) {
+                    String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
+
+                    //if barcode is still null, ensure we don't GPF
+                    if (barcode == null) {
+                        displayScanError();
+                        return;
+                    }
+
+                    QRURLParser parser = QRURLParser.getInstance();
+                    QrUrlResult result = parser.parse(barcode);
+                    String extracted_address = null;
+                    if (result != null && result.getProtocol().equals("address"))
+                    {
+                        extracted_address = result.getAddress();
+                        if (currentPage == ImportType.WATCH_FORM_INDEX)
+                        {
+                            ((SetWatchWalletFragment) pages.get(ImportType.WATCH_FORM_INDEX.ordinal()).second)
+                                    .setAddress(extracted_address);
+                        }
+                    }
+                }
+                break;
+            case DENY_PERMISSION:
+                showCameraDenied();
+                break;
+            default:
+                Log.e("SEND", String.format(getString(R.string.barcode_error_format),
+                                            "Code: " + String.valueOf(resultCode)
+                ));
+                break;
+        }
+    }
+
+    private void showCameraDenied()
+    {
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.title_dialog_error);
+        dialog.setMessage(R.string.error_camera_permission_denied);
+        dialog.setIcon(ERROR);
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    private void displayScanError()
+    {
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.toast_qr_code_no_address);
+        dialog.setButtonText(R.string.dialog_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
+        dialog.show();
     }
 }

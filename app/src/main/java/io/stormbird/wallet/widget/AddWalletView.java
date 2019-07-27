@@ -13,11 +13,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.ui.widget.OnSetWatchWalletListener;
 
 
 public class AddWalletView extends FrameLayout implements View.OnClickListener {
 	private OnNewWalletClickListener onNewWalletClickListener;
 	private OnImportWalletClickListener onImportWalletClickListener;
+	private OnWatchWalletClickListener onWatchWalletClickListener;
 
 	public AddWalletView(Context context) {
 		this(context, R.layout.layout_dialog_add_account);
@@ -33,6 +35,7 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
 		LayoutInflater.from(getContext()).inflate(layoutId, this, true);
 		findViewById(R.id.new_account_action).setOnClickListener(this);
 		findViewById(R.id.import_account_action).setOnClickListener(this);
+		findViewById(R.id.watch_account_action).setOnClickListener(this);
 
         ViewPager viewPager = findViewById(R.id.intro);
         if (viewPager != null) {
@@ -54,6 +57,12 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
 					onImportWalletClickListener.onImportWallet(view);
 				}
 			} break;
+            case R.id.watch_account_action: {
+                if (onWatchWalletClickListener != null) {
+                    onWatchWalletClickListener.onWatchWallet(view);
+                }
+            }
+            break;
 		}
 	}
 	
@@ -65,6 +74,10 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
 		this.onImportWalletClickListener = onImportWalletClickListener;
 	}
 
+	public void setOnWatchWalletClickListener(OnWatchWalletClickListener onWatchWalletClickListener) {
+	    this.onWatchWalletClickListener = onWatchWalletClickListener;
+    }
+
 	public interface OnNewWalletClickListener {
 		void onNewWallet(View view);
 	}
@@ -72,6 +85,10 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
 	public interface OnImportWalletClickListener {
 		void onImportWallet(View view);
 	}
+
+	public interface OnWatchWalletClickListener {
+	    void onWatchWallet(View view);
+    }
 
 	private static class IntroPagerAdapter extends PagerAdapter {
         private int[] titles = new int[] {

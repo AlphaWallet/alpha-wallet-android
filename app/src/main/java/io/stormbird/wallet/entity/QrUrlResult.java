@@ -36,11 +36,17 @@ public class QrUrlResult implements Parcelable
     {
         this.protocol = "address";
         this.address = address;
+        defaultParams();
     }
 
     public QrUrlResult(String protocol, String address) {
         this.protocol = protocol;
         this.address = address;
+        defaultParams();
+    }
+
+    private void defaultParams()
+    {
         chainId = 1;
         type = EIP681Type.ADDRESS;
         functionStr = "";
@@ -134,8 +140,6 @@ public class QrUrlResult implements Parcelable
         StringBuilder fd = new StringBuilder();
 
         if (functionStr != null) sb.append(functionStr);
-        tokenAmount = null;
-        functionToAddress = null;
 
         sb.append("(");
         fd.append(sb.toString());

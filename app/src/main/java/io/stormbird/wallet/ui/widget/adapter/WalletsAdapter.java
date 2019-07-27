@@ -1,5 +1,6 @@
 package io.stormbird.wallet.ui.widget.adapter;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
@@ -23,11 +24,13 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
     private ArrayList<Wallet> wallets;
     private Wallet defaultWallet = null;
     private NetworkInfo network;
+    private final Context context;
 
-    public WalletsAdapter(
+    public WalletsAdapter(Context ctx,
             OnSetWalletDefaultListener onSetWalletDefaultListener) {
         this.onSetWalletDefaultListener = onSetWalletDefaultListener;
         this.wallets = new ArrayList<>();
+        this.context = ctx;
     }
 
     @NotNull
@@ -81,10 +84,11 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
         switch (wallets.get(position).type)
         {
             default:
+            case WATCH:
             case KEYSTORE:
             case HDKEY:
                 return WalletHolder.VIEW_TYPE;
-            case NOT_DEFINED:
+            case TEXT_MARKER:
                 return TextHolder.VIEW_TYPE;
         }
     }
@@ -101,28 +105,53 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
 
     public void setWallets(Wallet[] wallets) {
         this.wallets.clear();
+        boolean hasLegacyWallet = false;
+        boolean hasWatchWallet = false;
         if (wallets != null)
         {
-            int walletsRemaining = wallets.length;
             //Add HD Wallets
             for (Wallet w : wallets)
             {
-                if (w.type == WalletType.HDKEY)
+                switch (w.type)
                 {
-                    this.wallets.add(w);
-                    walletsRemaining--;
+                    case KEYSTORE:
+                        hasLegacyWallet = true;
+                        break;
+                    case HDKEY:
+                        this.wallets.add(w);
+                        break;
+                    case WATCH:
+                        hasWatchWallet = true;
+                        break;
+                    default:
+                        break;
                 }
             }
 
-            if (walletsRemaining > 0)
+            if (hasLegacyWallet)
             {
-                Wallet legacyText = new Wallet("");
-                legacyText.type = WalletType.NOT_DEFINED;
+                Wallet legacyText = new Wallet(context.getString(R.string.legacy_wallets));
+                legacyText.type = WalletType.TEXT_MARKER;
                 this.wallets.add(legacyText);
 
                 for (Wallet w : wallets)
                 {
                     if (w.type == WalletType.KEYSTORE)
+                    {
+                        this.wallets.add(w);
+                    }
+                }
+            }
+
+            if (hasWatchWallet)
+            {
+                Wallet watchText = new Wallet(context.getString(R.string.watch_wallet));
+                watchText.type = WalletType.TEXT_MARKER;
+                this.wallets.add(watchText);
+
+                for (Wallet w : wallets)
+                {
+                    if (w.type == WalletType.WATCH)
                     {
                         this.wallets.add(w);
                     }

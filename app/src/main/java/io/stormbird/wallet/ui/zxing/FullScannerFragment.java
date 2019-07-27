@@ -20,7 +20,9 @@ import java.util.List;
 public class FullScannerFragment extends Fragment implements ZXingScannerView.ResultHandler
 {
     public static final String BarcodeObject = "Barcode";
-    public static final int SUCCESS = 0; /* currenly, this is the only possible result, so does it really make sense to use it? - Weiwu */
+    public static final int SUCCESS = 0; /* currenly, this is the only possible result, so does it really make sense to use it? - Weiwu
+                                            yes it does because there's also 'DENY_PERMISSION' I assume that wasn't coded at the time
+                                            of the comment - JB*/
 
     private static final String AUTO_FOCUS_STATE = "AUTO_FOCUS_STATE";
     private static final String SELECTED_FORMATS = "SELECTED_FORMATS";

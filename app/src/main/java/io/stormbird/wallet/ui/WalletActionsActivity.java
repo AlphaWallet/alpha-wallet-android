@@ -197,6 +197,10 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
             TextView backupDetail = findViewById(R.id.backup_text);
             backupDetail.setText(R.string.export_keystore_detail);
         }
+        else if (wallet.type == WalletType.WATCH)
+        {
+            findViewById(R.id.layout_backup_method).setVisibility(View.GONE);
+        }
     }
 
     @Override

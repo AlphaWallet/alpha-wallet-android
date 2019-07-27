@@ -797,7 +797,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
                     if (!alias.startsWith("0x")) alias = "0x" + alias;
                     Wallet hdKey = new Wallet(alias);
                     hdKey.type = WalletType.HDKEY;
-                    System.out.println("Key: " + keys.nextElement());
+                    System.out.println("Key: " + alias);
                     wallets.add(hdKey);
                 }
             }

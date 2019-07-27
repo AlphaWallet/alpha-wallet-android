@@ -54,7 +54,7 @@ public class QRURLParser {
 
             if (isValidAddress(str))
             {
-                address = str.substring(0, ADDRESS_LENGTH).toLowerCase();
+                address = str.substring(0, ADDRESS_LENGTH);
             }
             else
             {
@@ -79,7 +79,7 @@ public class QRURLParser {
             String address = extractAddress(parts[0]);
 
             if (address != null) {
-                result = new QrUrlResult(address.toLowerCase());
+                result = new QrUrlResult(address);
             }
         }
         else if (parts.length == 2)
@@ -93,7 +93,7 @@ public class QRURLParser {
         {
             String address = extractAddress(url);
             if (address != null) {
-                result = new QrUrlResult(address.toLowerCase());
+                result = new QrUrlResult(address);
             }
         }
 

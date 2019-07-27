@@ -12,6 +12,7 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -38,6 +39,7 @@ public class WalletsActivity extends BaseActivity implements
         View.OnClickListener,
         AddWalletView.OnNewWalletClickListener,
         AddWalletView.OnImportWalletClickListener,
+        AddWalletView.OnWatchWalletClickListener,
         CreateWalletCallbackInterface
 {
     @Inject
@@ -91,8 +93,9 @@ public class WalletsActivity extends BaseActivity implements
         list = findViewById(R.id.list);
         list.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new WalletsAdapter(this::onSetWalletDefault);
+        adapter = new WalletsAdapter(this, this::onSetWalletDefault);
         list.setAdapter(adapter);
+        list.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
@@ -219,6 +222,13 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
+    public void onWatchWallet(View view)
+    {
+        hideDialog();
+        viewModel.watchWallet(this);
+    }
+
+    @Override
     public void onImportWallet(View view) {
         hideDialog();
         viewModel.importWallet(this);
@@ -236,6 +246,7 @@ public class WalletsActivity extends BaseActivity implements
         AddWalletView addWalletView = new AddWalletView(this);
         addWalletView.setOnNewWalletClickListener(this);
         addWalletView.setOnImportWalletClickListener(this);
+        addWalletView.setOnWatchWalletClickListener(this);
         dialog = new BottomSheetDialog(this);
         dialog.setContentView(addWalletView);
         dialog.setCancelable(true);
@@ -265,6 +276,7 @@ public class WalletsActivity extends BaseActivity implements
             AddWalletView addWalletView = new AddWalletView(this, R.layout.layout_empty_add_account);
             addWalletView.setOnNewWalletClickListener(this);
             addWalletView.setOnImportWalletClickListener(this);
+            addWalletView.setOnWatchWalletClickListener(this);
             systemView.showEmpty(addWalletView);
             adapter.setWallets(new Wallet[0]);
             hideToolbar();

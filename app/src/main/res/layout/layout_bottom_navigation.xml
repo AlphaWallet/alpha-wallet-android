@@ -81,6 +81,7 @@
     </LinearLayout>
 
     <RelativeLayout
+        android:id="@+id/layout_nav_settings"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"

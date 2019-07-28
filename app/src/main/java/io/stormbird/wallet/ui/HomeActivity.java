@@ -31,6 +31,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import com.github.florent37.tutoshowcase.TutoShowcase;
+
 import dagger.android.AndroidInjection;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.BuildConfig;
@@ -79,6 +82,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private String walletTitle;
     private final LifecycleObserver lifeCycle;
     private static boolean updatePrompt = false;
+    private TutoShowcase backupWalletDialog;
+    private TutoShowcase findWalletAddressDialog;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -196,7 +201,46 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         viewModel.cleanDatabases(this);
+
+        showFindWalletAddressDialog();
     }
+
+    public void showBackupWalletDialog() {
+        if (!viewModel.isBackupWalletDialogShown()) {
+            backupWalletDialog = TutoShowcase.from(this);
+            backupWalletDialog.setContentView(R.layout.showcase_backup_wallet)
+                    .onClickContentView(R.id.btn_close, view -> {
+                        backupWalletDialog.dismiss();
+                    })
+                    .on(R.id.layout_nav_settings)
+                    .addCircle()
+                    .onClick(v -> {
+                        backupWalletDialog.dismiss();
+                        showPage(SETTINGS);
+                    })
+                    .show();
+            viewModel.setBackupWalletDialogShown(true);
+        }
+    }
+
+    public void showFindWalletAddressDialog() {
+        if (!viewModel.isFindWalletAddressDialogShown()) {
+            findWalletAddressDialog = TutoShowcase.from(this);
+            findWalletAddressDialog.setContentView(R.layout.showcase_find_wallet)
+                    .onClickContentView(R.id.btn_close, view -> {
+                        findWalletAddressDialog.dismiss();
+                    })
+                    .on(R.id.layout_nav_settings)
+                    .addCircle()
+                    .onClick(v -> {
+                        findWalletAddressDialog.dismiss();
+                        showPage(SETTINGS);
+                    })
+                    .show();
+            viewModel.setFindWalletAddressDialogShown(true);
+        }
+    }
+
 
     private void onWalletName(String name) {
         if (name != null && !name.isEmpty()) {

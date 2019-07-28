@@ -272,4 +272,20 @@ public class HomeViewModel extends BaseViewModel {
             deleteRecursive(file);
         }
     }
+
+    public boolean isBackupWalletDialogShown() {
+        return preferenceRepository.isBackupWalletDialogShown();
+    }
+
+    public void setBackupWalletDialogShown(boolean isShown) {
+        preferenceRepository.setBackupWalletDialogShown(isShown);
+    }
+
+    public boolean isFindWalletAddressDialogShown() {
+        return preferenceRepository.isFindWalletAddressDialogShown();
+    }
+
+    public void setFindWalletAddressDialogShown(boolean isShown) {
+        preferenceRepository.setFindWalletAddressDialogShown(isShown);
+    }
 }

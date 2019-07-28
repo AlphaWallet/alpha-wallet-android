@@ -31,7 +31,7 @@ android {
     buildToolsVersion '28.0.3'
     sourceSets {
         main {
-            
+
         }
     }
     defaultConfig {
@@ -160,6 +160,8 @@ dependencies {
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
     implementation 'com.trustwallet.walletcore:walletcore:0.12.1'
+
+    implementation 'com.github.florent37:tutoshowcase:1.0.1'
 
     // PW
     implementation fileTree(include: ['*.jar'], dir: 'libs')

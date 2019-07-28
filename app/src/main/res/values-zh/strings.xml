@@ -419,4 +419,9 @@
     <string name="ethereum_address_hint">Ethereum Address: 0x then 20 characters of 0-9 a-f A-F</string>
     <string name="action_watch_account">Watch an account</string>
     <string name="receive_payment">Receive Payment</string>
+    <string name="title_back_up_your_wallet">Back up your Wallet</string>
+    <string name="message_backup_wallet">Your funds will be at risk if you do not back up before using your wallet.</string>
+    <string name="action_close">Close</string>
+    <string name="title_find_your_wallet_address">Find your Wallet Address</string>
+    <string name="message_find_address">Tap here to find your Ethereum Wallet address</string>
 </resources>

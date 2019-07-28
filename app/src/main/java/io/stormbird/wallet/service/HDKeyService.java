@@ -116,7 +116,22 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         signCallback = callback;
         callback.setupAuthenticationCallback(this);
         currentKey = walletAddr;
-        getAuthenticationForSignature();
+        Wallet wallet = new Wallet(walletAddr);
+        wallet.checkWalletType(context);
+        switch (wallet.type)
+        {
+            case KEYSTORE:
+                signCallback.GotAuthorisation(true);
+                break;
+            case HDKEY:
+                getAuthenticationForSignature();
+                break;
+            case NOT_DEFINED:
+            case TEXT_MARKER:
+            case WATCH:
+                signCallback.GotAuthorisation(false);
+                break;
+        }
     }
 
     private void getAuthenticationForSignature()

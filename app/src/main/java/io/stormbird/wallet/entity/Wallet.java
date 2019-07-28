@@ -4,11 +4,14 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import io.stormbird.wallet.service.HDKeyService;
+import org.web3j.crypto.WalletUtils;
+import org.web3j.utils.Numeric;
 
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import static io.stormbird.wallet.service.KeystoreAccountService.KEYSTORE_FOLDER;
 import static io.stormbird.wallet.util.BalanceUtils.weiToEth;
 
 public class Wallet implements Parcelable {
@@ -60,7 +63,19 @@ public class Wallet implements Parcelable {
 		}
 		else
 		{
-			type = WalletType.KEYSTORE;
+			File[] keyStores = new File(ctx.getFilesDir(), KEYSTORE_FOLDER).listFiles();
+			String addr = Numeric.cleanHexPrefix(address);
+			for (File f : keyStores)
+			{
+				if (f.getName().contains(addr))
+				{
+					type = WalletType.KEYSTORE;
+					return;
+				}
+			}
+
+			//assume watch wallet
+			type = WalletType.WATCH;
 		}
 	}
 

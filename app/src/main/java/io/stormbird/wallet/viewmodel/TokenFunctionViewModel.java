@@ -88,7 +88,6 @@ public class TokenFunctionViewModel extends BaseViewModel
     }
     public void showTransferToken(Context context, Token token, String tokenIds)
     {
-        //transferTicketDetailRouter.open(context, token.getValue(), ticketIDs, defaultWallet.getValue());
         transferTicketRouter.open(context, token, tokenIds, new Wallet(token.getWallet()));
     }
 

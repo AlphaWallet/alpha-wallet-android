@@ -1,50 +1,29 @@
 package io.stormbird.wallet.ui.widget.holder;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.entity.AttributeType;
-import io.stormbird.token.entity.NonFungibleToken;
 import io.stormbird.token.entity.TicketRange;
-import io.stormbird.token.entity.TokenScriptResult;
-import io.stormbird.token.util.DateTime;
-import io.stormbird.token.util.DateTimeFactory;
-import io.stormbird.token.util.ZonedDateTime;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.TokenFunctionActivity;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.web3.Web3TokenView;
-import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.PageReadyCallback;
-import io.stormbird.wallet.widget.ProgressView;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 import static io.stormbird.wallet.C.Key.TICKET;
+import static io.stormbird.wallet.C.Key.WALLET;
 
 /**
  * Created by James on 26/03/2019.

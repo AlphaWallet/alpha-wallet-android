@@ -228,7 +228,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         }
 
         buttons[0].setVisibility(View.VISIBLE);
-        buttons[0].setText("Confirm");
+        buttons[0].setText(R.string.action_confirm);
     }
 
     @Override

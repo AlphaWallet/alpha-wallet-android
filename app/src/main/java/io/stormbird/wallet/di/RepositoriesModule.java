@@ -30,6 +30,8 @@ import dagger.Module;
 import dagger.Provides;
 import okhttp3.OkHttpClient;
 
+import static io.stormbird.wallet.service.KeystoreAccountService.KEYSTORE_FOLDER;
+
 @Module
 public class RepositoriesModule {
 	@Singleton
@@ -41,7 +43,7 @@ public class RepositoriesModule {
 	@Singleton
 	@Provides
 	AccountKeystoreService provideAccountKeyStoreService(Context context) {
-        File file = new File(context.getFilesDir(), "keystore/keystore");
+        File file = new File(context.getFilesDir(), KEYSTORE_FOLDER);
 		return new KeystoreAccountService(file);
 	}
 

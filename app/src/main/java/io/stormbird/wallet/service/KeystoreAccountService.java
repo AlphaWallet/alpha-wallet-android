@@ -33,6 +33,7 @@ import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
 
 public class KeystoreAccountService implements AccountKeystoreService
 {
+    public static final String KEYSTORE_FOLDER = "keystore/keystore";
     private static final int PRIVATE_KEY_RADIX = 16;
 
     private final File keyFolder;

@@ -41,7 +41,6 @@ android {
         versionCode 60
         versionName "2.01.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        multiDexEnabled = true
 
         buildConfigField 'int', 'DB_VERSION', '4'
     }
@@ -160,9 +159,7 @@ dependencies {
 
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
-    implementation 'com.trustwallet.walletcore:walletcore:0.10.0'
-
-    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.trustwallet.walletcore:walletcore:0.12.1'
 
     // PW
     implementation fileTree(include: ['*.jar'], dir: 'libs')

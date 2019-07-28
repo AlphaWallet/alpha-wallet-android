@@ -22,10 +22,8 @@ import javax.crypto.spec.IvParameterSpec;
 import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
+import java.time.ZoneOffset;
+import java.util.*;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
@@ -39,13 +37,14 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_NONE;
     private static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding";
     private static final int AUTHENTICATION_DURATION_SECONDS = 30;
+    private static final String NO_AUTH_LABEL = "-noauth-";
 
     public static final int TIME_BETWEEN_BACKUP_MILLIS = 1000 * 60 * 1; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
     public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000 * 60 * 1; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
 
     public enum Operation
     {
-        CREATE_HD_KEY, FETCH_MNEMONIC, IMPORT_HD_KEY, SIGN_WITH_KEY, CHECK_AUTHENTICATION, SIGN_DATA
+        CREATE_HD_KEY, FETCH_MNEMONIC, IMPORT_HD_KEY, SIGN_WITH_KEY, CHECK_AUTHENTICATION, SIGN_DATA, CREATE_NON_AUTHENTICATED_KEY, RESTORE_BACKUP_KEY
     }
 
     public enum AuthenticationLevel
@@ -137,7 +136,8 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             }
             byte[] iv = readBytesFromFile(getFilePath(context, currentKey + "iv"));
             Cipher outCipher = Cipher.getInstance(CIPHER_ALGORITHM);
-            outCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
+            final GCMParameterSpec spec = new GCMParameterSpec(128, iv);
+            outCipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
             signCallback.GotAuthorisation(true);
             return;
         }
@@ -148,8 +148,17 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         }
         catch (KeyPermanentlyInvalidatedException | UnrecoverableKeyException e)
         {
-            keyFailure("Key created at different security level. Please re-import key");
-            e.printStackTrace();
+            //see if we can automatically recover the key
+            if (autoRestoreBackupKey(currentKey))
+            {
+                //TODO: Warn user we just restored a key?
+                return;
+            }
+            else
+            {
+                keyFailure("Key created at different security level. Please re-import key");
+                e.printStackTrace();
+            }
         }
         catch (Exception e)
         {
@@ -170,8 +179,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         HDWallet newWallet = new HDWallet(mnemonic, "key1");
         PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
         byte[] digest = Hash.keccak256(transactionBytes);
-        byte[] signature = pk.sign(digest, Curve.SECP256K1);
-        return signature;
+        return pk.sign(digest, Curve.SECP256K1);
     }
 
     private synchronized String unpackMnemonic(Operation operation)
@@ -210,6 +218,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
                     callbackInterface.FetchMnemonic(mnemonic);
                     break;
                 case SIGN_DATA:
+                case RESTORE_BACKUP_KEY:
                     return mnemonic;
                 default:
                     break;
@@ -264,6 +273,52 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         return false;
     }
 
+    /**
+     * Delete the backup key after user proves they can restore a key
+     *
+     * @param walletAddr
+     * @return
+     */
+    public boolean deleteBackupKey(String walletAddr)
+    {
+        String backupKey = walletAddr + NO_AUTH_LABEL;
+        return deleteHDKey(backupKey);
+    }
+
+    /**
+     * Restore the backup key created at key creation in the event that user accidentally destroyed their key before being able to back it up
+     *
+     * @param walletAddress
+     * @param callback
+     */
+    public void restoreBackupKey(String walletAddress, ImportWalletCallback callback)
+    {
+        importCallback = callback;
+        callback.setupAuthenticationCallback(this);
+        //first obtain seed phrase from backup
+        currentKey = walletAddress + NO_AUTH_LABEL;
+        String mnemonic = unpackMnemonic(Operation.RESTORE_BACKUP_KEY);
+        HDWallet newWallet = new HDWallet(mnemonic, "key1");
+        storeHDKey(newWallet, Operation.CREATE_HD_KEY);
+    }
+
+    private boolean autoRestoreBackupKey(String walletAddress)
+    {
+        currentKey = walletAddress + NO_AUTH_LABEL;
+        String mnemonic = unpackMnemonic(Operation.RESTORE_BACKUP_KEY);
+        if (HDWallet.isValid(mnemonic))
+        {
+            currentKey = mnemonic;
+            HDWallet newWallet = new HDWallet(mnemonic, "key1");
+            storeHDKey(newWallet, Operation.RESTORE_BACKUP_KEY);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     private synchronized void deleteKey(KeyStore keyStore, String keyAddr)
     {
         try
@@ -286,15 +341,32 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     private void createHDKey()
     {
         HDWallet newWallet = new HDWallet(DEFAULT_KEY_STRENGTH, "key1");
+        storeHDKey(newWallet, Operation.CREATE_NON_AUTHENTICATED_KEY); //create non-authenticated 'backup' key
         storeHDKey(newWallet, Operation.CREATE_HD_KEY);
     }
 
+    /**
+     * Create key from imported seed phrase - note there's no need for non-authenticated backup here as user already has the key
+     */
     private void importHDKey()
     {
         HDWallet newWallet = new HDWallet(currentKey, "key1");
         storeHDKey(newWallet, Operation.IMPORT_HD_KEY);
     }
 
+    /**
+     * Stores a generated HDWallet in the Android keystore.
+     *
+     * Operation is:
+     * 1. determine HDKey ethereum address
+     * 2. generate most secure key possible within constraints - if we're generating a 'backup key' then switch off user Auth
+     * 3. attempt to encrypt the HD wallet seed using the generated key. If requires user Auth then go to 5, otherwise 4.
+     * 4. Key generation successful - signal to calling process key creation or import is complete along with the new address.
+     * 5. Key generation failed because we need a User Authentication event. Fire off the prompt for authentication, after which we start again at 1.
+     *
+     * @param newWallet
+     * @param operation
+     */
     private synchronized void storeHDKey(HDWallet newWallet, Operation operation)
     {
         String address = "";
@@ -303,17 +375,22 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         {
             PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
             address = CoinType.ETHEREUM.deriveAddress(pk);
-
             keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
+            boolean useAuth = true;
+
+            if (operation == Operation.CREATE_NON_AUTHENTICATED_KEY)
+            {
+                address += NO_AUTH_LABEL;
+                useAuth = false;
+            }
 
             if (keyStore.containsAlias(address)) //re-import existing key - no harm done as address is generated from mnemonic
             {
                 deleteKey(keyStore, address);
             }
 
-            KeyGenerator keyGenerator = getMaxSecurityKeyGenerator(address);
-
+            KeyGenerator keyGenerator = getMaxSecurityKeyGenerator(address, useAuth);
             final SecretKey secretKey = keyGenerator.generateKey();
             final Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
@@ -351,10 +428,15 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             switch (operation)
             {
                 case CREATE_HD_KEY:
-                    callbackInterface.HDKeyCreated(address, context, authLevel);
+                    if (callbackInterface != null) callbackInterface.HDKeyCreated(address, context, authLevel);
                     break;
                 case IMPORT_HD_KEY:
                     importCallback.WalletValidated(address, authLevel);
+                    deleteBackupKey(address); //in the case the user re-imported a key, destroy the backup key
+                    break;
+                case RESTORE_BACKUP_KEY:
+                    Log.d(TAG, "Restored Backup Key");
+                default:
                     break;
             }
             return;
@@ -363,6 +445,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         {
             //delete keys if created
             deleteKey(keyStore, address);
+            deleteKey(keyStore, address + NO_AUTH_LABEL);
             //User isn't authenticated, get authentication and start again
             checkAuthentication(operation);
             return;
@@ -389,7 +472,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         }
     }
 
-    private KeyGenerator getMaxSecurityKeyGenerator(String keyAddress)
+    private KeyGenerator getMaxSecurityKeyGenerator(String keyAddress, boolean useAuthentication)
     {
         KeyGenerator keyGenerator;
 
@@ -407,40 +490,33 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
 
         try
         {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && tryInitStrongBoxKey(keyGenerator, keyAddress))
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && tryInitStrongBoxKey(keyGenerator, keyAddress, useAuthentication))
             {
                 Log.d(TAG, "Using Strongbox");
                 authLevel = AuthenticationLevel.STRONGBOX_AUTHENTICATION;
             }
-            else
+            else if (tryInitTEEKey(keyGenerator, keyAddress, useAuthentication))
             {
-                tryInitUserAuthenticatedKey(keyGenerator, keyAddress);
                 //fallback to non Strongbox
                 Log.d(TAG, "Using Hardware security TEE");
                 authLevel = AuthenticationLevel.HARDWARE_AUTHENTICATION;
             }
-        }
-        catch (InvalidAlgorithmParameterException e)
-        {
-            if (tryInitZeroAuthenticationKey(keyGenerator, keyAddress))
+            else if (tryInitTEEKey(keyGenerator, keyAddress, false))
             {
+                Log.d(TAG, "Using Hardware security TEE without authentication");
                 authLevel = AuthenticationLevel.NO_AUTHENTICATION;
-            }
-            else
-            {
-                e.printStackTrace();
-                keyGenerator = null;
             }
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            //handle unable to generate key - should be impossible to get here after API 19
         }
 
         return keyGenerator;
     }
 
-    private boolean tryInitStrongBoxKey(KeyGenerator keyGenerator, String keyAddress) throws InvalidAlgorithmParameterException
+    private boolean tryInitStrongBoxKey(KeyGenerator keyGenerator, String keyAddress, boolean useAuthentication) throws InvalidAlgorithmParameterException
     {
         try
         {
@@ -449,7 +525,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
                     KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
                                       .setBlockModes(BLOCK_MODE)
                                       .setKeySize(256)
-                                      .setUserAuthenticationRequired(true)
+                                      .setUserAuthenticationRequired(useAuthentication)
                                       .setIsStrongBoxBacked(true)
                                       .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
                                       .setRandomizedEncryptionRequired(true)
@@ -467,7 +543,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         return true;
     }
 
-    private boolean tryInitUserAuthenticatedKey(KeyGenerator keyGenerator, String keyAddress) throws InvalidAlgorithmParameterException
+    private boolean tryInitTEEKey(KeyGenerator keyGenerator, String keyAddress, boolean useAuthentication)
     {
         try
         {
@@ -476,7 +552,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
                     KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
                                       .setBlockModes(BLOCK_MODE)
                                       .setKeySize(256)
-                                      .setUserAuthenticationRequired(true)
+                                      .setUserAuthenticationRequired(useAuthentication)
                                       .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
                                       .setRandomizedEncryptionRequired(true)
                                       .setEncryptionPaddings(PADDING)
@@ -485,28 +561,6 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         catch (IllegalStateException | InvalidAlgorithmParameterException e)
         {
             //couldn't create the key because of no lock
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean tryInitZeroAuthenticationKey(KeyGenerator keyGenerator, String keyAddress)
-    {
-        try
-        {
-            keyGenerator.init(new KeyGenParameterSpec.Builder(
-                    keyAddress,
-                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                                      .setBlockModes(BLOCK_MODE)
-                                      .setKeySize(256)
-                                      .setUserAuthenticationRequired(false)
-                                      .setRandomizedEncryptionRequired(true)
-                                      .setEncryptionPaddings(PADDING)
-                                      .build());
-        }
-        catch (InvalidAlgorithmParameterException e)
-        {
             return false;
         }
 
@@ -661,6 +715,10 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             case CHECK_AUTHENTICATION:
                 getAuthenticationForSignature();
                 break;
+            case RESTORE_BACKUP_KEY:
+                HDWallet newWallet = new HDWallet(currentKey, "key1");
+                storeHDKey(newWallet, Operation.RESTORE_BACKUP_KEY);
+                break;
             default:
                 break;
         }
@@ -779,6 +837,11 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         dialog.show();
     }
 
+    /**
+     * Return a list of HD Key wallets in date order, from first created
+     *
+     * @return List of Wallet, date ordered
+     */
     public List<Wallet> getAllHDWallets()
     {
         List<Wallet> wallets = new ArrayList<>();
@@ -787,19 +850,30 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
             Enumeration<String> keys = keyStore.aliases();
+            List<Date> fileDates = new ArrayList<>();
+            Map<Date, Wallet> walletMap = new HashMap<>();
 
             while (keys.hasMoreElements())
             {
                 String alias = keys.nextElement();
                 File hdEncryptedBytes = new File(getFilePath(context, alias + "hd"));
-                if (hdEncryptedBytes.exists())
+                if (!alias.contains(NO_AUTH_LABEL) && hdEncryptedBytes.exists())
                 {
+                    Date date = new Date(hdEncryptedBytes.lastModified());
+                    fileDates.add(date);
                     if (!alias.startsWith("0x")) alias = "0x" + alias;
                     Wallet hdKey = new Wallet(alias);
                     hdKey.type = WalletType.HDKEY;
                     System.out.println("Key: " + alias);
-                    wallets.add(hdKey);
+                    walletMap.put(date, hdKey);
                 }
+            }
+
+            Collections.sort(fileDates);
+
+            for (Date d : fileDates)
+            {
+                wallets.add(walletMap.get(d));
             }
         }
         catch (Exception e)

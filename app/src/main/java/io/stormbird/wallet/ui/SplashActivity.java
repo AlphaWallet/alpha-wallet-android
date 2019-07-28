@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.multidex.MultiDex;
 import android.view.View;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
@@ -26,7 +25,6 @@ import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
-import io.stormbird.wallet.router.ManageWalletsRouter;
 import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.viewmodel.SplashViewModel;
 import io.stormbird.wallet.viewmodel.SplashViewModelFactory;
@@ -35,7 +33,6 @@ import io.stormbird.wallet.widget.SignTransactionDialog;
 import javax.inject.Inject;
 
 import static io.stormbird.wallet.C.IMPORT_REQUEST_CODE;
-import static io.stormbird.wallet.C.SHOW_NEW_ACCOUNT_PROMPT;
 
 public class SplashActivity extends BaseActivity implements CreateWalletCallbackInterface
 {
@@ -49,7 +46,6 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        MultiDex.install(this);
     }
 
     @Override

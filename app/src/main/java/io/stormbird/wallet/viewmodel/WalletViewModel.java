@@ -182,6 +182,11 @@ public class WalletViewModel extends BaseViewModel
 
     private void onTokens(Token[] cachedTokens)
     {
+        if (cachedTokens.length == 0) //require another reset
+        {
+            currentWallet = null;
+            prepare();
+        }
         tokensService.addTokens(cachedTokens);
         tokensService.requireTokensRefresh();
         tokens.postValue(tokensService.getAllLiveTokens().toArray(new Token[0]));
@@ -363,6 +368,10 @@ public class WalletViewModel extends BaseViewModel
         if (backupCheckVal == 0 && token != null && token.hasRealValue() && token.isEthereum() && token.ticker != null)
         {
             backupCheckVal = openSeaCheckCounter + 5;
+        }
+        if (token.getFullName().contains("TokenScript"))
+        {
+            System.out.println("yoless");
         }
         balanceCheckDisposable = null;
         if (token == null) return;

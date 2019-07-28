@@ -11,6 +11,7 @@ import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.TickerService;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.util.AWEnsResolver;
 import okhttp3.OkHttpClient;
 import org.web3j.abi.*;
@@ -566,10 +567,26 @@ public class TokenRepository implements TokenRepositoryType {
         BigDecimal balance = BigDecimal.ZERO;
         try
         {
-            balance = getBalance(wallet, tokenInfo);
-            if (token != null && balance.compareTo(BigDecimal.valueOf(NODE_COMMS_ERROR)) == 0)
+            Function function = balanceOf(wallet.address);
+            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
+            String responseValue = callSmartContractFunction(function, tokenInfo.address, network, wallet);
+
+            if (token != null && responseValue == null)
             {
                 balance = token.balance;
+            }
+            else
+            {
+                List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
+                if (response.size() == 1) balance = new BigDecimal(((Uint256) response.get(0)).getValue());
+
+                if (token != null && balance.equals(BigDecimal.valueOf(32)) && responseValue.length() > 66)
+                {
+                    //this is a token returning an array balance. Try ERC875
+                    token.setInterfaceSpec(ContractType.ERC875);
+                    TokensService.setInterfaceSpec(tokenInfo.chainId, tokenInfo.address, ContractType.ERC875);
+                    balance = BigDecimal.ZERO;
+                }
             }
         }
         catch (Exception e)

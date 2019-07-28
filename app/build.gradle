@@ -31,7 +31,7 @@ android {
     buildToolsVersion '28.0.3'
     sourceSets {
         main {
-            
+
         }
     }
     defaultConfig {
@@ -163,6 +163,8 @@ dependencies {
     implementation 'com.trustwallet.walletcore:walletcore:0.10.0'
 
     implementation 'com.android.support:multidex:1.0.3'
+
+    implementation 'com.github.florent37:tutoshowcase:1.0.1'
 
     // PW
     implementation fileTree(include: ['*.jar'], dir: 'libs')

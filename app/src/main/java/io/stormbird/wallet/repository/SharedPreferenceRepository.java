@@ -16,6 +16,8 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String NOTIFICATIONS_KEY = "notifications";
     private static final String DEFAULT_SET_KEY = "default_net_set";
     private static final String LOCALE_KEY = "locale";
+    private static final String BACKUP_WALLET_SHOWN = "backup_wallet_shown";
+    private static final String FIND_WALLET_ADDRESS_SHOWN = "find_wallet_address_shown";
 
     private final SharedPreferences pref;
 
@@ -83,5 +85,25 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setDefaultLocale(String locale) {
         pref.edit().putString(LOCALE_KEY, locale).apply();
+    }
+
+    @Override
+    public boolean isBackupWalletDialogShown() {
+        return pref.getBoolean(BACKUP_WALLET_SHOWN, false);
+    }
+
+    @Override
+    public void setBackupWalletDialogShown(boolean isShown) {
+        pref.edit().putBoolean(BACKUP_WALLET_SHOWN, isShown).apply();
+    }
+
+    @Override
+    public boolean isFindWalletAddressDialogShown() {
+        return pref.getBoolean(FIND_WALLET_ADDRESS_SHOWN, false);
+    }
+
+    @Override
+    public void setFindWalletAddressDialogShown(boolean isShown) {
+        pref.edit().putBoolean(FIND_WALLET_ADDRESS_SHOWN, isShown).apply();
     }
 }

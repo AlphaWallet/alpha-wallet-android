@@ -272,6 +272,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 {
                     ((HomeActivity) getActivity()).notifyBackup(GenericWalletInteract.BackupLevel.WALLET_HAS_LOW_VALUE);
                     ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+                    ((HomeActivity) getActivity()).showBackupWalletDialog();
                 }
                 break;
             case WALLET_HAS_HIGH_VALUE:
@@ -287,6 +288,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 {
                     ((HomeActivity) getActivity()).notifyBackup(GenericWalletInteract.BackupLevel.WALLET_HAS_HIGH_VALUE);
                     ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+                    ((HomeActivity) getActivity()).showBackupWalletDialog();
                 }
                 break;
         }

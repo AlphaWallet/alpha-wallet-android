@@ -23,4 +23,12 @@ public interface PreferenceRepositoryType {
     String getDefaultLocale();
 
     void setDefaultLocale(String locale);
+
+    boolean isBackupWalletDialogShown();
+
+    void setBackupWalletDialogShown(boolean isShown);
+
+    boolean isFindWalletAddressDialogShown();
+
+    void setFindWalletAddressDialogShown(boolean isShown);
 }

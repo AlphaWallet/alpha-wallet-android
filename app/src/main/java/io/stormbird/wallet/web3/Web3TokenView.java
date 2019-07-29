@@ -28,8 +28,8 @@ import java.util.Map;
 public class Web3TokenView extends WebView
 {
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
-    private static final String JS_PROTOCOL_ON_SUCCESSFUL = "executeCallback(%1$s, null, \"%2$s\")";
-    private static final String JS_PROTOCOL_ON_FAILURE = "executeCallback(%1$s, \"%2$s\", null)";
+    private static final String JS_PROTOCOL_ON_SUCCESSFUL = "sendResponse(%1$s, \"%2$s\")";
+    private static final String JS_PROTOCOL_ON_FAILURE = "sendError(%1$s, \"%2$s\")";
 
     private JsInjectorClient jsInjectorClient;
     private TokenScriptClient tokenScriptClient;

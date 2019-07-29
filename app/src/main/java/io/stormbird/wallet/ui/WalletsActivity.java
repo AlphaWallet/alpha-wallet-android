@@ -5,8 +5,13 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
@@ -16,6 +21,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -95,7 +101,7 @@ public class WalletsActivity extends BaseActivity implements
 
         adapter = new WalletsAdapter(this, this::onSetWalletDefault);
         list.setAdapter(adapter);
-        list.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        list.addItemDecoration(new WalletDivider(this));
 
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
@@ -359,5 +365,58 @@ public class WalletsActivity extends BaseActivity implements
     public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
     {
         authInterface = authCallback;
+    }
+
+    private class WalletDivider extends RecyclerView.ItemDecoration
+    {
+        private final int[] ATTRS = new int[]{16843284};
+        private Drawable mDivider;
+        private final Rect mBounds = new Rect();
+        private int marginPx;
+
+        public WalletDivider(Context context)
+        {
+            TypedArray a = context.obtainStyledAttributes(ATTRS);
+            this.mDivider = a.getDrawable(0);
+            marginPx = (int) (10 * getResources().getDisplayMetrics().density);
+            if (this.mDivider == null)
+            {
+                Log.w("DividerItem", "@android:attr/listDivider was not set in the theme used for this DividerItemDecoration. Please set that attribute all call setDrawable()");
+            }
+
+            a.recycle();
+        }
+
+        public void setDrawable(@NonNull Drawable drawable)
+        {
+            this.mDivider = drawable;
+        }
+
+        public void onDraw(Canvas canvas, RecyclerView parent, RecyclerView.State state)
+        {
+            canvas.save();
+            int left = marginPx;
+            int right = parent.getWidth() - marginPx;
+            canvas.clipRect(left, parent.getPaddingTop(), right, parent.getHeight() - parent.getPaddingBottom());
+
+            int childCount = parent.getChildCount();
+
+            for (int i = 0; i < childCount; ++i)
+            {
+                View child = parent.getChildAt(i);
+                parent.getDecoratedBoundsWithMargins(child, this.mBounds);
+                int bottom = this.mBounds.bottom + Math.round(child.getTranslationY());
+                int top = bottom - this.mDivider.getIntrinsicHeight();
+                this.mDivider.setBounds(left, top, right, bottom);
+                this.mDivider.draw(canvas);
+            }
+
+            canvas.restore();
+        }
+
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state)
+        {
+            outRect.set(0, 0, 0, this.mDivider.getIntrinsicHeight());
+        }
     }
 }

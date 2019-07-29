@@ -31,13 +31,10 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	private final TextView address;
 	private final TextView balance;
 	private final TextView currency;
-    private final LinearLayout clickLayout;
     private final WalletClickCallback clickCallback;
 	private Wallet wallet;
 	private String currencySymbol;
 	private TextView walletName;
-
-	private final ImageView more;
 
 	public WalletHolder(int resId, ViewGroup parent, WalletClickCallback callback) {
 		super(resId, parent);
@@ -48,11 +45,9 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		balance = findViewById(R.id.balance_eth);
 		currency = findViewById(R.id.text_currency);
 		walletName = findViewById(R.id.wallet_name);
-		more = findViewById(R.id.btn_more);
-		clickLayout = findViewById(R.id.click_layer);
 		clickCallback = callback;
-		clickLayout.setOnClickListener(this);
-		more.setOnClickListener(this);
+		findViewById(R.id.click_layer).setOnClickListener(this);
+		findViewById(R.id.btn_more).setOnClickListener(this);
 	}
 
 	@Override
@@ -79,6 +74,14 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 			walletName.setText("--");
 		}
 		balance.setText(wallet.balance);
+		if (addition.getBoolean(IS_DEFAULT_ADDITION, false))
+		{
+			container.setElevation(0.0f);
+		}
+		else
+		{
+			container.setElevation(5.0f);
+		}
 		defaultAction.setChecked(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		container.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		currency.setText(currencySymbol);

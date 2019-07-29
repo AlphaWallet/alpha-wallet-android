@@ -15,8 +15,6 @@
         android:layout_marginTop="?android:attr/actionBarSize"
         android:background="@color/greyee"
         android:orientation="vertical"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
         android:paddingTop="20dp">
 
         <android.support.v4.widget.SwipeRefreshLayout

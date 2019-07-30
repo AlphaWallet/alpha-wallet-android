@@ -17,6 +17,16 @@ The best way to submit feedback and report bugs is to open a GitHub issue.
 Please be sure to include your operating system, device, version number, and
 steps to reproduce reported bugs.
 
+## Add your DApp to "Discover DApps" section in AlphaWallet
+
+Submit a PR for each of the files below:
+
+For Android:
+<https://github.com/AlphaWallet/alpha-wallet-android/blob/master/app/src/main/assets/dapps_list.json>
+
+For iOS:
+<https://github.com/AlphaWallet/alpha-wallet-ios/blob/master/AlphaWallet/Browser/ViewModel/Dapps.swift>
+
 ## GPL Acknowledgement
 
 The codebase for this app is originally forked from the Trust ethereum wallet and has had many major modifications. Their Android repo can be seen here: https://github.com/TrustWallet/trust-wallet-android-source

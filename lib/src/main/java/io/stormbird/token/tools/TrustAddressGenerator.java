@@ -10,7 +10,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
-import org.web3j.crypto.Hash;
+import org.bouncycastle.jcajce.provider.digest.Keccak;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,7 +39,7 @@ public class TrustAddressGenerator {
     public String generateTrustAddress(InputStream fileStream, String contractAddress, String status) throws Exception {
         byte[] tsmlRoot = getTSMLRootBytes(fileStream);
         String data = Numeric.toHexString(tsmlRoot);
-        BigInteger digest = generateDigestFromData(contractAddress, data, status);
+        BigInteger digest = generateDigestFromData(contractAddress, convertHexToBase64String(data), status);
         return generateAddressFromDigest(digest);
     }
 
@@ -67,10 +67,11 @@ public class TrustAddressGenerator {
         return os.toByteArray();
     }
 
-    private BigInteger generateDigestFromData(String contractAddress, String data, String status) {
-        String digest = convertHexToBase64String(data);
-        byte[] target = String.format("%s%s%s", contractAddress, status, digest).getBytes(UTF_8);
-        byte[] h_digest = Hash.sha3(target);
+    private BigInteger generateDigestFromData(String contractAddress, String XMLdigest, String status) {
+        byte[] target = String.format("%s%s%s", contractAddress, status, XMLdigest).getBytes(UTF_8);
+        Keccak.Digest256 digest = new Keccak.Digest256();
+        digest.update(target);
+        byte[] h_digest = digest.digest();
         return new BigInteger(Numeric.toHexStringNoPrefix(h_digest), 16);
     }
 
@@ -128,7 +129,9 @@ public class TrustAddressGenerator {
     }
 
     private byte[] computeAddress(byte[] pubBytes) {
-        byte[] addressBytes = Hash.sha3(Arrays.copyOfRange(pubBytes, 1, pubBytes.length));
+        Keccak.Digest256 digest = new Keccak.Digest256();
+        digest.update(Arrays.copyOfRange(pubBytes, 1, pubBytes.length));
+        byte[] addressBytes = digest.digest();
         return Arrays.copyOfRange(addressBytes, 0, 20);
     }
 

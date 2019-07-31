@@ -1,8 +1,7 @@
 [
   {"name": "State of the ÐApps", "description": "Directory of Decentralized Applications", "url": "https://www.stateofthedapps.com/", "category": "Directory"},
   {"name": "BulkSender", "description": "Batch sending of tokens", "url": "https://bulksender.app/", "category": "Finance"},
-  {"name": "ERC20 Faucet", "description": "Receive free erc20 token for testing", "url": "https://erc20faucet.com/", "category": "Tool"},
-  {"name": "Find The Rabbit", "description": "Provable shell game", "url": "https://findtherabbit.me/", "category": "Game"},
+  {"name": "Loanscan", "description": "Get the best return for your Tokens", "url": "https://loanscan.io/", "category": "Finance"},
   {"name": "Axie Infinity", "description": "Collect and raise fantasy creatures", "url": "https://axieinfinity.com/", "category": "Game"},
   {"name": "ChickenHunt", "description": "character-growing IDLE game", "url": "https://chickenhunt.io/", "category": "Game"},
   {"name": "CryptoCare", "description": "Social Impact Collectibles", "url": "https://cryptocare.tech/adopt/cryptocare", "category": "Game"},

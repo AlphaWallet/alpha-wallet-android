@@ -59,7 +59,6 @@ import io.stormbird.token.entity.TokenScriptResult;
 import io.stormbird.token.entity.TransactionResult;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.token.tools.TokenDefinition;
-import io.stormbird.token.tools.TrustAddressGenerator;
 import io.stormbird.token.tools.XMLDSigVerifier;
 import io.stormbird.token.web.Ethereum.TokenscriptFunction;
 import io.stormbird.token.web.Ethereum.TransactionHandler;
@@ -563,25 +562,5 @@ public class AppSiteController implements AttributeInterface
             status = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<String>(result.toString(), status);
-    }
-
-    @PostMapping("/api/v1/generateTrustAddress")
-    public ResponseEntity<String> generateTrustAddress(
-            @RequestParam("ownerAddress") String contractAddress, //contract address corresponding to tsml
-            @RequestParam("file") MultipartFile file, //tsml file
-            @RequestParam("status") String status //Either TRUST or REVOKE
-    ) {
-        try {
-            TrustAddressGenerator trustAddressGenerator = new TrustAddressGenerator();
-            String trustAddress = trustAddressGenerator.generateTrustAddress(
-                    file.getInputStream(),
-                    contractAddress,
-                    status
-            );
-            return new ResponseEntity<String>(trustAddress, HttpStatus.ACCEPTED);
-        } catch(Exception e) {
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-
     }
 }

@@ -4,6 +4,7 @@ import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.jcajce.provider.asymmetric.util.EC5Util;
+import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.ECPointUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -23,7 +24,6 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import javax.xml.crypto.dsig.XMLSignature;
-import sun.misc.BASE64Encoder;
 import static java.nio.charset.StandardCharsets.*;
 
 
@@ -75,7 +75,7 @@ public class TrustAddressGenerator {
         return new BigInteger(Numeric.toHexStringNoPrefix(h_digest), 16);
     }
 
-    private String convertHexToBase64String(String input) {
+    private String convertHexToBase64String(String input) throws IOException {
         byte barr[] = new byte[16];
         int bcnt = 0;
         for (int i = 0; i < 32; i += 2) {
@@ -88,9 +88,9 @@ public class TrustAddressGenerator {
             barr[bcnt] |= (byte) (i2 & 0x0F);
             bcnt++;
         }
-
-        BASE64Encoder encoder = new BASE64Encoder();
-        return encoder.encode(barr);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Base64.encode(barr, outputStream);
+        return outputStream.toString();
     }
 
     private static int convertCharToInt(char c) {

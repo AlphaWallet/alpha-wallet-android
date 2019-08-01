@@ -224,9 +224,9 @@ public class XMLDSigVerifier {
         return result;
     }
 
-    private List<X509Certificate> getCertificateChainFromXML(List xmlElements) throws KeyStoreException {
+    private List getCertificateChainFromXML(List xmlElements) throws KeyStoreException {
         boolean found = false;
-        List<X509Certificate> certs = null;
+        List certs = null;
         for (int i = 0; i < xmlElements.size(); i++)
         {
             XMLStructure xmlStructure = (XMLStructure) xmlElements.get(i);

@@ -223,40 +223,71 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void attachFragment(Fragment fragment, String tag) {
-        if (tag != null && getChildFragmentManager().findFragmentByTag(tag) == null) {
-            if (tag.equals(DAPP_HOME)) {
-                DappHomeFragment f = (DappHomeFragment) fragment;
-                showFragment(f, tag);
-            } else if (tag.equals(DISCOVER_DAPPS)) {
-                DiscoverDappsFragment f = (DiscoverDappsFragment) fragment;
-                showFragment(f, tag);
-            } else if (tag.equals(MY_DAPPS)) {
-                MyDappsFragment f = (MyDappsFragment) fragment;
-                showFragment(f, tag);
-            } else if (tag.equals(HISTORY)) {
-                BrowserHistoryFragment f = (BrowserHistoryFragment) fragment;
-                showFragment(f, tag);
-            } else {
-                showFragment(fragment, tag);
+        if (tag != null && getContext() != null && getChildFragmentManager().findFragmentByTag(tag) == null)
+        {
+            switch (tag)
+            {
+                case DAPP_HOME:
+                {
+                    DappHomeFragment f = (DappHomeFragment) fragment;
+                    showFragment(f, tag);
+                    break;
+                }
+                case DISCOVER_DAPPS:
+                {
+                    DiscoverDappsFragment f = (DiscoverDappsFragment) fragment;
+                    showFragment(f, tag);
+                    break;
+                }
+                case MY_DAPPS:
+                {
+                    MyDappsFragment f = (MyDappsFragment) fragment;
+                    showFragment(f, tag);
+                    break;
+                }
+                case HISTORY:
+                {
+                    BrowserHistoryFragment f = (BrowserHistoryFragment) fragment;
+                    showFragment(f, tag);
+                    break;
+                }
+                default:
+                    showFragment(fragment, tag);
+                    break;
             }
         }
     }
 
     private void attachFragment(String tag) {
-        if (tag != null && getChildFragmentManager().findFragmentByTag(tag) == null) {
-            if (tag.equals(DAPP_HOME)) {
-                DappHomeFragment f = new DappHomeFragment();
-                showFragment(f, tag);
-                lastHomeTag = DAPP_HOME;
-            } else if (tag.equals(DISCOVER_DAPPS)) {
-                DiscoverDappsFragment f = new DiscoverDappsFragment();
-                showFragment(f, tag);
-            } else if (tag.equals(MY_DAPPS)) {
-                MyDappsFragment f = new MyDappsFragment();
-                showFragment(f, tag);
-            } else if (tag.equals(HISTORY)) {
-                BrowserHistoryFragment f = new BrowserHistoryFragment();
-                showFragment(f, tag);
+        if (tag != null && getContext() != null && getChildFragmentManager().findFragmentByTag(tag) == null)
+        {
+            switch (tag)
+            {
+                case DAPP_HOME:
+                {
+                    DappHomeFragment f = new DappHomeFragment();
+                    showFragment(f, tag);
+                    lastHomeTag = DAPP_HOME;
+                    break;
+                }
+                case DISCOVER_DAPPS:
+                {
+                    DiscoverDappsFragment f = new DiscoverDappsFragment();
+                    showFragment(f, tag);
+                    break;
+                }
+                case MY_DAPPS:
+                {
+                    MyDappsFragment f = new MyDappsFragment();
+                    showFragment(f, tag);
+                    break;
+                }
+                case HISTORY:
+                {
+                    BrowserHistoryFragment f = new BrowserHistoryFragment();
+                    showFragment(f, tag);
+                    break;
+                }
             }
         }
     }

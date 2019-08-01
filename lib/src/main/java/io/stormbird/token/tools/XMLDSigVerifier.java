@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import javax.xml.crypto.AlgorithmMethod;
@@ -31,6 +30,7 @@ import javax.xml.crypto.KeySelectorResult;
 import javax.xml.crypto.XMLCryptoContext;
 import javax.xml.crypto.XMLStructure;
 import javax.xml.crypto.dsig.XMLSignature;
+import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
@@ -67,30 +67,11 @@ public class XMLDSigVerifier {
         XMLDsigVerificationResult result = new XMLDsigVerificationResult();
         try
         {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            dbFactory.setNamespaceAware(true);
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document xml = dBuilder.parse(fileStream);
-            xml.getDocumentElement().normalize();
-
-            // Find Signature element
-            NodeList nl = xml.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
-            if (nl.getLength() == 0) return result;
-
-            // Create a DOM XMLSignatureFactory that will be used to unmarshal the
-            // document containing the XMLSignature
-            XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
-
-            // Create a DOMValidateContext and specify a KeyValue KeySelector
-            // and document context
-            DOMValidateContext valContext = new DOMValidateContext(new SigningCertSelector(), nl.item(0));
-
-            // unmarshal the XMLSignature
-            XMLSignature signature = fac.unmarshalXMLSignature(valContext);
-
-            // Validate the XMLSignature (generated above)
-            result.isValid = signature.validate(valContext);
-
+            //Signature will also be validated in this call, if it fails an exception is thrown
+            //No point to validate the certificate is this signature is invalid to begin with
+            //And TrustAddressGenerator needs to get an XMLSignature too.
+            XMLSignature signature = getValidXMLSignature(fileStream);
+            result.isValid = true; //would go to catch if this was not the case
             //check that the tsml file is signed by a valid certificate
             return validateCertificateIssuer(signature, result);
         }
@@ -100,6 +81,39 @@ public class XMLDSigVerifier {
             result.failureReason = e.getMessage();
             return result;
         }
+    }
+
+    protected XMLSignature getValidXMLSignature(InputStream fileStream) throws Exception {
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        dbFactory.setNamespaceAware(true);
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document xml = dBuilder.parse(fileStream);
+        xml.getDocumentElement().normalize();
+
+        // Find Signature element
+        NodeList nl = xml.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
+        if (nl.getLength() == 0)
+        {
+            throw new Exception("Missing elements");
+        }
+
+        // Create a DOM XMLSignatureFactory that will be used to unmarshal the
+        // document containing the XMLSignature
+        XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
+
+        // Create a DOMValidateContext and specify a KeyValue KeySelector
+        // and document context
+        DOMValidateContext valContext = new DOMValidateContext(new SigningCertSelector(), nl.item(0));
+
+        // unmarshal the XMLSignature
+        XMLSignature signature = fac.unmarshalXMLSignature(valContext);
+
+        boolean validSig = signature.validate(valContext);
+        if(!validSig)
+        {
+            throw new XMLSignatureException("Invalid XML signature");
+        }
+        return signature;
     }
 
     private void validateCertificateChain(List<X509Certificate> certList) throws Exception {
@@ -190,23 +204,16 @@ public class XMLDSigVerifier {
             X509Certificate signingCert = selectSigningKeyFromXML(xmlKeyInfo.getContent());
             //Throws if invalid
             validateCertificateChain(orderedCerts);
-            if (result.isValid)
+            result.issuerPrincipal = signingCert.getIssuerX500Principal().getName();
+            result.subjectPrincipal = signingCert.getSubjectX500Principal().getName();
+            result.keyType = signingCert.getSigAlgName();
+            for (Object o : xmlKeyInfo.getContent())
             {
-                result.issuerPrincipal = signingCert.getIssuerX500Principal().getName();
-                result.subjectPrincipal = signingCert.getSubjectX500Principal().getName();
-                result.keyType = signingCert.getSigAlgName();
-                for (Object o : xmlKeyInfo.getContent())
+                XMLStructure xmlStructure = (XMLStructure) o;
+                if (xmlStructure instanceof KeyName)
                 {
-                    XMLStructure xmlStructure = (XMLStructure) o;
-                    if (xmlStructure instanceof KeyName)
-                    {
-                        result.keyName = ((KeyName) xmlStructure).getName();
-                    }
+                    result.keyName = ((KeyName) xmlStructure).getName();
                 }
-            }
-            else
-            {
-                result.isValid = false;
             }
         }
         catch(Exception e)
@@ -217,9 +224,9 @@ public class XMLDSigVerifier {
         return result;
     }
 
-    private List<X509Certificate> getCertificateChainFromXML(List xmlElements) throws KeyStoreException {
+    private List getCertificateChainFromXML(List xmlElements) throws KeyStoreException {
         boolean found = false;
-        List<X509Certificate> certs = null;
+        List certs = null;
         for (int i = 0; i < xmlElements.size(); i++)
         {
             XMLStructure xmlStructure = (XMLStructure) xmlElements.get(i);

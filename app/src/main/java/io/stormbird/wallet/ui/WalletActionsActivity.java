@@ -26,7 +26,7 @@ import io.stormbird.wallet.viewmodel.WalletActionsViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.BackupView;
 
-import static io.stormbird.wallet.C.SHARE_REQUEST_CODE;
+import static io.stormbird.wallet.C.*;
 
 public class WalletActionsActivity extends BaseActivity implements View.OnClickListener, Runnable {
     @Inject
@@ -242,7 +242,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
         intent.putExtra("ADDRESS", wallet.address);
         intent.putExtra("TYPE", "TEST_SEED");
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        startActivityForResult(intent, C.REQUEST_BACKUP_SEED);
+        startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
     }
 
     private void showWalletsActivity()
@@ -302,7 +302,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
         intent.putExtra("ADDRESS", wallet.address);
         intent.putExtra("TYPE", "JSON");
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        startActivityForResult(intent, C.REQUEST_BACKUP_SEED);
+        startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
     }
 
     @Override
@@ -314,12 +314,14 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
                 Toast.makeText(this, R.string.toast_message_wallet_exported, Toast.LENGTH_SHORT).show();
                 showToolbar();
                 hideDialog();
+                backupSuccessful();
             } else {
                 aDialog = new AWalletAlertDialog(this);
                 aDialog.setIcon(AWalletAlertDialog.NONE);
                 aDialog.setTitle(R.string.do_manage_make_backup);
                 aDialog.setButtonText(R.string.yes_continue);
                 aDialog.setButtonListener(v -> {
+                    backupSuccessful();
                     hideDialog();
                     showToolbar();
                 });
@@ -331,11 +333,19 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
                 aDialog.show();
             }
         }
-        else if (requestCode == C.REQUEST_BACKUP_SEED && resultCode == RESULT_OK)
+        else if (requestCode == C.REQUEST_BACKUP_WALLET && resultCode == RESULT_OK)
         {
             successOverlay.setVisibility(View.VISIBLE);
             handler.postDelayed(this, 1000);
+            backupSuccessful();
         }
+    }
+
+    private void backupSuccessful()
+    {
+        Intent intent = new Intent(BACKUP_WALLET_SUCCESS);
+        intent.putExtra("Key", wallet.address);
+        sendBroadcast(intent);
     }
 
     private void hideDialog() {

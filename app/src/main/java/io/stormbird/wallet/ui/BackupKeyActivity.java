@@ -65,6 +65,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         alertDialog = null;
 
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_backup_seed);
 
         toolbar();
@@ -148,10 +149,10 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         // space is left on each line.
         ViewTreeObserver vto = layoutHolder.getViewTreeObserver();
         vto.addOnGlobalLayoutListener (() -> {
-            if (state == BackupState.TEST_SEED_PHRASE && layoutHolderWidth == 0)
+            if (layoutHolderWidth == 0)
             {
                 layoutHolderWidth = layoutHolder.getMeasuredWidth();
-                if (layoutHolderWidth != 0)
+                if (state == BackupState.TEST_SEED_PHRASE && layoutHolderWidth != 0)
                 {
                     setupTestSeed();
                 }

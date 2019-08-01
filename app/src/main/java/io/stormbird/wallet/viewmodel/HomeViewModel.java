@@ -6,6 +6,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.*;
 import android.net.Uri;
 import android.os.Environment;
+import android.util.Log;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.MagicLinkData;
@@ -20,6 +21,7 @@ import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.ui.HomeActivity;
 import io.stormbird.wallet.util.LocaleUtils;
 
@@ -287,5 +289,41 @@ public class HomeViewModel extends BaseViewModel {
 
     public void setFindWalletAddressDialogShown(boolean isShown) {
         preferenceRepository.setFindWalletAddressDialogShown(isShown);
+    }
+
+    public void upgradeWallet(String keyAddress)
+    {
+        genericWalletInteract.getWallet(keyAddress)
+                .map(this::upgradeWallet)
+                .flatMap(fetchWalletsInteract::storeWallet)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onWalletUpgraded, this::onError)
+                .isDisposed();
+    }
+
+    private void onWalletUpgraded(Wallet wallet)
+    {
+        Log.d("HVM", "Wallet " + wallet.address + " Upgraded to: " + wallet.authLevel.toString());
+    }
+
+    private Wallet upgradeWallet(Wallet wallet)
+    {
+        switch (wallet.authLevel)
+        {
+            default:
+                break;
+            case NOT_SET:
+                if (wallet.type == WalletType.HDKEY) wallet.authLevel = HDKeyService.AuthenticationLevel.TEE_AUTHENTICATION;
+                break;
+            case TEE_NO_AUTHENTICATION:
+                wallet.authLevel = HDKeyService.AuthenticationLevel.TEE_AUTHENTICATION;
+                break;
+            case STRONGBOX_NO_AUTHENTICATION:
+                wallet.authLevel = HDKeyService.AuthenticationLevel.STRONGBOX_AUTHENTICATION;
+                break;
+        }
+
+        return wallet;
     }
 }

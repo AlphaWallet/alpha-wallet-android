@@ -48,10 +48,8 @@ import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
 import io.stormbird.wallet.viewmodel.HomeViewModelFactory;
-import io.stormbird.wallet.widget.AWalletAlertDialog;
-import io.stormbird.wallet.widget.AWalletConfirmationDialog;
-import io.stormbird.wallet.widget.DepositView;
-import io.stormbird.wallet.widget.SystemView;
+import io.stormbird.wallet.widget.*;
+import org.web3j.crypto.WalletUtils;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -59,7 +57,8 @@ import java.lang.reflect.Method;
 
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.*;
 
-public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, DownloadInterface, FragmentMessenger, ScrollControlInterface, Runnable
+public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener,
+        HomeCommsInterface, FragmentMessenger, ScrollControlInterface, Runnable, SignAuthenticationCallback
 {
     @Inject
     HomeViewModelFactory homeViewModelFactory;
@@ -72,7 +71,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private LinearLayout successOverlay;
     private ImageView successImage;
     private Handler handler;
-    private DownloadReceiver downloadReceiver;
+    private HomeReceiver homeReceiver;
     private AWalletConfirmationDialog cDialog;
     private String buildVersion;
     private final NewSettingsFragment settingsFragment;
@@ -84,6 +83,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private static boolean updatePrompt = false;
     private TutoShowcase backupWalletDialog;
     private TutoShowcase findWalletAddressDialog;
+    private PinAuthenticationCallbackInterface authInterface;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -189,7 +189,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         viewModel.loadExternalXMLContracts();
-        downloadReceiver = new DownloadReceiver(this, this);
 
         if (getIntent() != null && getIntent().getStringExtra("url") != null) {
             String url = getIntent().getStringExtra("url");
@@ -295,6 +294,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             e.printStackTrace();
         }
+
+        if (homeReceiver == null) homeReceiver = new HomeReceiver(this, this);
     }
 
     @Override
@@ -406,8 +407,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void onDestroy()
     {
         super.onDestroy();
-        unregisterReceiver(downloadReceiver);
         viewModel.onClean();
+        unregisterReceiver(homeReceiver);
     }
 
     private void showPage(int page) {
@@ -533,7 +534,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         showPage(newPage);
     }
 
-    private void backupSeedFail(String keyBackup)
+    private void backupWalletFail(String keyBackup)
     {
         //postpone backup until later
         settingsFragment.backupSeedSuccess();
@@ -546,15 +547,45 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         handler.postDelayed(this, 1000);
     }
 
-    private void backupSeedSuccess(String keyBackup)
+    private void backupWalletSuccess(String keyBackup)
     {
         settingsFragment.backupSeedSuccess();
         walletFragment.storeWalletBackupTime(keyBackup);
         removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
         successImage.setImageResource(R.drawable.big_green_tick);
         successOverlay.setVisibility(View.VISIBLE);
+
+        //Tentative: Now we have backup success, we can migrate the key to higher security
+        upgradeKey(keyBackup);
+
         handler = new Handler();
         handler.postDelayed(this, 1000);
+    }
+
+    private void upgradeKey(String keyBackup)
+    {
+        Wallet wallet = new Wallet(keyBackup);
+        wallet.checkWalletType(this);
+        HDKeyService svs;
+        switch (wallet.type)
+        {
+            case KEYSTORE:
+                //TODO: Migrate legacy to require auth
+                break;
+            case HDKEY:
+                svs = new HDKeyService(this);
+                if (svs.upgradeHDKey(keyBackup, this))
+                {
+                    CreatedKey(keyBackup); // already upgraded to top level
+                }
+                else
+                {
+                    //TODO: show failure to upgrade key
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -571,6 +602,25 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             successOverlay.setAlpha(1.0f);
             handler = null;
         }
+    }
+
+    @Override
+    public void GotAuthorisation(boolean gotAuth)
+    {
+
+    }
+
+    @Override
+    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface callBack)
+    {
+        authInterface = callBack;
+    }
+
+    @Override
+    public void CreatedKey(String keyAddress)
+    {
+        //Key was upgraded
+        viewModel.upgradeWallet(keyAddress);
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
@@ -648,6 +698,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void requestNotificationPermission()
     {
         checkNotificationPermission(RC_ASSET_NOTIFICATION_PERM);
+    }
+
+    @Override
+    public void backupSuccess(String keyAddress)
+    {
+        if (WalletUtils.isValidAddress(keyAddress)) backupWalletSuccess(keyAddress);
     }
 
     private void hideDialog()
@@ -789,6 +845,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        int taskCode = 0;
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            taskCode = requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
+            requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
+        }
+
         switch (requestCode)
         {
             case DAPP_BARCODE_READER_REQUEST_CODE:
@@ -797,11 +860,20 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case C.REQUEST_SELECT_NETWORK:
                 dappBrowserFragment.handleSelectNetwork(resultCode, data);
                 break;
-            case C.REQUEST_BACKUP_SEED:
+            case C.REQUEST_BACKUP_WALLET:
                 String keyBackup = null;
                 if (data != null) keyBackup = data.getStringExtra("Key");
-                if (resultCode == RESULT_OK) backupSeedSuccess(keyBackup);
-                else backupSeedFail(keyBackup);
+                if (resultCode == RESULT_OK) backupWalletSuccess(keyBackup);
+                else backupWalletFail(keyBackup);
+                break;
+            case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
+                //continue with generating the authenticated key
+                if (resultCode == RESULT_OK) authInterface.CompleteAuthentication(taskCode);
+                else
+                {
+                    authInterface.FailedAuthentication(taskCode);
+                    GotAuthorisation(false);
+                }
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);

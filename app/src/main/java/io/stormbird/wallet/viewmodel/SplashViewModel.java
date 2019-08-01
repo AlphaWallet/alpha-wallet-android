@@ -54,6 +54,7 @@ public class SplashViewModel extends ViewModel
 
     public void fetchWallets()
     {
+        System.out.println("KEYS: Fetchwallets");
         fetchWalletsInteract
                 .fetch()
                 .subscribe(wallets::postValue, this::onError);
@@ -201,7 +202,7 @@ public class SplashViewModel extends ViewModel
             fetchWalletsInteract.storeWallet(wallet)
                     .subscribe(account -> {
                         fetchWallets();
-                        createWallet.postValue(account);
+                        //createWallet.postValue(account);
                     }, this::onError).isDisposed();
         }
         else

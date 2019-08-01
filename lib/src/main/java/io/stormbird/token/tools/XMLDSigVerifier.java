@@ -227,7 +227,7 @@ public class XMLDSigVerifier {
             {
                 if(found) throw new KeyStoreException("Duplicate X509Data element");
                 found = true;
-                certs = ((X509Data) xmlStructure).getContent();
+                certs = (List<X509Certificate>) ((X509Data) xmlStructure).getContent();
             }
         }
         return certs;

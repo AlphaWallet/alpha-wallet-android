@@ -369,10 +369,6 @@ public class WalletViewModel extends BaseViewModel
         {
             backupCheckVal = openSeaCheckCounter + 5;
         }
-        if (token.getFullName().contains("TokenScript"))
-        {
-            System.out.println("yoless");
-        }
         balanceCheckDisposable = null;
         if (token == null) return;
         Token update = tokensService.addToken(token);
@@ -544,7 +540,7 @@ public class WalletViewModel extends BaseViewModel
             }
         }
 
-        if (value.compareTo(BigDecimal.ZERO) > 0)
+        if (value.compareTo(BigDecimal.ZERO) >= 0)
         {
             final BigDecimal calcValue = value;
             genericWalletInteract.getBackupWarning(getWalletAddr())

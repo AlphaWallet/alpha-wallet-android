@@ -4,17 +4,14 @@ package io.stormbird.wallet.ui;
 import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.util.ArraySet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,26 +21,21 @@ import android.widget.*;
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.GenericWalletInteract;
-import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.util.LocaleUtils;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModel;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModelFactory;
 import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.SelectLocaleDialog;
 
-import java.util.Set;
-
 import static io.stormbird.wallet.C.*;
 import static io.stormbird.wallet.ui.HomeActivity.RC_ASSET_EXTERNAL_WRITE_PERM;
 
-public class NewSettingsFragment extends Fragment {
+public class NewSettingsFragment extends Fragment
+{
     @Inject
     NewSettingsViewModelFactory newSettingsViewModelFactory;
 
@@ -207,7 +199,7 @@ public class NewSettingsFragment extends Fragment {
         }
 
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_SEED);
+        getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
     }
 
     private boolean isAppAvailable(String packageName) {

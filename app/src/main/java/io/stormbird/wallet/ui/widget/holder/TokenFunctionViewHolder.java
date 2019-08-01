@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RawRes;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import org.web3j.crypto.Sign;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
 import java.util.function.Function;
 
@@ -72,7 +74,9 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
             String injectedView = tokenView.injectWeb3TokenInit(getContext(), view, "");
             String style = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
             injectedView = tokenView.injectStyleData(injectedView, style);
-            tokenView.loadData(injectedView, "text/html", "utf-8");
+
+            String base64 = Base64.encodeToString(injectedView.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+            tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
         }
         catch (Exception ex)
         {

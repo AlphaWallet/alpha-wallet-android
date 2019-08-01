@@ -150,7 +150,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         ((ImportPrivateKeyFragment) pages.get(ImportType.PRIVATE_KEY_FORM_INDEX.ordinal()).second)
                 .setOnImportPrivateKeyListener(importWalletViewModel);
 
-        if (pages.get(ImportType.WATCH_FORM_INDEX.ordinal()) != null)
+        if (pages.size() > ImportType.WATCH_FORM_INDEX.ordinal() && pages.get(ImportType.WATCH_FORM_INDEX.ordinal()) != null)
         {
             ((SetWatchWalletFragment) pages.get(ImportType.WATCH_FORM_INDEX.ordinal()).second)
                     .setOnSetWatchWalletListener(importWalletViewModel);

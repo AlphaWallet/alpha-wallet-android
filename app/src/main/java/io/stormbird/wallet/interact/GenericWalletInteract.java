@@ -65,7 +65,12 @@ public class GenericWalletInteract
 		return walletRepository.getWalletBackupWarning(walletAddr);
 	}
 
-	public enum BackupLevel
+    public Single<Wallet> getWallet(String keyAddress)
+    {
+    	return walletRepository.findWallet(keyAddress);
+    }
+
+    public enum BackupLevel
 	{
 		BACKUP_NOT_REQUIRED, WALLET_HAS_LOW_VALUE, WALLET_HAS_HIGH_VALUE
 	}

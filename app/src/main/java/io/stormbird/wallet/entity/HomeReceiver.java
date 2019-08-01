@@ -9,15 +9,16 @@ import android.os.Bundle;
 
 import static io.stormbird.wallet.C.*;
 
-public class DownloadReceiver extends BroadcastReceiver
+public class HomeReceiver extends BroadcastReceiver
 {
-    private final DownloadInterface downloadInterface;
-    public DownloadReceiver(Activity ctx, DownloadInterface downloadInterface)
+    private final HomeCommsInterface homeCommsInterface;
+    public HomeReceiver(Activity ctx, HomeCommsInterface homeCommsInterface)
     {
         ctx.registerReceiver(this, new IntentFilter(DOWNLOAD_READY));
         ctx.registerReceiver(this, new IntentFilter(RESET_TOOLBAR));
         ctx.registerReceiver(this, new IntentFilter(REQUEST_NOTIFICATION_ACCESS));
-        this.downloadInterface = downloadInterface;
+        ctx.registerReceiver(this, new IntentFilter(BACKUP_WALLET_SUCCESS));
+        this.homeCommsInterface = homeCommsInterface;
     }
 
     @Override
@@ -28,13 +29,17 @@ public class DownloadReceiver extends BroadcastReceiver
         {
             case DOWNLOAD_READY:
                 String message = bundle.getString("Version");
-                downloadInterface.downloadReady(message);
+                homeCommsInterface.downloadReady(message);
                 break;
             case RESET_TOOLBAR:
-                downloadInterface.resetToolbar();
+                homeCommsInterface.resetToolbar();
                 break;
             case REQUEST_NOTIFICATION_ACCESS:
-                downloadInterface.requestNotificationPermission();
+                homeCommsInterface.requestNotificationPermission();
+                break;
+            case BACKUP_WALLET_SUCCESS:
+                String keyAddress = bundle.getString("Key");
+                homeCommsInterface.backupSuccess(keyAddress);
                 break;
             default:
                 break;

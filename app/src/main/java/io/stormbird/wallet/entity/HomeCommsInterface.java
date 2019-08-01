@@ -1,8 +1,9 @@
 package io.stormbird.wallet.entity;
 
-public interface DownloadInterface
+public interface HomeCommsInterface
 {
     void downloadReady(String ready);
     void resetToolbar();
     void requestNotificationPermission();
+    void backupSuccess(String keyAddress);
 }

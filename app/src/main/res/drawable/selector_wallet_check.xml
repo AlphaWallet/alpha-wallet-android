@@ -3,9 +3,9 @@
 
     <item
         android:state_checked="false"
-        android:drawable="@drawable/ic_private_key"/>
+        android:drawable="@drawable/ic_key_noauth"/>
 
     <item
         android:state_checked="true"
-        android:drawable="@drawable/ic_private_key_selected"/>
+        android:drawable="@drawable/ic_key_noauth_selected"/>
 </selector>

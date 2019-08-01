@@ -1,8 +1,6 @@
 package io.stormbird.wallet.ui;
 
-import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,15 +20,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import dagger.android.support.AndroidSupportInjection;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
-import io.stormbird.wallet.service.HDKeyService;
-import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
 import io.stormbird.wallet.ui.widget.entity.WarningData;
@@ -446,7 +440,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         }
 
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_SEED);
+        getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
     }
 
     @Override

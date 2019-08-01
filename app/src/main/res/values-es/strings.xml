@@ -158,4 +158,6 @@
     <string name="action_close">Close</string>
     <string name="title_find_your_wallet_address">Find your Wallet Address</string>
     <string name="message_find_address">Tap here to find your Ethereum Wallet address</string>
+    <string name="restore_from_standby_key">Restore from Standby Key</string>
+    <string name="restore_from_standby_key_detail">Your wallet key was restored from non-authorised standby key. This is caused by a change to phone security invalidating key. Recommend to backup your wallet key safely as soon as possible. Standby key is erased after successful backup.</string>
 </resources>

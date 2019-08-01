@@ -1,10 +1,12 @@
 package io.stormbird.wallet.ui;
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +17,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.Numeric;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
@@ -39,13 +42,13 @@ import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static io.stormbird.wallet.C.Key.TICKET;
-import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 import static io.stormbird.wallet.service.HDKeyService.Operation.SIGN_DATA;
 import static io.stormbird.wallet.ui.DappBrowserFragment.PERSONAL_MESSAGE_PREFIX;
@@ -113,7 +116,8 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
             injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
             if (action.style != null) injectedView = tokenView.injectStyleData(injectedView, action.style);
 
-            tokenView.loadData(injectedView, "text/html", "utf-8");
+            String base64 = Base64.encodeToString(injectedView.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+            tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
         }
         catch (Exception e)
         {
@@ -147,29 +151,32 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         TSAction action = functions.get(actionMethod);
         boolean hasTokenIds = false;
 
-        for (MethodArg arg : action.function.parameters)
+        if (action != null && action.function != null)
         {
-            int index = arg.getTokenIndex();
-            if (arg.isTokenId() && index >= 0 && index < tokenIds.size())
+            for (MethodArg arg : action.function.parameters)
             {
-                if (!hasTokenIds)
+                int index = arg.getTokenIndex();
+                if (arg.isTokenId() && index >= 0 && index < tokenIds.size())
                 {
-                    sb.append("tokenIds: [");
+                    if (!hasTokenIds)
+                    {
+                        sb.append("tokenIds: [");
+                    }
+                    else
+                    {
+                        sb.append(", ");
+                    }
+                    sb.append("\"");
+                    sb.append(tokenIds.get(index));
+                    sb.append("\"");
+                    hasTokenIds = true;
                 }
-                else
-                {
-                    sb.append(", ");
-                }
-                sb.append("\"");
-                sb.append(tokenIds.get(index));
-                sb.append("\"");
-                hasTokenIds = true;
             }
-        }
 
-        if (hasTokenIds)
-        {
-            sb.append("],\n");
+            if (hasTokenIds)
+            {
+                sb.append("],\n");
+            }
         }
     }
 
@@ -335,8 +342,19 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         {
             AttributeType attr = action.attributeTypes.get(e.ref);
             if (attr == null) return true;
+
             switch (attr.as)
             {
+                case UTF8:
+                    break;
+                case Unsigned:
+                    break;
+                case Signed:
+                    break;
+                case Mapping:
+                    break;
+                case Boolean:
+                    break;
                 case UnsignedInput:
                     //do we have a mapping?
                     String valueFromInput = args.get(e.ref);
@@ -365,6 +383,8 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
                         args.put(e.ref, unsignedValue.toString());
                         e.value = unsignedValue.toString();
                     }
+                    break;
+                case TokenId:
                     break;
                 default:
                     resolved = false;

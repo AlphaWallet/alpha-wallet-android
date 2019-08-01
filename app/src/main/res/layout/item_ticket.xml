@@ -5,7 +5,6 @@
     android:id="@+id/layout_select_ticket"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
     android:animateLayoutChanges="true"
     android:orientation="vertical">
 
@@ -32,6 +31,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/background_card_shadow"
+            android:elevation="2dp"
+            android:layout_marginBottom="6dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -256,10 +259,14 @@
             android:gravity="center"
             android:visibility="gone"
             android:orientation="vertical"
+            android:elevation="2dp"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
             android:paddingTop="10dp"
-            android:paddingBottom="10dp">
+            android:paddingBottom="10dp"
+            android:layout_marginBottom="6dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp">
 
             <io.stormbird.wallet.web3.Web3TokenView
                 android:id="@+id/web3_tokenview"

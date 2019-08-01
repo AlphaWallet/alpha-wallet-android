@@ -20,7 +20,7 @@ public class FunctionDefinition
     public ContractInfo contract;
     public String method;
     public TokenDefinition.Syntax syntax;
-    public TokenDefinition.As as;
+    public As as;
     public List<MethodArg> parameters = new ArrayList<>();
 
     public String result;

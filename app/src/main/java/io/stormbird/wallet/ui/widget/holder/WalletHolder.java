@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.ui.WalletActionsActivity;
 import io.stormbird.wallet.ui.widget.adapter.WalletsAdapter;
 import io.stormbird.wallet.ui.widget.entity.WalletClickCallback;
@@ -82,6 +83,52 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		{
 			container.setElevation(5.0f);
 		}
+
+		boolean isBackedUp = wallet.lastBackupTime > 0;
+
+		switch (wallet.type)
+		{
+			case KEYSTORE:
+				if (isBackedUp)
+				{
+					defaultAction.setBackgroundResource(R.drawable.selector_wallet_no_auth);
+				}
+				else
+				{
+					defaultAction.setBackgroundResource(R.drawable.selector_wallet_no_backup);
+				}
+				break;
+			case HDKEY:
+				switch (wallet.authLevel)
+				{
+					case NOT_SET:
+					case TEE_NO_AUTHENTICATION:
+					case STRONGBOX_NO_AUTHENTICATION:
+						if (!isBackedUp)
+						{
+							defaultAction.setBackgroundResource(R.drawable.selector_wallet_no_backup);
+						}
+						else
+						{
+							defaultAction.setBackgroundResource(R.drawable.selector_wallet_no_auth);
+						}
+						break;
+					case TEE_AUTHENTICATION:
+					case STRONGBOX_AUTHENTICATION:
+						defaultAction.setBackgroundResource(R.drawable.selector_wallet_tee_auth);
+						break;
+				}
+				break;
+			case WATCH:
+				defaultAction.setBackgroundResource(R.drawable.selector_wallet_watch);
+				break;
+			case NOT_DEFINED:
+			case TEXT_MARKER:
+				break;
+		}
+
+
+
 		defaultAction.setChecked(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		container.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		currency.setText(currencySymbol);
@@ -92,6 +139,8 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		switch (view.getId()) {
             case R.id.click_layer:
 				clickCallback.onWalletClicked(wallet);
+				defaultAction.setChecked(true);
+				container.setElevation(0.0f);
 				break;
 
 			case R.id.btn_more:

@@ -416,8 +416,9 @@ public class TokensService
 
     private Token checkCurrencies()
     {
-        if (currencyCheckCount == networkFilter.size()) return null;
-        int chainId = networkFilter.get(currencyCheckCount++);
+        if (currencyCheckCount >= networkFilter.size()) return null;
+        int chainId = networkFilter.get(currencyCheckCount);
+        currencyCheckCount++;
         return getToken(chainId, currentAddress);
     }
 

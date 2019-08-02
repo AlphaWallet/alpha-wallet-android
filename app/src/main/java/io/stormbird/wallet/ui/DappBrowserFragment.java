@@ -223,40 +223,71 @@ public class DappBrowserFragment extends Fragment implements
     }
 
     private void attachFragment(Fragment fragment, String tag) {
-        if (tag != null && getChildFragmentManager().findFragmentByTag(tag) == null) {
-            if (tag.equals(DAPP_HOME)) {
-                DappHomeFragment f = (DappHomeFragment) fragment;
-                showFragment(f, tag);
-            } else if (tag.equals(DISCOVER_DAPPS)) {
-                DiscoverDappsFragment f = (DiscoverDappsFragment) fragment;
-                showFragment(f, tag);
-            } else if (tag.equals(MY_DAPPS)) {
-                MyDappsFragment f = (MyDappsFragment) fragment;
-                showFragment(f, tag);
-            } else if (tag.equals(HISTORY)) {
-                BrowserHistoryFragment f = (BrowserHistoryFragment) fragment;
-                showFragment(f, tag);
-            } else {
-                showFragment(fragment, tag);
+        if (tag != null && getContext() != null && getChildFragmentManager().findFragmentByTag(tag) == null)
+        {
+            switch (tag)
+            {
+                case DAPP_HOME:
+                {
+                    DappHomeFragment f = (DappHomeFragment) fragment;
+                    showFragment(f, tag);
+                    break;
+                }
+                case DISCOVER_DAPPS:
+                {
+                    DiscoverDappsFragment f = (DiscoverDappsFragment) fragment;
+                    showFragment(f, tag);
+                    break;
+                }
+                case MY_DAPPS:
+                {
+                    MyDappsFragment f = (MyDappsFragment) fragment;
+                    showFragment(f, tag);
+                    break;
+                }
+                case HISTORY:
+                {
+                    BrowserHistoryFragment f = (BrowserHistoryFragment) fragment;
+                    showFragment(f, tag);
+                    break;
+                }
+                default:
+                    showFragment(fragment, tag);
+                    break;
             }
         }
     }
 
     private void attachFragment(String tag) {
-        if (tag != null && getChildFragmentManager().findFragmentByTag(tag) == null) {
-            if (tag.equals(DAPP_HOME)) {
-                DappHomeFragment f = new DappHomeFragment();
-                showFragment(f, tag);
-                lastHomeTag = DAPP_HOME;
-            } else if (tag.equals(DISCOVER_DAPPS)) {
-                DiscoverDappsFragment f = new DiscoverDappsFragment();
-                showFragment(f, tag);
-            } else if (tag.equals(MY_DAPPS)) {
-                MyDappsFragment f = new MyDappsFragment();
-                showFragment(f, tag);
-            } else if (tag.equals(HISTORY)) {
-                BrowserHistoryFragment f = new BrowserHistoryFragment();
-                showFragment(f, tag);
+        if (tag != null && getContext() != null && getChildFragmentManager().findFragmentByTag(tag) == null)
+        {
+            switch (tag)
+            {
+                case DAPP_HOME:
+                {
+                    DappHomeFragment f = new DappHomeFragment();
+                    showFragment(f, tag);
+                    lastHomeTag = DAPP_HOME;
+                    break;
+                }
+                case DISCOVER_DAPPS:
+                {
+                    DiscoverDappsFragment f = new DiscoverDappsFragment();
+                    showFragment(f, tag);
+                    break;
+                }
+                case MY_DAPPS:
+                {
+                    MyDappsFragment f = new MyDappsFragment();
+                    showFragment(f, tag);
+                    break;
+                }
+                case HISTORY:
+                {
+                    BrowserHistoryFragment f = new BrowserHistoryFragment();
+                    showFragment(f, tag);
+                    break;
+                }
             }
         }
     }
@@ -586,29 +617,36 @@ public class DappBrowserFragment extends Fragment implements
             }
         };
 
-        dialog = new SignMessageDialog(getActivity(), message);
-        dialog.setAddress(wallet.address);
-        dialog.setOnApproveListener(v -> {
-            //ensure we generate the signature correctly:
-            if (message.value != null)
-            {
-                byte[] signRequest = message.value.getBytes();
-                if (message.value.substring(0, 2).equals("0x"))
+        try
+        {
+            dialog = new SignMessageDialog(getActivity(), message);
+            dialog.setAddress(wallet.address);
+            dialog.setOnApproveListener(v -> {
+                //ensure we generate the signature correctly:
+                if (message.value != null)
                 {
-                    signRequest = Numeric.hexStringToByteArray(message.value);
+                    byte[] signRequest = message.value.getBytes();
+                    if (message.value.substring(0, 2).equals("0x"))
+                    {
+                        signRequest = Numeric.hexStringToByteArray(message.value);
+                    }
+                    viewModel.signMessage(signRequest, dAppFunction, message);
                 }
-                viewModel.signMessage(signRequest, dAppFunction, message);
-            }
-            else
-            {
-                onSignError();
-            }
-        });
-        dialog.setOnRejectListener(v -> {
-            web3.onSignCancel(message);
-            dialog.dismiss();
-        });
-        dialog.show();
+                else
+                {
+                    onSignError();
+                }
+            });
+            dialog.setOnRejectListener(v -> {
+                web3.onSignCancel(message);
+                dialog.dismiss();
+            });
+            dialog.show();
+        }
+        catch (Exception e)
+        {
+            onSignError(e.getMessage());
+        }
     }
 
     @Override
@@ -631,21 +669,30 @@ public class DappBrowserFragment extends Fragment implements
             }
         };
 
-        dialog = new SignMessageDialog(getActivity(), message);
-        dialog.setAddress(wallet.address);
-        dialog.setMessage(Hex.hexToUtf8(message.value));
-        dialog.setOnApproveListener(v -> {
-            String convertedMessage = Hex.hexToUtf8(message.value);
-            String signMessage = PERSONAL_MESSAGE_PREFIX
-                    + convertedMessage.length()
-                    + convertedMessage;
-            viewModel.signMessage(signMessage.getBytes(), dAppFunction, message);
-        });
-        dialog.setOnRejectListener(v -> {
-            web3.onSignCancel(message);
-            dialog.dismiss();
-        });
-        dialog.show();
+        try
+        {
+            dialog = new SignMessageDialog(getActivity(), message);
+            dialog.setAddress(wallet.address);
+            dialog.setMessage(Hex.hexToUtf8(message.value));
+            dialog.setOnApproveListener(v -> {
+                String convertedMessage = Hex.hexToUtf8(message.value);
+                String signMessage = PERSONAL_MESSAGE_PREFIX
+                        + convertedMessage.length()
+                        + convertedMessage;
+                viewModel.signMessage(signMessage.getBytes(), dAppFunction, message);
+            });
+            dialog.setOnRejectListener(v -> {
+                web3.onSignCancel(message);
+                dialog.dismiss();
+            });
+            dialog.show();
+        }
+        catch (Exception e)
+        {
+            // this will be mainly for developers, so no need to tidy the exception
+            // if a user comes across this message they can report to the dapp writer
+            onSignError(e.getMessage());
+        }
     }
 
     @Override
@@ -679,6 +726,21 @@ public class DappBrowserFragment extends Fragment implements
         resultDialog.setIcon(AWalletAlertDialog.ERROR);
         resultDialog.setTitle(getString(R.string.dialog_title_sign_message));
         resultDialog.setMessage(getString(R.string.contains_no_data));
+        resultDialog.setButtonText(R.string.button_ok);
+        resultDialog.setButtonListener(v -> {
+            resultDialog.dismiss();
+        });
+        resultDialog.setCancelable(true);
+        resultDialog.show();
+    }
+
+    private void onSignError(String message)
+    {
+        if (getActivity() == null) return;
+        resultDialog = new AWalletAlertDialog(getActivity());
+        resultDialog.setIcon(AWalletAlertDialog.ERROR);
+        resultDialog.setTitle(getString(R.string.dialog_title_sign_message));
+        resultDialog.setMessage(message);
         resultDialog.setButtonText(R.string.button_ok);
         resultDialog.setButtonListener(v -> {
             resultDialog.dismiss();

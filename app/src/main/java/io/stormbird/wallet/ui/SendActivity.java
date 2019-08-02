@@ -393,10 +393,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                     sendText.setVisibility(View.VISIBLE);
                     sendText.setText(R.string.token_transfer_request);
                 }
-                else
-                {
-                    //TODO: handle ERC875 & ERC721 transfer
-                }
                 break;
 
             case FUNCTION_CALL:
@@ -439,8 +435,8 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             dialog.dismiss();
         }
         super.onDestroy();
-        handler.removeCallbacksAndMessages(null);
-        amountInput.onClear();
+        if (handler != null) handler.removeCallbacksAndMessages(null);
+        if (amountInput != null) amountInput.onClear();
     }
 
     private boolean isBalanceEnough(String eth) {

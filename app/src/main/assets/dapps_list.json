@@ -1,8 +1,7 @@
 [
   {"name": "State of the ÐApps", "description": "Directory of Decentralized Applications", "url": "https://www.stateofthedapps.com/", "category": "Directory"},
-  {"name": "Token Multisender", "description": "Batch sending of tokens", "url": "https://multisender.app/", "category": "Finance"},
-  {"name": "ERC20 Faucet", "description": "Receive free erc20 token for testing", "url": "https://erc20faucet.com/", "category": "Tool"},
-  {"name": "Find The Rabbit", "description": "Provable shell game", "url": "https://findtherabbit.me/", "category": "Game"},
+  {"name": "BulkSender", "description": "Batch sending of tokens", "url": "https://bulksender.app/", "category": "Finance"},
+  {"name": "Loanscan", "description": "Get the best return for your Tokens", "url": "https://loanscan.io/", "category": "Finance"},
   {"name": "Axie Infinity", "description": "Collect and raise fantasy creatures", "url": "https://axieinfinity.com/", "category": "Game"},
   {"name": "ChickenHunt", "description": "character-growing IDLE game", "url": "https://chickenhunt.io/", "category": "Game"},
   {"name": "CryptoCare", "description": "Social Impact Collectibles", "url": "https://cryptocare.tech/adopt/cryptocare", "category": "Game"},
@@ -49,5 +48,6 @@
   {"name": "Bidali", "description": "Buy from top brands with crypto", "url": "https://commerce.bidali.com/dapp", "category": "Marketplace"},
   {"name": "Zerion", "description": "Trade and manage your digital assets across different wallets in one interface", "url": "https://zerion.io", "category": "Finance"},
   {"name": "ENS domain manager", "description": "Manage ENS domains", "url": "https://manager.ens.domains", "category": "Tool"},
-  {"name": "Humanity", "description": "Human Identity on Ethereum", "url": "https://humanitydao.org", "category": "Social Media"}
+  {"name": "Humanity", "description": "Human Identity on Ethereum", "url": "https://humanitydao.org", "category": "Social Media"},
+  {"name": "DEX.AG", "description": "Trade cryptoassets at the best price", "url": "https://dex.ag", "category": "Exchange"}
 ]

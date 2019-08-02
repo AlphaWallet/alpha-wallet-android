@@ -12,6 +12,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,8 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.ui.widget.OnImportKeystoreListener;
+import io.stormbird.wallet.ui.widget.OnImportPrivateKeyListener;
 import io.stormbird.wallet.ui.widget.OnImportSeedListener;
 import io.stormbird.wallet.ui.widget.OnSetWatchWalletListener;
 import io.stormbird.wallet.ui.widget.adapter.TabPagerAdapter;
@@ -39,6 +42,11 @@ import io.stormbird.wallet.viewmodel.ImportWalletViewModel;
 import io.stormbird.wallet.viewmodel.ImportWalletViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.SignTransactionDialog;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.web3j.crypto.ECKeyPair;
+import org.web3j.crypto.Keys;
+import org.web3j.utils.Numeric;
 
 import static io.stormbird.wallet.C.ErrorCode.ALREADY_ADDED;
 import static io.stormbird.wallet.C.RESET_WALLET;
@@ -47,7 +55,7 @@ import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 import static io.stormbird.wallet.widget.AWalletBottomNavigationView.WALLET;
 import static io.stormbird.wallet.widget.InputAddressView.BARCODE_READER_REQUEST_CODE;
 
-public class ImportWalletActivity extends BaseActivity implements OnImportSeedListener, ImportWalletCallback
+public class ImportWalletActivity extends BaseActivity implements OnImportSeedListener, ImportWalletCallback, OnImportKeystoreListener, OnImportPrivateKeyListener
 {
     private static enum ImportType
     {
@@ -146,9 +154,9 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         ((ImportSeedFragment) pages.get(ImportType.SEED_FORM_INDEX.ordinal()).second)
                 .setOnImportSeedListener(this);
         ((ImportKeystoreFragment) pages.get(ImportType.KEYSTORE_FORM_INDEX.ordinal()).second)
-                .setOnImportKeystoreListener(importWalletViewModel);
+                .setOnImportKeystoreListener(this);
         ((ImportPrivateKeyFragment) pages.get(ImportType.PRIVATE_KEY_FORM_INDEX.ordinal()).second)
-                .setOnImportPrivateKeyListener(importWalletViewModel);
+                .setOnImportPrivateKeyListener(this);
 
         if (pages.size() > ImportType.WATCH_FORM_INDEX.ordinal() && pages.get(ImportType.WATCH_FORM_INDEX.ordinal()) != null)
         {
@@ -253,9 +261,45 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     }
 
     @Override
+    public void onKeystore(String keystore, String password)
+    {
+        HDKeyService svs = new HDKeyService(this);
+
+        String address = extractAddressFromStore(keystore);
+        if (address != null)
+        {
+            svs.createKeystorePassword(address, this, keystore, password);
+        }
+    }
+
+    @Override
+    public void onPrivateKey(String privateKey)
+    {
+        HDKeyService svs = new HDKeyService(this);
+
+        BigInteger key = new BigInteger(privateKey, 16);
+        ECKeyPair keypair = ECKeyPair.create(key);
+        String address = Numeric.prependHexPrefix(Keys.getAddress(keypair));
+
+        svs.createPrivateKeyPassword(address, this, privateKey);
+    }
+
+    @Override
     public void WalletValidated(String address, HDKeyService.AuthenticationLevel level)
     {
         importWalletViewModel.onSeed(address, level);
+    }
+
+    @Override
+    public void KeystoreValidated(String address, String newPassword, String keystoreDetails, HDKeyService.AuthenticationLevel level)
+    {
+        importWalletViewModel.onKeystore(keystoreDetails, newPassword, level);
+    }
+
+    @Override
+    public void KeyValidated(String privateKey, String newPassword, HDKeyService.AuthenticationLevel level)
+    {
+        importWalletViewModel.onPrivateKey(privateKey, newPassword, level);
     }
 
     @Override
@@ -347,5 +391,14 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         dialog.setButtonText(R.string.dialog_ok);
         dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
+    }
+
+    private String extractAddressFromStore(String store) {
+        try {
+            JSONObject jsonObject = new JSONObject(store);
+            return "0x" + Numeric.cleanHexPrefix(jsonObject.getString("address"));
+        } catch (JSONException ex) {
+            return null;
+        }
     }
 }

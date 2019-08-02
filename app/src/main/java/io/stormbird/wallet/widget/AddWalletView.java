@@ -36,12 +36,6 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
 		findViewById(R.id.new_account_action).setOnClickListener(this);
 		findViewById(R.id.import_account_action).setOnClickListener(this);
 		findViewById(R.id.watch_account_action).setOnClickListener(this);
-
-        ViewPager viewPager = findViewById(R.id.intro);
-        if (viewPager != null) {
-            viewPager.setPageTransformer(false, new DepthPageTransformer());
-            viewPager.setAdapter(new IntroPagerAdapter());
-        }
 	}
 
 	@Override
@@ -88,81 +82,5 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
 
 	public interface OnWatchWalletClickListener {
 	    void onWatchWallet(View view);
-    }
-
-	private static class IntroPagerAdapter extends PagerAdapter {
-        private int[] titles = new int[] {
-                R.string.onboarding_1,
-                R.string.onboarding_2,
-                R.string.onboarding_3,
-        };
-        private int[] images = new int[] {
-                R.drawable.ic_onboarding1,
-                R.drawable.ic_onboarding2,
-                R.drawable.ic_onboarding3
-        };
-
-        @NonNull
-        @Override
-        public Object instantiateItem(@NonNull ViewGroup container, int position) {
-            View view = LayoutInflater.from(container.getContext())
-                    .inflate(R.layout.layout_page_intro, container, false);
-            ((TextView) view.findViewById(R.id.title)).setText(titles[position]);
-            ((ImageView) view.findViewById(R.id.img)).setImageResource(images[position]);
-            container.addView(view);
-            return view;
-        }
-
-        @Override
-        public int getCount() {
-            return titles.length;
-        }
-
-        @Override
-        public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
-            return view == object;
-        }
-
-        @Override
-        public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-            container.removeView((View) object);
-        }
-    }
-
-    private static class DepthPageTransformer implements ViewPager.PageTransformer {
-        private static final float MIN_SCALE = 0.75f;
-
-        public void transformPage(View view, float position) {
-            int pageWidth = view.getWidth();
-
-            if (position < -1) { // [-Infinity,-1)
-                // This page is way off-screen to the left.
-                view.setAlpha(0);
-
-            } else if (position <= 0) { // [-1,0]
-                // Use the default slide transition when moving to the left page
-                view.setAlpha(1);
-                view.setTranslationX(0);
-                view.setScaleX(1);
-                view.setScaleY(1);
-
-            } else if (position <= 1) { // (0,1]
-                // Fade the page out.
-                view.setAlpha(1 - position);
-
-                // Counteract the default slide transition
-                view.setTranslationX(pageWidth * -position);
-
-                // Scale the page down (between MIN_SCALE and 1)
-                float scaleFactor = MIN_SCALE
-                        + (1 - MIN_SCALE) * (1 - Math.abs(position));
-                view.setScaleX(scaleFactor);
-                view.setScaleY(scaleFactor);
-
-            } else { // (1,+Infinity]
-                // This page is way off-screen to the right.
-                view.setAlpha(0);
-            }
-        }
     }
 }

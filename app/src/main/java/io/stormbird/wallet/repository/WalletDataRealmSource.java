@@ -58,6 +58,7 @@ public class WalletDataRealmSource {
                             .equalTo("address", keyStoreWallet.address)
                             .findFirst();
 
+
                     composeWallet(keyStoreWallet, data, WalletType.KEYSTORE);
                     walletList.add(keyStoreWallet);
                 }
@@ -87,7 +88,14 @@ public class WalletDataRealmSource {
             wallet.name = d.getName();
             wallet.lastBackupTime = d.getLastBackup();
             wallet.authLevel = d.getAuthLevel();
-            wallet.type = type;
+            if (d.getType() == WalletType.NOT_DEFINED)
+            {
+                wallet.type = type;
+            }
+            else
+            {
+                wallet.type = d.getType();
+            }
         }
     }
 

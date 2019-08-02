@@ -95,17 +95,13 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
     private void onSignRequest(Boolean aBoolean)
     {
-        if (wallet != null && wallet.isHDWallet())
+        if (wallet != null)
         {
             //get authorisation to use HD key before signing
             if (!hdKeySvs.isChecking())
             {
                 hdKeySvs.getAuthenticationForSignature(wallet.address, this);
             }
-        }
-        else
-        {
-            GotAuthorisation(true);
         }
     }
 

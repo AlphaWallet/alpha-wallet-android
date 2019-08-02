@@ -13,7 +13,6 @@ import java.util.Map;
 import io.stormbird.wallet.entity.CryptoFunctions;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -32,17 +31,14 @@ public class FeeMasterService
 {
     private final OkHttpClient httpClient;
     private final TransactionRepositoryType transactionRepository;
-    private final PasswordStore passwordStore;
     private ParseMagicLink parser;
 
     private static final String API = "api/";
 
     public FeeMasterService(OkHttpClient httpClient,
-                            TransactionRepositoryType transactionRepository,
-                            PasswordStore passwordStore) {
+                            TransactionRepositoryType transactionRepository) {
         this.httpClient = httpClient;
         this.transactionRepository = transactionRepository;
-        this.passwordStore = passwordStore;
     }
 
     private void initParser()
@@ -95,14 +91,6 @@ public class FeeMasterService
 
             return result;
         });
-    }
-
-    private Single<byte[]> getTradeSig(Wallet wallet, int[] indicesArray, String contractAddress, BigInteger price, long expiry, int chainId)
-    {
-        initParser();
-        final byte[] tradeBytes = parser.getTradeBytes(indicesArray, contractAddress, price, expiry);
-        return passwordStore.getPassword(wallet)
-                    .flatMap(password -> transactionRepository.getSignature(wallet, tradeBytes, password, chainId));
     }
 
     private Single<int[]> generateTicketArray(String indices, Ticket ticket)

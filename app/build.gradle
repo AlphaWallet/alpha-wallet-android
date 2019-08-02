@@ -165,7 +165,6 @@ dependencies {
 
     // PW
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation project(':tn')
 }
 
 // WARNING WARNING WARNING

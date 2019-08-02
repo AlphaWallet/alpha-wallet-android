@@ -500,15 +500,11 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private void authoriseKey()
     {
         Wallet wallet = viewModel.wallet().getValue();
-        if (wallet != null && wallet.isHDWallet())
+        if (wallet != null)
         {
             //get authorisation to use HD key before signing
             HDKeyService svs = new HDKeyService(this);
             svs.getAuthenticationForSignature(wallet.address, this);
-        }
-        else
-        {
-            GotAuthorisation(true);
         }
     }
 

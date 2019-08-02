@@ -136,7 +136,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
 
                 for (Wallet w : wallets)
                 {
-                    if (w.type == WalletType.KEYSTORE)
+                    if (w.type == WalletType.KEYSTORE || w.type == WalletType.KEYSTORE_LEGACY)
                     {
                         this.wallets.add(w);
                     }

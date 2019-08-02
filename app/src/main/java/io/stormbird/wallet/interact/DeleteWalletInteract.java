@@ -4,7 +4,6 @@ import android.app.Activity;
 import io.reactivex.Completable;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletType;
-import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 
 import io.reactivex.Single;
@@ -16,11 +15,9 @@ import io.stormbird.wallet.service.HDKeyService;
  */
 public class DeleteWalletInteract {
 	private final WalletRepositoryType walletRepository;
-	private final PasswordStore passwordStore;
 
-	public DeleteWalletInteract(WalletRepositoryType walletRepository, PasswordStore passwordStore) {
+	public DeleteWalletInteract(WalletRepositoryType walletRepository) {
 		this.walletRepository = walletRepository;
-		this.passwordStore = passwordStore;
 	}
 
 	public Single<Wallet[]> delete(Wallet wallet, Activity activity)
@@ -45,8 +42,12 @@ public class DeleteWalletInteract {
 		}
 		else
 		{
-			return passwordStore.getPassword(wallet)
-					.flatMapCompletable(password -> walletRepository.deleteWallet(wallet.address, password))
+			return Single.fromCallable(() -> {
+				HDKeyService svs = new HDKeyService(activity);
+				svs.deleteKeystoreKey(wallet.address);
+				return wallet.address;
+			}).flatMap(walletRepository::deleteWalletFromRealm)
+					.flatMapCompletable(addr -> walletRepository.deleteWallet(addr, ""))
 					.andThen(walletRepository.fetchWallets())
 					.observeOn(AndroidSchedulers.mainThread());
 		}

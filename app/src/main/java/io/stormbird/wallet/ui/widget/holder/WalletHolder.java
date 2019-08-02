@@ -89,15 +89,6 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		switch (wallet.type)
 		{
 			case KEYSTORE:
-				if (isBackedUp)
-				{
-					defaultAction.setBackgroundResource(R.drawable.selector_wallet_no_auth);
-				}
-				else
-				{
-					defaultAction.setBackgroundResource(R.drawable.selector_wallet_no_backup);
-				}
-				break;
 			case HDKEY:
 				switch (wallet.authLevel)
 				{

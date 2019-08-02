@@ -426,14 +426,10 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     {
         //get authorisation if using an HD Key
         Wallet wallet = viewModel.defaultWallet().getValue();
-        if (wallet != null && wallet.isHDWallet())
+        if (wallet != null)
         {
             HDKeyService svs = new HDKeyService(this);
             svs.getAuthenticationForSignature(wallet.address, this);
-        }
-        else
-        {
-            sellTicketLinkFinal();
         }
     }
 

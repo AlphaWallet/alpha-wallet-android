@@ -309,16 +309,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private void onSendGasSettings(GasSettings gasSettings)
     {
         localGasSettings = gasSettings;
-        //get authorisation if using an HD Key
-        if (sendingWallet != null && sendingWallet.isHDWallet())
-        {
-            HDKeyService svs = new HDKeyService(this);
-            svs.getAuthenticationForSignature(viewModel.defaultWallet().getValue().address, this);
-        }
-        else
-        {
-            finaliseTransaction();
-        }
+        HDKeyService svs = new HDKeyService(this);
+        svs.getAuthenticationForSignature(viewModel.defaultWallet().getValue().address, this);
     }
 
     private void finaliseTransaction()

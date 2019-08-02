@@ -5,7 +5,6 @@ import dagger.Provides;
 import io.stormbird.wallet.interact.DeleteWalletInteract;
 import io.stormbird.wallet.interact.ExportWalletInteract;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
-import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.viewmodel.BackupKeyViewModelFactory;
 
@@ -24,14 +23,14 @@ public class BackupKeyModule {
 
     @Provides
     DeleteWalletInteract provideDeleteAccountInteract(
-            WalletRepositoryType accountRepository, PasswordStore store) {
-        return new DeleteWalletInteract(accountRepository, store);
+            WalletRepositoryType accountRepository) {
+        return new DeleteWalletInteract(accountRepository);
     }
 
     @Provides
     ExportWalletInteract provideExportWalletInteract(
-            WalletRepositoryType walletRepository, PasswordStore passwordStore) {
-        return new ExportWalletInteract(walletRepository, passwordStore);
+            WalletRepositoryType walletRepository) {
+        return new ExportWalletInteract(walletRepository);
     }
 
     @Provides

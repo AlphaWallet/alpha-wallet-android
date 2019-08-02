@@ -21,7 +21,6 @@ import io.stormbird.wallet.entity.BaseViewCallback;
 import io.stormbird.wallet.entity.CryptoFunctions;
 import io.stormbird.wallet.entity.TradeInstance;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -51,7 +50,6 @@ public class MarketQueueService {
 
     private final OkHttpClient httpClient;
     private final TransactionRepositoryType transactionRepository;
-    private final PasswordStore passwordStore;
 
     private Disposable marketQueueProcessing;
     private ApiMarketQueue marketQueueConnector;
@@ -60,11 +58,9 @@ public class MarketQueueService {
     private CryptoFunctions cryptoFunctions;
 
     public MarketQueueService(Context ctx, OkHttpClient httpClient,
-                              TransactionRepositoryType transactionRepository,
-                              PasswordStore passwordStore) {
+                              TransactionRepositoryType transactionRepository) {
         this.httpClient = httpClient;
         this.transactionRepository = transactionRepository;
-        this.passwordStore = passwordStore;
 
         buildConnector();
     }
@@ -240,8 +236,7 @@ public class MarketQueueService {
     }
 
     private Single<TradeInstance> getTradeMessages(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId, int chainId) {
-        return passwordStore.getPassword(wallet)
-                .flatMap(password -> tradesInnerLoop(wallet, password, price, tickets, contractAddr, firstTicketId, chainId));
+        return tradesInnerLoop(wallet, "password", price, tickets, contractAddr, firstTicketId, chainId);
     }
 
     private Single<byte[]> getTradeSignature(Wallet wallet, String password, TradeInstance trade, int chainId) {
@@ -260,10 +255,8 @@ public class MarketQueueService {
     }
 
     public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId) {
-        return passwordStore.getPassword(from)
-                .flatMap(password ->
-                        transactionRepository.createTransaction(from, to, subunitAmount, gasPrice, gasLimit, data, password, chainId)
-                                .observeOn(AndroidSchedulers.mainThread()));
+        return transactionRepository.createTransaction(from, to, subunitAmount, gasPrice, gasLimit, data, "password", chainId)
+                                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public void createSalesOrders(Wallet wallet, BigInteger price, int[] ticketIDs, String contractAddr, BigInteger firstTicketId, BaseViewCallback callback, int chainId) {

@@ -1,25 +1,18 @@
 package io.stormbird.wallet.viewmodel;
 
-import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.ImportWalletCallback;
 import io.stormbird.wallet.entity.ServiceErrorException;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.ImportWalletInteract;
 import io.stormbird.wallet.service.HDKeyService;
-import io.stormbird.wallet.ui.widget.OnImportKeystoreListener;
-import io.stormbird.wallet.ui.widget.OnImportPrivateKeyListener;
-import io.stormbird.wallet.ui.widget.OnImportSeedListener;
 import io.stormbird.wallet.ui.widget.OnSetWatchWalletListener;
-import wallet.core.jni.HDWallet;
 
-public class ImportWalletViewModel extends BaseViewModel implements OnImportKeystoreListener, OnImportPrivateKeyListener, OnSetWatchWalletListener
+public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWalletListener
 {
     private final ImportWalletInteract importWalletInteract;
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
@@ -29,20 +22,23 @@ public class ImportWalletViewModel extends BaseViewModel implements OnImportKeys
         this.importWalletInteract = importWalletInteract;
     }
 
-    @Override
-    public void onKeystore(String keystore, String password) {
+    public void onKeystore(String keystoreDetails, String newPassword, HDKeyService.AuthenticationLevel level) {
         progress.postValue(true);
+        String[] split = keystoreDetails.split("__");
+        String keystore = split[0];
+        String password = split[1];
         importWalletInteract
-                .importKeystore(keystore, password)
-                .subscribe(this::onWallet, this::onError);
+                .importKeystore(keystore, password, newPassword)
+                .flatMap(wallet -> importWalletInteract.storeKeystoreWallet(wallet, level))
+                .subscribe(this::onWallet, this::onError).isDisposed();
     }
 
-    @Override
-    public void onPrivateKey(String key) {
+    public void onPrivateKey(String privateKey, String newPassword, HDKeyService.AuthenticationLevel level) {
         progress.postValue(true);
         importWalletInteract
-                .importPrivateKey(key)
-                .subscribe(this::onWallet, this::onError);
+                .importPrivateKey(privateKey, newPassword)
+                .flatMap(wallet -> importWalletInteract.storeKeystoreWallet(wallet, level))
+                .subscribe(this::onWallet, this::onError).isDisposed();
     }
 
     @Override

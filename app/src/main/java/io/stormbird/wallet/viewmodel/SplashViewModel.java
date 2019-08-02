@@ -12,7 +12,6 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.interact.CreateWalletInteract;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
@@ -31,7 +30,6 @@ import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_FILE_URL;
 public class SplashViewModel extends ViewModel
 {
     private final FetchWalletsInteract fetchWalletsInteract;
-    private final CreateWalletInteract createWalletInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final LocaleRepositoryType localeRepository;
 
@@ -39,11 +37,9 @@ public class SplashViewModel extends ViewModel
     private MutableLiveData<Wallet> createWallet = new MutableLiveData<>();
 
     SplashViewModel(FetchWalletsInteract fetchWalletsInteract,
-                    CreateWalletInteract createWalletInteract,
                     PreferenceRepositoryType preferenceRepository,
                     LocaleRepositoryType localeRepository) {
         this.fetchWalletsInteract = fetchWalletsInteract;
-        this.createWalletInteract = createWalletInteract;
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
     }
@@ -74,8 +70,8 @@ public class SplashViewModel extends ViewModel
 
     public void createNewWallet(Activity ctx, CreateWalletCallbackInterface createCallback)
     {
-        //create a new wallet for the user
-        createWalletInteract.create(ctx, createCallback);
+        HDKeyService hdService = new HDKeyService(ctx);
+        hdService.createNewHDKey(createCallback);
     }
 
     public void checkVersionUpdate(Context ctx, long updateTime)

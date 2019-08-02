@@ -4,8 +4,6 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 import io.stormbird.wallet.App;
-import io.stormbird.wallet.repository.PasswordStore;
-import io.stormbird.wallet.repository.TrustPasswordStore;
 import io.stormbird.wallet.service.RealmManager;
 
 import java.util.concurrent.TimeUnit;
@@ -39,12 +37,6 @@ class ToolsModule {
                 .writeTimeout(30, TimeUnit.MINUTES)
 				.retryOnConnectionFailure(true)
                 .build();
-	}
-
-	@Singleton
-	@Provides
-	PasswordStore passwordStore(Context context) {
-		return new TrustPasswordStore(context);
 	}
 
 	@Singleton

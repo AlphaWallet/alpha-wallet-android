@@ -41,6 +41,6 @@ public class EIP681Request
         NumberFormat formatter = new DecimalFormat("0.#E0");
         formatter.setRoundingMode(RoundingMode.HALF_UP);
         formatter.setMaximumFractionDigits(6);
-        return formatter.format(x);
+        return formatter.format(x).replace(",", ".");
     }
 }

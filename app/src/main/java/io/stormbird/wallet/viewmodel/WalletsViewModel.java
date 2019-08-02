@@ -26,7 +26,6 @@ public class WalletsViewModel extends BaseViewModel
 {
     private final static String TAG = WalletsViewModel.class.getSimpleName();
 
-    private final CreateWalletInteract createWalletInteract;
     private final SetDefaultWalletInteract setDefaultWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
     private final GenericWalletInteract genericWalletInteract;
@@ -49,7 +48,6 @@ public class WalletsViewModel extends BaseViewModel
     private Map<String, Wallet> walletBalances = new HashMap<>();
 
     WalletsViewModel(
-            CreateWalletInteract createWalletInteract,
             SetDefaultWalletInteract setDefaultWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
             GenericWalletInteract genericWalletInteract,
@@ -58,7 +56,6 @@ public class WalletsViewModel extends BaseViewModel
             FetchTokensInteract fetchTokensInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract)
     {
-        this.createWalletInteract = createWalletInteract;
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.genericWalletInteract = genericWalletInteract;
@@ -193,7 +190,8 @@ public class WalletsViewModel extends BaseViewModel
 
     public void newWallet(Activity ctx, CreateWalletCallbackInterface createCallback)
     {
-        createWalletInteract.create(ctx, createCallback);
+        HDKeyService svs = new HDKeyService(ctx);
+        svs.createNewHDKey(createCallback);
     }
 
     /**

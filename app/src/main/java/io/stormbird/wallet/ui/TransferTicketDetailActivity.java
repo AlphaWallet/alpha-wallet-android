@@ -509,16 +509,11 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private void transferTicketAuth()
     {
         Wallet wallet = viewModel.defaultWallet().getValue();
-        if (wallet != null) wallet.checkWalletType(this);
-        if (wallet != null && wallet.isHDWallet())
+        if (wallet != null)
         {
-            //get authorisation to use HD key before signing
+            //get authorisation if required
             HDKeyService svs = new HDKeyService(this);
             svs.getAuthenticationForSignature(wallet.address, this);
-        }
-        else
-        {
-            transferTicketFinal();
         }
     }
 

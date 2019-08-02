@@ -183,8 +183,8 @@ public class AmountEntryItem
 
     private void updateEquivalentValue() throws NumberFormatException
     {
+        String amountStr = amountEditText.getText().toString();
         if (usdInput) {
-            String amountStr = amountEditText.getText().toString();
             String tokenAmountEquivalent = ethEquivalent(amountStr);
             tokenEquivalent.setText(tokenAmountEquivalent);
 
@@ -198,16 +198,15 @@ public class AmountEntryItem
             callback.amountChanged(String.valueOf(equivalent));
         } else
         {
-            String amount = amountEditText.getText().toString();
-            if (amount.length() == 0)
-                amount = "0";
-            if (isValidAmount(amount))
+            if (amountStr.length() == 0)
+                amountStr = "0";
+            if (isValidAmount(amountStr))
             {
-                String usdEquivStr = "US$ " + getUsdString(Double.valueOf(amount) * currentEthPrice);
+                String usdEquivStr = "US$ " + getUsdString(Double.parseDouble(amountStr) * currentEthPrice);
                 if (!hasRealValue) usdEquivStr = "(TEST) " + usdEquivStr;
                 usdValue.setText(usdEquivStr);
             }
-            callback.amountChanged(amount);
+            callback.amountChanged(amountStr);
         }
     }
 

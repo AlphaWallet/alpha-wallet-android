@@ -1,7 +1,6 @@
 package io.stormbird.wallet.di;
 
 import io.stormbird.wallet.interact.ImportWalletInteract;
-import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.viewmodel.ImportWalletViewModelFactory;
 
@@ -18,7 +17,7 @@ class ImportModule {
 
     @Provides
     ImportWalletInteract provideImportWalletInteract(
-            WalletRepositoryType walletRepository, PasswordStore passwordStore) {
-        return new ImportWalletInteract(walletRepository, passwordStore);
+            WalletRepositoryType walletRepository) {
+        return new ImportWalletInteract(walletRepository);
     }
 }

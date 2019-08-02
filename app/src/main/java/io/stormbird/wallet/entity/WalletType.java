@@ -10,5 +10,6 @@ public enum WalletType
     KEYSTORE,
     HDKEY,
     WATCH,
-    TEXT_MARKER // used as a separator in wallet view
+    TEXT_MARKER, // used as a separator in wallet view
+    KEYSTORE_LEGACY  // to support keys created from old wallets
 }

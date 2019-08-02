@@ -11,6 +11,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import static io.stormbird.wallet.service.HDKeyService.KEYSTORE_LABEL;
 import static io.stormbird.wallet.service.HDKeyService.NO_AUTH_LABEL;
 import static io.stormbird.wallet.service.KeystoreAccountService.KEYSTORE_FOLDER;
 import static io.stormbird.wallet.util.BalanceUtils.weiToEth;
@@ -71,7 +72,7 @@ public class Wallet implements Parcelable {
 			{
 				if (f.getName().contains(addr))
 				{
-					type = WalletType.KEYSTORE;
+					type = determineKeystoreType(ctx);// WalletType.KEYSTORE;
 					return;
 				}
 			}
@@ -79,6 +80,20 @@ public class Wallet implements Parcelable {
 			//assume watch wallet
 			type = WalletType.WATCH;
 		}
+	}
+
+	private WalletType determineKeystoreType(Context ctx)
+	{
+		File[] keyStores = new File(ctx.getFilesDir(), "").listFiles();
+		for (File path : keyStores)
+		{
+			if (path.getName().contains(address))
+			{
+				System.out.println("ATX: " + path.getName());
+			}
+		}
+		if (new File(ctx.getFilesDir(), address + KEYSTORE_LABEL).exists()) return WalletType.KEYSTORE;
+		else return WalletType.KEYSTORE_LEGACY;
 	}
 
 	public boolean hasNonAuthKey(Context ctx)

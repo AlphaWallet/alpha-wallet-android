@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
 import io.stormbird.wallet.repository.SharedPreferenceRepository;
 import io.stormbird.wallet.repository.TokenLocalSource;
@@ -152,9 +151,8 @@ public class RepositoriesModule {
 	@Singleton
 	@Provides
 	MarketQueueService provideMarketQueueService(Context ctx, OkHttpClient okHttpClient,
-												 TransactionRepositoryType transactionRepository,
-												 PasswordStore passwordStore) {
-		return new MarketQueueService(ctx, okHttpClient, transactionRepository, passwordStore);
+												 TransactionRepositoryType transactionRepository) {
+		return new MarketQueueService(ctx, okHttpClient, transactionRepository);
 	}
 
 	@Singleton
@@ -166,17 +164,15 @@ public class RepositoriesModule {
 	@Singleton
 	@Provides
 	FeeMasterService provideFeemasterService(OkHttpClient okHttpClient,
-											 TransactionRepositoryType transactionRepository,
-											 PasswordStore passwordStore) {
-		return new FeeMasterService(okHttpClient, transactionRepository, passwordStore);
+											 TransactionRepositoryType transactionRepository) {
+		return new FeeMasterService(okHttpClient, transactionRepository);
 	}
 
 	@Singleton
 	@Provides
 	ImportTokenService provideImportTokenService(OkHttpClient okHttpClient,
-												 TransactionRepositoryType transactionRepository,
-												 PasswordStore passwordStore) {
-		return new ImportTokenService(okHttpClient, transactionRepository, passwordStore);
+												 TransactionRepositoryType transactionRepository) {
+		return new ImportTokenService(okHttpClient, transactionRepository);
 	}
 
 	@Singleton

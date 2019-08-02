@@ -3,7 +3,6 @@ package io.stormbird.wallet.di;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.HomeRouter;
@@ -18,7 +17,6 @@ class AccountsManageModule {
 
 	@Provides
     WalletsViewModelFactory provideAccountsManageViewModelFactory(
-			CreateWalletInteract createWalletInteract,
 			SetDefaultWalletInteract setDefaultWalletInteract,
 			FetchWalletsInteract fetchWalletsInteract,
 			GenericWalletInteract genericWalletInteract,
@@ -26,20 +24,13 @@ class AccountsManageModule {
 			HomeRouter homeRouter,
 			FetchTokensInteract fetchTokensInteract,
 			FindDefaultNetworkInteract findDefaultNetworkInteract) {
-		return new WalletsViewModelFactory(createWalletInteract,
-                setDefaultWalletInteract,
+		return new WalletsViewModelFactory(setDefaultWalletInteract,
                 fetchWalletsInteract,
                                            genericWalletInteract,
                 importWalletRouter,
                 homeRouter,
 				fetchTokensInteract,
 				findDefaultNetworkInteract);
-	}
-
-	@Provides
-    CreateWalletInteract provideCreateAccountInteract(
-            WalletRepositoryType accountRepository, PasswordStore passwordStore) {
-		return new CreateWalletInteract(accountRepository, passwordStore);
 	}
 
 	@Provides

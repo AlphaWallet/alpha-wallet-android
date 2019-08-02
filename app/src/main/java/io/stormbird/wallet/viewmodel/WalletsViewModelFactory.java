@@ -12,7 +12,6 @@ import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
 
 public class WalletsViewModelFactory implements ViewModelProvider.Factory {
-    private final CreateWalletInteract createWalletInteract;
     private final SetDefaultWalletInteract setDefaultWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
     private final GenericWalletInteract genericWalletInteract;
@@ -23,7 +22,6 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
 
     @Inject
     public WalletsViewModelFactory(
-            CreateWalletInteract createWalletInteract,
             SetDefaultWalletInteract setDefaultWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
             GenericWalletInteract genericWalletInteract,
@@ -31,7 +29,6 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
             HomeRouter homeRouter,
             FetchTokensInteract fetchTokensInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract) {
-        this.createWalletInteract = createWalletInteract;
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.genericWalletInteract = genericWalletInteract;
@@ -45,7 +42,6 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new WalletsViewModel(
-                createWalletInteract,
                 setDefaultWalletInteract,
                 fetchWalletsInteract,
                 genericWalletInteract,

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.util.DateTime;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.ServiceErrorException;
 import io.stormbird.wallet.entity.Wallet;
@@ -22,10 +23,8 @@ import org.web3j.utils.Numeric;
 
 import java.io.File;
 import java.math.BigInteger;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.text.SimpleDateFormat;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -87,7 +86,11 @@ public class KeystoreAccountService implements AccountKeystoreService
                 ECKeyPair kp = org.web3j.crypto.Wallet.decrypt(password, walletFile);
                 Credentials credentials = Credentials.create(kp);
                 WalletFile wFile = org.web3j.crypto.Wallet.createLight(newPassword, credentials.getEcKeyPair());
-                String fileName = "UTC--" + Instant.now().toString().replace(":", "-") + "--" + Numeric.cleanHexPrefix(credentials.getAddress());
+
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'hh-mm-ss.mmmm'Z'", Locale.ROOT);
+                String asString = formatter.format(System.currentTimeMillis());
+
+                String fileName = "UTC--" + asString.replace(":", "-") + "--" + Numeric.cleanHexPrefix(credentials.getAddress());
                 //write new keystore to file
                 File destination = new File(keyFolder, fileName);
                 objectMapper.writeValue(destination, wFile);
@@ -177,26 +180,11 @@ public class KeystoreAccountService implements AccountKeystoreService
                     dataStr
                     );
 
-            byte[] encodedTx;
-            switch (signer.type)
-            {
-                default:
-                case NOT_DEFINED:
-                case KEYSTORE:
-                    Credentials credentials = getCredentials(signer.address, signerPassword);
-                    encodedTx = TransactionEncoder.signMessage(rtx, credentials);
-                    break;
-                case HDKEY:
-                    //we have already unlocked the auth here, if required
-                    byte[] signData = TransactionEncoder.encode(rtx);
-                    HDKeyService svs = new HDKeyService(null);
-                    byte[] signatureBytes = svs.signData(signer.address, signData);
-                    Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
-                    encodedTx = encode(rtx, sigData);
-                    break;
-            }
-
-            return encodedTx;
+            HDKeyService svs = new HDKeyService(null);
+            byte[] signData = TransactionEncoder.encode(rtx);
+            byte[] signatureBytes = svs.signData(signer.address, signData);
+            Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
+            return encode(rtx, sigData);
         })
         .subscribeOn(Schedulers.io());
     }
@@ -298,23 +286,8 @@ public class KeystoreAccountService implements AccountKeystoreService
     {
         return Single.fromCallable(() -> {
             byte[] messageHash = Hash.sha3(message);
-            //BigInt chain = new BigInt(chainId); // Chain identifier of the main net
-            byte[] signed;
-            switch (signer.type)
-            {
-                default:
-                case NOT_DEFINED:
-                case KEYSTORE:
-                    Credentials credentials = getCredentials(signer.address, signerPassword);
-                    Sign.SignatureData signatureData = Sign.signMessage(
-                            messageHash, credentials.getEcKeyPair(), false);
-                    signed = bytesFromSignature(signatureData);
-                    break;
-                case HDKEY:
-                    HDKeyService svs = new HDKeyService(null); //sign should already be unlocked
-                    signed = svs.signData(signer.address, messageHash);
-                    break;
-            }
+            HDKeyService svs = new HDKeyService(null); //sign should already be unlocked
+            byte[] signed = svs.signData(signer.address, messageHash);
 
             signed = patchSignatureVComponent(signed);
             return signed;
@@ -354,9 +327,14 @@ public class KeystoreAccountService implements AccountKeystoreService
                 if (WalletUtils.isValidAddress(address))
                 {
                     String d = fName.substring(5, index-1).replace("T", " ").substring(0, 23);
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss.SSS");
-                    LocalDateTime dateTime = LocalDateTime.parse(d, formatter);
-                    Date date = java.util.Date.from(dateTime.toInstant(ZoneOffset.UTC));
+
+                    //DateTime dt = DateTimeFactory.getDateTime(d);
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss.SSS", Locale.ROOT);
+                    Date date = simpleDateFormat.parse(d);
+
+                    //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss.SSS");
+                    //LocalDateTime dateTime = LocalDateTime.parse(d, formatter);
+                    //Date date = java.util.Date.from(dateTime.toInstant(ZoneOffset.UTC));
                     fileDates.add(date);
                     walletMap.put(date, address);
                 }

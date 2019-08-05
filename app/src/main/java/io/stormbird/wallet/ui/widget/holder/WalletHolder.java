@@ -88,6 +88,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 
 		switch (wallet.type)
 		{
+			case KEYSTORE_LEGACY:
 			case KEYSTORE:
 			case HDKEY:
 				switch (wallet.authLevel)

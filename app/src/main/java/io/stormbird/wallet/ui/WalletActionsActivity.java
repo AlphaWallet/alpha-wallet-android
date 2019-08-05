@@ -24,7 +24,6 @@ import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.viewmodel.WalletActionsViewModel;
 import io.stormbird.wallet.viewmodel.WalletActionsViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
-import io.stormbird.wallet.widget.BackupView;
 
 import static io.stormbird.wallet.C.*;
 
@@ -273,27 +272,6 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
         });
         aDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         aDialog.show();
-    }
-
-    private void startExport(Wallet wallet) {
-        BackupView view = new BackupView(this);
-        aDialog = new AWalletAlertDialog(this);
-        aDialog.setIcon(AWalletAlertDialog.NONE);
-        aDialog.setView(view);
-        aDialog.setButtonText(R.string.dialog_ok);
-        aDialog.setButtonListener(v -> {
-            viewModel.exportWallet(wallet, view.getPassword());
-            KeyboardUtils.hideKeyboard(view.findViewById(R.id.password));
-            aDialog.dismiss();
-        });
-        aDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
-        aDialog.setSecondaryButtonListener(v -> {
-            KeyboardUtils.hideKeyboard(view.findViewById(R.id.password));
-            aDialog.dismiss();
-        });
-        aDialog.setOnDismissListener(v -> KeyboardUtils.hideKeyboard(view.findViewById(R.id.password)));
-        aDialog.show();
-        handler.postDelayed(() -> KeyboardUtils.showKeyboard(view.findViewById(R.id.password)), 500);
     }
 
     private void exportJSON(Wallet wallet)

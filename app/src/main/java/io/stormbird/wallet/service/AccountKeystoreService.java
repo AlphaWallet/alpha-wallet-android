@@ -43,14 +43,12 @@ public interface AccountKeystoreService {
 	/**
 	 * Sign transaction
 	 * @param signer {@link Wallet}
-	 * @param signerPassword password from {@link Wallet}
 	 * @param toAddress transaction destination address
 	 * @param nonce
 	 * @return sign data
 	 */
 	Single<byte[]> signTransaction(
 			Wallet signer,
-			String signerPassword,
 			String toAddress,
 			BigInteger amount,
 			BigInteger gasPrice,
@@ -61,13 +59,12 @@ public interface AccountKeystoreService {
 
 	Single<byte[]> signTransaction(
 			Wallet signer,
-			String signerPassword,
 			byte[] message,
 			long chainId);
 
 	Single<byte[]> signTransactionFast(
 			Wallet signer,
-			String signerPassword,
+			String password,
 			byte[] message,
 			long chainId);
 

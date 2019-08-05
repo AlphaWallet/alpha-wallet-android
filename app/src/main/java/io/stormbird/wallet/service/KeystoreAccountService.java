@@ -167,7 +167,7 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     @Override
-    public Single<byte[]> signTransaction(Wallet signer, String signerPassword, String toAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
+    public Single<byte[]> signTransaction(Wallet signer, String toAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
         return Single.fromCallable(() -> {
             String dataStr = data != null ? Numeric.toHexString(data) : "";
 
@@ -282,7 +282,7 @@ public class KeystoreAccountService implements AccountKeystoreService
     //In all cases where we need to sign data the signature needs to be in Ethereum format
     //Geth gives us the pure EC function, but for hash signing
     @Override
-    public Single<byte[]> signTransaction(Wallet signer, String signerPassword, byte[] message, long chainId)
+    public Single<byte[]> signTransaction(Wallet signer, byte[] message, long chainId)
     {
         return Single.fromCallable(() -> {
             byte[] messageHash = Hash.sha3(message);

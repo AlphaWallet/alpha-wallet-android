@@ -27,20 +27,8 @@ public class TicketHolder extends BaseTicketHolder
     {
         super.bind(data, addition);
 
-        ticketRedeemed.setVisibility(View.GONE);
-
         ticketLayout.setOnClickListener(v -> {
-            if (ticketDetails.getText().toString().length() > 0)
-            {
-                if (ticketDetailsLayout.getVisibility() == View.VISIBLE)
-                {
-                    ticketDetailsLayout.setVisibility(View.GONE);
-                }
-                else
-                {
-                    ticketDetailsLayout.setVisibility(View.VISIBLE);
-                }
-            }
+
         });
     }
 }

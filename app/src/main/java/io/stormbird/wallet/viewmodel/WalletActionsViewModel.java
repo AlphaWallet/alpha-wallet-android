@@ -98,13 +98,6 @@ public class WalletActionsViewModel extends BaseViewModel {
         deleted.postValue(true);
     }
 
-    public void exportWallet(Wallet wallet, String storePassword) {
-        isTaskRunning.postValue(true);
-        disposable = exportWalletInteract
-                .export(wallet, storePassword)
-                .subscribe(this::onExport, this::onExportWalletError);
-    }
-
     private void onExport(String s) {
         isTaskRunning.postValue(false);
         exportedStore.postValue(s);

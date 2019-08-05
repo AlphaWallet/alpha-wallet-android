@@ -426,4 +426,11 @@
     <string name="message_find_address">Tap here to find your Ethereum Wallet address</string>
     <string name="restore_from_standby_key">Restore from Standby Key</string>
     <string name="restore_from_standby_key_detail">Your wallet key was restored from non-authorised standby key. This is caused by a change to phone security invalidating key. Recommend to backup your wallet key safely as soon as possible. Standby key is erased after successful backup.</string>
+    <string name="back_up_this_wallet">Back up this Wallet</string>
+    <string name="not_locked">Not Locked</string>
+    <string name="back_up_now">Back up Now!</string>
+    <string name="key_secure">100% Secure</string>
+    <string name="lock_key_upgrade">Lock your seed phrase to increase security</string>
+    <string name="upgrade_key_security_detail">Alphawallet security is being upgraded to the best achievable. Lock your seed phrase with biometrics.</string>
+    <string name="action_upgrade_key">Upgrade key security</string>
 </resources>

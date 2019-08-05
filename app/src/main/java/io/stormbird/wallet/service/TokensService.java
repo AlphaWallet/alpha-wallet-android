@@ -269,11 +269,6 @@ public class TokensService
 
     public void setCurrentAddress(String currentAddress)
     {
-        if (currentAddress == null || currentAddress.length() == 0)
-        {
-            System.out.println("YOLESS");
-        }
-        System.out.println("YOLESS: " + currentAddress);
         this.currentAddress = currentAddress.toLowerCase();
     }
     public String getCurrentAddress() { return this.currentAddress; }

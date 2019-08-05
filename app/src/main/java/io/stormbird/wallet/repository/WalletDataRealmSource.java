@@ -44,11 +44,15 @@ public class WalletDataRealmSource {
             {
                 for (Wallet hdWallet : svs.getAllHDWallets())
                 {
+                    if (hdWallet.address.startsWith("0x49Ba"))
+                    {
+                        System.out.println("yoless");
+                    }
                     RealmWalletData data = realm.where(RealmWalletData.class)
                             .equalTo("address", hdWallet.address)
                             .findFirst();
 
-                    composeWallet(hdWallet, data, WalletType.HDKEY);
+                    composeWallet(hdWallet, data, WalletType.HDKEY, hdWallet.authLevel);
                     walletList.add(hdWallet);
                 }
 
@@ -58,8 +62,9 @@ public class WalletDataRealmSource {
                             .equalTo("address", keyStoreWallet.address)
                             .findFirst();
 
-
-                    composeWallet(keyStoreWallet, data, WalletType.KEYSTORE);
+                    WalletType type = svs.keystoreType(keyStoreWallet.address);
+                    HDKeyService.AuthenticationLevel authLevel = svs.authLevel(keyStoreWallet.address);
+                    composeWallet(keyStoreWallet, data, type, authLevel);
                     walletList.add(keyStoreWallet);
                 }
 
@@ -79,7 +84,7 @@ public class WalletDataRealmSource {
         });
     }
 
-    private void composeWallet(Wallet wallet, RealmWalletData d, WalletType type)
+    private void composeWallet(Wallet wallet, RealmWalletData d, WalletType type, HDKeyService.AuthenticationLevel authLevel)
     {
         if (d != null)
         {
@@ -87,15 +92,15 @@ public class WalletDataRealmSource {
             wallet.balance = balance(d);
             wallet.name = d.getName();
             wallet.lastBackupTime = d.getLastBackup();
-            wallet.authLevel = d.getAuthLevel();
-            if (d.getType() == WalletType.NOT_DEFINED)
+            if (d.getAuthLevel() == HDKeyService.AuthenticationLevel.STRONGBOX_AUTHENTICATION || d.getAuthLevel() == HDKeyService.AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION)
             {
-                wallet.type = type;
+                wallet.authLevel = d.getAuthLevel();
             }
             else
             {
-                wallet.type = d.getType();
+                wallet.authLevel = authLevel;
             }
+            wallet.type = type;
         }
     }
 

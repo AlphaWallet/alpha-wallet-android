@@ -17,6 +17,8 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
 import io.stormbird.wallet.entity.PinAuthenticationCallbackInterface;
+import io.stormbird.wallet.entity.SignAuthenticationCallback;
+import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.viewmodel.BackupKeyViewModel;
@@ -29,9 +31,11 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.C.SHARE_REQUEST_CODE;
 
-public class BackupKeyActivity extends BaseActivity implements View.OnClickListener, CreateWalletCallbackInterface, TextWatcher
+public class BackupKeyActivity extends BaseActivity implements View.OnClickListener,
+        CreateWalletCallbackInterface, TextWatcher, SignAuthenticationCallback
 {
     @Inject
     BackupKeyViewModelFactory backupKeyViewModelFactory;
@@ -39,6 +43,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private BackupState state;
     private String keyBackup;
+    private Wallet wallet;
     private TextView title;
     private TextView detail;
     private TextView passwordDetail;
@@ -72,6 +77,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
         String type = getIntent().getStringExtra("TYPE");
         keyBackup = getIntent().getStringExtra("ADDRESS");
+        wallet = getIntent().getParcelableExtra(WALLET);
         layoutHolderWidth = 0;
         initViews();
 
@@ -79,7 +85,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         {
             case "HDKEY":
                 state = BackupState.ENTER_BACKUP_STATE_HD;
-                setTitle(R.string.backup_seed_phrase);
+                setTitle(getString(R.string.backup_seed_phrase));
                 break;
             case "JSON":
                 state = BackupState.ENTER_JSON_BACKUP;
@@ -90,15 +96,73 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                 state = BackupState.TEST_SEED_PHRASE;
                 setTitle(getString(R.string.seed_phrase));
                 break;
+            case "UPGRADE_KEY":
+                setTitle(getString(R.string.action_upgrade_key));
+                state = BackupState.UPGRADE_KEY_SECURITY;
+                setupUpgradeKey();
+                break;
         }
 
         initViewModel();
     }
 
+    private void setupUpgradeKey()
+    {
+        title.setText(R.string.lock_key_upgrade);
+        backupImage.setImageResource(R.drawable.ic_biometric);
+        detail.setVisibility(View.VISIBLE);
+        detail.setText(R.string.upgrade_key_security_detail);
+        nextButton.setText(getString(R.string.action_upgrade_key));
+    }
+
+    private void upgradeKeySecurity()
+    {
+        HDKeyService svs;
+        switch (wallet.type)
+        {
+            case KEYSTORE:
+            case KEYSTORE_LEGACY:
+            case HDKEY:
+                svs = new HDKeyService(this);
+                if (svs.upgradeKeySecurity(keyBackup, this))
+                {
+                    CreatedKey(keyBackup); // already upgraded to top level
+                }
+                else
+                {
+                    DisplayKeyFailureDialog("Unable to upgrade key: Enable screenlock on phone");
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void CreatedKey(String address)
+    {
+        //key upgraded
+        //store wallet upgrade
+        Wallet wallet = new Wallet(address);
+        wallet.checkWalletType(this);
+        switch (wallet.type)
+        {
+            case KEYSTORE_LEGACY:
+            case KEYSTORE:
+                backupKeySuccess("JSON");
+                break;
+            case HDKEY:
+                backupKeySuccess("HDKEY");
+                break;
+            default:
+                break;
+        }
+    }
+
     private void setupJSONExport()
     {
         title.setText(R.string.export_keystore_json);
-        backupImage.setImageResource(R.drawable.json_graphic);
+        backupImage.setImageResource(R.drawable.ic_keystore);
         detail.setVisibility(View.VISIBLE);
         detail.setText(R.string.keystore_detail_text);
         nextButton.setText(R.string.export_keystore_json);
@@ -209,6 +273,9 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             case TEST_SEED_PHRASE:
                 VerifySeedPhrase();
                 break;
+            case UPGRADE_KEY_SECURITY:
+                upgradeKeySecurity();
+                break;
         }
     }
 
@@ -225,8 +292,9 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void ShareEncryptedKeystore()
     {
-        viewModel.exportWallet(keyBackup, inputView.getText().toString());
-        KeyboardUtils.hideKeyboard(inputView);
+        //1. fetch password (may require authentication)
+        HDKeyService svs = new HDKeyService(this);
+        svs.getPassword(keyBackup, this);
     }
 
     private void JSONBackup()
@@ -458,13 +526,26 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     @Override
     public void FetchMnemonic(String mnemonic)
     {
-        addNewLayoutLine();
-        mnemonicArray = mnemonic.split(" ");
-        //start adding words to layout
-        for (String word : mnemonicArray)
+        if (state == BackupState.SET_JSON_PASSWORD)
         {
-            addWordToLayout(word);
+            viewModel.exportWallet(keyBackup, mnemonic, inputView.getText().toString());
         }
+        else
+        {
+            addNewLayoutLine();
+            mnemonicArray = mnemonic.split(" ");
+            //start adding words to layout
+            for (String word : mnemonicArray)
+            {
+                addWordToLayout(word);
+            }
+        }
+    }
+
+    @Override
+    public void GotAuthorisation(boolean gotAuth)
+    {
+        System.out.println("YOLESS: " + gotAuth);
     }
 
     @Override
@@ -612,6 +693,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     private enum BackupState
     {
         ENTER_BACKUP_STATE_HD, WRITE_DOWN_SEED_PHRASE, VERIFY_SEED_PHRASE, SEED_PHRASE_INVALID,
-        ENTER_JSON_BACKUP, SET_JSON_PASSWORD, TEST_SEED_PHRASE
+        ENTER_JSON_BACKUP, SET_JSON_PASSWORD, TEST_SEED_PHRASE, UPGRADE_KEY_SECURITY
     }
 }

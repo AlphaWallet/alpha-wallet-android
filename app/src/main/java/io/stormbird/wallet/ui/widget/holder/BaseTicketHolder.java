@@ -27,10 +27,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     private final AssetDefinitionService assetService; //need to cache this locally, unless we cache every string we need in the constructor
 
     private final View activityView;
-    protected final TextView ticketRedeemed;
-    protected final LinearLayout ticketDetailsLayout;
     protected final RelativeLayout ticketLayout;
-    protected final TextView ticketDetails;
 
     public BaseTicketHolder(int resId, ViewGroup parent, Token ticket, AssetDefinitionService service) {
         super(resId, parent);
@@ -38,9 +35,6 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
         activityView = this.itemView;
 
         itemView.setOnClickListener(this);
-        ticketRedeemed = findViewById(R.id.redeemed);
-        ticketDetailsLayout = findViewById(R.id.layout_ticket_details);
-        ticketDetails = findViewById(R.id.ticket_details);
         ticketLayout = findViewById(R.id.layout_select_ticket);
         assetService = service;
         token = ticket;

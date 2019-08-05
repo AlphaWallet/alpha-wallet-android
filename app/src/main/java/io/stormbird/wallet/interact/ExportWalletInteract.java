@@ -14,9 +14,9 @@ public class ExportWalletInteract {
         this.walletRepository = walletRepository;
     }
 
-    public Single<String> export(Wallet wallet, String backupPassword) {
+    public Single<String> export(Wallet wallet, String keystorePassword, String backupPassword) {
         return walletRepository
-                    .exportWallet(wallet, "password", backupPassword)
+                    .exportWallet(wallet, keystorePassword, backupPassword)
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

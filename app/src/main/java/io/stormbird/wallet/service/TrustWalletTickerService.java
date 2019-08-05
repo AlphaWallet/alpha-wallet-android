@@ -21,7 +21,6 @@ import retrofit2.http.Query;
 
 public class TrustWalletTickerService implements TickerService {
 
-    private static final String TRUST_API_URL = "https://api.trustwalletapp.com";
     private static final String COINMARKET_API = "https://api.coinmarketcap.com";
 
     private final OkHttpClient httpClient;

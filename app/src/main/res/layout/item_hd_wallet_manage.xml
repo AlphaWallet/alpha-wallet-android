@@ -114,5 +114,5 @@
         android:layout_margin="@dimen/normal_margin"
         android:contentDescription="@string/empty"
         android:visibility="gone"
-        app:srcCompat="@drawable/ic_backup" />
+        app:srcCompat="@drawable/ic_backup_vector" />
 </RelativeLayout>

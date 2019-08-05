@@ -26,15 +26,15 @@ public class ImportTokenService {
         this.transactionRepository = transactionRepository;
     }
 
-    public Single<byte[]> sign(Wallet wallet, byte[] importMessage, int chainId)
-    {
-        return transactionRepository.getSignature(wallet, importMessage, "password", chainId);
-                //.map(sig -> new SignaturePair(messagePair.selection, sig, messagePair.message));
-    }
+//    public Single<byte[]> sign(Wallet wallet, byte[] importMessage, int chainId)
+//    {
+//        return transactionRepository.getSignature(wallet, importMessage, chainId);
+//                //.map(sig -> new SignaturePair(messagePair.selection, sig, messagePair.message));
+//    }
 
     //sign the ticket data
-    public Single<byte[]> sign(Wallet wallet, String password, byte[] data, int chainId) {
-        return transactionRepository.getSignature(wallet, data, password, chainId);
+    public Single<byte[]> sign(Wallet wallet, byte[] data, int chainId) {
+        return transactionRepository.getSignature(wallet, data, chainId);
     }
 
     public static Sign.SignatureData sigFromByteArray(byte[] sig)

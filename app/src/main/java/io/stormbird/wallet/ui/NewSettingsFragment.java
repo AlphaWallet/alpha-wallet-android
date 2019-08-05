@@ -25,6 +25,7 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.GenericWalletInteract;
+import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.util.LocaleUtils;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModel;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModelFactory;
@@ -32,6 +33,7 @@ import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.SelectLocaleDialog;
 
 import static io.stormbird.wallet.C.*;
+import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.ui.HomeActivity.RC_ASSET_EXTERNAL_WRITE_PERM;
 
 public class NewSettingsFragment extends Fragment
@@ -42,6 +44,7 @@ public class NewSettingsFragment extends Fragment
     private NewSettingsViewModel viewModel;
 
     private TextView walletsSubtext;
+    private TextView backupStatusText;
     private TextView localeSubtext;
     private Switch notificationState;
     private LinearLayout layoutEnableXML;
@@ -51,6 +54,7 @@ public class NewSettingsFragment extends Fragment
     private TextView backupDetail;
     private RelativeLayout backupLayoutBackground;
     private ImageView backupMenuButton;
+    private ImageView backupStatusImage;
     private View backupPopupAnchor;
 
     @Nullable
@@ -66,6 +70,8 @@ public class NewSettingsFragment extends Fragment
         walletsSubtext = view.findViewById(R.id.wallets_subtext);
         localeSubtext = view.findViewById(R.id.locale_lang_subtext);
         notificationState = view.findViewById(R.id.switch_notifications);
+        backupStatusText = view.findViewById(R.id.text_backup_status);
+        backupStatusImage = view.findViewById(R.id.image_backup_status);
 
         TextView helpText = view.findViewById(R.id.text_version);
         try
@@ -90,6 +96,28 @@ public class NewSettingsFragment extends Fragment
         final LinearLayout layoutManageWallets = view.findViewById(R.id.layout_manage_wallets);
         layoutManageWallets.setOnClickListener(v -> {
             viewModel.showManageWallets(getContext(), false);
+        });
+
+        final LinearLayout layoutBackupKey = view.findViewById(R.id.layout_backup_wallet);
+        layoutBackupKey.setOnClickListener(v -> {
+            Wallet wallet = viewModel.defaultWallet().getValue();
+            if (wallet != null)
+            {
+                if (wallet.lastBackupTime == 0 || wallet.authLevel == HDKeyService.AuthenticationLevel.TEE_AUTHENTICATION
+                    || wallet.authLevel == HDKeyService.AuthenticationLevel.STRONGBOX_AUTHENTICATION)
+                {
+                    openBackupActivity(wallet);
+                }
+                else
+                {
+                    Intent intent = new Intent(getContext(), BackupKeyActivity.class);
+                    intent.putExtra("ADDRESS", wallet.address);
+                    intent.putExtra("TYPE", "UPGRADE_KEY");
+                    intent.putExtra(WALLET, wallet);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                    getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
+                }
+            }
         });
 
         final LinearLayout layoutSwitchnetworks = view.findViewById(R.id.layout_switch_network);
@@ -187,12 +215,14 @@ public class NewSettingsFragment extends Fragment
     {
         Intent intent = new Intent(getContext(), BackupKeyActivity.class);
         intent.putExtra("ADDRESS", wallet.address);
+        intent.putExtra(WALLET, wallet);
 
         switch (wallet.type)
         {
             case HDKEY:
                 intent.putExtra("TYPE", "HDKEY");
                 break;
+            case KEYSTORE_LEGACY:
             case KEYSTORE:
                 intent.putExtra("TYPE", "JSON");
                 break;
@@ -219,6 +249,28 @@ public class NewSettingsFragment extends Fragment
 
     private void onDefaultWallet(Wallet wallet) {
         walletsSubtext.setText(wallet.address);
+        switch (wallet.authLevel)
+        {
+            case NOT_SET:
+            case STRONGBOX_NO_AUTHENTICATION:
+            case TEE_NO_AUTHENTICATION:
+                if (wallet.lastBackupTime > 0)
+                {
+                    backupStatusText.setText(R.string.not_locked);
+                    backupStatusImage.setImageResource(R.drawable.ic_orange_bar);
+                }
+                else
+                {
+                    backupStatusText.setText(R.string.back_up_now);
+                    backupStatusImage.setImageResource(R.drawable.ic_red_bar);
+                }
+                break;
+            case TEE_AUTHENTICATION:
+            case STRONGBOX_AUTHENTICATION:
+                backupStatusText.setText(R.string.key_secure);
+                backupStatusImage.setImageResource(R.drawable.ic_green_bar);
+                break;
+        }
     }
 
     @Override

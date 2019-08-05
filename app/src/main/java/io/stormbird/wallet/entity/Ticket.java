@@ -312,18 +312,10 @@ public class Ticket extends Token implements Parcelable
             TextView textAmount = activity.findViewById(R.id.amount);
             TextView textTicketName = activity.findViewById(R.id.name);
             TextView textVenue = activity.findViewById(R.id.venue);
-            TextView textDate = activity.findViewById(R.id.date);
-            TextView textRange = activity.findViewById(R.id.tickettext);
-            TextView textCat = activity.findViewById(R.id.cattext);
-            TextView ticketDetails = activity.findViewById(R.id.ticket_details);
 
             textAmount.setText("");
             textTicketName.setText(blankingString);
             textVenue.setText("");
-            textDate.setText("");
-            textRange.setText("");
-            textCat.setText("");
-            ticketDetails.setText("");
         }
         catch (Exception e)
         {
@@ -336,25 +328,9 @@ public class Ticket extends Token implements Parcelable
         try
         {
             TextView textVenue = activity.findViewById(R.id.venue);
-            TextView textDate = activity.findViewById(R.id.date);
-            TextView textRange = activity.findViewById(R.id.tickettext);
-            TextView textCat = activity.findViewById(R.id.cattext);
-            TextView ticketDetails = activity.findViewById(R.id.ticket_details);
-            LinearLayout ticketLayout = activity.findViewById(R.id.ticketlayout);
-            LinearLayout catLayout = activity.findViewById(R.id.catlayout);
-            LinearLayout dateLayout = activity.findViewById(R.id.datelayout);
-            LinearLayout bottomPart = activity.findViewById(R.id.bottom_part);
 
             //textVenue.setVisibility(View.GONE);
             textVenue.setText("");
-            textDate.setText("");
-            textRange.setText("");
-            textCat.setText("");
-            ticketDetails.setText("");
-            ticketLayout.setVisibility(View.GONE);
-            catLayout.setVisibility(View.GONE);
-            dateLayout.setVisibility(View.GONE);
-            bottomPart.setVisibility(View.GONE);
         }
         catch (Exception e)
         {

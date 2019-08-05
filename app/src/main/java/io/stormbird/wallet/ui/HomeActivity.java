@@ -556,7 +556,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         successOverlay.setVisibility(View.VISIBLE);
 
         //Tentative: Now we have backup success, we can migrate the key to higher security
-        upgradeKey(keyBackup);
+        //upgradeKey(keyBackup);
 
         handler = new Handler();
         handler.postDelayed(this, 1000);
@@ -570,11 +570,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         switch (wallet.type)
         {
             case KEYSTORE:
-                //TODO: Migrate legacy to require auth
-                break;
+            case KEYSTORE_LEGACY:
             case HDKEY:
                 svs = new HDKeyService(this);
-                if (svs.upgradeHDKey(keyBackup, this))
+                if (svs.upgradeKeySecurity(keyBackup, this))
                 {
                     CreatedKey(keyBackup); // already upgraded to top level
                 }
@@ -607,7 +606,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-
+        System.out.println("YOLESS");
     }
 
     @Override

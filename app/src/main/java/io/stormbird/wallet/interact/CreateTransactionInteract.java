@@ -21,22 +21,20 @@ public class CreateTransactionInteract
 
     public Single<SignaturePair> sign(Wallet wallet, MessagePair messagePair, int chainId)
     {
-        String password = "lala";
-        return transactionRepository.getSignature(wallet, messagePair.message.getBytes(), password, chainId)
+        return transactionRepository.getSignature(wallet, messagePair.message.getBytes(), chainId)
                 .map(sig -> new SignaturePair(messagePair.selection, sig, messagePair.message));
     }
 
     public Single<byte[]> sign(Wallet wallet, byte[] message, int chainId)
     {
-        String password = "lala";
-        return transactionRepository.getSignature(wallet, message, password, chainId)
+        return transactionRepository.getSignature(wallet, message, chainId)
                         .subscribeOn(Schedulers.computation())
                         .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
     {
-        return transactionRepository.createTransaction(from, to, subunitAmount, gasPrice, gasLimit, data, "password", chainId)
+        return transactionRepository.createTransaction(from, to, subunitAmount, gasPrice, gasLimit, data, chainId)
                                              .subscribeOn(Schedulers.computation())
                                              .observeOn(AndroidSchedulers.mainThread());
     }
@@ -54,21 +52,21 @@ public class CreateTransactionInteract
      */
     public Single<String> create(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId)
     {
-        return transactionRepository.createTransaction(from, gasPrice, gasLimit, data, "password", chainId)
+        return transactionRepository.createTransaction(from, gasPrice, gasLimit, data, chainId)
                                          .subscribeOn(Schedulers.computation())
                                          .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Single<TransactionData> createWithSig(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
     {
-        return transactionRepository.createTransactionWithSig(from, to, subunitAmount, gasPrice, gasLimit, data, "password", chainId)
+        return transactionRepository.createTransactionWithSig(from, to, subunitAmount, gasPrice, gasLimit, data, chainId)
                                          .subscribeOn(Schedulers.computation())
                                          .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Single<TransactionData> createWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId)
     {
-        return transactionRepository.createTransactionWithSig(from, gasPrice, gasLimit, data, "password", chainId)
+        return transactionRepository.createTransactionWithSig(from, gasPrice, gasLimit, data, chainId)
                                          .subscribeOn(Schedulers.computation())
                                          .observeOn(AndroidSchedulers.mainThread());
     }

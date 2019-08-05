@@ -210,8 +210,8 @@ public class MarketQueueService {
     }
 
     //sign a trade transaction
-    public Single<byte[]> sign(Wallet wallet, String password, TradeInstance t, byte[] data, int chainId) {
-        return transactionRepository.getSignature(wallet, data, password, chainId);
+    public Single<byte[]> sign(Wallet wallet, TradeInstance t, byte[] data, int chainId) {
+        return transactionRepository.getSignature(wallet, data, chainId);
     }
 
     private Single<TradeInstance> tradesInnerLoop(Wallet wallet, String password, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId, int chainId) {
@@ -241,7 +241,7 @@ public class MarketQueueService {
 
     private Single<byte[]> getTradeSignature(Wallet wallet, String password, TradeInstance trade, int chainId) {
         return encodeMessageForTrade(trade)
-                .flatMap(tradeBytes -> transactionRepository.getSignatureFast(wallet, tradeBytes, password, chainId));
+                .flatMap(tradeBytes -> transactionRepository.getSignatureFast(wallet, password, tradeBytes, chainId));
     }
 
     private Single<byte[]> encodeMessageForTrade(TradeInstance trade) {
@@ -255,7 +255,7 @@ public class MarketQueueService {
     }
 
     public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId) {
-        return transactionRepository.createTransaction(from, to, subunitAmount, gasPrice, gasLimit, data, "password", chainId)
+        return transactionRepository.createTransaction(from, to, subunitAmount, gasPrice, gasLimit, data, chainId)
                                 .observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -371,7 +371,7 @@ public class MarketQueueService {
     private BigInteger ecRecoverPublicKey(Wallet wallet, String password, int chainId) throws Exception
     {
         String testSigMsg = "obtain public key";
-        byte[] testSigBytes = transactionRepository.getSignatureFast(wallet, testSigMsg.getBytes(), password, chainId).blockingGet();
+        byte[] testSigBytes = transactionRepository.getSignatureFast(wallet, password, testSigMsg.getBytes(), chainId).blockingGet();
         Sign.SignatureData testSig = sigFromByteArray(testSigBytes);
         BigInteger recoveredKey = Sign.signedMessageToKey(testSigMsg.getBytes(), testSig);
         String publicKeyString = Keys.getAddress(recoveredKey); //TODO: Remove - this is here for debug/testing

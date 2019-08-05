@@ -64,9 +64,9 @@ public class BackupKeyViewModel extends BaseViewModel {
         deleted.postValue(true);
     }
 
-    public void exportWallet(String walletAddr, String storePassword) {
+    public void exportWallet(String walletAddr, String keystorePassword, String storePassword) {
         disposable = exportWalletInteract
-                .export(new Wallet(walletAddr), storePassword)
+                .export(new Wallet(walletAddr), keystorePassword, storePassword)
                 .subscribe(exportedStore::postValue, this::onExportWalletError);
     }
 

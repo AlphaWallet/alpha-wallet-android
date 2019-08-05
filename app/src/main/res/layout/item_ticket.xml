@@ -52,20 +52,6 @@
                     android:paddingRight="20dp"
                     android:paddingTop="15dp">
 
-                    <TextView
-                        android:id="@+id/redeemed"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/small_curved"
-                        android:fontFamily="@font/font_semibold"
-                        android:gravity="center"
-                        android:paddingLeft="7dp"
-                        android:paddingRight="7dp"
-                        android:text="@string/redeemed"
-                        android:textColor="@color/white"
-                        android:textSize="15sp"
-                        android:visibility="gone" />
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -102,111 +88,6 @@
                         android:textColor="@color/text_black"
                         android:textSize="12sp" />
 
-                    <LinearLayout
-                        android:id="@+id/bottom_part"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minHeight="35dp"
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-                            android:id="@+id/datelayout"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1.2"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:id="@+id/calendar"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginRight="5dp"
-                                android:contentDescription="@string/empty"
-                                android:src="@drawable/ic_calendar" />
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:id="@+id/date"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="center_vertical"
-                                    android:paddingRight="5dp"
-                                    android:textSize="12sp" />
-
-                                <TextView
-                                    android:id="@+id/time"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="center_vertical"
-                                    android:paddingRight="5dp"
-                                    android:visibility="gone"
-                                    android:textSize="12sp" />
-
-                            </LinearLayout>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:id="@+id/ticketlayout"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:id="@+id/ticketicon"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginRight="5dp"
-                                android:contentDescription="@string/empty"
-                                android:src="@drawable/ic_ticket" />
-
-                            <TextView
-                                android:id="@+id/tickettext"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:fontFamily="@font/font_semibold"
-                                android:textColor="@color/semi_dark_grey"
-                                android:textSize="15sp" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:id="@+id/catlayout"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:id="@+id/caticon"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginRight="5dp"
-                                android:contentDescription="@string/empty"
-                                android:src="@drawable/ic_category" />
-
-                            <TextView
-                                android:id="@+id/cattext"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:fontFamily="@font/font_semibold"
-                                android:textColor="@color/semi_dark_grey"
-                                android:textSize="15sp" />
-                        </LinearLayout>
-                    </LinearLayout>
-
                     <TextView
                         android:id="@+id/symbol"
                         android:layout_width="wrap_content"
@@ -220,25 +101,6 @@
                         tools:text="" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/layout_ticket_details"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:animateLayoutChanges="true"
-                    android:background="@drawable/background_card_gray"
-                    android:orientation="vertical"
-                    android:padding="20dp"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:id="@+id/ticket_details"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_light"
-                        android:text=""
-                        android:textColor="@color/text_black" />
-
-                </LinearLayout>
             </LinearLayout>
 
             <ImageView

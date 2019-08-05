@@ -137,6 +137,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginBottom="25dp"
             android:text="@string/action_back_up_my_wallet"
+            android:elevation="4dp"
             android:textStyle="normal"
             android:textColor="@color/white"
             android:letterSpacing="0.04"

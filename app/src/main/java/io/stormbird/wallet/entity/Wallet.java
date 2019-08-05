@@ -11,8 +11,8 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import static io.stormbird.wallet.service.HDKeyService.KEYSTORE_LABEL;
-import static io.stormbird.wallet.service.HDKeyService.NO_AUTH_LABEL;
+import static io.stormbird.wallet.entity.WalletType.KEYSTORE_LEGACY;
+import static io.stormbird.wallet.service.HDKeyService.*;
 import static io.stormbird.wallet.service.KeystoreAccountService.KEYSTORE_FOLDER;
 import static io.stormbird.wallet.util.BalanceUtils.weiToEth;
 
@@ -53,59 +53,26 @@ public class Wallet implements Parcelable {
 		type = wType;
 	}
 
-	public boolean isHDWallet()
-	{
-		return type == WalletType.HDKEY;
-	}
 	public void checkWalletType(Context ctx)
 	{
-		if (new File(ctx.getFilesDir(), address+"hd").exists() ||
-				new File(ctx.getFilesDir(), address+NO_AUTH_LABEL+"hd").exists())
+		if (new File(ctx.getFilesDir(), address+HDKEY_LABEL).exists() ||
+				new File(ctx.getFilesDir(), address+NO_AUTH_LABEL+HDKEY_LABEL).exists())
 		{
 			type = WalletType.HDKEY;
 		}
+		else if (new File(ctx.getFilesDir(), address + KEYSTORE_LABEL).exists()
+				|| new File(ctx.getFilesDir(), address + NO_AUTH_LABEL + KEYSTORE_LABEL).exists())
+		{
+			type = WalletType.KEYSTORE;
+		}
+		else if (new File(ctx.getFilesDir(), address).exists())
+		{
+			type = WalletType.KEYSTORE_LEGACY;
+		}
 		else
 		{
-			File[] keyStores = new File(ctx.getFilesDir(), KEYSTORE_FOLDER).listFiles();
-			String addr = Numeric.cleanHexPrefix(address);
-			for (File f : keyStores)
-			{
-				if (f.getName().contains(addr))
-				{
-					type = determineKeystoreType(ctx);// WalletType.KEYSTORE;
-					return;
-				}
-			}
-
 			//assume watch wallet
 			type = WalletType.WATCH;
-		}
-	}
-
-	private WalletType determineKeystoreType(Context ctx)
-	{
-		File[] keyStores = new File(ctx.getFilesDir(), "").listFiles();
-		for (File path : keyStores)
-		{
-			if (path.getName().contains(address))
-			{
-				System.out.println("ATX: " + path.getName());
-			}
-		}
-		if (new File(ctx.getFilesDir(), address + KEYSTORE_LABEL).exists()) return WalletType.KEYSTORE;
-		else return WalletType.KEYSTORE_LEGACY;
-	}
-
-	public boolean hasNonAuthKey(Context ctx)
-	{
-		if (new File(ctx.getFilesDir(), address+"hd").exists() &&
-				new File(ctx.getFilesDir(), address+NO_AUTH_LABEL+"hd").exists())
-		{
-			return true;
-		}
-		else
-		{
-			return false;
 		}
 	}
 

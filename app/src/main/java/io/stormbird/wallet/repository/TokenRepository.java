@@ -47,6 +47,7 @@ public class TokenRepository implements TokenRepositoryType {
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TickerService tickerService;
     private final GasService gasService;
+    private final TokensService tokensService;
 
     public static final String INVALID_CONTRACT = "<invalid>";
 
@@ -60,12 +61,14 @@ public class TokenRepository implements TokenRepositoryType {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenLocalSource localSource,
             TickerService tickerService,
-            GasService gasService) {
+            GasService gasService,
+            TokensService tokensService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.localSource = localSource;
         this.tickerService = tickerService;
         this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
         this.gasService = gasService;
+        this.tokensService = tokensService;
 
         web3jNodeServers = new ConcurrentHashMap<>();
         okClient = new OkHttpClient.Builder()
@@ -647,7 +650,11 @@ public class TokenRepository implements TokenRepositoryType {
 
     private BigDecimal updatePending(Token oldToken, BigDecimal pendingBalance)
     {
-        if (pendingBalance.equals(BigDecimal.valueOf(-1)))
+        if (!tokensService.getCurrentAddress().equals(oldToken.getWallet()))
+        {
+            oldToken.pendingBalance = oldToken.balance;
+        }
+        else if (pendingBalance.equals(BigDecimal.valueOf(-1)))
         {
             oldToken.pendingBalance = oldToken.balance;
         }
@@ -711,7 +718,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<Token> getEthBalance(NetworkInfo network, Wallet wallet) {
         Token currency = createCurrencyToken(network, wallet);
-        currency.pendingBalance = BigDecimal.ONE;
+        currency.pendingBalance = BigDecimal.ZERO;
         return attachEth(network, wallet, currency);
     }
 

@@ -24,6 +24,7 @@ import dagger.android.support.AndroidSupportInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.util.LocaleUtils;
@@ -56,6 +57,8 @@ public class NewSettingsFragment extends Fragment
     private ImageView backupMenuButton;
     private ImageView backupStatusImage;
     private View backupPopupAnchor;
+    private LinearLayout layoutBackupKey;
+    private LinearLayout layoutBackupDivider;
 
     @Nullable
     @Override
@@ -63,6 +66,7 @@ public class NewSettingsFragment extends Fragment
         AndroidSupportInjection.inject(this);
         viewModel = ViewModelProviders.of(this, newSettingsViewModelFactory).get(NewSettingsViewModel.class);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.backUpMessage().observe(this, this::backupWarning);
         viewModel.setLocale(getContext());
 
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
@@ -98,25 +102,13 @@ public class NewSettingsFragment extends Fragment
             viewModel.showManageWallets(getContext(), false);
         });
 
-        final LinearLayout layoutBackupKey = view.findViewById(R.id.layout_backup_wallet);
+        layoutBackupDivider = view.findViewById(R.id.backup_divider);
+        layoutBackupKey = view.findViewById(R.id.layout_backup_wallet);
         layoutBackupKey.setOnClickListener(v -> {
             Wallet wallet = viewModel.defaultWallet().getValue();
             if (wallet != null)
             {
-                if (wallet.lastBackupTime == 0 || wallet.authLevel == HDKeyService.AuthenticationLevel.TEE_AUTHENTICATION
-                    || wallet.authLevel == HDKeyService.AuthenticationLevel.STRONGBOX_AUTHENTICATION)
-                {
-                    openBackupActivity(wallet);
-                }
-                else
-                {
-                    Intent intent = new Intent(getContext(), BackupKeyActivity.class);
-                    intent.putExtra("ADDRESS", wallet.address);
-                    intent.putExtra("TYPE", "UPGRADE_KEY");
-                    intent.putExtra(WALLET, wallet);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                    getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
-                }
+                openBackupActivity(wallet);
             }
         });
 
@@ -271,6 +263,12 @@ public class NewSettingsFragment extends Fragment
                 backupStatusImage.setImageResource(R.drawable.ic_green_bar);
                 break;
         }
+
+        if (wallet.type == WalletType.WATCH)
+        {
+            layoutBackupKey.setVisibility(View.GONE);
+            layoutBackupDivider.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -326,7 +324,15 @@ public class NewSettingsFragment extends Fragment
         }
     }
 
-    public void addBackupNotice(GenericWalletInteract.BackupLevel walletValue)
+    private void backupWarning(String s)
+    {
+        if (s.equals(viewModel.defaultWallet().getValue().address))
+        {
+            addBackupNotice(GenericWalletInteract.BackupLevel.WALLET_HAS_HIGH_VALUE);
+        }
+    }
+
+    void addBackupNotice(GenericWalletInteract.BackupLevel walletValue)
     {
         layoutBackup.setVisibility(View.VISIBLE);
         //current Wallet only
@@ -335,25 +341,15 @@ public class NewSettingsFragment extends Fragment
         {
             backupButton.setText(getString(R.string.back_up_wallet_action, wallet.address.substring(0, 5)));
             backupButton.setOnClickListener(v -> openBackupActivity(wallet));
+            backupTitle.setText(getString(R.string.wallet_not_backed_up));
+            backupLayoutBackground.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.warning_red));
+            backupButton.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.warning_dark_red));
+            backupDetail.setText(getString(R.string.backup_wallet_detail));
+            if (getActivity() !=null) ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+
             backupMenuButton.setOnClickListener(v -> {
                 showPopup(backupPopupAnchor, wallet.address);
             });
-
-            switch (walletValue)
-            {
-                case WALLET_HAS_LOW_VALUE:
-                    backupTitle.setText(getString(R.string.time_to_backup_wallet));
-                    backupDetail.setText(getString(R.string.recommend_monthly_backup));
-                    backupLayoutBackground.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.slate_grey));
-                    backupButton.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.backup_grey));
-                    break;
-                case WALLET_HAS_HIGH_VALUE:
-                    backupTitle.setText(getString(R.string.wallet_not_backed_up));
-                    backupDetail.setText(getString(R.string.not_backed_up_detail));
-                    backupLayoutBackground.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.warning_red));
-                    backupButton.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.warning_dark_red));
-                    break;
-            }
         }
     }
 
@@ -364,9 +360,16 @@ public class NewSettingsFragment extends Fragment
         int height = LinearLayout.LayoutParams.WRAP_CONTENT;
         final PopupWindow popupWindow = new PopupWindow(popupView, width, height, true);
         popupView.setOnClickListener(v -> {
-            if (getActivity() != null) ((HomeActivity)getActivity()).postponeWalletBackupWarning(walletAddress);
+            //if (getActivity() != null) ((HomeActivity)getActivity()).postponeWalletBackupWarning(walletAddress);
+            viewModel.setIsDismissed(walletAddress, true).subscribe(this::backedUp);
             popupWindow.dismiss();
         });
         popupWindow.showAsDropDown(view, 0, 20);
+    }
+
+    private void backedUp(String walletAddress)
+    {
+        layoutBackup.setVisibility(View.GONE);
+        if (getActivity() != null) ((HomeActivity)getActivity()).postponeWalletBackupWarning(walletAddress);
     }
 }

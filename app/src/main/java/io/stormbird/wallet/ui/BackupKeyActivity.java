@@ -54,6 +54,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     private ImageView backupImage;
     private Button nextButton;
     private TextView verifyTextBox;
+    private LinearLayout skipButton;
     private String[] mnemonicArray;
     private PinAuthenticationCallbackInterface authInterface;
 
@@ -96,11 +97,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                 state = BackupState.TEST_SEED_PHRASE;
                 setTitle(getString(R.string.seed_phrase));
                 break;
-            case "UPGRADE_KEY":
-                setTitle(getString(R.string.action_upgrade_key));
-                state = BackupState.UPGRADE_KEY_SECURITY;
-                setupUpgradeKey();
-                break;
         }
 
         initViewModel();
@@ -108,11 +104,26 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void setupUpgradeKey()
     {
+        inputView.setVisibility(View.GONE);
+        passwordDetail.setVisibility(View.GONE);
+        passwordLengthNote.setVisibility(View.GONE);
+        title.setVisibility(View.VISIBLE);
+        backupImage.setVisibility(View.VISIBLE);
+        detail.setVisibility(View.VISIBLE);
+        skipButton.setVisibility(View.VISIBLE);
+        layoutWordHolder.setVisibility(View.GONE);
+
+        setTitle(getString(R.string.action_upgrade_key));
+        state = BackupState.UPGRADE_KEY_SECURITY;
         title.setText(R.string.lock_key_upgrade);
         backupImage.setImageResource(R.drawable.ic_biometric);
         detail.setVisibility(View.VISIBLE);
         detail.setText(R.string.upgrade_key_security_detail);
         nextButton.setText(getString(R.string.action_upgrade_key));
+
+        skipButton.setOnClickListener(v -> {
+            CreatedKey(keyBackup);
+        });
     }
 
     private void upgradeKeySecurity()
@@ -124,15 +135,22 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             case KEYSTORE_LEGACY:
             case HDKEY:
                 svs = new HDKeyService(this);
-                if (svs.upgradeKeySecurity(keyBackup, this))
+                switch (svs.upgradeKeySecurity(keyBackup, this))
                 {
-                    CreatedKey(keyBackup); // already upgraded to top level
+                    case REQUESTING_SECURITY:
+                        //Do nothing, callback will return to 'CreatedKey()'. If it fails the returned key is empty
+                        break;
+                    case NO_SCREENLOCK:
+                        DisplayKeyFailureDialog("Unable to upgrade key: Enable screenlock on phone");
+                        break;
+                    case ALREADY_LOCKED:
+                        CreatedKey(keyBackup); // already upgraded to top level
+                        break;
+                    case ERROR:
+                        DisplayKeyFailureDialog("Unable to upgrade key: Unknown Error");
+                        break;
                 }
-                else
-                {
-                    DisplayKeyFailureDialog("Unable to upgrade key: Enable screenlock on phone");
-                }
-                break;
+
             default:
                 break;
         }
@@ -149,12 +167,13 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         {
             case KEYSTORE_LEGACY:
             case KEYSTORE:
-                backupKeySuccess("JSON");
+                finishBackupSuccess("JSON");
                 break;
             case HDKEY:
-                backupKeySuccess("HDKEY");
+                finishBackupSuccess("HDKEY");
                 break;
             default:
+                cancelAuthentication();
                 break;
         }
     }
@@ -206,6 +225,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         backupImage = findViewById(R.id.seed_image);
         inputView = findViewById(R.id.input_password);
         nextButton.setOnClickListener(this);
+        skipButton = findViewById(R.id.button_cancel);
         inputView.getEditText().addTextChangedListener(this);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
@@ -332,6 +352,10 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             }
         }
 
+        layoutWordHolder.setVisibility(View.GONE);
+        verifyTextBox.setVisibility(View.GONE);
+
+
         //terminate and display tick
         backupKeySuccess("HDKEY");
     }
@@ -348,6 +372,25 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     }
 
     private void backupKeySuccess(String keyType)
+    {
+        //now ask if user wants to upgrade the key security (if required)
+        wallet = new Wallet(keyBackup);
+        wallet.checkWalletType(this);
+
+        switch (wallet.authLevel)
+        {
+            case STRONGBOX_NO_AUTHENTICATION:
+            case TEE_NO_AUTHENTICATION:
+                //improve key security
+                setupUpgradeKey();
+                break;
+            default:
+                finishBackupSuccess(keyType);
+                break;
+        }
+    }
+
+    private void finishBackupSuccess(String keyType)
     {
         Intent intent = new Intent();
         intent.putExtra("Key", keyBackup);
@@ -545,7 +588,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        System.out.println("YOLESS: " + gotAuth);
+
     }
 
     @Override

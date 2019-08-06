@@ -40,6 +40,7 @@ public class WalletViewModel extends BaseViewModel
     private static final int CHECK_OPENSEA_INTERVAL_TIME = 40; //Opensea refresh interval in seconds
     private static final int CHECK_BLOCKSCOUT_INTERVAL_TIME = 30;
     private static final int OPENSEA_RINKEBY_CHECK = 3; //check Rinkeby opensea once per XX opensea checks (ie if interval time is 25 and rinkeby check is 1 in 6, rinkeby refresh time is once per 300 seconds).
+    public static double VALUE_THRESHOLD = 200.0; //$200 USD value is difference between red and grey backup warnings
 
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<BigDecimal> total = new MutableLiveData<>();
@@ -557,7 +558,7 @@ public class WalletViewModel extends BaseViewModel
         {
             return GenericWalletInteract.BackupLevel.BACKUP_NOT_REQUIRED;
         }
-        else if (value.compareTo(BigDecimal.valueOf(1000)) >= 0)
+        else if (value.compareTo(BigDecimal.valueOf(VALUE_THRESHOLD)) >= 0)
         {
             return GenericWalletInteract.BackupLevel.WALLET_HAS_HIGH_VALUE;
         }

@@ -116,9 +116,15 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<String> getWalletRequiresBackup()
+	public Single<String> getWalletRequiresBackup(String walletAddr)
 	{
-		return walletDataRealmSource.getWalletRequiresBackup();
+		return walletDataRealmSource.getWalletRequiresBackup(walletAddr);
+	}
+
+	@Override
+	public Single<String> setIsDismissed(String walletAddr, boolean isDismissed)
+	{
+		return walletDataRealmSource.setIsDismissed(walletAddr, isDismissed);
 	}
 
 	@Override

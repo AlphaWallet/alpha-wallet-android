@@ -9,6 +9,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:paddingTop="5dp"
         android:layout_gravity="center_horizontal"
         android:layout_weight="1"
         android:gravity="center_horizontal"
@@ -37,6 +38,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
         android:layout_weight="1"
+        android:paddingTop="5dp"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
@@ -61,6 +63,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
         android:layout_weight="1"
+        android:paddingTop="5dp"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
@@ -91,6 +94,7 @@
 
         <ImageView
             android:id="@+id/nav_settings"
+            android:layout_marginTop="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -107,11 +111,19 @@
             android:textColor="#8a000000"
             android:textSize="12sp" />
 
+        <LinearLayout
+            android:id="@+id/spacer"
+            android:layout_width="2dp"
+            android:layout_height="10dp"
+            android:layout_centerInParent="true"
+            android:background="#00000000"
+            android:orientation="horizontal"/>
+
         <TextView
             android:id="@+id/settings_badge"
             android:layout_width="19dp"
             android:layout_height="19dp"
-            android:layout_alignStart="@id/nav_settings"
+            android:layout_toStartOf="@id/spacer"
             android:background="@drawable/background_round_warning_red"
             android:fontFamily="@font/font_semibold"
             android:gravity="center"

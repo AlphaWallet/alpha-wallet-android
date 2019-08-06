@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid
+                android:width="1dp"
+                android:color="@color/white" />
+            <padding
+                android:bottom="1dp"
+                android:left="1dp"
+                android:right="1dp"
+                android:top="1dp" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+<item>
+    <shape android:shape="rectangle">
+        <solid
+            android:width="3dp"
+            android:color="@color/nasty_green" />
+        <padding
+            android:bottom="8dp"
+            android:left="8dp"
+            android:right="8dp"
+            android:top="8dp" />
+        <corners android:radius="23dp" />
+    </shape>
+</item>
+
+<item
+    android:drawable="@drawable/ic_white_tick"/>
+</layer-list>

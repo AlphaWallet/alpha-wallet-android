@@ -11,6 +11,8 @@ import io.stormbird.wallet.service.HDKeyService;
  */
 public class RealmWalletData extends RealmObject
 {
+    private static int DISMISS_WARNING_IN_SETTINGS_MASK = 0xFFFFFFFE;
+
     @PrimaryKey
     private String address;
     private String ENSName;
@@ -77,8 +79,10 @@ public class RealmWalletData extends RealmObject
     }
     public void setLastWarning(long lastWarning)
     {
-        this.lastWarning = lastWarning;
+        this.lastWarning = lastWarning & DISMISS_WARNING_IN_SETTINGS_MASK;
     }
+    public boolean getIsDismissedInSettings() { return (lastWarning & 0x1) == 1; }
+    public void setIsDismissedInSettings(boolean isDismissed) { lastWarning = (lastWarning&DISMISS_WARNING_IN_SETTINGS_MASK) + (isDismissed ? 0x1 : 0x0); }
 
     public HDKeyService.AuthenticationLevel getAuthLevel()
     {

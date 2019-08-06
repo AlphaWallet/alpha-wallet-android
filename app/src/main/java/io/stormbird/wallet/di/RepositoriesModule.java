@@ -110,12 +110,14 @@ public class RepositoriesModule {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenLocalSource tokenLocalSource,
             TickerService tickerService,
-			GasService gasService) {
+			GasService gasService,
+			TokensService tokensService) {
 	    return new TokenRepository(
 	            ethereumNetworkRepository,
                 tokenLocalSource,
                 tickerService,
-				gasService);
+				gasService,
+				tokensService);
     }
 
 	@Singleton

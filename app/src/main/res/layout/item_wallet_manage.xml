@@ -27,6 +27,16 @@
         android:background="@drawable/selector_wallet_check"
         android:buttonTint="@color/transparent" />
 
+    <ImageView
+        android:id="@+id/selected_tick"
+        android:layout_width="19dp"
+        android:layout_height="19dp"
+        android:src="@drawable/background_round_green_selected"
+        android:layout_marginTop="4dp"
+        android:visibility="gone"
+        android:layout_alignEnd="@id/default_action"
+        android:layout_alignTop="@id/default_action"/>
+
     <LinearLayout
         android:id="@+id/text_wrapper"
         android:layout_width="wrap_content"

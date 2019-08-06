@@ -37,6 +37,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Map<String, String>> defaultWalletBalance = new MutableLiveData<>();
+    private final MutableLiveData<String> backUpMessage = new MutableLiveData<>();
     private final GenericWalletInteract genericWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final MyAddressRouter myAddressRouter;
@@ -156,6 +157,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     public LiveData<Transaction[]> transactions() {
         return transactions;
     }
+    public LiveData<String> backUpMessage() { return backUpMessage; }
 
     public void prepare() {
         progress.postValue(true);
@@ -177,6 +179,9 @@ public class NewSettingsViewModel extends BaseViewModel {
 
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
+
+        genericWalletInteract.getWalletNeedsBackup(wallet.address)
+                .subscribe(backUpMessage::postValue).isDisposed();
     }
 
     public void showMyAddress(Context context) {
@@ -200,8 +205,8 @@ public class NewSettingsViewModel extends BaseViewModel {
         LocaleUtils.setLocale(activity, currentLocale);
     }
 
-    public Single<String> getWalletNotBackedUp()
+    public Single<String> setIsDismissed(String walletAddr, boolean isDismissed)
     {
-        return genericWalletInteract.getWalletNeedsBackup();
+        return genericWalletInteract.setIsDismissed(walletAddr, isDismissed);
     }
 }

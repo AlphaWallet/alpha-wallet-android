@@ -36,6 +36,8 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	private Wallet wallet;
 	private String currencySymbol;
 	private TextView walletName;
+	private final ImageView walletSelected;
+	private ImageView currentSelection;
 
 	public WalletHolder(int resId, ViewGroup parent, WalletClickCallback callback) {
 		super(resId, parent);
@@ -46,6 +48,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		balance = findViewById(R.id.balance_eth);
 		currency = findViewById(R.id.text_currency);
 		walletName = findViewById(R.id.wallet_name);
+		walletSelected = findViewById(R.id.selected_tick);
 		clickCallback = callback;
 		findViewById(R.id.click_layer).setOnClickListener(this);
 		findViewById(R.id.btn_more).setOnClickListener(this);
@@ -119,11 +122,15 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 				break;
 		}
 
-
-
-		defaultAction.setChecked(addition.getBoolean(IS_DEFAULT_ADDITION, false));
+		walletSelected.setVisibility(addition.getBoolean(IS_DEFAULT_ADDITION, false) ? View.VISIBLE : View.GONE);
+		//defaultAction.setChecked(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		container.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		currency.setText(currencySymbol);
+
+		if (addition.getBoolean(IS_DEFAULT_ADDITION, false))
+		{
+			currentSelection = walletSelected;
+		}
 	}
 
 	@Override
@@ -131,7 +138,8 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		switch (view.getId()) {
             case R.id.click_layer:
 				clickCallback.onWalletClicked(wallet);
-				defaultAction.setChecked(true);
+				if (currentSelection != null && currentSelection.getVisibility() == View.VISIBLE) currentSelection.setVisibility(View.GONE);
+				walletSelected.setVisibility(View.VISIBLE);
 				container.setElevation(0.0f);
 				break;
 

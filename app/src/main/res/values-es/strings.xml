@@ -91,7 +91,7 @@
     <string name="contains_no_recipient">Transaction has no recipient</string>
     <string name="contains_no_value">DApp transaction contains no value.</string>
     <string name="wallet_not_backed_up">Your Wallet is not backed up!</string>
-    <string name="not_backed_up_detail">You have not backed up your wallet yet. You have $1,000 USD net. Act now.</string>
+    <string name="not_backed_up_detail">You have not backed up your wallet yet. You have $200 USD net. Act now.</string>
     <string name="back_up_wallet_action">BACK UP WALLET %1$s →</string>
     <string name="backup_seed_phrase">Backup Seed Phrase</string>
     <string name="authentication_cancelled">Authentication Cancelled</string>
@@ -167,4 +167,6 @@
     <string name="lock_key_upgrade">Lock your seed phrase to increase security</string>
     <string name="upgrade_key_security_detail">Alphawallet security is being upgraded to the best achievable. Lock your seed phrase with biometrics.</string>
     <string name="action_upgrade_key">Upgrade key security</string>
+    <string name="backup_wallet_detail">We highly recommend you back up your wallet.</string>
+    <string name="skip_upgrade">Skip Upgrade</string>
 </resources>

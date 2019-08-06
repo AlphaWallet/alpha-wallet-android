@@ -65,4 +65,10 @@ public class BalanceUtils {
         assert(decimals >= 0);
         return new BigDecimal(subunitAmount).divide(BigDecimal.valueOf(10).pow(decimals));
     }
+
+    public static boolean isDecimalValue(String value)
+    {
+        for (char ch : value.toCharArray()) if (!(Character.isDigit(ch) || ch == '.')) return false;
+        return true;
+    }
 }

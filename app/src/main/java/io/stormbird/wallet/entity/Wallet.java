@@ -55,25 +55,27 @@ public class Wallet implements Parcelable {
 
 	public void checkWalletType(Context ctx)
 	{
-		if (new File(ctx.getFilesDir(), address+HDKEY_LABEL).exists() ||
-				new File(ctx.getFilesDir(), address+NO_AUTH_LABEL+HDKEY_LABEL).exists())
-		{
-			type = WalletType.HDKEY;
-		}
-		else if (new File(ctx.getFilesDir(), address + KEYSTORE_LABEL).exists()
-				|| new File(ctx.getFilesDir(), address + NO_AUTH_LABEL + KEYSTORE_LABEL).exists())
-		{
-			type = WalletType.KEYSTORE;
-		}
-		else if (new File(ctx.getFilesDir(), address).exists())
-		{
-			type = WalletType.KEYSTORE_LEGACY;
-		}
-		else
-		{
-			//assume watch wallet
-			type = WalletType.WATCH;
-		}
+		type = getKeystoreType(ctx, address);
+		authLevel = getAuthLevel(ctx, address);
+	}
+
+	public static WalletType getKeystoreType(Context context, String addr)
+	{
+		if (new File(context.getFilesDir(), addr+HDKEY_LABEL).exists() ||
+				new File(context.getFilesDir(), addr+NO_AUTH_LABEL+HDKEY_LABEL).exists()) return  WalletType.HDKEY;
+		else if (new File(context.getFilesDir(), addr + KEYSTORE_LABEL).exists()
+				|| new File(context.getFilesDir(), addr + NO_AUTH_LABEL + KEYSTORE_LABEL).exists()) return WalletType.KEYSTORE;
+		else if (new File(context.getFilesDir(), addr).exists()) return WalletType.KEYSTORE_LEGACY;
+		else return WalletType.WATCH;
+	}
+	public static AuthenticationLevel getAuthLevel(Context context, String addr)
+	{
+		if (new File(context.getFilesDir(), addr+HDKEY_LABEL).exists() ||
+				new File(context.getFilesDir(), addr+KEYSTORE_LABEL).exists()) return AuthenticationLevel.TEE_AUTHENTICATION;
+		else if (new File(context.getFilesDir(), addr + NO_AUTH_LABEL + HDKEY_LABEL).exists()
+				|| new File(context.getFilesDir(), addr + NO_AUTH_LABEL + KEYSTORE_LABEL).exists()
+				|| new File(context.getFilesDir(), addr).exists()) return AuthenticationLevel.TEE_NO_AUTHENTICATION;
+		else return AuthenticationLevel.NOT_SET;
 	}
 
 	public static final Creator<Wallet> CREATOR = new Creator<Wallet>() {

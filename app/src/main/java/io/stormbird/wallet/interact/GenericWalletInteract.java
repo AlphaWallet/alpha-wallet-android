@@ -1,12 +1,22 @@
 package io.stormbird.wallet.interact;
 
+import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.stormbird.wallet.util.BalanceUtils;
+
+import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 public class GenericWalletInteract
 {
@@ -50,9 +60,14 @@ public class GenericWalletInteract
 		return walletRepository.updateWarningTime(walletAddr);
 	}
 
-	public Single<String> getWalletNeedsBackup()
+	public Single<String> getWalletNeedsBackup(String walletAddr)
 	{
-		return walletRepository.getWalletRequiresBackup();
+		return walletRepository.getWalletRequiresBackup(walletAddr);
+	}
+
+	public Single<String> setIsDismissed(String walletAddr, boolean isDismissed)
+	{
+		return walletRepository.setIsDismissed(walletAddr, isDismissed);
 	}
 
 	/**
@@ -70,7 +85,15 @@ public class GenericWalletInteract
     	return walletRepository.findWallet(keyAddress);
     }
 
-    public enum BackupLevel
+	private boolean hasBalance(Wallet wallet)
+	{
+		String balance = wallet.balance;
+		if (balance == null || balance.length() == 0 || !BalanceUtils.isDecimalValue(balance)) return false;
+		BigDecimal b = new BigDecimal(balance);
+		return b.compareTo(BigDecimal.ZERO) > 0;
+	}
+
+	public enum BackupLevel
 	{
 		BACKUP_NOT_REQUIRED, WALLET_HAS_LOW_VALUE, WALLET_HAS_HIGH_VALUE
 	}

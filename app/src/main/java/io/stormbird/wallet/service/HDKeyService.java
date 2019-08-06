@@ -62,7 +62,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     public static final String KEYSTORE_LABEL = "ks";
     //public static final String STRONGBOX_LABEL = "-sb-";
     public static final int TIME_BETWEEN_BACKUP_MILLIS = 1000 * 60 * 1; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
-    public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000 * 60 * 1; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
+    public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000 * 60 * 3; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
 
     public enum Operation
     {
@@ -74,6 +74,11 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
     public enum AuthenticationLevel
     {
         NOT_SET, TEE_NO_AUTHENTICATION, TEE_AUTHENTICATION, STRONGBOX_NO_AUTHENTICATION, STRONGBOX_AUTHENTICATION
+    }
+
+    public enum UpgradeKeyResult
+    {
+        REQUESTING_SECURITY, NO_SCREENLOCK, ALREADY_LOCKED, ERROR
     }
 
     private static final int DEFAULT_KEY_STRENGTH = 128;
@@ -179,15 +184,15 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         }
     }
 
-    public boolean upgradeKeySecurity(String key, SignAuthenticationCallback callback)
+    public UpgradeKeyResult upgradeKeySecurity(String key, SignAuthenticationCallback callback)
     {
         signCallback = callback;
         callback.setupAuthenticationCallback(this);
         //first check we have ability to generate the key
         if (!deviceIsLocked())
-            return false;
+            return UpgradeKeyResult.NO_SCREENLOCK;
 
-        WalletType type = keystoreType(key);
+        WalletType type = Wallet.getKeystoreType(context, key);
 
         try
         {
@@ -214,24 +219,24 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
                         keyOperation = Operation.UPGRADE_HD_KEY;
                         break;
                     default:
-                        return false;
+                        return UpgradeKeyResult.ERROR;
                 }
 
                 if (currentKey == null)
-                    return false;
+                    return UpgradeKeyResult.ERROR;
 
                 //now re-encode the key using authentication
                 upgradeKey(keyOperation);
-                return true;
+                return UpgradeKeyResult.REQUESTING_SECURITY;
             }
             else
             {
-                return false;
+                return UpgradeKeyResult.ALREADY_LOCKED;
             }
         }
         catch (Exception e)
         {
-            return false;
+            return UpgradeKeyResult.ERROR;
         }
     }
 
@@ -581,6 +586,7 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
                 case UPGRADE_HD_KEY:
                     signCallback.CreatedKey(address);
                     deleteNonAuthKey(address);
+                    break;
                 case UPGRADE_KEYSTORE_KEY:
                     signCallback.CreatedKey(address);
                     deleteNonAuthKey(address);
@@ -1062,7 +1068,6 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
                         alias = "0x" + alias;
                     Wallet hdKey = new Wallet(alias);
                     hdKey.type = WalletType.HDKEY;
-                    System.out.println("Key: " + alias);
                     if (encryptedHDFileName.contains(NO_AUTH_LABEL)) hdKey.authLevel = AuthenticationLevel.TEE_NO_AUTHENTICATION;
                     else hdKey.authLevel = AuthenticationLevel.TEE_AUTHENTICATION;
                     walletMap.put(date, hdKey);
@@ -1089,6 +1094,11 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
         if (keyguardManager == null) return false;
         else return keyguardManager.isDeviceSecure();
+    }
+
+    public void checkWalletType(Wallet wallet)
+    {
+        wallet.checkWalletType(context);
     }
 
     public static void setTopmostActivity(Activity activity)
@@ -1188,25 +1198,6 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         }
 
         return sigBytes;
-    }
-
-    public WalletType keystoreType(String address)
-    {
-        if (new File(context.getFilesDir(), address+HDKEY_LABEL).exists() ||
-                new File(context.getFilesDir(), address+NO_AUTH_LABEL+HDKEY_LABEL).exists()) return  WalletType.HDKEY;
-        else if (new File(context.getFilesDir(), address + KEYSTORE_LABEL).exists()
-                || new File(context.getFilesDir(), address + NO_AUTH_LABEL + KEYSTORE_LABEL).exists()) return WalletType.KEYSTORE;
-        else if (new File(context.getFilesDir(), address).exists()) return WalletType.KEYSTORE_LEGACY;
-        else return WalletType.WATCH;
-    }
-    public AuthenticationLevel authLevel(String address)
-    {
-        if (new File(context.getFilesDir(), address+HDKEY_LABEL).exists() ||
-                new File(context.getFilesDir(), address+KEYSTORE_LABEL).exists()) return  AuthenticationLevel.TEE_AUTHENTICATION;
-        else if (new File(context.getFilesDir(), address + NO_AUTH_LABEL + HDKEY_LABEL).exists()
-                || new File(context.getFilesDir(), address + NO_AUTH_LABEL + KEYSTORE_LABEL).exists()
-                || new File(context.getFilesDir(), address).exists()) return AuthenticationLevel.TEE_NO_AUTHENTICATION;
-        else return AuthenticationLevel.NOT_SET;
     }
 
     private synchronized byte[] getData(

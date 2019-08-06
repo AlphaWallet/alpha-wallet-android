@@ -55,7 +55,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     private WalletViewModel viewModel;
 
     private TokensReceiver tokenReceiver;
-    private TextView debugAddr;
 
     private SystemView systemView;
     private ProgressView progressView;
@@ -80,7 +79,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         progressView.setWhiteCircle();
 
         RecyclerView list = view.findViewById(R.id.list);
-        debugAddr = view.findViewById(R.id.debug_addr);
 
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
@@ -251,7 +249,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         switch (backupLevel)
         {
             case BACKUP_NOT_REQUIRED:
-                if (getActivity() != null) ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+                //if (getActivity() != null) ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
                 break;
             case WALLET_HAS_LOW_VALUE:
                 wData = new WarningData(this);
@@ -264,8 +262,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 adapter.addWarning(wData);
                 if (getActivity() != null)
                 {
-                    ((HomeActivity) getActivity()).notifyBackup(GenericWalletInteract.BackupLevel.WALLET_HAS_LOW_VALUE);
-                    ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
                     ((HomeActivity) getActivity()).showBackupWalletDialog();
                 }
                 break;
@@ -280,8 +276,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 adapter.addWarning(wData);
                 if (getActivity() != null)
                 {
-                    ((HomeActivity) getActivity()).notifyBackup(GenericWalletInteract.BackupLevel.WALLET_HAS_HIGH_VALUE);
-                    ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
                     ((HomeActivity) getActivity()).showBackupWalletDialog();
                 }
                 break;
@@ -448,8 +442,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     {
         if (getActivity() != null)
         {
-            ((HomeActivity) getActivity()).notifyCancelBackup();
-            ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
             Toast.makeText(getActivity(), getString(R.string.postponed_backup_warning), Toast.LENGTH_LONG).show();
         }
         viewModel.setKeyWarningDismissTime(walletAddress).isDisposed();

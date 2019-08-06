@@ -44,15 +44,11 @@ public class WalletDataRealmSource {
             {
                 for (Wallet hdWallet : svs.getAllHDWallets())
                 {
-                    if (hdWallet.address.startsWith("0x49Ba"))
-                    {
-                        System.out.println("yoless");
-                    }
                     RealmWalletData data = realm.where(RealmWalletData.class)
                             .equalTo("address", hdWallet.address)
                             .findFirst();
 
-                    composeWallet(hdWallet, data, WalletType.HDKEY, hdWallet.authLevel);
+                    composeWallet(hdWallet, data);
                     walletList.add(hdWallet);
                 }
 
@@ -62,9 +58,8 @@ public class WalletDataRealmSource {
                             .equalTo("address", keyStoreWallet.address)
                             .findFirst();
 
-                    WalletType type = svs.keystoreType(keyStoreWallet.address);
-                    HDKeyService.AuthenticationLevel authLevel = svs.authLevel(keyStoreWallet.address);
-                    composeWallet(keyStoreWallet, data, type, authLevel);
+                    svs.checkWalletType(keyStoreWallet);
+                    composeWallet(keyStoreWallet, data);
                     walletList.add(keyStoreWallet);
                 }
 
@@ -84,7 +79,7 @@ public class WalletDataRealmSource {
         });
     }
 
-    private void composeWallet(Wallet wallet, RealmWalletData d, WalletType type, HDKeyService.AuthenticationLevel authLevel)
+    private void composeWallet(Wallet wallet, RealmWalletData d)
     {
         if (d != null)
         {
@@ -96,11 +91,6 @@ public class WalletDataRealmSource {
             {
                 wallet.authLevel = d.getAuthLevel();
             }
-            else
-            {
-                wallet.authLevel = authLevel;
-            }
-            wallet.type = type;
         }
     }
 
@@ -291,29 +281,44 @@ public class WalletDataRealmSource {
         });
     }
 
-    public Single<String> getWalletRequiresBackup()
+    public Single<Boolean> wasWarningDismissed(String walletAddr)
+    {
+        return getWalletTime(walletAddr, false)
+                .map(time -> (time & 0x1) == 1);
+    }
+
+    public Single<String> getWalletRequiresBackup(String wallet)
     {
         return Single.fromCallable(() -> {
-            String wallet = "";
+            String walletBackup = "";
             try (Realm realm = realmManager.getWalletDataRealmInstance()) {
-                RealmResults<RealmWalletData> realmItems = realm.where(RealmWalletData.class)
-                        .findAll();
+                RealmWalletData data = realm.where(RealmWalletData.class)
+                        .equalTo("address", wallet)
+                        .findFirst();
+
+                if (data != null &&
+                        !data.getIsDismissedInSettings() &&
+                        data.getLastBackup() == 0)
+                {
+                    walletBackup = wallet;
+                }
 
                 // This checks if there's an HD wallet that has never been backed up,
                 // and the warning for which hasn't been dismissed within the last dismiss period
-                for (RealmWalletData data : realmItems) {
-                    if (data.getType() == WalletType.HDKEY &&
-                            (data.getLastBackup() == 0 &&
-                                    System.currentTimeMillis() > (data.getLastWarning() + HDKeyService.TIME_BETWEEN_BACKUP_MILLIS)))
-                    {
-                        wallet = data.getAddress();
-                        break;
-                    }
-                }
+//                for (RealmWalletData data : realmItems) {
+//                    if (data.getType() == WalletType.HDKEY &&
+//                            !data.getIsDismissedInSettings() &&
+//                            (data.getLastBackup() == 0 &&
+//                                    System.currentTimeMillis() > (data.getLastWarning() + HDKeyService.TIME_BETWEEN_BACKUP_MILLIS)))
+//                    {
+//                        walletBackup = data.getAddress();
+//                        break;
+//                    }
+//                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return wallet;
+            return walletBackup;
         });
     }
 
@@ -374,6 +379,25 @@ public class WalletDataRealmSource {
                 {
                     realm.beginTransaction();
                     realmWallet.deleteFromRealm();
+                    realm.commitTransaction();
+                }
+            }
+            return walletAddr;
+        });
+    }
+
+    public Single<String> setIsDismissed(String walletAddr, boolean isDismissed)
+    {
+        return Single.fromCallable(() -> {
+            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
+                RealmWalletData realmWallet = realm.where(RealmWalletData.class)
+                        .equalTo("address", walletAddr)
+                        .findFirst();
+
+                if (realmWallet != null)
+                {
+                    realm.beginTransaction();
+                    realmWallet.setIsDismissedInSettings(isDismissed);
                     realm.commitTransaction();
                 }
             }

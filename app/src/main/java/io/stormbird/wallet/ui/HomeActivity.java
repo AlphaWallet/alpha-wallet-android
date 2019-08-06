@@ -539,7 +539,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         //postpone backup until later
         settingsFragment.backupSeedSuccess();
         walletFragment.remindMeLater(keyBackup);
-        removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
 
         successImage.setImageResource(R.drawable.ic_error);
         successOverlay.setVisibility(View.VISIBLE);
@@ -555,36 +554,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         successImage.setImageResource(R.drawable.big_green_tick);
         successOverlay.setVisibility(View.VISIBLE);
 
-        //Tentative: Now we have backup success, we can migrate the key to higher security
-        //upgradeKey(keyBackup);
-
         handler = new Handler();
         handler.postDelayed(this, 1000);
-    }
-
-    private void upgradeKey(String keyBackup)
-    {
-        Wallet wallet = new Wallet(keyBackup);
-        wallet.checkWalletType(this);
-        HDKeyService svs;
-        switch (wallet.type)
-        {
-            case KEYSTORE:
-            case KEYSTORE_LEGACY:
-            case HDKEY:
-                svs = new HDKeyService(this);
-                if (svs.upgradeKeySecurity(keyBackup, this))
-                {
-                    CreatedKey(keyBackup); // already upgraded to top level
-                }
-                else
-                {
-                    //TODO: show failure to upgrade key
-                }
-                break;
-            default:
-                break;
-        }
     }
 
     @Override
@@ -606,7 +577,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        System.out.println("YOLESS");
+
     }
 
     @Override
@@ -930,17 +901,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         updatePrompt = true;
     }
 
-    public void notifyCancelBackup()
+    void postponeWalletBackupWarning(String walletAddress)
     {
-        settingsFragment.backupSeedSuccess();
+        removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
     }
 
-    public void postponeWalletBackupWarning(String walletAddress)
-    {
-        walletFragment.remindMeLater(walletAddress);
-    }
-
-    public void notifyBackup(GenericWalletInteract.BackupLevel walletValue)
+    void notifyBackup(GenericWalletInteract.BackupLevel walletValue)
     {
         settingsFragment.addBackupNotice(walletValue);
     }

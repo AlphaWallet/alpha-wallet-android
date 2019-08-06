@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -51,13 +49,22 @@
             android:textSize="14sp"
             android:textColor="@color/text_dark_gray"/>
 
+        <ImageView
+            android:id="@+id/seed_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/seed_graphic" />
+
         <LinearLayout
             android:id="@+id/layout_center_holder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="59dp"
             android:orientation="vertical"
-            android:layout_centerInParent="true"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="227dp"
             android:layout_marginEnd="26dp"
             android:layout_marginStart="26dp">
 
@@ -83,13 +90,6 @@
                 android:textColor="@color/dark_seed_danger"
                 android:layout_gravity="center_horizontal" />
 
-            <ImageView
-                android:id="@+id/seed_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:background="@drawable/seed_graphic" />
-
             <LinearLayout
                 android:id="@+id/layout_word_holder"
                 android:layout_width="match_parent"
@@ -99,19 +99,18 @@
 
         </LinearLayout>
 
-
         <TextView
             android:id="@+id/text_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:fontFamily="@font/font_light"
+            android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:layout_above="@id/layout_center_holder"
             android:gravity="center_horizontal"
             android:layout_marginStart="18dp"
             android:layout_marginEnd="20dp"
-            android:layout_marginBottom="50dp"
+            android:layout_marginTop="30dp"
             android:text="@string/backup_with_seed_phrase"
             android:textColor="@color/black"
             android:textSize="28sp" />
@@ -120,7 +119,7 @@
             android:id="@+id/text_detail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/layout_center_holder"
+            android:layout_below="@id/seed_image"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
             android:layout_marginStart="18dp"
@@ -144,6 +143,27 @@
             android:layout_alignParentBottom="true"
             android:textSize="16sp"
             android:textAllCaps="true" />
+
+        <LinearLayout
+            android:id="@+id/button_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/button_next"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="16dp"
+            android:padding="4dp"
+            android:elevation="4dp"
+            android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textAllCaps="true"
+            android:textColor="@color/warning_red"
+            android:text="@string/skip_upgrade"/>
+
+        </LinearLayout>
 
 
     </RelativeLayout>

@@ -46,5 +46,6 @@ public interface WalletRepositoryType {
 
     Single<Boolean> getWalletBackupWarning(String walletAddr);
 
-    Single<String> getWalletRequiresBackup();
+    Single<String> getWalletRequiresBackup(String walletAddr);
+    Single<String> setIsDismissed(String walletAddr, boolean isDismissed);
 }

@@ -24,7 +24,7 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="15dp"
-        android:background="@drawable/selector_wallet_check"
+        android:background="@drawable/ic_ethereum"
         android:buttonTint="@color/transparent" />
 
     <ImageView

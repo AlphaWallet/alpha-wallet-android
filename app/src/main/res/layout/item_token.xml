@@ -17,7 +17,7 @@
         android:layout_height="32dp"
         android:layout_marginStart="@dimen/big_margin"
         android:contentDescription="@string/empty"
-        android:src="@mipmap/token_logo"
+        android:src="@drawable/ic_ethereum"
         android:visibility="gone"
         />
 

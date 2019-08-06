@@ -8,10 +8,8 @@
             android:height="100dp"/>
     </shape>
 </item>
-
-    <item>
-        <bitmap
+        <item
             android:gravity="center"
-            android:src="@drawable/icons_checkmark_success" />
-    </item>
+            android:drawable="@drawable/ic_large_white_tick"/>
+
 </layer-list>

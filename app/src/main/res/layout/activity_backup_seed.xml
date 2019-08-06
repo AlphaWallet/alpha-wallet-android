@@ -63,8 +63,7 @@
             android:layout_marginBottom="59dp"
             android:orientation="vertical"
             android:layout_centerHorizontal="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="227dp"
+            android:layout_centerVertical="true"
             android:layout_marginEnd="26dp"
             android:layout_marginStart="26dp">
 
@@ -86,7 +85,7 @@
                 android:text="@string/invalid_phrase"
                 android:textSize="14sp"
                 android:visibility="gone"
-                android:layout_marginBottom="50dp"
+                android:paddingBottom="50dp"
                 android:textColor="@color/dark_seed_danger"
                 android:layout_gravity="center_horizontal" />
 

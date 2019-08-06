@@ -184,7 +184,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             case -2:
             case -3:
                 //Contract creation
-                typeIcon.setImageResource(R.drawable.token_icon);
+                typeIcon.setImageResource(R.drawable.ic_ethereum);
                 colourResource = R.color.black;
                 value.setVisibility(View.GONE);
                 break;

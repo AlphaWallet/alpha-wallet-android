@@ -4,21 +4,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.ui.WalletActionsActivity;
-import io.stormbird.wallet.ui.widget.adapter.WalletsAdapter;
 import io.stormbird.wallet.ui.widget.entity.WalletClickCallback;
 
 public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnClickListener {
@@ -101,21 +96,21 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 					case STRONGBOX_NO_AUTHENTICATION:
 						if (!isBackedUp)
 						{
-							defaultAction.setBackgroundResource(R.drawable.selector_wallet_no_backup);
+							defaultAction.setBackgroundResource(R.mipmap.ic_key_noauth);
 						}
 						else
 						{
-							defaultAction.setBackgroundResource(R.drawable.selector_wallet_no_auth);
+							defaultAction.setBackgroundResource(R.mipmap.ic_key_auth);
 						}
 						break;
 					case TEE_AUTHENTICATION:
 					case STRONGBOX_AUTHENTICATION:
-						defaultAction.setBackgroundResource(R.drawable.selector_wallet_tee_auth);
+						defaultAction.setBackgroundResource(R.mipmap.ic_key_fullauth);
 						break;
 				}
 				break;
 			case WATCH:
-				defaultAction.setBackgroundResource(R.drawable.selector_wallet_watch);
+				defaultAction.setBackgroundResource(R.drawable.ic_ethereum);
 				break;
 			case NOT_DEFINED:
 			case TEXT_MARKER:

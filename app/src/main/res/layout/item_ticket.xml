@@ -105,7 +105,7 @@
 
             <ImageView
                 android:id="@+id/image_view"
-                android:background="@drawable/ic_action_star"
+                android:background="@drawable/ic_ethereum"
                 android:visibility="gone"
                 android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"

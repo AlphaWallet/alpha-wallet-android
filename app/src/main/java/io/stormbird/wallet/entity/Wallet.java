@@ -68,13 +68,15 @@ public class Wallet implements Parcelable {
 		else if (new File(context.getFilesDir(), addr).exists()) return WalletType.KEYSTORE_LEGACY;
 		else return WalletType.WATCH;
 	}
-	public static AuthenticationLevel getAuthLevel(Context context, String addr)
+	private static AuthenticationLevel getAuthLevel(Context context, String addr)
 	{
 		if (new File(context.getFilesDir(), addr+HDKEY_LABEL).exists() ||
-				new File(context.getFilesDir(), addr+KEYSTORE_LABEL).exists()) return AuthenticationLevel.TEE_AUTHENTICATION;
+				new File(context.getFilesDir(), addr+KEYSTORE_LABEL).exists())
+			return HDKeyService.hasStrongbox() ? AuthenticationLevel.STRONGBOX_AUTHENTICATION : AuthenticationLevel.TEE_AUTHENTICATION;
 		else if (new File(context.getFilesDir(), addr + NO_AUTH_LABEL + HDKEY_LABEL).exists()
 				|| new File(context.getFilesDir(), addr + NO_AUTH_LABEL + KEYSTORE_LABEL).exists()
-				|| new File(context.getFilesDir(), addr).exists()) return AuthenticationLevel.TEE_NO_AUTHENTICATION;
+				|| new File(context.getFilesDir(), addr).exists())
+			return HDKeyService.hasStrongbox() ? AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION : AuthenticationLevel.TEE_NO_AUTHENTICATION;
 		else return AuthenticationLevel.NOT_SET;
 	}
 

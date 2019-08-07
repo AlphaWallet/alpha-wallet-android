@@ -87,10 +87,6 @@ public class WalletDataRealmSource {
             wallet.balance = balance(d);
             wallet.name = d.getName();
             wallet.lastBackupTime = d.getLastBackup();
-            if (d.getAuthLevel() == HDKeyService.AuthenticationLevel.STRONGBOX_AUTHENTICATION || d.getAuthLevel() == HDKeyService.AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION)
-            {
-                wallet.authLevel = d.getAuthLevel();
-            }
         }
     }
 

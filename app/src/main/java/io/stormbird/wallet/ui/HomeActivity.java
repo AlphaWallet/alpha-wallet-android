@@ -590,7 +590,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void CreatedKey(String keyAddress)
     {
         //Key was upgraded
-        viewModel.upgradeWallet(keyAddress);
+        //viewModel.upgradeWallet(keyAddress);
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {

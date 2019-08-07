@@ -122,7 +122,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         nextButton.setText(getString(R.string.action_upgrade_key));
 
         skipButton.setOnClickListener(v -> {
-            CreatedKey(keyBackup);
+            finishBackupSuccess(false);
         });
     }
 
@@ -144,7 +144,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                         DisplayKeyFailureDialog("Unable to upgrade key: Enable screenlock on phone");
                         break;
                     case ALREADY_LOCKED:
-                        CreatedKey(keyBackup); // already upgraded to top level
+                        finishBackupSuccess(false); // already upgraded to top level
                         break;
                     case ERROR:
                         DisplayKeyFailureDialog("Unable to upgrade key: Unknown Error");
@@ -167,10 +167,9 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         {
             case KEYSTORE_LEGACY:
             case KEYSTORE:
-                finishBackupSuccess("JSON");
-                break;
             case HDKEY:
-                finishBackupSuccess("HDKEY");
+                viewModel.upgradeWallet(keyBackup);
+                finishBackupSuccess(true);
                 break;
             default:
                 cancelAuthentication();
@@ -385,16 +384,32 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                 setupUpgradeKey();
                 break;
             default:
-                finishBackupSuccess(keyType);
+                finishBackupSuccess(false);
                 break;
         }
     }
 
-    private void finishBackupSuccess(String keyType)
+    private void finishBackupSuccess(boolean upgradeKey)
     {
+        Wallet wallet = new Wallet(keyBackup);
+        wallet.checkWalletType(this);
         Intent intent = new Intent();
+        switch (wallet.type)
+        {
+            case KEYSTORE_LEGACY:
+            case KEYSTORE:
+                intent.putExtra("TYPE", "JSON");
+                break;
+            case HDKEY:
+                intent.putExtra("TYPE", "HDKEY");
+                break;
+            default:
+                cancelAuthentication();
+                break;
+        }
+
         intent.putExtra("Key", keyBackup);
-        intent.putExtra("TYPE", keyType);
+        intent.putExtra("Upgrade", upgradeKey);
         setResult(RESULT_OK, intent);
         finish();
     }

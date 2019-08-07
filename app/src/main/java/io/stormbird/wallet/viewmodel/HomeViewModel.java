@@ -290,40 +290,4 @@ public class HomeViewModel extends BaseViewModel {
     public void setFindWalletAddressDialogShown(boolean isShown) {
         preferenceRepository.setFindWalletAddressDialogShown(isShown);
     }
-
-    public void upgradeWallet(String keyAddress)
-    {
-        genericWalletInteract.getWallet(keyAddress)
-                .map(this::upgradeWallet)
-                .flatMap(fetchWalletsInteract::storeWallet)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onWalletUpgraded, this::onError)
-                .isDisposed();
-    }
-
-    private void onWalletUpgraded(Wallet wallet)
-    {
-        Log.d("HVM", "Wallet " + wallet.address + " Upgraded to: " + wallet.authLevel.toString());
-    }
-
-    private Wallet upgradeWallet(Wallet wallet)
-    {
-        switch (wallet.authLevel)
-        {
-            default:
-                break;
-            case NOT_SET:
-                if (wallet.type == WalletType.HDKEY) wallet.authLevel = HDKeyService.AuthenticationLevel.TEE_AUTHENTICATION;
-                break;
-            case TEE_NO_AUTHENTICATION:
-                wallet.authLevel = HDKeyService.AuthenticationLevel.TEE_AUTHENTICATION;
-                break;
-            case STRONGBOX_NO_AUTHENTICATION:
-                wallet.authLevel = HDKeyService.AuthenticationLevel.STRONGBOX_AUTHENTICATION;
-                break;
-        }
-
-        return wallet;
-    }
 }

@@ -39,6 +39,11 @@ public class FetchWalletsInteract {
         return accountRepository.storeWallets(wallets, isMainNet);
     }
 
+    public Single<Wallet> getWallet(String keyAddress)
+    {
+        return accountRepository.findWallet(keyAddress);
+    }
+
     public Single<Wallet> storeWallet(Wallet wallet) {
         return accountRepository.storeWallet(wallet);
     }

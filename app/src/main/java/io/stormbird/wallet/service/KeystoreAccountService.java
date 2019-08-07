@@ -135,7 +135,7 @@ public class KeystoreAccountService implements AccountKeystoreService
     @Override
     public Single<String> exportAccount(Wallet wallet, String password, String newPassword) {
         return Single
-                .fromCallable(() -> getCredentials(wallet.address, password))
+                .fromCallable(() -> getCredentials(keyFolder, wallet.address, password))
                 .map(credentials -> org.web3j.crypto.Wallet.createLight(newPassword, credentials.getEcKeyPair()))
                 .map(objectMapper::writeValueAsString)
                 .subscribeOn(Schedulers.io());
@@ -191,11 +191,12 @@ public class KeystoreAccountService implements AccountKeystoreService
 
     /**
      * Get web3j credentials
+     * @param keyFolder KeyStore Folder
      * @param address
      * @param password
      * @return
      */
-    private Credentials getCredentials(String address, String password)
+    public static Credentials getCredentials(File keyFolder, String address, String password)
     {
         Credentials credentials = null;
         //first find the file
@@ -270,7 +271,7 @@ public class KeystoreAccountService implements AccountKeystoreService
     @Override
     public Single<byte[]> signTransactionFast(Wallet signer, String signerPassword, byte[] message, long chainId) {
         return Single.fromCallable(() -> {
-            Credentials credentials = getCredentials(signer.address, signerPassword);
+            Credentials credentials = getCredentials(keyFolder, signer.address, signerPassword);
             Sign.SignatureData signatureData = Sign.signMessage(
                     message, credentials.getEcKeyPair());
             byte[] signed = bytesFromSignature(signatureData);
@@ -366,7 +367,7 @@ public class KeystoreAccountService implements AccountKeystoreService
         return signature;
     }
 
-    private byte[] bytesFromSignature(Sign.SignatureData signature)
+    public static byte[] bytesFromSignature(Sign.SignatureData signature)
     {
         byte[] sigBytes = new byte[65];
         Arrays.fill(sigBytes, (byte) 0);

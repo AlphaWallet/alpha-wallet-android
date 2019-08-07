@@ -497,12 +497,11 @@
     <string name="wallet_not_backed_up">Your Wallet is not backed up!</string>
     <string name="not_backed_up_detail">You have not backed up your wallet yet. You have $200 USD net. Act now.</string>
     <string name="back_up_wallet_action">BACK UP WALLET %1$s →</string>
-    <string name="backup_seed_phrase">Backup Seed Phrase</string>
     <string name="authentication_cancelled">Authentication Cancelled</string>
     <string name="authentication_failed">Authentication Failed</string>
     <string name="authentication_failed_message">User Authentication failed, try again?</string>
     <string name="action_try_again">Try Again</string>
-    <string name="backup_with_seed_phrase">Back up your wallet with seed phrase</string>
+    <string name="backup_seed_phrase">Back up your wallet with seed phrase</string>
     <string name="backup_seed_phrase_detail">Making backup is very simple and safe: just write down 12 words and keep them in a safe place, offline.</string>
     <string name="action_back_up_my_wallet">back up my wallet</string>
     <string name="write_down_seed_phrase">Write down seed phrase\non paper</string>

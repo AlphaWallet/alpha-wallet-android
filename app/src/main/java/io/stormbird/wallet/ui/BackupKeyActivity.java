@@ -20,7 +20,6 @@ import io.stormbird.wallet.entity.PinAuthenticationCallbackInterface;
 import io.stormbird.wallet.entity.SignAuthenticationCallback;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.service.HDKeyService;
-import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.viewmodel.BackupKeyViewModel;
 import io.stormbird.wallet.viewmodel.BackupKeyViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
@@ -72,7 +71,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         alertDialog = null;
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-        setContentView(R.layout.activity_backup_seed);
+        setContentView(R.layout.activity_backup);
 
         toolbar();
 

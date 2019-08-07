@@ -488,8 +488,8 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
                         "Failed to saveTokens the file for: " + address);
             }
 
-            //blank class var
-            currentKey = null;
+            //blank secret key unless we just restored it (to handle the event that requested upgrade but then cancelled or failed authentication)
+            if (operation != RESTORE_NON_AUTHENTICATED_KEY) currentKey = null;
 
             switch (operation)
             {
@@ -551,22 +551,6 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
         }
 
         failToStore(operation);
-    }
-
-    /**
-     * Delete a non-auth key
-     * note that the iv and keystore key will have been replaced by the newly minted auth key
-     *
-     * @param address
-     */
-    private void deleteNonAuthKey(String address)
-    {
-        String noAuthEncryptedHDKeyPath = getFilePath(context, address + NO_AUTH_LABEL + HDKEY_LABEL);
-        String noAuthEncryptedKeystoreKeyPath = getFilePath(context, address + NO_AUTH_LABEL + KEYSTORE_LABEL);
-        File nonAuthKey = new File(noAuthEncryptedHDKeyPath);
-        File nonAuthKeystore = new File(noAuthEncryptedKeystoreKeyPath);
-        if (nonAuthKey.exists()) nonAuthKey.delete();
-        if (nonAuthKeystore.exists()) nonAuthKeystore.delete();
     }
 
     private void failToStore(Operation operation)
@@ -1241,6 +1225,22 @@ public class HDKeyService implements AuthenticationCallback, PinAuthenticationCa
             e.printStackTrace();
         }
         return false;
+    }
+
+    /**
+     * Delete a non-auth key
+     * note that the iv and keystore key will have been replaced by the newly minted auth key
+     *
+     * @param address
+     */
+    private void deleteNonAuthKey(String address)
+    {
+        File nonAuthKey = new File(getFilePath(context, address + NO_AUTH_LABEL + HDKEY_LABEL));
+        File nonAuthKeystore = new File(getFilePath(context, address + NO_AUTH_LABEL + KEYSTORE_LABEL));
+        File legacyKey = new File(getFilePath(context, address));
+        if (nonAuthKey.exists()) nonAuthKey.delete();
+        if (nonAuthKeystore.exists()) nonAuthKeystore.delete();
+        if (legacyKey.exists()) legacyKey.delete();
     }
 
     public synchronized void deleteKeystoreKey(String keyAddress)

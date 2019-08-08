@@ -3,15 +3,19 @@ package io.stormbird.wallet.entity.tokenscript;
 import io.reactivex.Observable;
 import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.wallet.util.BalanceUtils;
 import okhttp3.OkHttpClient;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.BytesType;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Int;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.abi.datatypes.generated.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthCall;
@@ -43,6 +47,209 @@ public abstract class TokenscriptFunction
             resolveReference(arg, tokenId, definition, attrIf);
             switch (arg.parameterType)
             {
+                case "e18":
+                    BigInteger e18 = new BigInteger(BalanceUtils.EthToWei(arg.element.value));
+                    params.add(new Uint(e18));
+                    break;
+                case "e8":
+                    BigInteger e8 =  BalanceUtils.baseToSubunit(arg.element.value, 8);
+                    params.add(new Uint(e8));
+                    break;
+                case "int":
+                    params.add(new Int(new BigInteger(arg.element.value)));
+                    break;
+                case "int8":
+                    params.add(new Int8(new BigInteger(arg.element.value)));
+                    break;
+                case "int16":
+                    params.add(new Int16(new BigInteger(arg.element.value)));
+                    break;
+                case "int24":
+                    params.add(new Int24(new BigInteger(arg.element.value)));
+                    break;
+                case "int32":
+                    params.add(new Int32(new BigInteger(arg.element.value)));
+                    break;
+                case "int40":
+                    params.add(new Int40(new BigInteger(arg.element.value)));
+                    break;
+                case "int48":
+                    params.add(new Int48(new BigInteger(arg.element.value)));
+                    break;
+                case "int56":
+                    params.add(new Int56(new BigInteger(arg.element.value)));
+                    break;
+                case "int64":
+                    params.add(new Int64(new BigInteger(arg.element.value)));
+                    break;
+                case "int72":
+                    params.add(new Int72(new BigInteger(arg.element.value)));
+                    break;
+                case "int80":
+                    params.add(new Int80(new BigInteger(arg.element.value)));
+                    break;
+                case "int88":
+                    params.add(new Int88(new BigInteger(arg.element.value)));
+                    break;
+                case "int96":
+                    params.add(new Int96(new BigInteger(arg.element.value)));
+                    break;
+                case "int104":
+                    params.add(new Int104(new BigInteger(arg.element.value)));
+                    break;
+                case "int112":
+                    params.add(new Int112(new BigInteger(arg.element.value)));
+                    break;
+                case "int120":
+                    params.add(new Int120(new BigInteger(arg.element.value)));
+                    break;
+                case "int128":
+                    params.add(new Int128(new BigInteger(arg.element.value)));
+                    break;
+                case "int136":
+                    params.add(new Int136(new BigInteger(arg.element.value)));
+                    break;
+                case "int144":
+                    params.add(new Int144(new BigInteger(arg.element.value)));
+                    break;
+                case "int152":
+                    params.add(new Int152(new BigInteger(arg.element.value)));
+                    break;
+                case "int160":
+                    params.add(new Int160(new BigInteger(arg.element.value)));
+                    break;
+                case "int168":
+                    params.add(new Int168(new BigInteger(arg.element.value)));
+                    break;
+                case "int176":
+                    params.add(new Int176(new BigInteger(arg.element.value)));
+                    break;
+                case "int184":
+                    params.add(new Int184(new BigInteger(arg.element.value)));
+                    break;
+                case "int192":
+                    params.add(new Int192(new BigInteger(arg.element.value)));
+                    break;
+                case "int200":
+                    params.add(new Int200(new BigInteger(arg.element.value)));
+                    break;
+                case "int208":
+                    params.add(new Int208(new BigInteger(arg.element.value)));
+                    break;
+                case "int216":
+                    params.add(new Int216(new BigInteger(arg.element.value)));
+                    break;
+                case "int224":
+                    params.add(new Int224(new BigInteger(arg.element.value)));
+                    break;
+                case "int232":
+                    params.add(new Int232(new BigInteger(arg.element.value)));
+                    break;
+                case "int240":
+                    params.add(new Int240(new BigInteger(arg.element.value)));
+                    break;
+                case "int248":
+                    params.add(new Int248(new BigInteger(arg.element.value)));
+                    break;
+                case "int256":
+                    params.add(new Int256(new BigInteger(arg.element.value)));
+                    break;
+                case "uint":
+                    params.add(new Uint(new BigInteger(arg.element.value)));
+                    break;
+                case "uint8":
+                    params.add(new Uint8(new BigInteger(arg.element.value)));
+                    break;
+                case "uint16":
+                    params.add(new Uint16(new BigInteger(arg.element.value)));
+                    break;
+                case "uint24":
+                    params.add(new Uint24(new BigInteger(arg.element.value)));
+                    break;
+                case "uint32":
+                    params.add(new Uint32(new BigInteger(arg.element.value)));
+                    break;
+                case "uint40":
+                    params.add(new Uint40(new BigInteger(arg.element.value)));
+                    break;
+                case "uint48":
+                    params.add(new Uint48(new BigInteger(arg.element.value)));
+                    break;
+                case "uint56":
+                    params.add(new Uint56(new BigInteger(arg.element.value)));
+                    break;
+                case "uint64":
+                    params.add(new Uint64(new BigInteger(arg.element.value)));
+                    break;
+                case "uint72":
+                    params.add(new Uint72(new BigInteger(arg.element.value)));
+                    break;
+                case "uint80":
+                    params.add(new Uint80(new BigInteger(arg.element.value)));
+                    break;
+                case "uint88":
+                    params.add(new Uint88(new BigInteger(arg.element.value)));
+                    break;
+                case "uint96":
+                    params.add(new Uint96(new BigInteger(arg.element.value)));
+                    break;
+                case "uint104":
+                    params.add(new Uint104(new BigInteger(arg.element.value)));
+                    break;
+                case "uint112":
+                    params.add(new Uint112(new BigInteger(arg.element.value)));
+                    break;
+                case "uint120":
+                    params.add(new Uint120(new BigInteger(arg.element.value)));
+                    break;
+                case "uint128":
+                    params.add(new Uint128(new BigInteger(arg.element.value)));
+                    break;
+                case "uint136":
+                    params.add(new Uint136(new BigInteger(arg.element.value)));
+                    break;
+                case "uint144":
+                    params.add(new Uint144(new BigInteger(arg.element.value)));
+                    break;
+                case "uint152":
+                    params.add(new Uint152(new BigInteger(arg.element.value)));
+                    break;
+                case "uint160":
+                    params.add(new Uint160(new BigInteger(arg.element.value)));
+                    break;
+                case "uint168":
+                    params.add(new Uint168(new BigInteger(arg.element.value)));
+                    break;
+                case "uint176":
+                    params.add(new Uint176(new BigInteger(arg.element.value)));
+                    break;
+                case "uint184":
+                    params.add(new Uint184(new BigInteger(arg.element.value)));
+                    break;
+                case "uint192":
+                    params.add(new Uint192(new BigInteger(arg.element.value)));
+                    break;
+                case "uint200":
+                    params.add(new Uint200(new BigInteger(arg.element.value)));
+                    break;
+                case "uint208":
+                    params.add(new Uint208(new BigInteger(arg.element.value)));
+                    break;
+                case "uint216":
+                    params.add(new Uint216(new BigInteger(arg.element.value)));
+                    break;
+                case "uint224":
+                    params.add(new Uint224(new BigInteger(arg.element.value)));
+                    break;
+                case "uint232":
+                    params.add(new Uint232(new BigInteger(arg.element.value)));
+                    break;
+                case "uint240":
+                    params.add(new Uint240(new BigInteger(arg.element.value)));
+                    break;
+                case "uint248":
+                    params.add(new Uint248(new BigInteger(arg.element.value)));
+                    break;
                 case "uint256":
                     switch (arg.element.ref)
                     {
@@ -67,6 +274,74 @@ public abstract class TokenscriptFunction
                             break;
                     }
                     break;
+                case "string":
+                    params.add(new Utf8String(arg.element.value));
+                case "bytes":
+                    params.add(new BytesType(Numeric.hexStringToByteArray(arg.element.value), "bytes"));
+                case "bytes1":
+                    params.add(new Bytes1(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes2":
+                    params.add(new Bytes2(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes3":
+                    params.add(new Bytes3(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes4":
+                    params.add(new Bytes4(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes5":
+                    params.add(new Bytes5(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes6":
+                    params.add(new Bytes6(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes7":
+                    params.add(new Bytes7(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes8":
+                    params.add(new Bytes8(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes9":
+                    params.add(new Bytes9(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes10":
+                    params.add(new Bytes10(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes11":
+                    params.add(new Bytes11(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes12":
+                    params.add(new Bytes12(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes13":
+                    params.add(new Bytes13(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes14":
+                    params.add(new Bytes14(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes15":
+                    params.add(new Bytes15(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes16":
+                    params.add(new Bytes16(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes17":
+                    params.add(new Bytes17(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes18":
+                    params.add(new Bytes18(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes19":
+                    params.add(new Bytes19(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes20":
+                    params.add(new Bytes20(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes21":
+                    params.add(new Bytes21(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes22":
+                    params.add(new Bytes22(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes23":
+                    params.add(new Bytes23(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes24":
+                    params.add(new Bytes24(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes25":
+                    params.add(new Bytes25(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes26":
+                    params.add(new Bytes26(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes27":
+                    params.add(new Bytes27(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes28":
+                    params.add(new Bytes28(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes29":
+                    params.add(new Bytes29(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes30":
+                    params.add(new Bytes30(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes31":
+                    params.add(new Bytes31(Numeric.hexStringToByteArray(arg.element.value)));
+                case "bytes32":
+                    params.add(new Bytes32(Numeric.hexStringToByteArray(arg.element.value)));
                 default:
                     System.out.println("NOT IMPLEMENTED: " + arg.parameterType);
                     break;

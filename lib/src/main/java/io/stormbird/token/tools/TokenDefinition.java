@@ -32,7 +32,7 @@ public class TokenDefinition {
     public TokenscriptContext context;
     public String holdingToken;
 
-    public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2019/05";
+    public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2019/07";
     public static final String TOKENSCRIPT_REPO_SERVER = "https://repo.tokenscript.org/";
 
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";

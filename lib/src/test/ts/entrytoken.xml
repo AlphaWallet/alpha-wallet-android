@@ -1,4 +1,4 @@
-<ts:token xmlns="http://www.w3.org/1999/xhtml" xmlns:ts="http://tokenscript.org/2019/05/tokenscript" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" custodian="false" xsi:schemaLocation="http://tokenscript.org/2019/05/tokenscript ../../schema/tokenscript.xsd">
+<ts:token xmlns="http://www.w3.org/1999/xhtml" xmlns:ts="http://tokenscript.org/2019/07/tokenscript" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" custodian="false" xsi:schemaLocation="http://tokenscript.org/2019/07/tokenscript">
   <ts:name>
     <ts:plurals xml:lang="en">
       <ts:string quantity="one">Ticket</ts:string>

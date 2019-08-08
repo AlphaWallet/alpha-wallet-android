@@ -1,6 +1,5 @@
 package io.stormbird.wallet.ui;
 
-import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,11 +16,10 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.Numeric;
-import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.TokenFunctionViewModel;
@@ -50,7 +48,7 @@ import java.util.Map;
 
 import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
-import static io.stormbird.wallet.service.HDKeyService.Operation.SIGN_DATA;
+import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
 import static io.stormbird.wallet.ui.DappBrowserFragment.PERSONAL_MESSAGE_PREFIX;
 
 /**
@@ -242,7 +240,6 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     public void onResume() {
         super.onResume();
         handler.postDelayed(this, 1000);
-        HDKeyService.setTopmostActivity(this);
     }
 
     @Override
@@ -542,8 +539,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         dialog.setMessage(message.value);
         dialog.setOnApproveListener(v -> {
             messageToSign = message;
-            HDKeyService svs = new HDKeyService(this);
-            svs.getAuthenticationForSignature(token.getWallet(), this);
+            viewModel.getAuthorisation(token.getWallet(), this, this);
         });
         dialog.setOnRejectListener(v -> {
             tokenView.onSignCancel(message);

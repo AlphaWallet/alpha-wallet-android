@@ -1,14 +1,12 @@
 package io.stormbird.wallet.interact;
 
-import io.reactivex.Completable;
-import io.reactivex.SingleSource;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 
 public class ImportWalletInteract {
 
@@ -30,7 +28,7 @@ public class ImportWalletInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<Wallet> storeHDWallet(String walletAddress, HDKeyService.AuthenticationLevel authLevel)
+    public Single<Wallet> storeHDWallet(String walletAddress, KeyService.AuthenticationLevel authLevel)
     {
         Wallet wallet = new Wallet(walletAddress);
         wallet.type = WalletType.HDKEY;
@@ -47,7 +45,7 @@ public class ImportWalletInteract {
         return walletRepository.storeWallet(wallet);
     }
 
-    public Single<Wallet> storeKeystoreWallet(Wallet wallet, HDKeyService.AuthenticationLevel level)
+    public Single<Wallet> storeKeystoreWallet(Wallet wallet, KeyService.AuthenticationLevel level)
     {
         wallet.authLevel = level;
         wallet.type = WalletType.KEYSTORE;

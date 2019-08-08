@@ -17,7 +17,6 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -29,7 +28,7 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.ui.widget.adapter.WalletsAdapter;
 import io.stormbird.wallet.viewmodel.WalletsViewModel;
 import io.stormbird.wallet.viewmodel.WalletsViewModelFactory;
@@ -60,8 +59,7 @@ public class WalletsActivity extends BaseActivity implements
     private WalletsAdapter adapter;
 
     private boolean walletChange = false;
-    private boolean isSetDefault;
-    private boolean isNewWalletCreated;
+    private boolean requiresHomeRefresh;
     private NetworkInfo networkInfo;
     private PinAuthenticationCallbackInterface authInterface;
 
@@ -73,6 +71,7 @@ public class WalletsActivity extends BaseActivity implements
         toolbar();
         setTitle(getString(R.string.title_change_wallet));
         initViews();
+        requiresHomeRefresh = false;
     }
 
     @Override
@@ -200,11 +199,10 @@ public class WalletsActivity extends BaseActivity implements
                 Snackbar.make(systemView, getString(R.string.toast_message_wallet_imported), Snackbar.LENGTH_SHORT)
                         .show();
                 onScanBlockReceived(0); //reset scan block
-                //set as isSetDefault
+
                 Wallet importedWallet = data.getParcelableExtra(C.Key.WALLET);
                 if (importedWallet != null) {
-                    isSetDefault = true;
-                    walletChange = true;
+                    requiresHomeRefresh = true;
                     viewModel.setDefaultWallet(importedWallet);
                 }
             }
@@ -269,9 +267,9 @@ public class WalletsActivity extends BaseActivity implements
         }
 
         adapter.setDefaultWallet(wallet);
-
-        if (isSetDefault && !isNewWalletCreated)
+        if (requiresHomeRefresh)
         {
+            requiresHomeRefresh = false;
             viewModel.showHome(this);
         }
     }
@@ -309,10 +307,9 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     private void onSetWalletDefault(Wallet wallet) {
+        requiresHomeRefresh = true;
         viewModel.setDefaultWallet(wallet);
-        isSetDefault = true;
         walletChange = true;
-        isNewWalletCreated = false;
     }
 
     private void hideDialog() {
@@ -328,7 +325,7 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
-    public void HDKeyCreated(String address, Context ctx, HDKeyService.AuthenticationLevel level)
+    public void HDKeyCreated(String address, Context ctx, KeyService.AuthenticationLevel level)
     {
         viewModel.StoreHDWallet(address, level);
     }

@@ -154,13 +154,13 @@
             android:elevation="4dp"
             android:visibility="gone">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textAllCaps="true"
-            android:textColor="@color/warning_red"
-            android:text="@string/skip_upgrade"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textAllCaps="true"
+                android:textColor="@color/warning_red"
+                android:text="@string/skip_upgrade"/>
 
         </LinearLayout>
 

@@ -37,6 +37,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.crypto.WalletUtils;
 import org.xml.sax.SAXException;
 
 import java.io.*;
@@ -1029,12 +1030,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         Completable.complete()
                 .subscribeWith(new DisposableCompletableObserver()
                 {
-                    Realm realm;
+                    Realm realm = null;
 
                     @Override
                     public void onStart()
                     {
                         if (tResult.result == null) tResult.result = "";
+                        if (!WalletUtils.isValidAddress(tokensService.getCurrentAddress())) return;
                         realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress());
                         ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
                         RealmAuxData realmToken = realm.where(RealmAuxData.class)

@@ -26,7 +26,6 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.interact.GenericWalletInteract;
-import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.util.LocaleUtils;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModel;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModelFactory;

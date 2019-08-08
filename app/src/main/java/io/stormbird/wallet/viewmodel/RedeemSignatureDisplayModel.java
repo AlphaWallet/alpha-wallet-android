@@ -1,5 +1,6 @@
 package io.stormbird.wallet.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
@@ -11,6 +12,7 @@ import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 
+import io.stormbird.wallet.service.KeyService;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
 
@@ -35,7 +37,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private static final long CYCLE_SIGNATURE_INTERVAL = 30;
     private static final long CHECK_BALANCE_INTERVAL = 10;
 
-    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
+    private final KeyService keyService;
     private final GenericWalletInteract genericWalletInteract;
     private final SignatureGenerateInteract signatureGenerateInteract;
     private final CreateTransactionInteract createTransactionInteract;
@@ -67,14 +69,14 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
             GenericWalletInteract genericWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             CreateTransactionInteract createTransactionInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            KeyService keyService,
             FetchTokensInteract fetchTokensInteract,
             MemPoolInteract memoryPoolInteract,
             AssetDisplayRouter assetDisplayRouter,
             AssetDefinitionService assetDefinitionService) {
         this.genericWalletInteract = genericWalletInteract;
         this.signatureGenerateInteract = signatureGenerateInteract;
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+        this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.memoryPoolInteract = memoryPoolInteract;
@@ -282,5 +284,13 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public void getAuthorisation(Activity activity, SignAuthenticationCallback callback)
+    {
+        if (defaultWallet.getValue() != null)
+        {
+            keyService.getAuthenticationForSignature(defaultWallet.getValue().address, activity, callback);
+        }
     }
 }

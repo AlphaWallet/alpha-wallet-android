@@ -19,7 +19,7 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.HomeRouter;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.util.BalanceUtils;
 import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.ConfirmationViewModel;
@@ -39,7 +39,7 @@ import static io.stormbird.wallet.C.ETH_SYMBOL;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
 import static io.stormbird.wallet.entity.ConfirmationType.ETH;
 import static io.stormbird.wallet.entity.ConfirmationType.WEB3TRANSACTION;
-import static io.stormbird.wallet.service.HDKeyService.Operation.SIGN_DATA;
+import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
 import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 
 public class ConfirmationActivity extends BaseActivity implements SignAuthenticationCallback {
@@ -309,8 +309,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private void onSendGasSettings(GasSettings gasSettings)
     {
         localGasSettings = gasSettings;
-        HDKeyService svs = new HDKeyService(this);
-        svs.getAuthenticationForSignature(viewModel.defaultWallet().getValue().address, this);
+        viewModel.getAuthorisation(this, this);
     }
 
     private void finaliseTransaction()

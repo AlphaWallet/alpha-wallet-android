@@ -4,6 +4,7 @@ import dagger.Module;
 import dagger.Provides;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.repository.*;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.viewmodel.SplashViewModelFactory;
 
 @Module
@@ -12,8 +13,9 @@ public class SplashModule {
     @Provides
     SplashViewModelFactory provideSplashViewModelFactory(FetchWalletsInteract fetchWalletsInteract,
                                                          PreferenceRepositoryType preferenceRepository,
-                                                         LocaleRepositoryType localeRepository) {
-        return new SplashViewModelFactory(fetchWalletsInteract, preferenceRepository, localeRepository);
+                                                         LocaleRepositoryType localeRepository,
+                                                         KeyService keyService) {
+        return new SplashViewModelFactory(fetchWalletsInteract, preferenceRepository, localeRepository, keyService);
     }
 
     @Provides

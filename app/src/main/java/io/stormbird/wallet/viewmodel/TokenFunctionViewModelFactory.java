@@ -9,6 +9,7 @@ import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.service.TokensService;
 
 /**
@@ -24,6 +25,7 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
     private final GasService gasService;
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final KeyService keyService;
 
     public TokenFunctionViewModelFactory(
             AssetDefinitionService assetDefinitionService,
@@ -32,7 +34,8 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
             CreateTransactionInteract createTransactionInteract,
             GasService gasService,
             TokensService tokensService,
-            EthereumNetworkRepositoryType ethereumNetworkRepository) {
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            KeyService keyService) {
         this.assetDefinitionService = assetDefinitionService;
         this.sellTicketRouter = sellTicketRouter;
         this.transferTicketRouter = transferTicketRouter;
@@ -40,11 +43,12 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
         this.gasService = gasService;
         this.tokensService = tokensService;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.keyService = keyService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new TokenFunctionViewModel(assetDefinitionService, sellTicketRouter, transferTicketRouter, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository);
+        return (T) new TokenFunctionViewModel(assetDefinitionService, sellTicketRouter, transferTicketRouter, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService);
     }
 }

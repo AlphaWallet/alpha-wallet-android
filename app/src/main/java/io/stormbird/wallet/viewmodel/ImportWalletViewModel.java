@@ -1,39 +1,40 @@
 package io.stormbird.wallet.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.ServiceErrorException;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.ImportWalletInteract;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
+import io.stormbird.wallet.ui.ImportWalletActivity;
 import io.stormbird.wallet.ui.widget.OnSetWatchWalletListener;
 
 public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWalletListener
 {
     private final ImportWalletInteract importWalletInteract;
+    private final KeyService keyService;
+
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> badSeed = new MutableLiveData<>();
 
-    ImportWalletViewModel(ImportWalletInteract importWalletInteract) {
+    ImportWalletViewModel(ImportWalletInteract importWalletInteract, KeyService keyService) {
         this.importWalletInteract = importWalletInteract;
+        this.keyService = keyService;
     }
 
-    public void onKeystore(String keystoreDetails, String newPassword, HDKeyService.AuthenticationLevel level) {
+    public void onKeystore(String keystore, String password, String newPassword, KeyService.AuthenticationLevel level) {
         progress.postValue(true);
-        String[] split = keystoreDetails.split("__");
-        String keystore = split[0];
-        String password = split[1];
+
         importWalletInteract
                 .importKeystore(keystore, password, newPassword)
                 .flatMap(wallet -> importWalletInteract.storeKeystoreWallet(wallet, level))
                 .subscribe(this::onWallet, this::onError).isDisposed();
     }
 
-    public void onPrivateKey(String privateKey, String newPassword, HDKeyService.AuthenticationLevel level) {
+    public void onPrivateKey(String privateKey, String newPassword, KeyService.AuthenticationLevel level) {
         progress.postValue(true);
         importWalletInteract
                 .importPrivateKey(privateKey, newPassword)
@@ -71,7 +72,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
         }
     }
 
-    public void onSeed(String walletAddress, HDKeyService.AuthenticationLevel level)
+    public void onSeed(String walletAddress, KeyService.AuthenticationLevel level)
     {
         if (walletAddress == null)
         {
@@ -86,5 +87,25 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(wallet::postValue, this::onError); //signal to UI wallet import complete
         }
+    }
+
+    public void getAuthorisation(String walletAddress, Activity activity, SignAuthenticationCallback callback)
+    {
+        keyService.getAuthenticationForSignature(walletAddress, activity, callback);
+    }
+
+    public void importHDWallet(String seedPhrase, Activity activity, ImportWalletCallback callback)
+    {
+        keyService.importHDKey(seedPhrase, activity, callback);
+    }
+
+    public void importKeystoreWallet(String address, Activity activity, ImportWalletCallback callback)
+    {
+        keyService.createKeystorePassword(address, activity, callback);
+    }
+
+    public void importPrivateKeyWallet(String address, Activity activity, ImportWalletCallback callback)
+    {
+        keyService.createPrivateKeyPassword(address, activity, callback);
     }
 }

@@ -11,6 +11,7 @@ import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.GasSettingsRouter;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.viewmodel.ConfirmationViewModelFactory;
 
@@ -23,9 +24,10 @@ public class ConfirmationModule {
             CreateTransactionInteract createTransactionInteract,
             GasSettingsRouter gasSettingsRouter,
             TokensService tokensService,
-            FindDefaultNetworkInteract findDefaultNetworkInteract
+            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            KeyService keyService
     ) {
-        return new ConfirmationViewModelFactory(genericWalletInteract, gasService, createTransactionInteract, gasSettingsRouter, tokensService, findDefaultNetworkInteract);
+        return new ConfirmationViewModelFactory(genericWalletInteract, gasService, createTransactionInteract, gasSettingsRouter, tokensService, findDefaultNetworkInteract, keyService);
     }
 
     @Provides

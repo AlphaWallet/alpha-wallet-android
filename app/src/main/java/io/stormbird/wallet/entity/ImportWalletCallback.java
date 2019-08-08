@@ -1,11 +1,11 @@
 package io.stormbird.wallet.entity;
 
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 
 public interface ImportWalletCallback
 {
-    void WalletValidated(String address, HDKeyService.AuthenticationLevel level);
-    void KeystoreValidated(String address, String newPassword, String keystoreDetails, HDKeyService.AuthenticationLevel level);
+    void WalletValidated(String address, KeyService.AuthenticationLevel level);
+    void KeystoreValidated(String newPassword, KeyService.AuthenticationLevel level);
     void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback);
-    void KeyValidated(String privateKey, String newPassword, HDKeyService.AuthenticationLevel authLevel);
+    void KeyValidated(String newPassword, KeyService.AuthenticationLevel authLevel);
 }

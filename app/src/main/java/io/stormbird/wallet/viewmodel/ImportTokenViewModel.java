@@ -1,5 +1,6 @@
 package io.stormbird.wallet.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.Nullable;
@@ -28,6 +29,7 @@ import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.tools.ParseMagicLink;
+import io.stormbird.wallet.service.KeyService;
 
 import static io.stormbird.token.tools.ParseMagicLink.*;
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
@@ -52,6 +54,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private final AssetDefinitionService assetDefinitionService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final GasService gasService;
+    private final KeyService keyService;
 
     private ParseMagicLink parser;
 
@@ -88,7 +91,8 @@ public class ImportTokenViewModel extends BaseViewModel
                          EthereumNetworkRepositoryType ethereumNetworkRepository,
                          AssetDefinitionService assetDefinitionService,
                          FetchTransactionsInteract fetchTransactionsInteract,
-                         GasService gasService) {
+                         GasService gasService,
+                         KeyService keyService) {
         this.genericWalletInteract = genericWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
@@ -99,6 +103,7 @@ public class ImportTokenViewModel extends BaseViewModel
         this.assetDefinitionService = assetDefinitionService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.gasService = gasService;
+        this.keyService = keyService;
     }
 
     private void initParser()
@@ -663,5 +668,13 @@ public class ImportTokenViewModel extends BaseViewModel
     public void stopGasPriceChecker()
     {
         gasService.stopGasListener();
+    }
+
+    public void getAuthorisation(Activity activity, SignAuthenticationCallback callback)
+    {
+        if (wallet.getValue() != null)
+        {
+            keyService.getAuthenticationForSignature(wallet.getValue().address, activity, callback);
+        }
     }
 }

@@ -17,7 +17,7 @@ import io.stormbird.wallet.interact.DeleteWalletInteract;
 import io.stormbird.wallet.interact.ExportWalletInteract;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.router.HomeRouter;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 
 public class WalletActionsViewModel extends BaseViewModel {
     private final static String TAG = WalletActionsViewModel.class.getSimpleName();
@@ -69,21 +69,11 @@ public class WalletActionsViewModel extends BaseViewModel {
         return isTaskRunning;
     }
 
-    public void deleteWallet(Wallet wallet, Activity activity) {
+    public void deleteWallet(Wallet wallet) {
         isTaskRunning.postValue(true);
         disposable = deleteWalletInteract
-                .delete(wallet, activity)
-                .flatMap(wallets -> deleteKey(wallets, wallet, activity))
+                .delete(wallet)
                 .subscribe(this::onDelete, this::onDeleteWalletError);
-    }
-
-    private Single<Wallet[]> deleteKey(Wallet[] wallets, Wallet wallet, Activity activity)
-    {
-        return Single.fromCallable(() -> {
-            HDKeyService svs = new HDKeyService(activity);
-            svs.deleteKeystoreKey(wallet.address);
-            return wallets;
-        });
     }
 
     private void onDeleteWalletError(Throwable throwable) {

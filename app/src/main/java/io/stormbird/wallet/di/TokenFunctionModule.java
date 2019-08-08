@@ -11,6 +11,7 @@ import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.viewmodel.TokenFunctionViewModelFactory;
 /**
@@ -29,10 +30,11 @@ public class TokenFunctionModule
             CreateTransactionInteract createTransactionInteract,
             GasService gasService,
             TokensService tokensService,
-            EthereumNetworkRepositoryType ethereumNetworkRepository) {
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            KeyService keyService) {
 
         return new TokenFunctionViewModelFactory(
-                assetDefinitionService, sellTicketRouter, transferTicketRouter, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository);
+                assetDefinitionService, sellTicketRouter, transferTicketRouter, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService);
     }
 
     @Provides

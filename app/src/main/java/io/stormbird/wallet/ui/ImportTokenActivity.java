@@ -29,7 +29,7 @@ import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.router.HomeRouter;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModel;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
@@ -40,7 +40,7 @@ import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
 import static io.stormbird.token.tools.ParseMagicLink.spawnable;
 import static io.stormbird.wallet.C.IMPORT_STRING;
-import static io.stormbird.wallet.service.HDKeyService.Operation.SIGN_DATA;
+import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
@@ -489,23 +489,12 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         cDialog.setPrimaryButtonText(R.string.confirm_purchase_button_text);
         cDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         cDialog.setPrimaryButtonListener(v -> {
-            authoriseKey();
+            viewModel.getAuthorisation(this, this);
             cDialog.dismiss();
         });
         cDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         cDialog.setSecondaryButtonListener(v -> cDialog.dismiss());
         cDialog.show();
-    }
-
-    private void authoriseKey()
-    {
-        Wallet wallet = viewModel.wallet().getValue();
-        if (wallet != null)
-        {
-            //get authorisation to use HD key before signing
-            HDKeyService svs = new HDKeyService(this);
-            svs.getAuthenticationForSignature(wallet.address, this);
-        }
     }
 
     private void onTransaction(String hash) {

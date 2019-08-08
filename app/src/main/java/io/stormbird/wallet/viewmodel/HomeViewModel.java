@@ -6,7 +6,6 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.*;
 import android.net.Uri;
 import android.os.Environment;
-import android.util.Log;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.MagicLinkData;
@@ -21,7 +20,6 @@ import io.stormbird.wallet.router.AddTokenRouter;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.HDKeyService;
 import io.stormbird.wallet.ui.HomeActivity;
 import io.stormbird.wallet.util.LocaleUtils;
 

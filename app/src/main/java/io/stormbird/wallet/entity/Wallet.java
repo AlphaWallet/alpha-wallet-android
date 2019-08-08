@@ -3,17 +3,13 @@ package io.stormbird.wallet.entity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import io.stormbird.wallet.service.HDKeyService;
-import org.web3j.crypto.WalletUtils;
-import org.web3j.utils.Numeric;
+import io.stormbird.wallet.service.KeyService;
 
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import static io.stormbird.wallet.entity.WalletType.KEYSTORE_LEGACY;
-import static io.stormbird.wallet.service.HDKeyService.*;
-import static io.stormbird.wallet.service.KeystoreAccountService.KEYSTORE_FOLDER;
+import static io.stormbird.wallet.service.KeyService.*;
 import static io.stormbird.wallet.util.BalanceUtils.weiToEth;
 
 public class Wallet implements Parcelable {
@@ -23,7 +19,7 @@ public class Wallet implements Parcelable {
     public String name;
     public WalletType type;
     public long lastBackupTime;
-    public HDKeyService.AuthenticationLevel authLevel;
+    public KeyService.AuthenticationLevel authLevel;
 
 	public Wallet(String address) {
 		this.address = address;
@@ -32,7 +28,7 @@ public class Wallet implements Parcelable {
 		this.name = "";
 		this.type = WalletType.NOT_DEFINED;
 		this.lastBackupTime = 0;
-		this.authLevel = HDKeyService.AuthenticationLevel.NOT_SET;
+		this.authLevel = KeyService.AuthenticationLevel.NOT_SET;
 	}
 
 	private Wallet(Parcel in)
@@ -45,7 +41,7 @@ public class Wallet implements Parcelable {
 		type = WalletType.values()[t];
 		lastBackupTime = in.readLong();
 		t = in.readInt();
-		authLevel = HDKeyService.AuthenticationLevel.values()[t];
+		authLevel = KeyService.AuthenticationLevel.values()[t];
 	}
 
 	public void setWalletType(WalletType wType)
@@ -72,11 +68,11 @@ public class Wallet implements Parcelable {
 	{
 		if (new File(context.getFilesDir(), addr+HDKEY_LABEL).exists() ||
 				new File(context.getFilesDir(), addr+KEYSTORE_LABEL).exists())
-			return HDKeyService.hasStrongbox() ? AuthenticationLevel.STRONGBOX_AUTHENTICATION : AuthenticationLevel.TEE_AUTHENTICATION;
+			return KeyService.hasStrongbox() ? AuthenticationLevel.STRONGBOX_AUTHENTICATION : AuthenticationLevel.TEE_AUTHENTICATION;
 		else if (new File(context.getFilesDir(), addr + NO_AUTH_LABEL + HDKEY_LABEL).exists()
 				|| new File(context.getFilesDir(), addr + NO_AUTH_LABEL + KEYSTORE_LABEL).exists()
 				|| new File(context.getFilesDir(), addr).exists())
-			return HDKeyService.hasStrongbox() ? AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION : AuthenticationLevel.TEE_NO_AUTHENTICATION;
+			return KeyService.hasStrongbox() ? AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION : AuthenticationLevel.TEE_NO_AUTHENTICATION;
 		else return AuthenticationLevel.NOT_SET;
 	}
 

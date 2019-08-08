@@ -15,7 +15,7 @@ import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -32,16 +32,19 @@ public class SplashViewModel extends ViewModel
     private final FetchWalletsInteract fetchWalletsInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final LocaleRepositoryType localeRepository;
+    private final KeyService keyService;
 
     private MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private MutableLiveData<Wallet> createWallet = new MutableLiveData<>();
 
     SplashViewModel(FetchWalletsInteract fetchWalletsInteract,
                     PreferenceRepositoryType preferenceRepository,
-                    LocaleRepositoryType localeRepository) {
+                    LocaleRepositoryType localeRepository,
+                    KeyService keyService) {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
+        this.keyService = keyService;
     }
 
     public void setLocale(Context context) {
@@ -70,8 +73,7 @@ public class SplashViewModel extends ViewModel
 
     public void createNewWallet(Activity ctx, CreateWalletCallbackInterface createCallback)
     {
-        HDKeyService hdService = new HDKeyService(ctx);
-        hdService.createNewHDKey(createCallback);
+        keyService.createNewHDKey(ctx, createCallback);
     }
 
     public void checkVersionUpdate(Context ctx, long updateTime)
@@ -188,7 +190,7 @@ public class SplashViewModel extends ViewModel
         }
     }
 
-    public void StoreHDKey(String address, HDKeyService.AuthenticationLevel authLevel)
+    public void StoreHDKey(String address, KeyService.AuthenticationLevel authLevel)
     {
         if (!address.equals(ZERO_ADDRESS))
         {

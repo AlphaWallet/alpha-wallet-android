@@ -41,7 +41,7 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.GenericWalletInteract;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.ui.widget.entity.ScrollControlInterface;
 import io.stormbird.wallet.ui.widget.entity.ScrollControlViewPager;
 import io.stormbird.wallet.util.RootUtil;
@@ -50,7 +50,6 @@ import io.stormbird.wallet.viewmodel.HomeViewModel;
 import io.stormbird.wallet.viewmodel.HomeViewModelFactory;
 import io.stormbird.wallet.widget.*;
 import org.web3j.crypto.WalletUtils;
-
 import javax.inject.Inject;
 import java.io.File;
 import java.lang.reflect.Method;
@@ -267,7 +266,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         checkRoot();
         successOverlay = findViewById(R.id.layout_success_overlay);
         successImage = findViewById(R.id.success_image);
-        HDKeyService.setTopmostActivity(this);
+
         //check clipboard
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         try
@@ -540,10 +539,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         settingsFragment.backupSeedSuccess();
         walletFragment.remindMeLater(keyBackup);
 
-        successImage.setImageResource(R.drawable.ic_error);
+        /*successImage.setImageResource(R.drawable.ic_error);
         successOverlay.setVisibility(View.VISIBLE);
-        handler = new Handler();
-        handler.postDelayed(this, 1000);
+        handler = new Handler();*/
     }
 
     private void backupWalletSuccess(String keyBackup)

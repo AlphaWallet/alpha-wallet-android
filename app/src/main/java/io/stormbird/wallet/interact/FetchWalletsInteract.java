@@ -4,6 +4,7 @@ import java.util.Map;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
@@ -47,4 +48,16 @@ public class FetchWalletsInteract {
     public Single<Wallet> storeWallet(Wallet wallet) {
         return accountRepository.storeWallet(wallet);
     }
+
+    /**
+     * Called when wallet marked as backed up.
+     * Update the wallet backup date
+     *
+     * @param walletAddr
+     */
+    public Disposable updateBackupTime(String walletAddr)
+    {
+        return accountRepository.updateBackupTime(walletAddr);
+    }
+
 }

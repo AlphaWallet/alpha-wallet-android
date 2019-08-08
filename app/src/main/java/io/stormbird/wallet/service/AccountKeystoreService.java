@@ -2,6 +2,7 @@ package io.stormbird.wallet.service;
 
 import io.stormbird.wallet.entity.Wallet;
 
+import java.io.File;
 import java.math.BigInteger;
 
 import io.reactivex.Completable;

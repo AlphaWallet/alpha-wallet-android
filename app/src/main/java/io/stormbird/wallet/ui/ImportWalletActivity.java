@@ -9,7 +9,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 
 import java.math.BigInteger;
@@ -23,16 +22,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import dagger.android.AndroidInjection;
-import io.stormbird.token.entity.SalesOrderMalformed;
-import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.ui.widget.OnImportKeystoreListener;
 import io.stormbird.wallet.ui.widget.OnImportPrivateKeyListener;
 import io.stormbird.wallet.ui.widget.OnImportSeedListener;
-import io.stormbird.wallet.ui.widget.OnSetWatchWalletListener;
 import io.stormbird.wallet.ui.widget.adapter.TabPagerAdapter;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
@@ -52,7 +48,6 @@ import static io.stormbird.wallet.C.ErrorCode.ALREADY_ADDED;
 import static io.stormbird.wallet.C.RESET_WALLET;
 import static io.stormbird.wallet.ui.zxing.QRScanningActivity.DENY_PERMISSION;
 import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
-import static io.stormbird.wallet.widget.AWalletBottomNavigationView.WALLET;
 import static io.stormbird.wallet.widget.InputAddressView.BARCODE_READER_REQUEST_CODE;
 
 public class ImportWalletActivity extends BaseActivity implements OnImportSeedListener, ImportWalletCallback, OnImportKeystoreListener, OnImportPrivateKeyListener
@@ -256,50 +251,50 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     @Override
     public void onSeed(String seedPhrase, Activity ctx)
     {
-        HDKeyService hdKeyService = new HDKeyService(ctx);
-        hdKeyService.importHDKey(seedPhrase, this);
+        importWalletViewModel.importHDWallet(seedPhrase, this, this);
     }
 
     @Override
     public void onKeystore(String keystore, String password)
     {
-        HDKeyService svs = new HDKeyService(this);
-
         String address = extractAddressFromStore(keystore);
-        if (address != null)
-        {
-            svs.createKeystorePassword(address, this, keystore, password);
-        }
+        importWalletViewModel.importKeystoreWallet(address, this, this);
     }
 
     @Override
     public void onPrivateKey(String privateKey)
     {
-        HDKeyService svs = new HDKeyService(this);
-
         BigInteger key = new BigInteger(privateKey, 16);
         ECKeyPair keypair = ECKeyPair.create(key);
         String address = Numeric.prependHexPrefix(Keys.getAddress(keypair));
 
-        svs.createPrivateKeyPassword(address, this, privateKey);
+        importWalletViewModel.importPrivateKeyWallet(address, this, this);
     }
 
     @Override
-    public void WalletValidated(String address, HDKeyService.AuthenticationLevel level)
+    public void WalletValidated(String address, KeyService.AuthenticationLevel level)
     {
         importWalletViewModel.onSeed(address, level);
     }
 
     @Override
-    public void KeystoreValidated(String address, String newPassword, String keystoreDetails, HDKeyService.AuthenticationLevel level)
+    public void KeystoreValidated(String newPassword, KeyService.AuthenticationLevel level)
     {
-        importWalletViewModel.onKeystore(keystoreDetails, newPassword, level);
+        ImportKeystoreFragment importKeystoreFragment = (ImportKeystoreFragment) pages.get(ImportType.KEYSTORE_FORM_INDEX.ordinal()).second;
+        if (importKeystoreFragment != null)
+        {
+            importWalletViewModel.onKeystore(importKeystoreFragment.getKeystore(), importKeystoreFragment.getPassword(), newPassword, level);
+        }
     }
 
     @Override
-    public void KeyValidated(String privateKey, String newPassword, HDKeyService.AuthenticationLevel level)
+    public void KeyValidated(String newPassword, KeyService.AuthenticationLevel level)
     {
-        importWalletViewModel.onPrivateKey(privateKey, newPassword, level);
+        ImportPrivateKeyFragment importPrivateKeyFragment = (ImportPrivateKeyFragment) pages.get(ImportType.PRIVATE_KEY_FORM_INDEX.ordinal()).second;
+        if (importPrivateKeyFragment != null)
+        {
+            importWalletViewModel.onPrivateKey(importPrivateKeyFragment.getPrivateKey(), newPassword, level);
+        }
     }
 
     @Override

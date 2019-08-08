@@ -6,25 +6,20 @@ import io.stormbird.wallet.interact.DeleteWalletInteract;
 import io.stormbird.wallet.interact.ExportWalletInteract;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.repository.WalletRepositoryType;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.viewmodel.BackupKeyViewModelFactory;
 
 @Module
 public class BackupKeyModule {
     @Provides
     BackupKeyViewModelFactory provideBackupKeyViewModelFactory(
-            DeleteWalletInteract deleteWalletInteract,
+            KeyService keyService,
             ExportWalletInteract exportWalletInteract,
             FetchWalletsInteract fetchWalletsInteract) {
         return new BackupKeyViewModelFactory(
-                deleteWalletInteract,
+                keyService,
                 exportWalletInteract,
                 fetchWalletsInteract);
-    }
-
-    @Provides
-    DeleteWalletInteract provideDeleteAccountInteract(
-            WalletRepositoryType accountRepository) {
-        return new DeleteWalletInteract(accountRepository);
     }
 
     @Provides

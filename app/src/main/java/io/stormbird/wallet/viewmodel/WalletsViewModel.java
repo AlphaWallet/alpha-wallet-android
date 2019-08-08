@@ -14,8 +14,7 @@ import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
-import io.stormbird.wallet.service.HDKeyService;
-import io.stormbird.wallet.ui.WalletsActivity;
+import io.stormbird.wallet.service.KeyService;
 
 import java.util.*;
 
@@ -31,6 +30,7 @@ public class WalletsViewModel extends BaseViewModel
     private final GenericWalletInteract genericWalletInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
+    private final KeyService keyService;
 
     private final ImportWalletRouter importWalletRouter;
     private final HomeRouter homeRouter;
@@ -54,7 +54,8 @@ public class WalletsViewModel extends BaseViewModel
             ImportWalletRouter importWalletRouter,
             HomeRouter homeRouter,
             FetchTokensInteract fetchTokensInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract)
+            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            KeyService keyService)
     {
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
@@ -63,6 +64,7 @@ public class WalletsViewModel extends BaseViewModel
         this.homeRouter = homeRouter;
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+        this.keyService = keyService;
     }
 
     public LiveData<Wallet[]> wallets()
@@ -190,8 +192,7 @@ public class WalletsViewModel extends BaseViewModel
 
     public void newWallet(Activity ctx, CreateWalletCallbackInterface createCallback)
     {
-        HDKeyService svs = new HDKeyService(ctx);
-        svs.createNewHDKey(createCallback);
+        keyService.createNewHDKey(ctx, createCallback);
     }
 
     /**
@@ -296,7 +297,7 @@ public class WalletsViewModel extends BaseViewModel
 
     public void showHome(Context context)
     {
-        homeRouter.open(context, true);
+        homeRouter.open(context, true);  // create 2.
     }
 
     public NetworkInfo getNetwork()
@@ -304,7 +305,7 @@ public class WalletsViewModel extends BaseViewModel
         return currentNetwork;
     }
 
-    public void StoreHDWallet(String address, HDKeyService.AuthenticationLevel authLevel)
+    public void StoreHDWallet(String address, KeyService.AuthenticationLevel authLevel)
     {
         if (!address.equals(ZERO_ADDRESS))
         {

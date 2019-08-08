@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
@@ -41,9 +42,9 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	AccountKeystoreService provideAccountKeyStoreService(Context context) {
+	AccountKeystoreService provideAccountKeyStoreService(Context context, KeyService keyService) {
         File file = new File(context.getFilesDir(), KEYSTORE_FOLDER);
-		return new KeystoreAccountService(file);
+		return new KeystoreAccountService(file, context.getFilesDir(), keyService);
 	}
 
 	@Singleton
@@ -69,9 +70,10 @@ public class RepositoriesModule {
 			EthereumNetworkRepositoryType networkRepository,
 			TransactionsNetworkClientType blockExplorerClient,
 			WalletDataRealmSource walletDataRealmSource,
-			OkHttpClient httpClient) {
+			OkHttpClient httpClient,
+			KeyService keyService) {
 		return new WalletRepository(
-		        preferenceRepositoryType, accountKeystoreService, networkRepository, blockExplorerClient, walletDataRealmSource, httpClient);
+		        preferenceRepositoryType, accountKeystoreService, networkRepository, blockExplorerClient, walletDataRealmSource, httpClient, keyService);
 	}
 
 	@Singleton
@@ -187,5 +189,11 @@ public class RepositoriesModule {
 	@Provides
 	AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, Context ctx, NotificationService notificationService, RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, TokensService tokensService, TokenLocalSource tls) {
 		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, ethereumNetworkRepository, tokensService, tls);
+	}
+
+	@Singleton
+	@Provides
+	KeyService provideKeyService(Context ctx) {
+		return new KeyService(ctx);
 	}
 }

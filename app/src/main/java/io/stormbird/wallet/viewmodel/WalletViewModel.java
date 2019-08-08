@@ -541,7 +541,7 @@ public class WalletViewModel extends BaseViewModel
             }
         }
 
-        if (value.compareTo(BigDecimal.ZERO) >= 0)
+        if (value.compareTo(BigDecimal.ZERO) > 0)
         {
             final BigDecimal calcValue = value;
             genericWalletInteract.getBackupWarning(getWalletAddr())

@@ -12,6 +12,7 @@ import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.viewmodel.RedeemSignatureDisplayModelFactory;
 
 import dagger.Module;
@@ -28,19 +29,13 @@ public class RedeemSignatureDisplayModule {
             GenericWalletInteract genericWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             CreateTransactionInteract createTransactionInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            KeyService keyService,
             FetchTokensInteract fetchTokensInteract,
             MemPoolInteract memPoolInteract,
             AssetDisplayRouter assetDisplayRouter,
             AssetDefinitionService assetDefinitionService) {
         return new RedeemSignatureDisplayModelFactory(
-                genericWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract, memPoolInteract, assetDisplayRouter, assetDefinitionService);
-    }
-
-    @Provides
-    FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
-            EthereumNetworkRepositoryType networkRepository) {
-        return new FindDefaultNetworkInteract(networkRepository);
+                genericWalletInteract, signatureGenerateInteract, createTransactionInteract, keyService, fetchTokensInteract, memPoolInteract, assetDisplayRouter, assetDefinitionService);
     }
 
     @Provides

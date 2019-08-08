@@ -25,7 +25,7 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.router.HomeRouter;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.adapter.AutoCompleteUrlAdapter;
 import io.stormbird.wallet.ui.widget.adapter.NonFungibleTokenAdapter;
@@ -35,12 +35,10 @@ import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.util.QRURLParser;
-import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.TransferTicketDetailViewModel;
 import io.stormbird.wallet.viewmodel.TransferTicketDetailViewModelFactory;
 import io.stormbird.wallet.widget.*;
 import org.web3j.abi.datatypes.Address;
-import org.web3j.tx.Contract;
 
 import javax.inject.Inject;
 import java.math.BigInteger;
@@ -54,7 +52,7 @@ import java.util.Locale;
 import static io.stormbird.wallet.C.*;
 import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.C.Key.WALLET;
-import static io.stormbird.wallet.service.HDKeyService.Operation.SIGN_DATA;
+import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
 import static io.stormbird.wallet.ui.zxing.QRScanningActivity.DENY_PERMISSION;
 import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 
@@ -506,17 +504,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
                 token.integerListToString(token.ticketIdStringToIndexList(prunedIds), true));
     }
 
-    private void transferTicketAuth()
-    {
-        Wallet wallet = viewModel.defaultWallet().getValue();
-        if (wallet != null)
-        {
-            //get authorisation if required
-            HDKeyService svs = new HDKeyService(this);
-            svs.getAuthenticationForSignature(wallet.address, this);
-        }
-    }
-
     @Override
     protected void onResume()
     {
@@ -679,7 +666,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         confirmationDialog.setMediumText(qty);
         confirmationDialog.setPrimaryButtonText(R.string.transfer_tickets);
         confirmationDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
-        confirmationDialog.setPrimaryButtonListener(v1 -> transferTicketAuth());
+        confirmationDialog.setPrimaryButtonListener(v1 -> viewModel.getAuthorisation(this, this));
         confirmationDialog.setSecondaryButtonListener(v1 -> confirmationDialog.dismiss());
         confirmationDialog.show();
     }

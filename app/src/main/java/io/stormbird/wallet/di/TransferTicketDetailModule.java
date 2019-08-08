@@ -7,7 +7,7 @@ import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.GasService;
-import io.stormbird.wallet.service.MarketQueueService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.viewmodel.TransferTicketDetailViewModelFactory;
 
 import dagger.Module;
@@ -23,7 +23,7 @@ public class TransferTicketDetailModule {
     @Provides
     TransferTicketDetailViewModelFactory transferTicketDetailViewModelFactory(
             GenericWalletInteract genericWalletInteract,
-            MarketQueueService marketQueueService,
+            KeyService keyService,
             CreateTransactionInteract createTransactionInteract,
             TransferTicketDetailRouter transferTicketDetailRouter,
             FetchTransactionsInteract fetchTransactionsInteract,
@@ -33,7 +33,7 @@ public class TransferTicketDetailModule {
             ConfirmationRouter confirmationRouter,
             ENSInteract ensInteract) {
         return new TransferTicketDetailViewModelFactory(
-                genericWalletInteract, marketQueueService, createTransactionInteract, transferTicketDetailRouter, fetchTransactionsInteract,
+                genericWalletInteract, keyService, createTransactionInteract, transferTicketDetailRouter, fetchTransactionsInteract,
                 assetDisplayRouter, assetDefinitionService, gasService, confirmationRouter, ensInteract);
     }
 

@@ -1,5 +1,6 @@
 package io.stormbird.wallet.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
@@ -11,6 +12,7 @@ import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.SellDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.tools.ParseMagicLink;
@@ -36,7 +38,7 @@ public class SellDetailViewModel extends BaseViewModel {
     private final MarketQueueService marketQueueService;
     private final CreateTransactionInteract createTransactionInteract;
     private final SellDetailRouter sellDetailRouter;
-    private final AssetDisplayRouter assetDisplayRouter;
+    private final KeyService keyService;
     private final AssetDefinitionService assetDefinitionService;
 
     private byte[] linkMessage;
@@ -46,14 +48,14 @@ public class SellDetailViewModel extends BaseViewModel {
                         MarketQueueService marketQueueService,
                         CreateTransactionInteract createTransactionInteract,
                         SellDetailRouter sellDetailRouter,
-                        AssetDisplayRouter assetDisplayRouter,
+                        KeyService keyService,
                         AssetDefinitionService assetDefinitionService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
         this.sellDetailRouter = sellDetailRouter;
-        this.assetDisplayRouter = assetDisplayRouter;
+        this.keyService = keyService;
         this.assetDefinitionService = assetDefinitionService;
     }
 
@@ -134,5 +136,13 @@ public class SellDetailViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public void getAuthorisation(Activity activity, SignAuthenticationCallback callback)
+    {
+        if (defaultWallet.getValue() != null)
+        {
+            keyService.getAuthenticationForSignature(defaultWallet.getValue().address, activity, callback);
+        }
     }
 }

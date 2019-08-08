@@ -3,7 +3,7 @@ package io.stormbird.wallet.repository.entity;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 import io.stormbird.wallet.entity.WalletType;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 
 /**
  * Created by James on 8/11/2018.
@@ -84,12 +84,12 @@ public class RealmWalletData extends RealmObject
     public boolean getIsDismissedInSettings() { return (lastWarning & 0x1) == 1; }
     public void setIsDismissedInSettings(boolean isDismissed) { lastWarning = (lastWarning&DISMISS_WARNING_IN_SETTINGS_MASK) + (isDismissed ? 0x1 : 0x0); }
 
-    public HDKeyService.AuthenticationLevel getAuthLevel()
+    public KeyService.AuthenticationLevel getAuthLevel()
     {
-        return HDKeyService.AuthenticationLevel.values()[authLevel];
+        return KeyService.AuthenticationLevel.values()[authLevel];
     }
 
-    public void setAuthLevel(HDKeyService.AuthenticationLevel authLevel)
+    public void setAuthLevel(KeyService.AuthenticationLevel authLevel)
     {
         this.authLevel = authLevel.ordinal();
     }

@@ -6,20 +6,21 @@ import android.support.annotation.NonNull;
 import io.stormbird.wallet.interact.DeleteWalletInteract;
 import io.stormbird.wallet.interact.ExportWalletInteract;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
+import io.stormbird.wallet.service.KeyService;
 
 import javax.inject.Inject;
 
 public class BackupKeyViewModelFactory implements ViewModelProvider.Factory {
-    private final DeleteWalletInteract deleteWalletInteract;
+    private final KeyService keyService;
     private final ExportWalletInteract exportWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
 
     @Inject
     public BackupKeyViewModelFactory(
-            DeleteWalletInteract deleteWalletInteract,
+            KeyService keyService,
             ExportWalletInteract exportWalletInteract,
             FetchWalletsInteract fetchWalletsInteract) {
-        this.deleteWalletInteract = deleteWalletInteract;
+        this.keyService = keyService;
         this.exportWalletInteract = exportWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
     }
@@ -28,7 +29,7 @@ public class BackupKeyViewModelFactory implements ViewModelProvider.Factory {
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new BackupKeyViewModel(
-                deleteWalletInteract,
+                keyService,
                 exportWalletInteract,
                 fetchWalletsInteract);
     }

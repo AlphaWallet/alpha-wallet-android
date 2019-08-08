@@ -20,7 +20,7 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.ui.widget.adapter.NonFungibleTokenAdapter;
 import io.stormbird.wallet.ui.widget.entity.TicketRangeParcel;
 import io.stormbird.wallet.viewmodel.RedeemSignatureDisplayModel;
@@ -32,7 +32,7 @@ import javax.inject.Inject;
 
 import static io.stormbird.wallet.C.Key.*;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
-import static io.stormbird.wallet.service.HDKeyService.Operation.SIGN_DATA;
+import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
 
 /**
  * Created by James on 24/01/2018.
@@ -53,9 +53,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     private Token token;
     private TicketRangeParcel ticketRange;
     private PinAuthenticationCallbackInterface authInterface;
-    HDKeyService hdKeySvs;
-
-    NonFungibleTokenAdapter adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,14 +92,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
     private void onSignRequest(Boolean aBoolean)
     {
-        if (wallet != null)
-        {
-            //get authorisation to use HD key before signing
-            if (!hdKeySvs.isChecking())
-            {
-                hdKeySvs.getAuthenticationForSignature(wallet.address, this);
-            }
-        }
+        viewModel.getAuthorisation(this, this);
     }
 
     private Bitmap createQRImage(String address) {
@@ -129,7 +119,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     protected void onResume() {
         super.onResume();
         viewModel.prepare(token.tokenInfo.address, token, ticketRange.range);
-        hdKeySvs = new HDKeyService(this);
     }
 
     @Override

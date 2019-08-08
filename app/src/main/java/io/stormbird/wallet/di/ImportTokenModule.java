@@ -7,6 +7,7 @@ import io.stormbird.wallet.repository.*;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;
 
 /**
@@ -27,9 +28,10 @@ public class ImportTokenModule {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             AssetDefinitionService assetDefinitionService,
             FetchTransactionsInteract fetchTransactionsInteract,
-            GasService gasService) {
+            GasService gasService,
+            KeyService keyService) {
         return new ImportTokenViewModelFactory(
-                genericWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService);
+                genericWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService, keyService);
     }
 
     @Provides

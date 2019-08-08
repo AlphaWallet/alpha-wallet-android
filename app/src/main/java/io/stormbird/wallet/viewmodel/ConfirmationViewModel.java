@@ -14,6 +14,7 @@ import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.GasSettingsRouter;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.ConfirmationActivity;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
@@ -33,19 +34,22 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final TokensService tokensService;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GasSettingsRouter gasSettingsRouter;
+    private final KeyService keyService;
 
     ConfirmationViewModel(GenericWalletInteract genericWalletInteract,
                           GasService gasService,
                           CreateTransactionInteract createTransactionInteract,
                           GasSettingsRouter gasSettingsRouter,
                           TokensService tokensService,
-                          FindDefaultNetworkInteract findDefaultNetworkInteract) {
+                          FindDefaultNetworkInteract findDefaultNetworkInteract,
+                          KeyService keyService) {
         this.genericWalletInteract = genericWalletInteract;
         this.gasService = gasService;
         this.createTransactionInteract = createTransactionInteract;
         this.gasSettingsRouter = gasSettingsRouter;
         this.tokensService = tokensService;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+        this.keyService = keyService;
     }
 
     public void createTransaction(Wallet from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
@@ -232,5 +236,13 @@ public class ConfirmationViewModel extends BaseViewModel {
 
         Intent launchBrowser = new Intent(Intent.ACTION_VIEW, etherscanLink);
         ctx.startActivity(launchBrowser);
+    }
+
+    public void getAuthorisation(Activity activity, SignAuthenticationCallback callback)
+    {
+        if (defaultWallet.getValue() != null)
+        {
+            keyService.getAuthenticationForSignature(defaultWallet.getValue().address, activity, callback);
+        }
     }
 }

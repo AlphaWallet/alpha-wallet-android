@@ -7,6 +7,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletUpdate;
 import io.stormbird.wallet.service.AccountKeystoreService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.service.TransactionsNetworkClientType;
 import okhttp3.OkHttpClient;
 import org.web3j.protocol.Web3j;
@@ -24,6 +25,7 @@ public class WalletRepository implements WalletRepositoryType
 	private final TransactionsNetworkClientType blockExplorerClient;
 	private final WalletDataRealmSource walletDataRealmSource;
 	private final OkHttpClient httpClient;
+	private final KeyService keyService;
 
 	public WalletRepository(
 			PreferenceRepositoryType preferenceRepositoryType,
@@ -31,20 +33,22 @@ public class WalletRepository implements WalletRepositoryType
 			EthereumNetworkRepositoryType networkRepository,
 			TransactionsNetworkClientType blockExplorerClient,
 			WalletDataRealmSource walletDataRealmSource,
-			OkHttpClient httpClient) {
+			OkHttpClient httpClient,
+			KeyService keyService) {
 		this.preferenceRepositoryType = preferenceRepositoryType;
 		this.accountKeystoreService = accountKeystoreService;
 		this.networkRepository = networkRepository;
 		this.blockExplorerClient = blockExplorerClient;
 		this.walletDataRealmSource = walletDataRealmSource;
 		this.httpClient = httpClient;
+		this.keyService = keyService;
 	}
 
 	@Override
 	public Single<Wallet[]> fetchWallets()
 	{
 		return accountKeystoreService.fetchAccounts()
-				.flatMap(walletDataRealmSource::populateWalletData);
+				.flatMap(wallets -> walletDataRealmSource.populateWalletData(wallets, keyService));
 	}
 
 	@Override

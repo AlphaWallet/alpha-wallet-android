@@ -1,5 +1,6 @@
 package io.stormbird.wallet.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.text.TextUtils;
@@ -7,18 +8,15 @@ import android.util.Log;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
-import io.stormbird.wallet.entity.ErrorEnvelope;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.entity.WalletType;
-import io.stormbird.wallet.interact.DeleteWalletInteract;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.ExportWalletInteract;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 
 public class BackupKeyViewModel extends BaseViewModel {
     private final static String TAG = BackupKeyViewModel.class.getSimpleName();
 
-    private final DeleteWalletInteract deleteWalletInteract;
+    private final KeyService keyService;
     private final ExportWalletInteract exportWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
 
@@ -29,10 +27,10 @@ public class BackupKeyViewModel extends BaseViewModel {
     private final MutableLiveData<ErrorEnvelope> deleteWalletError = new MutableLiveData<>();
 
     public BackupKeyViewModel(
-            DeleteWalletInteract deleteWalletInteract,
+            KeyService keyService,
             ExportWalletInteract exportWalletInteract,
             FetchWalletsInteract fetchWalletsInteract) {
-        this.deleteWalletInteract = deleteWalletInteract;
+        this.keyService = keyService;
         this.exportWalletInteract = exportWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
     }
@@ -115,17 +113,38 @@ public class BackupKeyViewModel extends BaseViewModel {
             default:
                 break;
             case NOT_SET:
-                if (wallet.type == WalletType.HDKEY) wallet.authLevel = HDKeyService.AuthenticationLevel.TEE_AUTHENTICATION;
+                if (wallet.type == WalletType.HDKEY) wallet.authLevel = KeyService.AuthenticationLevel.TEE_AUTHENTICATION;
                 break;
             case TEE_NO_AUTHENTICATION:
-                wallet.authLevel = HDKeyService.AuthenticationLevel.TEE_AUTHENTICATION;
+                wallet.authLevel = KeyService.AuthenticationLevel.TEE_AUTHENTICATION;
                 break;
             case STRONGBOX_NO_AUTHENTICATION:
-                wallet.authLevel = HDKeyService.AuthenticationLevel.STRONGBOX_AUTHENTICATION;
+                wallet.authLevel = KeyService.AuthenticationLevel.STRONGBOX_AUTHENTICATION;
                 break;
         }
 
         return wallet;
+    }
+
+
+    public KeyService.UpgradeKeyResult upgradeKeySecurity(String keyBackup, Activity activity, SignAuthenticationCallback callback)
+    {
+        return keyService.upgradeKeySecurity(keyBackup, activity, callback);
+    }
+
+    public void getPasswordForKeystore(String keyBackup, Activity activity, CreateWalletCallbackInterface callback)
+    {
+        keyService.getPassword(keyBackup, activity, callback);
+    }
+
+    public void getSeedPhrase(String keyBackup, Activity activity, CreateWalletCallbackInterface callback)
+    {
+        keyService.getMnemonic(keyBackup, activity, callback);
+    }
+
+    public void backupSuccess(String keyBackup)
+    {
+        fetchWalletsInteract.updateBackupTime(keyBackup).isDisposed();
     }
 }
 

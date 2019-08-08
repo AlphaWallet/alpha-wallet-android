@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.util.DateTime;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.ServiceErrorException;
 import io.stormbird.wallet.entity.Wallet;
@@ -24,8 +23,6 @@ import org.web3j.utils.Numeric;
 import java.io.File;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
@@ -36,10 +33,14 @@ public class KeystoreAccountService implements AccountKeystoreService
     private static final int PRIVATE_KEY_RADIX = 16;
 
     private final File keyFolder;
+    private final File databaseFolder;
+    private final KeyService keyService;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public KeystoreAccountService(File keyStoreFile) {
+    public KeystoreAccountService(File keyStoreFile, File baseFile, KeyService keyService) {
         keyFolder = keyStoreFile;
+        databaseFolder = baseFile;
+        this.keyService = keyService;
         objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -163,7 +164,38 @@ public class KeystoreAccountService implements AccountKeystoreService
                     }
                 }
             }
+
+            //Now delete database files (ie tokens, transactions and Tokenscript data for account)
+            contents = databaseFolder.listFiles();
+            if (contents != null)
+            {
+                for (File f : contents)
+                {
+                    if (f.getName().contains(cleanedAddr))
+                    {
+                        deleteRecursive(f);
+                    }
+                }
+            }
+
+            //Now delete all traces of the key in Android keystore, encrypted bytes and iv file in private data area
+            keyService.deleteKeyCompletely(address);
         } );
+    }
+
+    private void deleteRecursive(File fp)
+    {
+        if (fp.isDirectory())
+        {
+            File[] contents = fp.listFiles();
+            if (contents != null)
+            {
+                for (File child : contents)
+                    deleteRecursive(child);
+            }
+        }
+
+        fp.delete();
     }
 
     @Override
@@ -180,9 +212,8 @@ public class KeystoreAccountService implements AccountKeystoreService
                     dataStr
                     );
 
-            HDKeyService svs = new HDKeyService(null);
             byte[] signData = TransactionEncoder.encode(rtx);
-            byte[] signatureBytes = svs.signData(signer.address, signData);
+            byte[] signatureBytes = keyService.signData(signer.address, signData);
             Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
             return encode(rtx, sigData);
         })
@@ -287,8 +318,7 @@ public class KeystoreAccountService implements AccountKeystoreService
     {
         return Single.fromCallable(() -> {
             byte[] messageHash = Hash.sha3(message);
-            HDKeyService svs = new HDKeyService(null); //sign should already be unlocked
-            byte[] signed = svs.signData(signer.address, messageHash);
+            byte[] signed = keyService.signData(signer.address, messageHash);
 
             signed = patchSignatureVComponent(signed);
             return signed;
@@ -328,14 +358,8 @@ public class KeystoreAccountService implements AccountKeystoreService
                 if (WalletUtils.isValidAddress(address))
                 {
                     String d = fName.substring(5, index-1).replace("T", " ").substring(0, 23);
-
-                    //DateTime dt = DateTimeFactory.getDateTime(d);
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss.SSS", Locale.ROOT);
                     Date date = simpleDateFormat.parse(d);
-
-                    //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ss.SSS");
-                    //LocalDateTime dateTime = LocalDateTime.parse(d, formatter);
-                    //Date date = java.util.Date.from(dateTime.toInstant(ZoneOffset.UTC));
                     fileDates.add(date);
                     walletMap.put(date, address);
                 }

@@ -1,5 +1,6 @@
 package io.stormbird.wallet.viewmodel;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -9,16 +10,14 @@ import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.entity.TokenScriptResult;
 import io.stormbird.wallet.C;
-import io.stormbird.wallet.entity.ConfirmationType;
-import io.stormbird.wallet.entity.DAppFunction;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.*;
 import io.stormbird.wallet.ui.widget.entity.TicketRangeParcel;
@@ -44,6 +43,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final GasService gasService;
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final KeyService keyService;
 
     TokenFunctionViewModel(
             AssetDefinitionService assetDefinitionService,
@@ -52,7 +52,8 @@ public class TokenFunctionViewModel extends BaseViewModel
             CreateTransactionInteract createTransactionInteract,
             GasService gasService,
             TokensService tokensService,
-            EthereumNetworkRepositoryType ethereumNetworkRepository) {
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            KeyService keyService) {
         this.assetDefinitionService = assetDefinitionService;
         this.sellTicketRouter = sellTicketRouter;
         this.transferTicketRouter = transferTicketRouter;
@@ -60,6 +61,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         this.gasService = gasService;
         this.tokensService = tokensService;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.keyService = keyService;
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -181,5 +183,10 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void stopGasSettingsFetch()
     {
         gasService.stopGasListener();
+    }
+
+    public void getAuthorisation(String walletAddress, Activity activity, SignAuthenticationCallback callback)
+    {
+        keyService.getAuthenticationForSignature(walletAddress, activity, callback);
     }
 }

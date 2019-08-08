@@ -20,11 +20,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
-import io.stormbird.wallet.viewmodel.GasSettingsViewModel;
 import io.stormbird.wallet.widget.SignTransactionDialog;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
@@ -52,7 +50,7 @@ import static io.stormbird.wallet.C.EXTRA_TOKENID_LIST;
 import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
-import static io.stormbird.wallet.service.HDKeyService.Operation.SIGN_DATA;
+import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
 import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
 /**
@@ -74,7 +72,6 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
 
     private Token token;
     private Wallet wallet;
-    private TicketRange ticketRange;
     private NonFungibleTokenAdapter adapter;
     private String ticketIds;
     private String prunedIds;
@@ -277,7 +274,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
             case SET_EXPIRY:
                 if (isExpiryDateTimeValid())
                 {
-                    sellTicketLink();
+                    viewModel.getAuthorisation(this, this);
                 }
                 break;
             case SET_MARKET_SALE:
@@ -419,17 +416,6 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
             } catch (NumberFormatException|MissingFormatArgumentException e) {
                 //silent fail, just don't update
             }
-        }
-    }
-
-    private void sellTicketLink()
-    {
-        //get authorisation if using an HD Key
-        Wallet wallet = viewModel.defaultWallet().getValue();
-        if (wallet != null)
-        {
-            HDKeyService svs = new HDKeyService(this);
-            svs.getAuthenticationForSignature(wallet.address, this);
         }
     }
 

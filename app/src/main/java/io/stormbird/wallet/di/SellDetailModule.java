@@ -9,6 +9,7 @@ import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.SellDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.viewmodel.SellDetailModelFactory;
 
@@ -29,10 +30,10 @@ public class SellDetailModule {
             MarketQueueService marketQueueService,
             CreateTransactionInteract createTransactionInteract,
             SellDetailRouter sellDetailRouter,
-            AssetDisplayRouter assetDisplayRouter,
+            KeyService keyService,
             AssetDefinitionService assetDefinitionService) {
         return new SellDetailModelFactory(
-                findDefaultNetworkInteract, genericWalletInteract, marketQueueService, createTransactionInteract, sellDetailRouter, assetDisplayRouter, assetDefinitionService);
+                findDefaultNetworkInteract, genericWalletInteract, marketQueueService, createTransactionInteract, sellDetailRouter, keyService, assetDefinitionService);
     }
 
     @Provides
@@ -54,10 +55,5 @@ public class SellDetailModule {
     @Provides
     SellDetailRouter provideSellDetailRouter() {
         return new SellDetailRouter();
-    }
-
-    @Provides
-    AssetDisplayRouter provideAssetDisplayRouter() {
-        return new AssetDisplayRouter();
     }
 }

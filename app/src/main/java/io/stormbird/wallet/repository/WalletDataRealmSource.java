@@ -5,7 +5,6 @@ import android.util.Log;
 import java.util.*;
 
 import io.reactivex.Completable;
-import io.reactivex.CompletableObserver;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
@@ -15,7 +14,7 @@ import io.realm.Sort;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.repository.entity.RealmWalletData;
-import io.stormbird.wallet.service.HDKeyService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.service.RealmManager;
 
 /**
@@ -25,24 +24,20 @@ import io.stormbird.wallet.service.RealmManager;
 
 public class WalletDataRealmSource {
     private static final String TAG = WalletDataRealmSource.class.getSimpleName();
-
     private final RealmManager realmManager;
 
     public WalletDataRealmSource(RealmManager realmManager) {
         this.realmManager = realmManager;
     }
 
-    public Single<Wallet[]> populateWalletData(Wallet[] wallets) {
+    public Single<Wallet[]> populateWalletData(Wallet[] wallets, KeyService keyService) {
         return Single.fromCallable(() -> {
             List<Wallet> walletList = new ArrayList<>();
             for (Wallet w : wallets) if (w != null && w.address != null) { w.type = WalletType.KEYSTORE; };
 
-            //Fetch all the HD wallets from keystore
-            HDKeyService svs = new HDKeyService(null);
-
             try (Realm realm = realmManager.getWalletDataRealmInstance())
             {
-                for (Wallet hdWallet : svs.getAllHDWallets())
+                for (Wallet hdWallet : keyService.getAllHDWallets())
                 {
                     RealmWalletData data = realm.where(RealmWalletData.class)
                             .equalTo("address", hdWallet.address)
@@ -58,7 +53,7 @@ public class WalletDataRealmSource {
                             .equalTo("address", keyStoreWallet.address)
                             .findFirst();
 
-                    svs.checkWalletType(keyStoreWallet);
+                    keyService.checkWalletType(keyStoreWallet);
                     composeWallet(keyStoreWallet, data);
                     walletList.add(keyStoreWallet);
                 }
@@ -342,25 +337,13 @@ public class WalletDataRealmSource {
     private Boolean requiresBackup(Long backupTime, Long warningTime)
     {
         boolean warningDismissed = false;
-        if (System.currentTimeMillis() < (warningTime + HDKeyService.TIME_BETWEEN_BACKUP_WARNING_MILLIS))
+        if (System.currentTimeMillis() < (warningTime + KeyService.TIME_BETWEEN_BACKUP_WARNING_MILLIS))
         {
             warningDismissed = true;
         }
 
-        if (!warningDismissed && backupTime == 0) // wallet never backed up but backup warning may have been swiped away
-        {
-            return true;
-        }
-        /*else if (!warningDismissed && System.currentTimeMillis() > (backupTime + HDKeyService.TIME_BETWEEN_BACKUP_MILLIS)) //wallet has been backed up but may be due for backup check
-        {
-            return true;
-        }*/
-        else
-        {
-            long diff = (warningTime + HDKeyService.TIME_BETWEEN_BACKUP_MILLIS) - System.currentTimeMillis();
-            System.out.println("TIME TO BACKUP: " + diff/1000);
-            return false;
-        }
+        // wallet never backed up but backup warning may have been swiped away
+        return !warningDismissed && backupTime == 0;
     }
 
     public Single<String> deleteWallet(String walletAddr)

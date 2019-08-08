@@ -15,7 +15,7 @@ import java.security.*;
 import java.security.cert.CertificateException;
 
 import static io.stormbird.wallet.entity.ServiceErrorException.*;
-import static io.stormbird.wallet.service.HDKeyService.*;
+import static io.stormbird.wallet.service.KeyService.*;
 
 public class LegacyKeystore
 {

@@ -267,7 +267,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
         aDialog.setMessage(R.string.confirm_delete_account);
         aDialog.setButtonText(R.string.dialog_ok);
         aDialog.setButtonListener(v -> {
-            viewModel.deleteWallet(wallet, this);
+            viewModel.deleteWallet(wallet);
             aDialog.dismiss();
         });
         aDialog.setSecondaryButtonText(R.string.dialog_cancel_back);

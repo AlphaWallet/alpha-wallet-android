@@ -100,6 +100,15 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
         }
     }
 
+    public String getKeystore()
+    {
+        return this.keystore.getText().toString();
+    }
+    public String getPassword()
+    {
+        return this.password.getText().toString();
+    }
+
     public boolean backPressed()
     {
         if (password.getVisibility() == View.VISIBLE)

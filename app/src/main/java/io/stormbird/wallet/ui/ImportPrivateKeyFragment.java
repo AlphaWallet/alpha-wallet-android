@@ -121,4 +121,10 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
             updateButtonState(false);
         }
     }
+
+    public String getPrivateKey()
+    {
+        String value = privateKey.getText().toString();
+        return Numeric.cleanHexPrefix(value.replaceAll("\\s+", "")); //remove whitespace and leading 0x
+    }
 }

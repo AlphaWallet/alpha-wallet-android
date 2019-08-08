@@ -570,4 +570,6 @@
     <string name="action_upgrade_key">Upgrade key security</string>
     <string name="backup_wallet_detail">We highly recommend you back up your wallet.</string>
     <string name="skip_upgrade">Skip Upgrade</string>
+    <string name="lock_keystore_upgrade">Lock your Keystore to increase security</string>
+    <string name="title_backup_seed">Backup Seed Phrase</string>
 </resources>

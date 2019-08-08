@@ -38,8 +38,8 @@ android {
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 60
-        versionName "2.01.0"
+        versionCode 61
+        versionName "2.10.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         buildConfigField 'int', 'DB_VERSION', '4'

@@ -311,7 +311,7 @@ public class NewSettingsFragment extends Fragment
 
     public void backupSeedSuccess()
     {
-        layoutBackup.setVisibility(View.GONE);
+        if (layoutBackup != null) layoutBackup.setVisibility(View.GONE);
     }
 
     private void askWritePermission() {

@@ -51,7 +51,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     public static final String KEYSTORE_LABEL = "ks";
 
     //This value determines the time interval between the user swiping away the backup warning notice and it re-appearing
-    public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000 * 60 * 3; //TODO: RESTORE 30 DAYS. TESTING: 1 minute  //1000 * 60 * 60 * 24 * 30; //30 days
+    public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000 * 60 * 60 * 24 * 30; //30 days //1000 * 60 * 3; //3 minutes for testing
 
     public enum Operation
     {

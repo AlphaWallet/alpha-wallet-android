@@ -31,9 +31,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import com.github.florent37.tutoshowcase.TutoShowcase;
-
 import dagger.android.AndroidInjection;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.BuildConfig;
@@ -41,7 +39,6 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.GenericWalletInteract;
-import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.ui.widget.entity.ScrollControlInterface;
 import io.stormbird.wallet.ui.widget.entity.ScrollControlViewPager;
 import io.stormbird.wallet.util.RootUtil;
@@ -50,6 +47,7 @@ import io.stormbird.wallet.viewmodel.HomeViewModel;
 import io.stormbird.wallet.viewmodel.HomeViewModelFactory;
 import io.stormbird.wallet.widget.*;
 import org.web3j.crypto.WalletUtils;
+
 import javax.inject.Inject;
 import java.io.File;
 import java.lang.reflect.Method;
@@ -144,7 +142,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         viewPager.setOffscreenPageLimit(4);
-//        viewPager.setPageTransformer(true, new DepthPageTransformer());
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {

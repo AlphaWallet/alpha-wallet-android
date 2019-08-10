@@ -78,7 +78,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private TutoShowcase backupWalletDialog;
     private TutoShowcase findWalletAddressDialog;
     private PinAuthenticationCallbackInterface authInterface;
-    private boolean walletNeedsUpdating;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -193,28 +192,26 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         viewModel.cleanDatabases(this);
-        walletNeedsUpdating = false;
-
         showFindWalletAddressDialog();
     }
 
-    public void showBackupWalletDialog() {
-        if (!viewModel.isBackupWalletDialogShown()) {
-            backupWalletDialog = TutoShowcase.from(this);
-            backupWalletDialog.setContentView(R.layout.showcase_backup_wallet)
-                    .onClickContentView(R.id.btn_close, view -> {
-                        backupWalletDialog.dismiss();
-                    })
-                    .on(R.id.layout_nav_settings)
-                    .addCircle()
-                    .onClick(v -> {
-                        backupWalletDialog.dismiss();
-                        showPage(SETTINGS);
-                    })
-                    .show();
-            viewModel.setBackupWalletDialogShown(true);
-        }
-    }
+//    public void showBackupWalletDialog() {
+//        if (!viewModel.isBackupWalletDialogShown()) {
+//            backupWalletDialog = TutoShowcase.from(this);
+//            backupWalletDialog.setContentView(R.layout.showcase_backup_wallet)
+//                    .onClickContentView(R.id.btn_close, view -> {
+//                        backupWalletDialog.dismiss();
+//                    })
+//                    .on(R.id.layout_nav_settings)
+//                    .addCircle()
+//                    .onClick(v -> {
+//                        backupWalletDialog.dismiss();
+//                        showPage(SETTINGS);
+//                    })
+//                    .show();
+//            viewModel.setBackupWalletDialogShown(true);
+//        }
+//    }
 
     public void showFindWalletAddressDialog() {
         if (!viewModel.isFindWalletAddressDialogShown()) {
@@ -223,7 +220,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     .onClickContentView(R.id.btn_close, view -> {
                         findWalletAddressDialog.dismiss();
                         findWalletAddressDialog = null;
-                        showBackupWalletDialog();
                     })
                     .on(R.id.layout_nav_settings)
                     .addCircle()
@@ -873,11 +869,5 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     void postponeWalletBackupWarning(String walletAddress)
     {
         removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
-    }
-
-    public void backupRequired()
-    {
-        walletNeedsUpdating = true;
-        if (findWalletAddressDialog == null) showBackupWalletDialog();
     }
 }

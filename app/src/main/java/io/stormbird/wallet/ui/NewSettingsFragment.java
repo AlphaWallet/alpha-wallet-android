@@ -311,6 +311,7 @@ public class NewSettingsFragment extends Fragment
 
     public void backupSeedSuccess()
     {
+        if (viewModel != null) viewModel.TestWalletBackup();
         if (layoutBackup != null) layoutBackup.setVisibility(View.GONE);
     }
 
@@ -328,6 +329,15 @@ public class NewSettingsFragment extends Fragment
         if (s.equals(viewModel.defaultWallet().getValue().address))
         {
             addBackupNotice(GenericWalletInteract.BackupLevel.WALLET_HAS_HIGH_VALUE);
+        }
+        else
+        {
+            if (layoutBackup != null)
+            {
+                layoutBackup.setVisibility(View.GONE);
+            }
+            //remove the number prompt
+            if (getActivity() !=null) ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
         }
     }
 
@@ -349,8 +359,6 @@ public class NewSettingsFragment extends Fragment
             backupMenuButton.setOnClickListener(v -> {
                 showPopup(backupPopupAnchor, wallet.address);
             });
-
-            ((HomeActivity)getActivity()).backupRequired();
         }
     }
 

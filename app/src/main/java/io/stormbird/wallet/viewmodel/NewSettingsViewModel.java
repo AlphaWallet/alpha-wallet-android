@@ -180,8 +180,16 @@ public class NewSettingsViewModel extends BaseViewModel {
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
 
-        genericWalletInteract.getWalletNeedsBackup(wallet.address)
-                .subscribe(backUpMessage::postValue).isDisposed();
+        TestWalletBackup();
+    }
+
+    public void TestWalletBackup()
+    {
+        if (defaultWallet.getValue() != null)
+        {
+            genericWalletInteract.getWalletNeedsBackup(defaultWallet.getValue().address)
+                    .subscribe(backUpMessage::postValue).isDisposed();
+        }
     }
 
     public void showMyAddress(Context context) {

@@ -260,10 +260,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 wData.buttonColour = ContextCompat.getColor(getContext(), R.color.backup_grey);
                 wData.address = viewModel.getWalletAddr();
                 adapter.addWarning(wData);
-                if (getActivity() != null)
-                {
-                    ((HomeActivity) getActivity()).showBackupWalletDialog();
-                }
                 break;
             case WALLET_HAS_HIGH_VALUE:
                 wData = new WarningData(this);
@@ -274,10 +270,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 wData.buttonColour = ContextCompat.getColor(getContext(), R.color.warning_dark_red);
                 wData.address = viewModel.getWalletAddr();
                 adapter.addWarning(wData);
-                if (getActivity() != null)
-                {
-                    ((HomeActivity) getActivity()).showBackupWalletDialog();
-                }
                 break;
         }
     }

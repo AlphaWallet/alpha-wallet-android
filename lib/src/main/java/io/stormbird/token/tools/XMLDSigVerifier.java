@@ -1,16 +1,24 @@
 package io.stormbird.token.tools;
 
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.Key;
 import java.security.KeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.cert.CertPathValidator;
+import java.security.cert.CertPathValidatorException;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateNotYetValidException;
@@ -27,6 +35,7 @@ import javax.xml.crypto.AlgorithmMethod;
 import javax.xml.crypto.KeySelector;
 import javax.xml.crypto.KeySelectorException;
 import javax.xml.crypto.KeySelectorResult;
+import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.XMLCryptoContext;
 import javax.xml.crypto.XMLStructure;
 import javax.xml.crypto.dsig.XMLSignature;
@@ -39,6 +48,8 @@ import javax.xml.crypto.dsig.keyinfo.KeyValue;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import io.stormbird.token.entity.XMLDsigVerificationResult;
 
 /**
@@ -83,7 +94,14 @@ public class XMLDSigVerifier {
         }
     }
 
-    protected XMLSignature getValidXMLSignature(InputStream fileStream) throws Exception {
+    XMLSignature getValidXMLSignature(InputStream fileStream)
+            throws ParserConfigurationException,
+            IOException,
+            SAXException,
+            MarshalException,
+            XMLSignatureException,
+            DOMException
+    {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setNamespaceAware(true);
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -94,7 +112,7 @@ public class XMLDSigVerifier {
         NodeList nl = xml.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
         if (nl.getLength() == 0)
         {
-            throw new Exception("Missing elements");
+            throw new DOMException(DOMException.INDEX_SIZE_ERR, "Missing elements");
         }
 
         // Create a DOM XMLSignatureFactory that will be used to unmarshal the
@@ -116,7 +134,13 @@ public class XMLDSigVerifier {
         return signature;
     }
 
-    private void validateCertificateChain(List<X509Certificate> certList) throws Exception {
+    private void validateCertificateChain(List<X509Certificate> certList)
+            throws NoSuchAlgorithmException,
+            KeyStoreException,
+            InvalidAlgorithmParameterException,
+            CertificateException,
+            CertPathValidatorException
+    {
         // By default on Oracle JRE, algorithm is PKIX
         TrustManagerFactory tmf = TrustManagerFactory
                 .getInstance(TrustManagerFactory.getDefaultAlgorithm());
@@ -135,7 +159,20 @@ public class XMLDSigVerifier {
         Security.setProperty("ocsp.enable", "true");
         params.setRevocationEnabled(true);
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
-        cpv.validate(factory.generateCertPath(certList), params);
+        try
+        {
+            cpv.validate(factory.generateCertPath(certList), params);
+        }
+        catch (CertPathValidatorException e)
+        {
+            System.out.println(e.getIndex());
+            //if the timestamp check fails because the cert is expired
+            //we allow this to continue (code 0)
+            if(e.getIndex() != 0)
+            {
+                throw e;
+            }
+        }
     }
 
     private X509Certificate findRootCert(List<X509Certificate> certificates) {
@@ -265,18 +302,22 @@ public class XMLDSigVerifier {
         return keyVal;
     }
 
-    private X509Certificate selectSigningKeyFromXML(List xmlElements) throws
-            KeyStoreException,
-            CertificateNotYetValidException,
-            CertificateExpiredException
-    {
+    private X509Certificate selectSigningKeyFromXML(List xmlElements) throws KeyStoreException, CertificateNotYetValidException {
         PublicKey recovered = recoverPublicKeyFromXML(xmlElements);
         //Certificates from the XML might be in the wrong order
         List<X509Certificate> certList = reorderCertificateChain(getCertificateChainFromXML(xmlElements));
-        if(certList == null) return null;
         for (X509Certificate crt : certList)
         {
-            crt.checkValidity();
+            try
+            {
+                crt.checkValidity();
+            }
+            catch (CertificateExpiredException e)
+            {
+                //allow this
+                System.out.println("Allowing expired cert: " + e.getMessage());
+                continue;
+            }
             if (recovered != null)
             {
                 PublicKey certKey = crt.getPublicKey();
@@ -287,11 +328,12 @@ public class XMLDSigVerifier {
             }
             else if (crt.getSigAlgName().equals("SHA256withECDSA"))
             {
-               return crt;
+                return crt;
             }
         }
         //if non recovered, simply return the first certificate?
         return certList.get(0);
+
     }
 
     private class SigningCertSelector extends KeySelector

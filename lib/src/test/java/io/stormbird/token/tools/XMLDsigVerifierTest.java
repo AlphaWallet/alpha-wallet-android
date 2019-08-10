@@ -37,9 +37,8 @@ public class XMLDsigVerifierTest {
     public void testFifaTSMLECDSA() throws Exception {
         InputStream EntryToken = new FileInputStream("src/test/ts/fifa.tsml");
         XMLDsigVerificationResult result = new XMLDSigVerifier().VerifyXMLDSig(EntryToken);
-        //Fails because cert is expired
-        assert(!result.isValid);
-        assert(result.failureReason.equals("cannot find validation key")); // that's the error for expired certs
+        //cert is expired but we still allow this so long as the signature is valid and is approved by ca
+        assert(result.isValid);
     }
 
     @Test

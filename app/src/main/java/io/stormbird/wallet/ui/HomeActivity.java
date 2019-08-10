@@ -38,7 +38,6 @@ import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
@@ -79,6 +78,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private TutoShowcase backupWalletDialog;
     private TutoShowcase findWalletAddressDialog;
     private PinAuthenticationCallbackInterface authInterface;
+    private boolean walletNeedsUpdating;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -193,6 +193,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         viewModel.cleanDatabases(this);
+        walletNeedsUpdating = false;
 
         showFindWalletAddressDialog();
     }
@@ -221,12 +222,14 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             findWalletAddressDialog.setContentView(R.layout.showcase_find_wallet)
                     .onClickContentView(R.id.btn_close, view -> {
                         findWalletAddressDialog.dismiss();
+                        findWalletAddressDialog = null;
+                        showBackupWalletDialog();
                     })
                     .on(R.id.layout_nav_settings)
                     .addCircle()
                     .onClick(v -> {
                         findWalletAddressDialog.dismiss();
-                        showPage(SETTINGS);
+                        findWalletAddressDialog = null;
                     })
                     .show();
             viewModel.setFindWalletAddressDialogShown(true);
@@ -872,8 +875,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
     }
 
-    void notifyBackup(GenericWalletInteract.BackupLevel walletValue)
+    public void backupRequired()
     {
-        settingsFragment.addBackupNotice(walletValue);
+        walletNeedsUpdating = true;
+        if (findWalletAddressDialog == null) showBackupWalletDialog();
     }
 }

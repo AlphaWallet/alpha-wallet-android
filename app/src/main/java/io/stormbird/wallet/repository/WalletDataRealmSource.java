@@ -92,24 +92,6 @@ public class WalletDataRealmSource {
         else return value;
     }
 
-    public Single<Wallet[]> loadWallets() {
-        return Single.fromCallable(() -> {
-            List<Wallet> wallets = new ArrayList<>();
-            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
-                RealmResults<RealmWalletData> realmItems = realm.where(RealmWalletData.class)
-                        .findAll();
-
-                for (RealmWalletData data : realmItems) {
-                    Wallet thisWallet = convertWallet(data);
-                    wallets.add(thisWallet);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return wallets.toArray(new Wallet[0]);
-        });
-    }
-
     private Wallet convertWallet(RealmWalletData data) {
         Wallet wallet = new Wallet(data.getAddress());
         wallet.ENSname = data.getENSName();

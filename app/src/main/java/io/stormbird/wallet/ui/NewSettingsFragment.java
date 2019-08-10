@@ -349,6 +349,8 @@ public class NewSettingsFragment extends Fragment
             backupMenuButton.setOnClickListener(v -> {
                 showPopup(backupPopupAnchor, wallet.address);
             });
+
+            ((HomeActivity)getActivity()).backupRequired();
         }
     }
 

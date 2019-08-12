@@ -26,6 +26,7 @@ public class PasswordInputView extends LinearLayout
     private TextView error;
     private EditText editText;
     private CheckBox togglePassword;
+    private TextView instruction;
 
     private int labelResId;
     private int lines;
@@ -63,6 +64,7 @@ public class PasswordInputView extends LinearLayout
         label.setText(labelResId);
         error = findViewById(R.id.error);
         editText = findViewById(R.id.edit_text);
+        instruction = findViewById(R.id.instruction);
         if (labelResId != R.string.empty) label.setVisibility(View.VISIBLE);
         togglePassword = findViewById(R.id.toggle_password);
         togglePassword.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -157,6 +159,11 @@ public class PasswordInputView extends LinearLayout
 
     public CharSequence getText() {
         return this.editText.getText();
+    }
+
+    public void setInstruction(int resourceId)
+    {
+        this.instruction.setText(resourceId);
     }
 
     public void setText(CharSequence text) {

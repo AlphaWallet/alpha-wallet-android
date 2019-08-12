@@ -502,7 +502,7 @@
     <string name="authentication_failed_message">User Authentication failed, try again?</string>
     <string name="action_try_again">Try Again</string>
     <string name="backup_seed_phrase">Back up your wallet with seed phrase</string>
-    <string name="backup_seed_phrase_detail">Making backup is very simple and safe: just write down 12 words and keep them in a safe place, offline.</string>
+    <string name="backup_seed_phrase_detail">Making a backup is very simple and safe: just write down 12 words and keep them in a safe place, offline.</string>
     <string name="action_back_up_my_wallet">back up my wallet</string>
     <string name="write_down_seed_phrase">Write down seed phrase\non paper</string>
     <string name="wrote_down_seed_phrase">OK, I wrote this down</string>
@@ -543,7 +543,7 @@
     <string name="action_remind_later">Remind me later</string>
     <string name="title_change_wallet">Change Wallet</string>
     <string name="legacy_wallets">Legacy Wallets</string>
-    <string name="postponed_backup_warning">Backup warning postponed.</string>
+    <string name="postponed_backup_warning">Backup postponed.</string>
     <string name="key_error">Key Error</string>
     <string name="password_6_characters_or_more">Password 6 characters or more</string>
     <string name="create_a_new_wallet">Create a new Wallet</string>

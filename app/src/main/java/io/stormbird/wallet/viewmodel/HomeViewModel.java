@@ -36,7 +36,7 @@ public class HomeViewModel extends BaseViewModel {
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
-    private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
+    private final MutableLiveData<String> backUpMessage = new MutableLiveData<>();
 
     private final PreferenceRepositoryType preferenceRepository;
     private final ExternalBrowserRouter externalBrowserRouter;
@@ -91,6 +91,10 @@ public class HomeViewModel extends BaseViewModel {
 
     public LiveData<File> installIntent() {
         return installIntent;
+    }
+
+    public LiveData<String> backUpMessage() {
+        return backUpMessage;
     }
 
     public void prepare() {
@@ -242,6 +246,12 @@ public class HomeViewModel extends BaseViewModel {
         }
     }
 
+    public void checkIsBackedUp(String walletAddress)
+    {
+        genericWalletInteract.getWalletNeedsBackup(walletAddress)
+                .subscribe(backUpMessage::postValue).isDisposed();
+    }
+
     private void deleteRecursive(File fileDir)
     {
         if (fileDir.isDirectory()) {
@@ -270,14 +280,6 @@ public class HomeViewModel extends BaseViewModel {
             //erase file
             deleteRecursive(file);
         }
-    }
-
-    public boolean isBackupWalletDialogShown() {
-        return preferenceRepository.isBackupWalletDialogShown();
-    }
-
-    public void setBackupWalletDialogShown(boolean isShown) {
-        preferenceRepository.setBackupWalletDialogShown(isShown);
     }
 
     public boolean isFindWalletAddressDialogShown() {

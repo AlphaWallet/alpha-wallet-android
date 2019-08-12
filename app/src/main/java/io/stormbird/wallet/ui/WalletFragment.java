@@ -432,10 +432,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     @Override
     public void remindMeLater(String walletAddress)
     {
-        if (getActivity() != null)
-        {
-            Toast.makeText(getActivity(), getString(R.string.postponed_backup_warning), Toast.LENGTH_LONG).show();
-        }
         viewModel.setKeyWarningDismissTime(walletAddress).isDisposed();
         adapter.removeBackupWarning();
     }

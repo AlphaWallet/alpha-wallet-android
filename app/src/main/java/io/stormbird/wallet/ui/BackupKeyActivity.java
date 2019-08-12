@@ -43,8 +43,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     private TextView title;
     private TextView detail;
     private TextView passwordDetail;
-    private TextView passwordLengthNote;
-    private LinearLayout layoutHolder;
     private LinearLayout layoutWordHolder;
     private PasswordInputView inputView;
     private ImageView backupImage;
@@ -53,12 +51,17 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     private LinearLayout skipButton;
     private String[] mnemonicArray;
     private PinAuthenticationCallbackInterface authInterface;
+    private ImageView spacerImage;
 
     private AWalletAlertDialog alertDialog;
 
     private LinearLayout currentHolder;
     private int currentEdge;
+
     private int layoutHolderWidth;
+    private int seedTextSize;
+    private int seedTextHPadding;
+    private int seedTextVPadding;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -68,15 +71,13 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         alertDialog = null;
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-        setContentView(R.layout.activity_backup);
-
-        toolbar();
 
         String type = getIntent().getStringExtra("TYPE");
         keyBackup = getIntent().getStringExtra("ADDRESS");
         wallet = getIntent().getParcelableExtra(WALLET);
         layoutHolderWidth = 0;
-        initViews();
+
+        toolbar();
 
         switch (type)
         {
@@ -90,29 +91,17 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                 break;
             case "TEST_SEED":
                 state = BackupState.TEST_SEED_PHRASE;
-                setTitle(getString(R.string.seed_phrase));
+                setupTestSeed();
                 break;
         }
 
         initViewModel();
     }
 
-    private void resetView()
-    {
-        inputView.setVisibility(View.GONE);
-        passwordDetail.setVisibility(View.GONE);
-        passwordLengthNote.setVisibility(View.GONE);
-        title.setVisibility(View.VISIBLE);
-        backupImage.setVisibility(View.VISIBLE);
-        detail.setVisibility(View.VISIBLE);
-        skipButton.setVisibility(View.GONE);
-        layoutWordHolder.setVisibility(View.GONE);
-        setBottomButtonActive(true);
-    }
-
     private void setupUpgradeKey()
     {
-        resetView();
+        setContentView(R.layout.activity_backup);
+        initViews();
 
         setTitle(getString(R.string.action_upgrade_key));
         state = BackupState.UPGRADE_KEY_SECURITY;
@@ -180,6 +169,9 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void setHDBackupSplash()
     {
+        setContentView(R.layout.activity_backup);
+        initViews();
+
         setTitle(getString(R.string.title_backup_seed));
         title.setText(R.string.backup_seed_phrase);
         backupImage.setImageResource(R.drawable.seed_graphic);
@@ -191,6 +183,9 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void setupJSONExport()
     {
+        setContentView(R.layout.activity_backup);
+        initViews();
+
         setTitle(getString(R.string.export_keystore_json));
         title.setText(R.string.export_keystore_json);
         backupImage.setImageResource(R.drawable.ic_keystore);
@@ -202,9 +197,11 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void setupTestSeed()
     {
+        setContentView(R.layout.activity_backup_write_seed);
+        initViews();
+
+        setTitle(getString(R.string.seed_phrase));
         title.setText(getString(R.string.make_a_backup, "12"));
-        backupImage.setVisibility(View.GONE);
-        detail.setVisibility(View.GONE);
         nextButton.setText(R.string.test_seed_phrase);
         DisplaySeed();
     }
@@ -215,7 +212,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         super.onPause();
         //hide seed phrase and any visible words
         layoutWordHolder.removeAllViews();
-        verifyTextBox.setText("");
 
         switch (state)
         {
@@ -223,12 +219,10 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             case WRITE_DOWN_SEED_PHRASE:
             case VERIFY_SEED_PHRASE:
             case TEST_SEED_PHRASE:
-                resetView();
                 state = BackupState.ENTER_BACKUP_STATE_HD;
                 break;
 
             case SET_JSON_PASSWORD:
-                resetView();
                 state = BackupState.ENTER_JSON_BACKUP;
                 break;
 
@@ -248,6 +242,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         switch (state)
         {
             case ENTER_BACKUP_STATE_HD:
+                setHDBackupSplash();
                 break;
 
             case ENTER_JSON_BACKUP:
@@ -264,31 +259,60 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         title = findViewById(R.id.text_title);
         detail = findViewById(R.id.text_detail);
         passwordDetail = findViewById(R.id.text_detail_password);
-        passwordLengthNote = findViewById(R.id.text_password_length);
-        layoutHolder = findViewById(R.id.layout_center_holder);
         layoutWordHolder = findViewById(R.id.layout_word_holder);
         nextButton = findViewById(R.id.button_next);
         verifyTextBox = findViewById(R.id.text_verify);
         backupImage = findViewById(R.id.seed_image);
+        if (layoutHolderWidth > 0 && layoutHolderWidth <= 800)
+        {
+            setBackupImageSmall();
+        }
         inputView = findViewById(R.id.input_password);
         nextButton.setOnClickListener(this);
         skipButton = findViewById(R.id.button_cancel);
-        inputView.getEditText().addTextChangedListener(this);
+        spacerImage = findViewById(R.id.spacer_image);
+        if (inputView != null) inputView.getEditText().addTextChangedListener(this);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         // Note: The seed display requires the holder view to be drawn so it can measure how much
         // space is left on each line.
-        ViewTreeObserver vto = layoutHolder.getViewTreeObserver();
-        vto.addOnGlobalLayoutListener (() -> {
-            if (layoutHolderWidth == 0)
-            {
-                layoutHolderWidth = layoutHolder.getMeasuredWidth();
-                if (state == BackupState.TEST_SEED_PHRASE && layoutHolderWidth != 0)
+        if (layoutHolderWidth == 0 && layoutWordHolder != null)
+        {
+            ViewTreeObserver vto = layoutWordHolder.getViewTreeObserver();
+            vto.addOnGlobalLayoutListener(() -> {
+                if (layoutHolderWidth == 0)
                 {
-                    setupTestSeed();
+                    layoutHolderWidth = layoutWordHolder.getMeasuredWidth();
+                    if (layoutHolderWidth > 800)
+                    {
+                        seedTextVPadding = 25;
+                        seedTextSize = 20;
+                    }
+                    else if (layoutHolderWidth > 600)
+                    {
+                        setBackupImageSmall();
+                        seedTextVPadding = 15;
+                        seedTextSize = 18;
+                    }
+                    else
+                    {
+                        setBackupImageSmall();
+                        seedTextVPadding = 8;
+                        seedTextSize = 16;
+                    }
+                    seedTextHPadding = layoutHolderWidth / 25;
                 }
-            }
-        });
+            });
+        }
+
+        toolbar();
+    }
+
+    private void setBackupImageSmall()
+    {
+        if (backupImage != null) backupImage.setVisibility(View.GONE);
+        backupImage = findViewById(R.id.seed_image_small);
+        if (backupImage != null) backupImage.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -304,11 +328,11 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                         WriteDownSeedPhrase();
                         break;
                     case WRITE_DOWN_SEED_PHRASE:
-                        resetView();
+                        //resetView();
                         setHDBackupSplash();
                         break;
                     case SET_JSON_PASSWORD:
-                        resetView();
+                        //resetView();
                         setupJSONExport();
                         break;
                     default:
@@ -367,15 +391,12 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void JSONBackup()
     {
+        setContentView(R.layout.activity_set_json_password);
+        initViews();
+
         setTitle(getString(R.string.set_keystore_password));
-        inputView.setVisibility(View.VISIBLE);
-        passwordDetail.setVisibility(View.VISIBLE);
+        inputView.setInstruction(R.string.password_6_characters_or_more);
         state = BackupState.SET_JSON_PASSWORD;
-        title.setVisibility(View.GONE);
-        backupImage.setVisibility(View.GONE);
-        detail.setVisibility(View.GONE);
-        passwordDetail.setText(R.string.keystore_loss_warning);
-        passwordLengthNote.setVisibility(View.VISIBLE);
         inputView.getEditText().addTextChangedListener(this);
         nextButton.setText(R.string.share_keystore);
         updateButtonState(false);
@@ -467,10 +488,18 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void VerifySeedPhrase()
     {
+        setContentView(R.layout.activity_verify_seed_phrase);
+        initViews();
+
+        if (layoutHolderWidth < 600)
+        {
+            spacerImage.setVisibility(View.GONE);
+        }
+
+        setTitle(getString(R.string.title_backup_seed));
         state = BackupState.VERIFY_SEED_PHRASE;
         title.setText(R.string.verify_seed_phrase);
         nextButton.setText(R.string.action_continue);
-        verifyTextBox.setVisibility(View.VISIBLE);
         TextView invalid = findViewById(R.id.text_invalid);
         invalid.setVisibility(View.INVISIBLE);
         layoutWordHolder.setVisibility(View.VISIBLE);
@@ -522,13 +551,12 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void WriteDownSeedPhrase()
     {
-        ResetInputBox();
-        verifyTextBox.setVisibility(View.GONE);
+        setContentView(R.layout.activity_backup_write_seed);
+        initViews();
 
+        setTitle(getString(R.string.title_backup_seed));
         state = BackupState.WRITE_DOWN_SEED_PHRASE;
-        backupImage.setVisibility(View.GONE);
         title.setText(R.string.write_down_seed_phrase);
-        detail.setVisibility(View.GONE);
         nextButton.setText(R.string.wrote_down_seed_phrase);
         setBottomButtonActive(true);
 
@@ -554,6 +582,22 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         layoutWordHolder.addView(currentHolder);
     }
 
+    private void setSeedWordSize(TextView seedWord)
+    {
+        seedWord.setTextSize(TypedValue.COMPLEX_UNIT_SP, seedTextSize);
+        seedWord.setPadding(seedTextHPadding, seedTextVPadding, seedTextHPadding, seedTextVPadding);
+//        if (layoutHolderWidth > 600)
+//        {
+//            seedWord.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+//            seedWord.setPadding(40, 25, 40, 25);
+//        }
+//        else
+//        {
+//            seedWord.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+//            seedWord.setPadding(16, 6, 16, 6);
+//        }
+    }
+
     private TextView addWordToLayout(String word)
     {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -565,8 +609,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         seedWord.setBackgroundResource(R.drawable.background_seed_word);
         seedWord.setTextColor(getColor(R.color.greyaa));
         seedWord.setLayoutParams(params);
-        seedWord.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-        seedWord.setPadding(40,25,40,25);
+        setSeedWordSize(seedWord);
 
         seedWord.measure(0, 0);
         int measuredWidth = seedWord.getMeasuredWidth();
@@ -598,6 +641,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         {
             Intent intent = new Intent();
             setResult(RESULT_CANCELED, intent);
+            intent.putExtra("Key", keyBackup);
             finish();
         }
     }
@@ -627,6 +671,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     {
         Intent intent = new Intent();
         setResult(RESULT_CANCELED, intent);
+        intent.putExtra("Key", keyBackup);
         finish();
     }
 

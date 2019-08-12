@@ -38,6 +38,7 @@ import io.stormbird.wallet.BuildConfig;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
@@ -173,6 +174,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.setLocale(this);
         viewModel.installIntent().observe(this, this::onInstallIntent);
         viewModel.walletName().observe(this, this::onWalletName);
+        viewModel.backUpMessage().observe(this, this::onBackup);
 
         if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false)) {
             showPage(SETTINGS);
@@ -195,7 +197,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         showFindWalletAddressDialog();
     }
 
-//    public void showBackupWalletDialog() {
+    private void onBackup(String address)
+    {
+        if (address != null && WalletUtils.isValidAddress(address))
+        {
+            Toast.makeText(this, getString(R.string.postponed_backup_warning), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    //    public void showBackupWalletDialog() {
 //        if (!viewModel.isBackupWalletDialogShown()) {
 //            backupWalletDialog = TutoShowcase.from(this);
 //            backupWalletDialog.setContentView(R.layout.showcase_backup_wallet)
@@ -505,6 +515,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         //postpone backup until later
         settingsFragment.backupSeedSuccess();
         walletFragment.remindMeLater(keyBackup);
+        viewModel.checkIsBackedUp(keyBackup);
 
         /*successImage.setImageResource(R.drawable.ic_error);
         successOverlay.setVisibility(View.VISIBLE);

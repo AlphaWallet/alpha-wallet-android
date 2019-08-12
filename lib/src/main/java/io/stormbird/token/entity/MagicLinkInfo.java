@@ -131,9 +131,9 @@ public class MagicLinkInfo
             case GOERLI_NETWORK_ID:
                 return GOERLI_RPC_URL;
             case ARTIS_SIGMA1_NETWORK_ID:
-                return ARTIS_SIGMA1_ID;
+                return ARTIS_SIGMA1_RPC_URL;
             case ARTIS_TAU1_NETWORK_ID:
-                return ARTIS_TAU1_ID;
+                return ARTIS_TAU1_RPC_URL;
             default:
                 return MAINNET_RPC_URL;
         }

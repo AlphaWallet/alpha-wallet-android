@@ -101,6 +101,12 @@ public class Utils {
             case EthereumNetworkRepository.XDAI_ID:
                 view.setBackgroundResource(R.drawable.background_xdai);
                 break;
+            case EthereumNetworkRepository.ARTIS_SIGMA1_ID:
+                view.setBackgroundResource(R.drawable.background_artis_sigma1);
+                break;
+            case EthereumNetworkRepository.ARTIS_TAU1_ID:
+                view.setBackgroundResource(R.drawable.background_artis_tau1);
+                break;
         }
     }
 

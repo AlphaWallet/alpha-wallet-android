@@ -30,6 +30,8 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	public static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
 	public static final String SOKOL_RPC_URL = "https://sokol.poa.network";
 	public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
+    public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
 
 	public static final int MAINNET_ID = 1;
 	public static final int CLASSIC_ID = 61;
@@ -40,6 +42,8 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	public static final int RINKEBY_ID = 4;
 	public static final int XDAI_ID = 100;
 	public static final int GOERLI_ID = 5;
+    public static final int ARTIS_SIGMA1_ID = 246529;
+    public static final int ARTIS_TAU1_ID = 246785;
 
 	public static final String BLOCKSCOUT_API = "https://blockscout.com/";
 	public static final String BLOCKSCOUT_TOKEN_ARGS = "/api?module=account&action=tokenlist&address=";

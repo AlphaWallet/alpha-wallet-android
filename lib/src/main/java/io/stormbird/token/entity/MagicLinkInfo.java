@@ -19,6 +19,8 @@ public class MagicLinkInfo
     private static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     private static final String SOKOL_RPC_URL = "https://sokol.poa.network";
     private static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    private static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
+    private static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
 
     //domains for DMZ
     private static final String mainnetMagicLinkDomain = "aw.app";
@@ -32,6 +34,8 @@ public class MagicLinkInfo
     private static final String sokolMagicLinkDomain = "sokol.aw.app";
     private static final String xDaiMagicLinkDomain = "xdai.aw.app";
     private static final String goerliMagicLinkDomain = "goerli.aw.app";
+    private static final String artisSigma1MagicLinkDomain = "artissigma1.aw.app";
+    private static final String artisTau1MagicLinkDomain = "artistau1.aw.app";
     private static final String customMagicLinkDomain = "custom.aw.app";
 
     //Etherscan domains
@@ -45,6 +49,8 @@ public class MagicLinkInfo
     private static final String sokolEtherscan = "https://sokol-explorer.poa.network/account/";
     private static final String xDaiEtherscan = "https://blockscout.com/poa/dai/";
     private static final String goerliEtherscan = "https://goerli.etherscan.io/";
+    private static final String artisSigma1Etherscan = "https://explorer.sigma1.artis.network/";
+    private static final String artisTau1Etherscan = "https://explorer.tau1.artis.network/";
 
     //network ids
     private static final int LEGACY_VALUE = 0;
@@ -57,6 +63,8 @@ public class MagicLinkInfo
     private static final int SOKOL_NETWORK_ID = 77;
     private static final int XDAI_NETWORK_ID = 100;
     private static final int GOERLI_NETWORK_ID = 5;
+    private static final int ARTIS_SIGMA1_NETWORK_ID = 246529;
+    private static final int ARTIS_TAU1_NETWORK_ID = 246785;
 
     //network names
     private static final String ETHEREUM_NETWORK = "Ethereum";
@@ -68,6 +76,8 @@ public class MagicLinkInfo
     private static final String SOKOL_NETWORK = "Sokol";
     private static final String XDAI_NETWORK = "xDAI";
     private static final String GOERLI_NETWORK = "Görli";
+    private static final String ARTIS_SIGMA1_NETWORK = "ARTIS sigma1";
+    private static final String ARTIS_TAU1_NETWORK = "ARTIS tau1";
 
 
 
@@ -91,6 +101,10 @@ public class MagicLinkInfo
                 return XDAI_NETWORK;
             case GOERLI_NETWORK_ID:
                 return GOERLI_NETWORK;
+            case ARTIS_SIGMA1_NETWORK_ID:
+                return ARTIS_SIGMA1_NETWORK;
+            case ARTIS_TAU1_NETWORK_ID:
+                return ARTIS_TAU1_NETWORK;
             default:
                 return ETHEREUM_NETWORK;
         }
@@ -116,6 +130,10 @@ public class MagicLinkInfo
                 return XDAI_RPC_URL;
             case GOERLI_NETWORK_ID:
                 return GOERLI_RPC_URL;
+            case ARTIS_SIGMA1_NETWORK_ID:
+                return ARTIS_SIGMA1_ID;
+            case ARTIS_TAU1_NETWORK_ID:
+                return ARTIS_TAU1_ID;
             default:
                 return MAINNET_RPC_URL;
         }
@@ -144,6 +162,10 @@ public class MagicLinkInfo
                 return xDaiMagicLinkDomain;
             case GOERLI_NETWORK_ID:
                 return goerliMagicLinkDomain;
+            case ARTIS_SIGMA1_NETWORK_ID:
+                return artisSigma1MagicLinkDomain;
+            case ARTIS_TAU1_NETWORK_ID:
+                return artisTau1MagicLinkDomain;
         }
     }
 
@@ -172,6 +194,10 @@ public class MagicLinkInfo
                 return XDAI_NETWORK_ID;
             case goerliMagicLinkDomain:
                 return GOERLI_NETWORK_ID;
+            case artisSigma1MagicLinkDomain:
+                return ARTIS_SIGMA1_NETWORK_ID;
+            case artisTau1MagicLinkDomain:
+                return ARTIS_TAU1_NETWORK_ID;
         }
     }
 
@@ -196,6 +222,10 @@ public class MagicLinkInfo
                 return xDaiEtherscan;
             case GOERLI_NETWORK_ID:
                 return goerliEtherscan;
+            case ARTIS_SIGMA1_NETWORK_ID:
+                return artisSigma1Etherscan;
+            case ARTIS_TAU1_NETWORK_ID:
+                return artisTau1Etherscan;
         }
     }
 

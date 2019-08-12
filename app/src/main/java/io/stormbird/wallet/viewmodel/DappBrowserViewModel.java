@@ -22,6 +22,7 @@ import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.ui.AddEditDappActivity;
 import io.stormbird.wallet.ui.ImportTokenActivity;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
@@ -52,6 +53,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final ConfirmationRouter confirmationRouter;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final GasService gasService;
+    private final KeyService keyService;
 
     private double ethToUsd = 0;
     private ArrayList<String> bookmarks;
@@ -64,7 +66,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
             FetchTokensInteract fetchTokensInteract,
             ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            GasService gasService) {
+            GasService gasService,
+            KeyService keyService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -73,6 +76,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         this.confirmationRouter = confirmationRouter;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.gasService = gasService;
+        this.keyService = keyService;
     }
 
     public AssetDefinitionService getAssetDefinitionService() {
@@ -300,5 +304,10 @@ public class DappBrowserViewModel extends BaseViewModel  {
     public void stopGasPriceChecker()
     {
         gasService.stopGasListener();
+    }
+
+    public void getAuthorisation(String walletAddress, Activity activity, SignAuthenticationCallback callback)
+    {
+        keyService.getAuthenticationForSignature(walletAddress, activity, callback);
     }
 }

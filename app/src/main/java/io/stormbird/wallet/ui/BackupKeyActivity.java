@@ -78,6 +78,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         layoutHolderWidth = 0;
 
         toolbar();
+        initViewModel();
 
         switch (type)
         {
@@ -94,8 +95,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                 setupTestSeed();
                 break;
         }
-
-        initViewModel();
     }
 
     private void setupUpgradeKey()
@@ -211,7 +210,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     {
         super.onPause();
         //hide seed phrase and any visible words
-        layoutWordHolder.removeAllViews();
+        if (layoutWordHolder != null) layoutWordHolder.removeAllViews();
 
         switch (state)
         {
@@ -328,11 +327,9 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                         WriteDownSeedPhrase();
                         break;
                     case WRITE_DOWN_SEED_PHRASE:
-                        //resetView();
                         setHDBackupSplash();
                         break;
                     case SET_JSON_PASSWORD:
-                        //resetView();
                         setupJSONExport();
                         break;
                     default:
@@ -565,8 +562,11 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void DisplaySeed()
     {
-        layoutWordHolder.setVisibility(View.VISIBLE);
-        layoutWordHolder.removeAllViews();
+        if (layoutWordHolder != null )
+        {
+            layoutWordHolder.setVisibility(View.VISIBLE);
+            layoutWordHolder.removeAllViews();
+        }
 
         viewModel.getSeedPhrase(keyBackup, this, this);
     }

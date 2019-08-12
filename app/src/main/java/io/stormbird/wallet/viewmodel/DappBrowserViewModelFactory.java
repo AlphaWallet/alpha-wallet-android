@@ -10,6 +10,7 @@ import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 
 public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -20,6 +21,7 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
     private final ConfirmationRouter confirmationRouter;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final GasService gasService;
+    private final KeyService keyService;
 
     public DappBrowserViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -29,7 +31,8 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
             FetchTokensInteract fetchTokensInteract,
             ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            GasService gasService) {
+            GasService gasService,
+            KeyService keyService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -38,6 +41,7 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
         this.confirmationRouter = confirmationRouter;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.gasService = gasService;
+        this.keyService = keyService;
     }
 
     @NonNull
@@ -51,6 +55,7 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
                 fetchTokensInteract,
                 confirmationRouter,
                 ethereumNetworkRepository,
-                gasService);
+                gasService,
+                keyService);
     }
 }

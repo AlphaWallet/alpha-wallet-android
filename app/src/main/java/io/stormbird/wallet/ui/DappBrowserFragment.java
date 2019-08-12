@@ -10,7 +10,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -24,12 +23,16 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebHistoryItem;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.*;
+import android.widget.AutoCompleteTextView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
-import io.stormbird.wallet.ui.widget.entity.DappBrowserSwipeInterface;
-import io.stormbird.wallet.ui.widget.entity.DappBrowserSwipeLayout;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
@@ -50,6 +53,8 @@ import io.stormbird.wallet.entity.DApp;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.FragmentMessenger;
 import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.PinAuthenticationCallbackInterface;
+import io.stormbird.wallet.entity.SignAuthenticationCallback;
 import io.stormbird.wallet.entity.SignTransactionInterface;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.URLLoadInterface;
@@ -59,6 +64,8 @@ import io.stormbird.wallet.ui.widget.OnDappClickListener;
 import io.stormbird.wallet.ui.widget.OnDappHomeNavClickListener;
 import io.stormbird.wallet.ui.widget.OnHistoryItemRemovedListener;
 import io.stormbird.wallet.ui.widget.adapter.DappBrowserSuggestionsAdapter;
+import io.stormbird.wallet.ui.widget.entity.DappBrowserSwipeInterface;
+import io.stormbird.wallet.ui.widget.entity.DappBrowserSwipeLayout;
 import io.stormbird.wallet.ui.widget.entity.ItemClickListener;
 import io.stormbird.wallet.ui.zxing.FullScannerFragment;
 import io.stormbird.wallet.util.DappBrowserUtils;
@@ -78,18 +85,20 @@ import io.stormbird.wallet.web3.entity.TypedData;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.SignMessageDialog;
+import io.stormbird.wallet.widget.SignTransactionDialog;
 
 import static android.app.Activity.RESULT_OK;
 import static io.stormbird.wallet.C.RESET_TOOLBAR;
 import static io.stormbird.wallet.C.RESET_WALLET;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
+import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
 import static io.stormbird.wallet.ui.zxing.QRScanningActivity.DENY_PERMISSION;
 import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 
 public class DappBrowserFragment extends Fragment implements
         OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
         URLLoadInterface, ItemClickListener, SignTransactionInterface, OnDappClickListener, OnDappHomeNavClickListener,
-        OnHistoryItemRemovedListener, DappBrowserSwipeInterface
+        OnHistoryItemRemovedListener, DappBrowserSwipeInterface, SignAuthenticationCallback
 {
     private static final String TAG = DappBrowserFragment.class.getSimpleName();
     private static final String DAPP_BROWSER = "DAPP_BROWSER";
@@ -137,6 +146,16 @@ public class DappBrowserFragment extends Fragment implements
 
     private WebBackForwardList sessionHistory;
     private String lastHomeTag;
+    private PinAuthenticationCallbackInterface authInterface;
+    private Message<String> messageToSign;
+    private byte[] messageBytes;
+    private DAppFunction dAppFunction;
+    private SignType signType;
+
+    private enum SignType
+    {
+        SIGN_PERSONAL_MESSAGE, SIGN_MESSAGE
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -601,7 +620,8 @@ public class DappBrowserFragment extends Fragment implements
 
     @Override
     public void onSignMessage(Message<String> message) {
-        DAppFunction dAppFunction = new DAppFunction() {
+        messageToSign = message;
+        dAppFunction = new DAppFunction() {
             @Override
             public void DAppError(Throwable error, Message<String> message) {
                 web3.onSignCancel(message);
@@ -625,12 +645,12 @@ public class DappBrowserFragment extends Fragment implements
                 //ensure we generate the signature correctly:
                 if (message.value != null)
                 {
-                    byte[] signRequest = message.value.getBytes();
+                    messageBytes = message.value.getBytes();
                     if (message.value.substring(0, 2).equals("0x"))
                     {
-                        signRequest = Numeric.hexStringToByteArray(message.value);
+                        messageBytes = Numeric.hexStringToByteArray(message.value);
                     }
-                    viewModel.signMessage(signRequest, dAppFunction, message);
+                    viewModel.getAuthorisation(wallet.address, getActivity(), this);
                 }
                 else
                 {
@@ -651,7 +671,8 @@ public class DappBrowserFragment extends Fragment implements
 
     @Override
     public void onSignPersonalMessage(Message<String> message) {
-        DAppFunction dAppFunction = new DAppFunction() {
+        messageToSign = message;
+        dAppFunction = new DAppFunction() {
             @Override
             public void DAppError(Throwable error, Message<String> message) {
                 web3.onSignCancel(message);
@@ -679,7 +700,8 @@ public class DappBrowserFragment extends Fragment implements
                 String signMessage = PERSONAL_MESSAGE_PREFIX
                         + convertedMessage.length()
                         + convertedMessage;
-                viewModel.signMessage(signMessage.getBytes(), dAppFunction, message);
+                messageBytes = signMessage.getBytes();
+                viewModel.getAuthorisation(wallet.address, getActivity(), this);
             });
             dialog.setOnRejectListener(v -> {
                 web3.onSignCancel(message);
@@ -882,7 +904,7 @@ public class DappBrowserFragment extends Fragment implements
     public void testRecoverAddressFromSignature(String message, String sig)
     {
         String prefix = PERSONAL_MESSAGE_PREFIX + message.length();
-        byte[] msgHash = (prefix + message).getBytes(); //Hash.sha3((prefix + message3).getBytes());
+        byte[] msgHash = (prefix + message).getBytes();
 
         byte[] signatureBytes = Numeric.hexStringToByteArray(sig);
         Sign.SignatureData sd = sigFromByteArray(signatureBytes);
@@ -1065,5 +1087,36 @@ public class DappBrowserFragment extends Fragment implements
     public int getCurrentScrollPosition()
     {
         return web3.getScrollY();
+    }
+
+    public void onActivityResult(int requestCode, int resultCode)
+    {
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            GotAuthorisation(resultCode == RESULT_OK);
+        }
+    }
+
+    @Override
+    public void GotAuthorisation(boolean gotAuth)
+    {
+        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
+        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+
+        if (gotAuth)
+        {
+            viewModel.signMessage(messageBytes, dAppFunction, messageToSign);
+        }
+        else if (dialog != null && dialog.isShowing())
+        {
+            web3.onSignCancel(messageToSign);
+            dialog.dismiss();
+        }
+    }
+
+    @Override
+    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+    {
+        authInterface = authCallback;
     }
 }

@@ -317,8 +317,8 @@ public class KeystoreAccountService implements AccountKeystoreService
     public Single<byte[]> signTransaction(Wallet signer, byte[] message, long chainId)
     {
         return Single.fromCallable(() -> {
-            byte[] messageHash = Hash.sha3(message);
-            byte[] signed = keyService.signData(signer.address, messageHash);
+            //byte[] messageHash = Hash.sha3(message);
+            byte[] signed = keyService.signData(signer.address, message);
 
             signed = patchSignatureVComponent(signed);
             return signed;

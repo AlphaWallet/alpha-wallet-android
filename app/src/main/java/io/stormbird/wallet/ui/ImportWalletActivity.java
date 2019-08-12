@@ -42,6 +42,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.utils.Numeric;
 
 import static io.stormbird.wallet.C.ErrorCode.ALREADY_ADDED;
@@ -258,17 +259,32 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     public void onKeystore(String keystore, String password)
     {
         String address = extractAddressFromStore(keystore);
-        importWalletViewModel.importKeystoreWallet(address, this, this);
+        if (address != null && WalletUtils.isValidAddress(keystore))
+        {
+            importWalletViewModel.importKeystoreWallet(address, this, this);
+        }
+        else
+        {
+            keyImportError(getString(R.string.invalid_keystore));
+        }
     }
 
     @Override
     public void onPrivateKey(String privateKey)
     {
-        BigInteger key = new BigInteger(privateKey, 16);
-        ECKeyPair keypair = ECKeyPair.create(key);
-        String address = Numeric.prependHexPrefix(Keys.getAddress(keypair));
+        try
+        {
+            BigInteger key = new BigInteger(privateKey, 16);
+            if (!WalletUtils.isValidPrivateKey(privateKey)) throw new Exception(getString(R.string.invalid_private_key));
+            ECKeyPair keypair = ECKeyPair.create(key);
+            String address = Numeric.prependHexPrefix(Keys.getAddress(keypair));
 
-        importWalletViewModel.importPrivateKeyWallet(address, this, this);
+            importWalletViewModel.importPrivateKeyWallet(address, this, this);
+        }
+        catch (Exception e)
+        {
+            keyImportError(e.getMessage());
+        }
     }
 
     @Override
@@ -375,6 +391,19 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         dialog.setButtonListener(v -> {
             dialog.dismiss();
         });
+        dialog.show();
+    }
+
+    private void keyImportError(String error)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.error_import);
+        dialog.setMessage(error);
+        dialog.setButtonText(R.string.dialog_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
     }
 

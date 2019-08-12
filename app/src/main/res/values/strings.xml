@@ -551,7 +551,7 @@
     <string name="already_have_a_wallet">I already have a wallet:</string>
     <string name="watch_wallet">Watch Wallet</string>
     <string name="suggestion_address">Enter Ethereum Address</string>
-    <string name="ethereum_address_hint">Ethereum Address: 0x then 20 characters of 0-9 a-f A-F</string>
+    <string name="ethereum_address_hint">Ethereum Address: 0x then 20 characters of 0–9 a-f A-F</string>
     <string name="action_watch_account">Watch an account</string>
     <string name="receive_payment">Receive Payment</string>
     <string name="title_back_up_your_wallet">Back up your Wallet</string>
@@ -566,10 +566,12 @@
     <string name="back_up_now">Back up Now!</string>
     <string name="key_secure">100% Secure</string>
     <string name="lock_key_upgrade">Lock your seed phrase to increase security</string>
-    <string name="upgrade_key_security_detail">Alphawallet security is being upgraded to the best achievable. Lock your seed phrase with biometrics.</string>
+    <string name="upgrade_key_security_detail">AlphaWallet security is being upgraded to the best achievable. Lock your seed phrase with biometrics.</string>
     <string name="action_upgrade_key">Upgrade key security</string>
     <string name="backup_wallet_detail">We highly recommend you back up your wallet.</string>
     <string name="skip_upgrade">Skip Upgrade</string>
     <string name="lock_keystore_upgrade">Lock your Keystore to increase security</string>
     <string name="title_backup_seed">Backup Seed Phrase</string>
+    <string name="invalid_keystore">Invalid Keystore Import</string>
+    <string name="invalid_private_key">Invalid Private Key</string>
 </resources>

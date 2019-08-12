@@ -7,6 +7,7 @@ import io.stormbird.wallet.repository.*;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModelFactory;
 
 @Module
@@ -20,7 +21,8 @@ public class DappBrowserModule {
             FetchTokensInteract fetchTokensInteract,
             ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            GasService gasService) {
+            GasService gasService,
+            KeyService keyService) {
         return new DappBrowserViewModelFactory(
                 findDefaultNetworkInteract,
                 genericWalletInteract,
@@ -29,7 +31,8 @@ public class DappBrowserModule {
                 fetchTokensInteract,
                 confirmationRouter,
                 ethereumNetworkRepository,
-                gasService);
+                gasService,
+                keyService);
     }
 
     @Provides

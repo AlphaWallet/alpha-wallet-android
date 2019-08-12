@@ -813,12 +813,20 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 else backupWalletFail(keyBackup);
                 break;
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
-                //continue with generating the authenticated key
-                if (resultCode == RESULT_OK) authInterface.CompleteAuthentication(taskCode);
-                else
+                switch (getSelectedItem())
                 {
-                    authInterface.FailedAuthentication(taskCode);
-                    GotAuthorisation(false);
+                    case DAPP_BROWSER:
+                        dappBrowserFragment.GotAuthorisation(resultCode == RESULT_OK);
+                        break;
+                    default:
+                        //continue with generating the authenticated key
+                        if (resultCode == RESULT_OK) authInterface.CompleteAuthentication(taskCode);
+                        else
+                        {
+                            authInterface.FailedAuthentication(taskCode);
+                            GotAuthorisation(false);
+                        }
+                        break;
                 }
                 break;
             default:

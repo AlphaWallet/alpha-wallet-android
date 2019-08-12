@@ -438,10 +438,8 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
     public void storeWalletBackupTime(String backedUpKey)
     {
-        viewModel.setKeyBackupTime(backedUpKey)
-                .isDisposed();
-
-        adapter.removeBackupWarning();
+        if (viewModel != null) viewModel.setKeyBackupTime(backedUpKey).isDisposed();
+        if (adapter != null) adapter.removeBackupWarning();
     }
 
     public class SwipeCallback extends ItemTouchHelper.SimpleCallback {

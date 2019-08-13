@@ -77,9 +77,9 @@ public class KeystoreAccountService implements AccountKeystoreService
     public Single<Wallet> importKeystore(String store, String password, String newPassword) {
         return Single.fromCallable(() -> {
             String address = extractAddressFromStore(store);
-            Wallet wallet = null;
+            Wallet wallet;
             if (hasAccount(address)) {
-                throw new ServiceErrorException(C.ErrorCode.ALREADY_ADDED, "Already added");
+                throw new ServiceErrorException(C.ErrorCode.ALREADY_ADDED, "Already added wallet " + address);
             }
 
             try {
@@ -289,14 +289,6 @@ public class KeystoreAccountService implements AccountKeystoreService
         }
 
         return result;
-    }
-
-    private Single<byte[]> encodeTransaction(byte[] signatureBytes, RawTransaction rtx)
-    {
-        return Single.fromCallable(() -> {
-            Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
-            return encode(rtx, sigData);
-        });
     }
 
     @Override

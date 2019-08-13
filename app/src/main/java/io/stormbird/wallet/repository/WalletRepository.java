@@ -27,14 +27,8 @@ public class WalletRepository implements WalletRepositoryType
 	private final OkHttpClient httpClient;
 	private final KeyService keyService;
 
-	public WalletRepository(
-			PreferenceRepositoryType preferenceRepositoryType,
-			AccountKeystoreService accountKeystoreService,
-			EthereumNetworkRepositoryType networkRepository,
-			TransactionsNetworkClientType blockExplorerClient,
-			WalletDataRealmSource walletDataRealmSource,
-			OkHttpClient httpClient,
-			KeyService keyService) {
+	public WalletRepository(PreferenceRepositoryType preferenceRepositoryType, AccountKeystoreService accountKeystoreService, EthereumNetworkRepositoryType networkRepository, TransactionsNetworkClientType blockExplorerClient, WalletDataRealmSource walletDataRealmSource, OkHttpClient httpClient, KeyService keyService)
+	{
 		this.preferenceRepositoryType = preferenceRepositoryType;
 		this.accountKeystoreService = accountKeystoreService;
 		this.networkRepository = networkRepository;
@@ -47,46 +41,51 @@ public class WalletRepository implements WalletRepositoryType
 	@Override
 	public Single<Wallet[]> fetchWallets()
 	{
-		return accountKeystoreService.fetchAccounts()
-				.flatMap(wallets -> walletDataRealmSource.populateWalletData(wallets, keyService));
+		return accountKeystoreService.fetchAccounts().flatMap(wallets -> walletDataRealmSource.populateWalletData(wallets, keyService));
 	}
 
 	@Override
-	public Single<Wallet> findWallet(String address) {
-		return fetchWallets()
-				.flatMap(accounts -> {
-					for (Wallet wallet : accounts) {
-						if (wallet.sameAddress(address)) {
-							return Single.just(wallet);
-						}
-					}
-					return null;
-				});
+	public Single<Wallet> findWallet(String address)
+	{
+		return fetchWallets().flatMap(accounts -> {
+			for (Wallet wallet : accounts)
+			{
+				if (wallet.sameAddress(address))
+				{
+					return Single.just(wallet);
+				}
+			}
+			return null;
+		});
 	}
 
 	@Override
-	public Single<Wallet> createWallet(String password) {
-		return accountKeystoreService
-				.createAccount(password);
+	public Single<Wallet> createWallet(String password)
+	{
+		return accountKeystoreService.createAccount(password);
 	}
 
 	@Override
-	public Single<Wallet> importKeystoreToWallet(String store, String password, String newPassword) {
+	public Single<Wallet> importKeystoreToWallet(String store, String password, String newPassword)
+	{
 		return accountKeystoreService.importKeystore(store, password, newPassword);
 	}
 
-    @Override
-    public Single<Wallet> importPrivateKeyToWallet(String privateKey, String newPassword) {
-        return accountKeystoreService.importPrivateKey(privateKey, newPassword);
-    }
+	@Override
+	public Single<Wallet> importPrivateKeyToWallet(String privateKey, String newPassword)
+	{
+		return accountKeystoreService.importPrivateKey(privateKey, newPassword);
+	}
 
-    @Override
-	public Single<String> exportWallet(Wallet wallet, String password, String newPassword) {
+	@Override
+	public Single<String> exportWallet(Wallet wallet, String password, String newPassword)
+	{
 		return accountKeystoreService.exportAccount(wallet, password, newPassword);
 	}
 
 	@Override
-	public Completable deleteWallet(String address, String password) {
+	public Completable deleteWallet(String address, String password)
+	{
 		return accountKeystoreService.deleteAccount(address, password);
 	}
 
@@ -97,7 +96,8 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Completable setDefaultWallet(Wallet wallet) {
+	public Completable setDefaultWallet(Wallet wallet)
+	{
 		return Completable.fromAction(() -> preferenceRepositoryType.setCurrentWalletAddress(wallet.address));
 	}
 
@@ -132,21 +132,19 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<Wallet> getDefaultWallet() {
-		return Single.fromCallable(preferenceRepositoryType::getCurrentWalletAddress)
-				.flatMap(this::findWallet);
+	public Single<Wallet> getDefaultWallet()
+	{
+		return Single.fromCallable(preferenceRepositoryType::getCurrentWalletAddress).flatMap(this::findWallet);
 	}
 
 	@Override
-	public Single<BigDecimal> balanceInWei(Wallet wallet) {
+	public Single<BigDecimal> balanceInWei(Wallet wallet)
+	{
 		return Single.fromCallable(() -> {
 			//return BigDecimal.valueOf(15.995).movePointRight(18);
-			try {
-				return new BigDecimal(Web3j
-						.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl, httpClient, false))
-						.ethGetBalance(wallet.address, DefaultBlockParameterName.PENDING)
-						.send()
-						.getBalance());
+			try
+			{
+				return new BigDecimal(Web3j.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl, httpClient, false)).ethGetBalance(wallet.address, DefaultBlockParameterName.PENDING).send().getBalance());
 			}
 			catch (IOException e)
 			{
@@ -168,7 +166,8 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<String> getName(String address) {
+	public Single<String> getName(String address)
+	{
 		return walletDataRealmSource.getName(address);
 	}
 

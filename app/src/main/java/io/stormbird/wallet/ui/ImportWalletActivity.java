@@ -259,7 +259,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     public void onKeystore(String keystore, String password)
     {
         String address = extractAddressFromStore(keystore);
-        if (address != null && WalletUtils.isValidAddress(keystore))
+        if (address != null && WalletUtils.isValidAddress(address))
         {
             importWalletViewModel.importKeystoreWallet(address, this, this);
         }

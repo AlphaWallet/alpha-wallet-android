@@ -199,7 +199,7 @@
     <string name="universal_link_notice">在MagicLink链接过期之前，任何人都可以通过点击此链接来买到你的门票.</string>
     <string name="label_important">重要</string>
     <string name="eth_00">0.00 ETH</string>
-    <string name="toolbar_title_my_wallets">我的钱包</string>
+    <string name="toolbar_title_wallets">更换当前钱包</string>
     <string name="sent">发送了</string>
     <string name="received">收到了</string>
 <string name="facebook">Facebook</string>

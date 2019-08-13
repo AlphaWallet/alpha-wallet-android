@@ -270,6 +270,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         successOverlay = findViewById(R.id.layout_success_overlay);
         successImage = findViewById(R.id.success_image);
 
+        successOverlay.setOnClickListener(view -> {
+            //dismiss big green tick
+            successOverlay.setVisibility(View.GONE);
+        });
+
         //check clipboard
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         try

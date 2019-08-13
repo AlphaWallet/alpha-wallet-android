@@ -52,4 +52,9 @@ public class ImportWalletInteract {
         wallet.lastBackupTime = System.currentTimeMillis();
         return walletRepository.storeWallet(wallet);
     }
+
+    public boolean keyStoreExists(String address)
+    {
+        return walletRepository.keystoreExists(address);
+    }
 }

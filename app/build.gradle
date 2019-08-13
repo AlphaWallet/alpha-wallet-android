@@ -39,7 +39,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 61
-        versionName "2.10.0"
+        versionName "2.10.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         buildConfigField 'int', 'DB_VERSION', '4'

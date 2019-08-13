@@ -176,4 +176,10 @@ public class WalletRepository implements WalletRepositoryType
 	{
 		return blockExplorerClient.scanENSTransactionsForWalletNames(wallets, lastBlockChecked);
 	}
+
+	@Override
+    public boolean keystoreExists(String address)
+    {
+        return accountKeystoreService.hasAccount(address);
+    }
 }

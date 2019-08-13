@@ -48,4 +48,6 @@ public interface WalletRepositoryType {
 
     Single<String> getWalletRequiresBackup(String walletAddr);
     Single<String> setIsDismissed(String walletAddr, boolean isDismissed);
+
+    boolean keystoreExists(String address);
 }

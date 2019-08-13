@@ -172,4 +172,6 @@
     <string name="title_backup_seed">Backup Seed Phrase</string>
     <string name="invalid_keystore">Invalid Keystore Import</string>
     <string name="invalid_private_key">Invalid Private Key</string>
+    <string name="reimport_wallet_detail">Wallet %1$s already exists, do you wish to re-import the wallet?</string>
+    <string name="reimport_wallet_title">Re-Import Wallet?</string>
 </resources>

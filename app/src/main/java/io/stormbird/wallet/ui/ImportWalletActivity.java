@@ -22,6 +22,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import dagger.android.AndroidInjection;
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
@@ -261,12 +264,42 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         String address = extractAddressFromStore(keystore);
         if (address != null && WalletUtils.isValidAddress(address))
         {
-            importWalletViewModel.importKeystoreWallet(address, this, this);
+            onProgress(true);
+            importWalletViewModel.checkKeystorePassword(keystore, address, password)
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(result -> keyStoreValid(result, address)).isDisposed();
         }
         else
         {
             keyImportError(getString(R.string.invalid_keystore));
         }
+    }
+
+    private void keyStoreValid(Boolean result, String address)
+    {
+        onProgress(false);
+        if (!result)
+        {
+            keyImportError("Invalid Password for Keystore");
+        }
+        else if (importWalletViewModel.keystoreExists(address))
+        {
+            queryReplaceWalletKeystore(address);
+        }
+        else
+        {
+            importWalletViewModel.importKeystoreWallet(address, this, this);
+        }
+    }
+
+    private void queryReplaceWalletKeystore(String address)
+    {
+        replaceWallet(address);
+        dialog.setButtonListener(v -> {
+            importWalletViewModel.importKeystoreWallet(address, this, this);
+        });
+        dialog.show();
     }
 
     @Override
@@ -279,12 +312,28 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
             ECKeyPair keypair = ECKeyPair.create(key);
             String address = Numeric.prependHexPrefix(Keys.getAddress(keypair));
 
-            importWalletViewModel.importPrivateKeyWallet(address, this, this);
+            if (importWalletViewModel.keystoreExists(address))
+            {
+                queryReplaceWalletPrivateKey(address);
+            }
+            else
+            {
+                importWalletViewModel.importPrivateKeyWallet(address, this, this);
+            }
         }
         catch (Exception e)
         {
             keyImportError(e.getMessage());
         }
+    }
+
+    private void queryReplaceWalletPrivateKey(String address)
+    {
+        replaceWallet(address);
+        dialog.setButtonListener(v -> {
+            importWalletViewModel.importPrivateKeyWallet(address, this, this);
+        });
+        dialog.show();
     }
 
     @Override
@@ -424,5 +473,21 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         } catch (JSONException ex) {
             return null;
         }
+    }
+
+    private void replaceWallet(String address)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.WARNING);
+        dialog.setTitle(R.string.reimport_wallet_title);
+        dialog.setMessage(getString(R.string.reimport_wallet_detail, address));
+        dialog.setButtonText(R.string.dialog_ok);
+        dialog.setSecondaryButtonText(R.string.action_cancel);
+        dialog.setSecondaryButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
     }
 }

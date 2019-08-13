@@ -3,6 +3,15 @@ package io.stormbird.wallet.viewmodel;
 import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.web3j.crypto.ECKeyPair;
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.WalletFile;
+import org.web3j.utils.Numeric;
+
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
@@ -107,5 +116,30 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     public void importPrivateKeyWallet(String address, Activity activity, ImportWalletCallback callback)
     {
         keyService.createPrivateKeyPassword(address, activity, callback);
+    }
+
+    public boolean keystoreExists(String address)
+    {
+        return importWalletInteract.keyStoreExists(address);
+    }
+
+    public Single<Boolean> checkKeystorePassword(String keystore, String keystoreAddress, String password)
+    {
+        return Single.fromCallable(() -> {
+            Boolean isValid = false;
+            try
+            {
+                ObjectMapper objectMapper = new ObjectMapper();
+                WalletFile walletFile = objectMapper.readValue(keystore, WalletFile.class);
+                ECKeyPair kp = org.web3j.crypto.Wallet.decrypt(password, walletFile);
+                String address = Numeric.prependHexPrefix(Keys.getAddress(kp));
+                if (address.equalsIgnoreCase(keystoreAddress)) isValid = true;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            return isValid;
+        });
     }
 }

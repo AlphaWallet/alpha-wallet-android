@@ -65,7 +65,7 @@ public class KeystoreAccountService implements AccountKeystoreService
         }).compose(upstream -> importKeystore(upstream.blockingGet(), password, password))
         .subscribeOn(Schedulers.io());
     }
-
+    
     /**
      * Import Keystore
      * @param store store to include
@@ -78,9 +78,9 @@ public class KeystoreAccountService implements AccountKeystoreService
         return Single.fromCallable(() -> {
             String address = extractAddressFromStore(store);
             Wallet wallet;
-            if (hasAccount(address)) {
-                throw new ServiceErrorException(C.ErrorCode.ALREADY_ADDED, "Already added wallet " + address);
-            }
+//            if (hasAccount(address)) {
+//                throw new ServiceErrorException(C.ErrorCode.ALREADY_ADDED, "Already added wallet " + address);
+//            }
 
             try {
                 WalletFile walletFile = objectMapper.readValue(store, WalletFile.class);

@@ -65,7 +65,7 @@ public class KeystoreAccountService implements AccountKeystoreService
         }).compose(upstream -> importKeystore(upstream.blockingGet(), password, password))
         .subscribeOn(Schedulers.io());
     }
-    
+
     /**
      * Import Keystore
      * @param store store to include
@@ -78,9 +78,8 @@ public class KeystoreAccountService implements AccountKeystoreService
         return Single.fromCallable(() -> {
             String address = extractAddressFromStore(store);
             Wallet wallet;
-//            if (hasAccount(address)) {
-//                throw new ServiceErrorException(C.ErrorCode.ALREADY_ADDED, "Already added wallet " + address);
-//            }
+            //delete old account files - these have had their password overwritten. If present user chose to refresh key
+            deleteAccountFiles(address);
 
             try {
                 WalletFile walletFile = objectMapper.readValue(store, WalletFile.class);
@@ -100,7 +99,7 @@ public class KeystoreAccountService implements AccountKeystoreService
                 wallet.setWalletType(WalletType.KEYSTORE);
             } catch (Exception ex) {
                 // We need to make sure that we do not have a broken account
-                deleteAccount(address, newPassword).subscribe(() -> {}, t -> {});
+                deleteAccount(address, newPassword).subscribe(() -> {}, t -> {}).isDisposed();
                 throw ex;
             }
 
@@ -152,21 +151,10 @@ public class KeystoreAccountService implements AccountKeystoreService
     public Completable deleteAccount(String address, String password) {
         return Completable.fromAction(() -> {
             String cleanedAddr = Numeric.cleanHexPrefix(address);
-            File[] contents = keyFolder.listFiles();
-            if (contents != null)
-            {
-                for (File f : contents)
-                {
-                    if (f.getName().contains(cleanedAddr))
-                    {
-                        f.delete();
-                        break;
-                    }
-                }
-            }
+            deleteAccountFiles(cleanedAddr);
 
             //Now delete database files (ie tokens, transactions and Tokenscript data for account)
-            contents = databaseFolder.listFiles();
+            File[] contents = databaseFolder.listFiles();
             if (contents != null)
             {
                 for (File f : contents)
@@ -181,6 +169,22 @@ public class KeystoreAccountService implements AccountKeystoreService
             //Now delete all traces of the key in Android keystore, encrypted bytes and iv file in private data area
             keyService.deleteKeyCompletely(address);
         } );
+    }
+
+    private void deleteAccountFiles(String address)
+    {
+        String cleanedAddr = Numeric.cleanHexPrefix(address);
+        File[] contents = keyFolder.listFiles();
+        if (contents != null)
+        {
+            for (File f : contents)
+            {
+                if (f.getName().contains(cleanedAddr))
+                {
+                    f.delete();
+                }
+            }
+        }
     }
 
     private void deleteRecursive(File fp)

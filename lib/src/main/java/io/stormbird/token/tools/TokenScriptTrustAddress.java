@@ -3,6 +3,7 @@ package io.stormbird.token.tools;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.KeyPairGeneratorSpi;
 import org.bouncycastle.jcajce.provider.asymmetric.util.EC5Util;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.jce.ECNamedCurveTable;
@@ -19,10 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Security;
+import java.security.*;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
@@ -46,6 +44,22 @@ public class TokenScriptTrustAddress {
         byte[] tsmlRoot = getTSMLRootBytes(tokenscript);
         tokenscript.close();
         this.digest = convertHexToBase64String(Numeric.toHexString(tsmlRoot));
+    }
+
+    // a public zero-argument constructor is required by Amazon Lambda
+    // object created in this fashion is un-initialised, only suited for handleRequest which has its own initialisation code
+    public TokenScriptTrustAddress() throws NoSuchProviderException, NoSuchAlgorithmException {
+    }
+
+    public String handleRequest(TokenScriptTrustAddressRequest req) throws Exception {
+        // this one has to initialise the object
+        Security.addProvider(new BouncyCastleProvider());
+        InputStream targetStream = new ByteArrayInputStream(req.getTokenScript().getBytes());
+        byte[] tsmlRoot = getTSMLRootBytes(targetStream);
+        targetStream.close();
+        this.digest = convertHexToBase64String(Numeric.toHexString(tsmlRoot));
+        // object initialised. Now getTrustAddress
+        return getTrustAddress(req.getContractAddress());
     }
 
     public String getTrustAddress(String contractAddress) throws Exception {

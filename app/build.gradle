@@ -151,6 +151,10 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.8.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
 
+    // Amazon Android SDK
+    implementation 'com.amazonaws:aws-android-sdk-core:2.2.+'
+    implementation 'com.amazonaws:aws-android-sdk-lambda:2.2.+'
+
     // Tests
     testImplementation 'junit:junit:4.12'
     androidTestImplementation("com.android.support.test.espresso:espresso-core:2.2.2", {

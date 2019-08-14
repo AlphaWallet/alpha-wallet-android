@@ -14,6 +14,7 @@ import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.jcajce.provider.digest.Keccak;
 import org.xml.sax.SAXException;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,14 +39,13 @@ public class TokenScriptTrustAddress {
     private ECDomainParameters CURVE = new ECDomainParameters(CURVE_PARAMS.getCurve(), CURVE_PARAMS.getG(),
             CURVE_PARAMS.getN(), CURVE_PARAMS.getH());
     public String digest;
-    public ECPublicKey masterPubKey;
+    public static final byte[] masterPubKey = parseHexBinary("04f0985bd9dbb6f461adc994a0c12595716a7f4fb2879bfc5155dffec3770096201c13f8314b46db8d8177887f8d95af1f2dd217291ce6ffe9183681186696bbe5");
 
     public TokenScriptTrustAddress(InputStream tokenscript) throws IOException, MarshalException, ParserConfigurationException, SAXException, XMLSignatureException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         Security.addProvider(new BouncyCastleProvider());
         byte[] tsmlRoot = getTSMLRootBytes(tokenscript);
+        tokenscript.close();
         this.digest = convertHexToBase64String(Numeric.toHexString(tsmlRoot));
-        // TODO: this class variable can probably be initialised at compile time
-        masterPubKey = decodeKey(parseHexBinary("04f0985bd9dbb6f461adc994a0c12595716a7f4fb2879bfc5155dffec3770096201c13f8314b46db8d8177887f8d95af1f2dd217291ce6ffe9183681186696bbe5"));
     }
 
     public String getTrustAddress(String contractAddress) throws Exception {
@@ -66,7 +66,7 @@ public class TokenScriptTrustAddress {
 
         // use the hash to derive a new address
         BigInteger keyDerivationFactor = new BigInteger(Numeric.toHexStringNoPrefix(hash), 16);
-        ECPoint donatePKPoint = extractPublicKey(this.masterPubKey);
+        ECPoint donatePKPoint = extractPublicKey(decodeKey(masterPubKey));
         ECPoint digestPKPoint = donatePKPoint.multiply(keyDerivationFactor);
         return getAddress(digestPKPoint);
     }

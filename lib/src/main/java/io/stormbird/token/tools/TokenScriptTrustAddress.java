@@ -46,22 +46,6 @@ public class TokenScriptTrustAddress {
         this.digest = convertHexToBase64String(Numeric.toHexString(tsmlRoot));
     }
 
-    // a public zero-argument constructor is required by Amazon Lambda
-    // object created in this fashion is un-initialised, only suited for handleRequest which has its own initialisation code
-    public TokenScriptTrustAddress() throws NoSuchProviderException, NoSuchAlgorithmException {
-    }
-
-    public String handleRequest(TokenScriptTrustAddressRequest req) throws Exception {
-        // this one has to initialise the object
-        Security.addProvider(new BouncyCastleProvider());
-        InputStream targetStream = new ByteArrayInputStream(req.getTokenScript().getBytes());
-        byte[] tsmlRoot = getTSMLRootBytes(targetStream);
-        targetStream.close();
-        this.digest = convertHexToBase64String(Numeric.toHexString(tsmlRoot));
-        // object initialised. Now getTrustAddress
-        return getTrustAddress(req.getContractAddress());
-    }
-
     public String getTrustAddress(String contractAddress) throws Exception {
         return preimageToAddress(String.format("%s%s%s", contractAddress, "TRUST", this.digest).getBytes(UTF_8));
     }
@@ -165,5 +149,43 @@ public class TokenScriptTrustAddress {
         return computeAddress(pubPoint.getEncoded(false ));
     }
 
+    /***************** Below are for making this class usable with Amazon Lambda *******************/
+
+    // a public zero-argument constructor is required by Amazon Lambda
+    // object created in this fashion is un-initialised, only suited for handleRequest which has its own initialisation code
+    public TokenScriptTrustAddress() throws NoSuchProviderException, NoSuchAlgorithmException {
+    }
+
+    public TokenScriptTrustAddress.Response handleRequest(TokenScriptTrustAddressRequest req) throws Exception {
+        // this one has to initialise the object
+        Security.addProvider(new BouncyCastleProvider());
+        InputStream targetStream = new ByteArrayInputStream(req.getTokenScript().getBytes());
+        byte[] tsmlRoot = getTSMLRootBytes(targetStream);
+        targetStream.close();
+        this.digest = convertHexToBase64String(Numeric.toHexString(tsmlRoot));
+        // object initialised. Now getTrustAddress
+        return new TokenScriptTrustAddress.Response(getTrustAddress(req.getContractAddress()), getRevokeAddress(req.getContractAddress()));
+    }
+
+    public class Response {
+        String trustAddress;
+        String revokeAddress;
+
+        public String getTrustAddress() { return trustAddress; }
+
+        public void setTrustAddress(String trustAddress) { this.trustAddress = trustAddress; }
+
+        public String getRevokeAddress() { return revokeAddress; }
+
+        public void setRevokeAddress(String revokeAddress) { this.revokeAddress = revokeAddress; }
+
+        public Response(String trustAddress, String revokeAddress) {
+            this.trustAddress = trustAddress;
+            this.revokeAddress = revokeAddress;
+        }
+
+        public Response() {
+        }
+    }
 }
 

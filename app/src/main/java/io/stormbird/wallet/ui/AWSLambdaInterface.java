@@ -2,6 +2,7 @@ package io.stormbird.wallet.ui;
 
 import com.amazonaws.mobileconnectors.lambdainvoker.LambdaFunction;
 import io.stormbird.token.tools.TokenScriptTrustAddressRequest;
+import io.stormbird.token.tools.TokenScriptTrustAddress;
 
 public interface AWSLambdaInterface {
 
@@ -13,6 +14,6 @@ public interface AWSLambdaInterface {
      * -- Weiwu
      */
     @LambdaFunction
-    String TokenScriptTrustAddress(TokenScriptTrustAddressRequest request);
+    TokenScriptTrustAddress.Response TokenScriptTrustAddress(TokenScriptTrustAddressRequest request);
 
 }

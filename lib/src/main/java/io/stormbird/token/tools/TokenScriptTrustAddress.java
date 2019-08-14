@@ -12,6 +12,8 @@ import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.jcajce.provider.digest.Keccak;
+import org.xml.sax.SAXException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,35 +25,53 @@ import java.security.Security;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignature;
+import javax.xml.crypto.dsig.XMLSignatureException;
+import javax.xml.parsers.ParserConfigurationException;
+
 import static java.nio.charset.StandardCharsets.*;
+import static javax.xml.bind.DatatypeConverter.parseHexBinary;
 
-
-public class TrustAddressGenerator {
+public class TokenScriptTrustAddress {
     private X9ECParameters CURVE_PARAMS = CustomNamedCurves.getByName("secp256k1");
     private ECDomainParameters CURVE = new ECDomainParameters(CURVE_PARAMS.getCurve(), CURVE_PARAMS.getG(),
             CURVE_PARAMS.getN(), CURVE_PARAMS.getH());
+    public String digest;
+    public ECPublicKey masterPubKey;
 
-    public TrustAddressGenerator() {
+    public TokenScriptTrustAddress(InputStream tokenscript) throws IOException, MarshalException, ParserConfigurationException, SAXException, XMLSignatureException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         Security.addProvider(new BouncyCastleProvider());
+        byte[] tsmlRoot = getTSMLRootBytes(tokenscript);
+        this.digest = convertHexToBase64String(Numeric.toHexString(tsmlRoot));
+        // TODO: this class variable can probably be initialised at compile time
+        masterPubKey = decodeKey(parseHexBinary("04f0985bd9dbb6f461adc994a0c12595716a7f4fb2879bfc5155dffec3770096201c13f8314b46db8d8177887f8d95af1f2dd217291ce6ffe9183681186696bbe5"));
     }
 
-    public String generateTrustAddress(InputStream fileStream, String contractAddress, String status) throws Exception {
-        byte[] tsmlRoot = getTSMLRootBytes(fileStream);
-        String data = Numeric.toHexString(tsmlRoot);
-        BigInteger digest = generateDigestFromData(contractAddress, convertHexToBase64String(data), status);
-        return generateAddressFromDigest(digest);
+    public String getTrustAddress(String contractAddress) throws Exception {
+        return preimageToAddress(String.format("%s%s%s", contractAddress, "TRUST", this.digest).getBytes(UTF_8));
     }
 
-    private String generateAddressFromDigest(BigInteger digest) throws Exception {
-        String PUBKEYHEX = "04f0985bd9dbb6f461adc994a0c12595716a7f4fb2879bfc5155dffec3770096201c13f8314b46db8d8177887f8d95af1f2dd217291ce6ffe9183681186696bbe5";
-        ECPublicKey pubkey = decodeKey(Numeric.hexStringToByteArray(PUBKEYHEX));
-        ECPoint donatePKPoint = extractPublicKey(pubkey);
-        ECPoint digestPKPoint = donatePKPoint.multiply(digest);
+    public String getRevokeAddress(String contractAddress) throws Exception {
+        return preimageToAddress(String.format("%s%s%s", contractAddress, "REVOKE", this.digest).getBytes(UTF_8));
+    }
+
+    // this won't make sense at all if you didn't read security.md
+    // https://github.com/AlphaWallet/TokenScript/blob/master/doc/security.md
+    public String preimageToAddress(byte[] preimage) throws Exception {
+        // get the hash of the preimage text
+        Keccak.Digest256 digest = new Keccak.Digest256();
+        digest.update(preimage);
+        byte[] hash = digest.digest();
+
+        // use the hash to derive a new address
+        BigInteger keyDerivationFactor = new BigInteger(Numeric.toHexStringNoPrefix(hash), 16);
+        ECPoint donatePKPoint = extractPublicKey(this.masterPubKey);
+        ECPoint digestPKPoint = donatePKPoint.multiply(keyDerivationFactor);
         return getAddress(digestPKPoint);
     }
 
-    private byte[] getTSMLRootBytes(InputStream tsmlFile) throws Exception {
+    private byte[] getTSMLRootBytes(InputStream tsmlFile) throws MarshalException, ParserConfigurationException, SAXException, XMLSignatureException, IOException {
         XMLDSigVerifier sigVerifier = new XMLDSigVerifier();
         XMLSignature signature = sigVerifier.getValidXMLSignature(tsmlFile);
         InputStream digest = signature.getSignedInfo().getCanonicalizedData();
@@ -65,14 +85,6 @@ public class TrustAddressGenerator {
             os.write(buffer, 0, len);
         }
         return os.toByteArray();
-    }
-
-    private BigInteger generateDigestFromData(String contractAddress, String XMLdigest, String status) {
-        byte[] target = String.format("%s%s%s", contractAddress, status, XMLdigest).getBytes(UTF_8);
-        Keccak.Digest256 digest = new Keccak.Digest256();
-        digest.update(target);
-        byte[] h_digest = digest.digest();
-        return new BigInteger(Numeric.toHexStringNoPrefix(h_digest), 16);
     }
 
     private String convertHexToBase64String(String input) throws IOException {

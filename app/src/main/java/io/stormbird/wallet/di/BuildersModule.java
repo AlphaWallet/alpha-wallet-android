@@ -8,7 +8,6 @@ import io.stormbird.wallet.ui.Erc20DetailActivity;
 import io.stormbird.wallet.ui.FunctionActivity;
 import io.stormbird.wallet.ui.GasSettingsActivity;
 import io.stormbird.wallet.ui.HelpActivity;
-import io.stormbird.wallet.ui.HelpFragment;
 import io.stormbird.wallet.ui.HomeActivity;
 import io.stormbird.wallet.ui.ImportTokenActivity;
 import io.stormbird.wallet.ui.ImportWalletActivity;
@@ -101,10 +100,6 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = ImportTokenModule.class)
 	abstract ImportTokenActivity bindImportTokenActivity();
-
-	@FragmentScope
-	@ContributesAndroidInjector(modules = HelpModule.class)
-	abstract HelpFragment bindHelpFragment();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = TransferTicketDetailModule.class)

@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
@@ -10,7 +8,6 @@
     <include layout="@layout/layout_simple_toolbar" />
 
     <RelativeLayout
-        android:id="@+id/relativeLayout3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/background_card"
@@ -23,14 +20,14 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_gravity="center_horizontal"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="35dp"
             android:layout_marginTop="20dp"
-            android:layout_marginEnd="20dp"
-            android:fontFamily="@font/font_light"
+            android:layout_marginEnd="35dp"
+            android:fontFamily="@font/font_regular"
             android:gravity="center_horizontal"
-            android:text="@string/backup_seed_phrase"
+            android:text="@string/make_a_backup"
             android:textColor="@color/black"
-            android:textSize="28sp" />
+            android:textSize="17sp" />
 
         <LinearLayout
             android:id="@+id/layout_center_holder"
@@ -39,7 +36,6 @@
             android:layout_above="@id/button_holder"
             android:layout_below="@+id/text_title"
             android:layout_marginTop="0dp"
-            android:gravity="center"
             android:orientation="vertical">
 
             <LinearLayout
@@ -47,7 +43,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="39dp"
                 android:layout_marginEnd="10dp"
                 android:orientation="vertical"
                 android:visibility="visible" />

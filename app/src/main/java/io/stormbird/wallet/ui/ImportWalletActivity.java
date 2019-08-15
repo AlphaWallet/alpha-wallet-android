@@ -181,6 +181,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     }
 
     private void onWallet(Wallet wallet) {
+        onProgress(false);
         Intent result = new Intent();
         result.putExtra(C.Key.WALLET, wallet);
         setResult(RESULT_OK, result);

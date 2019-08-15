@@ -8,24 +8,34 @@ import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
-import android.view.*;
+import android.view.Gravity;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
+import io.stormbird.wallet.entity.PinAuthenticationCallbackInterface;
+import io.stormbird.wallet.entity.SignAuthenticationCallback;
+import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.viewmodel.BackupKeyViewModel;
 import io.stormbird.wallet.viewmodel.BackupKeyViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.PasswordInputView;
 import io.stormbird.wallet.widget.SignTransactionDialog;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
 
 import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.C.SHARE_REQUEST_CODE;
@@ -42,7 +52,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     private Wallet wallet;
     private TextView title;
     private TextView detail;
-    private TextView passwordDetail;
     private LinearLayout layoutWordHolder;
     private PasswordInputView inputView;
     private ImageView backupImage;
@@ -72,27 +81,37 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
-        String type = getIntent().getStringExtra("TYPE");
+        BackupOperationType type = (BackupOperationType) getIntent().getSerializableExtra("TYPE");
         keyBackup = getIntent().getStringExtra("ADDRESS");
         wallet = getIntent().getParcelableExtra(WALLET);
         layoutHolderWidth = 0;
+        if (type == null) type = BackupOperationType.UNDEFINED;
 
         toolbar();
         initViewModel();
 
         switch (type)
         {
-            case "HDKEY":
+            case UNDEFINED:
+                state = BackupState.UNDEFINED;
+                DisplayKeyFailureDialog("Unknown Key operation");
+                break;
+            case BACKUP_HD_KEY:
                 state = BackupState.ENTER_BACKUP_STATE_HD;
                 setHDBackupSplash();
                 break;
-            case "JSON":
+            case BACKUP_KEYSTORE_KEY:
                 state = BackupState.ENTER_JSON_BACKUP;
                 setupJSONExport();
                 break;
-            case "TEST_SEED":
-                state = BackupState.TEST_SEED_PHRASE;
+            case SHOW_SEED_PHRASE:
+                state = BackupState.SHOW_SEED_PHRASE;
                 setupTestSeed();
+                DisplaySeed();
+                break;
+            case EXPORT_PRIVATE_KEY:
+                DisplayKeyFailureDialog("Export Private key not yet implemented");
+                //TODO: Not yet implemented
                 break;
         }
     }
@@ -124,7 +143,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             case KEYSTORE:
             case KEYSTORE_LEGACY:
             case HDKEY:
-                switch (viewModel.upgradeKeySecurity(keyBackup, this, this))
+                switch (viewModel.upgradeKeySecurity(wallet.address, this, this))
                 {
                     case REQUESTING_SECURITY:
                         //Do nothing, callback will return to 'CreatedKey()'. If it fails the returned key is empty
@@ -157,7 +176,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             case KEYSTORE_LEGACY:
             case KEYSTORE:
             case HDKEY:
-                viewModel.upgradeWallet(keyBackup);
+                viewModel.upgradeWallet(address);
                 finishBackupSuccess(true);
                 break;
             default:
@@ -174,10 +193,8 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         setTitle(getString(R.string.title_backup_seed));
         title.setText(R.string.backup_seed_phrase);
         backupImage.setImageResource(R.drawable.seed_graphic);
-        detail.setVisibility(View.VISIBLE);
         detail.setText(R.string.backup_seed_phrase_detail);
         nextButton.setText(R.string.action_back_up_my_wallet);
-        state = BackupState.ENTER_BACKUP_STATE_HD;
     }
 
     private void setupJSONExport()
@@ -188,7 +205,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         setTitle(getString(R.string.export_keystore_json));
         title.setText(R.string.export_keystore_json);
         backupImage.setImageResource(R.drawable.ic_keystore);
-        detail.setVisibility(View.VISIBLE);
         detail.setText(R.string.keystore_detail_text);
         nextButton.setText(R.string.export_keystore_json);
         state = BackupState.ENTER_JSON_BACKUP;
@@ -196,13 +212,12 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void setupTestSeed()
     {
-        setContentView(R.layout.activity_backup_write_seed);
+        setContentView(R.layout.activity_show_seed_phrase);
         initViews();
 
         setTitle(getString(R.string.seed_phrase));
         title.setText(getString(R.string.make_a_backup, "12"));
         nextButton.setText(R.string.test_seed_phrase);
-        DisplaySeed();
     }
 
     @Override
@@ -214,15 +229,19 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
         switch (state)
         {
-            case SEED_PHRASE_INVALID:
             case WRITE_DOWN_SEED_PHRASE:
+            case SHOW_SEED_PHRASE:
+                setHDBackupSplash(); //note, the OS calls onPause if user chooses to authenticate using PIN or password (takes them to the auth screen).
+                break;
+
+            case SEED_PHRASE_INVALID:
             case VERIFY_SEED_PHRASE:
-            case TEST_SEED_PHRASE:
-                state = BackupState.ENTER_BACKUP_STATE_HD;
+                state = BackupState.ENTER_BACKUP_STATE_HD; //reset view back to splash screen
+                setHDBackupSplash();
                 break;
 
             case SET_JSON_PASSWORD:
-                state = BackupState.ENTER_JSON_BACKUP;
+                setupJSONExport();
                 break;
 
             case ENTER_JSON_BACKUP:
@@ -232,32 +251,10 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         }
     }
 
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-        initViews();
-
-        switch (state)
-        {
-            case ENTER_BACKUP_STATE_HD:
-                setHDBackupSplash();
-                break;
-
-            case ENTER_JSON_BACKUP:
-                setupJSONExport();
-                break;
-
-            default:
-                break;
-        }
-    }
-
     private void initViews()
     {
         title = findViewById(R.id.text_title);
         detail = findViewById(R.id.text_detail);
-        passwordDetail = findViewById(R.id.text_detail_password);
         layoutWordHolder = findViewById(R.id.layout_word_holder);
         nextButton = findViewById(R.id.button_next);
         verifyTextBox = findViewById(R.id.text_verify);
@@ -281,6 +278,9 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             vto.addOnGlobalLayoutListener(() -> {
                 if (layoutHolderWidth == 0)
                 {
+                    //This is a little bit of a kludge, but it means the generated seed words
+                    //adapt to the size of the screen. It's required for old phones with low resolution display.
+                    //Tested against the oldest possible phone (Android 6) with a 480 pixel width.
                     layoutHolderWidth = layoutWordHolder.getMeasuredWidth();
                     if (layoutHolderWidth > 800)
                     {
@@ -300,6 +300,15 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                         seedTextSize = 16;
                     }
                     seedTextHPadding = layoutHolderWidth / 25;
+
+                    // may need to resume
+                    switch (state)
+                    {
+                        case SHOW_SEED_PHRASE:
+                            addSeedWordsToScreen();
+                        default:
+                            break;
+                    }
                 }
             });
         }
@@ -325,8 +334,10 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                         //if we're currently verifying seed or we made a mistake copying the seed down then allow user to restart
                         state = BackupState.WRITE_DOWN_SEED_PHRASE;
                         WriteDownSeedPhrase();
+                        DisplaySeed();
                         break;
                     case WRITE_DOWN_SEED_PHRASE:
+                        state = BackupState.ENTER_BACKUP_STATE_HD;
                         setHDBackupSplash();
                         break;
                     case SET_JSON_PASSWORD:
@@ -349,6 +360,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         {
             case ENTER_BACKUP_STATE_HD:
                 WriteDownSeedPhrase();
+                DisplaySeed();
                 break;
             case WRITE_DOWN_SEED_PHRASE:
                 VerifySeedPhrase();
@@ -366,7 +378,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             case SET_JSON_PASSWORD:
                 viewModel.getPasswordForKeystore(keyBackup, this, this);
                 break;
-            case TEST_SEED_PHRASE:
+            case SHOW_SEED_PHRASE:
                 VerifySeedPhrase();
                 break;
             case UPGRADE_KEY_SECURITY:
@@ -422,7 +434,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         verifyTextBox.setVisibility(View.GONE);
 
         //terminate and display tick
-        backupKeySuccess("HDKEY");
+        backupKeySuccess(BackupOperationType.BACKUP_HD_KEY);
     }
 
     private void seedIncorrect()
@@ -436,7 +448,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         state = BackupState.SEED_PHRASE_INVALID;
     }
 
-    private void backupKeySuccess(String keyType)
+    private void backupKeySuccess(BackupOperationType type)
     {
         //first record backup time success, in case user aborts operation during key locking
         viewModel.backupSuccess(keyBackup);
@@ -467,10 +479,10 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         {
             case KEYSTORE_LEGACY:
             case KEYSTORE:
-                intent.putExtra("TYPE", "JSON");
+                intent.putExtra("TYPE", BackupOperationType.BACKUP_KEYSTORE_KEY);
                 break;
             case HDKEY:
-                intent.putExtra("TYPE", "HDKEY");
+                intent.putExtra("TYPE", BackupOperationType.BACKUP_HD_KEY);
                 break;
             default:
                 cancelAuthentication();
@@ -556,8 +568,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         title.setText(R.string.write_down_seed_phrase);
         nextButton.setText(R.string.wrote_down_seed_phrase);
         setBottomButtonActive(true);
-
-        DisplaySeed();
     }
 
     private void DisplaySeed()
@@ -678,19 +688,44 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     @Override
     public void FetchMnemonic(String mnemonic)
     {
-        if (state == BackupState.SET_JSON_PASSWORD || state == BackupState.ENTER_JSON_BACKUP)
+        switch (state)
         {
-            viewModel.exportWallet(keyBackup, mnemonic, inputView.getText().toString());
+            case WRITE_DOWN_SEED_PHRASE:
+                WriteDownSeedPhrase();
+                mnemonicArray = mnemonic.split(" ");
+                addSeedWordsToScreen();
+                break;
+            case ENTER_JSON_BACKUP:
+            case SET_JSON_PASSWORD:
+                viewModel.exportWallet(keyBackup, mnemonic, inputView.getText().toString());
+                break;
+            case SHOW_SEED_PHRASE:
+                setupTestSeed();
+                mnemonicArray = mnemonic.split(" ");
+                addSeedWordsToScreen();
+                break;
+            case VERIFY_SEED_PHRASE:
+                VerifySeedPhrase();
+                mnemonicArray = mnemonic.split(" ");
+                addSeedWordsToScreen();
+                break;
+            case SEED_PHRASE_INVALID:
+            case UNDEFINED:
+            case ENTER_BACKUP_STATE_HD:
+            case UPGRADE_KEY_SECURITY:
+                DisplayKeyFailureDialog("Error in key restore: " + state.ordinal());
+                break;
         }
-        else
+    }
+
+    private void addSeedWordsToScreen()
+    {
+        if (mnemonicArray == null) return;
+        addNewLayoutLine();
+        //start adding words to layout
+        for (String word : mnemonicArray)
         {
-            addNewLayoutLine();
-            mnemonicArray = mnemonic.split(" ");
-            //start adding words to layout
-            for (String word : mnemonicArray)
-            {
-                addWordToLayout(word);
-            }
+            addWordToLayout(word);
         }
     }
 
@@ -744,7 +779,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             case SHARE_REQUEST_CODE:
                 if (resultCode == RESULT_OK)
                 {
-                    backupKeySuccess("JSON");
+                    backupKeySuccess(BackupOperationType.BACKUP_KEYSTORE_KEY);
                 }
                 else
                 {
@@ -774,7 +809,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         alertDialog.setButtonText(R.string.yes_continue);
         alertDialog.setButtonListener(v -> {
             hideDialog();
-            backupKeySuccess("JSON");
+            backupKeySuccess(BackupOperationType.BACKUP_KEYSTORE_KEY);
         });
         alertDialog.setSecondaryButtonText(R.string.no_repeat);
         alertDialog.setSecondaryButtonListener(v -> {
@@ -837,14 +872,19 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                     updateButtonState(false);
                 }
                 break;
-            case TEST_SEED_PHRASE:
+            case SHOW_SEED_PHRASE:
                 break;
         }
     }
 
     private enum BackupState
     {
-        ENTER_BACKUP_STATE_HD, WRITE_DOWN_SEED_PHRASE, VERIFY_SEED_PHRASE, SEED_PHRASE_INVALID,
-        ENTER_JSON_BACKUP, SET_JSON_PASSWORD, TEST_SEED_PHRASE, UPGRADE_KEY_SECURITY
+        UNDEFINED, ENTER_BACKUP_STATE_HD, WRITE_DOWN_SEED_PHRASE, VERIFY_SEED_PHRASE, SEED_PHRASE_INVALID,
+        ENTER_JSON_BACKUP, SET_JSON_PASSWORD, SHOW_SEED_PHRASE, UPGRADE_KEY_SECURITY
+    }
+
+    public enum BackupOperationType
+    {
+        UNDEFINED, BACKUP_HD_KEY, BACKUP_KEYSTORE_KEY, SHOW_SEED_PHRASE, EXPORT_PRIVATE_KEY
     }
 }

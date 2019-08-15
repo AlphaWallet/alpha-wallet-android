@@ -1,21 +1,21 @@
 package io.stormbird.wallet.repository;
 
-import io.reactivex.Completable;
-import io.reactivex.Single;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.entity.WalletUpdate;
-import io.stormbird.wallet.service.AccountKeystoreService;
-import io.stormbird.wallet.service.KeyService;
-import io.stormbird.wallet.service.TransactionsNetworkClientType;
-import okhttp3.OkHttpClient;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.http.HttpService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+
+import io.reactivex.Completable;
+import io.reactivex.Single;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.service.AccountKeystoreService;
+import io.stormbird.wallet.service.KeyService;
+import io.stormbird.wallet.service.TransactionsNetworkClientType;
+import okhttp3.OkHttpClient;
 
 public class WalletRepository implements WalletRepositoryType
 {

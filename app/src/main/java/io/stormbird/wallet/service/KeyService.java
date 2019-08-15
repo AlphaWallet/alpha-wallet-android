@@ -401,7 +401,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             keyStore.load(null);
             SecretKey secretKey = (SecretKey) keyStore.getKey(currentKeyAddress, null);
             String encryptedHDKeyPath = getEncryptedFilePath(currentKeyAddress);//getFilePath(context, currentKey + "hd");
-            boolean fileExists = new File(encryptedHDKeyPath).exists();
+            boolean fileExists = encryptedHDKeyPath != null && new File(encryptedHDKeyPath).exists();
             if (!fileExists || secretKey == null)
             {
                 signCallback.GotAuthorisation(false);
@@ -701,6 +701,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     {
         switch (operation)
         {
+            default:
             case CREATE_HD_KEY:
                 callbackInterface.HDKeyCreated(ZERO_ADDRESS, context, AuthenticationLevel.NOT_SET);
                 break;
@@ -1162,12 +1163,13 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             case CREATE_PRIVATE_KEY:
                 return deviceIsLocked();
             default:
-                return true;
+                return false;
         }
     }
 
     private String getEncryptedFilePath(String keyAddr)
     {
+        if (keyAddr == null) return null;
         String authEncryptedHDKeyPath = getFilePath(context, keyAddr + HDKEY_LABEL);
         String noAuthEncryptedHDKeyPath = getFilePath(context, keyAddr + NO_AUTH_LABEL + HDKEY_LABEL);
         String authEncryptedKeystorePath = getFilePath(context, keyAddr + KEYSTORE_LABEL);
@@ -1302,10 +1304,10 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             File iv = new File(getFilePath(context, keyAddr + "iv"));
             if (iv.exists())
                 iv.delete();
-            if (keyStore != null && keyStore.containsAlias(keyAddr))
+            if (keyStore != null && keyAddr != null && keyStore.containsAlias(keyAddr))
                 keyStore.deleteEntry(keyAddr);
         }
-        catch (KeyStoreException e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }
@@ -1319,6 +1321,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
      */
     private void deleteNonAuthKeyEncryptedKeyBytes(String address)
     {
+        if (address == null) return;
         File nonAuthKey = new File(getFilePath(context, address + NO_AUTH_LABEL + HDKEY_LABEL));
         File nonAuthKeystore = new File(getFilePath(context, address + NO_AUTH_LABEL + KEYSTORE_LABEL));
         File legacyKey = new File(getFilePath(context, address));

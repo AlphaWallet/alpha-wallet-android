@@ -1,12 +1,11 @@
 package io.stormbird.wallet.interact;
 
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
-
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.util.AWEnsResolver;
 

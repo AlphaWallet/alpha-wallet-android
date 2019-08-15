@@ -20,7 +20,6 @@ import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ErrorEnvelope;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletType;
-import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.viewmodel.WalletActionsViewModel;
 import io.stormbird.wallet.viewmodel.WalletActionsViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
@@ -239,7 +238,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
     {
         Intent intent = new Intent(this, BackupKeyActivity.class);
         intent.putExtra("ADDRESS", wallet.address);
-        intent.putExtra("TYPE", "TEST_SEED");
+        intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.SHOW_SEED_PHRASE);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
     }
@@ -278,7 +277,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
     {
         Intent intent = new Intent(this, BackupKeyActivity.class);
         intent.putExtra("ADDRESS", wallet.address);
-        intent.putExtra("TYPE", "JSON");
+        intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_KEYSTORE_KEY);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
     }

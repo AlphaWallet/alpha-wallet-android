@@ -211,11 +211,11 @@ public class NewSettingsFragment extends Fragment
         switch (wallet.type)
         {
             case HDKEY:
-                intent.putExtra("TYPE", "HDKEY");
+                intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_HD_KEY);
                 break;
             case KEYSTORE_LEGACY:
             case KEYSTORE:
-                intent.putExtra("TYPE", "JSON");
+                intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_KEYSTORE_KEY);
                 break;
         }
 

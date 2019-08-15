@@ -1,8 +1,5 @@
 package io.stormbird.wallet.util;
 
-import io.reactivex.Single;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.service.GasService;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.ens.Contracts;
 import org.web3j.ens.EnsResolutionException;
@@ -16,12 +13,11 @@ import org.web3j.protocol.core.methods.response.EthSyncing;
 import org.web3j.protocol.core.methods.response.NetVersion;
 import org.web3j.tx.ClientTransactionManager;
 import org.web3j.tx.TransactionManager;
-import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Numeric;
 
-import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
-
-//import org.web3j.tx.gas.DefaultGasProvider;
+import io.reactivex.Single;
+import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.service.GasService;
 
 /**
  * Created by James on 29/05/2019.

@@ -9,28 +9,36 @@ import android.util.Log;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.Scheduler;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.internal.operators.observable.ObservableError;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
-import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.interact.*;
-import io.stormbird.wallet.repository.EthereumNetworkRepository;
+import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
+import io.stormbird.wallet.entity.ErrorEnvelope;
+import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletType;
+import io.stormbird.wallet.interact.FetchTokensInteract;
+import io.stormbird.wallet.interact.FetchWalletsInteract;
+import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
+import io.stormbird.wallet.interact.SetDefaultWalletInteract;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
 import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.util.AWEnsResolver;
 import okhttp3.OkHttpClient;
-
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static io.stormbird.wallet.C.IMPORT_REQUEST_CODE;
 import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;

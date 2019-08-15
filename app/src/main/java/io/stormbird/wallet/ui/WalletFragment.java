@@ -418,10 +418,10 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         switch (viewModel.getWalletType())
         {
             case HDKEY:
-                intent.putExtra("TYPE", "HDKEY");
+                intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_HD_KEY);
                 break;
             case KEYSTORE:
-                intent.putExtra("TYPE", "JSON");
+                intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_KEYSTORE_KEY);
                 break;
         }
 

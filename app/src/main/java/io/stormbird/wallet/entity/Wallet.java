@@ -57,7 +57,8 @@ public class Wallet implements Parcelable {
 
 	public static WalletType getKeystoreType(Context context, String addr)
 	{
-		if (new File(context.getFilesDir(), addr+HDKEY_LABEL).exists() ||
+		if (addr == null) return WalletType.NOT_DEFINED;
+		else if (new File(context.getFilesDir(), addr+HDKEY_LABEL).exists() ||
 				new File(context.getFilesDir(), addr+NO_AUTH_LABEL+HDKEY_LABEL).exists()) return  WalletType.HDKEY;
 		else if (new File(context.getFilesDir(), addr + KEYSTORE_LABEL).exists()
 				|| new File(context.getFilesDir(), addr + NO_AUTH_LABEL + KEYSTORE_LABEL).exists()) return WalletType.KEYSTORE;

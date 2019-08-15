@@ -15,12 +15,15 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
-import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.entity.ErrorEnvelope;
+import io.stormbird.wallet.entity.ImportWalletCallback;
+import io.stormbird.wallet.entity.ServiceErrorException;
+import io.stormbird.wallet.entity.SignAuthenticationCallback;
+import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.ImportWalletInteract;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.KeyService;
-import io.stormbird.wallet.ui.ImportWalletActivity;
 import io.stormbird.wallet.ui.widget.OnSetWatchWalletListener;
 import io.stormbird.wallet.util.AWEnsResolver;
 
@@ -61,6 +64,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     @Override
     public void onWatchWallet(String address)
     {
+        progress.postValue(true);
         //user just asked for a watch wallet
         disposable = importWalletInteract.storeWatchWallet(address, ensResolver)
                 .subscribeOn(Schedulers.io())

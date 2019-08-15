@@ -812,7 +812,30 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     private void checkAuthentication(Operation operation)
     {
-        signDialog = new SignTransactionDialog(activity, operation.ordinal());
+        String dialogTitle;
+        switch (operation)
+        {
+            case IMPORT_HD_KEY:
+            case CREATE_HD_KEY:
+            case UPGRADE_HD_KEY:
+            case CREATE_KEYSTORE_KEY:
+            case UPGRADE_KEYSTORE_KEY:
+            case CREATE_PRIVATE_KEY:
+                dialogTitle = context.getString(R.string.provide_authentication);
+                break;
+            case FETCH_MNEMONIC:
+            case SIGN_WITH_KEY:
+            case CHECK_AUTHENTICATION:
+            case SIGN_DATA:
+            case CREATE_NON_AUTHENTICATED_KEY:
+            case RESTORE_NON_AUTHENTICATED_HD_KEY:
+            case RESTORE_NON_AUTHENTICATED_KS_KEY:
+            default:
+                dialogTitle = context.getString(R.string.unlock_private_key);
+                break;
+        }
+
+        signDialog = new SignTransactionDialog(activity, operation.ordinal(), dialogTitle, null);
         signDialog.setCanceledOnTouchOutside(false);
         signDialog.setCancelListener(v -> {
             authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation.ordinal());

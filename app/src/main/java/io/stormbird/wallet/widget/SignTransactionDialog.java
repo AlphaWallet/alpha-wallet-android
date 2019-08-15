@@ -36,12 +36,14 @@ public class SignTransactionDialog extends BottomSheetDialog
 
     protected Activity context;
     private int callBackId;
-    private ImageView fingerprint;
-    private TextView cancel;
-    private TextView usePin;
-    private TextView fingerprintError;
+    private final ImageView fingerprint;
+    private final TextView cancel;
+    private final TextView usePin;
+    private final TextView fingerprintError;
+    private final String unlockTitle;
+    private final String unlockDetail;
 
-    public SignTransactionDialog(@NonNull Activity activity, int callBackId)
+    public SignTransactionDialog(@NonNull Activity activity, int callBackId, String msg, String desc)
     {
         super(activity);
         context = activity;
@@ -49,8 +51,13 @@ public class SignTransactionDialog extends BottomSheetDialog
         fingerprint = findViewById(R.id.image_fingerprint);
         cancel = findViewById(R.id.text_cancel);
         usePin = findViewById(R.id.text_use_pin);
+        TextView dialogTitle = findViewById(R.id.dialog_main_text);
         fingerprintError = findViewById(R.id.text_fingerprint_error);
         fingerprint.setVisibility(View.VISIBLE);
+        unlockTitle = msg;
+        unlockDetail = desc;
+
+        if (msg != null) dialogTitle.setText(msg);
 
         this.callBackId = callBackId;
         getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -93,7 +100,7 @@ public class SignTransactionDialog extends BottomSheetDialog
     private void showAuthenticationScreen()
     {
         KeyguardManager mKeyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
-        Intent intent = mKeyguardManager.createConfirmDeviceCredentialIntent(context.getString(R.string.unlock_private_key), null);
+        Intent intent = mKeyguardManager.createConfirmDeviceCredentialIntent(unlockTitle, unlockDetail);
         if (intent != null) {
             context.startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + callBackId);
         }

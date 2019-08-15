@@ -116,12 +116,13 @@ public class HelpActivity extends BaseActivity {
         new AsyncTask<io.stormbird.token.tools.TrustAddressGenerator.Request, Void, io.stormbird.token.tools.TrustAddressGenerator.Response>() {
             @Override
             protected io.stormbird.token.tools.TrustAddressGenerator.Response doInBackground(io.stormbird.token.tools.TrustAddressGenerator.Request... params) {
-                // invoke "echo" method. In case it fails, it will throw a
+                // invoke the lambda method. In case it fails, it will throw a
                 // LambdaFunctionException.
                 try {
                     return AWSLambdaInterface.DeriveTrustAddress(params[0]);
                 } catch (LambdaFunctionException lfe) {
-                    Log.e("Tag", "Failed to invoke echo" + lfe.getDetails(), lfe);
+                    // please don't ignore such exception in production code!!
+                    Log.e("Tag", "Failed to invoke AWS Lambda" + lfe.getDetails(), lfe);
                     return null;
                 }
             }

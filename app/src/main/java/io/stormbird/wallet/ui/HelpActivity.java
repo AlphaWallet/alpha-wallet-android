@@ -77,7 +77,7 @@ public class HelpActivity extends BaseActivity {
     private void helpIntent()
     {
         String uriText =
-                "mailto:support@awallet.io" +
+                "mailto:feedback+android" + (byte)64 + "alphawallet.com" +
                         "?subject=" + Uri.encode("Hi guys") +
                         "&body=" + Uri.encode("");
 

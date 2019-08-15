@@ -20,8 +20,6 @@ import static io.stormbird.wallet.C.ETHER_DECIMALS;
 
 public class EtherscanTransaction
 {
-    private static final String TENZID_REGISTER = "newSubdomain(string,string,string,address,address)";
-
     public String blockNumber;
     long timeStamp;
     String hash;
@@ -323,41 +321,6 @@ public class EtherscanTransaction
         if (trans.operations != null && trans.operations.length > 0 && trans.operations[0].walletInvolvedWithTransaction(walletAddr))
             involved = true;
         return involved;
-    }
-
-    public static void prepParser()
-    {
-        if (ensDecoder == null) ensDecoder = new TransactionDecoder();
-        ensDecoder.addScanFunction(TENZID_REGISTER, false);
-    }
-
-    public Wallet scanForENS(Map<String, Wallet> walletMap)
-    {
-        Wallet foundWallet = null;
-        //breakdown this transaction and see if it has any of the wallets we're using
-        TransactionInput data = ensDecoder.decodeInput(input);
-
-        switch (data.functionData.functionFullName)
-        {
-            case TENZID_REGISTER:
-                String address = data.getFirstAddress();
-                //only accept the ID if:
-                // - the transaction completed successfully
-                // - the transaction originated from the same address that is being designated
-                //This is to stop any attempt at ENS spoofing
-                if (address != null && isError.equals("0") && address.equals(from)
-                        && walletMap.containsKey(address))
-                {
-                    foundWallet = walletMap.get(address);
-                    foundWallet.ENSname = data.miscData.get(0) + "." + data.miscData.get(1) + "." + data.miscData.get(2);
-                }
-                break;
-            default:
-                break;
-        }
-
-
-        return foundWallet;
     }
 
     public String getHash() { return hash; }

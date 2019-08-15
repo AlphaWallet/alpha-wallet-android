@@ -172,12 +172,6 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<WalletUpdate> scanForNames(Wallet[] wallets, long lastBlockChecked)
-	{
-		return blockExplorerClient.scanENSTransactionsForWalletNames(wallets, lastBlockChecked);
-	}
-
-	@Override
     public boolean keystoreExists(String address)
     {
         return accountKeystoreService.hasAccount(address);

@@ -38,6 +38,8 @@ import io.stormbird.wallet.widget.SignTransactionDialog;
 import io.stormbird.wallet.widget.SystemView;
 
 import javax.inject.Inject;
+
+import java.util.List;
 import java.util.Map;
 
 public class WalletsActivity extends BaseActivity implements
@@ -87,9 +89,14 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.createdWallet().observe(this, this::onCreatedWallet);
         viewModel.createWalletError().observe(this, this::onCreateWalletError);
         viewModel.updateBalance().observe(this, this::onUpdatedBalance);
-        viewModel.namedWallets().observe(this, this::onNamedWallets);
-        viewModel.lastENSScanBlock().observe(this, this::onScanBlockReceived);
+        viewModel.updateENSName().observe(this, this::updateWalletName);
         viewModel.findNetwork();
+    }
+
+    private void updateWalletName(Wallet wallet)
+    {
+        //systemView.showProgress(false);
+        adapter.updateWalletName(wallet);
     }
 
     private void initViews() {
@@ -113,15 +120,7 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     private void onSwipeRefresh() {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        long lastBlockChecked = pref.getLong(C.ENS_SCAN_BLOCK, 0);
-        viewModel.swipeRefreshWallets(0); //check all records
-    }
-
-    private void onScanBlockReceived(long blockNumber) {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putLong(C.ENS_SCAN_BLOCK, blockNumber).apply();
+        viewModel.swipeRefreshWallets(); //check all records
     }
 
     private void onCreateWalletError(ErrorEnvelope errorEnvelope) {
@@ -198,7 +197,6 @@ public class WalletsActivity extends BaseActivity implements
             if (resultCode == RESULT_OK) {
                 Snackbar.make(systemView, getString(R.string.toast_message_wallet_imported), Snackbar.LENGTH_SHORT)
                         .show();
-                onScanBlockReceived(0); //reset scan block
 
                 Wallet importedWallet = data.getParcelableExtra(C.Key.WALLET);
                 if (importedWallet != null) {
@@ -239,11 +237,7 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     private void onUpdatedBalance(Wallet wallet) {
-        adapter.updateWalletbalance(wallet); //updateWalletBalances(balances);
-    }
-
-    private void onNamedWallets(Map<String, String> walletNames) {
-        adapter.updateWalletNames(walletNames);
+        adapter.updateWalletbalance(wallet);
     }
 
     private void onAddWallet() {

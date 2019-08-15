@@ -32,10 +32,6 @@ public class FetchWalletsInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<WalletUpdate> scanForNames(Wallet[] wallets, long lastBlockChecked) {
-        return accountRepository.scanForNames(wallets, lastBlockChecked);
-    }
-
     public Single<Integer> storeWallets(Wallet[] wallets, boolean isMainNet) {
         return accountRepository.storeWallets(wallets, isMainNet);
     }

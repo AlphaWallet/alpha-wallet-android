@@ -2,6 +2,7 @@ package io.stormbird.wallet.di;
 
 import io.stormbird.wallet.interact.ImportWalletInteract;
 import io.stormbird.wallet.repository.WalletRepositoryType;
+import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.viewmodel.ImportWalletViewModelFactory;
 
@@ -12,8 +13,8 @@ import dagger.Provides;
 class ImportModule {
     @Provides
     ImportWalletViewModelFactory provideImportWalletViewModelFactory(
-            ImportWalletInteract importWalletInteract, KeyService keyService) {
-        return new ImportWalletViewModelFactory(importWalletInteract, keyService);
+            ImportWalletInteract importWalletInteract, KeyService keyService, GasService gasService) {
+        return new ImportWalletViewModelFactory(importWalletInteract, keyService, gasService);
     }
 
     @Provides

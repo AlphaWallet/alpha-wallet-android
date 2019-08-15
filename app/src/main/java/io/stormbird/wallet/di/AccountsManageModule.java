@@ -7,7 +7,9 @@ import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
+import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.KeyService;
+import io.stormbird.wallet.util.AWEnsResolver;
 import io.stormbird.wallet.viewmodel.WalletsViewModelFactory;
 
 import dagger.Module;
@@ -25,7 +27,8 @@ class AccountsManageModule {
 			HomeRouter homeRouter,
 			FetchTokensInteract fetchTokensInteract,
 			FindDefaultNetworkInteract findDefaultNetworkInteract,
-			KeyService keyService)
+			KeyService keyService,
+			GasService gasService)
 	{
 		return new WalletsViewModelFactory(setDefaultWalletInteract,
 										   fetchWalletsInteract,
@@ -34,7 +37,8 @@ class AccountsManageModule {
 										   homeRouter,
 										   fetchTokensInteract,
 										   findDefaultNetworkInteract,
-										   keyService);
+										   keyService,
+										   gasService);
 	}
 
 	@Provides

@@ -39,6 +39,7 @@ import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.GenericWalletInteract;
+import io.stormbird.wallet.ui.widget.entity.ScrollControlViewPager;
 import io.stormbird.wallet.util.RootUtil;
 import io.stormbird.wallet.viewmodel.BaseNavigationActivity;
 import io.stormbird.wallet.viewmodel.HomeViewModel;
@@ -61,7 +62,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private SystemView systemView;
     private Dialog dialog;
-    private ViewPager viewPager;
+    private ScrollControlViewPager viewPager;
     private PagerAdapter pagerAdapter;
     private LinearLayout successOverlay;
     private ImageView successImage;
@@ -136,6 +137,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         toolbar();
 
         viewPager = findViewById(R.id.view_pager);
+        viewPager.lockPages(true);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         viewPager.setOffscreenPageLimit(4);

@@ -34,6 +34,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import static io.stormbird.token.entity.MagicLinkInfo.getNodeURLByNetworkId;
 import static io.stormbird.wallet.C.BURN_ADDRESS;
 import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
 import static io.stormbird.wallet.util.Utils.isAlNum;
@@ -1259,5 +1260,17 @@ public class TokenRepository implements TokenRepositoryType {
     public Disposable updateBlockRead(Token token, Wallet wallet)
     {
         return localSource.storeBlockRead(token, wallet);
+    }
+
+    public static Web3j getWeb3jService(int chainId)
+    {
+        OkHttpClient okClient = new OkHttpClient.Builder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(false)
+                .build();
+        String rpcServerUrl = getNodeURLByNetworkId(chainId);
+        return Web3j.build(new HttpService(rpcServerUrl, okClient, false));
     }
 }

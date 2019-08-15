@@ -17,21 +17,28 @@ import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.ImportWalletInteract;
+import io.stormbird.wallet.repository.TokenRepository;
+import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.ui.ImportWalletActivity;
 import io.stormbird.wallet.ui.widget.OnSetWatchWalletListener;
+import io.stormbird.wallet.util.AWEnsResolver;
+
+import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
 
 public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWalletListener
 {
     private final ImportWalletInteract importWalletInteract;
     private final KeyService keyService;
+    private final AWEnsResolver ensResolver;
 
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> badSeed = new MutableLiveData<>();
 
-    ImportWalletViewModel(ImportWalletInteract importWalletInteract, KeyService keyService) {
+    ImportWalletViewModel(ImportWalletInteract importWalletInteract, KeyService keyService, GasService gasService) {
         this.importWalletInteract = importWalletInteract;
         this.keyService = keyService;
+        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), gasService);
     }
 
     public void onKeystore(String keystore, String password, String newPassword, KeyService.AuthenticationLevel level) {
@@ -39,7 +46,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
 
         importWalletInteract
                 .importKeystore(keystore, password, newPassword)
-                .flatMap(wallet -> importWalletInteract.storeKeystoreWallet(wallet, level))
+                .flatMap(wallet -> importWalletInteract.storeKeystoreWallet(wallet, level, ensResolver))
                 .subscribe(this::onWallet, this::onError).isDisposed();
     }
 
@@ -47,7 +54,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
         progress.postValue(true);
         importWalletInteract
                 .importPrivateKey(privateKey, newPassword)
-                .flatMap(wallet -> importWalletInteract.storeKeystoreWallet(wallet, level))
+                .flatMap(wallet -> importWalletInteract.storeKeystoreWallet(wallet, level, ensResolver))
                 .subscribe(this::onWallet, this::onError).isDisposed();
     }
 
@@ -55,7 +62,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     public void onWatchWallet(String address)
     {
         //user just asked for a watch wallet
-        disposable = importWalletInteract.storeWatchWallet(address)
+        disposable = importWalletInteract.storeWatchWallet(address, ensResolver)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(wallet::postValue, this::onError); //signal to UI wallet import complete
@@ -91,7 +98,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
         else
         {
             //begin key storage process
-            disposable = importWalletInteract.storeHDWallet(walletAddress, level)
+            disposable = importWalletInteract.storeHDWallet(walletAddress, level, ensResolver)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(wallet::postValue, this::onError); //signal to UI wallet import complete

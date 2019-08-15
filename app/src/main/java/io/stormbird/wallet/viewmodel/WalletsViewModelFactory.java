@@ -10,7 +10,9 @@ import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
+import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.KeyService;
+import io.stormbird.wallet.util.AWEnsResolver;
 
 public class WalletsViewModelFactory implements ViewModelProvider.Factory {
     private final SetDefaultWalletInteract setDefaultWalletInteract;
@@ -21,6 +23,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
     private final ImportWalletRouter importWalletRouter;
     private final HomeRouter homeRouter;
     private final KeyService keyService;
+    private final GasService gasService;
 
     @Inject
     public WalletsViewModelFactory(
@@ -31,7 +34,8 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
             HomeRouter homeRouter,
             FetchTokensInteract fetchTokensInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            KeyService keyService) {
+            KeyService keyService,
+            GasService gasService) {
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.genericWalletInteract = genericWalletInteract;
@@ -40,6 +44,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.keyService = keyService;
+        this.gasService = gasService;
     }
 
     @NonNull
@@ -53,6 +58,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
                 homeRouter,
                 fetchTokensInteract,
                 findDefaultNetworkInteract,
-                keyService);
+                keyService,
+                gasService);
     }
 }

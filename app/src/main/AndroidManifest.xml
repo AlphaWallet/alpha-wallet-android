@@ -173,10 +173,6 @@
             android:label="@string/toolbar_header_help" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.EthereumInfoActivity"
-            android:label="@string/toolbar_ethereum_info" />
-
-        <activity
             android:name="io.stormbird.wallet.ui.zxing.QRScanningActivity"
             android:label="@string/qr_scanner" />
 

@@ -6,6 +6,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.stormbird.wallet.R;
@@ -186,21 +188,33 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
         notifyDataSetChanged();
     }
 
-    public void updateWalletNames(Map<String, String> namedWallets) {
-        for (Wallet localWallet : wallets) {
-            if (namedWallets.containsKey(localWallet.address)) {
-                localWallet.ENSname = namedWallets.get(localWallet.address);
-                namedWallets.remove(localWallet.address);
-                if (namedWallets.size() == 0) break;
-            }
+    public void updateWalletNames(List<Wallet> updatedWallets)
+    {
+        Map<String, String> ensUpdates = new HashMap<>();
+        for (Wallet wallet : updatedWallets) ensUpdates.put(wallet.address, wallet.ENSname);
+        for (int i = 0; i < wallets.size(); i++)
+        {
+            wallets.get(i).ENSname = ensUpdates.get(wallets.get(i).address);
         }
-        notifyDataSetChanged();
     }
 
     @Override
     public void onWalletClicked(Wallet wallet)
     {
         onSetWalletDefaultListener.onSetDefault(wallet);
+    }
+
+    public void updateWalletName(Wallet wallet)
+    {
+        for (int i = 0; i < wallets.size(); i++)
+        {
+            if (wallet.address.equalsIgnoreCase(wallets.get(i).address))
+            {
+                wallets.get(i).ENSname = wallet.ENSname;
+                notifyItemChanged(i);
+                break;
+            }
+        }
     }
 
     public interface OnSetWalletDefaultListener {

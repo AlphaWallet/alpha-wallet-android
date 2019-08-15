@@ -33,8 +33,6 @@ public interface WalletRepositoryType {
 
     Single<BigDecimal> balanceInWei(Wallet wallet);
 
-    Single<WalletUpdate> scanForNames(Wallet[] wallets, long lastBlockChecked);
-
     Single<Integer> storeWallets(Wallet[] wallets, boolean isMainNet);
 
     Single<Wallet> storeWallet(Wallet wallet);

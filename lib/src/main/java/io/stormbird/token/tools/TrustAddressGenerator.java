@@ -12,6 +12,7 @@ import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.jcajce.provider.digest.Keccak;
+import org.bouncycastle.util.encoders.Hex;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
@@ -28,24 +29,21 @@ import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.parsers.ParserConfigurationException;
 
-import static java.nio.charset.StandardCharsets.*;
-import static javax.xml.bind.DatatypeConverter.parseHexBinary;
-
-    public class TrustAddressGenerator {
+public class TrustAddressGenerator {
     private static final X9ECParameters CURVE_PARAMS = CustomNamedCurves.getByName("secp256k1");
     private static final ECDomainParameters CURVE = new ECDomainParameters(CURVE_PARAMS.getCurve(), CURVE_PARAMS.getG(),
             CURVE_PARAMS.getN(), CURVE_PARAMS.getH());
 
-    public static final byte[] masterPubKey = parseHexBinary("04f0985bd9dbb6f461adc994a0c12595716a7f4fb2879bfc5155dffec3770096201c13f8314b46db8d8177887f8d95af1f2dd217291ce6ffe9183681186696bbe5");
+    public static final byte[] masterPubKey = Hex.decode("04f0985bd9dbb6f461adc994a0c12595716a7f4fb2879bfc5155dffec3770096201c13f8314b46db8d8177887f8d95af1f2dd217291ce6ffe9183681186696bbe5");
 
     public static String getTrustAddress(String contractAddress, InputStream tokenscript) throws Exception {
         String digest = getXMLDSigSignedInfoDigest(tokenscript);
-        return preimageToAddress(String.format("%s%s%s", contractAddress, "TRUST", digest).getBytes(UTF_8));
+        return preimageToAddress((contractAddress + "TRUST" + digest).getBytes());
     }
 
     public static String getRevokeAddress(String contractAddress, InputStream tokenscript) throws Exception {
         String digest = getXMLDSigSignedInfoDigest(tokenscript);
-        return preimageToAddress(String.format("%s%s%s", contractAddress, "REVOKE", digest).getBytes(UTF_8));
+        return preimageToAddress((contractAddress + "REVOKE" + digest).getBytes());
     }
 
     // this won't make sense at all if you didn't read security.md

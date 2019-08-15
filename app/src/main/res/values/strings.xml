@@ -303,7 +303,7 @@
     <string name="universal_link_notice">Before the link expires, anyone with the MagicLink can purchase your tickets with one click.</string>
     <string name="label_important">Important</string>
     <string name="eth_00">0.00 ETH</string>
-    <string name="toolbar_title_my_wallets">My Wallets</string>
+    <string name="toolbar_title_wallets">Change Wallet</string>
     <string name="facebook">Facebook</string>
     <string name="twitter">Twitter</string>
     <string name="erc20">ERC 20</string>

@@ -86,7 +86,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:fontFamily="@font/font_light"
-                        android:text="@string/toolbar_title_my_wallets"
+                        android:text="@string/toolbar_title_wallets"
                         android:textColor="@color/black"
                         android:textSize="20sp" />
 

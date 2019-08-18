@@ -34,17 +34,17 @@ public class TrustAddressGenerator {
 
     public static final byte[] masterPubKey = Hex.decode("04f0985bd9dbb6f461adc994a0c12595716a7f4fb2879bfc5155dffec3770096201c13f8314b46db8d8177887f8d95af1f2dd217291ce6ffe9183681186696bbe5");
 
-    public static String getTrustAddress(String contractAddress, String digest) throws Exception {
+    public static String getTrustAddress(String contractAddress, String digest) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         return preimageToAddress((contractAddress + "TRUST" + digest).getBytes());
     }
 
-    public static String getRevokeAddress(String contractAddress, String digest) throws Exception {
+    public static String getRevokeAddress(String contractAddress, String digest) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         return preimageToAddress((contractAddress + "REVOKE" + digest).getBytes());
     }
 
     // this won't make sense at all if you didn't read security.md
     // https://github.com/AlphaWallet/TokenScript/blob/master/doc/security.md
-    public static String preimageToAddress(byte[] preimage) throws Exception {
+    public static String preimageToAddress(byte[] preimage) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         Security.addProvider(new BouncyCastleProvider());
 
         // get the hash of the preimage text
@@ -94,7 +94,40 @@ public class TrustAddressGenerator {
         return computeAddress(pubPoint.getEncoded(false ));
     }
 
-    /***************** Below are for making this class usable with Amazon Lambda *******************/
+    /**********************************************************************************
+     For use in Command Console
+     **********************************************************************************/
+
+    public static void main(String args[]) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
+        if (args.length == 2) {
+            System.out.println("Express of Trust Address derived using the following:");
+            System.out.println("");
+            System.out.println("\tContract Address: " + args[0]);
+            System.out.println("\tXML Digest for Signature: " + args[1]);
+            System.out.println("");
+            System.out.println("Are:");
+            System.out.println("");
+            System.out.println("\tTrust Address:\t" + getTrustAddress(args[0], args[1]));
+            System.out.println("\tRevoke Address:\t" + getRevokeAddress(args[0], args[1]));
+        } else {
+            System.out.println("This utility generates express-of-trust address and its revocation address\n for a given pair of token contract and TokenScript");
+            System.out.println("");
+            System.out.println("Expecting two arguments: contract address and XML digest.");
+            System.out.println("");
+            System.out.println("\tExample:");
+            System.out.println("\tAssuming classpath is set properly,:");
+            System.out.println("\te.g. if you built the lib project with `gradle shadowJar` and you've set");
+            System.out.println("\tCLASSPATH=build/libs/lib-all.jar");
+            System.out.println("\tRun the following:");
+            System.out.println("");
+            System.out.println("$ java " + TrustAddressGenerator.class.getCanonicalName() +
+                    "0x63cCEF733a093E5Bd773b41C96D3eCE361464942 z+I6NxdALVtlc3TuUo2QEeV9rwyAmKB4UtQWkTLQhpE=");
+        }
+    }
+
+    /**********************************************************************************
+     For use in Amazon Lambda
+     **********************************************************************************/
 
     public Response DeriveTrustAddress(Request req) throws Exception {
         String trust = getTrustAddress(req.contract, req.getDigest());

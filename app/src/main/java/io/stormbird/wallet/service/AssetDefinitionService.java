@@ -1110,7 +1110,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         StringBuilder attrs = new StringBuilder();
 
-        TokenScriptResult.addPair(attrs, "name", token.getTokenTitle());
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+        String name = token.getTokenTitle();
+        if (definition != null && definition.getTokenName(1) != null) name = definition.getTokenName(1);
+
+        TokenScriptResult.addPair(attrs, "name", name);
         TokenScriptResult.addPair(attrs, "symbol", token.tokenInfo.symbol);
         TokenScriptResult.addPair(attrs, "_count", String.valueOf(count));
         TokenScriptResult.addPair(attrs, "contractAddress", token.tokenInfo.address);

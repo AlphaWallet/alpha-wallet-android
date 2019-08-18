@@ -434,23 +434,23 @@ public class TokenDefinition {
                             if (thisDate.equals(schemaDate))
                             {
                                 //all good
-                                result.parseMessage(ParseResult.ParseResultId.OK);
+                                if (result != null) result.parseMessage(ParseResult.ParseResultId.OK);
                             }
                             else if (thisDate.before(schemaDate))
                             {
                                 //still acceptable
-                                result.parseMessage(ParseResult.ParseResultId.XML_OUT_OF_DATE);
+                                if (result != null) result.parseMessage(ParseResult.ParseResultId.XML_OUT_OF_DATE);
                             }
                             else
                             {
                                 //cannot parse future schema
-                                result.parseMessage(ParseResult.ParseResultId.PARSER_OUT_OF_DATE);
+                                if (result != null) result.parseMessage(ParseResult.ParseResultId.PARSER_OUT_OF_DATE);
                                 nameSpace = null;
                             }
                         }
                         else
                         {
-                            result.parseMessage(ParseResult.ParseResultId.PARSE_FAILED);
+                            if (result != null) result.parseMessage(ParseResult.ParseResultId.PARSE_FAILED);
                             nameSpace = null;
                         }
                         return;
@@ -458,7 +458,7 @@ public class TokenDefinition {
                 }
                 catch (Exception e)
                 {
-                    result.parseMessage(ParseResult.ParseResultId.PARSE_FAILED);
+                    if (result != null) result.parseMessage(ParseResult.ParseResultId.PARSE_FAILED);
                     nameSpace = null;
                     e.printStackTrace();
                 }

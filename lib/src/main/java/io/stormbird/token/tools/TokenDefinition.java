@@ -29,7 +29,7 @@ public class TokenDefinition {
     public TokenscriptContext context;
     public String holdingToken;
 
-    public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2019/05";
+    public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2019/07";
     public static final String TOKENSCRIPT_REPO_SERVER = "https://repo.tokenscript.org/";
 
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";
@@ -704,6 +704,10 @@ public class TokenDefinition {
                 int network = 1;
                 if (networkStr != null) network = Integer.parseInt(networkStr);
                 String address = addressElement.getTextContent().toLowerCase();
+                if (address != null && address.equalsIgnoreCase("0x6C8c6b02E7b2BE14d4fA6022Dfd6d75921D90E4E"))
+                {
+                    System.out.println("yoless");
+                }
                 List<String> addresses = info.addresses.get(network);
                 if (addresses == null)
                 {

@@ -222,7 +222,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         return allowThroughFilter &&  //Add token to display list if it's the base currency, or if it has balance
                 ((token.isEthereum() && token.tokenInfo.chainId == MAINNET_ID) ||
                         (!token.isTerminated() && !token.isBad() &&
-                                (token.hasPositiveBalance())));
+                                (token.hasDebugTokenscript || token.hasPositiveBalance())));
     }
 
     private void populateTokens(Token[] tokens)

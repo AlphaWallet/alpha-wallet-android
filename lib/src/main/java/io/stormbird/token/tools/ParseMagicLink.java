@@ -168,6 +168,7 @@ public class ParseMagicLink
                     return getDataFromLinks(data, ds);
             }
         } catch (Exception e) {
+            data.chainId = 0;
             throw new SalesOrderMalformed();
         }
     }

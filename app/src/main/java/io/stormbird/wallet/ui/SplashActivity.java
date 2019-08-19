@@ -18,7 +18,10 @@ import javax.inject.Inject;
 import com.crashlytics.android.core.CrashlyticsCore;
 import dagger.android.AndroidInjection;
 import io.fabric.sdk.android.Fabric;
+import io.stormbird.token.entity.SalesOrderMalformed;
+import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.BuildConfig;
+import io.stormbird.wallet.entity.CryptoFunctions;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportTokenRouter;
@@ -136,16 +139,24 @@ public class SplashActivity extends BaseActivity {
         else
         {
             //there is at least one account here
-            if (importData != null)
+
+            //See if this is a valid import magiclink
+            if (importData != null && importData.length() > 60 && importData.contains("aw.app") )
             {
-                new ImportTokenRouter().open(this, importData);
-                finish();
+                try
+                {
+                    ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
+                    if (parser.parseUniversalLink(importData).chainId > 0)
+                    {
+                        new ImportTokenRouter().open(this, importData);
+                        finish();
+                        return;
+                    }                }
+                catch (SalesOrderMalformed ignored) { }
             }
-            else
-            {
-                new HomeRouter().open(this, true);
-                finish();
-            }
+
+            new HomeRouter().open(this, true);
+            finish();
         }
     }
 }

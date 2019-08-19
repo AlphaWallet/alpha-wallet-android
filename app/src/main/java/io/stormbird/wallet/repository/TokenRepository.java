@@ -694,7 +694,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<Token> getEthBalance(NetworkInfo network, Wallet wallet) {
         Token currency = createCurrencyToken(network, wallet);
-        currency.pendingBalance = BigDecimal.ONE;
+        currency.pendingBalance = BigDecimal.ZERO;
         return attachEth(network, wallet, currency);
     }
 

@@ -76,7 +76,6 @@ public class SplashViewModel extends ViewModel {
                 .create()
                 .subscribe(account -> {
                     fetchWallets();
-                    createWallet.postValue(account);
                 }, this::onError);
     }
 

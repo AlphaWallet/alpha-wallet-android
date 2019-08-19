@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.w3c.dom.Node.ELEMENT_NODE;
@@ -283,7 +286,7 @@ public class TokenDefinition {
 
         NodeList nList = xml.getElementsByTagNameNS(nameSpace, "token");
 
-        if (nList.getLength() == 0 || !nameSpace.equals(TOKENSCRIPT))
+        if (nList.getLength() == 0 || nameSpace == null)
         {
             System.out.println("Legacy XML format - no longer supported");
             return;
@@ -413,15 +416,51 @@ public class TokenDefinition {
             //check attributes
             for (int j = 0; j < n.getAttributes().getLength(); j++)
             {
-                Node thisAttr = n.getAttributes().item(j);
-                if (thisAttr.getNodeValue().contains(TOKENSCRIPTBASE))
+                try
                 {
-                    nameSpace = TOKENSCRIPT;
-                    if (result != null && !thisAttr.getNodeValue().equals(TOKENSCRIPT))
+                    Node thisAttr = n.getAttributes().item(j);
+                    if (thisAttr.getNodeValue().contains(TOKENSCRIPTBASE))
                     {
-                        result.parseMessage(ParseResult.ParseResultId.OK);
+                        nameSpace = thisAttr.getNodeValue();
+
+                        int dateIndex = nameSpace.indexOf(TOKENSCRIPTBASE) + TOKENSCRIPTBASE.length();
+                        int lastSeparator = nameSpace.lastIndexOf("/");
+                        if ((lastSeparator - dateIndex) == 7)
+                        {
+                            DateFormat format = new SimpleDateFormat("yyyy/MM", Locale.ENGLISH);
+                            Date thisDate = format.parse(nameSpace.substring(dateIndex, lastSeparator));
+                            Date schemaDate = format.parse(TOKENSCRIPT_CURRENT_SCHEMA);
+
+                            if (thisDate.equals(schemaDate))
+                            {
+                                //all good
+                                if (result != null) result.parseMessage(ParseResult.ParseResultId.OK);
+                            }
+                            else if (thisDate.before(schemaDate))
+                            {
+                                //still acceptable
+                                if (result != null) result.parseMessage(ParseResult.ParseResultId.XML_OUT_OF_DATE);
+                            }
+                            else
+                            {
+                                //cannot parse future schema
+                                if (result != null) result.parseMessage(ParseResult.ParseResultId.PARSER_OUT_OF_DATE);
+                                nameSpace = null;
+                            }
+                        }
+                        else
+                        {
+                            if (result != null) result.parseMessage(ParseResult.ParseResultId.PARSE_FAILED);
+                            nameSpace = null;
+                        }
+                        return;
                     }
-                    return;
+                }
+                catch (Exception e)
+                {
+                    if (result != null) result.parseMessage(ParseResult.ParseResultId.PARSE_FAILED);
+                    nameSpace = null;
+                    e.printStackTrace();
                 }
             }
         }

@@ -885,6 +885,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 Token token = tokensService.getToken(networkId, address);
                 if (token != null)
                 {
+                    File tokenDef = defMap.get(address);
+                    if (tokenDef != null && tokenDef.getAbsolutePath().contains(ALPHAWALLET_DIR)) token.hasDebugTokenscript = true;
                     token.hasTokenScript = true;
                     TokenDefinition td = getAssetDefinition(networkId, address);
                     ContractInfo cInfo = td.contracts.get(td.holdingToken);

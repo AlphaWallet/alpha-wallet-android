@@ -437,7 +437,17 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
             isValid = false;
         }
 
-        String to = function.tx.args.get("to").value;
+        //is 'to' overridden?
+        String to = null;
+        if (function.tx.args.get("to") != null)
+        {
+            to = function.tx.args.get("to").value;
+        }
+        else if (function.contract.addresses.get(token.tokenInfo.chainId) != null)
+        {
+            to = function.contract.addresses.get(token.tokenInfo.chainId).get(0);
+        }
+
         if (to == null || !Utils.isAddressValid(to))
         {
             errorInvalidAddress(to);

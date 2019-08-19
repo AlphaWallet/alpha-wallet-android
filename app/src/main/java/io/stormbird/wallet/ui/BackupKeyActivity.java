@@ -203,7 +203,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         initViews();
 
         setTitle(getString(R.string.export_keystore_json));
-        title.setText(R.string.export_keystore_json);
+        title.setText(R.string.what_is_keystore_json);
         backupImage.setImageResource(R.drawable.ic_keystore);
         detail.setText(R.string.keystore_detail_text);
         nextButton.setText(R.string.export_keystore_json);

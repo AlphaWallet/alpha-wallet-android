@@ -189,4 +189,9 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         keyService.getAuthenticationForSignature(walletAddress, activity, callback);
     }
+
+    public Token getCurrency(int chainId, String walletAddr)
+    {
+        return tokensService.getToken(chainId, walletAddr);
+    }
 }

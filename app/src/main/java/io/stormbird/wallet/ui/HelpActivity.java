@@ -2,12 +2,20 @@ package io.stormbird.wallet.ui;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.View;
 import android.widget.LinearLayout;
 
+import android.widget.Toast;
+import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobileconnectors.lambdainvoker.LambdaFunctionException;
+import com.amazonaws.mobileconnectors.lambdainvoker.LambdaInvokerFactory;
+import com.amazonaws.regions.Regions;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.HelpItem;
 import io.stormbird.wallet.ui.widget.adapter.HelpAdapter;
@@ -76,9 +84,10 @@ public class HelpActivity extends BaseActivity {
 
     private void helpIntent()
     {
+        final String at = "@";
         String uriText =
-                "mailto:support@awallet.io" +
-                        "?subject=" + Uri.encode("Hi guys") +
+                "mailto:feedback+android" + at + "alphawallet.com" +
+                        "?subject=" + Uri.encode("Hi guys. I've been using AlphaWallet") +
                         "&body=" + Uri.encode("");
 
         Uri uri = Uri.parse(uriText);
@@ -87,4 +96,48 @@ public class HelpActivity extends BaseActivity {
         emailIntent.setData(uri);
         startActivity(Intent.createChooser(emailIntent, "Send email"));
     }
+
+    public void onClick(View v) {
+        // Create an instance of CognitoCachingCredentialsProvider
+        CognitoCachingCredentialsProvider cognitoProvider = new CognitoCachingCredentialsProvider(
+                this.getApplicationContext(), "cn-north-1:44edb8ae-67c1-40de-b70d-ae9db5581e6e", Regions.CN_NORTH_1);
+
+        // Create LambdaInvokerFactory, to be used to instantiate the Lambda proxy.
+        LambdaInvokerFactory factory = new LambdaInvokerFactory(this.getApplicationContext(),
+                Regions.CN_NORTH_1, cognitoProvider);
+
+        // Create the Lambda proxy object with a default Json data binder.
+        // You can provide your own data binder by implementing
+        // LambdaDataBinder.
+        final TrustAddressGenerator AWSLambdaInterface = factory.build(TrustAddressGenerator.class);
+
+        io.stormbird.token.tools.TrustAddressGenerator.Request request = new io.stormbird.token.tools.TrustAddressGenerator.Request("0x63cCEF733a093E5Bd773b41C96D3eCE361464942", "z+I6NxdALVtlc3TuUo2QEeV9rwyAmKB4UtQWkTLQhpE=");
+        // The Lambda function invocation results in a network call.
+        // Make sure it is not called from the main thread.
+        new AsyncTask<io.stormbird.token.tools.TrustAddressGenerator.Request, Void, io.stormbird.token.tools.TrustAddressGenerator.Response>() {
+            @Override
+            protected io.stormbird.token.tools.TrustAddressGenerator.Response doInBackground(io.stormbird.token.tools.TrustAddressGenerator.Request... params) {
+                // invoke the lambda method. In case it fails, it will throw a
+                // LambdaFunctionException.
+                try {
+                    return AWSLambdaInterface.DeriveTrustAddress(params[0]);
+                } catch (LambdaFunctionException lfe) {
+                    // please don't ignore such exception in production code!!
+                    Log.e("Tag", "Failed to invoke AWS Lambda" + lfe.getDetails(), lfe);
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(io.stormbird.token.tools.TrustAddressGenerator.Response response) {
+                if (response == null) {
+                    return;
+                }
+
+                // Do a toast
+                Toast.makeText(HelpActivity.this, response.getTrustAddress(), Toast.LENGTH_LONG).show();
+            }
+        }.execute(request);
+    }
+
 }

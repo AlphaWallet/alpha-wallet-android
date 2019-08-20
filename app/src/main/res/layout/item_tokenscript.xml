@@ -36,7 +36,7 @@
             android:layout_margin="5dp"
             android:gravity="center"
             android:orientation="vertical"
-            android:padding="10dp">
+            android:padding="5dp">
 
             <io.stormbird.wallet.web3.Web3TokenView
                 android:id="@+id/web3_tokenview"

@@ -1,38 +1,29 @@
 package io.stormbird.wallet.ui.widget.holder;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.RawRes;
 import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import io.stormbird.token.entity.MagicLinkInfo;
+
+import java.nio.charset.StandardCharsets;
+
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.DAppFunction;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.util.Hex;
-import io.stormbird.wallet.web3.JsInjectorClient;
 import io.stormbird.wallet.web3.OnSignPersonalMessageListener;
 import io.stormbird.wallet.web3.Web3TokenView;
-import io.stormbird.wallet.web3.entity.*;
+import io.stormbird.wallet.web3.entity.Address;
+import io.stormbird.wallet.web3.entity.FunctionCallback;
+import io.stormbird.wallet.web3.entity.Message;
+import io.stormbird.wallet.web3.entity.PageReadyCallback;
+import io.stormbird.wallet.web3.entity.ScriptFunction;
 import io.stormbird.wallet.widget.SignMessageDialog;
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.Sign;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.SignatureException;
-import java.util.function.Function;
-
-import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 import static io.stormbird.wallet.ui.DappBrowserFragment.PERSONAL_MESSAGE_PREFIX;
 
 /**

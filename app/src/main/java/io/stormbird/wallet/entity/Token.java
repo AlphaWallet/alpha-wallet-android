@@ -41,6 +41,7 @@ public class Token implements Parcelable
     public boolean balanceChanged;
     public boolean walletUIUpdateRequired;
     public boolean hasTokenScript;
+    public boolean hasDebugTokenscript;
     public boolean refreshCheck;
     public long    lastTxUpdate = 0;
 
@@ -80,6 +81,7 @@ public class Token implements Parcelable
             lastTxUpdate = oldToken.lastTxUpdate;
             balanceChanged = oldToken.balanceChanged;
             hasTokenScript = oldToken.hasTokenScript;
+            hasDebugTokenscript = oldToken.hasDebugTokenscript;
         }
         refreshCheck = false;
     }
@@ -96,7 +98,9 @@ public class Token implements Parcelable
         lastTxCheck = in.readLong();
         lastTxUpdate = in.readLong();
         int readTS = in.readByte();
+        int readDTS = in.readByte();
         hasTokenScript = readTS == 1;
+        hasDebugTokenscript = readDTS == 1;
         balanceChanged = false;
         if (readType <= ContractType.CREATION.ordinal())
         {
@@ -154,6 +158,7 @@ public class Token implements Parcelable
         dest.writeLong(lastTxCheck);
         dest.writeLong(lastTxUpdate);
         dest.writeByte(hasTokenScript?(byte)1:(byte)0);
+        dest.writeByte(hasDebugTokenscript?(byte)1:(byte)0);
     }
 
     public void setRealmBalance(RealmToken realmToken)
@@ -201,6 +206,7 @@ public class Token implements Parcelable
 
     public BigDecimal getCorrectedBalance(int scale)
     {
+        if (balance.equals(BigDecimal.ZERO)) return BigDecimal.ZERO;
         BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
         BigDecimal ethBalance = tokenInfo.decimals > 0
                 ? balance.divide(decimalDivisor) : balance;

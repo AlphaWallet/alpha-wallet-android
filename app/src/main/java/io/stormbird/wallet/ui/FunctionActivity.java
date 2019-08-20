@@ -40,6 +40,7 @@ import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
 import java.util.HashMap;
@@ -457,7 +458,17 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
             isValid = false;
         }
 
-        String to = function.tx.args.get("to").value;
+        //is 'to' overridden?
+        String to = null;
+        if (function.tx.args.get("to") != null)
+        {
+            to = function.tx.args.get("to").value;
+        }
+        else if (function.contract.addresses.get(token.tokenInfo.chainId) != null)
+        {
+            to = function.contract.addresses.get(token.tokenInfo.chainId).get(0);
+        }
+
         if (to == null || !Utils.isAddressValid(to))
         {
             errorInvalidAddress(to);

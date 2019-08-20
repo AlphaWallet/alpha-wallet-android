@@ -9,9 +9,12 @@ import android.support.v7.widget.AppCompatRadioButton;
 import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.TicketRange;
@@ -25,12 +28,7 @@ import io.stormbird.wallet.web3.Web3TokenView;
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.PageReadyCallback;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-
 import static io.stormbird.wallet.C.Key.TICKET;
-import static io.stormbird.wallet.C.Key.WALLET;
 
 /**
  * Created by James on 31/05/2019.

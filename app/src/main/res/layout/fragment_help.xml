@@ -18,6 +18,8 @@
         android:paddingRight="10dp" />
 
     <TextView
+        android:onClick="onClick"
+        android:id="@+id/lambda_call"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="?actionBarSize"

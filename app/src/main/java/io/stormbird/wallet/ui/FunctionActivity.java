@@ -433,11 +433,13 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
 
         //calculate native amount
         BigDecimal value = new BigDecimal(function.tx.args.get("value").value);
+        //this is a native send, so check the native currency
+        Token currency = viewModel.getCurrency(token.tokenInfo.chainId, token.getWallet());
 
-        if (token.balance.subtract(value).compareTo(BigDecimal.ZERO) < 0)
+        if (currency.balance.subtract(value).compareTo(BigDecimal.ZERO) < 0)
         {
             //flash up dialog box insufficent funds
-            errorInsufficientFunds();
+            errorInsufficientFunds(currency);
             isValid = false;
         }
 
@@ -480,12 +482,12 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         alertDialog.show();
     }
 
-    private void errorInsufficientFunds()
+    private void errorInsufficientFunds(Token currency)
     {
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(AWalletAlertDialog.ERROR);
         alertDialog.setTitle(R.string.error_insufficient_funds);
-        alertDialog.setMessage(getString(R.string.current_funds, token.getCorrectedBalance(token.tokenInfo.decimals), token.tokenInfo.symbol));
+        alertDialog.setMessage(getString(R.string.current_funds, currency.getCorrectedBalance(currency.tokenInfo.decimals), currency.tokenInfo.symbol));
         alertDialog.setButtonText(R.string.button_ok);
         alertDialog.setButtonListener(v ->alertDialog.dismiss());
         alertDialog.show();

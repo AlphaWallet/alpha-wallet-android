@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.widget.AppCompatRadioButton;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -30,6 +31,7 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.*;
@@ -391,7 +393,8 @@ public class Ticket extends Token implements Parcelable
         String viewData = tokenView.injectWeb3TokenInit(ctx, view, attrs.toString());
         viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
 
-        tokenView.loadData(viewData, "text/html", "utf-8");
+        String base64 = android.util.Base64.encodeToString(viewData.getBytes(Charset.forName("UTF-8")), Base64.DEFAULT);
+        tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
     }
 
     private void onError(Throwable throwable, Context ctx, AssetDefinitionService assetService, StringBuilder attrs, ProgressBar waitSpinner, Web3TokenView tokenView, boolean iconified)

@@ -38,8 +38,8 @@ android {
         applicationId "io.stormbird.wallet"
         minSdkVersion 18
         targetSdkVersion 28
-        versionCode 59
-        versionName "2.01.0"
+        versionCode 62
+        versionName "2.01.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
 

@@ -184,4 +184,9 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         gasService.stopGasListener();
     }
+
+    public Token getCurrency(int chainId, String walletAddr)
+    {
+        return tokensService.getToken(chainId, walletAddr);
+    }
 }

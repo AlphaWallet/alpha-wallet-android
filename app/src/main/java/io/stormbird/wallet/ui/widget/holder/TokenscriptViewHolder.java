@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
+import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
@@ -25,6 +26,7 @@ import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.PageReadyCallback;
 
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 
 import static io.stormbird.wallet.C.Key.TICKET;
@@ -97,7 +99,8 @@ public class TokenscriptViewHolder extends BinderViewHolder<TicketRange> impleme
         String viewData = tokenView.injectWeb3TokenInit(getContext(), view, tokenAttrs);
         viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
 
-        tokenView.loadData(viewData, "text/html", "utf-8");
+        String base64 = Base64.encodeToString(viewData.getBytes(Charset.forName("UTF-8")), Base64.DEFAULT);
+        tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
 
         if (iconified)
         {

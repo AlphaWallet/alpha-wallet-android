@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,6 +42,8 @@ import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.List;
@@ -111,7 +114,8 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
             injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
             if (action.style != null) injectedView = tokenView.injectStyleData(injectedView, action.style);
 
-            tokenView.loadData(injectedView, "text/html", "utf-8");
+            String base64 = Base64.encodeToString(injectedView.getBytes(Charset.forName("UTF-8")), Base64.DEFAULT);
+            tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
         }
         catch (Exception e)
         {

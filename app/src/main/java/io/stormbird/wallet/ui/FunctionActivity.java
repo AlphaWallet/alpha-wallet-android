@@ -378,7 +378,8 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
 
     private void handleFunction(TSAction action)
     {
-        if (action.function.tx != null && (action.function.parameters == null || action.function.parameters.size() == 0))
+        if (action.function.tx != null && (action.function.method == null || action.function.method.length() == 0)
+                && (action.function.parameters == null || action.function.parameters.size() == 0))
         {
             //no params, this is a native style transaction
             NativeSend(action);
@@ -407,14 +408,15 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
                 //this is very specific but 'value' is a specifically handled param
                 value = action.function.tx.args.get("value").value;
                 BigDecimal valCorrected = getCorrectedBalance(value, 18);
-                functionEffect = valCorrected.toString() + " " + token.tokenInfo.symbol + " to " + actionMethod;
+                Token currency = viewModel.getCurrency(token.tokenInfo.chainId, token.getWallet());
+                functionEffect = valCorrected.toString() + " " + currency.tokenInfo.symbol + " to " + actionMethod;
             }
 
             //finished resolving attributes, blank definition cache so definition is re-loaded when next needed
             viewModel.getAssetDefinitionService().clearCache();
 
             viewModel.confirmTransaction(this, cAddr.chainId, functionData, null,
-                                         cAddr.address, actionMethod, functionEffect, value);
+                    cAddr.address, actionMethod, functionEffect, value);
         }
     }
 

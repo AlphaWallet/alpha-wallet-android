@@ -92,7 +92,7 @@ public class WalletsViewModel extends BaseViewModel
         this.keyService = keyService;
         this.gasService = gasService;
 
-        executorService = Executors.newFixedThreadPool(4);
+        executorService = Executors.newFixedThreadPool(10);
     }
 
     public LiveData<Wallet[]> wallets()
@@ -207,7 +207,14 @@ public class WalletsViewModel extends BaseViewModel
 
     private void updateOnName(Wallet wallet)
     {
-        if (wallet.ENSname != null && wallet.ENSname.length() > 0) updateENSName.postValue(wallet);
+        if (wallet.ENSname != null && wallet.ENSname.length() > 0)
+        {
+            //updateENSName.postValue(wallet);
+            disposable = fetchWalletsInteract.updateWalletData(wallet)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(updateENSName::postValue, this::onError);
+        }
     }
 
     private Observable<Wallet> resolveEns(Wallet wallet)
@@ -347,6 +354,7 @@ public class WalletsViewModel extends BaseViewModel
         {
             Wallet wallet = new Wallet(address);
             wallet.type = WalletType.HDKEY;
+            wallet.authLevel = authLevel;
             fetchWalletsInteract.storeWallet(wallet)
                     .subscribe(account -> {
                         fetchWallets();

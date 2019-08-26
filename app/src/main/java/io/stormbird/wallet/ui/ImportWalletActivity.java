@@ -340,27 +340,24 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     @Override
     public void WalletValidated(String address, KeyService.AuthenticationLevel level)
     {
-        importWalletViewModel.onSeed(address, level);
+        if (address == null) keyImportError(getString(R.string.import_error));
+        else importWalletViewModel.onSeed(address, level);
     }
 
     @Override
     public void KeystoreValidated(String newPassword, KeyService.AuthenticationLevel level)
     {
         ImportKeystoreFragment importKeystoreFragment = (ImportKeystoreFragment) pages.get(ImportType.KEYSTORE_FORM_INDEX.ordinal()).second;
-        if (importKeystoreFragment != null)
-        {
-            importWalletViewModel.onKeystore(importKeystoreFragment.getKeystore(), importKeystoreFragment.getPassword(), newPassword, level);
-        }
+        if (importKeystoreFragment == null || newPassword == null) keyImportError(getString(R.string.import_error));
+        else importWalletViewModel.onKeystore(importKeystoreFragment.getKeystore(), importKeystoreFragment.getPassword(), newPassword, level);
     }
 
     @Override
     public void KeyValidated(String newPassword, KeyService.AuthenticationLevel level)
     {
         ImportPrivateKeyFragment importPrivateKeyFragment = (ImportPrivateKeyFragment) pages.get(ImportType.PRIVATE_KEY_FORM_INDEX.ordinal()).second;
-        if (importPrivateKeyFragment != null)
-        {
-            importWalletViewModel.onPrivateKey(importPrivateKeyFragment.getPrivateKey(), newPassword, level);
-        }
+        if (importPrivateKeyFragment == null || newPassword == null) keyImportError(getString(R.string.import_error));
+        else importWalletViewModel.onPrivateKey(importPrivateKeyFragment.getPrivateKey(), newPassword, level);
     }
 
     @Override

@@ -25,7 +25,7 @@ import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
+import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 public class KeystoreAccountService implements AccountKeystoreService
 {
@@ -117,7 +117,8 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     /**
-     * TODO: Import private key to keystore
+     * Import private key to keystore
+     *
      * @param privateKey
      * @param newPassword
      * @return
@@ -142,7 +143,8 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     /**
-     * TODO: Delete file, check if corresponding key is deleted
+     * Delete 'geth' keystore file then ensure password encrypted bytes and keys in Android keystore
+     * are deleted
      * @param address account address
      * @param password account password
      * @return
@@ -167,7 +169,7 @@ public class KeystoreAccountService implements AccountKeystoreService
             }
 
             //Now delete all traces of the key in Android keystore, encrypted bytes and iv file in private data area
-            keyService.deleteKeyCompletely(address);
+            keyService.deleteKey(address);
         } );
     }
 
@@ -217,9 +219,10 @@ public class KeystoreAccountService implements AccountKeystoreService
                     );
 
             byte[] signData = TransactionEncoder.encode(rtx);
-            byte[] signatureBytes = keyService.signData(signer.address, signData);
+            byte[] signatureBytes = keyService.signData(signer, signData);
             Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
-            return encode(rtx, sigData);
+            if (sigData == null) return "0000".getBytes();
+            else return encode(rtx, sigData);
         })
         .subscribeOn(Schedulers.io());
     }
@@ -314,7 +317,7 @@ public class KeystoreAccountService implements AccountKeystoreService
     {
         return Single.fromCallable(() -> {
             //byte[] messageHash = Hash.sha3(message);
-            byte[] signed = keyService.signData(signer.address, message);
+            byte[] signed = keyService.signData(signer, message);
 
             signed = patchSignatureVComponent(signed);
             return signed;
@@ -369,6 +372,7 @@ public class KeystoreAccountService implements AccountKeystoreService
                 String address = walletMap.get(d);
                 Wallet wallet = new Wallet(address);
                 wallet.type = WalletType.KEYSTORE;
+                wallet.walletCreationTime = d.getTime();
                 wallets.add(wallet);
             }
 
@@ -377,6 +381,17 @@ public class KeystoreAccountService implements AccountKeystoreService
         .subscribeOn(Schedulers.io());
     }
 
+    /**
+     * Patch the 'V'/position component of the signature bytes. The spongy castle signing algorithm returns
+     * 0 or 1 for the V component, and although most services accept this some require V to be 27 or 28
+     * This just changes 0 or 1 to 0x1b or 0x1c to be universally compatible with all ethereum services.
+     * Simple test example: login to 'Chibi Fighters' Dapp (in the discover dapps in the wallet)
+     * by signing their challenge. With V = 0 or 1 challenge (ie without this patch)
+     * verification will fail, but will pass with V = 0x1b or 0x1c.
+     *
+     * @param signature
+     * @return
+     */
     private byte[] patchSignatureVComponent(byte[] signature)
     {
         if (signature != null && signature.length == 65 && signature[64] < 27)

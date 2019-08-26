@@ -177,4 +177,5 @@
     <string name="reimport_wallet_detail">Wallet %1$s already exists, do you wish to re-import the wallet?</string>
     <string name="reimport_wallet_title">Re-Import Wallet?</string>
     <string name="provide_authentication">Provide authentication to create key</string>
+    <string name="import_error">Import Error, Try re-import again.</string>
 </resources>

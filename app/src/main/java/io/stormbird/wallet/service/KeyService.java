@@ -30,7 +30,10 @@ import java.security.cert.CertificateException;
 import java.util.*;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
+import static io.stormbird.wallet.entity.WalletType.HDKEY;
+import static io.stormbird.wallet.entity.WalletType.KEYSTORE;
 import static io.stormbird.wallet.entity.WalletType.KEYSTORE_LEGACY;
+import static io.stormbird.wallet.entity.WalletType.NOT_DEFINED;
 import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static io.stormbird.wallet.service.KeyService.Operation.*;
 import static io.stormbird.wallet.service.KeystoreAccountService.KEYSTORE_FOLDER;
@@ -45,10 +48,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_NONE;
     private static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding";
     private static final int AUTHENTICATION_DURATION_SECONDS = 30;
-
-    public static final String HDKEY_LABEL = "hd";
-    public static final String NO_AUTH_LABEL = "-noauth-";
-    public static final String KEYSTORE_LABEL = "ks";
+    private static final String REQUIRE_AUTHENTICATION = "-A-";
+    private static final String FAILED_SIGNATURE = "00000000000000000000000000000000000000000000000000000000000000000";
 
     //This value determines the time interval between the user swiping away the backup warning notice and it re-appearing
     public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000 * 60 * 60 * 24 * 30; //30 days //1000 * 60 * 3; //3 minutes for testing
@@ -56,9 +57,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     //Used mainly for re-entrant encrypt/decrypt operations for types of keys
     public enum Operation
     {
-        CREATE_HD_KEY, FETCH_MNEMONIC, IMPORT_HD_KEY, SIGN_WITH_KEY, CHECK_AUTHENTICATION, SIGN_DATA,
-        CREATE_NON_AUTHENTICATED_KEY, UPGRADE_HD_KEY, CREATE_KEYSTORE_KEY, UPGRADE_KEYSTORE_KEY,
-        CREATE_PRIVATE_KEY, RESTORE_NON_AUTHENTICATED_HD_KEY, RESTORE_NON_AUTHENTICATED_KS_KEY
+        CREATE_HD_KEY, FETCH_MNEMONIC, IMPORT_HD_KEY, CHECK_AUTHENTICATION, SIGN_DATA,
+        UPGRADE_HD_KEY, CREATE_KEYSTORE_KEY, UPGRADE_KEYSTORE_KEY, CREATE_PRIVATE_KEY
     }
 
     public enum AuthenticationLevel
@@ -82,8 +82,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     private final Context context;
     private Activity activity;
 
-    //Used for keeping the Ethereum address between re-entrant calls
-    private String currentKeyAddress;
+    //Used for keeping the Ethereum account information between re-entrant calls
+    private Wallet currentWallet;
 
     private AuthenticationLevel authLevel;
     private SignTransactionDialog signDialog;
@@ -94,6 +94,11 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     private static SecurityStatus securityStatus = SecurityStatus.NOT_CHECKED;
 
+    public Context getContext()
+    {
+        return context;
+    }
+
     public KeyService(Context ctx)
     {
         System.loadLibrary("TrustWalletCore");
@@ -102,7 +107,10 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     }
 
     /**
-     * Create a new HD key. Callback is not used if the key does not need to be created as locked.
+     * Create a new HD key.
+     * call createHDKey which creates a new HD wallet, stores the mnemonic and calls HDKeyCreated callback
+     * We use a callback to allow creation of a key with authentication lock
+     *
      * @param callingActivity
      * @param callback
      */
@@ -115,21 +123,15 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     }
 
     /**
-     * Create and encrypt/store keystore password for importing a keystore. Flow for importing a private key is almost identical
+     * Create and encrypt/store an authentication-locked keystore password for importing a keystore.
+     * Flow for importing a private key is almost identical
      *
-     * Possible flows are:
+     * Flow is as follows:
      *
-     * 1. Create the random bytes that will be the keystore password (createPassword)
-     * 2. Attempt to store the bytes used an auth-locked key (storeEncryptedBytes)
-     *    - If authentication event is required go to (a.) otherwise flow forward to 3.
-     *      a. Re-enter storeEncryptedBytes but store the password without requiring auth-lock
-     *      b. Display fingerprint/PIN dialog
-     *      c. On receiving authentication pass re-start flow at authenticatePass(int callbackId). If authentication fails e.
-     *      d. authenticatePass switches flow for a return from CREATE_KEYSTORE_KEY and resumes flow back at 1.
-     *      e. Authentication fails. Return import error. TODO: still create import key but don't authenticate lock.
-     *  3. Store password using authentication-locked AES cipher.
-     *  4. Return operation to calling Activity: either importCallback.KeystoreValidated for CREATE_KEYSTORE_KEY
-     *      or importCallback.KeyValidated for CREATE_PRIVATE_KEY
+     * 1. Obtain authentication event - pop up the unlock dialog.
+     * 2. After authentication event, proceed to authenticatePass and switch through to createPassword()
+     * 3. Create a new strong keystore password, store the password.
+     * 4. Call the KeystoreValidated callback.
      *
      * @param address
      * @param callingActivity
@@ -140,8 +142,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         activity = callingActivity;
         importCallback = callback;
         callback.setupAuthenticationCallback(this);
-        currentKeyAddress = address;
-        createPassword(CREATE_KEYSTORE_KEY);
+        currentWallet = new Wallet(address);
+        checkAuthentication(CREATE_KEYSTORE_KEY);
     }
 
     /**
@@ -157,23 +159,18 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         activity = callingActivity;
         importCallback = callback;
         callback.setupAuthenticationCallback(this);
-        currentKeyAddress = address;
-        createPassword(CREATE_PRIVATE_KEY);
+        currentWallet = new Wallet(address);
+        checkAuthentication(CREATE_PRIVATE_KEY);
     }
 
     /**
      * Encrypt and store mnemonic for HDWallet
      *
-     * 1. Check valid seed phrase, generate HDWallet and attempt to store the key.
-     * 2. storeHDKey calls storeEncryptedBytes which determines the key address and attempts to store the mnemonic bytes
-     *    - If authentication event is required go to (a.) otherwise flow forward to 3.
-     *      a. Re-enter storeEncryptedBytes but store the mnemonic without requiring auth-lock
-     *      b. Display fingerprint/PIN dialog
-     *      c. On receiving authentication pass re-start flow at authenticatePass(int callbackId). If authentication fails e.
-     *      d. authenticatePass switches flow for a return from IMPORT_HD_KEY, reads the key stored at a. and passes it back into stage 2.
-     *      e. Authentication fails. The non-locked key will be used, flow is passed back to calling activity.
-     *  3. Mnemonic is stored with authentication-locked AES cipher.
-     *  4. Pass flow back to calling activity via importCallback.WalletValidated
+     * 1. Check valid seed phrase, generate HDWallet and store the mnemonic without authentication lock
+     * 2. Obtain authentication event.
+     * 3. After authentication pass through to authenticatePass and switch to importHDKey()
+     * 4. ImportHDKey() restores the mnemonic and replaces the key with an authentication locked key.
+     * 5. KeyValidated callback to pass control back to viewModel
      *
      * @param seedPhrase
      * @param callingActivity
@@ -193,10 +190,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         else
         {
             HDWallet newWallet = new HDWallet(seedPhrase, "");
-            //now attempt to store a full authentication locked key
-            //if auth is required, the storeEncryptedBytes function will store an encrypted, unlocked temporary version
-            //then restore this version once we have a user-authentication event, then delete it once the locked key is created
-            storeHDKey(newWallet, Operation.IMPORT_HD_KEY);
+            storeHDKey(newWallet, false); //store encrypted bytes in case of re-entry
+            checkAuthentication(IMPORT_HD_KEY);
         }
     }
 
@@ -204,50 +199,49 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
      * Fetch mnemonic from storage
      *
      * 1. call unpackMnemonic
-     * 2. unpackMnemonic attempts to use the AES cipher in the KeyStore to decrypt the encrypted mnemonic password bytes
-     *    - If authentication is required go to (a.) otherwise flow to 3.
-     *      a. Display fingerprint/PIN dialog
-     *      b. On receiving authentication event re-start flow at authenticatePass. Re-enter at 2. unpackMnemonic
-     *      c. If authentication is cancelled or fails return flow via authenticateFail
-     * 3. decrypt mnemonic and resume flow with callbackInterface.FetchMnemonic
+     * 2. if authentication required, get authentication event and call unpackMnemonic
+     * 3. return mnemonic to FetchMnemonic callback
      *
-     * @param address
+     * @param wallet
      * @param callingActivity
      * @param callback
      */
-    public void getMnemonic(String address, Activity callingActivity, CreateWalletCallbackInterface callback)
+    public void getMnemonic(Wallet wallet, Activity callingActivity, CreateWalletCallbackInterface callback)
     {
         activity = callingActivity;
-        currentKeyAddress = address;
+        currentWallet = wallet;
         callbackInterface = callback;
         callback.setupAuthenticationCallback(this);
-        unpackMnemonic(address, Operation.FETCH_MNEMONIC);
+        String mnemonic = unpackMnemonic();
+        if (mnemonic.equals(REQUIRE_AUTHENTICATION))
+        {
+            checkAuthentication(FETCH_MNEMONIC);
+        }
+        else
+        {
+            callback.FetchMnemonic(mnemonic);
+        }
     }
 
     /**
-     * Called before requesting a signature to fulfil an authentication event
+     * 1. Get authentication event if required.
+     * 2. Resume operation at getAuthenticationForSignature
+     * 3. get mnemonic/password
+     * 4. rebuild private key
+     * 5. sign.
      *
-     * The operation of signing is slightly different from the other operations due to not wanting to change the structure
-     * of the signing operation. There is no activity in the sign request code, so we should see if authentication is required
-     * from the activity before starting a sign flow.
-     *
-     * Simply tries to restore the key for this wallet; if authentication is required then display authentication dialog and
-     * resume flow as per the import functions.
-     *
-     * @param walletAddr
+     * @param wallet
      * @param callingActivity
      * @param callback
      */
-    public void getAuthenticationForSignature(String walletAddr, Activity callingActivity, SignAuthenticationCallback callback)
+    public void getAuthenticationForSignature(Wallet wallet, Activity callingActivity, SignAuthenticationCallback callback)
     {
         signCallback = callback;
         callback.setupAuthenticationCallback(this);
         activity = callingActivity;
-        currentKeyAddress = walletAddr;
+        currentWallet = wallet;
         if (isChecking()) return; //guard against resetting existing dialog request
 
-        Wallet wallet = new Wallet(walletAddr);
-        wallet.checkWalletType(context);
         switch (wallet.type)
         {
             case KEYSTORE_LEGACY:
@@ -255,7 +249,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 break;
             case KEYSTORE:
             case HDKEY:
-                getAuthenticationForSignature();
+                checkAuthentication(Operation.CHECK_AUTHENTICATION);
                 break;
             case NOT_DEFINED:
             case TEXT_MARKER:
@@ -268,33 +262,41 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     /**
      * Upgrade key security
      *
-     * Works much the same as the import functions, but care must be taken not to destroy the existing key during upgrade
-     * In the process of attempting to encrypt using an auth-locked key, we necessarily overwrite the existing key.
-     * By attempting encryption we may trigger UserNotAuthenticatedException. In this case, the old key is already overwritten.
-     * Therefore, the flow re-writes the old keystore password/mnemonic bytes using a non-authentication locked AES key.
-     *
-     * The flow asks for authentication, if provided it will restore the password/mnemonic bytes from the key generated stored in the last step
-     * and again attempt to store the password/mnemonic bytes using an authentication-locked key. This time it will pass and the key is created.
-     * If Authentication fails there is a usable fallback key available.
+     * 1. Get authentication, and then execute 'upgradeKey()' from authenticatePass
+     * 2. Upgrade key reads the mnemonic/password, then calls storeEncryptedBytes with authentication.
+     * 3. returns result and flow back to callee via signCallback.CreatedKey
      *
      *
-     * @param key
+     * @param wallet
      * @param callingActivity
      * @param callback
      * @return
      */
-    public UpgradeKeyResult upgradeKeySecurity(String key, Activity callingActivity, SignAuthenticationCallback callback)
+    public UpgradeKeyResult upgradeKeySecurity(Wallet wallet, Activity callingActivity, SignAuthenticationCallback callback)
     {
         signCallback = callback;
         activity = callingActivity;
+        currentWallet = wallet;
         callback.setupAuthenticationCallback(this);
         //first check we have ability to generate the key
         if (!deviceIsLocked())
             return UpgradeKeyResult.NO_SCREENLOCK;
 
-        currentKeyAddress = key;
+        //request authentication
+        switch (wallet.type)
+        {
+            case KEYSTORE:
+            case KEYSTORE_LEGACY:
+                checkAuthentication(UPGRADE_KEYSTORE_KEY);
+                return UpgradeKeyResult.REQUESTING_SECURITY;
+            case HDKEY:
+                checkAuthentication(UPGRADE_HD_KEY);
+                return UpgradeKeyResult.REQUESTING_SECURITY;
+            default:
+                break;
+        }
 
-        return upgradeKey();
+        return UpgradeKeyResult.ERROR;
     }
 
     /**
@@ -306,25 +308,23 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
      * If HDWallet - decrypt mnemonic, regenerate private key, generate digest, sign digest using Trezor libs.
      * If Keystore - fetch keystore JSON file, decrypt keystore password, regenerate Web3j Credentials and sign.
      *
-     * @param key
+     * @param wallet
      * @param transactionBytes
      * @return
      */
-    public synchronized byte[] signData(String key, byte[] transactionBytes)
+    public synchronized byte[] signData(Wallet wallet, byte[] transactionBytes)
     {
-        currentKeyAddress = key;
-        Wallet wallet = new Wallet(currentKeyAddress);
-        wallet.checkWalletType(context);
+        currentWallet = wallet;
         switch (wallet.type)
         {
             case KEYSTORE_LEGACY:
-                return signWithKeystore(wallet, transactionBytes);
+                return signWithKeystore(transactionBytes);
             case KEYSTORE:
-                return signWithKeystore(wallet, transactionBytes);
+                return signWithKeystore(transactionBytes);
             case HDKEY:
-                String mnemonic = unpackMnemonic(currentKeyAddress, Operation.SIGN_DATA);
+                String mnemonic = unpackMnemonic();
                 if (mnemonic.length() == 0)
-                    return "0000".getBytes();
+                    return FAILED_SIGNATURE.getBytes();
                 HDWallet newWallet = new HDWallet(mnemonic, "");
                 PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
                 byte[] digest = Hash.keccak256(transactionBytes);
@@ -333,26 +333,23 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             case TEXT_MARKER:
             case WATCH:
             default:
-                return "0000".getBytes();
+                return FAILED_SIGNATURE.getBytes();
         }
     }
-
 
     /**
      * Fetches keystore password for export/backup of keystore
      *
-     * @param address
+     * @param wallet
      * @param callingActivity
      * @param callback
      */
-    public void getPassword(String address, Activity callingActivity, CreateWalletCallbackInterface callback)
+    public void getPassword(Wallet wallet, Activity callingActivity, CreateWalletCallbackInterface callback)
     {
         activity = callingActivity;
-        currentKeyAddress = address;
+        currentWallet = wallet;
         callbackInterface = callback;
         callback.setupAuthenticationCallback(this);
-        Wallet wallet = new Wallet(address);
-        wallet.checkWalletType(context);
 
         String password = null;
 
@@ -361,10 +358,13 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             switch (wallet.type)
             {
                 case KEYSTORE:
-                    password = unpackMnemonic(wallet.address, Operation.FETCH_MNEMONIC);
+                    password = unpackMnemonic();
+                    if (password.equals(REQUIRE_AUTHENTICATION)) checkAuthentication(FETCH_MNEMONIC);
+                    else callback.FetchMnemonic(password);
                     break;
                 case KEYSTORE_LEGACY:
                     password = new String(getLegacyPassword(context, wallet.address));
+                    callback.FetchMnemonic(password);
                     break;
                 default:
                     break;
@@ -380,11 +380,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         {
             e.printStackTrace();
         }
-
-        if (password != null)
-        {
-            callback.FetchMnemonic(password);
-        }
     }
 
 
@@ -399,15 +394,14 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         {
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
-            SecretKey secretKey = (SecretKey) keyStore.getKey(currentKeyAddress, null);
-            String encryptedHDKeyPath = getEncryptedFilePath(currentKeyAddress);//getFilePath(context, currentKey + "hd");
-            boolean fileExists = encryptedHDKeyPath != null && new File(encryptedHDKeyPath).exists();
-            if (!fileExists || secretKey == null)
+            SecretKey secretKey = (SecretKey) keyStore.getKey(currentWallet.address, null);
+            String encryptedHDKeyPath = getFilePath(context, currentWallet.address);
+            if (!new File(encryptedHDKeyPath).exists() || secretKey == null)
             {
                 signCallback.GotAuthorisation(false);
                 return;
             }
-            byte[] iv = readBytesFromFile(getFilePath(context, currentKeyAddress + "iv"));
+            byte[] iv = readBytesFromFile(getFilePath(context, currentWallet.address + "iv"));
             Cipher outCipher = Cipher.getInstance(CIPHER_ALGORITHM);
             final GCMParameterSpec spec = new GCMParameterSpec(128, iv);
             outCipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
@@ -434,27 +428,26 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         signCallback.GotAuthorisation(false);
     }
 
-    private synchronized String unpackMnemonic(String keyAddr, Operation operation)
+    private synchronized String unpackMnemonic()
     {
         try
         {
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
-            if (!keyStore.containsAlias(keyAddr))
+            if (!keyStore.containsAlias(currentWallet.address))
             {
                 keyFailure("Key not found in keystore. Re-import key.");
                 return "";
             }
 
             //create a stream to the encrypted bytes
-            FileInputStream encryptedHDKeyBytes = getEncryptedFileStream(keyAddr);
-
-            SecretKey secretKey = (SecretKey) keyStore.getKey(keyAddr, null);
-            boolean ivExists = new File(getFilePath(context, keyAddr + "iv")).exists();
+            FileInputStream encryptedHDKeyBytes = new FileInputStream(getFilePath(context, currentWallet.address));
+            SecretKey secretKey = (SecretKey) keyStore.getKey(currentWallet.address, null);
+            boolean ivExists = new File(getFilePath(context, currentWallet.address + "iv")).exists();
             byte[] iv = null;
 
             if (ivExists)
-                iv = readBytesFromFile(getFilePath(context, keyAddr + "iv"));
+                iv = readBytesFromFile(getFilePath(context, currentWallet.address + "iv"));
             if (iv == null || iv.length == 0)
             {
                 keyFailure("Cannot setup wallet seed.");
@@ -465,25 +458,13 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             outCipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
             CipherInputStream cipherInputStream = new CipherInputStream(encryptedHDKeyBytes, outCipher);
             byte[] mnemonicBytes = readBytesFromStream(cipherInputStream);
-            String mnemonic = new String(mnemonicBytes);
-
-            switch (operation)
-            {
-                case FETCH_MNEMONIC:
-                    callbackInterface.FetchMnemonic(mnemonic);
-                    break;
-                case UPGRADE_HD_KEY:
-                case SIGN_DATA:
-                    return mnemonic;
-                default:
-                    break;
-            }
+            return new String(mnemonicBytes);
         }
         catch (InvalidKeyException e)
         {
             if (e instanceof UserNotAuthenticatedException)
             {
-                checkAuthentication(operation);
+                return REQUIRE_AUTHENTICATION;
             }
             else
             {
@@ -508,17 +489,12 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         return "";
     }
 
-    private FileInputStream getEncryptedFileStream(String currentKey) throws FileNotFoundException
-    {
-        String encryptedHDKeyPath = getEncryptedFilePath(currentKey);
-        if (encryptedHDKeyPath != null) return new FileInputStream(encryptedHDKeyPath);
-        else throw new FileNotFoundException("No key file found");
-    }
-
     private void createHDKey()
     {
         HDWallet newWallet = new HDWallet(DEFAULT_KEY_STRENGTH, "");
-        storeHDKey(newWallet, Operation.CREATE_NON_AUTHENTICATED_KEY); //create non-authenticated key initially
+        boolean success = storeHDKey(newWallet, false); //create non-authenticated key initially
+        if (callbackInterface != null)
+            callbackInterface.HDKeyCreated(success ? currentWallet.address : null, context, authLevel);
     }
 
     /**
@@ -528,51 +504,46 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     {
         //first recover the seed phrase from non-authlocked key. This removes the need to keep the seed phrase as a member on the heap
         // - making the key operation more secure
-        String seedPhrase = unpackMnemonic(currentKeyAddress, UPGRADE_HD_KEY);
+        String seedPhrase = unpackMnemonic();
         HDWallet newWallet = new HDWallet(seedPhrase, "");
-        storeHDKey(newWallet, Operation.IMPORT_HD_KEY);
+        boolean success = storeHDKey(newWallet, true);
+        String reportAddress = success ? currentWallet.address : null;
+        importCallback.WalletValidated(reportAddress, authLevel);
     }
 
-    private UpgradeKeyResult upgradeKey()
+    /**
+     * Reached after authentication has been provided
+     * @return
+     */
+    private void upgradeKey()
     {
         try
         {
-            WalletType type = Wallet.getKeystoreType(context, currentKeyAddress);
-            //now check it's an unlocked key
-            String existingEncryptedKey = getEncryptedFilePath(currentKeyAddress);
-            if (existingEncryptedKey != null && (existingEncryptedKey.contains(NO_AUTH_LABEL) || type == KEYSTORE_LEGACY))
+            String secretData = null;
+
+            switch (currentWallet.type)
             {
-                Operation keyOperation;
-                String secretData = null;
+                case HDKEY:
+                case KEYSTORE:
+                    secretData = unpackMnemonic();
+                    break;
+                case KEYSTORE_LEGACY:
+                    secretData = new String(getLegacyPassword(context, currentWallet.address));
+                    break;
+                default:
+                    break;
+            }
 
-                switch (type)
-                {
-                    case KEYSTORE:
-                        secretData = unpackMnemonic(currentKeyAddress, Operation.UPGRADE_HD_KEY);
-                        keyOperation = Operation.UPGRADE_KEYSTORE_KEY;
-                        break;
-                    case KEYSTORE_LEGACY:
-                        secretData = new String(getLegacyPassword(context, currentKeyAddress));
-                        keyOperation = Operation.UPGRADE_KEYSTORE_KEY;
-                        break;
-                    case HDKEY:
-                        secretData = unpackMnemonic(currentKeyAddress, Operation.UPGRADE_HD_KEY);
-                        keyOperation = Operation.UPGRADE_HD_KEY;
-                        break;
-                    default:
-                        return UpgradeKeyResult.ERROR;
-                }
+            if (secretData == null) return;
 
-                if (secretData == null)
-                    return UpgradeKeyResult.ERROR;
-
-                storeEncryptedBytes(currentKeyAddress, secretData.getBytes(), keyOperation);
-
-                return UpgradeKeyResult.REQUESTING_SECURITY;
+            boolean keyStored = storeEncryptedBytes(secretData.getBytes(), true);
+            if (keyStored)
+            {
+                signCallback.CreatedKey(currentWallet.address);
             }
             else
             {
-                return UpgradeKeyResult.ALREADY_LOCKED;
+                signCallback.CreatedKey(ZERO_ADDRESS);
             }
         }
         catch (ServiceErrorException e)
@@ -580,47 +551,44 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             //Legacy keystore error
             if (!BuildConfig.DEBUG) Crashlytics.logException(e);
             e.printStackTrace();
-            return UpgradeKeyResult.ERROR;
+            signCallback.CreatedKey(ZERO_ADDRESS);
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            return UpgradeKeyResult.ERROR;
+            signCallback.CreatedKey(ZERO_ADDRESS);
         }
     }
 
-    private synchronized void storeHDKey(HDWallet newWallet, Operation operation)
+    private synchronized boolean storeHDKey(HDWallet newWallet, boolean keyRequiresAuthentication)
     {
         PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
-        currentKeyAddress = CoinType.ETHEREUM.deriveAddress(pk);
+        currentWallet = new Wallet(CoinType.ETHEREUM.deriveAddress(pk));
 
-        storeEncryptedBytes(currentKeyAddress, newWallet.mnemonic().getBytes(), operation);
+        return storeEncryptedBytes(newWallet.mnemonic().getBytes(), keyRequiresAuthentication);
     }
 
-    private synchronized void storeEncryptedBytes(String address, byte[] data, Operation operation)
+    private synchronized boolean storeEncryptedBytes(byte[] data, boolean createAuthLocked)
     {
         KeyStore keyStore = null;
         try
         {
             keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
-            boolean useAuth = keyIsAuthLocked(operation);
-            String encryptedHDKeyPath = createEncryptedFilePath(address, operation);
-
-            KeyGenerator keyGenerator = getMaxSecurityKeyGenerator(address, useAuth);
+            String encryptedHDKeyPath = getFilePath(context, currentWallet.address);
+            KeyGenerator keyGenerator = getMaxSecurityKeyGenerator(currentWallet.address, createAuthLocked);
             final SecretKey secretKey = keyGenerator.generateKey();
             final Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             byte[] iv = cipher.getIV();
-            String ivPath = getFilePath(context, address + "iv");
+            String ivPath = getFilePath(context, currentWallet.address + "iv");
             boolean success = writeBytesToFile(ivPath, iv);
             if (!success)
             {
-                deleteKey(keyStore, address);
-                failToStore(operation);
+                deleteKey(currentWallet.address);
                 throw new ServiceErrorException(
                         ServiceErrorException.FAIL_TO_SAVE_IV_FILE,
-                        "Failed to saveTokens the iv file for: " + address + "iv");
+                        "Failed to saveTokens the iv file for: " + currentWallet.address + "iv");
             }
 
             try (CipherOutputStream cipherOutputStream = new CipherOutputStream(
@@ -631,104 +599,33 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             }
             catch (Exception ex)
             {
-                deleteKey(keyStore, address);
-                failToStore(operation);
+                deleteKey(currentWallet.address);
                 throw new ServiceErrorException(
                         ServiceErrorException.KEY_STORE_ERROR,
-                        "Failed to saveTokens the file for: " + address);
+                        "Failed to saveTokens the file for: " + currentWallet.address);
             }
 
-            switch (operation)
-            {
-                case CREATE_HD_KEY:
-                case CREATE_NON_AUTHENTICATED_KEY:
-                    if (callbackInterface != null)
-                        callbackInterface.HDKeyCreated(address, context, authLevel);
-                    break;
-                case IMPORT_HD_KEY:
-                    importCallback.WalletValidated(address, authLevel);
-                    deleteNonAuthKeyEncryptedKeyBytes(address); //in the case the user re-imported a key, destroy the backup key
-                    break;
-                case UPGRADE_HD_KEY:
-                case UPGRADE_KEYSTORE_KEY:
-                    signCallback.CreatedKey(address);
-                    deleteNonAuthKeyEncryptedKeyBytes(address);
-                    break;
-                case CREATE_KEYSTORE_KEY:
-                    importCallback.KeystoreValidated(new String(data), authLevel);
-                    break;
-                case CREATE_PRIVATE_KEY:
-                    importCallback.KeyValidated(new String(data), authLevel);
-                    break;
-                default:
-                    break;
-            }
-
-            return;
-        }
-        catch (UserNotAuthenticatedException e)
-        {
-            //Store non-authenticated key if required.
-            //This keeps the operation modular
-            switch (operation)
-            {
-                case IMPORT_HD_KEY:
-                case UPGRADE_HD_KEY:
-                    storeEncryptedBytes(address, data, RESTORE_NON_AUTHENTICATED_HD_KEY);
-                    break;
-                case UPGRADE_KEYSTORE_KEY:
-                    storeEncryptedBytes(address, data, RESTORE_NON_AUTHENTICATED_KS_KEY);
-                    break;
-                default:
-                    deleteKey(keyStore, address);
-                    break;
-            }
-
-            //User isn't authenticated, get authentication and start again
-            checkAuthentication(operation);
-            return;
+            return true;
         }
         catch (Exception ex)
         {
-            deleteKey(keyStore, address);
+            deleteKey(currentWallet.address);
             Log.d(TAG, "Key store error", ex);
         }
 
-        failToStore(operation);
-    }
-
-    private void failToStore(Operation operation)
-    {
-        switch (operation)
-        {
-            default:
-            case CREATE_HD_KEY:
-                callbackInterface.HDKeyCreated(ZERO_ADDRESS, context, AuthenticationLevel.NOT_SET);
-                break;
-            case IMPORT_HD_KEY:
-                importCallback.WalletValidated(null, AuthenticationLevel.NOT_SET);
-                break;
-        }
+        return false;
     }
 
     private KeyGenerator getMaxSecurityKeyGenerator(String keyAddress, boolean useAuthentication)
     {
-        KeyGenerator keyGenerator;
+        KeyGenerator keyGenerator = null;
 
         try
         {
             keyGenerator = KeyGenerator.getInstance(
                     KeyProperties.KEY_ALGORITHM_AES,
                     ANDROID_KEY_STORE);
-        }
-        catch (NoSuchAlgorithmException | NoSuchProviderException ex)
-        {
-            ex.printStackTrace();
-            return null;
-        }
 
-        try
-        {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && tryInitStrongBoxKey(keyGenerator, keyAddress, useAuthentication))
             {
                 Log.d(TAG, "Using Strongbox");
@@ -748,10 +645,14 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 authLevel = AuthenticationLevel.TEE_NO_AUTHENTICATION;
             }
         }
+        catch (NoSuchAlgorithmException | NoSuchProviderException ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
         catch (Exception e)
         {
             e.printStackTrace();
-            //handle unable to generate key - should be impossible to get here after API 19
             authLevel = AuthenticationLevel.NOT_SET;
         }
 
@@ -824,12 +725,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 dialogTitle = context.getString(R.string.provide_authentication);
                 break;
             case FETCH_MNEMONIC:
-            case SIGN_WITH_KEY:
             case CHECK_AUTHENTICATION:
             case SIGN_DATA:
-            case CREATE_NON_AUTHENTICATED_KEY:
-            case RESTORE_NON_AUTHENTICATED_HD_KEY:
-            case RESTORE_NON_AUTHENTICATED_KS_KEY:
             default:
                 dialogTitle = context.getString(R.string.unlock_private_key);
                 break;
@@ -866,11 +763,11 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         Operation operation = Operation.values()[callbackId];
         switch (operation)
         {
-            case CREATE_HD_KEY:
+            case CREATE_HD_KEY: //Note: not currently used: may be used if we create an HD key with authentication
                 createHDKey();
                 break;
             case FETCH_MNEMONIC:
-                unpackMnemonic(currentKeyAddress, Operation.FETCH_MNEMONIC);
+                callbackInterface.FetchMnemonic(unpackMnemonic());
                 break;
             case IMPORT_HD_KEY:
                 importHDKey();
@@ -998,6 +895,9 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         dialog.show();
     }
 
+    /**
+     * Only ever called after authentication event
+     */
     private void createPassword(Operation operation)
     {
         //generate password
@@ -1022,34 +922,43 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
         random.nextBytes(newPassword);
 
-        //attempt to store this password. NB this may result in a callback firing off then re-entering this function.
-        storeEncryptedBytes(currentKeyAddress, newPassword, operation);  //because we'll now only ever be importing keystore, always create with Auth
+        boolean success = storeEncryptedBytes(newPassword, true);  //because we'll now only ever be importing keystore, always create with Auth
+        if (!success) newPassword = null;
+        switch (operation)
+        {
+            case CREATE_KEYSTORE_KEY:
+                importCallback.KeystoreValidated(new String(newPassword), authLevel);
+                break;
+            case CREATE_PRIVATE_KEY:
+                importCallback.KeyValidated(new String(newPassword), authLevel);
+                break;
+        }
     }
 
-    private synchronized byte[] signWithKeystore(Wallet wallet, byte[] transactionBytes)
+    private synchronized byte[] signWithKeystore(byte[] transactionBytes)
     {
         //1. get password from store
         //2. construct credentials
         //3. sign
-        byte[] sigBytes = "0000".getBytes();
+        byte[] sigBytes = FAILED_SIGNATURE.getBytes();
 
         try
         {
             String password = "";
-            switch (wallet.type)
+            switch (currentWallet.type)
             {
                 case KEYSTORE:
-                    password = unpackMnemonic(wallet.address, Operation.SIGN_DATA);
+                    password = unpackMnemonic();
                     break;
                 case KEYSTORE_LEGACY:
-                    password = new String(getLegacyPassword(context, wallet.address));
+                    password = new String(getLegacyPassword(context, currentWallet.address));
                     break;
                 default:
                     break;
             }
 
             File keyFolder = new File(context.getFilesDir(), KEYSTORE_FOLDER);
-            Credentials credentials = KeystoreAccountService.getCredentials(keyFolder, wallet.address, password);
+            Credentials credentials = KeystoreAccountService.getCredentials(keyFolder, currentWallet.address, password);
             Sign.SignatureData signatureData = Sign.signMessage(
                     transactionBytes, credentials.getEcKeyPair());
             sigBytes = KeystoreAccountService.bytesFromSignature(signatureData);
@@ -1067,145 +976,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
         return sigBytes;
     }
-
-
-    /**
-     * Return a list of HD Key wallets in date order, from first created
-     *
-     * @return List of Wallet, date ordered
-     */
-    public List<Wallet> getAllHDWallets()
-    {
-        List<Wallet> wallets = new ArrayList<>();
-        try
-        {
-            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
-            keyStore.load(null);
-            Enumeration<String> keys = keyStore.aliases();
-            List<Date> fileDates = new ArrayList<>();
-            Map<Date, Wallet> walletMap = new HashMap<>();
-
-            while (keys.hasMoreElements())
-            {
-                String alias = keys.nextElement();
-                String encryptedHDFileName = getEncryptedFilePath(alias);
-                if (encryptedHDFileName != null && encryptedHDFileName.contains(HDKEY_LABEL))
-                {
-                    File hdEncryptedBytes = new File(encryptedHDFileName);
-                    Date date = new Date(hdEncryptedBytes.lastModified());
-                    fileDates.add(date);
-                    if (!alias.startsWith("0x"))
-                        alias = "0x" + alias;
-                    Wallet hdKey = new Wallet(alias);
-                    hdKey.type = WalletType.HDKEY;
-
-                    switch (securityStatus)
-                    {
-                        default:
-                            if (encryptedHDFileName.contains(NO_AUTH_LABEL)) hdKey.authLevel = AuthenticationLevel.TEE_NO_AUTHENTICATION;
-                            else hdKey.authLevel = AuthenticationLevel.TEE_AUTHENTICATION;
-                            break;
-                        case HAS_STRONGBOX:
-                            if (encryptedHDFileName.contains(NO_AUTH_LABEL)) hdKey.authLevel = AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
-                            else hdKey.authLevel = AuthenticationLevel.STRONGBOX_AUTHENTICATION;
-                            break;
-                    }
-
-                    walletMap.put(date, hdKey);
-                }
-            }
-
-            Collections.sort(fileDates);
-
-            for (Date d : fileDates)
-            {
-                wallets.add(walletMap.get(d));
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return wallets;
-    }
-
-    private String createEncryptedFilePath(String address, Operation operation)
-    {
-        String fileName = address;
-        switch (operation)
-        {
-            case UPGRADE_HD_KEY:
-            case IMPORT_HD_KEY:
-            case CREATE_HD_KEY:
-                fileName += HDKEY_LABEL;
-                break;
-
-            case RESTORE_NON_AUTHENTICATED_HD_KEY:
-            case CREATE_NON_AUTHENTICATED_KEY:
-                fileName = fileName + NO_AUTH_LABEL + HDKEY_LABEL;
-                break;
-            case CREATE_KEYSTORE_KEY:
-            case CREATE_PRIVATE_KEY:
-                if (deviceIsLocked())
-                {
-                    fileName += KEYSTORE_LABEL;
-                }
-                else
-                {
-                    fileName = fileName + NO_AUTH_LABEL + KEYSTORE_LABEL;
-                }
-                break;
-            case RESTORE_NON_AUTHENTICATED_KS_KEY:
-                fileName = fileName + NO_AUTH_LABEL + KEYSTORE_LABEL;
-                break;
-            case UPGRADE_KEYSTORE_KEY:
-                fileName += KEYSTORE_LABEL;
-                break;
-            default:
-                break;
-        }
-
-        return getFilePath(context, fileName);
-    }
-
-    private boolean keyIsAuthLocked(Operation operation)
-    {
-        switch (operation)
-        {
-            case UPGRADE_HD_KEY:
-            case CREATE_HD_KEY:
-            case UPGRADE_KEYSTORE_KEY:
-            case IMPORT_HD_KEY:
-                return true;
-            case CREATE_NON_AUTHENTICATED_KEY:
-            case RESTORE_NON_AUTHENTICATED_HD_KEY:
-            case RESTORE_NON_AUTHENTICATED_KS_KEY:
-                return false;
-            case CREATE_KEYSTORE_KEY:
-            case CREATE_PRIVATE_KEY:
-                return deviceIsLocked();
-            default:
-                return false;
-        }
-    }
-
-    private String getEncryptedFilePath(String keyAddr)
-    {
-        if (keyAddr == null) return null;
-        String authEncryptedHDKeyPath = getFilePath(context, keyAddr + HDKEY_LABEL);
-        String noAuthEncryptedHDKeyPath = getFilePath(context, keyAddr + NO_AUTH_LABEL + HDKEY_LABEL);
-        String authEncryptedKeystorePath = getFilePath(context, keyAddr + KEYSTORE_LABEL);
-        String noAuthEncryptedKeystorePath = getFilePath(context, keyAddr + NO_AUTH_LABEL + KEYSTORE_LABEL);
-        String legacyKeyBytes = getFilePath(context, keyAddr);
-        if (new File(authEncryptedHDKeyPath).exists()) return authEncryptedHDKeyPath;
-        else if (new File(noAuthEncryptedHDKeyPath).exists()) return noAuthEncryptedHDKeyPath;
-        else if (new File(authEncryptedKeystorePath).exists()) return authEncryptedKeystorePath;
-        else if (new File(noAuthEncryptedKeystorePath).exists()) return noAuthEncryptedKeystorePath;
-        else if (new File(legacyKeyBytes).exists()) return legacyKeyBytes;
-        else return null;
-    }
-
 
     /*
             Utility methods
@@ -1227,7 +997,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         }
         return bytes;
     }
-
 
     public synchronized static String getFilePath(Context context, String fileName)
     {
@@ -1317,65 +1086,21 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         return byteBuffer.toByteArray();
     }
 
-
-    private synchronized void deleteKey(KeyStore keyStore, String keyAddr)
-    {
-        try
-        {
-            String encryptedBytesPath = getEncryptedFilePath(keyAddr);
-            if (encryptedBytesPath != null && new File(encryptedBytesPath).exists())  new File(encryptedBytesPath).delete();
-            File iv = new File(getFilePath(context, keyAddr + "iv"));
-            if (iv.exists())
-                iv.delete();
-            if (keyStore != null && keyAddr != null && keyStore.containsAlias(keyAddr))
-                keyStore.deleteEntry(keyAddr);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Delete a non-auth key
-     * note that the iv and keystore key will have been replaced by the newly minted auth key
-     *
-     * @param address
-     */
-    private void deleteNonAuthKeyEncryptedKeyBytes(String address)
-    {
-        if (address == null) return;
-        File nonAuthKey = new File(getFilePath(context, address + NO_AUTH_LABEL + HDKEY_LABEL));
-        File nonAuthKeystore = new File(getFilePath(context, address + NO_AUTH_LABEL + KEYSTORE_LABEL));
-        File legacyKey = new File(getFilePath(context, address));
-        if (nonAuthKey.exists()) nonAuthKey.delete();
-        if (nonAuthKeystore.exists()) nonAuthKeystore.delete();
-        if (legacyKey.exists()) legacyKey.delete();
-    }
-
     /**
      * Delete all traces of the key in Android keystore, encrypted bytes and iv file in private data area
      * @param keyAddress
      */
-    public synchronized void deleteKeyCompletely(String keyAddress)
+    public synchronized void deleteKey(String keyAddress)
     {
-        KeyStore keyStore;
         try {
-            keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
+            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
-            keyStore.deleteEntry(keyAddress);
-            String encryptedPasswordBytes = getEncryptedFilePath(keyAddress);
-            if (encryptedPasswordBytes == null)
-            {
-                //try legacy keystore
-                if (new File(getFilePath(context, keyAddress)).exists()) encryptedPasswordBytes = getFilePath(context, keyAddress);
-            }
-            if (encryptedPasswordBytes != null)
-            {
-                new File(getFilePath(context, encryptedPasswordBytes)).delete();
-                new File(getFilePath(context, keyAddress + "iv")).delete();
-            }
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
+            if (keyStore.containsAlias(keyAddress)) keyStore.deleteEntry(keyAddress);
+            File encryptedKeyBytes = new File(getFilePath(context, keyAddress));
+            File encryptedBytesFileIV = new File(getFilePath(context, keyAddress + "iv"));
+            if (encryptedKeyBytes.exists()) encryptedKeyBytes.delete();
+            if (encryptedBytesFileIV.exists()) encryptedBytesFileIV.delete();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -1412,11 +1137,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
         if (keyguardManager == null) return false;
         else return keyguardManager.isDeviceSecure();
-    }
-
-    public void checkWalletType(Wallet wallet)
-    {
-        wallet.checkWalletType(context);
     }
 
     private void vibrate()

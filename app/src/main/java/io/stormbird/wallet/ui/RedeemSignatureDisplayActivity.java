@@ -76,7 +76,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         viewModel.selection().observe(this, this::onSelected);
         viewModel.burnNotice().observe(this, this::onBurned);
         viewModel.signRequest().observe(this, this::onSignRequest);
-        wallet.checkWalletType(this);
 
         ticketBurnNotice();
         TextView tv = findViewById(R.id.textAddIDs);

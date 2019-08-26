@@ -36,6 +36,7 @@ public interface WalletRepositoryType {
     Single<Integer> storeWallets(Wallet[] wallets, boolean isMainNet);
 
     Single<Wallet> storeWallet(Wallet wallet);
+    Single<Wallet> updateWalletData(Wallet wallet);
 
     Single<String> getName(String address);
 

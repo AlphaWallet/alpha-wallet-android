@@ -38,6 +38,8 @@ import retrofit2.Response;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
 
+import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
+
 /**
  * Created by James on 7/02/2018.
  */
@@ -377,19 +379,5 @@ public class MarketQueueService {
         String publicKeyString = Keys.getAddress(recoveredKey); //TODO: Remove - this is here for debug/testing
 
         return recoveredKey;
-    }
-
-    public static Sign.SignatureData sigFromByteArray(byte[] sig)
-    {
-        byte   subv = sig[64];
-        if (subv < 27) subv += 27;
-
-        byte[] subrRev = Arrays.copyOfRange(sig, 0, 32);
-        byte[] subsRev = Arrays.copyOfRange(sig, 32, 64);
-
-        BigInteger r = new BigInteger(1, subrRev);
-        BigInteger s = new BigInteger(1, subsRev);
-
-        return new Sign.SignatureData(subv, subrRev, subsRev);
     }
 }

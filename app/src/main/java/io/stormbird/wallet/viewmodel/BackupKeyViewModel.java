@@ -65,9 +65,9 @@ public class BackupKeyViewModel extends BaseViewModel {
         deleted.postValue(true);
     }
 
-    public void exportWallet(String walletAddr, String keystorePassword, String storePassword) {
+    public void exportWallet(Wallet wallet, String keystorePassword, String storePassword) {
         disposable = exportWalletInteract
-                .export(new Wallet(walletAddr), keystorePassword, storePassword)
+                .export(wallet, keystorePassword, storePassword)
                 .subscribe(exportedStore::postValue, this::onExportWalletError);
     }
 
@@ -103,6 +103,16 @@ public class BackupKeyViewModel extends BaseViewModel {
 
     private void onWalletUpgraded(Wallet wallet)
     {
+        switch (wallet.authLevel)
+        {
+            default:
+            case TEE_NO_AUTHENTICATION:
+                wallet.authLevel = KeyService.AuthenticationLevel.TEE_AUTHENTICATION;
+                break;
+            case STRONGBOX_NO_AUTHENTICATION:
+                wallet.authLevel = KeyService.AuthenticationLevel.STRONGBOX_AUTHENTICATION;
+                break;
+        }
         Log.d("HVM", "Wallet " + wallet.address + " Upgraded to: " + wallet.authLevel.toString());
     }
 
@@ -127,24 +137,24 @@ public class BackupKeyViewModel extends BaseViewModel {
     }
 
 
-    public KeyService.UpgradeKeyResult upgradeKeySecurity(String keyBackup, Activity activity, SignAuthenticationCallback callback)
+    public KeyService.UpgradeKeyResult upgradeKeySecurity(Wallet wallet, Activity activity, SignAuthenticationCallback callback)
     {
-        return keyService.upgradeKeySecurity(keyBackup, activity, callback);
+        return keyService.upgradeKeySecurity(wallet, activity, callback);
     }
 
-    public void getPasswordForKeystore(String keyBackup, Activity activity, CreateWalletCallbackInterface callback)
+    public void getPasswordForKeystore(Wallet wallet, Activity activity, CreateWalletCallbackInterface callback)
     {
-        keyService.getPassword(keyBackup, activity, callback);
+        keyService.getPassword(wallet, activity, callback);
     }
 
-    public void getSeedPhrase(String keyBackup, Activity activity, CreateWalletCallbackInterface callback)
+    public void getSeedPhrase(Wallet wallet, Activity activity, CreateWalletCallbackInterface callback)
     {
-        keyService.getMnemonic(keyBackup, activity, callback);
+        keyService.getMnemonic(wallet, activity, callback);
     }
 
-    public void backupSuccess(String keyBackup)
+    public void backupSuccess(Wallet wallet)
     {
-        fetchWalletsInteract.updateBackupTime(keyBackup).isDisposed();
+        fetchWalletsInteract.updateBackupTime(wallet.address).isDisposed();
     }
 }
 

@@ -521,12 +521,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         //postpone backup until later
         settingsFragment.backupSeedSuccess();
-        walletFragment.remindMeLater(keyBackup);
-        viewModel.checkIsBackedUp(keyBackup);
-
-        /*successImage.setImageResource(R.drawable.ic_error);
-        successOverlay.setVisibility(View.VISIBLE);
-        handler = new Handler();*/
+        if (keyBackup != null)
+        {
+            walletFragment.remindMeLater(new Wallet(keyBackup));
+            viewModel.checkIsBackedUp(keyBackup);
+        }
     }
 
     private void backupWalletSuccess(String keyBackup)

@@ -242,7 +242,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     {
         if (defaultWallet.getValue() != null)
         {
-            keyService.getAuthenticationForSignature(defaultWallet.getValue().address, activity, callback);
+            keyService.getAuthenticationForSignature(defaultWallet.getValue(), activity, callback);
         }
     }
 }

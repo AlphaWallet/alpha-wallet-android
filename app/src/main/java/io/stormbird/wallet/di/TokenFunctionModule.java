@@ -4,9 +4,11 @@ import dagger.Module;
 import dagger.Provides;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
+import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -31,10 +33,11 @@ public class TokenFunctionModule
             GasService gasService,
             TokensService tokensService,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            KeyService keyService) {
+            KeyService keyService,
+            GenericWalletInteract genericWalletInteract) {
 
         return new TokenFunctionViewModelFactory(
-                assetDefinitionService, sellTicketRouter, transferTicketRouter, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService);
+                assetDefinitionService, sellTicketRouter, transferTicketRouter, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract);
     }
 
     @Provides
@@ -55,5 +58,10 @@ public class TokenFunctionModule
     @Provides
     FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
         return new FetchTokensInteract(tokenRepository);
+    }
+
+    @Provides
+    GenericWalletInteract provideGenericWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 }

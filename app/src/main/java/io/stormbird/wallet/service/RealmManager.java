@@ -50,6 +50,10 @@ public class RealmManager {
         return getRealmInstance("WalletData-db.realm");
     }
 
+    public Realm getWalletTypeRealmInstance() {
+        return getRealmInstance("WalletType-db.realm");
+    }
+
     private String get721Name(Wallet wallet) {
         return wallet.address + "-721-db.realm";
     }

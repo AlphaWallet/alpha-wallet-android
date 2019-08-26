@@ -623,4 +623,9 @@ public class WalletViewModel extends BaseViewModel
     {
         return genericWalletInteract.updateWarningTime(walletAddr);
     }
+
+    public Wallet getWallet()
+    {
+        return currentWallet;
+    }
 }

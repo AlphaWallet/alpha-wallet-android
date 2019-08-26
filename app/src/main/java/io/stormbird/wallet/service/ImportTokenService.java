@@ -36,17 +36,4 @@ public class ImportTokenService {
     public Single<byte[]> sign(Wallet wallet, byte[] data, int chainId) {
         return transactionRepository.getSignature(wallet, data, chainId);
     }
-
-    public static Sign.SignatureData sigFromByteArray(byte[] sig)
-    {
-        byte subv = (byte)(sig[64] + 27);
-
-        byte[] subrRev = Arrays.copyOfRange(sig, 0, 32);
-        byte[] subsRev = Arrays.copyOfRange(sig, 32, 64);
-
-        BigInteger r = new BigInteger(1, subrRev);
-        BigInteger s = new BigInteger(1, subsRev);
-
-        return new Sign.SignatureData(subv, subrRev, subsRev);
-    }
 }

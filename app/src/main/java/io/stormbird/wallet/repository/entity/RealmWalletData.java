@@ -18,10 +18,7 @@ public class RealmWalletData extends RealmObject
     private String ENSName;
     private String balance;
     private String name;
-    private int type;
-    private long lastBackup;
     private long lastWarning;
-    private int authLevel;
 
     public String getAddress()
     {
@@ -61,18 +58,6 @@ public class RealmWalletData extends RealmObject
         this.name = name;
     }
 
-    public WalletType getType() { return WalletType.values()[type]; }
-    public void setType(WalletType type) { this.type = type.ordinal(); }
-
-    public long getLastBackup()
-    {
-        return lastBackup;
-    }
-    public void setLastBackup(long lastBackup)
-    {
-        this.lastBackup = lastBackup;
-    }
-
     public long getLastWarning()
     {
         return lastWarning;
@@ -83,14 +68,4 @@ public class RealmWalletData extends RealmObject
     }
     public boolean getIsDismissedInSettings() { return (lastWarning & 0x1) == 1; }
     public void setIsDismissedInSettings(boolean isDismissed) { lastWarning = (lastWarning&DISMISS_WARNING_IN_SETTINGS_MASK) + (isDismissed ? 0x1 : 0x0); }
-
-    public KeyService.AuthenticationLevel getAuthLevel()
-    {
-        return KeyService.AuthenticationLevel.values()[authLevel];
-    }
-
-    public void setAuthLevel(KeyService.AuthenticationLevel authLevel)
-    {
-        this.authLevel = authLevel.ordinal();
-    }
 }

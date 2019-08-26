@@ -28,6 +28,7 @@ public class CryptoFunctions implements CryptoFunctionsInterface
     public BigInteger signedMessageToKey(byte[] data, byte[] signature) throws SignatureException
     {
         Sign.SignatureData sigData = sigFromByteArray(signature);
+        if (sigData == null) return BigInteger.ZERO;
         return Sign.signedMessageToKey(data, sigData);
     }
 

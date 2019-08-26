@@ -205,7 +205,6 @@ public class NewSettingsFragment extends Fragment
     private void openBackupActivity(Wallet wallet)
     {
         Intent intent = new Intent(getContext(), BackupKeyActivity.class);
-        intent.putExtra("ADDRESS", wallet.address);
         intent.putExtra(WALLET, wallet);
 
         switch (wallet.type)
@@ -337,7 +336,8 @@ public class NewSettingsFragment extends Fragment
                 layoutBackup.setVisibility(View.GONE);
             }
             //remove the number prompt
-            if (getActivity() !=null) ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+            if (getActivity() != null) ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+            onDefaultWallet(viewModel.defaultWallet().getValue());
         }
     }
 

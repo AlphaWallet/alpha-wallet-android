@@ -25,7 +25,7 @@ import okhttp3.RequestBody;
 
 import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
 import static io.stormbird.token.tools.ParseMagicLink.spawnable;
-import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
+import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 public class FeeMasterService
 {
@@ -121,9 +121,12 @@ public class FeeMasterService
     private void addSignature(Map<String, String> args, byte[] sig)
     {
         Sign.SignatureData sigData = sigFromByteArray(sig);
-        args.put("r", Numeric.toHexString(sigData.getR()));
-        args.put("s", Numeric.toHexString(sigData.getS()));
-        args.put("v", Integer.toHexString(sigData.getV()));
+        if (sigData != null)
+        {
+            args.put("r", Numeric.toHexString(sigData.getR()));
+            args.put("s", Numeric.toHexString(sigData.getS()));
+            args.put("v", Integer.toHexString(sigData.getV()));
+        }
     }
 
     private Single<Integer> sendFeemasterTransaction(String url, int networkId, String toAddress, long expiry, String indices, byte[] tradeSig) {

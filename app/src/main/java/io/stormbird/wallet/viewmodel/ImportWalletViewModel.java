@@ -109,10 +109,10 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
         }
     }
 
-    public void getAuthorisation(String walletAddress, Activity activity, SignAuthenticationCallback callback)
-    {
-        keyService.getAuthenticationForSignature(walletAddress, activity, callback);
-    }
+//    public void getAuthorisation(String walletAddress, Activity activity, SignAuthenticationCallback callback)
+//    {
+//        keyService.getAuthenticationForSignature(walletAddress, activity, callback);
+//    }
 
     public void importHDWallet(String seedPhrase, Activity activity, ImportWalletCallback callback)
     {

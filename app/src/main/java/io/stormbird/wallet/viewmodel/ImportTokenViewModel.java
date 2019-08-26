@@ -674,7 +674,7 @@ public class ImportTokenViewModel extends BaseViewModel
     {
         if (wallet.getValue() != null)
         {
-            keyService.getAuthenticationForSignature(wallet.getValue().address, activity, callback);
+            keyService.getAuthenticationForSignature(wallet.getValue(), activity, callback);
         }
     }
 }

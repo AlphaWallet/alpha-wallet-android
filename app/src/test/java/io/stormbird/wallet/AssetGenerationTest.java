@@ -87,7 +87,7 @@ public class AssetGenerationTest
 
 
         String city = String.format("%02x", 1);
-        //String spacer = "FFFFFFFFFFFFFFFFFFFF";
+        String spacer = "00000000000000000000000000";
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         boolean first = true;

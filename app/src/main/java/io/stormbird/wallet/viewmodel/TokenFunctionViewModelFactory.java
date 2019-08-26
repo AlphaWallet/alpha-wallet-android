@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.SellTicketRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
@@ -26,6 +27,7 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
+    private final GenericWalletInteract genericWalletInteract;
 
     public TokenFunctionViewModelFactory(
             AssetDefinitionService assetDefinitionService,
@@ -35,7 +37,8 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
             GasService gasService,
             TokensService tokensService,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            KeyService keyService) {
+            KeyService keyService,
+            GenericWalletInteract genericWalletInteract) {
         this.assetDefinitionService = assetDefinitionService;
         this.sellTicketRouter = sellTicketRouter;
         this.transferTicketRouter = transferTicketRouter;
@@ -44,11 +47,12 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
         this.tokensService = tokensService;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.keyService = keyService;
+        this.genericWalletInteract = genericWalletInteract;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new TokenFunctionViewModel(assetDefinitionService, sellTicketRouter, transferTicketRouter, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService);
+        return (T) new TokenFunctionViewModel(assetDefinitionService, sellTicketRouter, transferTicketRouter, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract);
     }
 }

@@ -98,6 +98,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         tokenView.setVisibility(View.GONE);
         waitSpinner.setVisibility(View.VISIBLE);
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
+        viewModel.getCurrentWallet();
 
         getAttrs();
     }
@@ -425,7 +426,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
                 //this is very specific but 'value' is a specifically handled param
                 value = action.function.tx.args.get("value").value;
                 BigDecimal valCorrected = getCorrectedBalance(value, 18);
-                Token currency = viewModel.getCurrency(token.tokenInfo.chainId, token.getWallet());
+                Token currency = viewModel.getCurrency(token.tokenInfo.chainId);
                 functionEffect = valCorrected.toString() + " " + currency.tokenInfo.symbol + " to " + actionMethod;
             }
 
@@ -453,7 +454,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         //calculate native amount
         BigDecimal value = new BigDecimal(function.tx.args.get("value").value);
         //this is a native send, so check the native currency
-        Token currency = viewModel.getCurrency(token.tokenInfo.chainId, token.getWallet());
+        Token currency = viewModel.getCurrency(token.tokenInfo.chainId);
 
         if (currency.balance.subtract(value).compareTo(BigDecimal.ZERO) < 0)
         {
@@ -529,9 +530,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void signMessage(byte[] sign, DAppFunction dAppFunction, Message<String> message)
     {
-        Wallet signingWallet = new Wallet(token.getWallet());
-        signingWallet.checkWalletType(this);
-        viewModel.signMessage(sign, dAppFunction, message, token.tokenInfo.chainId, signingWallet);
+        viewModel.signMessage(sign, dAppFunction, message, token.tokenInfo.chainId);
     }
 
     @Override
@@ -554,7 +553,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         dialog.setMessage(message.value);
         dialog.setOnApproveListener(v -> {
             messageToSign = message;
-            viewModel.getAuthorisation(token.getWallet(), this, this);
+            viewModel.getAuthorisation(this, this);
         });
         dialog.setOnRejectListener(v -> {
             tokenView.onSignCancel(message);

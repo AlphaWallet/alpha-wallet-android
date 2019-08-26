@@ -39,7 +39,7 @@ public class WarningHolder extends BinderViewHolder<WarningData>
         layoutBackground.setBackgroundColor(data.colour);
         backupButton.setText(data.buttonText);
         backupButton.setBackgroundColor(data.buttonColour);
-        backupButton.setOnClickListener(v -> { data.callback.BackupClick(data.address); });
+        backupButton.setOnClickListener(v -> { data.callback.BackupClick(data.wallet); });
         menuButton.setOnClickListener(v -> {
             showPopup(popupAnchor, data);
         });
@@ -51,7 +51,7 @@ public class WarningHolder extends BinderViewHolder<WarningData>
         int height = LinearLayout.LayoutParams.WRAP_CONTENT;
         final PopupWindow popupWindow = new PopupWindow(popupView, width, height, true);
         popupView.setOnClickListener(v -> {
-            data.callback.remindMeLater(data.address);
+            data.callback.remindMeLater(data.wallet);
             popupWindow.dismiss();
         });
         popupWindow.showAsDropDown(view, 0, 20);

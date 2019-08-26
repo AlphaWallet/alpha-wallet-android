@@ -45,6 +45,10 @@ public class FetchWalletsInteract {
         return accountRepository.storeWallet(wallet);
     }
 
+    public Single<Wallet> updateWalletData(Wallet wallet) {
+        return accountRepository.updateWalletData(wallet);
+    }
+
     /**
      * Called when wallet marked as backed up.
      * Update the wallet backup date

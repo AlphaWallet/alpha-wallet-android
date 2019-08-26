@@ -4,13 +4,11 @@ import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
@@ -24,10 +22,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import javax.inject.Inject;
+
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
+import io.stormbird.wallet.entity.ErrorEnvelope;
+import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.PinAuthenticationCallbackInterface;
+import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.ui.widget.adapter.WalletsAdapter;
 import io.stormbird.wallet.viewmodel.WalletsViewModel;
@@ -36,11 +41,6 @@ import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.AddWalletView;
 import io.stormbird.wallet.widget.SignTransactionDialog;
 import io.stormbird.wallet.widget.SystemView;
-
-import javax.inject.Inject;
-
-import java.util.List;
-import java.util.Map;
 
 public class WalletsActivity extends BaseActivity implements
         View.OnClickListener,
@@ -95,7 +95,6 @@ public class WalletsActivity extends BaseActivity implements
 
     private void updateWalletName(Wallet wallet)
     {
-        //systemView.showProgress(false);
         adapter.updateWalletName(wallet);
     }
 
@@ -321,7 +320,8 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     public void HDKeyCreated(String address, Context ctx, KeyService.AuthenticationLevel level)
     {
-        viewModel.StoreHDWallet(address, level);
+        if (address == null) onCreateWalletError(new ErrorEnvelope(""));
+        else viewModel.StoreHDWallet(address, level);
     }
 
     @Override

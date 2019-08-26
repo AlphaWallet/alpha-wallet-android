@@ -13,6 +13,7 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletType;
+import io.stormbird.wallet.repository.entity.RealmKeyType;
 import io.stormbird.wallet.repository.entity.RealmWalletData;
 import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.service.RealmManager;
@@ -32,46 +33,60 @@ public class WalletDataRealmSource {
 
     public Single<Wallet[]> populateWalletData(Wallet[] wallets, KeyService keyService) {
         return Single.fromCallable(() -> {
-            List<Wallet> walletList = new ArrayList<>();
-            for (Wallet w : wallets) if (w != null && w.address != null) { w.type = WalletType.KEYSTORE; };
+            List<Wallet> walletList = loadOrCreateKeyRealmDB(wallets, keyService); //call has action on upgrade to new UX
 
             try (Realm realm = realmManager.getWalletDataRealmInstance())
             {
-                for (Wallet hdWallet : keyService.getAllHDWallets())
+                //Add additional - non critical wallet data. This database can be voided for upgrade if required
+                for (Wallet wallet : walletList)
                 {
                     RealmWalletData data = realm.where(RealmWalletData.class)
-                            .equalTo("address", hdWallet.address)
+                            .equalTo("address", wallet.address)
                             .findFirst();
-
-                    composeWallet(hdWallet, data);
-                    walletList.add(hdWallet);
-                }
-
-                for (Wallet keyStoreWallet : wallets)
-                {
-                    RealmWalletData data = realm.where(RealmWalletData.class)
-                            .equalTo("address", keyStoreWallet.address)
-                            .findFirst();
-
-                    keyService.checkWalletType(keyStoreWallet);
-                    composeWallet(keyStoreWallet, data);
-                    walletList.add(keyStoreWallet);
-                }
-
-                //finally add watch wallets
-                RealmResults<RealmWalletData> realmItems = realm.where(RealmWalletData.class)
-                        .sort("lastBackup", Sort.ASCENDING)
-                        .equalTo("type", WalletType.WATCH.ordinal())
-                        .findAll();
-
-                for (RealmWalletData walletData : realmItems)
-                {
-                    walletList.add(convertWallet(walletData));
+                    composeWallet(wallet, data);
                 }
             }
 
             return walletList.toArray(new Wallet[0]);
         });
+    }
+
+    private List<Wallet> loadOrCreateKeyRealmDB(Wallet[] wallets,KeyService keyService)
+    {
+        List<Wallet> walletList = new ArrayList<>();
+        try (Realm realm = realmManager.getWalletTypeRealmInstance())
+        {
+            RealmResults<RealmKeyType> realmKeyTypes = realm.where(RealmKeyType.class)
+                    .sort("dateAdded", Sort.ASCENDING)
+                    .findAll();
+
+            if (realmKeyTypes.size() > 0)
+            {
+                //Load fixed wallet data: wallet type, creation and backup times
+                for (RealmKeyType walletTypeData : realmKeyTypes)
+                {
+                    Wallet w = composeKeyType(walletTypeData);
+                    if (w != null) walletList.add(w);
+                }
+            }
+            else //only zero on upgrade from v2.01.3 and lower (pre-HD key)
+            {
+                realm.beginTransaction();
+                for (Wallet wallet : wallets)
+                {
+                    RealmKeyType realmKey = realm.createObject(RealmKeyType.class, wallet.address);
+                    wallet.authLevel = KeyService.AuthenticationLevel.TEE_NO_AUTHENTICATION;
+                    wallet.type = WalletType.KEYSTORE_LEGACY;
+                    realmKey.setType(wallet.type); //all keys are legacy
+                    realmKey.setLastBackup(System.currentTimeMillis());
+                    realmKey.setDateAdded(wallet.walletCreationTime);
+                    realmKey.setAuthLevel(wallet.authLevel);
+                    walletList.add(wallet);
+                }
+                realm.commitTransaction();
+            }
+        }
+        return walletList;
     }
 
     private void composeWallet(Wallet wallet, RealmWalletData d)
@@ -81,8 +96,22 @@ public class WalletDataRealmSource {
             wallet.ENSname = d.getENSName();
             wallet.balance = balance(d);
             wallet.name = d.getName();
-            wallet.lastBackupTime = d.getLastBackup();
         }
+    }
+
+    private Wallet composeKeyType(RealmKeyType keyType)
+    {
+        Wallet wallet = null;
+        if (keyType != null)
+        {
+            wallet = new Wallet(keyType.getAddress());
+            wallet.type = keyType.getType();
+            wallet.walletCreationTime = keyType.getDateAdded();
+            wallet.lastBackupTime = keyType.getLastBackup();
+            wallet.authLevel = keyType.getAuthLevel();
+        }
+
+        return wallet;
     }
 
     private String balance(RealmWalletData data)
@@ -96,9 +125,6 @@ public class WalletDataRealmSource {
         Wallet wallet = new Wallet(data.getAddress());
         wallet.ENSname = data.getENSName();
         wallet.balance = data.getBalance();
-        wallet.lastBackupTime = data.getLastBackup();
-        wallet.authLevel = data.getAuthLevel();
-        wallet.type = data.getType();
         wallet.name = data.getName();
         return wallet;
     }
@@ -119,7 +145,6 @@ public class WalletDataRealmSource {
                         realmWallet.setENSName(wallet.ENSname);
                         if (mainNet) realmWallet.setBalance(wallet.balance);
                         realmWallet.setName(wallet.name);
-                        realmWallet.setType(wallet.type);
                         updated++;
                     } else {
                         if (mainNet && (realmWallet.getBalance() == null || !wallet.balance.equals(realmWallet.getENSName())))
@@ -127,7 +152,6 @@ public class WalletDataRealmSource {
                         if (wallet.ENSname != null && (realmWallet.getENSName() == null || !wallet.ENSname.equals(realmWallet.getENSName())))
                             realmWallet.setENSName(wallet.ENSname);
                         realmWallet.setName(wallet.name);
-                        realmWallet.setType(wallet.type);
                         updated++;
                     }
                 }
@@ -141,29 +165,15 @@ public class WalletDataRealmSource {
 
     public Single<Wallet> storeWallet(Wallet wallet) {
         return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
-                realm.beginTransaction();
+            storeKeyData(wallet);
+            storeWalletData(wallet);
+            return wallet;
+        });
+    }
 
-                RealmWalletData realmWallet = realm.where(RealmWalletData.class)
-                        .equalTo("address", wallet.address)
-                        .findFirst();
-
-                if (realmWallet == null) {
-                    realmWallet = realm.createObject(RealmWalletData.class, wallet.address);
-                }
-
-                realmWallet.setName(wallet.name);
-                realmWallet.setType(wallet.type);
-                realmWallet.setENSName(wallet.ENSname);
-                realmWallet.setBalance(wallet.balance);
-                realmWallet.setType(wallet.type);
-                realmWallet.setLastBackup(wallet.lastBackupTime);
-                realmWallet.setAuthLevel(wallet.authLevel);
-
-                realm.commitTransaction();
-            } catch (Exception e) {
-                Log.e(TAG, "storeWallet: " + e.getMessage(), e);
-            }
+    public Single<Wallet> updateWalletData(Wallet wallet) {
+        return Single.fromCallable(() -> {
+            storeWalletData(wallet);
             return wallet;
         });
     }
@@ -193,15 +203,19 @@ public class WalletDataRealmSource {
                     public void onStart()
                     {
                         realm = realmManager.getWalletDataRealmInstance();
+                        realm.beginTransaction();
+                        if (isBackupTime)
+                        {
+                            setKeyBackupTime(walletAddr);
+                        }
+
                         RealmWalletData realmWallet = realm.where(RealmWalletData.class)
                                 .equalTo("address", walletAddr)
                                 .findFirst();
 
                         if (realmWallet != null)
                         {
-                            realm.beginTransaction();
                             //Always update warning time but only update backup time if a backup was made
-                            if (isBackupTime) realmWallet.setLastBackup(System.currentTimeMillis());
                             realmWallet.setLastWarning(System.currentTimeMillis());
                         }
                     }
@@ -234,114 +248,41 @@ public class WalletDataRealmSource {
         return updateTimeInternal(walletAddr, false);
     }
 
-    private Single<Long> getWalletTime(String walletAddr, boolean isBackupTime)
+    public Single<String> getWalletRequiresBackup(String walletAddr)
     {
         return Single.fromCallable(() -> {
-            long backupTime = 0L;
-            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
-                RealmWalletData realmWallet = realm.where(RealmWalletData.class)
-                        .equalTo("address", walletAddr)
-                        .findFirst();
-                if (realmWallet != null)
-                {
-                    if (isBackupTime) backupTime = realmWallet.getLastBackup();
-                    else backupTime = realmWallet.getLastWarning();
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "getLastBackup: " + e.getMessage(), e);
-            }
-            return backupTime;
-        });
-    }
-
-    public Single<Boolean> wasWarningDismissed(String walletAddr)
-    {
-        return getWalletTime(walletAddr, false)
-                .map(time -> (time & 0x1) == 1);
-    }
-
-    public Single<String> getWalletRequiresBackup(String wallet)
-    {
-        return Single.fromCallable(() -> {
-            String walletBackup = "";
-            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
-                RealmWalletData data = realm.where(RealmWalletData.class)
-                        .equalTo("address", wallet)
-                        .findFirst();
-
-                if (data != null &&
-                        !data.getIsDismissedInSettings() &&
-                        data.getLastBackup() == 0)
-                {
-                    walletBackup = wallet;
-                }
-
-                // This checks if there's an HD wallet that has never been backed up,
-                // and the warning for which hasn't been dismissed within the last dismiss period
-//                for (RealmWalletData data : realmItems) {
-//                    if (data.getType() == WalletType.HDKEY &&
-//                            !data.getIsDismissedInSettings() &&
-//                            (data.getLastBackup() == 0 &&
-//                                    System.currentTimeMillis() > (data.getLastWarning() + HDKeyService.TIME_BETWEEN_BACKUP_MILLIS)))
-//                    {
-//                        walletBackup = data.getAddress();
-//                        break;
-//                    }
-//                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return walletBackup;
+            boolean wasDismissed = isDismissedInSettings(walletAddr);
+            long backupTime = getKeyBackupTime(walletAddr);
+            if (!wasDismissed && backupTime == 0) return walletAddr;
+            else return "";
         });
     }
 
     public Single<Boolean> getWalletBackupWarning(String walletAddr)
     {
         return Single.fromCallable(() -> {
-            long backupTime = 0L;
-            long warningTime = 0L;
-            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
-                RealmWalletData realmWallet = realm.where(RealmWalletData.class)
-                        .equalTo("address", walletAddr)
-                        .findFirst();
-                if (realmWallet != null)
-                {
-                    backupTime = realmWallet.getLastBackup();
-                    warningTime = realmWallet.getLastWarning();
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "getLastBackup: " + e.getMessage(), e);
-            }
+            long backupTime = getKeyBackupTime(walletAddr);
+            long warningTime = getWalletWarningTime(walletAddr);
             return requiresBackup(backupTime, warningTime);
         });
-    }
-
-    private Boolean requiresBackup(Long backupTime, Long warningTime)
-    {
-        boolean warningDismissed = false;
-        if (System.currentTimeMillis() < (warningTime + KeyService.TIME_BETWEEN_BACKUP_WARNING_MILLIS))
-        {
-            warningDismissed = true;
-        }
-
-        // wallet never backed up but backup warning may have been swiped away
-        return !warningDismissed && backupTime == 0;
     }
 
     public Single<String> deleteWallet(String walletAddr)
     {
         return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
-                RealmWalletData realmWallet = realm.where(RealmWalletData.class)
-                        .equalTo("address", walletAddr)
-                        .findFirst();
-
-                if (realmWallet != null)
-                {
-                    realm.beginTransaction();
-                    realmWallet.deleteFromRealm();
-                    realm.commitTransaction();
-                }
+            try (Realm realm = realmManager.getWalletDataRealmInstance())
+            {
+                RealmWalletData realmWallet = realm.where(RealmWalletData.class).equalTo("address", walletAddr).findFirst();
+                realm.beginTransaction();
+                if (realmWallet != null) realmWallet.deleteFromRealm();
+                realm.commitTransaction();
+            }
+            try (Realm realm = realmManager.getWalletTypeRealmInstance())
+            {
+                RealmKeyType realmKey = realm.where(RealmKeyType.class).equalTo("address", walletAddr).findFirst();
+                realm.beginTransaction();
+                if (realmKey != null) realmKey.deleteFromRealm();
+                realm.commitTransaction();
             }
             return walletAddr;
         });
@@ -364,5 +305,136 @@ public class WalletDataRealmSource {
             }
             return walletAddr;
         });
+    }
+
+
+    private void storeKeyData(Wallet wallet)
+    {
+        try (Realm realm = realmManager.getWalletTypeRealmInstance())
+        {
+            RealmKeyType realmKey = realm.where(RealmKeyType.class)
+                    .equalTo("address", wallet.address)
+                    .findFirst();
+
+            realm.beginTransaction();
+            if (realmKey == null) {
+                realmKey = realm.createObject(RealmKeyType.class, wallet.address);
+                realmKey.setDateAdded(System.currentTimeMillis());
+            }
+            else if (realmKey.getDateAdded() == 0) realmKey.setDateAdded(System.currentTimeMillis());
+
+            realmKey.setType(wallet.type);
+            realmKey.setLastBackup(wallet.lastBackupTime);
+            realmKey.setAuthLevel(wallet.authLevel);
+            realmKey.setKeyModulus("");
+            realm.commitTransaction();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void storeWalletData(Wallet wallet)
+    {
+        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        {
+            RealmWalletData realmWallet = realm.where(RealmWalletData.class)
+                    .equalTo("address", wallet.address)
+                    .findFirst();
+
+            realm.beginTransaction();
+            if (realmWallet == null) {
+                realmWallet = realm.createObject(RealmWalletData.class, wallet.address);
+            }
+
+            realmWallet.setName(wallet.name);
+            realmWallet.setENSName(wallet.ENSname);
+            realmWallet.setBalance(wallet.balance);
+            realm.commitTransaction();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void setKeyBackupTime(String walletAddr)
+    {
+        try (Realm realm = realmManager.getWalletTypeRealmInstance()) {
+            RealmKeyType realmKey = realm.where(RealmKeyType.class)
+                    .equalTo("address", walletAddr)
+                    .findFirst();
+
+            if (realmKey != null)
+            {
+                realm.beginTransaction();
+                realmKey.setLastBackup(System.currentTimeMillis());
+                realm.commitTransaction();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private boolean isDismissedInSettings(String wallet)
+    {
+        try (Realm realm = realmManager.getWalletDataRealmInstance()) {
+            RealmWalletData data = realm.where(RealmWalletData.class)
+                    .equalTo("address", wallet)
+                    .findFirst();
+            return data != null && data.getIsDismissedInSettings();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private long getWalletWarningTime(String walletAddr)
+    {
+        try (Realm realm = realmManager.getWalletDataRealmInstance()) {
+            RealmWalletData data = realm.where(RealmWalletData.class)
+                    .equalTo("address", walletAddr)
+                    .findFirst();
+
+            if (data != null)
+            {
+                return data.getLastWarning();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    private long getKeyBackupTime(String walletAddr)
+    {
+        try (Realm realm = realmManager.getWalletTypeRealmInstance()) {
+            RealmKeyType realmKey = realm.where(RealmKeyType.class)
+                    .equalTo("address", walletAddr)
+                    .findFirst();
+
+            if (realmKey != null)
+            {
+                return realmKey.getLastBackup();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    private Boolean requiresBackup(Long backupTime, Long warningTime)
+    {
+        boolean warningDismissed = false;
+        if (System.currentTimeMillis() < (warningTime + KeyService.TIME_BETWEEN_BACKUP_WARNING_MILLIS))
+        {
+            warningDismissed = true;
+        }
+
+        // wallet never backed up but backup warning may have been swiped away
+        return !warningDismissed && backupTime == 0;
     }
 }

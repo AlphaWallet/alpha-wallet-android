@@ -650,7 +650,7 @@ public class DappBrowserFragment extends Fragment implements
                     {
                         messageBytes = Numeric.hexStringToByteArray(message.value);
                     }
-                    viewModel.getAuthorisation(wallet.address, getActivity(), this);
+                    viewModel.getAuthorisation(wallet, getActivity(), this);
                 }
                 else
                 {
@@ -701,7 +701,7 @@ public class DappBrowserFragment extends Fragment implements
                         + convertedMessage.length()
                         + convertedMessage;
                 messageBytes = signMessage.getBytes();
-                viewModel.getAuthorisation(wallet.address, getActivity(), this);
+                viewModel.getAuthorisation(wallet, getActivity(), this);
             });
             dialog.setOnRejectListener(v -> {
                 web3.onSignCancel(message);

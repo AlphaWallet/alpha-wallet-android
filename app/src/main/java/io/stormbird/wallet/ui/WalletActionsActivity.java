@@ -25,6 +25,7 @@ import io.stormbird.wallet.viewmodel.WalletActionsViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 
 import static io.stormbird.wallet.C.*;
+import static io.stormbird.wallet.C.Key.WALLET;
 
 public class WalletActionsActivity extends BaseActivity implements View.OnClickListener, Runnable {
     @Inject
@@ -238,7 +239,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
     private void testSeedPhrase(Wallet wallet)
     {
         Intent intent = new Intent(this, BackupKeyActivity.class);
-        intent.putExtra("ADDRESS", wallet.address);
+        intent.putExtra(WALLET, wallet);
         intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.SHOW_SEED_PHRASE);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
@@ -277,7 +278,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
     private void exportJSON(Wallet wallet)
     {
         Intent intent = new Intent(this, BackupKeyActivity.class);
-        intent.putExtra("ADDRESS", wallet.address);
+        intent.putExtra(WALLET, wallet);
         intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_KEYSTORE_KEY);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);

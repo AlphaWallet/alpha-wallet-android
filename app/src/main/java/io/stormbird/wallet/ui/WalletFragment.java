@@ -41,6 +41,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
+import static io.stormbird.wallet.C.Key.WALLET;
 
 /**
  * Created by justindeguzman on 2/28/18.
@@ -258,7 +259,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 wData.buttonText = getString(R.string.back_up_wallet_action, viewModel.getWalletAddr().substring(0, 5));
                 wData.colour = ContextCompat.getColor(getContext(), R.color.slate_grey);
                 wData.buttonColour = ContextCompat.getColor(getContext(), R.color.backup_grey);
-                wData.address = viewModel.getWalletAddr();
+                wData.wallet = viewModel.getWallet();
                 adapter.addWarning(wData);
                 break;
             case WALLET_HAS_HIGH_VALUE:
@@ -268,7 +269,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 wData.buttonText = getString(R.string.back_up_wallet_action, viewModel.getWalletAddr().substring(0, 5));
                 wData.colour = ContextCompat.getColor(getContext(), R.color.warning_red);
                 wData.buttonColour = ContextCompat.getColor(getContext(), R.color.warning_dark_red);
-                wData.address = viewModel.getWalletAddr();
+                wData.wallet = viewModel.getWallet();
                 adapter.addWarning(wData);
                 break;
         }
@@ -410,10 +411,10 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     }
 
     @Override
-    public void BackupClick(String address)
+    public void BackupClick(Wallet wallet)
     {
         Intent intent = new Intent(getContext(), BackupKeyActivity.class);
-        intent.putExtra("ADDRESS", address);
+        intent.putExtra(WALLET, wallet);
 
         switch (viewModel.getWalletType())
         {
@@ -430,9 +431,9 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     }
 
     @Override
-    public void remindMeLater(String walletAddress)
+    public void remindMeLater(Wallet wallet)
     {
-        viewModel.setKeyWarningDismissTime(walletAddress).isDisposed();
+        viewModel.setKeyWarningDismissTime(wallet.address).isDisposed();
         adapter.removeBackupWarning();
     }
 
@@ -457,7 +458,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-            remindMeLater(viewModel.getWalletAddr());
+            remindMeLater(viewModel.getWallet());
         }
 
 //        @Override

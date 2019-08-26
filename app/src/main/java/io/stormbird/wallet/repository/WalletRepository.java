@@ -166,6 +166,12 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
+	public Single<Wallet> updateWalletData(Wallet wallet)
+	{
+		return walletDataRealmSource.updateWalletData(wallet);
+	}
+
+	@Override
 	public Single<String> getName(String address)
 	{
 		return walletDataRealmSource.getName(address);

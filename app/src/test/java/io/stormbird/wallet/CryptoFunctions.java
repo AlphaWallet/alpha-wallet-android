@@ -28,7 +28,8 @@ public class CryptoFunctions implements CryptoFunctionsInterface
     public BigInteger signedMessageToKey(byte[] data, byte[] signature) throws SignatureException
     {
         Sign.SignatureData sigData = sigFromByteArray(signature);
-        return Sign.signedMessageToKey(data, sigData);
+        if (sigData == null) return BigInteger.ZERO;
+        else return Sign.signedMessageToKey(data, sigData);
     }
 
     @Override
@@ -39,6 +40,8 @@ public class CryptoFunctions implements CryptoFunctionsInterface
 
     public static Sign.SignatureData sigFromByteArray(byte[] sig)
     {
+        if (sig.length < 64 || sig.length > 65) return null;
+
         byte   subv = sig[64];
         if (subv < 27) subv += 27;
 

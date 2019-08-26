@@ -48,7 +48,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     BackupKeyViewModel viewModel;
 
     private BackupState state;
-    private String keyBackup;
     private Wallet wallet;
     private TextView title;
     private TextView detail;
@@ -82,7 +81,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
         BackupOperationType type = (BackupOperationType) getIntent().getSerializableExtra("TYPE");
-        keyBackup = getIntent().getStringExtra("ADDRESS");
         wallet = getIntent().getParcelableExtra(WALLET);
         layoutHolderWidth = 0;
         if (type == null) type = BackupOperationType.UNDEFINED;
@@ -143,7 +141,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             case KEYSTORE:
             case KEYSTORE_LEGACY:
             case HDKEY:
-                switch (viewModel.upgradeKeySecurity(wallet.address, this, this))
+                switch (viewModel.upgradeKeySecurity(wallet, this, this))
                 {
                     case REQUESTING_SECURITY:
                         //Do nothing, callback will return to 'CreatedKey()'. If it fails the returned key is empty
@@ -169,19 +167,20 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     {
         //key upgraded
         //store wallet upgrade
-        Wallet wallet = new Wallet(address);
-        wallet.checkWalletType(this);
-        switch (wallet.type)
+        if (wallet.address.equalsIgnoreCase(address))
         {
-            case KEYSTORE_LEGACY:
-            case KEYSTORE:
-            case HDKEY:
-                viewModel.upgradeWallet(address);
-                finishBackupSuccess(true);
-                break;
-            default:
-                cancelAuthentication();
-                break;
+            switch (wallet.type)
+            {
+                case KEYSTORE_LEGACY:
+                case KEYSTORE:
+                case HDKEY:
+                    viewModel.upgradeWallet(address);
+                    finishBackupSuccess(true);
+                    break;
+                default:
+                    cancelAuthentication();
+                    break;
+            }
         }
     }
 
@@ -376,7 +375,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                 JSONBackup();
                 break;
             case SET_JSON_PASSWORD:
-                viewModel.getPasswordForKeystore(keyBackup, this, this);
+                viewModel.getPasswordForKeystore(wallet, this, this);
                 break;
             case SHOW_SEED_PHRASE:
                 VerifySeedPhrase();
@@ -451,12 +450,9 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     private void backupKeySuccess(BackupOperationType type)
     {
         //first record backup time success, in case user aborts operation during key locking
-        viewModel.backupSuccess(keyBackup);
+        viewModel.backupSuccess(wallet);
 
         //now ask if user wants to upgrade the key security (if required)
-        wallet = new Wallet(keyBackup);
-        wallet.checkWalletType(this);
-
         switch (wallet.authLevel)
         {
             case STRONGBOX_NO_AUTHENTICATION:
@@ -472,8 +468,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void finishBackupSuccess(boolean upgradeKey)
     {
-        Wallet wallet = new Wallet(keyBackup);
-        wallet.checkWalletType(this);
         Intent intent = new Intent();
         switch (wallet.type)
         {
@@ -489,7 +483,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                 break;
         }
 
-        intent.putExtra("Key", keyBackup);
+        intent.putExtra("Key", wallet.address);
         intent.putExtra("Upgrade", upgradeKey);
         setResult(RESULT_OK, intent);
         finish();
@@ -578,7 +572,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             layoutWordHolder.removeAllViews();
         }
 
-        viewModel.getSeedPhrase(keyBackup, this, this);
+        viewModel.getSeedPhrase(wallet, this, this);
     }
 
     private void addNewLayoutLine()
@@ -651,7 +645,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         {
             Intent intent = new Intent();
             setResult(RESULT_CANCELED, intent);
-            intent.putExtra("Key", keyBackup);
+            intent.putExtra("Key", wallet.address);
             finish();
         }
     }
@@ -681,7 +675,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     {
         Intent intent = new Intent();
         setResult(RESULT_CANCELED, intent);
-        intent.putExtra("Key", keyBackup);
+        intent.putExtra("Key", wallet.address);
         finish();
     }
 
@@ -697,7 +691,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                 break;
             case ENTER_JSON_BACKUP:
             case SET_JSON_PASSWORD:
-                viewModel.exportWallet(keyBackup, mnemonic, inputView.getText().toString());
+                viewModel.exportWallet(wallet, mnemonic, inputView.getText().toString());
                 break;
             case SHOW_SEED_PHRASE:
                 setupTestSeed();
@@ -887,4 +881,31 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     {
         UNDEFINED, BACKUP_HD_KEY, BACKUP_KEYSTORE_KEY, SHOW_SEED_PHRASE, EXPORT_PRIVATE_KEY
     }
+
+//                switch (operation)
+//    {
+//        case CREATE_HD_KEY:
+//        case CREATE_NON_AUTHENTICATED_KEY:
+//            if (callbackInterface != null)
+//                callbackInterface.HDKeyCreated(address, context, authLevel);
+//            break;
+//        case IMPORT_HD_KEY:
+//            importCallback.WalletValidated(address, authLevel);
+//            deleteNonAuthKeyEncryptedKeyBytes(address); //in the case the user re-imported a key, destroy the backup key
+//            break;
+//        case UPGRADE_HD_KEY:
+//        case UPGRADE_KEYSTORE_KEY:
+//            signCallback.CreatedKey(address);
+//            deleteNonAuthKeyEncryptedKeyBytes(address);
+//            break;
+//        case CREATE_KEYSTORE_KEY:
+//            importCallback.KeystoreValidated(new String(data), authLevel);
+//            break;
+//        case CREATE_PRIVATE_KEY:
+//            importCallback.KeyValidated(new String(data), authLevel);
+//            break;
+//        default:
+//            break;
+//    }
+
 }

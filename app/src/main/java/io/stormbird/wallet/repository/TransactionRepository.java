@@ -25,7 +25,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
+import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 public class TransactionRepository implements TransactionRepositoryType {
 
@@ -168,6 +168,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	{
 		return Single.fromCallable(() -> {
 			Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
+			if (sigData == null) return "0000".getBytes();
 			return encode(rtx, sigData);
 		});
 	}

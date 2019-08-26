@@ -6,6 +6,6 @@ package io.stormbird.wallet.entity;
  */
 public interface BackupTokenCallback
 {
-    void BackupClick(String address);
-    void remindMeLater(String address);
+    void BackupClick(Wallet wallet);
+    void remindMeLater(Wallet wallet);
 }

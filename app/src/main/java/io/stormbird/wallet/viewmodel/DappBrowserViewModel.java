@@ -306,8 +306,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
         gasService.stopGasListener();
     }
 
-    public void getAuthorisation(String walletAddress, Activity activity, SignAuthenticationCallback callback)
+    public void getAuthorisation(Wallet wallet, Activity activity, SignAuthenticationCallback callback)
     {
-        keyService.getAuthenticationForSignature(walletAddress, activity, callback);
+        keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 }

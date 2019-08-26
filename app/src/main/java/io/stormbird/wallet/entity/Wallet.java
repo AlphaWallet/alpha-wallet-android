@@ -20,6 +20,7 @@ public class Wallet implements Parcelable {
     public WalletType type;
     public long lastBackupTime;
     public KeyService.AuthenticationLevel authLevel;
+    public long walletCreationTime;
 
 	public Wallet(String address) {
 		this.address = address;
@@ -29,6 +30,7 @@ public class Wallet implements Parcelable {
 		this.type = WalletType.NOT_DEFINED;
 		this.lastBackupTime = 0;
 		this.authLevel = KeyService.AuthenticationLevel.NOT_SET;
+		this.walletCreationTime = 0;
 	}
 
 	private Wallet(Parcel in)
@@ -42,39 +44,12 @@ public class Wallet implements Parcelable {
 		lastBackupTime = in.readLong();
 		t = in.readInt();
 		authLevel = KeyService.AuthenticationLevel.values()[t];
+		walletCreationTime = in.readLong();
 	}
 
 	public void setWalletType(WalletType wType)
 	{
 		type = wType;
-	}
-
-	public void checkWalletType(Context ctx)
-	{
-		type = getKeystoreType(ctx, address);
-		authLevel = getAuthLevel(ctx, address);
-	}
-
-	public static WalletType getKeystoreType(Context context, String addr)
-	{
-		if (addr == null) return WalletType.NOT_DEFINED;
-		else if (new File(context.getFilesDir(), addr+HDKEY_LABEL).exists() ||
-				new File(context.getFilesDir(), addr+NO_AUTH_LABEL+HDKEY_LABEL).exists()) return  WalletType.HDKEY;
-		else if (new File(context.getFilesDir(), addr + KEYSTORE_LABEL).exists()
-				|| new File(context.getFilesDir(), addr + NO_AUTH_LABEL + KEYSTORE_LABEL).exists()) return WalletType.KEYSTORE;
-		else if (new File(context.getFilesDir(), addr).exists()) return WalletType.KEYSTORE_LEGACY;
-		else return WalletType.WATCH;
-	}
-	private static AuthenticationLevel getAuthLevel(Context context, String addr)
-	{
-		if (new File(context.getFilesDir(), addr+HDKEY_LABEL).exists() ||
-				new File(context.getFilesDir(), addr+KEYSTORE_LABEL).exists())
-			return KeyService.hasStrongbox() ? AuthenticationLevel.STRONGBOX_AUTHENTICATION : AuthenticationLevel.TEE_AUTHENTICATION;
-		else if (new File(context.getFilesDir(), addr + NO_AUTH_LABEL + HDKEY_LABEL).exists()
-				|| new File(context.getFilesDir(), addr + NO_AUTH_LABEL + KEYSTORE_LABEL).exists()
-				|| new File(context.getFilesDir(), addr).exists())
-			return KeyService.hasStrongbox() ? AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION : AuthenticationLevel.TEE_NO_AUTHENTICATION;
-		else return AuthenticationLevel.NOT_SET;
 	}
 
 	public static final Creator<Wallet> CREATOR = new Creator<Wallet>() {
@@ -108,6 +83,7 @@ public class Wallet implements Parcelable {
 		parcel.writeInt(type.ordinal());
 		parcel.writeLong(lastBackupTime);
 		parcel.writeInt(authLevel.ordinal());
+		parcel.writeLong(walletCreationTime);
 	}
 
 	public void setWalletBalance(BigDecimal balanceBD)

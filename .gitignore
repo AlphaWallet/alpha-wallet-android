@@ -11,6 +11,10 @@
 *.swp
 *.swo
 
+app/mapping.txt
+app/seeds.txt
+app/unused.txt
+
 # Files for the Dalvik VM
 *.dex
 

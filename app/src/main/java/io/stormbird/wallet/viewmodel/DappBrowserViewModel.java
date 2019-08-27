@@ -310,4 +310,9 @@ public class DappBrowserViewModel extends BaseViewModel  {
     {
         keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
+
+    public void resetSignDialog()
+    {
+        keyService.resetSigningDialog();
+    }
 }

@@ -216,6 +216,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     {
         super.onPause();
         hideDialog();
+        viewModel.resetSignDialog();
     }
 
     @Override

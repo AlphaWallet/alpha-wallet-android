@@ -208,4 +208,9 @@ public class TokenFunctionViewModel extends BaseViewModel
                 .find()
                 .subscribe(wallet -> { this.wallet = wallet; }, this::onError);
     }
+
+    public void resetSignDialog()
+    {
+        keyService.resetSigningDialog();
+    }
 }

@@ -677,4 +677,9 @@ public class ImportTokenViewModel extends BaseViewModel
             keyService.getAuthenticationForSignature(wallet.getValue(), activity, callback);
         }
     }
+
+    public void resetSignDialog()
+    {
+        keyService.resetSigningDialog();
+    }
 }

@@ -7,7 +7,7 @@
     android:background="@color/colorPrimaryDark"
     android:orientation="vertical">
 
-    <include layout="@layout/layout_simple_toolbar" />
+    <include layout="@layout/layout_white_toolbar" />
 
     <RelativeLayout
         android:id="@+id/relativeLayout3"

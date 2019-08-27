@@ -42,6 +42,8 @@ import io.stormbird.wallet.widget.AddWalletView;
 import io.stormbird.wallet.widget.SignTransactionDialog;
 import io.stormbird.wallet.widget.SystemView;
 
+import static io.stormbird.wallet.C.Key.WALLET;
+
 public class WalletsActivity extends BaseActivity implements
         View.OnClickListener,
         AddWalletView.OnNewWalletClickListener,
@@ -90,7 +92,15 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.createWalletError().observe(this, this::onCreateWalletError);
         viewModel.updateBalance().observe(this, this::onUpdatedBalance);
         viewModel.updateENSName().observe(this, this::updateWalletName);
+        viewModel.noWalletsError().observe(this, this::noWallets);
         viewModel.findNetwork();
+    }
+
+    private void noWallets(Boolean aBoolean)
+    {
+        Intent intent = new Intent(this, SplashActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void updateWalletName(Wallet wallet)

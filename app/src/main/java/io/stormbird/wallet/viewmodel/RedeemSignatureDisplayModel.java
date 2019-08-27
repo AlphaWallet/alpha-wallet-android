@@ -293,4 +293,9 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
             keyService.getAuthenticationForSignature(defaultWallet.getValue(), activity, callback);
         }
     }
+
+    public void resetSignDialog()
+    {
+        keyService.resetSigningDialog();
+    }
 }

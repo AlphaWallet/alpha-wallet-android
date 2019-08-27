@@ -121,6 +121,13 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     }
 
     @Override
+    public void onPause()
+    {
+        super.onPause();
+        viewModel.resetSignDialog();
+    }
+
+    @Override
     protected void onDestroy()
     {
         super.onDestroy();

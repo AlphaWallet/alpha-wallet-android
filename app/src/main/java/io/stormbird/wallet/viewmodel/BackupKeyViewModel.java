@@ -156,5 +156,10 @@ public class BackupKeyViewModel extends BaseViewModel {
     {
         fetchWalletsInteract.updateBackupTime(wallet.address).isDisposed();
     }
+
+    public void resetSignDialog()
+    {
+        keyService.resetSigningDialog();
+    }
 }
 

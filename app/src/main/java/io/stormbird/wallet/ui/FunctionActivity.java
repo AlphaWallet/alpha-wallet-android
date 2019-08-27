@@ -546,6 +546,13 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     }
 
     @Override
+    public void onPause()
+    {
+        super.onPause();
+        viewModel.resetSignDialog();
+    }
+
+    @Override
     public void onSignPersonalMessage(Message<String> message)
     {
         dialog = new SignMessageDialog(this, message);

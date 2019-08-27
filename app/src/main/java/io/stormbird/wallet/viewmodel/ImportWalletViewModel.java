@@ -153,4 +153,9 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
             return isValid;
         });
     }
+
+    public void resetSignDialog()
+    {
+        keyService.resetSigningDialog();
+    }
 }

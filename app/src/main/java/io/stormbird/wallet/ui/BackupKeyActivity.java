@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -41,7 +42,7 @@ import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.C.SHARE_REQUEST_CODE;
 
 public class BackupKeyActivity extends BaseActivity implements View.OnClickListener,
-        CreateWalletCallbackInterface, TextWatcher, SignAuthenticationCallback
+        CreateWalletCallbackInterface, TextWatcher, SignAuthenticationCallback, Runnable
 {
     @Inject
     BackupKeyViewModelFactory backupKeyViewModelFactory;
@@ -60,6 +61,8 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     private String[] mnemonicArray;
     private PinAuthenticationCallbackInterface authInterface;
     private ImageView spacerImage;
+    private LinearLayout successOverlay;
+    private Handler handler;
 
     private AWalletAlertDialog alertDialog;
 
@@ -119,7 +122,12 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         setContentView(R.layout.activity_backup);
         initViews();
 
-        setTitle(getString(R.string.action_upgrade_key));
+        successOverlay = findViewById(R.id.layout_success_overlay);
+        if (successOverlay != null) successOverlay.setVisibility(View.VISIBLE);
+        handler = new Handler();
+        handler.postDelayed(this, 1000);
+
+        setTitle(getString(R.string.empty));
         state = BackupState.UPGRADE_KEY_SECURITY;
         if (wallet.type == WalletType.KEYSTORE) title.setText(R.string.lock_keystore_upgrade);
         else title.setText(R.string.lock_key_upgrade);
@@ -189,7 +197,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         setContentView(R.layout.activity_backup);
         initViews();
 
-        setTitle(getString(R.string.title_backup_seed));
+        setTitle(getString(R.string.empty));
         title.setText(R.string.backup_seed_phrase);
         backupImage.setImageResource(R.drawable.seed_graphic);
         detail.setText(R.string.backup_seed_phrase_detail);
@@ -198,7 +206,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     private void setupJSONExport()
     {
-        setContentView(R.layout.activity_backup);
+        setContentView(R.layout.activity_json_backup);
         initViews();
 
         setTitle(getString(R.string.export_keystore_json));
@@ -214,15 +222,33 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         setContentView(R.layout.activity_show_seed_phrase);
         initViews();
 
-        setTitle(getString(R.string.seed_phrase));
+        setTitle(getString(R.string.empty));
         title.setText(getString(R.string.make_a_backup, "12"));
         nextButton.setText(R.string.test_seed_phrase);
+    }
+
+    @Override
+    public void run()
+    {
+        if (successOverlay == null) return;
+        if (successOverlay.getAlpha() > 0)
+        {
+            successOverlay.animate().alpha(0.0f).setDuration(500);
+            handler.postDelayed(this, 750);
+        }
+        else
+        {
+            successOverlay.setVisibility(View.GONE);
+            successOverlay.setAlpha(1.0f);
+            handler = null;
+        }
     }
 
     @Override
     public void onPause()
     {
         super.onPause();
+        viewModel.resetSignDialog();
         //hide seed phrase and any visible words
         if (layoutWordHolder != null) layoutWordHolder.removeAllViews();
 
@@ -499,7 +525,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             spacerImage.setVisibility(View.GONE);
         }
 
-        setTitle(getString(R.string.title_backup_seed));
+        setTitle(getString(R.string.empty));
         state = BackupState.VERIFY_SEED_PHRASE;
         title.setText(R.string.verify_seed_phrase);
         nextButton.setText(R.string.action_continue);
@@ -557,7 +583,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         setContentView(R.layout.activity_backup_write_seed);
         initViews();
 
-        setTitle(getString(R.string.title_backup_seed));
+        setTitle(getString(R.string.empty));
         state = BackupState.WRITE_DOWN_SEED_PHRASE;
         title.setText(R.string.write_down_seed_phrase);
         nextButton.setText(R.string.wrote_down_seed_phrase);

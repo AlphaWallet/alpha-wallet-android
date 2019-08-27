@@ -4,6 +4,7 @@
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:id="@+id/layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
@@ -21,6 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="21dp"
+            android:gravity="center_horizontal"
             android:fontFamily="@font/font_regular"
             android:text="@string/title_find_your_wallet_address"
             android:textColor="@color/text_black"
@@ -48,6 +50,16 @@
             android:textSize="16sp"
             android:textStyle="normal" />
     </LinearLayout>
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="16dp"
+        android:layout_below="@id/layout"
+        android:layout_alignEnd="@id/layout"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="10dp"
+        android:rotation="180"
+        android:src="@drawable/item_white_triangle" />
 
 
 </RelativeLayout>

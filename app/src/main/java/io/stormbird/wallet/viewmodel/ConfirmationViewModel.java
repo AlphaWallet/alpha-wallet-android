@@ -245,4 +245,9 @@ public class ConfirmationViewModel extends BaseViewModel {
             keyService.getAuthenticationForSignature(defaultWallet.getValue(), activity, callback);
         }
     }
+
+    public void resetSignDialog()
+    {
+        keyService.resetSigningDialog();
+    }
 }

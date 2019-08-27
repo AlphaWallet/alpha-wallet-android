@@ -737,6 +737,9 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         signDialog.setCancelListener(v -> {
             authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation.ordinal());
         });
+        signDialog.setOnDismissListener(v -> {
+            signDialog = null;
+        });
         signDialog.show();
         signDialog.getFingerprintAuthorisation(this);
     }
@@ -1130,6 +1133,12 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     public static boolean hasStrongbox()
     {
         return securityStatus == SecurityStatus.HAS_STRONGBOX;
+    }
+
+    public void resetSigningDialog()
+    {
+        if (signDialog != null) signDialog.dismiss();
+        signDialog = null;
     }
 
     private boolean deviceIsLocked()

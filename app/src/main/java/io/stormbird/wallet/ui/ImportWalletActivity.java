@@ -176,8 +176,8 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     @Override
     protected void onPause() {
         super.onPause();
-
         hideDialog();
+        importWalletViewModel.resetSignDialog();
     }
 
     private void onWallet(Wallet wallet) {

@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.arch.lifecycle.*;
 import android.content.*;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -196,7 +197,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         viewModel.cleanDatabases(this);
-        showFindWalletAddressDialog();
+        showBackupWalletDialog();
     }
 
     private void onBackup(String address)
@@ -207,43 +208,44 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    //    public void showBackupWalletDialog() {
-//        if (!viewModel.isBackupWalletDialogShown()) {
-//            backupWalletDialog = TutoShowcase.from(this);
-//            backupWalletDialog.setContentView(R.layout.showcase_backup_wallet)
-//                    .onClickContentView(R.id.btn_close, view -> {
-//                        backupWalletDialog.dismiss();
-//                    })
-//                    .on(R.id.layout_nav_settings)
-//                    .addCircle()
-//                    .onClick(v -> {
-//                        backupWalletDialog.dismiss();
-//                        showPage(SETTINGS);
-//                    })
-//                    .show();
-//            viewModel.setBackupWalletDialogShown(true);
-//        }
-//    }
-
-    public void showFindWalletAddressDialog() {
+    public void showBackupWalletDialog() {
         if (!viewModel.isFindWalletAddressDialogShown()) {
-            findWalletAddressDialog = TutoShowcase.from(this);
-            findWalletAddressDialog.setContentView(R.layout.showcase_find_wallet)
+            int lighterBackground = Color.argb(102, 0, 0, 0); //40% opacity
+            backupWalletDialog = TutoShowcase.from(this);
+            backupWalletDialog.setContentView(R.layout.showcase_backup_wallet)
+                    .setBackgroundColor(lighterBackground)
                     .onClickContentView(R.id.btn_close, view -> {
-                        findWalletAddressDialog.dismiss();
-                        findWalletAddressDialog = null;
+                        backupWalletDialog.dismiss();
                     })
                     .on(R.id.layout_nav_settings)
                     .addCircle()
                     .onClick(v -> {
-                        findWalletAddressDialog.dismiss();
-                        findWalletAddressDialog = null;
+                        backupWalletDialog.dismiss();
+                        showPage(SETTINGS);
                     })
                     .show();
             viewModel.setFindWalletAddressDialogShown(true);
         }
     }
 
+//    public void showFindWalletAddressDialog() {
+//        if (!viewModel.isFindWalletAddressDialogShown()) {
+//            findWalletAddressDialog = TutoShowcase.from(this);
+//            findWalletAddressDialog.setContentView(R.layout.showcase_find_wallet)
+//                    .onClickContentView(R.id.btn_close, view -> {
+//                        findWalletAddressDialog.dismiss();
+//                        findWalletAddressDialog = null;
+//                    })
+//                    .on(R.id.layout_nav_settings)
+//                    .addCircle()
+//                    .onClick(v -> {
+//                        findWalletAddressDialog.dismiss();
+//                        findWalletAddressDialog = null;
+//                    })
+//                    .show();
+//            viewModel.setFindWalletAddressDialogShown(true);
+//        }
+//    }
 
     private void onWalletName(String name) {
         if (name != null && !name.isEmpty()) {

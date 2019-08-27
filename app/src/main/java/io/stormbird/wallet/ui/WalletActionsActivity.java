@@ -64,7 +64,6 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
             walletCount++;
             isNewWallet = getIntent().getBooleanExtra("isNewWallet", false);
             initViews();
-            //HDKeyService.flagAsNotBackedUp(this, wallet.address);
         } else {
             finish();
         }

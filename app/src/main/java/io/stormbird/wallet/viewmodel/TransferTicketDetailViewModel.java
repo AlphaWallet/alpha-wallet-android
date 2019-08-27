@@ -277,4 +277,9 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
             keyService.getAuthenticationForSignature(defaultWallet.getValue(), activity, callback);
         }
     }
+
+    public void resetSignDialog()
+    {
+        keyService.resetSigningDialog();
+    }
 }

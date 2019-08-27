@@ -550,6 +550,13 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     }
 
     @Override
+    public void onPause()
+    {
+        super.onPause();
+        viewModel.resetSignDialog();
+    }
+
+    @Override
     public void onTokenClick(View view, Token token, List<BigInteger> ids, boolean selected) {
         Context context = view.getContext();
         //TODO: what action should be performed when clicking on a range?

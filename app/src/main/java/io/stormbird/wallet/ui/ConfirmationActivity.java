@@ -277,6 +277,13 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         viewModel.prepare(this);
     }
 
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        viewModel.resetSignDialog();
+    }
+
     private void onProgress(boolean shouldShowProgress) {
         hideDialog();
         if (shouldShowProgress) {

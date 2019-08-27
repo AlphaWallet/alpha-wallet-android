@@ -448,6 +448,13 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         }
     }
 
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        viewModel.resetSignDialog();
+    }
+
     private void onProgress(boolean shouldShowProgress)
     {
         hideDialog();

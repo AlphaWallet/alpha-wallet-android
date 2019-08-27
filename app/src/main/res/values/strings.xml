@@ -580,4 +580,6 @@
     <string name="reimport_wallet_title">Re-Import Wallet?</string>
     <string name="provide_authentication">Provide authentication to create key</string>
     <string name="import_error">Import Error, Try re-import again.</string>
+    <string name="welcome_to_alphawallet">Welcome to AlphaWallet</string>
+    <string name="logo">AlphaWallet Logo</string>
 </resources>

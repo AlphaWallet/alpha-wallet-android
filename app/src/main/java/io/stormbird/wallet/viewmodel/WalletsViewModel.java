@@ -63,6 +63,7 @@ public class WalletsViewModel extends BaseViewModel
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Wallet> createdWallet = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> createWalletError = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> noWalletsError = new MutableLiveData<>();
     private final MutableLiveData<Wallet> updateBalance = new MutableLiveData<>();
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> updateENSName = new MutableLiveData<>();
@@ -119,6 +120,7 @@ public class WalletsViewModel extends BaseViewModel
     {
         return createWalletError;
     }
+    public LiveData<Boolean> noWalletsError() { return noWalletsError; }
 
     public LiveData<Wallet> updateBalance()
     {
@@ -155,8 +157,8 @@ public class WalletsViewModel extends BaseViewModel
 
         disposable = genericWalletInteract
                 .find()
-                .subscribe(this::onDefaultWalletChanged, t -> {
-                });
+                .subscribe(this::onDefaultWalletChanged,
+                        error -> noWalletsError.postValue(true));
     }
 
     private void onWallets(Wallet[] items)

@@ -8,7 +8,7 @@ public interface TrustAddressGenerator {
      * Invoke the Lambda function "TokenScriptTrustAddress".
      *
      * Change the method name in this Interface to fit the
-     * function-name of deployed lambda. This class is created follwing the tutorial:
+     * function-name of deployed lambda. This class is created following the tutorial:
      * https://docs.aws.amazon.com/aws-mobile/latest/developerguide/how-to-android-lambda.html
      *
      * This Interface serve to describe to the Android runtime

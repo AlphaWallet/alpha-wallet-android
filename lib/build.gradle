@@ -15,6 +15,7 @@ dependencies {
     implementation('com.amazonaws:aws-lambda-java-events:2.2.6')
     testImplementation 'junit:junit:4.12'
     implementation 'org.bouncycastle:bcprov-jdk15on:1.60'
+    compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
 }
 
 sourceCompatibility = "1.8"

@@ -30,7 +30,6 @@
 -dontskipnonpubliclibraryclassmembers
 -dontpreverify
 -verbose
--dump class_files.txt
 -printseeds seeds.txt
 -printusage unused.txt
 -printmapping mapping.txt
@@ -39,3 +38,4 @@
 #---------------Begin: proguard configuration for support library  ----------
 -keep class android.support.v4.app.** { *; }
 -keep interface android.support.v4.app.** { *; }
+-keep class wallet.core {*;}

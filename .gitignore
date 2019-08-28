@@ -14,6 +14,7 @@
 app/mapping.txt
 app/seeds.txt
 app/unused.txt
+app/full-r8-config.txt
 
 # Files for the Dalvik VM
 *.dex
@@ -29,6 +30,7 @@ gen/
 .gradle/
 /build
 app/release
+app/debug
 
 # Fastlane
 fastlane/report.xml

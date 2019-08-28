@@ -103,7 +103,6 @@ public class AppSiteController implements AttributeInterface
     @GetMapping(value = "/{UniversalLink}")
     public @ResponseBody String handleUniversalLink(
             @PathVariable("UniversalLink") String universalLink,
-            @RequestHeader("User-Agent") String agent,
             Model model,
             HttpServletRequest request
     )
@@ -129,12 +128,11 @@ public class AppSiteController implements AttributeInterface
             return "error: " + e;
         }
         parser.getOwnerKey(data);
-        return handleTokenLink(data, agent, model, universalLink);
+        return handleTokenLink(data, model, universalLink);
     }
 
     private String handleTokenLink(
             MagicLinkData data,
-            String agent,
             Model model,
             String universalLink
     ) throws IOException, SAXException, NoHandlerFoundException

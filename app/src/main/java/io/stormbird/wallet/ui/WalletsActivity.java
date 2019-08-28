@@ -163,9 +163,7 @@ public class WalletsActivity extends BaseActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (adapter.getItemCount() > 0) {
-            getMenuInflater().inflate(R.menu.menu_add, menu);
-        }
+        getMenuInflater().inflate(R.menu.menu_add, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

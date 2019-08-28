@@ -1,7 +1,7 @@
 package io.stormbird.wallet;
 
 
-import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
+import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertArrayEquals;

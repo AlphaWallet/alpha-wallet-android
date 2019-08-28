@@ -14,7 +14,7 @@ dependencies {
     implementation('com.amazonaws:aws-lambda-java-core:1.2.0')
     implementation('com.amazonaws:aws-lambda-java-events:2.2.6')
     testImplementation 'junit:junit:4.12'
-    implementation 'org.bouncycastle:bcprov-jdk15on:1.60'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.62'
 }
 
 sourceCompatibility = "1.8"

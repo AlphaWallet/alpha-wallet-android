@@ -60,7 +60,7 @@ import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
  * Created by James on 21/02/2018.
  */
 
-public class TransferTicketDetailActivity extends BaseActivity implements Runnable, ItemClickListener, OnTokenClickListener, SignAuthenticationCallback
+public class TransferTicketDetailActivity extends BaseActivity implements Runnable, ItemClickListener, OnTokenClickListener
 {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
     private static final int SEND_INTENT_REQUEST_CODE = 2;
@@ -113,6 +113,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private TimePickerDialog timePickerDialog;
 
     private PinAuthenticationCallbackInterface authInterface;
+    private SignAuthenticationCallback signCallback;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -334,7 +335,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
                 break;
             case TRANSFER_USING_LINK:
                 //generate link
-                viewModel.generateUniversalLink(token.getTicketIndices(ticketIds), token.getAddress(), calculateExpiryTime());
+                getAuthenticationForLinkGeneration();
                 break;
             case TRANSFER_TO_ADDRESS:
                 //transfer using eth
@@ -343,6 +344,29 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         }
 
         return newState;
+    }
+
+    private void getAuthenticationForLinkGeneration()
+    {
+        signCallback = new SignAuthenticationCallback()
+        {
+            @Override
+            public void GotAuthorisation(boolean gotAuth)
+            {
+                if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
+                else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+
+                if (gotAuth) viewModel.generateUniversalLink(token.getTicketIndices(ticketIds), token.getAddress(), calculateExpiryTime());
+            }
+
+            @Override
+            public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+            {
+                authInterface = authCallback;
+            }
+        };
+
+        viewModel.getAuthorisation(this, signCallback);
     }
 
     private long calculateExpiryTime()
@@ -596,7 +620,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
                 break;
 
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
-                GotAuthorisation(resultCode == RESULT_OK);
+                signCallback.GotAuthorisation(resultCode == RESULT_OK);
                 break;
 
             default:
@@ -667,13 +691,31 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
                 getResources().getString(R.string.to) + " " +
                 toAddress;
 
+        signCallback = new SignAuthenticationCallback()
+        {
+            @Override
+            public void GotAuthorisation(boolean gotAuth)
+            {
+                if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
+                else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+
+                if (gotAuth) transferTicketFinal();
+            }
+
+            @Override
+            public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+            {
+                authInterface = authCallback;
+            }
+        };
+
         confirmationDialog = new AWalletConfirmationDialog(this);
         confirmationDialog.setTitle(R.string.title_transaction_details);
         confirmationDialog.setSmallText(R.string.confirm_transfer_details);
         confirmationDialog.setMediumText(qty);
         confirmationDialog.setPrimaryButtonText(R.string.transfer_tickets);
         confirmationDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
-        confirmationDialog.setPrimaryButtonListener(v1 -> viewModel.getAuthorisation(this, this));
+        confirmationDialog.setPrimaryButtonListener(v1 -> viewModel.getAuthorisation(this, signCallback));
         confirmationDialog.setSecondaryButtonListener(v1 -> confirmationDialog.dismiss());
         confirmationDialog.show();
     }
@@ -743,21 +785,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     public void onItemClick(String url)
     {
         ensHandler.handleHistoryItemClick(url);
-    }
-
-    @Override
-    public void GotAuthorisation(boolean gotAuth)
-    {
-        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
-        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
-
-        if (gotAuth) transferTicketFinal();
-    }
-
-    @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-    {
-        authInterface = authCallback;
     }
 }
 

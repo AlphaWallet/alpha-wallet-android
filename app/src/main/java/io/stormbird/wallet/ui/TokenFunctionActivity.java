@@ -75,6 +75,7 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
         setTitle(getString(R.string.token_function));
         setupFunctions();
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
+        viewModel.getCurrentWallet();
 
         handler = new Handler();
     }

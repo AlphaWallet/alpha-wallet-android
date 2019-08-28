@@ -3,6 +3,8 @@ package io.stormbird.wallet.ui;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -82,6 +84,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         alertDialog = null;
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        LockOrientation();
 
         BackupOperationType type = (BackupOperationType) getIntent().getSerializableExtra("TYPE");
         wallet = getIntent().getParcelableExtra(WALLET);
@@ -114,6 +117,18 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                 DisplayKeyFailureDialog("Export Private key not yet implemented");
                 //TODO: Not yet implemented
                 break;
+        }
+    }
+
+    private void LockOrientation()
+    {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+        {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+        else
+        {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
     }
 

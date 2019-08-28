@@ -3,6 +3,8 @@ package io.stormbird.wallet.ui;
 import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -77,6 +79,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_import_wallet);
+        LockOrientation();
 
         toolbar();
 
@@ -487,5 +490,17 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
             dialog.dismiss();
         });
         dialog.show();
+    }
+
+    private void LockOrientation()
+    {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+        {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+        else
+        {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
     }
 }

@@ -1,4 +1,4 @@
-package io.stormbird.wallet.ui;
+package io.stormbird.wallet.util;
 
 import com.amazonaws.mobileconnectors.lambdainvoker.LambdaFunction;
 

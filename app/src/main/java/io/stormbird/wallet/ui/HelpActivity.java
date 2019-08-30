@@ -19,6 +19,7 @@ import com.amazonaws.regions.Regions;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.HelpItem;
 import io.stormbird.wallet.ui.widget.adapter.HelpAdapter;
+import io.stormbird.wallet.util.TrustAddressGenerator;
 import io.stormbird.wallet.viewmodel.HelpViewModel;
 import io.stormbird.wallet.viewmodel.HelpViewModelFactory;
 

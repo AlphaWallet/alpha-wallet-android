@@ -49,5 +49,6 @@
   {"name": "Zerion", "description": "Trade and manage your digital assets across different wallets in one interface", "url": "https://zerion.io", "category": "Finance"},
   {"name": "ENS domain manager", "description": "Manage ENS domains", "url": "https://manager.ens.domains", "category": "Tool"},
   {"name": "Humanity", "description": "Human Identity on Ethereum", "url": "https://humanitydao.org", "category": "Social Media"},
-  {"name": "DEX.AG", "description": "Trade cryptoassets at the best price", "url": "https://dex.ag", "category": "Exchange"}
+  {"name": "DEX.AG", "description": "Trade cryptoassets at the best price", "url": "https://dex.ag", "category": "Exchange"},
+  {"name": "Totle Swap", "description": "Totle automatically finds and acquires the best price across decentralized exchanges for ERC-20 swaps", "url": "https://swap.totle.com", "category": "Exchange"}
 ]

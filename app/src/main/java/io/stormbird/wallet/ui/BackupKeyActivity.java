@@ -149,7 +149,16 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         backupImage.setImageResource(R.drawable.ic_biometric);
         detail.setVisibility(View.VISIBLE);
         detail.setText(R.string.upgrade_key_security_detail);
-        nextButton.setText(getString(R.string.action_upgrade_key));
+        switch (wallet.type)
+        {
+            default:
+                nextButton.setText(getString(R.string.action_upgrade_key));
+                break;
+            case HDKEY:
+                nextButton.setText(getString(R.string.lock_seed_phrase));
+                break;
+        }
+
         skipButton.setVisibility(View.VISIBLE);
 
         skipButton.setOnClickListener(v -> {

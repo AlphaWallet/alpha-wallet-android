@@ -4,18 +4,18 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import io.stormbird.token.entity.XMLDsigVerificationResult;
-import org.json.simple.JSONObject;
+import com.github.cliftonlabs.json_simple.JsonObject;
 
 public class VerifyXMLDSig {
 
     //Invoke with Lambda via VerifyXMLDSig interface
     public Response VerifyTSMLFile(Request req) throws Exception {
-        JSONObject result = validateSSLCertificate(req.file);
+        JsonObject result = validateSSLCertificate(req.file);
         return new Response(result);
     }
 
-    public JSONObject validateSSLCertificate(String file) throws UnsupportedEncodingException {
-        JSONObject result = new JSONObject();
+    public JsonObject validateSSLCertificate(String file) throws UnsupportedEncodingException {
+        JsonObject result = new JsonObject();
         InputStream stream = new ByteArrayInputStream(file.getBytes("UTF-8"));
         XMLDsigVerificationResult XMLDsigVerificationResult = new XMLDSigVerifier().VerifyXMLDSig(stream);
         if (XMLDsigVerificationResult.isValid)
@@ -54,13 +54,13 @@ public class VerifyXMLDSig {
     }
 
     public static class Response {
-        JSONObject result;
+        JsonObject result;
 
-        public JSONObject getResult() { return result; }
+        public JsonObject getResult() { return result; }
 
-        public void setResult(JSONObject result) { this.result = result; }
+        public void setResult(JsonObject result) { this.result = result; }
 
-        public Response(JSONObject result) {
+        public Response(JsonObject result) {
             this.result = result;
         }
 

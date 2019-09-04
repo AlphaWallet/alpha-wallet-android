@@ -583,4 +583,5 @@
     <string name="welcome_to_alphawallet">Welcome to AlphaWallet</string>
     <string name="logo">AlphaWallet Logo</string>
     <string name="lock_seed_phrase">LOCK SEED PHRASE</string>
+    <string name="no_key">No Key found</string>
 </resources>

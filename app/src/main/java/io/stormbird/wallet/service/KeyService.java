@@ -48,7 +48,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_NONE;
     private static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding";
     private static final int AUTHENTICATION_DURATION_SECONDS = 30;
-    private static final String REQUIRE_AUTHENTICATION = "-A-";
     private static final String FAILED_SIGNATURE = "00000000000000000000000000000000000000000000000000000000000000000";
 
     //This value determines the time interval between the user swiping away the backup warning notice and it re-appearing
@@ -212,14 +211,19 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         currentWallet = wallet;
         callbackInterface = callback;
         callback.setupAuthenticationCallback(this);
-        String mnemonic = unpackMnemonic();
-        if (mnemonic.equals(REQUIRE_AUTHENTICATION))
+
+        try
+        {
+            String mnemonic = unpackMnemonic();
+            callback.FetchMnemonic(mnemonic);
+        }
+        catch (KeyServiceException e)
+        {
+            keyFailure(e.getMessage());
+        }
+        catch (UserNotAuthenticatedException e)
         {
             checkAuthentication(FETCH_MNEMONIC);
-        }
-        else
-        {
-            callback.FetchMnemonic(mnemonic);
         }
     }
 
@@ -322,17 +326,28 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             case KEYSTORE:
                 return signWithKeystore(transactionBytes);
             case HDKEY:
-                String mnemonic = unpackMnemonic();
-                if (mnemonic.length() == 0)
-                    return FAILED_SIGNATURE.getBytes();
-                HDWallet newWallet = new HDWallet(mnemonic, "");
-                PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
-                byte[] digest = Hash.keccak256(transactionBytes);
-                return pk.sign(digest, Curve.SECP256K1);
+                try
+                {
+                    String mnemonic = unpackMnemonic();
+                    HDWallet newWallet = new HDWallet(mnemonic, "");
+                    PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
+                    byte[] digest = Hash.keccak256(transactionBytes);
+                    return pk.sign(digest, Curve.SECP256K1);
+                }
+                catch (KeyServiceException e)
+                {
+                    keyFailure(e.getMessage());
+                }
+                catch (UserNotAuthenticatedException e)
+                {
+                    checkAuthentication(FETCH_MNEMONIC);
+                }
+                return FAILED_SIGNATURE.getBytes();
             case NOT_DEFINED:
             case TEXT_MARKER:
             case WATCH:
             default:
+                keyFailure(context.getString(R.string.no_key));
                 return FAILED_SIGNATURE.getBytes();
         }
     }
@@ -351,7 +366,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         callbackInterface = callback;
         callback.setupAuthenticationCallback(this);
 
-        String password = null;
+        String password;
 
         try
         {
@@ -359,8 +374,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             {
                 case KEYSTORE:
                     password = unpackMnemonic();
-                    if (password.equals(REQUIRE_AUTHENTICATION)) checkAuthentication(FETCH_MNEMONIC);
-                    else callback.FetchMnemonic(password);
+                    callback.FetchMnemonic(password);
                     break;
                 case KEYSTORE_LEGACY:
                     password = new String(getLegacyPassword(context, wallet.address));
@@ -370,11 +384,19 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                     break;
             }
         }
+        catch (UserNotAuthenticatedException e)
+        {
+            checkAuthentication(FETCH_MNEMONIC);
+        }
         catch (ServiceErrorException e)
         {
             //Legacy keystore error
             if (!BuildConfig.DEBUG) Crashlytics.logException(e);
             e.printStackTrace();
+        }
+        catch (KeyServiceException e)
+        {
+            keyFailure(e.getMessage());
         }
         catch (Exception e)
         {
@@ -428,7 +450,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         signCallback.GotAuthorisation(false);
     }
 
-    private synchronized String unpackMnemonic()
+    private synchronized String unpackMnemonic() throws KeyServiceException, UserNotAuthenticatedException
     {
         try
         {
@@ -436,8 +458,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             keyStore.load(null);
             if (!keyStore.containsAlias(currentWallet.address))
             {
-                keyFailure("Key not found in keystore. Re-import key.");
-                return "";
+                throw new KeyServiceException("Key not found in keystore. Re-import key.");
             }
 
             //create a stream to the encrypted bytes
@@ -450,8 +471,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 iv = readBytesFromFile(getFilePath(context, currentWallet.address + "iv"));
             if (iv == null || iv.length == 0)
             {
-                keyFailure("Cannot setup wallet seed.");
-                return "";
+                throw new KeyServiceException("Cannot setup wallet seed.");
             }
             Cipher outCipher = Cipher.getInstance(CIPHER_ALGORITHM);
             final GCMParameterSpec spec = new GCMParameterSpec(128, iv);
@@ -464,29 +484,26 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         {
             if (e instanceof UserNotAuthenticatedException)
             {
-                return REQUIRE_AUTHENTICATION;
+                throw new UserNotAuthenticatedException("Requires Authentication");
             }
             else
             {
-                keyFailure(e.getMessage());
+                throw new KeyServiceException(e.getMessage());
             }
         }
         catch (UnrecoverableKeyException e)
         {
-            keyFailure("Key created at different security level. Please re-import key");
-            e.printStackTrace();
+            throw new KeyServiceException("Key created at different security level. Please re-import key");
         }
         catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException e)
         {
             e.printStackTrace();
-            keyFailure(e.getMessage());
+            throw new KeyServiceException(e.getMessage());
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            throw new KeyServiceException(e.getMessage());
         }
-
-        return "";
     }
 
     private void createHDKey()
@@ -504,11 +521,23 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     {
         //first recover the seed phrase from non-authlocked key. This removes the need to keep the seed phrase as a member on the heap
         // - making the key operation more secure
-        String seedPhrase = unpackMnemonic();
-        HDWallet newWallet = new HDWallet(seedPhrase, "");
-        boolean success = storeHDKey(newWallet, true);
-        String reportAddress = success ? currentWallet.address : null;
-        importCallback.WalletValidated(reportAddress, authLevel);
+        try
+        {
+            String seedPhrase = unpackMnemonic();
+            HDWallet newWallet = new HDWallet(seedPhrase, "");
+            boolean success = storeHDKey(newWallet, true);
+            String reportAddress = success ? currentWallet.address : null;
+            importCallback.WalletValidated(reportAddress, authLevel);
+        }
+        catch (UserNotAuthenticatedException e)
+        {
+            //Should not get this. Authentication has already been requested and key should not be auth-locked at this stage
+            checkAuthentication(IMPORT_HD_KEY);
+        }
+        catch (KeyServiceException e)
+        {
+            keyFailure(e.getMessage());
+        }
     }
 
     /**
@@ -770,7 +799,18 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 createHDKey();
                 break;
             case FETCH_MNEMONIC:
-                callbackInterface.FetchMnemonic(unpackMnemonic());
+                try
+                {
+                    callbackInterface.FetchMnemonic(unpackMnemonic());
+                }
+                catch (UserNotAuthenticatedException e)
+                {
+                    checkAuthentication(FETCH_MNEMONIC);
+                }
+                catch (KeyServiceException e)
+                {
+                    keyFailure(e.getMessage());
+                }
                 break;
             case IMPORT_HD_KEY:
                 importHDKey();

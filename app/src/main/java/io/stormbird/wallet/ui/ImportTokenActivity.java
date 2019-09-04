@@ -12,10 +12,12 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import io.stormbird.token.entity.MagicLinkInfo;
+import io.stormbird.token.entity.XMLDsigDescriptor;
 import io.stormbird.token.tools.Convert;
 import io.stormbird.wallet.entity.*;
 import java.math.BigDecimal;
@@ -65,12 +67,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private TextView importTxt;
     private TextView importHeader;
 
-    private AppCompatRadioButton verified;
-    private AppCompatRadioButton unVerified;
-    private TextView textVerified;
-    private TextView textUnverified;
-    private RelativeLayout verifiedLayer;
-
     private LinearLayout costLayout;
     private int chainId = 0;
     private boolean usingFeeMaster = false;
@@ -102,13 +98,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         importTxt = findViewById(R.id.textImport);
         costLayout = findViewById(R.id.cost_layout);
 
-        verified = findViewById(R.id.radioVerified);
-        unVerified = findViewById(R.id.radioUnverified);
-        textVerified = findViewById(R.id.verified);
-        textUnverified = findViewById(R.id.unverified);
-        verifiedLayer = findViewById(R.id.verifiedLayer);
-        verifiedLayer.setVisibility(View.GONE);
-
         setTicket(false, true, false);
 
         Button importTickets = findViewById(R.id.import_ticket);
@@ -131,10 +120,52 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         viewModel.checkContractNetwork().observe(this, this::checkContractNetwork);
         viewModel.ticketNotValid().observe(this, this::onInvalidTicket);
         viewModel.feemasterAvailable().observe(this, this::onFeemasterAvailable);
+        viewModel.sig().observe(this, this::onSigData);
 
         ticketRange = null;
 
         Ticket.blankTicketHolder(R.string.loading,this);
+    }
+
+    private void onSigData(XMLDsigDescriptor sigData)
+    {
+        findViewById(R.id.certificate_spinner).setVisibility(View.GONE);
+        ImageView lockStatus = findViewById(R.id.image_lock);
+        TextView signatureMessage = findViewById(R.id.text_verified);
+        lockStatus.setVisibility(View.VISIBLE);
+        String certifier = sigData.certificateName;
+        if (certifier == null) certifier = "aw.app";
+
+        switch (sigData.type)
+        {
+            case NO_TOKENSCRIPT:
+                lockStatus.setVisibility(View.GONE);
+                break;
+            case DEBUG_NO_SIGNATURE:
+                lockStatus.setImageResource(R.mipmap.ic_unlocked_debug);
+                signatureMessage.setText(R.string.no_certificate);
+                break;
+            case DEBUG_SIGNATURE_INVALID:
+                lockStatus.setImageResource(R.mipmap.ic_unlocked_debug);
+                signatureMessage.setText(R.string.certificate_fail);
+                break;
+            case DEBUG_SIGNATURE_PASS:
+                lockStatus.setImageResource(R.mipmap.ic_locked_debug);
+                signatureMessage.setText(getString(R.string.verified, certifier));
+                break;
+            case NO_SIGNATURE:
+                lockStatus.setImageResource(R.mipmap.ic_unverified);
+                signatureMessage.setText(R.string.no_certificate);
+                break;
+            case SIGNATURE_INVALID:
+                lockStatus.setImageResource(R.mipmap.ic_unverified);
+                signatureMessage.setText(R.string.certificate_fail);
+                break;
+            case SIGNATURE_PASS:
+                lockStatus.setImageResource(R.mipmap.ic_locked);
+                signatureMessage.setText(getString(R.string.verified, certifier));
+                break;
+        }
     }
 
     private void onError(ErrorEnvelope errorEnvelope)
@@ -346,19 +377,21 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                 break;
         }
 
-        verifiedLayer.setVisibility(View.VISIBLE);
+        viewModel.checkTokenScriptSignature(data.chainId, data.contractAddress);
 
-        //TODO: Must be signed
-        if (viewModel.getAssetDefinitionService().hasDefinition(data.chainId, data.contractAddress) || usingFeeMaster)
-        {
-            verified.setVisibility(View.VISIBLE);
-            textVerified.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            unVerified.setVisibility(View.VISIBLE);
-            textUnverified.setVisibility(View.VISIBLE);
-        }
+//        verifiedLayer.setVisibility(View.VISIBLE);
+//
+//        //TODO: Must be signed
+//        if (viewModel.getAssetDefinitionService().hasDefinition(data.chainId, data.contractAddress) || usingFeeMaster)
+//        {
+//            verified.setVisibility(View.VISIBLE);
+//            textVerified.setVisibility(View.VISIBLE);
+//        }
+//        else
+//        {
+//            unVerified.setVisibility(View.VISIBLE);
+//            textUnverified.setVisibility(View.VISIBLE);
+//        }
     }
 
     private void displayImportAction()
@@ -395,11 +428,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         if (available)
         {
             priceETH.setText(R.string.free_import);
-            //is verified by stormbird
-            verified.setVisibility(View.VISIBLE);
-            textVerified.setVisibility(View.VISIBLE);
-            unVerified.setVisibility(View.GONE);
-            textUnverified.setVisibility(View.GONE);
             displayImportAction();
         }
         else

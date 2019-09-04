@@ -2,14 +2,18 @@ package io.stormbird.wallet.service;
 
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Numeric;
 
-import java.math.BigInteger;
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.stormbird.token.entity.XMLDsigDescriptor;
 import io.stormbird.wallet.entity.CryptoFunctions;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Wallet;
@@ -19,6 +23,7 @@ import io.reactivex.Single;
 import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.tools.ParseMagicLink;
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -27,18 +32,23 @@ import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
 import static io.stormbird.token.tools.ParseMagicLink.spawnable;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
-public class FeeMasterService
+public class AlphaWalletService
 {
     private final OkHttpClient httpClient;
     private final TransactionRepositoryType transactionRepository;
+    private final Gson gson;
     private ParseMagicLink parser;
 
     private static final String API = "api/";
+    private static MediaType MEDIA_TYPE_TOKENSCRIPT
+            = MediaType.parse("text/xml; charset=UTF-8");
 
-    public FeeMasterService(OkHttpClient httpClient,
-                            TransactionRepositoryType transactionRepository) {
+    public AlphaWalletService(OkHttpClient httpClient,
+                              TransactionRepositoryType transactionRepository,
+                              Gson gson) {
         this.httpClient = httpClient;
         this.transactionRepository = transactionRepository;
+        this.gson = gson;
     }
 
     private void initParser()
@@ -62,6 +72,57 @@ public class FeeMasterService
                         .flatMap(ticketStr -> sendFeemasterTransaction(url, chainId, wallet.address, order.expiry, ticketStr, order.signature))
                         .toObservable();
         }
+    }
+
+    /*
+    {"result":"pass",
+    "subject":"CN=skstravel.cn,OU=PositiveSSL,OU=Domain Control Validated",
+    "keyName":"Shankai",
+    "keyType":"SHA256withECDSA",
+    "issuer":"CN=COMODO ECC Domain Validation Secure Server CA,O=COMODO CA Limited,L=Salford,ST=Greater Manchester,C=GB"}
+     */
+    public XMLDsigDescriptor checkTokenScriptSignature(File tokenScriptFile)
+    {
+        XMLDsigDescriptor dsigDescriptor = new XMLDsigDescriptor();
+        dsigDescriptor.result = "fail";
+        try
+        {
+            RequestBody body = RequestBody.Companion.create(tokenScriptFile, MEDIA_TYPE_TOKENSCRIPT);
+
+            RequestBody requestBody = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("file", "tokenscript", body)
+                    .build();
+
+            Request request = new Request.Builder().url("https://aw.app/api/v1/verifyXMLDSig")
+                    .post(requestBody)
+                    .build();
+
+            okhttp3.Response response = httpClient.newCall(request).execute();
+
+            String result = response.body().string();
+            if (!result.contains("\"fail\"")) //check return value doesn't contain "fail" before attempting to gson it
+            {
+                dsigDescriptor = gson.fromJson(result, XMLDsigDescriptor.class);
+                //interpret issuer
+                String[] certifiers = dsigDescriptor.subject.split(",");
+                if (certifiers[0] != null && certifiers[0].length() > 3 && certifiers[0].startsWith("CN="))
+                {
+                    dsigDescriptor.certificateName = certifiers[0].substring(3);
+                }
+            }
+            else
+            {
+                JsonObject obj = gson.fromJson(result, JsonObject.class);
+                dsigDescriptor.subject = obj.get("failureReason").getAsString();
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return dsigDescriptor;
     }
 
     private Observable<Integer> sendFeemasterCurrencyTransaction(String url, int networkId, String address, MagicLinkData order)

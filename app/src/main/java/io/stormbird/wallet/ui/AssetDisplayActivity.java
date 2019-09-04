@@ -15,9 +15,13 @@ import android.view.View;
 import javax.inject.Inject;
 
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+
 import dagger.android.AndroidInjection;
 import io.stormbird.token.entity.FunctionDefinition;
 import io.stormbird.token.entity.TSAction;
+import io.stormbird.token.entity.XMLDsigDescriptor;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
@@ -79,7 +83,7 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
         setContentView(R.layout.activity_asset_display);
         toolbar();
 
-        setTitle(getString(R.string.title_show_tickets));
+        setTitle(getString(R.string.empty));
         systemView = findViewById(R.id.system_view);
         systemView.hide();
         progressView = findViewById(R.id.progress_view);
@@ -96,6 +100,7 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.ticket().observe(this, this::onTokenUpdate);
+        viewModel.sig().observe(this, this::onSigData);
 
         adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
         if (token instanceof ERC721Token)
@@ -114,6 +119,55 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
 
         finishReceiver = new FinishReceiver(this);
         checkForTokenScript();
+        findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE);
+        viewModel.checkTokenScriptValidity(token);
+    }
+
+    /**
+     * Received Signature data either cached from AssetDefinitionService or from the API call
+     * @param sigData
+     */
+    private void onSigData(XMLDsigDescriptor sigData)
+    {
+        findViewById(R.id.certificate_spinner).setVisibility(View.GONE);
+        ImageView lockStatus = findViewById(R.id.image_lock);
+        TextView signatureMessage = findViewById(R.id.text_verified);
+        lockStatus.setVisibility(View.VISIBLE);
+        String certifier = sigData.certificateName;
+        if (certifier == null) certifier = "aw.app";
+
+        switch (sigData.type)
+        {
+            case NO_TOKENSCRIPT:
+                lockStatus.setVisibility(View.GONE);
+                break;
+            case DEBUG_NO_SIGNATURE:
+                lockStatus.setImageResource(R.mipmap.ic_unlocked_debug);
+                signatureMessage.setText(R.string.no_certificate);
+                break;
+            case DEBUG_SIGNATURE_INVALID:
+                lockStatus.setImageResource(R.mipmap.ic_unlocked_debug);
+                signatureMessage.setText(R.string.certificate_fail);
+                break;
+            case DEBUG_SIGNATURE_PASS:
+                lockStatus.setImageResource(R.mipmap.ic_locked_debug);
+                signatureMessage.setText(getString(R.string.verified, certifier));
+                adapter.notifyItemChanged(0); //update issuer
+                break;
+            case NO_SIGNATURE:
+                lockStatus.setImageResource(R.mipmap.ic_unverified);
+                signatureMessage.setText(R.string.no_certificate);
+                break;
+            case SIGNATURE_INVALID:
+                lockStatus.setImageResource(R.mipmap.ic_unverified);
+                signatureMessage.setText(R.string.certificate_fail);
+                break;
+            case SIGNATURE_PASS:
+                lockStatus.setImageResource(R.mipmap.ic_locked);
+                signatureMessage.setText(getString(R.string.verified, certifier));
+                adapter.notifyItemChanged(0); //update issuer
+                break;
+        }
     }
 
     /**
@@ -253,7 +307,7 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
                 if (dialog == null) dialog = new AWalletAlertDialog(this);
                 dialog.setIcon(AWalletAlertDialog.ERROR);
                 dialog.setTitle(R.string.token_selection);
-                dialog.setMessage(getString(R.string.token_requirement, action.function.getTokenRequirement()));
+                dialog.setMessage(getString(R.string.token_requirement, String.valueOf(action.function.getTokenRequirement())));
                 dialog.setButtonText(R.string.dialog_ok);
                 dialog.setButtonListener(v -> dialog.dismiss());
                 dialog.show();
@@ -327,8 +381,15 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
         Vibrator vb = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (vb != null && vb.hasVibrator())
         {
-            VibrationEffect vibe = VibrationEffect.createOneShot(200, DEFAULT_AMPLITUDE);
-            vb.vibrate(vibe);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                VibrationEffect vibe = VibrationEffect.createOneShot(200, DEFAULT_AMPLITUDE);
+                vb.vibrate(vibe);
+            }
+            else
+            {
+                //noinspection deprecation
+                vb.vibrate(200);
+            }
         }
 
         if (findViewById(R.id.layoutButtons).getVisibility() != View.VISIBLE)

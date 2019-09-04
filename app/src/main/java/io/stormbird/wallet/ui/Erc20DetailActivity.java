@@ -14,11 +14,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import dagger.android.AndroidInjection;
 import io.stormbird.token.entity.TSAction;
+import io.stormbird.token.entity.XMLDsigDescriptor;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
@@ -80,6 +82,48 @@ public class Erc20DetailActivity extends BaseActivity {
         viewModel.token().observe(this, this::onTokenData);
         viewModel.tokenTicker().observe(this, this::onTokenTicker);
         viewModel.transactionUpdate().observe(this, this::newTransactions);
+        viewModel.sig().observe(this, this::onSigData);
+    }
+
+    private void onSigData(XMLDsigDescriptor sigData)
+    {
+        findViewById(R.id.certificate_spinner).setVisibility(View.GONE);
+        ImageView lockStatus = findViewById(R.id.image_lock);
+        TextView signatureMessage = findViewById(R.id.text_verified);
+        lockStatus.setVisibility(View.VISIBLE);
+        String certifier = sigData.certificateName;
+        if (certifier == null) certifier = "aw.app";
+
+        switch (sigData.type)
+        {
+            case NO_TOKENSCRIPT:
+                lockStatus.setVisibility(View.GONE);
+                break;
+            case DEBUG_NO_SIGNATURE:
+                lockStatus.setImageResource(R.mipmap.ic_unlocked_debug);
+                signatureMessage.setText(R.string.no_certificate);
+                break;
+            case DEBUG_SIGNATURE_INVALID:
+                lockStatus.setImageResource(R.mipmap.ic_unlocked_debug);
+                signatureMessage.setText(R.string.certificate_fail);
+                break;
+            case DEBUG_SIGNATURE_PASS:
+                lockStatus.setImageResource(R.mipmap.ic_locked_debug);
+                signatureMessage.setText(getString(R.string.verified, certifier));
+                break;
+            case NO_SIGNATURE:
+                lockStatus.setImageResource(R.mipmap.ic_unverified);
+                signatureMessage.setText(R.string.no_certificate);
+                break;
+            case SIGNATURE_INVALID:
+                lockStatus.setImageResource(R.mipmap.ic_unverified);
+                signatureMessage.setText(R.string.certificate_fail);
+                break;
+            case SIGNATURE_PASS:
+                lockStatus.setImageResource(R.mipmap.ic_locked);
+                signatureMessage.setText(getString(R.string.verified, certifier));
+                break;
+        }
     }
 
     private void onTokenTicker(Ticker ticker)
@@ -126,6 +170,9 @@ public class Erc20DetailActivity extends BaseActivity {
         if (viewModel.hasAction(token)) {
             setupAction();
         }
+
+        findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE);
+        viewModel.checkTokenScriptValidity(token);
     }
 
     private void setupAction()
@@ -250,15 +297,6 @@ public class Erc20DetailActivity extends BaseActivity {
             sendBtn.setVisibility(View.GONE);
             receiveBtn.setVisibility(View.GONE);
         }
-        else if (hasDefinition)
-        {
-            findViewById(R.id.text_confirmed).setVisibility(View.VISIBLE);
-            findViewById(R.id.text_unconfirmed).setVisibility(View.GONE);
-        }
-        else
-        {
-            findViewById(R.id.layout_confirmed).setVisibility(View.GONE);
-        }
     }
 
     private void addTokenPage() {
@@ -275,6 +313,7 @@ public class Erc20DetailActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_qr, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

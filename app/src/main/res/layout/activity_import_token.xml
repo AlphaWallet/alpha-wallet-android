@@ -5,7 +5,7 @@
     android:background="@color/colorPrimaryDark"
     android:orientation="vertical">
 
-    <include layout="@layout/layout_simple_toolbar" />
+    <include layout="@layout/layout_certified_toolbar" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -21,12 +21,25 @@
             android:paddingRight="15dp">
 
             <TextView
+                android:id="@+id/textNetworkName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:fontFamily="@font/font_regular"
+                android:text=""
+                android:paddingEnd="5dp"
+                android:paddingStart="5dp"
+                android:textColor="@color/text_black"
+                android:textSize="16sp"
+                android:visibility="visible" />
+
+            <TextView
                 android:id="@+id/import_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="30dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 android:fontFamily="@font/font_light"
                 android:gravity="center"
                 android:paddingLeft="40dp"
@@ -34,8 +47,6 @@
                 android:text="@string/toolbar_header_importing_tickets"
                 android:textColor="@color/text_black"
                 android:textSize="25sp" />
-
-            <include layout="@layout/item_verified" />
 
             <include layout="@layout/item_ticket" />
 

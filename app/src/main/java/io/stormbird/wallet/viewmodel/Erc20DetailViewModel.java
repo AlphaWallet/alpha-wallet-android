@@ -13,6 +13,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.TSAction;
+import io.stormbird.token.entity.XMLDsigDescriptor;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.router.MyAddressRouter;
@@ -29,6 +30,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final MutableLiveData<Token> token = new MutableLiveData<>();
     private final MutableLiveData<Ticker> tokenTicker = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactionUpdate = new MutableLiveData<>();
+    private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
 
     private final MyAddressRouter myAddressRouter;
     private final FetchTokensInteract fetchTokensInteract;
@@ -185,6 +187,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     public LiveData<Transaction[]> transactionUpdate() {
         return transactionUpdate;
     }
+    public LiveData<XMLDsigDescriptor> sig() { return sig; }
 
     public void cleanUp() {
         if (fetchTransactionDisposable != null && !fetchTransactionDisposable.isDisposed()) {
@@ -280,5 +283,13 @@ public class Erc20DetailViewModel extends BaseViewModel {
     public Map<String, TSAction> getActions(Token token)
     {
         return assetDefinitionService.getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+    }
+
+    public void checkTokenScriptValidity(Token token)
+    {
+        disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(sig::postValue, this::onError);
     }
 }

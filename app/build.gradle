@@ -38,8 +38,8 @@ android {
         applicationId "io.stormbird.wallet"
         minSdkVersion 18
         targetSdkVersion 28
-        versionCode 59
-        versionName "2.01.0"
+        versionCode 62
+        versionName "2.01.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
 
@@ -150,6 +150,10 @@ dependencies {
     // Image Loader
     implementation 'com.github.bumptech.glide:glide:4.8.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
+
+    // Amazon Android SDK
+    implementation 'com.amazonaws:aws-android-sdk-core:2.2.+'
+    implementation 'com.amazonaws:aws-android-sdk-lambda:2.2.+'
 
     // Tests
     testImplementation 'junit:junit:4.12'

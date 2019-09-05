@@ -1,20 +1,27 @@
 package io.stormbird.token.tools;
 
-import io.stormbird.token.entity.*;
 import org.junit.Test;
 import org.xml.sax.SAXException;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Locale;
 import java.util.stream.Stream;
+import io.stormbird.token.entity.AttributeInterface;
+import io.stormbird.token.entity.AttributeType;
+import io.stormbird.token.entity.ContractAddress;
+import io.stormbird.token.entity.ContractInfo;
+import io.stormbird.token.entity.ParseResult;
+import io.stormbird.token.entity.TransactionResult;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import static org.junit.Assert.*;
 
-
-public class TokenDefinitionTest implements AttributeInterface
+public class TokenDefinitionTest implements AttributeInterface, ParseResult
 {
     Stream<BigInteger> ticketIDs = Stream.of(
             "1015b4a28f000000000000000000000", "1015b4a28f000000000000000000000",
@@ -25,7 +32,7 @@ public class TokenDefinitionTest implements AttributeInterface
     @Test
     public void TokenInformationCanBeExtracted() throws IOException, SAXException {
         assertTrue(file.exists());
-        TokenDefinition entryToken = new TokenDefinition(new FileInputStream(file), new Locale("en"), null);
+        TokenDefinition entryToken = new TokenDefinition(new FileInputStream(file), new Locale("en"), this);
         assertFalse(entryToken.attributeTypes.isEmpty());
         for (String contractName : entryToken.contracts.keySet())
         {
@@ -49,7 +56,7 @@ public class TokenDefinitionTest implements AttributeInterface
 
     @Test
     public void AttributeTypesShouldParse() throws IOException, SAXException {
-        TokenDefinition entryToken = new TokenDefinition(new FileInputStream(file), new Locale("en"), null);
+        TokenDefinition entryToken = new TokenDefinition(new FileInputStream(file), new Locale("en"), this);
         BigInteger tokenId = new BigInteger("1015b4a28f000000000000000000000", 16);
 
         //StringBuilder tokenData = new StringBuilder();
@@ -72,14 +79,14 @@ public class TokenDefinitionTest implements AttributeInterface
 
     @Test
     public void XMLSignatureShouldValidate() throws IOException, SAXException {
-        TokenDefinition entryToken = new TokenDefinition(new FileInputStream(file), new Locale("en"), null);
+        TokenDefinition entryToken = new TokenDefinition(new FileInputStream(file), new Locale("en"), this);
         assertEquals("EntryToken", entryToken.holdingToken);
         // TODO: actually validate XML signature
     }
 
     @Test(expected = SAXException.class)
     public void BadLocaleShouldThrowException() throws IOException, SAXException {
-        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("asdf"), null);
+        TokenDefinition ticketAsset = new TokenDefinition(new FileInputStream(file), new Locale("asdf"), this);
     }
 
 
@@ -102,5 +109,27 @@ public class TokenDefinitionTest implements AttributeInterface
     public boolean resolveOptimisedAttr(ContractAddress contract, AttributeType attr, TransactionResult transactionResult)
     {
         return false;
+    }
+
+    @Override
+    public void parseMessage(ParseResultId parseResult)
+    {
+        switch (parseResult)
+        {
+            case OK:
+                System.out.println("Schema date is correct.");
+                break;
+            case XML_OUT_OF_DATE:
+                System.out.println("Parsing outdated schema. It's an older schema but it checks out.");
+                break;
+            case PARSER_OUT_OF_DATE:
+                System.out.println("Parser attempting to parse future schema. Code base needs to be updated.");
+                fail();
+                break;
+            case PARSE_FAILED:
+                System.out.println("Parser Error.");
+                fail();
+                break;
+        }
     }
 }

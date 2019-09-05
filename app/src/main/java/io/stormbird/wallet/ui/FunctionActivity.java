@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,6 +42,8 @@ import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.List;
@@ -111,7 +114,8 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
             injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
             if (action.style != null) injectedView = tokenView.injectStyleData(injectedView, action.style);
 
-            tokenView.loadData(injectedView, "text/html", "utf-8");
+            String base64 = Base64.encodeToString(injectedView.getBytes(Charset.forName("UTF-8")), Base64.DEFAULT);
+            tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
         }
         catch (Exception e)
         {
@@ -374,7 +378,8 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
 
     private void handleFunction(TSAction action)
     {
-        if (action.function.tx != null && (action.function.parameters == null || action.function.parameters.size() == 0))
+        if (action.function.tx != null && (action.function.method == null || action.function.method.length() == 0)
+                && (action.function.parameters == null || action.function.parameters.size() == 0))
         {
             //no params, this is a native style transaction
             NativeSend(action);
@@ -403,14 +408,15 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
                 //this is very specific but 'value' is a specifically handled param
                 value = action.function.tx.args.get("value").value;
                 BigDecimal valCorrected = getCorrectedBalance(value, 18);
-                functionEffect = valCorrected.toString() + " " + token.tokenInfo.symbol + " to " + actionMethod;
+                Token currency = viewModel.getCurrency(token.tokenInfo.chainId, token.getWallet());
+                functionEffect = valCorrected.toString() + " " + currency.tokenInfo.symbol + " to " + actionMethod;
             }
 
             //finished resolving attributes, blank definition cache so definition is re-loaded when next needed
             viewModel.getAssetDefinitionService().clearCache();
 
             viewModel.confirmTransaction(this, cAddr.chainId, functionData, null,
-                                         cAddr.address, actionMethod, functionEffect, value);
+                    cAddr.address, actionMethod, functionEffect, value);
         }
     }
 
@@ -429,15 +435,27 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
 
         //calculate native amount
         BigDecimal value = new BigDecimal(function.tx.args.get("value").value);
+        //this is a native send, so check the native currency
+        Token currency = viewModel.getCurrency(token.tokenInfo.chainId, token.getWallet());
 
-        if (token.balance.subtract(value).compareTo(BigDecimal.ZERO) < 0)
+        if (currency.balance.subtract(value).compareTo(BigDecimal.ZERO) < 0)
         {
             //flash up dialog box insufficent funds
-            errorInsufficientFunds();
+            errorInsufficientFunds(currency);
             isValid = false;
         }
 
-        String to = function.tx.args.get("to").value;
+        //is 'to' overridden?
+        String to = null;
+        if (function.tx.args.get("to") != null)
+        {
+            to = function.tx.args.get("to").value;
+        }
+        else if (function.contract.addresses.get(token.tokenInfo.chainId) != null)
+        {
+            to = function.contract.addresses.get(token.tokenInfo.chainId).get(0);
+        }
+
         if (to == null || !Utils.isAddressValid(to))
         {
             errorInvalidAddress(to);
@@ -466,12 +484,12 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         alertDialog.show();
     }
 
-    private void errorInsufficientFunds()
+    private void errorInsufficientFunds(Token currency)
     {
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(AWalletAlertDialog.ERROR);
         alertDialog.setTitle(R.string.error_insufficient_funds);
-        alertDialog.setMessage(getString(R.string.current_funds, token.getCorrectedBalance(token.tokenInfo.decimals), token.tokenInfo.symbol));
+        alertDialog.setMessage(getString(R.string.current_funds, currency.getCorrectedBalance(currency.tokenInfo.decimals), currency.tokenInfo.symbol));
         alertDialog.setButtonText(R.string.button_ok);
         alertDialog.setButtonListener(v ->alertDialog.dismiss());
         alertDialog.show();

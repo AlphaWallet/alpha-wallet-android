@@ -52,8 +52,7 @@ public class WalletsActivity extends BaseActivity implements
     private WalletsAdapter adapter;
 
     private boolean walletChange = false;
-    private boolean isSetDefault;
-    private boolean isNewWalletCreated;
+    private boolean requiresHomeRefresh;
     private NetworkInfo networkInfo;
 
     @Override
@@ -64,6 +63,7 @@ public class WalletsActivity extends BaseActivity implements
         toolbar();
         setTitle(R.string.empty);
         initViews();
+        requiresHomeRefresh = false;
     }
 
     @Override
@@ -180,8 +180,7 @@ public class WalletsActivity extends BaseActivity implements
                 //set as isSetDefault
                 Wallet importedWallet = data.getParcelableExtra(C.Key.WALLET);
                 if (importedWallet != null) {
-                    isSetDefault = true;
-                    walletChange = true;
+                    requiresHomeRefresh = true;
                     viewModel.setDefaultWallet(importedWallet);
                 }
             }
@@ -238,9 +237,9 @@ public class WalletsActivity extends BaseActivity implements
         }
 
         adapter.setDefaultWallet(wallet);
-
-        if (isSetDefault && !isNewWalletCreated)
+        if (requiresHomeRefresh)
         {
+            requiresHomeRefresh = false;
             viewModel.showHome(this);
         }
     }
@@ -287,10 +286,9 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     private void onSetWalletDefault(Wallet wallet) {
+        requiresHomeRefresh = true;
         viewModel.setDefaultWallet(wallet);
-        isSetDefault = true;
         walletChange = true;
-        isNewWalletCreated = false;
     }
 
     private void hideDialog() {

@@ -363,6 +363,10 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
         switch (result.type)
         {
+            case ADDRESS:
+                toAddressEditText.setText(result.getAddress());
+                break;
+
             case PAYMENT:
                 //correct chain and asset type
                 String ethAmount = BalanceUtils.weiToEth(new BigDecimal(result.weiValue)).setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
@@ -400,9 +404,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                 amountInput = new AmountEntryItem(this, tokenRepository, "", false, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
                 amountInput.setAmountText(result.functionDetail);
                 if (result.functionToAddress != null) toAddressEditText.setText(result.functionToAddress);
-                break;
-
-            default:
                 break;
         }
     }

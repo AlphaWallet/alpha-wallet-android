@@ -1,7 +1,7 @@
 package io.stormbird.token.web;
 
+import com.github.cliftonlabs.json_simple.JsonObject;
 import org.apache.commons.io.IOUtils;
-import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -103,7 +103,6 @@ public class AppSiteController implements AttributeInterface
     @GetMapping(value = "/{UniversalLink}")
     public @ResponseBody String handleUniversalLink(
             @PathVariable("UniversalLink") String universalLink,
-            @RequestHeader("User-Agent") String agent,
             Model model,
             HttpServletRequest request
     )
@@ -129,12 +128,11 @@ public class AppSiteController implements AttributeInterface
             return "error: " + e;
         }
         parser.getOwnerKey(data);
-        return handleTokenLink(data, agent, model, universalLink);
+        return handleTokenLink(data, model, universalLink);
     }
 
     private String handleTokenLink(
             MagicLinkData data,
-            String agent,
             Model model,
             String universalLink
     ) throws IOException, SAXException, NoHandlerFoundException
@@ -545,7 +543,7 @@ public class AppSiteController implements AttributeInterface
     @SuppressWarnings("unchecked")
     public ResponseEntity<String> validateSSLCertificate(@RequestParam("file") MultipartFile file) throws IOException {
         HttpStatus status = HttpStatus.ACCEPTED;
-        JSONObject result = new JSONObject();
+        JsonObject result = new JsonObject();
         XMLDsigVerificationResult XMLDsigVerificationResult = new XMLDSigVerifier().VerifyXMLDSig(file.getInputStream());
         if (XMLDsigVerificationResult.isValid)
         {

@@ -102,6 +102,14 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 							"https://goerli.etherscan.io/tx/",GOERLI_ID, false,
 							GOERLI_RPC_URL,
 							"https://api-goerli.etherscan.io/", ETHEREUM_TICKER_NAME, GOERLI_BLOCKSCOUT),
+			new NetworkInfo(ARTIS_SIGMA1_NETWORK, ARTIS_SIGMA1_SYMBOL, ARTIS_SIGMA1_RPC_URL,
+							"https://explorer.sigma1.artis.network/tx/", ARTIS_SIGMA1_ID, false,
+							ARTIS_SIGMA1_RPC_URL,
+							"https://explorer.sigma1.artis.network/", ETHEREUM_TICKER_NAME, ""),
+			new NetworkInfo(ARTIS_TAU1_NETWORK, ARTIS_TAU1_SYMBOL, ARTIS_TAU1_RPC_URL,
+							"https://explorer.tau1.artis.network/tx/", ARTIS_TAU1_ID, false,
+							ARTIS_TAU1_RPC_URL,
+							"https://explorer.tau1.artis.network/", ETHEREUM_TICKER_NAME, ""),
 	};
 
 	private final PreferenceRepositoryType preferences;

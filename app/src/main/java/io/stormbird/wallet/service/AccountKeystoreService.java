@@ -2,6 +2,7 @@ package io.stormbird.wallet.service;
 
 import io.stormbird.wallet.entity.Wallet;
 
+import java.io.File;
 import java.math.BigInteger;
 
 import io.reactivex.Completable;
@@ -43,14 +44,12 @@ public interface AccountKeystoreService {
 	/**
 	 * Sign transaction
 	 * @param signer {@link Wallet}
-	 * @param signerPassword password from {@link Wallet}
 	 * @param toAddress transaction destination address
 	 * @param nonce
 	 * @return sign data
 	 */
 	Single<byte[]> signTransaction(
 			Wallet signer,
-			String signerPassword,
 			String toAddress,
 			BigInteger amount,
 			BigInteger gasPrice,
@@ -61,15 +60,12 @@ public interface AccountKeystoreService {
 
 	Single<byte[]> signTransaction(
 			Wallet signer,
-			String signerPassword,
 			byte[] message,
 			long chainId);
 
-	void unlockAccount(Wallet signer, String signerPassword) throws Exception;
-	void lockAccount(Wallet signer, String signerPassword) throws Exception;
 	Single<byte[]> signTransactionFast(
 			Wallet signer,
-			String signerPassword,
+			String password,
 			byte[] message,
 			long chainId);
 

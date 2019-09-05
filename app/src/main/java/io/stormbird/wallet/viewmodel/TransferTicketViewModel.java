@@ -3,7 +3,6 @@ package io.stormbird.wallet.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.Nullable;
 
 import io.stormbird.wallet.entity.NetworkInfo;
@@ -11,7 +10,7 @@ import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
 
 import java.util.concurrent.TimeUnit;
@@ -19,19 +18,14 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.ui.TransferTicketDetailActivity;
 
-import static io.stormbird.wallet.C.EXTRA_STATE;
-import static io.stormbird.wallet.C.EXTRA_TOKENID_LIST;
-import static io.stormbird.wallet.C.Key.TICKET;
-import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.ui.TransferTicketDetailActivity.TRANSFER_TO_ADDRESS;
 
 public class TransferTicketViewModel extends BaseViewModel {
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final TransferTicketDetailRouter transferTicketDetailRouter;
     private final AssetDefinitionService assetDefinitionService;
 
@@ -44,12 +38,12 @@ public class TransferTicketViewModel extends BaseViewModel {
 
     TransferTicketViewModel(
             FetchTokensInteract fetchTokensInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             TransferTicketDetailRouter transferTicketDetailRouter,
             AssetDefinitionService assetDefinitionService) {
         this.fetchTokensInteract = fetchTokensInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.transferTicketDetailRouter = transferTicketDetailRouter;
         this.assetDefinitionService = assetDefinitionService;
@@ -92,7 +86,7 @@ public class TransferTicketViewModel extends BaseViewModel {
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         defaultNetwork.postValue(networkInfo);
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }

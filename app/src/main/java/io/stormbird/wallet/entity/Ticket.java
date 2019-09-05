@@ -1,50 +1,40 @@
 package io.stormbird.wallet.entity;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v7.widget.AppCompatRadioButton;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import io.stormbird.token.entity.*;
-import io.stormbird.token.tools.TokenDefinition;
-import io.stormbird.token.util.DateTime;
-import io.stormbird.token.util.DateTimeFactory;
-
-import io.stormbird.wallet.C;
-import io.stormbird.wallet.entity.opensea.Asset;
-import io.stormbird.wallet.ui.TokenFunctionActivity;
-import io.stormbird.wallet.web3.Web3TokenView;
-import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.TicketRange;
+import io.stormbird.token.entity.TokenScriptResult;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.BaseActivity;
 import io.stormbird.wallet.ui.widget.holder.TokenHolder;
 import io.stormbird.wallet.viewmodel.BaseViewModel;
-
-import static io.stormbird.wallet.C.Key.TICKET;
-import static io.stormbird.wallet.util.Utils.isAlNum;
+import io.stormbird.wallet.web3.Web3TokenView;
 
 /**
  * Created by James on 27/01/2018.  It might seem counter intuitive
@@ -312,18 +302,10 @@ public class Ticket extends Token implements Parcelable
             TextView textAmount = activity.findViewById(R.id.amount);
             TextView textTicketName = activity.findViewById(R.id.name);
             TextView textVenue = activity.findViewById(R.id.venue);
-            TextView textDate = activity.findViewById(R.id.date);
-            TextView textRange = activity.findViewById(R.id.tickettext);
-            TextView textCat = activity.findViewById(R.id.cattext);
-            TextView ticketDetails = activity.findViewById(R.id.ticket_details);
 
             textAmount.setText("");
             textTicketName.setText(blankingString);
             textVenue.setText("");
-            textDate.setText("");
-            textRange.setText("");
-            textCat.setText("");
-            ticketDetails.setText("");
         }
         catch (Exception e)
         {
@@ -336,25 +318,9 @@ public class Ticket extends Token implements Parcelable
         try
         {
             TextView textVenue = activity.findViewById(R.id.venue);
-            TextView textDate = activity.findViewById(R.id.date);
-            TextView textRange = activity.findViewById(R.id.tickettext);
-            TextView textCat = activity.findViewById(R.id.cattext);
-            TextView ticketDetails = activity.findViewById(R.id.ticket_details);
-            LinearLayout ticketLayout = activity.findViewById(R.id.ticketlayout);
-            LinearLayout catLayout = activity.findViewById(R.id.catlayout);
-            LinearLayout dateLayout = activity.findViewById(R.id.datelayout);
-            LinearLayout bottomPart = activity.findViewById(R.id.bottom_part);
 
             //textVenue.setVisibility(View.GONE);
             textVenue.setText("");
-            textDate.setText("");
-            textRange.setText("");
-            textCat.setText("");
-            ticketDetails.setText("");
-            ticketLayout.setVisibility(View.GONE);
-            catLayout.setVisibility(View.GONE);
-            dateLayout.setVisibility(View.GONE);
-            bottomPart.setVisibility(View.GONE);
         }
         catch (Exception e)
         {
@@ -393,7 +359,7 @@ public class Ticket extends Token implements Parcelable
         String viewData = tokenView.injectWeb3TokenInit(ctx, view, attrs.toString());
         viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
 
-        String base64 = android.util.Base64.encodeToString(viewData.getBytes(Charset.forName("UTF-8")), Base64.DEFAULT);
+        String base64 = android.util.Base64.encodeToString(viewData.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
         tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
     }
 

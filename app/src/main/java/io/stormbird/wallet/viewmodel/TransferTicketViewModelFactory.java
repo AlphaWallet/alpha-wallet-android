@@ -6,7 +6,7 @@ import android.support.annotation.NonNull;
 
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 
@@ -18,18 +18,18 @@ public class TransferTicketViewModelFactory implements ViewModelProvider.Factory
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final TransferTicketDetailRouter transferTicketDetailRouter;
     private final AssetDefinitionService assetDefinitionService;
 
     public TransferTicketViewModelFactory(
             FetchTokensInteract fetchTokensInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             TransferTicketDetailRouter transferTicketDetailRouter,
             AssetDefinitionService assetDefinitionService) {
         this.fetchTokensInteract = fetchTokensInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.transferTicketDetailRouter = transferTicketDetailRouter;
         this.assetDefinitionService = assetDefinitionService;
@@ -38,6 +38,6 @@ public class TransferTicketViewModelFactory implements ViewModelProvider.Factory
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new TransferTicketViewModel(fetchTokensInteract, findDefaultWalletInteract, findDefaultNetworkInteract, transferTicketDetailRouter, assetDefinitionService);
+        return (T) new TransferTicketViewModel(fetchTokensInteract, genericWalletInteract, findDefaultNetworkInteract, transferTicketDetailRouter, assetDefinitionService);
     }
 }

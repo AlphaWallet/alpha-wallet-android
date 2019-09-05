@@ -5,9 +5,11 @@ import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
+import io.reactivex.disposables.Disposable;
 import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.WalletUpdate;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 
 public interface WalletRepositoryType {
     Single<Wallet[]> fetchWallets();
@@ -23,6 +25,7 @@ public interface WalletRepositoryType {
     Single<String> exportWallet(Wallet wallet, String password, String newPassword);
 
     Completable deleteWallet(String address, String password);
+    Single<String> deleteWalletFromRealm(String address);
 
     Completable setDefaultWallet(Wallet wallet);
 
@@ -30,11 +33,20 @@ public interface WalletRepositoryType {
 
     Single<BigDecimal> balanceInWei(Wallet wallet);
 
-    Single<WalletUpdate> scanForNames(Wallet[] wallets, long lastBlockChecked);
-
     Single<Integer> storeWallets(Wallet[] wallets, boolean isMainNet);
 
-    Single<Integer> storeWallet(Wallet wallet);
+    Single<Wallet> storeWallet(Wallet wallet);
+    Single<Wallet> updateWalletData(Wallet wallet);
 
     Single<String> getName(String address);
+
+    Disposable updateBackupTime(String walletAddr);
+    Disposable updateWarningTime(String walletAddr);
+
+    Single<Boolean> getWalletBackupWarning(String walletAddr);
+
+    Single<String> getWalletRequiresBackup(String walletAddr);
+    Single<String> setIsDismissed(String walletAddr, boolean isDismissed);
+
+    boolean keystoreExists(String address);
 }

@@ -27,7 +27,7 @@ public class WalletModule {
             SendTokenRouter sendTokenRouter,
             Erc20DetailRouter erc20DetailRouter,
             AssetDisplayRouter assetDisplayRouter,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             AddTokenInteract addTokenInteract,
             SetupTokensInteract setupTokensInteract,
             AssetDefinitionService assetDefinitionService,
@@ -41,7 +41,7 @@ public class WalletModule {
                 sendTokenRouter,
                 erc20DetailRouter,
                 assetDisplayRouter,
-                findDefaultWalletInteract,
+                genericWalletInteract,
                 addTokenInteract,
                 setupTokensInteract,
                 assetDefinitionService,
@@ -83,8 +83,8 @@ public class WalletModule {
     }
 
     @Provides
-    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new FindDefaultWalletInteract(walletRepository);
+    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides

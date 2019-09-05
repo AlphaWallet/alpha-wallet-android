@@ -5,30 +5,56 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.util.Log;
+
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.http.HttpService;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
-import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.interact.*;
-import io.stormbird.wallet.repository.EthereumNetworkRepository;
+import io.stormbird.wallet.entity.CreateWalletCallbackInterface;
+import io.stormbird.wallet.entity.ErrorEnvelope;
+import io.stormbird.wallet.entity.NetworkInfo;
+import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletType;
+import io.stormbird.wallet.interact.FetchTokensInteract;
+import io.stormbird.wallet.interact.FetchWalletsInteract;
+import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
+import io.stormbird.wallet.interact.SetDefaultWalletInteract;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
-
-import java.util.*;
+import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
+import io.stormbird.wallet.util.AWEnsResolver;
+import okhttp3.OkHttpClient;
 
 import static io.stormbird.wallet.C.IMPORT_REQUEST_CODE;
+import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
 
 public class WalletsViewModel extends BaseViewModel
 {
     private final static String TAG = WalletsViewModel.class.getSimpleName();
 
-    private final CreateWalletInteract createWalletInteract;
     private final SetDefaultWalletInteract setDefaultWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
+    private final KeyService keyService;
+    private final GasService gasService;
 
     private final ImportWalletRouter importWalletRouter;
     private final HomeRouter homeRouter;
@@ -37,42 +63,42 @@ public class WalletsViewModel extends BaseViewModel
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Wallet> createdWallet = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> createWalletError = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> noWalletsError = new MutableLiveData<>();
     private final MutableLiveData<Wallet> updateBalance = new MutableLiveData<>();
-    private final MutableLiveData<Map<String, String>> namedWallets = new MutableLiveData<>();
-    private final MutableLiveData<Long> lastENSScanBlock = new MutableLiveData<>();
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
+    private final MutableLiveData<Wallet> updateENSName = new MutableLiveData<>();
 
     private NetworkInfo currentNetwork;
     private Map<String, Wallet> walletBalances = new HashMap<>();
+    private final ExecutorService executorService;
 
     WalletsViewModel(
-            CreateWalletInteract createWalletInteract,
             SetDefaultWalletInteract setDefaultWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             ImportWalletRouter importWalletRouter,
             HomeRouter homeRouter,
             FetchTokensInteract fetchTokensInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract)
+            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            KeyService keyService,
+            GasService gasService)
     {
-        this.createWalletInteract = createWalletInteract;
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.importWalletRouter = importWalletRouter;
         this.homeRouter = homeRouter;
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+        this.keyService = keyService;
+        this.gasService = gasService;
+
+        executorService = Executors.newFixedThreadPool(10);
     }
 
     public LiveData<Wallet[]> wallets()
     {
         return wallets;
-    }
-
-    public LiveData<Map<String, String>> namedWallets()
-    {
-        return namedWallets;
     }
 
     public LiveData<NetworkInfo> defaultNetwork()
@@ -94,16 +120,14 @@ public class WalletsViewModel extends BaseViewModel
     {
         return createWalletError;
     }
+    public LiveData<Boolean> noWalletsError() { return noWalletsError; }
 
     public LiveData<Wallet> updateBalance()
     {
         return updateBalance;
     }
 
-    public LiveData<Long> lastENSScanBlock()
-    {
-        return lastENSScanBlock;
-    }
+    public LiveData<Wallet> updateENSName() { return updateENSName; }
 
     public void setDefaultWallet(Wallet wallet)
     {
@@ -113,7 +137,7 @@ public class WalletsViewModel extends BaseViewModel
     }
 
     private Wallet addWalletToMap(Wallet wallet) {
-        if (wallet.address != null && !walletBalances.containsKey(wallet.address)) walletBalances.put(wallet.address, wallet);
+        if (wallet.address != null && !walletBalances.containsKey(wallet.address.toLowerCase())) walletBalances.put(wallet.address.toLowerCase(), wallet);
         return wallet;
     }
 
@@ -127,14 +151,14 @@ public class WalletsViewModel extends BaseViewModel
 
     private void onDefaultNetwork(NetworkInfo networkInfo)
     {
-        networkInfo = findDefaultNetworkInteract.getNetworkInfo(EthereumNetworkRepository.MAINNET_ID); //always show mainnet eth in wallet page
+        networkInfo = findDefaultNetworkInteract.getNetworkInfo(MAINNET_ID); //always show mainnet eth in wallet page
         defaultNetwork.postValue(networkInfo);
         currentNetwork = networkInfo;
 
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
-                .subscribe(this::onDefaultWalletChanged, t -> {
-                });
+                .subscribe(this::onDefaultWalletChanged,
+                        error -> noWalletsError.postValue(true));
     }
 
     private void onWallets(Wallet[] items)
@@ -170,16 +194,66 @@ public class WalletsViewModel extends BaseViewModel
                 .subscribe(this::onWallets, this::onError);
     }
 
-    public void swipeRefreshWallets(long block)
+    public void swipeRefreshWallets()
     {
         walletBalances.clear();
         //check for updates
         //check names first
-        disposable = fetchWalletsInteract.fetch()
-                .flatMap(wallets -> fetchWalletsInteract.scanForNames(wallets, block))
+        disposable = fetchWalletsInteract.fetch().toObservable()
+                .flatMap(Observable::fromArray)
+                .flatMap(this::resolveEns)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::updateNames, this::onError);
+                .subscribe(this::updateOnName, this::onError, () -> progress.postValue(false));
+    }
+
+    private void updateOnName(Wallet wallet)
+    {
+        if (wallet.ENSname != null && wallet.ENSname.length() > 0)
+        {
+            //updateENSName.postValue(wallet);
+            disposable = fetchWalletsInteract.updateWalletData(wallet)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(updateENSName::postValue, this::onError);
+        }
+    }
+
+    private Observable<Wallet> resolveEns(Wallet wallet)
+    {
+        return Observable.fromCallable(() -> {
+            AWEnsResolver resolver = new AWEnsResolver(getService(MAINNET_ID), gasService);
+            try
+            {
+                wallet.ENSname = resolver.reverseResolve(wallet.address);
+                if (wallet.ENSname != null && wallet.ENSname.length() > 0)
+                {
+                    //check ENS name integrity - it must point to the wallet address
+                    String resolveAddress = resolver.resolve(wallet.ENSname);
+                    if (!resolveAddress.equalsIgnoreCase(wallet.address))
+                    {
+                        wallet.ENSname = null;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                //ignore
+            }
+            return wallet;
+        }).subscribeOn(Schedulers.from(executorService));
+    }
+
+    private Web3j getService(int chainId)
+    {
+        OkHttpClient okClient = new OkHttpClient.Builder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(false)
+                .build();
+        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(chainId);
+        return Web3j.build(new HttpService(network.rpcServerUrl, okClient, false));
     }
 
     public void fetchWallets()
@@ -188,15 +262,9 @@ public class WalletsViewModel extends BaseViewModel
         findNetwork();
     }
 
-    public void newWallet()
+    public void newWallet(Activity ctx, CreateWalletCallbackInterface createCallback)
     {
-        progress.setValue(true);
-        createWalletInteract
-                .create()
-                .subscribe(account -> {
-                    fetchWallets();
-                    createdWallet.postValue(account);
-                }, this::onCreateWalletError).isDisposed();
+        keyService.createNewHDKey(ctx, createCallback);
     }
 
     /**
@@ -206,7 +274,7 @@ public class WalletsViewModel extends BaseViewModel
      */
     private void getWalletsBalance(Wallet[] wallets)
     {
-        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(EthereumNetworkRepository.MAINNET_ID);
+        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(MAINNET_ID);
 
         disposable = fetchWalletList(wallets)
                 .flatMapIterable(wallet -> wallet) //iterate through each wallet
@@ -239,33 +307,6 @@ public class WalletsViewModel extends BaseViewModel
             Wallet[] walletsFromUpdate = walletBalances.values().toArray(new Wallet[0]);
             storeWallets(walletsFromUpdate);
         }
-    }
-
-    private void updateNames(WalletUpdate update)
-    {
-        //update names for wallets
-        //got names?
-        //preserve order
-        if (wallets.getValue() != null)
-        {
-            for (Wallet w : wallets.getValue())
-            {
-                if (update.wallets.containsKey(w.address))
-                {
-                    w.ENSname = update.wallets.get(w.address).ENSname;
-                }
-            }
-        }
-
-        if (update.wallets.size() > 0)
-        {
-            wallets.postValue(wallets.getValue());
-            storeWallets(wallets.getValue());
-        }
-
-        lastENSScanBlock.postValue(update.lastBlock);
-
-        progress.postValue(false);
     }
 
     private void storeWallets(Wallet[] wallets)
@@ -307,5 +348,25 @@ public class WalletsViewModel extends BaseViewModel
     public NetworkInfo getNetwork()
     {
         return currentNetwork;
+    }
+
+    public void StoreHDWallet(String address, KeyService.AuthenticationLevel authLevel)
+    {
+        if (!address.equals(ZERO_ADDRESS))
+        {
+            Wallet wallet = new Wallet(address);
+            wallet.type = WalletType.HDKEY;
+            wallet.authLevel = authLevel;
+            fetchWalletsInteract.storeWallet(wallet)
+                    .subscribe(account -> {
+                        fetchWallets();
+                        createdWallet.postValue(account);
+                    }, this::onCreateWalletError).isDisposed();
+        }
+    }
+
+    public void watchWallet(Activity activity)
+    {
+        importWalletRouter.openWatchCreate(activity, IMPORT_REQUEST_CODE);
     }
 }

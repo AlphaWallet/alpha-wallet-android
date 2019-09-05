@@ -1,5 +1,6 @@
 package io.stormbird.wallet.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
@@ -9,14 +10,12 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.stormbird.wallet.entity.FileData;
-import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.interact.CreateWalletInteract;
+import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
+import io.stormbird.wallet.service.KeyService;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -25,25 +24,27 @@ import java.util.Arrays;
 import java.util.List;
 
 import static io.stormbird.wallet.C.DOWNLOAD_READY;
+import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_FILE_URL;
 
-public class SplashViewModel extends ViewModel {
+public class SplashViewModel extends ViewModel
+{
     private final FetchWalletsInteract fetchWalletsInteract;
-    private final CreateWalletInteract createWalletInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final LocaleRepositoryType localeRepository;
+    private final KeyService keyService;
 
     private MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private MutableLiveData<Wallet> createWallet = new MutableLiveData<>();
 
     SplashViewModel(FetchWalletsInteract fetchWalletsInteract,
-                    CreateWalletInteract createWalletInteract,
                     PreferenceRepositoryType preferenceRepository,
-                    LocaleRepositoryType localeRepository) {
+                    LocaleRepositoryType localeRepository,
+                    KeyService keyService) {
         this.fetchWalletsInteract = fetchWalletsInteract;
-        this.createWalletInteract = createWalletInteract;
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
+        this.keyService = keyService;
     }
 
     public void setLocale(Context context) {
@@ -52,6 +53,7 @@ public class SplashViewModel extends ViewModel {
 
     public void fetchWallets()
     {
+        System.out.println("KEYS: Fetchwallets");
         fetchWalletsInteract
                 .fetch()
                 .subscribe(wallets::postValue, this::onError);
@@ -69,14 +71,9 @@ public class SplashViewModel extends ViewModel {
         return createWallet;
     }
 
-    public void createNewWallet()
+    public void createNewWallet(Activity ctx, CreateWalletCallbackInterface createCallback)
     {
-        //create a new wallet for the user
-        createWalletInteract
-                .create()
-                .subscribe(account -> {
-                    fetchWallets();
-                }, this::onError);
+        keyService.createNewHDKey(ctx, createCallback);
     }
 
     public void checkVersionUpdate(Context ctx, long updateTime)
@@ -190,6 +187,26 @@ public class SplashViewModel extends ViewModel {
             Intent intent = new Intent(DOWNLOAD_READY);
             intent.putExtra("Version", newVersion);
             baseContext.sendBroadcast(intent);
+        }
+    }
+
+    public void StoreHDKey(String address, KeyService.AuthenticationLevel authLevel)
+    {
+        if (!address.equals(ZERO_ADDRESS))
+        {
+            Wallet wallet = new Wallet(address);
+            wallet.type = WalletType.HDKEY;
+            wallet.authLevel = authLevel;
+            fetchWalletsInteract.storeWallet(wallet)
+                    .subscribe(account -> {
+                        fetchWallets();
+                        //createWallet.postValue(account);
+                    }, this::onError).isDisposed();
+        }
+        else
+        {
+            //TODO: Relax key creation params (ie authentication) slightly to ensure a key is always created
+            wallets.postValue(new Wallet[0]);
         }
     }
 }

@@ -1,11 +1,13 @@
 package io.stormbird.wallet.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.wallet.C;
@@ -15,6 +17,7 @@ import io.stormbird.wallet.interact.DeleteWalletInteract;
 import io.stormbird.wallet.interact.ExportWalletInteract;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.router.HomeRouter;
+import io.stormbird.wallet.service.KeyService;
 
 public class WalletActionsViewModel extends BaseViewModel {
     private final static String TAG = WalletActionsViewModel.class.getSimpleName();
@@ -85,13 +88,6 @@ public class WalletActionsViewModel extends BaseViewModel {
         deleted.postValue(true);
     }
 
-    public void exportWallet(Wallet wallet, String storePassword) {
-        isTaskRunning.postValue(true);
-        disposable = exportWalletInteract
-                .export(wallet, storePassword)
-                .subscribe(this::onExport, this::onExportWalletError);
-    }
-
     private void onExport(String s) {
         isTaskRunning.postValue(false);
         exportedStore.postValue(s);
@@ -112,10 +108,10 @@ public class WalletActionsViewModel extends BaseViewModel {
                 .subscribe(this::onStored, this::onError);
     }
 
-    private void onStored(Integer count) {
+    private void onStored(Wallet wallet) {
         isTaskRunning.postValue(false);
-        Log.d(TAG, "Stored " + count + " Wallets");
-        saved.postValue(count);
+        Log.d(TAG, "Stored " + wallet.address);
+        saved.postValue(1);
     }
 
     @Override

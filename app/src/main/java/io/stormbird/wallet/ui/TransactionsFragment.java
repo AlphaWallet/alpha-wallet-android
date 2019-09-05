@@ -199,4 +199,9 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     {
         adapter.notifyDataSetChanged();
     }
+
+    void transactionsShowing()
+    {
+        if (adapter != null) adapter.notifyDataSetChanged();
+    }
 }

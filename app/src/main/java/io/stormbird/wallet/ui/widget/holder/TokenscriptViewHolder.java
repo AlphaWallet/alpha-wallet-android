@@ -9,9 +9,12 @@ import android.support.v7.widget.AppCompatRadioButton;
 import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.TicketRange;
@@ -24,10 +27,6 @@ import io.stormbird.wallet.ui.TokenFunctionActivity;
 import io.stormbird.wallet.web3.Web3TokenView;
 import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.PageReadyCallback;
-
-import java.math.BigInteger;
-import java.nio.charset.Charset;
-import java.text.ParseException;
 
 import static io.stormbird.wallet.C.Key.TICKET;
 
@@ -99,7 +98,7 @@ public class TokenscriptViewHolder extends BinderViewHolder<TicketRange> impleme
         String viewData = tokenView.injectWeb3TokenInit(getContext(), view, tokenAttrs);
         viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
 
-        String base64 = Base64.encodeToString(viewData.getBytes(Charset.forName("UTF-8")), Base64.DEFAULT);
+        String base64 = Base64.encodeToString(viewData.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
         tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
 
         if (iconified)

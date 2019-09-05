@@ -5,7 +5,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import io.stormbird.wallet.interact.FetchWalletsInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
@@ -20,7 +20,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final AddTokenRouter addTokenRouter;
     private final LocaleRepositoryType localeRepository;
     private final AssetDefinitionService assetDefinitionService;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
 
     public HomeViewModelFactory(
@@ -30,7 +30,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             ExternalBrowserRouter externalBrowserRouter,
             AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             FetchWalletsInteract fetchWalletsInteract) {
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
@@ -38,7 +38,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.externalBrowserRouter = externalBrowserRouter;
         this.addTokenRouter = addTokenRouter;
         this.assetDefinitionService = assetDefinitionService;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
     }
 
@@ -52,7 +52,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 externalBrowserRouter,
                 addTokenRouter,
                 assetDefinitionService,
-                findDefaultWalletInteract,
+                genericWalletInteract,
                 fetchWalletsInteract
                 );
     }

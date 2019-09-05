@@ -18,16 +18,12 @@
 
             <include layout="@layout/layout_simple_toolbar" />
 
-<!--            <android.support.v4.view.ViewPager-->
-<!--                android:id="@+id/view_pager"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent" />-->
+            <io.stormbird.wallet.ui.widget.entity.ScrollControlViewPager
+                android:id="@+id/view_pager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
-                    <io.stormbird.wallet.ui.widget.entity.ScrollControlViewPager
-                        android:id="@+id/view_pager"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
-                </LinearLayout>
+        </LinearLayout>
 
     </FrameLayout>
 
@@ -68,5 +64,23 @@
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
         android:layout_gravity="bottom" />
+
+    <LinearLayout
+        android:id="@+id/layout_success_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="gone"
+        android:background="@color/blur">
+
+        <ImageView
+            android:id="@+id/success_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|center_horizontal|center_vertical"
+            android:src="@drawable/big_green_tick"
+            android:foregroundGravity="center" />
+
+    </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

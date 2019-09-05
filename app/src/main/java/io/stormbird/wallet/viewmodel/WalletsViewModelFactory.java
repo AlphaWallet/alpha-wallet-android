@@ -6,56 +6,59 @@ import android.support.annotation.NonNull;
 
 import javax.inject.Inject;
 
-import io.stormbird.wallet.interact.CreateWalletInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FetchWalletsInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.interact.SetDefaultWalletInteract;
+import io.stormbird.wallet.interact.*;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.router.HomeRouter;
 import io.stormbird.wallet.router.ImportWalletRouter;
+import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
+import io.stormbird.wallet.util.AWEnsResolver;
 
 public class WalletsViewModelFactory implements ViewModelProvider.Factory {
-    private final CreateWalletInteract createWalletInteract;
     private final SetDefaultWalletInteract setDefaultWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final ImportWalletRouter importWalletRouter;
     private final HomeRouter homeRouter;
+    private final KeyService keyService;
+    private final GasService gasService;
 
     @Inject
     public WalletsViewModelFactory(
-            CreateWalletInteract createWalletInteract,
             SetDefaultWalletInteract setDefaultWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             ImportWalletRouter importWalletRouter,
             HomeRouter homeRouter,
             FetchTokensInteract fetchTokensInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract) {
-        this.createWalletInteract = createWalletInteract;
+            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            KeyService keyService,
+            GasService gasService) {
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.importWalletRouter = importWalletRouter;
         this.homeRouter = homeRouter;
         this.fetchTokensInteract = fetchTokensInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+        this.keyService = keyService;
+        this.gasService = gasService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new WalletsViewModel(
-                createWalletInteract,
                 setDefaultWalletInteract,
                 fetchWalletsInteract,
-                findDefaultWalletInteract,
+                genericWalletInteract,
                 importWalletRouter,
                 homeRouter,
                 fetchTokensInteract,
-                findDefaultNetworkInteract);
+                findDefaultNetworkInteract,
+                keyService,
+                gasService);
     }
 }

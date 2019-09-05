@@ -14,7 +14,7 @@
         android:layout_marginTop="?android:actionBarSize"
         android:background="@drawable/background_card"
         android:orientation="vertical"
-        android:paddingTop="20dp">
+        android:paddingTop="5dp">
 
         <TextView
             android:id="@+id/wallet_title"
@@ -80,29 +80,84 @@
             android:textColorHint="@color/light_gray"
             android:textSize="14sp" />
 
-        <TextView
-            android:id="@+id/delete"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:id="@+id/layout_backup_method"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_trash"
-            android:drawablePadding="15dp"
-            android:fontFamily="@font/font_regular"
-            android:padding="15dp"
-            android:text="@string/delete_wallet"
-            android:textColor="@color/text_dark_gray"
-            android:textSize="18sp" />
+            android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/greye5"/>
 
         <TextView
             android:id="@+id/backup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_backup"
+            android:drawableLeft="@drawable/ic_storewallet"
             android:drawablePadding="15dp"
             android:fontFamily="@font/font_regular"
-            android:padding="15dp"
-            android:text="@string/backup_keystore"
+            android:paddingBottom="15dp"
+            android:paddingLeft="18dp"
+            android:paddingTop="17dp"
+            android:text="@string/show_seed_phrase"
             android:textColor="@color/text_dark_gray"
             android:textSize="18sp" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/greye5"/>
+
+        <TextView
+            android:id="@+id/backup_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:layout_marginStart="18dp"
+            android:layout_marginEnd="52dp"
+            android:text="@string/seed_phrase_loss_warning"
+            android:layout_marginBottom="20dp"/>
+
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/greye5"/>
+
+        <TextView
+            android:id="@+id/delete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_losewallet"
+            android:drawablePadding="15dp"
+            android:fontFamily="@font/font_regular"
+            android:paddingBottom="15dp"
+            android:paddingLeft="18dp"
+            android:paddingTop="17dp"
+            android:text="@string/lose_this_wallet"
+            android:textColor="@color/text_dark_gray"
+            android:textSize="18sp" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/greye5"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:layout_marginStart="18dp"
+            android:layout_marginEnd="52dp"
+            android:text="@string/delete_lose_funds_warning"
+            android:layout_marginBottom="20dp"/>
 
     </LinearLayout>
 
@@ -127,6 +182,23 @@
             android:textAllCaps="false"
             android:textColor="@color/button_text_color"
             android:textSize="16sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_success_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="gone"
+        android:background="@color/blur">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|center_horizontal|center_vertical"
+            android:background="@drawable/big_green_tick"
+            android:foregroundGravity="center" />
+
     </LinearLayout>
 
 </RelativeLayout>

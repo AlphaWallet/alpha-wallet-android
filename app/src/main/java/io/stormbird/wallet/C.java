@@ -6,6 +6,7 @@ public abstract class C {
     public static final int EXPORT_REQUEST_CODE = 1002;
     public static final int SHARE_REQUEST_CODE = 1003;
     public static final int REQUEST_SELECT_NETWORK = 1010;
+    public static final int REQUEST_BACKUP_WALLET = 1011;
 
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";
@@ -93,6 +94,8 @@ public abstract class C {
             "io.stormbird.wallet.SIGN_TRANSACTION";
     public static final String REQUEST_NOTIFICATION_ACCESS =
             "io.stormbird.wallet.REQUEST_NOTIFICATION";
+    public static final String BACKUP_WALLET_SUCCESS =
+            "io.stormbird.wallet.BACKUP_SUCCESS";
 
     public static final String COINBASE_WIDGET_CODE = "88d6141a-ff60-536c-841c-8f830adaacfd";
     public static final String SHAPESHIFT_KEY = "c4097b033e02163da6114fbbc1bf15155e759ddfd8352c88c55e7fef162e901a800e7eaecf836062a0c075b2b881054e0b9aa2324be7bc3694578493faf59af4";
@@ -157,4 +160,7 @@ public abstract class C {
 
     public static final String GOOGLE_SEARCH_PREFIX = "https://www.google.com/search?q=";
     public static final String HTTPS_PREFIX = "https://";
+
+    // Settings Badge Keys
+    public static final String KEY_NEEDS_BACKUP = "needsBackup";
 }

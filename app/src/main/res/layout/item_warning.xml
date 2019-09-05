@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_item_warning"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    android:elevation="2dp"
+    android:layout_margin="10dp"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/layout_backup_text"
+        android:layout_width="match_parent"
+        android:layout_height="167dp"
+        android:background="@drawable/backup_warning_red"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="vertical"
+        android:paddingStart="21dp">
+
+        <TextView
+            android:id="@+id/text_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:fontFamily="@font/font_regular"
+            android:paddingTop="20dp"
+            android:text="@string/wallet_not_backed_up"
+            android:textColor="@color/white"
+            android:textSize="22sp" />
+
+        <TextView
+            android:id="@+id/text_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/text_title"
+            android:layout_marginTop="9dp"
+            android:layout_marginEnd="70dp"
+            android:fontFamily="@font/font_regular"
+            android:text="@string/not_backed_up_detail"
+            android:textColor="@color/white"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/button_backup"
+            android:layout_width="wrap_content"
+            android:layout_height="37dp"
+            android:layout_below="@id/text_detail"
+            android:layout_marginTop="19dp"
+            android:background="@color/warning_dark_red"
+            android:fontFamily="@font/font_semibold"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/btn_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/text_title"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="8dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:src="@drawable/ic_more_vert"
+            android:tint="@color/white" />
+
+        <View
+            android:id="@+id/popup_anchor"
+            android:layout_width="1dp"
+            android:layout_height="10dp"
+            android:layout_centerHorizontal="true"/>
+
+    </RelativeLayout>
+</LinearLayout>

@@ -5,13 +5,13 @@ import dagger.Module;
 import dagger.Provides;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.GasSettingsRouter;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.viewmodel.ConfirmationViewModelFactory;
 
@@ -19,24 +19,25 @@ import io.stormbird.wallet.viewmodel.ConfirmationViewModelFactory;
 public class ConfirmationModule {
     @Provides
     public ConfirmationViewModelFactory provideConfirmationViewModelFactory(
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             GasService gasService,
             CreateTransactionInteract createTransactionInteract,
             GasSettingsRouter gasSettingsRouter,
             TokensService tokensService,
-            FindDefaultNetworkInteract findDefaultNetworkInteract
+            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            KeyService keyService
     ) {
-        return new ConfirmationViewModelFactory(findDefaultWalletInteract, gasService, createTransactionInteract, gasSettingsRouter, tokensService, findDefaultNetworkInteract);
+        return new ConfirmationViewModelFactory(genericWalletInteract, gasService, createTransactionInteract, gasSettingsRouter, tokensService, findDefaultNetworkInteract, keyService);
     }
 
     @Provides
-    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new FindDefaultWalletInteract(walletRepository);
+    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides
-    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository, PasswordStore passwordStore) {
-        return new CreateTransactionInteract(transactionRepository, passwordStore);
+    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository) {
+        return new CreateTransactionInteract(transactionRepository);
     }
 
     @Provides

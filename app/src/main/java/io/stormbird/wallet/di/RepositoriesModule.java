@@ -4,10 +4,9 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 
-import io.stormbird.wallet.interact.SetupTokensInteract;
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
 import io.stormbird.wallet.repository.SharedPreferenceRepository;
 import io.stormbird.wallet.repository.TokenLocalSource;
@@ -31,6 +30,8 @@ import dagger.Module;
 import dagger.Provides;
 import okhttp3.OkHttpClient;
 
+import static io.stormbird.wallet.service.KeystoreAccountService.KEYSTORE_FOLDER;
+
 @Module
 public class RepositoriesModule {
 	@Singleton
@@ -41,9 +42,9 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	AccountKeystoreService provideAccountKeyStoreService(Context context) {
-        File file = new File(context.getFilesDir(), "keystore/keystore");
-		return new GethKeystoreAccountService(file);
+	AccountKeystoreService provideAccountKeyStoreService(Context context, KeyService keyService) {
+        File file = new File(context.getFilesDir(), KEYSTORE_FOLDER);
+		return new KeystoreAccountService(file, context.getFilesDir(), keyService);
 	}
 
 	@Singleton
@@ -69,9 +70,10 @@ public class RepositoriesModule {
 			EthereumNetworkRepositoryType networkRepository,
 			TransactionsNetworkClientType blockExplorerClient,
 			WalletDataRealmSource walletDataRealmSource,
-			OkHttpClient httpClient) {
+			OkHttpClient httpClient,
+			KeyService keyService) {
 		return new WalletRepository(
-		        preferenceRepositoryType, accountKeystoreService, networkRepository, blockExplorerClient, walletDataRealmSource, httpClient);
+		        preferenceRepositoryType, accountKeystoreService, networkRepository, blockExplorerClient, walletDataRealmSource, httpClient, keyService);
 	}
 
 	@Singleton
@@ -110,12 +112,14 @@ public class RepositoriesModule {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenLocalSource tokenLocalSource,
             TickerService tickerService,
-			GasService gasService) {
+			GasService gasService,
+			TokensService tokensService) {
 	    return new TokenRepository(
 	            ethereumNetworkRepository,
                 tokenLocalSource,
                 tickerService,
-				gasService);
+				gasService,
+				tokensService);
     }
 
 	@Singleton
@@ -151,9 +155,8 @@ public class RepositoriesModule {
 	@Singleton
 	@Provides
 	MarketQueueService provideMarketQueueService(Context ctx, OkHttpClient okHttpClient,
-												 TransactionRepositoryType transactionRepository,
-												 PasswordStore passwordStore) {
-		return new MarketQueueService(ctx, okHttpClient, transactionRepository, passwordStore);
+												 TransactionRepositoryType transactionRepository) {
+		return new MarketQueueService(ctx, okHttpClient, transactionRepository);
 	}
 
 	@Singleton
@@ -165,17 +168,15 @@ public class RepositoriesModule {
 	@Singleton
 	@Provides
 	FeeMasterService provideFeemasterService(OkHttpClient okHttpClient,
-											 TransactionRepositoryType transactionRepository,
-											 PasswordStore passwordStore) {
-		return new FeeMasterService(okHttpClient, transactionRepository, passwordStore);
+											 TransactionRepositoryType transactionRepository) {
+		return new FeeMasterService(okHttpClient, transactionRepository);
 	}
 
 	@Singleton
 	@Provides
 	ImportTokenService provideImportTokenService(OkHttpClient okHttpClient,
-												 TransactionRepositoryType transactionRepository,
-												 PasswordStore passwordStore) {
-		return new ImportTokenService(okHttpClient, transactionRepository, passwordStore);
+												 TransactionRepositoryType transactionRepository) {
+		return new ImportTokenService(okHttpClient, transactionRepository);
 	}
 
 	@Singleton
@@ -188,5 +189,11 @@ public class RepositoriesModule {
 	@Provides
 	AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, Context ctx, NotificationService notificationService, RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, TokensService tokensService, TokenLocalSource tls) {
 		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, ethereumNetworkRepository, tokensService, tls);
+	}
+
+	@Singleton
+	@Provides
+	KeyService provideKeyService(Context ctx) {
+		return new KeyService(ctx);
 	}
 }

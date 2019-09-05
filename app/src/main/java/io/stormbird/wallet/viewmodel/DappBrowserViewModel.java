@@ -17,11 +17,12 @@ import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.ui.AddEditDappActivity;
 import io.stormbird.wallet.ui.ImportTokenActivity;
 import io.stormbird.wallet.ui.zxing.QRScanningActivity;
@@ -45,34 +46,37 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final MutableLiveData<Token> token = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final ConfirmationRouter confirmationRouter;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final GasService gasService;
+    private final KeyService keyService;
 
     private double ethToUsd = 0;
     private ArrayList<String> bookmarks;
 
     DappBrowserViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
             ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            GasService gasService) {
+            GasService gasService,
+            KeyService keyService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.confirmationRouter = confirmationRouter;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.gasService = gasService;
+        this.keyService = keyService;
     }
 
     public AssetDefinitionService getAssetDefinitionService() {
@@ -135,7 +139,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         defaultNetwork.postValue(networkInfo);
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }
@@ -165,7 +169,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
             return Observable.fromCallable(() -> defaultWallet().getValue());
         } else
             return findDefaultNetworkInteract.find()
-                    .flatMap(networkInfo -> findDefaultWalletInteract
+                    .flatMap(networkInfo -> genericWalletInteract
                             .find()).toObservable();
     }
 
@@ -300,5 +304,15 @@ public class DappBrowserViewModel extends BaseViewModel  {
     public void stopGasPriceChecker()
     {
         gasService.stopGasListener();
+    }
+
+    public void getAuthorisation(Wallet wallet, Activity activity, SignAuthenticationCallback callback)
+    {
+        keyService.getAuthenticationForSignature(wallet, activity, callback);
+    }
+
+    public void resetSignDialog()
+    {
+        keyService.resetSigningDialog();
     }
 }

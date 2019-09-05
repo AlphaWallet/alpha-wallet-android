@@ -25,7 +25,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
+import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 public class TransactionRepository implements TransactionRepositoryType {
 
@@ -69,11 +69,11 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password, int chainId) {
+	public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId) {
 		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
-		.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, chainId))
+		.flatMap(nonce -> accountKeystoreService.signTransaction(from, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, chainId))
 		.flatMap(signedMessage -> Single.fromCallable( () -> {
 			EthSendTransaction raw = web3j
 					.ethSendRawTransaction(Numeric.toHexString(signedMessage))
@@ -86,13 +86,13 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password, int chainId) {
+	public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId) {
 		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
 
 		TransactionData txData = new TransactionData();
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
-				.flatMap(nonce -> accountKeystoreService.signTransaction(from, password, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, chainId))
+				.flatMap(nonce -> accountKeystoreService.signTransaction(from, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, chainId))
 				.flatMap(signedMessage -> Single.fromCallable( () -> {
 					txData.signature = Numeric.toHexString(signedMessage);
 					EthSendTransaction raw = web3j
@@ -107,12 +107,12 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password, int chainId) {
+	public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId) {
 		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
 				.flatMap(nonce -> getRawTransaction(nonce, gasPrice, gasLimit, BigInteger.ZERO, data))
-				.flatMap(rawTx -> signEncodeRawTransaction(rawTx, password, from, chainId))
+				.flatMap(rawTx -> signEncodeRawTransaction(rawTx, from, chainId))
 				.flatMap(signedMessage -> Single.fromCallable( () -> {
 					EthSendTransaction raw = web3j
 							.ethSendRawTransaction(Numeric.toHexString(signedMessage))
@@ -125,14 +125,14 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password, int chainId) {
+	public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId) {
 		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
 
 		TransactionData txData = new TransactionData();
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
 				.flatMap(nonce -> getRawTransaction(nonce, gasPrice, gasLimit, BigInteger.ZERO, data))
-				.flatMap(rawTx -> signEncodeRawTransaction(rawTx, password, from, chainId))
+				.flatMap(rawTx -> signEncodeRawTransaction(rawTx, from, chainId))
 				.flatMap(signedMessage -> Single.fromCallable( () -> {
 					txData.signature = Numeric.toHexString(signedMessage);
 					EthSendTransaction raw = web3j
@@ -157,10 +157,10 @@ public class TransactionRepository implements TransactionRepositoryType {
 					data));
 	}
 
-	private Single<byte[]> signEncodeRawTransaction(RawTransaction rtx, String password, Wallet wallet, int chainId)
+	private Single<byte[]> signEncodeRawTransaction(RawTransaction rtx, Wallet wallet, int chainId)
 	{
 		return Single.fromCallable(() -> TransactionEncoder.encode(rtx))
-				.flatMap(encoded -> accountKeystoreService.signTransaction(wallet, password, encoded, chainId))
+				.flatMap(encoded -> accountKeystoreService.signTransaction(wallet, encoded, chainId))
 				.flatMap(signatureBytes -> encodeTransaction(signatureBytes, rtx));
 	}
 
@@ -168,30 +168,19 @@ public class TransactionRepository implements TransactionRepositoryType {
 	{
 		return Single.fromCallable(() -> {
 			Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
+			if (sigData == null) return "0000".getBytes();
 			return encode(rtx, sigData);
 		});
 	}
 
 	@Override
-	public Single<byte[]> getSignature(Wallet wallet, byte[] message, String password, int chainId) {
-		return accountKeystoreService.signTransaction(wallet, password, message, chainId);
+	public Single<byte[]> getSignature(Wallet wallet, byte[] message, int chainId) {
+		return accountKeystoreService.signTransaction(wallet, message, chainId);
 	}
 
 	@Override
-	public Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String password, int chainId) {
+	public Single<byte[]> getSignatureFast(Wallet wallet, String password, byte[] message, int chainId) {
 		return accountKeystoreService.signTransactionFast(wallet, password, message, chainId);
-	}
-
-	@Override
-	public void unlockAccount(Wallet signer, String signerPassword) throws Exception
-	{
-		accountKeystoreService.unlockAccount(signer, signerPassword);
-	}
-
-	@Override
-	public void lockAccount(Wallet signer, String signerPassword) throws Exception
-	{
-		accountKeystoreService.lockAccount(signer, signerPassword);
 	}
 
 	private Single<Transaction[]> fetchFromCache(Wallet wallet, int maxTransactions) {

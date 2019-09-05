@@ -43,7 +43,7 @@ public class TokenViewModel extends TokenDefinition {
                 textFieldDataModel.setBitmask(attr.bitmask);
                 textFieldDataModel.setBitshift(attr.bitshift);
                 textFieldDataModel.setType(attr.syntax.name());
-                textFieldDataModel.setAs(attr.as.name());
+                textFieldDataModel.setAs(attr.getAs().name());
                 this.textFieldDataModelList.add(textFieldDataModel);
             }
         }

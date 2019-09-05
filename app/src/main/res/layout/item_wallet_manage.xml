@@ -5,12 +5,16 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/selector_round_green"
+    android:minHeight="72dp"
+    android:background="@drawable/background_marketplace_event"
     android:descendantFocusability="blocksDescendants"
     android:orientation="horizontal"
+    android:elevation="5dp"
     android:paddingBottom="15dp"
     android:paddingLeft="15dp"
     android:paddingRight="15dp"
+    android:layout_marginEnd="10dp"
+    android:layout_marginStart="10dp"
     android:paddingTop="15dp">
 
     <RadioButton
@@ -20,10 +24,21 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="15dp"
-        android:background="@drawable/selector_radio_check"
+        android:background="@drawable/ic_ethereum"
         android:buttonTint="@color/transparent" />
 
+    <ImageView
+        android:id="@+id/selected_tick"
+        android:layout_width="19dp"
+        android:layout_height="19dp"
+        android:src="@drawable/background_round_green_selected"
+        android:layout_marginTop="4dp"
+        android:visibility="gone"
+        android:layout_alignEnd="@id/default_action"
+        android:layout_alignTop="@id/default_action"/>
+
     <LinearLayout
+        android:id="@+id/text_wrapper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
@@ -47,7 +62,7 @@
                 android:text=""
                 android:textColor="@color/text_black"
                 android:textIsSelectable="true"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 tools:text="3.2345" />
 
             <TextView
@@ -83,36 +98,26 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/click_layer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@id/text_wrapper"
+        android:layout_alignTop="@id/text_wrapper"
+        android:layout_alignBottom="@id/text_wrapper"
+        android:orientation="horizontal"
+        android:background="@color/transparent"/>
+
     <ImageView
         android:id="@+id/btn_more"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_margin="@dimen/normal_margin"
+        android:layout_marginBottom="@dimen/normal_margin"
+        android:layout_marginTop="@dimen/normal_margin"
         android:contentDescription="@string/empty"
-        android:enabled="false"
+        android:padding="2dp"
         android:src="@drawable/ic_more_vert" />
-
-    <ImageView
-        android:id="@+id/delete_action"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_margin="@dimen/normal_margin"
-        android:layout_toStartOf="@+id/export_action"
-        android:contentDescription="@string/empty"
-        android:visibility="gone"
-        app:srcCompat="@drawable/ic_trash" />
-
-    <ImageView
-        android:id="@+id/export_action"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:layout_margin="@dimen/normal_margin"
-        android:contentDescription="@string/empty"
-        android:visibility="gone"
-        app:srcCompat="@drawable/ic_backup" />
 </RelativeLayout>

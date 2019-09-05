@@ -10,34 +10,38 @@ import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 
 public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final ConfirmationRouter confirmationRouter;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final GasService gasService;
+    private final KeyService keyService;
 
     public DappBrowserViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
             ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            GasService gasService) {
+            GasService gasService,
+            KeyService keyService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.confirmationRouter = confirmationRouter;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.gasService = gasService;
+        this.keyService = keyService;
     }
 
     @NonNull
@@ -45,12 +49,13 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new DappBrowserViewModel(
                 findDefaultNetworkInteract,
-                findDefaultWalletInteract,
+                genericWalletInteract,
                 assetDefinitionService,
                 createTransactionInteract,
                 fetchTokensInteract,
                 confirmationRouter,
                 ethereumNetworkRepository,
-                gasService);
+                gasService,
+                keyService);
     }
 }

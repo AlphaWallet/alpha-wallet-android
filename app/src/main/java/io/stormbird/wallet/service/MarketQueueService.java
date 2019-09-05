@@ -21,7 +21,6 @@ import io.stormbird.wallet.entity.BaseViewCallback;
 import io.stormbird.wallet.entity.CryptoFunctions;
 import io.stormbird.wallet.entity.TradeInstance;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -39,6 +38,8 @@ import retrofit2.Response;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
 
+import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
+
 /**
  * Created by James on 7/02/2018.
  */
@@ -51,7 +52,6 @@ public class MarketQueueService {
 
     private final OkHttpClient httpClient;
     private final TransactionRepositoryType transactionRepository;
-    private final PasswordStore passwordStore;
 
     private Disposable marketQueueProcessing;
     private ApiMarketQueue marketQueueConnector;
@@ -60,11 +60,9 @@ public class MarketQueueService {
     private CryptoFunctions cryptoFunctions;
 
     public MarketQueueService(Context ctx, OkHttpClient httpClient,
-                              TransactionRepositoryType transactionRepository,
-                              PasswordStore passwordStore) {
+                              TransactionRepositoryType transactionRepository) {
         this.httpClient = httpClient;
         this.transactionRepository = transactionRepository;
-        this.passwordStore = passwordStore;
 
         buildConnector();
     }
@@ -214,15 +212,14 @@ public class MarketQueueService {
     }
 
     //sign a trade transaction
-    public Single<byte[]> sign(Wallet wallet, String password, TradeInstance t, byte[] data, int chainId) {
-        return transactionRepository.getSignature(wallet, data, password, chainId);
+    public Single<byte[]> sign(Wallet wallet, TradeInstance t, byte[] data, int chainId) {
+        return transactionRepository.getSignature(wallet, data, chainId);
     }
 
     private Single<TradeInstance> tradesInnerLoop(Wallet wallet, String password, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId, int chainId) {
         return Single.fromCallable(() ->
         {
             long initialExpiry = (System.currentTimeMillis() / 1000L) + MARKET_INTERVAL;
-            transactionRepository.unlockAccount(wallet, password);
             //Recover public key
             BigInteger recoveredKey = ecRecoverPublicKey(wallet, password, chainId);
 
@@ -235,20 +232,18 @@ public class MarketQueueService {
                 float upd = ((float)i/TRADE_AMOUNT)*100.0f;
                 messageCallback.queueUpdate((int)upd);
             }
-            transactionRepository.lockAccount(wallet, password);
             trade.expiry = BigInteger.valueOf(initialExpiry); //ensure expiry of first order is correct
             return trade;
         });
     }
 
     private Single<TradeInstance> getTradeMessages(Wallet wallet, BigInteger price, int[] tickets, String contractAddr, BigInteger firstTicketId, int chainId) {
-        return passwordStore.getPassword(wallet)
-                .flatMap(password -> tradesInnerLoop(wallet, password, price, tickets, contractAddr, firstTicketId, chainId));
+        return tradesInnerLoop(wallet, "password", price, tickets, contractAddr, firstTicketId, chainId);
     }
 
     private Single<byte[]> getTradeSignature(Wallet wallet, String password, TradeInstance trade, int chainId) {
         return encodeMessageForTrade(trade)
-                .flatMap(tradeBytes -> transactionRepository.getSignatureFast(wallet, tradeBytes, password, chainId));
+                .flatMap(tradeBytes -> transactionRepository.getSignatureFast(wallet, password, tradeBytes, chainId));
     }
 
     private Single<byte[]> encodeMessageForTrade(TradeInstance trade) {
@@ -262,10 +257,8 @@ public class MarketQueueService {
     }
 
     public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId) {
-        return passwordStore.getPassword(from)
-                .flatMap(password ->
-                        transactionRepository.createTransaction(from, to, subunitAmount, gasPrice, gasLimit, data, password, chainId)
-                                .observeOn(AndroidSchedulers.mainThread()));
+        return transactionRepository.createTransaction(from, to, subunitAmount, gasPrice, gasLimit, data, chainId)
+                                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public void createSalesOrders(Wallet wallet, BigInteger price, int[] ticketIDs, String contractAddr, BigInteger firstTicketId, BaseViewCallback callback, int chainId) {
@@ -380,25 +373,11 @@ public class MarketQueueService {
     private BigInteger ecRecoverPublicKey(Wallet wallet, String password, int chainId) throws Exception
     {
         String testSigMsg = "obtain public key";
-        byte[] testSigBytes = transactionRepository.getSignatureFast(wallet, testSigMsg.getBytes(), password, chainId).blockingGet();
+        byte[] testSigBytes = transactionRepository.getSignatureFast(wallet, password, testSigMsg.getBytes(), chainId).blockingGet();
         Sign.SignatureData testSig = sigFromByteArray(testSigBytes);
         BigInteger recoveredKey = Sign.signedMessageToKey(testSigMsg.getBytes(), testSig);
         String publicKeyString = Keys.getAddress(recoveredKey); //TODO: Remove - this is here for debug/testing
 
         return recoveredKey;
-    }
-
-    public static Sign.SignatureData sigFromByteArray(byte[] sig)
-    {
-        byte   subv = sig[64];
-        if (subv < 27) subv += 27;
-
-        byte[] subrRev = Arrays.copyOfRange(sig, 0, 32);
-        byte[] subsRev = Arrays.copyOfRange(sig, 32, 64);
-
-        BigInteger r = new BigInteger(1, subrRev);
-        BigInteger s = new BigInteger(1, subsRev);
-
-        return new Sign.SignatureData(subv, subrRev, subsRev);
     }
 }

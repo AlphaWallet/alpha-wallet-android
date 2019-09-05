@@ -2,7 +2,7 @@ package io.stormbird.wallet.di;
 
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
@@ -23,12 +23,12 @@ public class SellTicketModule
     @Provides
     SellTicketModelFactory sellTicketModelFactory(
             FetchTokensInteract fetchTokensInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             SellDetailRouter sellDetailRouter,
             AssetDefinitionService assetDefinitionService) {
         return new SellTicketModelFactory(
-                fetchTokensInteract, findDefaultWalletInteract, findDefaultNetworkInteract, sellDetailRouter, assetDefinitionService);
+                fetchTokensInteract, genericWalletInteract, findDefaultNetworkInteract, sellDetailRouter, assetDefinitionService);
     }
 
     @Provides
@@ -38,8 +38,8 @@ public class SellTicketModule
     }
 
     @Provides
-    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new FindDefaultWalletInteract(walletRepository);
+    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides

@@ -2,10 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
     android:background="@drawable/background_marketplace_event"
     android:orientation="horizontal"
-    android:paddingBottom="@dimen/normal_margin"
+    android:paddingBottom="3dp"
+    android:elevation="2dp"
+    android:layout_marginBottom="6dp"
     android:paddingTop="@dimen/normal_margin">
 
     <ImageView

@@ -3,16 +3,16 @@ package io.stormbird.wallet.di;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.interact.MemPoolInteract;
 import io.stormbird.wallet.interact.SignatureGenerateInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TokenRepositoryType;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.viewmodel.RedeemSignatureDisplayModelFactory;
 
 import dagger.Module;
@@ -26,27 +26,21 @@ import dagger.Provides;
 public class RedeemSignatureDisplayModule {
     @Provides
     RedeemSignatureDisplayModelFactory signatureDisplayModelFactory(
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             CreateTransactionInteract createTransactionInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            KeyService keyService,
             FetchTokensInteract fetchTokensInteract,
             MemPoolInteract memPoolInteract,
             AssetDisplayRouter assetDisplayRouter,
             AssetDefinitionService assetDefinitionService) {
         return new RedeemSignatureDisplayModelFactory(
-                findDefaultWalletInteract, signatureGenerateInteract, createTransactionInteract, findDefaultNetworkInteract, fetchTokensInteract, memPoolInteract, assetDisplayRouter, assetDefinitionService);
+                genericWalletInteract, signatureGenerateInteract, createTransactionInteract, keyService, fetchTokensInteract, memPoolInteract, assetDisplayRouter, assetDefinitionService);
     }
 
     @Provides
-    FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
-            EthereumNetworkRepositoryType networkRepository) {
-        return new FindDefaultNetworkInteract(networkRepository);
-    }
-
-    @Provides
-    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new FindDefaultWalletInteract(walletRepository);
+    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides
@@ -60,8 +54,8 @@ public class RedeemSignatureDisplayModule {
     }
 
     @Provides
-    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository, PasswordStore passwordStore) {
-        return new CreateTransactionInteract(transactionRepository, passwordStore);
+    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository) {
+        return new CreateTransactionInteract(transactionRepository);
     }
 
     @Provides

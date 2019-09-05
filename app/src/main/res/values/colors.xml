@@ -23,8 +23,10 @@
 
     <color name="transparent">#00000000</color>
     <color name="item_icon_tint">#89000000</color>
+	<color name="blur">#80000000</color>
     <color name="grey">#EEEEEE</color>
     <color name="holo_blue">#FF33b5e5</color>
+	<color name="tealish">#239ec5</color>
 
 	<color name="semi_dark_grey">#707070</color>
 	<color name="text_black">#2f2f2f</color>
@@ -35,6 +37,22 @@
 	<color name="button_green">#69c800</color>
 	<color name="button_disabled">#b4cd99</color>
 	<color name="greyf6">#f6f6f6</color>
+	<color name="greyaa">#2a2a2a</color>
+	<color name="greyee">#eeeeee</color>
+	<color name="greye5">#e5e5e5</color>
+	<color name="greyc2">#c2c2c2</color>
+	<color name="greyf9">#f9f9f9</color>
+	<color name="grey_faint">#332a2a2a</color>
+	<color name="grey_faint2">#33c2c2c2</color>
+	<color name="grey2">#2a2a2a</color>
+	<color name="greyfivef">#de5f5f5f</color>
+	<color name="slate_grey">#60677d</color>
+	<color name="backup_grey">#40475b</color>
+	<color name="greye_faint">#00e5e5e5</color>
+	<color name="card_shadow">#3d000000</color>
+	<color name="card_outer">#1e000000</color>
+	<color name="grey_bar">#ebebeb</color>
+
 
 	<color name="onboarding_indicator_unselected">#d8d8d8</color>
 	<color name="onboarding_indicator_selected">#b7b7b7</color>
@@ -42,6 +60,12 @@
 	<color name="disabled_color">#888888</color>
 	<color name="cancel_red">#db393a</color>
 	<color name="dark_yellow">#e1b706</color>
+	<color name="warning_red">#c34840</color>
+	<color name="warning_dark_red">#7f342f</color>
+	<color name="dark_seed_danger">#cb1b1b</color>
+	<color name="nasty_green">#75b943</color>
+	<color name="inactive_green">#d7ebc8</color>
+	<color name="material_green">#009688</color>
 
 	<color name="viewfinder_mask">#60000000</color>
 	<color name="viewfinder_laser">#ffcc0000</color>

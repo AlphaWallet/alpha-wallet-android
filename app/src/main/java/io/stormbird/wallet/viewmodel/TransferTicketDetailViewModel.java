@@ -1,14 +1,9 @@
 package io.stormbird.wallet.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.SalesOrderMalformed;
@@ -17,15 +12,22 @@ import io.stormbird.token.tools.Numeric;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.entity.opensea.Asset;
-import io.stormbird.wallet.interact.*;
+import io.stormbird.wallet.interact.CreateTransactionInteract;
+import io.stormbird.wallet.interact.ENSInteract;
+import io.stormbird.wallet.interact.FetchTransactionsInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.router.TransferTicketDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.GasService;
-import io.stormbird.wallet.service.MarketQueueService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.service.TokensService;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.List;
 
 /**
  * Created by James on 21/02/2018.
@@ -38,8 +40,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final MutableLiveData<String> ensResolve = new MutableLiveData<>();
     private final MutableLiveData<String> ensFail = new MutableLiveData<>();
 
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
-    private final MarketQueueService marketQueueService;
+    private final GenericWalletInteract genericWalletInteract;
+    private final KeyService keyService;
     private final CreateTransactionInteract createTransactionInteract;
     private final TransferTicketDetailRouter transferTicketDetailRouter;
     private final FetchTransactionsInteract fetchTransactionsInteract;
@@ -54,8 +56,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     private byte[] linkMessage;
 
-    TransferTicketDetailViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
-                                  MarketQueueService marketQueueService,
+    TransferTicketDetailViewModel(GenericWalletInteract genericWalletInteract,
+                                  KeyService keyService,
                                   CreateTransactionInteract createTransactionInteract,
                                   TransferTicketDetailRouter transferTicketDetailRouter,
                                   FetchTransactionsInteract fetchTransactionsInteract,
@@ -64,8 +66,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                                   GasService gasService,
                                   ConfirmationRouter confirmationRouter,
                                   ENSInteract ensInteract) {
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
-        this.marketQueueService = marketQueueService;
+        this.genericWalletInteract = genericWalletInteract;
+        this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
         this.transferTicketDetailRouter = transferTicketDetailRouter;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
@@ -96,7 +98,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public void prepare(Token token)
     {
         this.token = token;
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
 
@@ -105,11 +107,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
-    }
-
-    public void generateSalesOrders(String contractAddr, BigInteger price, int[] ticketIndicies, BigInteger firstTicketId)
-    {
-        marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId, processMessages, token.tokenInfo.chainId);
     }
 
     public void setWallet(Wallet wallet)
@@ -271,5 +268,18 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public void stopGasSettingsFetch()
     {
         gasService.stopGasListener();
+    }
+
+    public void getAuthorisation(Activity activity, SignAuthenticationCallback callback)
+    {
+        if (defaultWallet.getValue() != null)
+        {
+            keyService.getAuthenticationForSignature(defaultWallet.getValue(), activity, callback);
+        }
+    }
+
+    public void resetSignDialog()
+    {
+        keyService.resetSigningDialog();
     }
 }

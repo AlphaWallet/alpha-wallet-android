@@ -11,7 +11,7 @@ import io.stormbird.wallet.service.TokensService;
 public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AddTokenInteract addTokenInteract;
     private final SetupTokensInteract setupTokensInteract;
@@ -21,7 +21,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
 
     public TransactionsViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             FetchTransactionsInteract fetchTransactionsInteract,
             SetupTokensInteract setupTokensInteract,
             AddTokenInteract addTokenInteract,
@@ -29,7 +29,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.transactionDetailRouter = transactionDetailRouter;
         this.addTokenInteract = addTokenInteract;
@@ -43,7 +43,7 @@ public class TransactionsViewModelFactory implements ViewModelProvider.Factory {
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new TransactionsViewModel(
                 findDefaultNetworkInteract,
-                findDefaultWalletInteract,
+                genericWalletInteract,
                 fetchTransactionsInteract,
                 setupTokensInteract,
                 addTokenInteract,

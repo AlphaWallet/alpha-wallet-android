@@ -5,16 +5,16 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Intent;
 import android.net.Uri;
-import android.text.TextUtils;
 import io.stormbird.token.entity.MagicLinkInfo;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.TokenRepository;
 import io.stormbird.wallet.router.GasSettingsRouter;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.ConfirmationActivity;
 import io.stormbird.wallet.web3.entity.Web3Transaction;
@@ -28,47 +28,50 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final MutableLiveData<TransactionData> newDappTransaction = new MutableLiveData<>();
     private final MutableLiveData<GasSettings> sendGasSettings = new MutableLiveData<>();
 
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final GasService gasService;
     private final CreateTransactionInteract createTransactionInteract;
     private final TokensService tokensService;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GasSettingsRouter gasSettingsRouter;
+    private final KeyService keyService;
 
-    ConfirmationViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
-                                 GasService gasService,
-                                 CreateTransactionInteract createTransactionInteract,
-                                 GasSettingsRouter gasSettingsRouter,
-                                 TokensService tokensService,
-                                 FindDefaultNetworkInteract findDefaultNetworkInteract) {
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+    ConfirmationViewModel(GenericWalletInteract genericWalletInteract,
+                          GasService gasService,
+                          CreateTransactionInteract createTransactionInteract,
+                          GasSettingsRouter gasSettingsRouter,
+                          TokensService tokensService,
+                          FindDefaultNetworkInteract findDefaultNetworkInteract,
+                          KeyService keyService) {
+        this.genericWalletInteract = genericWalletInteract;
         this.gasService = gasService;
         this.createTransactionInteract = createTransactionInteract;
         this.gasSettingsRouter = gasSettingsRouter;
         this.tokensService = tokensService;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+        this.keyService = keyService;
     }
 
-    public void createTransaction(String from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
+    public void createTransaction(Wallet from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
         progress.postValue(true);
         disposable = createTransactionInteract
-                .create(new Wallet(from), to, amount, gasPrice, gasLimit, null, chainId)
+                .create(from, to, amount, gasPrice, gasLimit, null, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
-    public void createTokenTransfer(String from, String to, String contractAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
+    public void createTokenTransfer(Wallet from, String to, String contractAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
         progress.postValue(true);
         final byte[] data = TokenRepository.createTokenTransferData(to, amount);
         disposable = createTransactionInteract
-                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
+                .create(from, contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
-    public void createTicketTransfer(String from, String to, String contractAddress, String ids, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
+    public void createTicketTransfer(Wallet from, String to, String contractAddress, String ids, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
         progress.postValue(true);
         final byte[] data = getERC875TransferBytes(to, contractAddress, ids, chainId);
         disposable = createTransactionInteract
-                .create(new Wallet(from), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
+                .create(from, contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
@@ -102,7 +105,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     public void prepare(ConfirmationActivity ctx)
     {
         gasService.gasPriceUpdateListener().observe(ctx, this::onGasPrice);
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }
@@ -233,5 +236,18 @@ public class ConfirmationViewModel extends BaseViewModel {
 
         Intent launchBrowser = new Intent(Intent.ACTION_VIEW, etherscanLink);
         ctx.startActivity(launchBrowser);
+    }
+
+    public void getAuthorisation(Activity activity, SignAuthenticationCallback callback)
+    {
+        if (defaultWallet.getValue() != null)
+        {
+            keyService.getAuthenticationForSignature(defaultWallet.getValue(), activity, callback);
+        }
+    }
+
+    public void resetSignDialog()
+    {
+        keyService.resetSigningDialog();
     }
 }

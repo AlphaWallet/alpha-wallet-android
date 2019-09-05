@@ -19,26 +19,26 @@ import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import dagger.android.AndroidInjection;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.FinishReceiver;
-import io.stormbird.wallet.entity.SignaturePair;
-import io.stormbird.wallet.entity.Token;
-import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.ui.widget.adapter.NonFungibleTokenAdapter;
 import io.stormbird.wallet.ui.widget.entity.TicketRangeParcel;
 import io.stormbird.wallet.viewmodel.RedeemSignatureDisplayModel;
 import io.stormbird.wallet.viewmodel.RedeemSignatureDisplayModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
+import io.stormbird.wallet.widget.SignTransactionDialog;
 
 import javax.inject.Inject;
 
 import static io.stormbird.wallet.C.Key.*;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
+import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
 
 /**
  * Created by James on 24/01/2018.
  */
 
-public class RedeemSignatureDisplayActivity extends BaseActivity implements View.OnClickListener
+public class RedeemSignatureDisplayActivity extends BaseActivity implements View.OnClickListener, SignAuthenticationCallback
 {
     private static final float QR_IMAGE_WIDTH_RATIO = 0.9f;
     public static final String KEY_ADDRESS = "key_address";
@@ -52,8 +52,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     private Wallet wallet;
     private Token token;
     private TicketRangeParcel ticketRange;
-
-    NonFungibleTokenAdapter adapter;
+    private PinAuthenticationCallbackInterface authInterface;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -76,6 +75,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         viewModel.signature().observe(this, this::onSignatureChanged);
         viewModel.selection().observe(this, this::onSelected);
         viewModel.burnNotice().observe(this, this::onBurned);
+        viewModel.signRequest().observe(this, this::onSignRequest);
 
         ticketBurnNotice();
         TextView tv = findViewById(R.id.textAddIDs);
@@ -87,6 +87,11 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         //given a webview populate with rendered token
         token.displayTicketHolder(ticketRange.range, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
         finishReceiver = new FinishReceiver(this);
+    }
+
+    private void onSignRequest(Boolean aBoolean)
+    {
+        viewModel.getAuthorisation(this, this);
     }
 
     private Bitmap createQRImage(String address) {
@@ -113,6 +118,13 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     protected void onResume() {
         super.onResume();
         viewModel.prepare(token.tokenInfo.address, token, ticketRange.range);
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        viewModel.resetSignDialog();
     }
 
     @Override
@@ -175,5 +187,35 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     private void onSelected(String selectionStr)
     {
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode,resultCode,intent);
+
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            GotAuthorisation(resultCode == RESULT_OK);
+        }
+    }
+
+    @Override
+    public void GotAuthorisation(boolean gotAuth)
+    {
+        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
+        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+        if (gotAuth) viewModel.updateSignature(wallet);
+        else dialogKeyNotAvailableError();
+    }
+
+    private void dialogKeyNotAvailableError()
+    {
+
+    }
+
+    @Override
+    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+    {
+        authInterface = authCallback;
     }
 }

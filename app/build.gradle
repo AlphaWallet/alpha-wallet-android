@@ -27,47 +27,41 @@ repositories {
 }
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     buildToolsVersion '28.0.3'
     sourceSets {
         main {
-            
+
         }
     }
     defaultConfig {
         applicationId "io.stormbird.wallet"
-        minSdkVersion 18
-        targetSdkVersion 28
-        versionCode 62
-        versionName "2.01.3"
+        minSdkVersion 23
+        targetSdkVersion 29
+        versionCode 71
+        versionName "2.10.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        multiDexEnabled = true
 
         buildConfigField 'int', 'DB_VERSION', '4'
+
+        ndk {
+            abiFilters "armeabi-v7a", "x86"
+        }
     }
     buildTypes {
         debug {
             minifyEnabled false
-            useProguard false
 //            proguardFiles getDefaultProguardFile('proguard-android.txt'),
 //                    'proguard-rules.pro'
         }
         release {
             minifyEnabled false
-            useProguard true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     packagingOptions {
         exclude 'META-INF/NOTICE' // will not include NOTICE file
         exclude 'META-INF/LICENSE' // will not include LICENSE file
-        // as noted by @Vishnuvathsan you may also need to include
-        // variations on the file name. It depends on your dependencies.
-        // Some other common variations on notice and license file names
-        //exclude 'META-INF/notice'
-        //exclude 'META-INF/notice.txt'
-        //exclude 'META-INF/license'
-        //exclude 'META-INF/license.txt'
     }
     lintOptions {
         abortOnError false
@@ -80,13 +74,12 @@ android {
 
 project.ext {
     retrofitVersion = "2.5.0"
-    okhttpVersion = "3.14.1"
+    okhttpVersion = "4.0.0"
     picassoVersion = "2.71828"
     supportVersion = "28.0.0"
     web3jVersion = "4.2.0-android"
-    gethVersion = "1.8.11"
     gsonVersion = "2.8.5"
-    rxJavaVersion = "2.2.8"
+    rxJavaVersion = "2.2.10"
     rxAndroidVersion = "2.1.1"
     daggerVersion = "2.22"
 }
@@ -103,7 +96,6 @@ dependencies {
 
     // Ethereum client
     implementation "org.web3j:core:$project.web3jVersion"
-    implementation "org.ethereum:geth:$project.gethVersion"
 
     // Http client
     implementation "com.squareup.retrofit2:retrofit:$project.retrofitVersion"
@@ -149,7 +141,7 @@ dependencies {
 
     // Image Loader
     implementation 'com.github.bumptech.glide:glide:4.8.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
 
     // Amazon Android SDK
     implementation 'com.amazonaws:aws-android-sdk-core:2.2.+'
@@ -157,18 +149,21 @@ dependencies {
 
     // Tests
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation("com.android.support.test.espresso:espresso-core:2.2.2", {
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.2', {
         exclude group: "com.android.support", module: "support-annotations"
     })
     androidTestImplementation('tools.fastlane:screengrab:1.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.9'
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+
+    implementation 'com.trustwallet.walletcore:walletcore:0.12.8'
+
+    implementation 'com.github.florent37:tutoshowcase:1.0.1'
 
     // PW
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation project(':tn')
 }
 
 // WARNING WARNING WARNING

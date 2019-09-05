@@ -14,7 +14,7 @@ import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Transaction;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -30,14 +30,14 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     TransactionDetailViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             ExternalBrowserRouter externalBrowserRouter,
             TokensService service) {
         this.networkInteract = findDefaultNetworkInteract;
         this.externalBrowserRouter = externalBrowserRouter;
         this.tokenService = service;
 
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(defaultWallet::postValue,  t -> {});

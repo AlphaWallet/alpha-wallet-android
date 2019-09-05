@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/layout_new_wallet"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/splash_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/splash_background"
+            android:gravity="center_horizontal"/>
+
+        <TextView
+            android:layout_marginTop="9dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="26sp"
+            android:textColor="@color/text_black"
+            android:gravity="center_horizontal"
+            android:text="@string/welcome_to_alphawallet"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_new_wallet"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/button_create"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/nasty_green"
+            android:layout_marginBottom="25dp"
+            android:text="@string/create_a_new_wallet"
+            android:elevation="2dp"
+            android:textStyle="normal"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textAllCaps="true" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="27dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@color/grey_bar"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/already_have_a_wallet"
+            android:textColor="@color/text_dark_gray"
+            android:textSize="16sp"
+            android:layout_gravity="center_horizontal"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="25dp">
+
+            <Button
+                android:id="@+id/button_watch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/watch"
+                android:layout_weight="1.0"
+                android:background="@drawable/background_white_button"
+                android:elevation="2dp"
+                android:layout_marginEnd="4dp"
+                android:padding="2dp"
+                android:textAllCaps="true"
+                android:textColor="@color/tealish"/>
+
+            <Button
+                android:id="@+id/button_import"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/action_import"
+                android:layout_weight="1.0"
+                android:background="@drawable/background_white_button"
+                android:elevation="2dp"
+                android:layout_marginStart="4dp"
+                android:padding="2dp"
+                android:textAllCaps="true"
+                android:textColor="@color/tealish"/>
+
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

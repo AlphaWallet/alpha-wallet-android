@@ -7,6 +7,7 @@ import io.stormbird.wallet.repository.*;
 import io.stormbird.wallet.router.ConfirmationRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.viewmodel.DappBrowserViewModelFactory;
 
 @Module
@@ -14,22 +15,24 @@ public class DappBrowserModule {
     @Provides
     DappBrowserViewModelFactory provideWalletViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             AssetDefinitionService assetDefinitionService,
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
             ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            GasService gasService) {
+            GasService gasService,
+            KeyService keyService) {
         return new DappBrowserViewModelFactory(
                 findDefaultNetworkInteract,
-                findDefaultWalletInteract,
+                genericWalletInteract,
                 assetDefinitionService,
                 createTransactionInteract,
                 fetchTokensInteract,
                 confirmationRouter,
                 ethereumNetworkRepository,
-                gasService);
+                gasService,
+                keyService);
     }
 
     @Provides
@@ -44,14 +47,14 @@ public class DappBrowserModule {
     }
 
     @Provides
-    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository)
+    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository)
     {
-        return new FindDefaultWalletInteract(walletRepository);
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides
-    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository, PasswordStore passwordStore) {
-        return new CreateTransactionInteract(transactionRepository, passwordStore);
+    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository) {
+        return new CreateTransactionInteract(transactionRepository);
     }
 
     @Provides

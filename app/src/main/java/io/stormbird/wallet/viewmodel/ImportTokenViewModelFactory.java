@@ -8,6 +8,7 @@ import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 
 /**
  * Created by James on 9/03/2018.
@@ -15,7 +16,7 @@ import io.stormbird.wallet.service.GasService;
 
 public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
 
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final SetupTokensInteract setupTokensInteract;
@@ -25,8 +26,9 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
     private final AssetDefinitionService assetDefinitionService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final GasService gasService;
+    private final KeyService keyService;
 
-    public ImportTokenViewModelFactory(FindDefaultWalletInteract findDefaultWalletInteract,
+    public ImportTokenViewModelFactory(GenericWalletInteract genericWalletInteract,
                                        CreateTransactionInteract createTransactionInteract,
                                        FetchTokensInteract fetchTokensInteract,
                                        SetupTokensInteract setupTokensInteract,
@@ -35,8 +37,9 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
                                        EthereumNetworkRepositoryType ethereumNetworkRepository,
                                        AssetDefinitionService assetDefinitionService,
                                        FetchTransactionsInteract fetchTransactionsInteract,
-                                       GasService gasService) {
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+                                       GasService gasService,
+                                       KeyService keyService) {
+        this.genericWalletInteract = genericWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.setupTokensInteract = setupTokensInteract;
@@ -46,12 +49,13 @@ public class ImportTokenViewModelFactory implements ViewModelProvider.Factory {
         this.assetDefinitionService = assetDefinitionService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.gasService = gasService;
+        this.keyService = keyService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new ImportTokenViewModel(findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService);
+        return (T) new ImportTokenViewModel(genericWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService, keyService);
     }
 }
 

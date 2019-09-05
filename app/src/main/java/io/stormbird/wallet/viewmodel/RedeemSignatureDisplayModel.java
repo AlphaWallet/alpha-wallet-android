@@ -1,5 +1,6 @@
 package io.stormbird.wallet.viewmodel;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
@@ -7,14 +8,11 @@ import android.os.NetworkOnMainThreadException;
 import android.support.annotation.Nullable;
 
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.interact.CreateTransactionInteract;
-import io.stormbird.wallet.interact.FetchTokensInteract;
-import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
-import io.stormbird.wallet.interact.MemPoolInteract;
-import io.stormbird.wallet.interact.SignatureGenerateInteract;
+import io.stormbird.wallet.interact.*;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 
+import io.stormbird.wallet.service.KeyService;
 import org.web3j.abi.datatypes.generated.Uint16;
 import org.web3j.utils.Numeric;
 
@@ -39,8 +37,8 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private static final long CYCLE_SIGNATURE_INTERVAL = 30;
     private static final long CHECK_BALANCE_INTERVAL = 10;
 
-    private final FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final KeyService keyService;
+    private final GenericWalletInteract genericWalletInteract;
     private final SignatureGenerateInteract signatureGenerateInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
@@ -53,6 +51,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
 
     private final MutableLiveData<String> selection = new MutableLiveData<>();
     private final MutableLiveData<Boolean> burnNotice = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> signRequest = new MutableLiveData<>();
 
     private Disposable memPoolSubscription;
     private List<Integer> ticketIndicies;
@@ -67,17 +66,17 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private String address;
 
     RedeemSignatureDisplayModel(
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             SignatureGenerateInteract signatureGenerateInteract,
             CreateTransactionInteract createTransactionInteract,
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
+            KeyService keyService,
             FetchTokensInteract fetchTokensInteract,
             MemPoolInteract memoryPoolInteract,
             AssetDisplayRouter assetDisplayRouter,
             AssetDefinitionService assetDefinitionService) {
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.signatureGenerateInteract = signatureGenerateInteract;
-        this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+        this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.memoryPoolInteract = memoryPoolInteract;
@@ -96,6 +95,9 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     }
     public LiveData<Boolean> burnNotice() {
         return burnNotice;
+    }
+    public LiveData<Boolean> signRequest() {
+        return signRequest;
     }
 
     @Override
@@ -192,17 +194,22 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         this.address = address;
         token = ticket;
         this.ticketIndicies = ((Ticket)ticket).ticketIdListToIndexList(ticketRange.tokenIds);
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
     private void startCycleSignature() {
         cycleSignatureDisposable = Observable.interval(0, CYCLE_SIGNATURE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> signatureGenerateInteract
-                        .getMessage(ticketIndicies, token.getAddress())
-                        .subscribe(this::onSignMessage, this::onError))
+                .doOnNext(l -> signRequest.postValue(true))
                 .subscribe(l -> {}, t -> {});
+    }
+
+    public void updateSignature(Wallet wallet)
+    {
+        signatureGenerateInteract
+                .getMessage(ticketIndicies, token.getAddress())
+                .subscribe(pair -> onSignMessage(pair, wallet), this::onError);
     }
 
     private void startMemoryPoolListener() {
@@ -229,11 +236,11 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         startMemoryPoolListener();
     }
 
-    private void onSignMessage(MessagePair pair) {
+    private void onSignMessage(MessagePair pair, Wallet wallet) {
         //now run this guy through the signed message system
         if (pair != null)
         disposable = createTransactionInteract
-                .sign(defaultWallet.getValue(), pair, token.tokenInfo.chainId)
+                .sign(wallet, pair, token.tokenInfo.chainId)
                 .subscribe(this::onSignedMessage, this::onError);
     }
 
@@ -268,11 +275,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         {
             ticketsBurned();
         }
-        else {
-            disposable = signatureGenerateInteract
-                    .getMessage(ticketIndicies, token.getAddress())
-                    .subscribe(this::onSignMessage, this::onError);
-        }
     }
 
     public void showAssets(Context context, Ticket t, boolean isClearStack) {
@@ -282,5 +284,18 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public void getAuthorisation(Activity activity, SignAuthenticationCallback callback)
+    {
+        if (defaultWallet.getValue() != null)
+        {
+            keyService.getAuthenticationForSignature(defaultWallet.getValue(), activity, callback);
+        }
+    }
+
+    public void resetSignDialog()
+    {
+        keyService.resetSigningDialog();
     }
 }

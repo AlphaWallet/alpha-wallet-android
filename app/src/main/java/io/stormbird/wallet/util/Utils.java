@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
+import org.web3j.crypto.WalletUtils;
 
 public class Utils {
 
@@ -174,15 +175,7 @@ public class Utils {
 
     public static boolean isAddressValid(String address)
     {
-        try
-        {
-            new org.web3j.abi.datatypes.Address(address);
-            return true;
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
+        return WalletUtils.isValidAddress(address);
     }
 
     public static String intArrayToString(int[] values)

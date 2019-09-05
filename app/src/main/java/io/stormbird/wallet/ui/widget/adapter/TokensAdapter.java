@@ -4,24 +4,14 @@ import android.content.Context;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.ContractType;
-import io.stormbird.wallet.entity.NetworkInfo;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
-import io.stormbird.wallet.ui.widget.entity.SortedItem;
-import io.stormbird.wallet.ui.widget.entity.TokenBalanceSortedItem;
-import io.stormbird.wallet.ui.widget.entity.TokenSortedItem;
-import io.stormbird.wallet.ui.widget.entity.TotalBalanceSortedItem;
-import io.stormbird.wallet.ui.widget.holder.AssetInstanceScriptHolder;
-import io.stormbird.wallet.ui.widget.holder.BinderViewHolder;
-import io.stormbird.wallet.ui.widget.holder.TokenHolder;
-import io.stormbird.wallet.ui.widget.holder.TotalBalanceHolder;
+import io.stormbird.wallet.ui.widget.entity.*;
+import io.stormbird.wallet.ui.widget.holder.*;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -38,7 +28,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public static final int FILTER_COLLECTIBLES = 3;
 
     private int filterType;
-    private Context context;
     private boolean needsRefresh;
     protected final AssetDefinitionService assetService;
 
@@ -83,7 +72,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
     public TokensAdapter(Context context, OnTokenClickListener onTokenClickListener, AssetDefinitionService aService) {
-        this.context = context;
         this.onTokenClickListener = onTokenClickListener;
         needsRefresh = true;
         this.assetService = aService;
@@ -110,6 +98,9 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 holder = tokenHolder;
             }
             break;
+            case WarningHolder.VIEW_TYPE:
+                holder = new WarningHolder(R.layout.item_warning, parent);
+                break;
             case AssetInstanceScriptHolder.VIEW_TYPE:
                 holder = new AssetInstanceScriptHolder(R.layout.item_ticket, parent, null, assetService, false);
                 break;
@@ -143,6 +134,25 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         boolean refresh = needsRefresh;
         needsRefresh = false;
         return refresh;
+    }
+
+    public void addWarning(WarningData data)
+    {
+        items.add(new WarningSortedItem(data, 0));
+    }
+
+    public void removeBackupWarning()
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
+            if (items.get(i).viewType == WarningHolder.VIEW_TYPE)
+            {
+                items.removeItemAt(i);
+                notifyItemRemoved(i);
+                notifyDataSetChanged();
+                break;
+            }
+        }
     }
 
     public void setTokens(Token[] tokens)
@@ -371,5 +381,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public void setClear()
     {
         needsRefresh = true;
+    }
+
+    public boolean hasBackupWarning()
+    {
+        return items.size() > 0 && items.get(0).viewType == WarningHolder.VIEW_TYPE;
     }
 }

@@ -11,6 +11,11 @@
 *.swp
 *.swo
 
+app/mapping.txt
+app/seeds.txt
+app/unused.txt
+app/full-r8-config.txt
+
 # Files for the Dalvik VM
 *.dex
 
@@ -25,6 +30,8 @@ gen/
 .gradle/
 /build
 app/release
+app/debug
+app/debug/output.json
 
 # Fastlane
 fastlane/report.xml
@@ -49,5 +56,3 @@ gen-external-apklibs
 
 # Emacs saves
 *~
-
-tn/trustnative.aar

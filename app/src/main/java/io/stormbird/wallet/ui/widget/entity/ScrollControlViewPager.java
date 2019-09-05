@@ -15,12 +15,7 @@ import static android.view.MotionEvent.*;
  */
 public class ScrollControlViewPager extends ViewPager
 {
-    private ScrollControlInterface pageInterface;
-    private float trackMove;
-    private boolean alwaysLeft;
-    private boolean alwaysRight;
-    private float lastX;
-    private float flingRequired;
+    private boolean isLocked = true; //locked by default
 
     public ScrollControlViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -31,63 +26,27 @@ public class ScrollControlViewPager extends ViewPager
         super(context);
     }
 
-    public void setInterface(ScrollControlInterface pInterface, int width)
+    public void lockPages(boolean locked)
     {
-        pageInterface = pInterface;
-        flingRequired = ((float)width)*0.6f;
+        isLocked = locked;
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev)
     {
-        if (pageInterface != null && pageInterface.isViewingDappBrowser())
+        if (isLocked)
         {
-            //Simple algorithm to ensure only a 'fling' to left or right will page the view.
-            //the threshold for a 'fling' seems to be velocity of 5.5 or above.
-            switch (ev.getAction())
-            {
-                case ACTION_DOWN:
-                    trackMove = ev.getX();
-                    lastX = trackMove;
-                    alwaysLeft = true;
-                    alwaysRight = true;
-                    break;
-                case ACTION_UP:
-                    float flingDistance = Math.abs(ev.getX() - trackMove);
-                    float velocity = (float)flingDistance / (float) (ev.getEventTime() - ev.getDownTime());
-                    if (flingDistance > flingRequired && velocity > 5.5f)
-                    {
-                        if (alwaysLeft) pageInterface.moveLeft();
-                        else if (alwaysRight) pageInterface.moveRight();
-                    }
-                    break;
-                case ACTION_MOVE:
-                    //moving left, value decreases
-                    if ((ev.getX() - lastX) > 0)
-                    {
-                        alwaysRight = false;
-                    }
-                    else if ((ev.getX() - lastX) < 0)
-                    {
-                        alwaysLeft = false;
-                    }
-                    lastX = ev.getX();
-                    break;
-                default:
-                    break;
-            }
+            return false;
         }
         else
         {
             return super.onInterceptTouchEvent(ev);
         }
-
-        return false;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (pageInterface != null && pageInterface.isViewingDappBrowser())
+        if (isLocked)
         {
             return false;
         }
@@ -103,3 +62,4 @@ public class ScrollControlViewPager extends ViewPager
         return super.performClick();
     }
 }
+

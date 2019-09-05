@@ -90,26 +90,22 @@ public class TokenDefinition {
     {
         switch(resolve.getAttribute("as").toLowerCase()) {
             case "signed":
-                return TokenDefinition.As.Signed;
+                return As.Signed;
             case "utf8":
             case "": //no type specified, return string
-                return TokenDefinition.As.UTF8;
+                return As.UTF8;
             case "bool":
-                return TokenDefinition.As.Boolean;
+                return As.Boolean;
             case "mapping":
-                return TokenDefinition.As.Mapping;
+                return As.Mapping;
             default: // "unsigned"
-                return TokenDefinition.As.Unsigned;
+                return As.Unsigned;
         }
     }
 
     public enum Syntax {
         DirectoryString, IA5String, Integer, GeneralizedTime,
         Boolean, BitString, CountryString, JPEG, NumericString
-    }
-
-    public enum As {  // always assume big endian
-        UTF8, Unsigned, Signed, Mapping, Boolean, UnsignedInput, TokenId
     }
 
     /* for many occurance of the same tag, return the text content of the one in user's current language */

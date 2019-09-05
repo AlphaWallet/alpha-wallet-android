@@ -1,7 +1,7 @@
 package io.stormbird.wallet;
 
 import android.app.Activity;
-import android.support.multidex.MultiDexApplication;
+import android.app.Application;
 import android.support.v4.app.Fragment;
 import io.stormbird.wallet.di.DaggerAppComponent;
 import javax.inject.Inject;
@@ -11,7 +11,7 @@ import dagger.android.HasActivityInjector;
 import dagger.android.support.HasSupportFragmentInjector;
 import io.realm.Realm;
 
-public class App extends MultiDexApplication implements HasActivityInjector, HasSupportFragmentInjector {
+public class App extends Application implements HasActivityInjector, HasSupportFragmentInjector {
 
 	@Inject
 	DispatchingAndroidInjector<Activity> dispatchingAndroidInjector;

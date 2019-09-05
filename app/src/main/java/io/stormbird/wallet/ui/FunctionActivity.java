@@ -1,6 +1,7 @@
 package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -17,8 +18,8 @@ import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.DAppFunction;
-import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.util.Utils;
 import io.stormbird.wallet.viewmodel.TokenFunctionViewModel;
@@ -29,10 +30,7 @@ import io.stormbird.wallet.web3.entity.Address;
 import io.stormbird.wallet.web3.entity.FunctionCallback;
 import io.stormbird.wallet.web3.entity.Message;
 import io.stormbird.wallet.web3.entity.PageReadyCallback;
-import io.stormbird.wallet.widget.AWalletAlertDialog;
-import io.stormbird.wallet.widget.ProgressView;
-import io.stormbird.wallet.widget.SignMessageDialog;
-import io.stormbird.wallet.widget.SystemView;
+import io.stormbird.wallet.widget.*;
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
@@ -51,6 +49,7 @@ import java.util.Map;
 
 import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
+import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
 import static io.stormbird.wallet.ui.DappBrowserFragment.PERSONAL_MESSAGE_PREFIX;
 
 /**
@@ -58,7 +57,7 @@ import static io.stormbird.wallet.ui.DappBrowserFragment.PERSONAL_MESSAGE_PREFIX
  * Stormbird in Singapore
  */
 public class FunctionActivity extends BaseActivity implements View.OnClickListener, FunctionCallback,
-        Runnable, PageReadyCallback, OnSignPersonalMessageListener
+        Runnable, PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback
 {
     @Inject
     protected TokenFunctionViewModelFactory viewModelFactory;
@@ -77,6 +76,8 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     private Map<String, String> args = new HashMap<>();
     private StringBuilder attrs;
     private AWalletAlertDialog alertDialog;
+    private Message<String> messageToSign;
+    private PinAuthenticationCallbackInterface authInterface;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
@@ -97,6 +98,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         tokenView.setVisibility(View.GONE);
         waitSpinner.setVisibility(View.VISIBLE);
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
+        viewModel.getCurrentWallet();
 
         getAttrs();
     }
@@ -114,7 +116,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
             injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
             if (action.style != null) injectedView = tokenView.injectStyleData(injectedView, action.style);
 
-            String base64 = Base64.encodeToString(injectedView.getBytes(Charset.forName("UTF-8")), Base64.DEFAULT);
+            String base64 = Base64.encodeToString(injectedView.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
             tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
         }
         catch (Exception e)
@@ -149,29 +151,32 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         TSAction action = functions.get(actionMethod);
         boolean hasTokenIds = false;
 
-        for (MethodArg arg : action.function.parameters)
+        if (action != null && action.function != null)
         {
-            int index = arg.getTokenIndex();
-            if (arg.isTokenId() && index >= 0 && index < tokenIds.size())
+            for (MethodArg arg : action.function.parameters)
             {
-                if (!hasTokenIds)
+                int index = arg.getTokenIndex();
+                if (arg.isTokenId() && index >= 0 && index < tokenIds.size())
                 {
-                    sb.append("tokenIds: [");
+                    if (!hasTokenIds)
+                    {
+                        sb.append("tokenIds: [");
+                    }
+                    else
+                    {
+                        sb.append(", ");
+                    }
+                    sb.append("\"");
+                    sb.append(tokenIds.get(index));
+                    sb.append("\"");
+                    hasTokenIds = true;
                 }
-                else
-                {
-                    sb.append(", ");
-                }
-                sb.append("\"");
-                sb.append(tokenIds.get(index));
-                sb.append("\"");
-                hasTokenIds = true;
             }
-        }
 
-        if (hasTokenIds)
-        {
-            sb.append("],\n");
+            if (hasTokenIds)
+            {
+                sb.append("],\n");
+            }
         }
     }
 
@@ -230,7 +235,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         }
 
         buttons[0].setVisibility(View.VISIBLE);
-        buttons[0].setText("Confirm");
+        buttons[0].setText(R.string.action_confirm);
     }
 
     @Override
@@ -336,8 +341,19 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         {
             AttributeType attr = action.attributeTypes.get(e.ref);
             if (attr == null) return true;
+
             switch (attr.as)
             {
+                case UTF8:
+                    break;
+                case Unsigned:
+                    break;
+                case Signed:
+                    break;
+                case Mapping:
+                    break;
+                case Boolean:
+                    break;
                 case UnsignedInput:
                     //do we have a mapping?
                     String valueFromInput = args.get(e.ref);
@@ -366,6 +382,8 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
                         args.put(e.ref, unsignedValue.toString());
                         e.value = unsignedValue.toString();
                     }
+                    break;
+                case TokenId:
                     break;
                 default:
                     resolved = false;
@@ -408,7 +426,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
                 //this is very specific but 'value' is a specifically handled param
                 value = action.function.tx.args.get("value").value;
                 BigDecimal valCorrected = getCorrectedBalance(value, 18);
-                Token currency = viewModel.getCurrency(token.tokenInfo.chainId, token.getWallet());
+                Token currency = viewModel.getCurrency(token.tokenInfo.chainId);
                 functionEffect = valCorrected.toString() + " " + currency.tokenInfo.symbol + " to " + actionMethod;
             }
 
@@ -436,7 +454,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         //calculate native amount
         BigDecimal value = new BigDecimal(function.tx.args.get("value").value);
         //this is a native send, so check the native currency
-        Token currency = viewModel.getCurrency(token.tokenInfo.chainId, token.getWallet());
+        Token currency = viewModel.getCurrency(token.tokenInfo.chainId);
 
         if (currency.balance.subtract(value).compareTo(BigDecimal.ZERO) < 0)
         {
@@ -512,7 +530,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void signMessage(byte[] sign, DAppFunction dAppFunction, Message<String> message)
     {
-        viewModel.signMessage(sign, dAppFunction, message, token.tokenInfo.chainId, token.getWallet());
+        viewModel.signMessage(sign, dAppFunction, message, token.tokenInfo.chainId);
     }
 
     @Override
@@ -528,34 +546,21 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     }
 
     @Override
+    public void onPause()
+    {
+        super.onPause();
+        viewModel.resetSignDialog();
+    }
+
+    @Override
     public void onSignPersonalMessage(Message<String> message)
     {
-        DAppFunction dAppFunction = new DAppFunction() {
-            @Override
-            public void DAppError(Throwable error, Message<String> message) {
-                tokenView.onSignCancel(message);
-                dialog.dismiss();
-            }
-
-            @Override
-            public void DAppReturn(byte[] data, Message<String> message) {
-                String signHex = Numeric.toHexString(data);
-                signHex = Numeric.cleanHexPrefix(signHex);
-                tokenView.onSignPersonalMessageSuccessful(message, signHex);
-                testRecoverAddressFromSignature(message.value, signHex);
-                dialog.dismiss();
-            }
-        };
-
         dialog = new SignMessageDialog(this, message);
         dialog.setAddress(token.getAddress());
         dialog.setMessage(message.value);
         dialog.setOnApproveListener(v -> {
-            String convertedMessage = message.value;
-            String signMessage = PERSONAL_MESSAGE_PREFIX
-                    + convertedMessage.length()
-                    + convertedMessage;
-            signMessage(signMessage.getBytes(), dAppFunction, message);
+            messageToSign = message;
+            viewModel.getAuthorisation(this, this);
         });
         dialog.setOnRejectListener(v -> {
             tokenView.onSignCancel(message);
@@ -589,6 +594,10 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         {
             e.printStackTrace();
         }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     public BigDecimal getCorrectedBalance(String value, int scale)
@@ -606,5 +615,57 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         }
 
         return val.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode,resultCode,intent);
+
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            GotAuthorisation(resultCode == RESULT_OK);
+        }
+    }
+
+    @Override
+    public void GotAuthorisation(boolean gotAuth)
+    {
+        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
+        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+
+        if (gotAuth)
+        {
+            DAppFunction dAppFunction = new DAppFunction()
+            {
+                @Override
+                public void DAppError(Throwable error, Message<String> message)
+                {
+                    tokenView.onSignCancel(message);
+                    dialog.dismiss();
+                }
+
+                @Override
+                public void DAppReturn(byte[] data, Message<String> message)
+                {
+                    String signHex = Numeric.toHexString(data);
+                    signHex = Numeric.cleanHexPrefix(signHex);
+                    tokenView.onSignPersonalMessageSuccessful(message, signHex);
+                    testRecoverAddressFromSignature(message.value, signHex);
+                    dialog.dismiss();
+                }
+            };
+
+            String convertedMessage = messageToSign.value;
+            String signMessage = PERSONAL_MESSAGE_PREFIX
+                    + convertedMessage.length()
+                    + convertedMessage;
+            signMessage(signMessage.getBytes(), dAppFunction, messageToSign);
+        }
+    }
+
+    @Override
+    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+    {
+        authInterface = authCallback;
     }
 }

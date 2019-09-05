@@ -10,7 +10,7 @@ import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.router.SellDetailRouter;
 
 import java.util.concurrent.TimeUnit;
@@ -29,7 +29,7 @@ public class SellTicketModel  extends BaseViewModel {
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final SellDetailRouter sellDetailRouter;
     private final AssetDefinitionService assetDefinitionService;
 
@@ -42,12 +42,12 @@ public class SellTicketModel  extends BaseViewModel {
 
     SellTicketModel(
             FetchTokensInteract fetchTokensInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             SellDetailRouter sellDetailRouter,
             AssetDefinitionService assetDefinitionService) {
         this.fetchTokensInteract = fetchTokensInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.sellDetailRouter = sellDetailRouter;
         this.assetDefinitionService = assetDefinitionService;
@@ -91,7 +91,7 @@ public class SellTicketModel  extends BaseViewModel {
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         defaultNetwork.postValue(networkInfo);
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
     }

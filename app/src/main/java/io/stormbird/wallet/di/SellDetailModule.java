@@ -2,14 +2,14 @@ package io.stormbird.wallet.di;
 
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
-import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.SellDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.service.MarketQueueService;
 import io.stormbird.wallet.viewmodel.SellDetailModelFactory;
 
@@ -26,14 +26,14 @@ public class SellDetailModule {
     @Provides
     SellDetailModelFactory sellDetailModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             MarketQueueService marketQueueService,
             CreateTransactionInteract createTransactionInteract,
             SellDetailRouter sellDetailRouter,
-            AssetDisplayRouter assetDisplayRouter,
+            KeyService keyService,
             AssetDefinitionService assetDefinitionService) {
         return new SellDetailModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, sellDetailRouter, assetDisplayRouter, assetDefinitionService);
+                findDefaultNetworkInteract, genericWalletInteract, marketQueueService, createTransactionInteract, sellDetailRouter, keyService, assetDefinitionService);
     }
 
     @Provides
@@ -43,22 +43,17 @@ public class SellDetailModule {
     }
 
     @Provides
-    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new FindDefaultWalletInteract(walletRepository);
+    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides
-    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository, PasswordStore passwordStore) {
-        return new CreateTransactionInteract(transactionRepository, passwordStore);
+    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository) {
+        return new CreateTransactionInteract(transactionRepository);
     }
 
     @Provides
     SellDetailRouter provideSellDetailRouter() {
         return new SellDetailRouter();
-    }
-
-    @Provides
-    AssetDisplayRouter provideAssetDisplayRouter() {
-        return new AssetDisplayRouter();
     }
 }

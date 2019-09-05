@@ -1,6 +1,5 @@
 package io.stormbird.wallet.util;
 
-import io.stormbird.wallet.service.GasService;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.ens.Contracts;
 import org.web3j.ens.EnsResolutionException;
@@ -16,7 +15,9 @@ import org.web3j.tx.ClientTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.web3j.utils.Numeric;
 
-//import org.web3j.tx.gas.DefaultGasProvider;
+import io.reactivex.Single;
+import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.service.GasService;
 
 /**
  * Created by James on 29/05/2019.
@@ -24,7 +25,6 @@ import org.web3j.utils.Numeric;
  */
 public class AWEnsResolver
 {
-
     static final long DEFAULT_SYNC_THRESHOLD = 1000 * 60 * 3;
     static final String REVERSE_NAME_SUFFIX = ".addr.reverse";
 
@@ -50,6 +50,34 @@ public class AWEnsResolver
 
     public long getSyncThreshold() {
         return syncThreshold;
+    }
+
+    public Single<Wallet> resolveWalletEns(Wallet wallet)
+    {
+        return Single.fromCallable(() -> {
+            try
+            {
+                wallet.ENSname = reverseResolve(wallet.address);
+                if (wallet.ENSname != null && wallet.ENSname.length() > 0)
+                {
+                    //check ENS name integrity - it must point to the wallet address
+                    String resolveAddress = resolve(wallet.ENSname);
+                    if (!resolveAddress.equalsIgnoreCase(wallet.address))
+                    {
+                        wallet.ENSname = null;
+                    }
+                }
+                else
+                {
+                    wallet.ENSname = null;
+                }
+            }
+            catch (Exception e)
+            {
+                wallet.ENSname = null;
+            }
+            return wallet;
+        });
     }
 
     /**
@@ -79,6 +107,8 @@ public class AWEnsResolver
             PublicResolver resolver = obtainPublicResolver(contractId);
 
             byte[] nameHash = NameHash.nameHashAsBytes(contractId);
+            String hash = Numeric.toHexString(nameHash);
+            System.out.println(hash);
             return resolver.addr(nameHash).send();
         } else {
             return contractId;
@@ -86,8 +116,9 @@ public class AWEnsResolver
     }
 
     /**
-     * Reverse name resolution as documented in the
-     * <a href="https://docs.ens.domains/en/latest/userguide.html#reverse-name-resolution">specification</a>.
+     * Reverse name resolution as documented in the <a
+     * href="https://docs.ens.domains/en/latest/userguide.html#reverse-name-resolution">specification</a>.
+     *
      * @param address an ethereum address, example: "0x314159265dd8dbb310642f98f50c066173c1259b"
      * @return a EnsName registered for provided address
      */
@@ -114,22 +145,25 @@ public class AWEnsResolver
         }
     }
 
-    PublicResolver lookupResolver(String ensName) throws Exception {
+    private PublicResolver lookupResolver(String ensName) throws Exception {
         NetVersion netVersion = web3j.netVersion().send();
         String registryContract = Contracts.resolveRegistryContract(netVersion.getNetVersion());
 
-        ENS ensRegistry = ENS.load(
-                registryContract, web3j, transactionManager,
-                gasService);
+        ENS ensRegistry =
+                ENS.load(
+                        registryContract,
+                        web3j,
+                        transactionManager,
+                        gasService);
 
         byte[] nameHash = NameHash.nameHashAsBytes(ensName);
 
         String resolverAddress = ensRegistry.resolver(nameHash).send();
-        PublicResolver resolver = PublicResolver.load(
-                resolverAddress, web3j, transactionManager,
-                gasService);
-
-        return resolver;
+        return PublicResolver.load(
+                        resolverAddress,
+                        web3j,
+                        transactionManager,
+                        gasService);
     }
 
     boolean isSynced() throws Exception {
@@ -146,7 +180,7 @@ public class AWEnsResolver
     }
 
     public static boolean isValidEnsName(String input) {
-        return input != null  // will be set to null on new Contract creation
+        return input != null // will be set to null on new Contract creation
                 && (input.contains(".") || !WalletUtils.isValidAddress(input));
     }
 }

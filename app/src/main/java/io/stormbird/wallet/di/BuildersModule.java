@@ -1,7 +1,10 @@
 package io.stormbird.wallet.di;
 
+import dagger.Module;
+import dagger.android.ContributesAndroidInjector;
 import io.stormbird.wallet.ui.AddTokenActivity;
 import io.stormbird.wallet.ui.AssetDisplayActivity;
+import io.stormbird.wallet.ui.BackupKeyActivity;
 import io.stormbird.wallet.ui.ConfirmationActivity;
 import io.stormbird.wallet.ui.DappBrowserFragment;
 import io.stormbird.wallet.ui.Erc20DetailActivity;
@@ -11,10 +14,10 @@ import io.stormbird.wallet.ui.HelpActivity;
 import io.stormbird.wallet.ui.HomeActivity;
 import io.stormbird.wallet.ui.ImportTokenActivity;
 import io.stormbird.wallet.ui.ImportWalletActivity;
+import io.stormbird.wallet.ui.MyAddressActivity;
 import io.stormbird.wallet.ui.NewSettingsFragment;
 import io.stormbird.wallet.ui.RedeemAssetSelectActivity;
 import io.stormbird.wallet.ui.RedeemSignatureDisplayActivity;
-import io.stormbird.wallet.ui.MyAddressActivity;
 import io.stormbird.wallet.ui.SelectNetworkActivity;
 import io.stormbird.wallet.ui.SellDetailActivity;
 import io.stormbird.wallet.ui.SellTicketActivity;
@@ -28,8 +31,6 @@ import io.stormbird.wallet.ui.TransferTicketDetailActivity;
 import io.stormbird.wallet.ui.WalletActionsActivity;
 import io.stormbird.wallet.ui.WalletFragment;
 import io.stormbird.wallet.ui.WalletsActivity;
-import dagger.Module;
-import dagger.android.ContributesAndroidInjector;
 
 @Module
 public abstract class BuildersModule {
@@ -128,6 +129,10 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = WalletActionsModule.class)
 	abstract WalletActionsActivity bindWalletActionsActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = BackupKeyModule.class)
+	abstract BackupKeyActivity bindBackupKeyActivity();
 
 	@ActivityScope
 	@ContributesAndroidInjector(modules = MyAddressModule.class)

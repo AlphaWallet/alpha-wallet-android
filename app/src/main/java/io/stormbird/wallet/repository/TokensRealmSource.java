@@ -27,6 +27,7 @@ import io.stormbird.wallet.repository.entity.RealmERC721Token;
 import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.repository.entity.RealmTokenTicker;
 import io.stormbird.wallet.service.RealmManager;
+import org.web3j.crypto.WalletUtils;
 
 import static io.stormbird.wallet.interact.SetupTokensInteract.EXPIRED_CONTRACT;
 
@@ -240,6 +241,7 @@ public class TokensRealmSource implements TokenLocalSource {
             Realm realm = null;
             try {
                 realm = realmManager.getRealmInstance(wallet);
+                if (!WalletUtils.isValidAddress(wallet.address)) return;
                 TransactionsRealmCache.addRealm();
                 realm.beginTransaction();
                 long now = System.currentTimeMillis();
@@ -537,6 +539,7 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     private void saveToken(Wallet wallet, Token token, Date currentTime) {
+        if (!WalletUtils.isValidAddress(wallet.address)) return;
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
             TransactionsRealmCache.addRealm();
@@ -559,6 +562,7 @@ public class TokensRealmSource implements TokenLocalSource {
      */
     private void saveERC721Token(Wallet wallet, Token token, Date now)
     {
+        if (!WalletUtils.isValidAddress(wallet.address)) return;
         try (Realm realm = realmManager.getERC721RealmInstance(wallet))
         {
             realm.beginTransaction();
@@ -582,6 +586,8 @@ public class TokensRealmSource implements TokenLocalSource {
         {
             return; //no storage here
         }
+
+        if (!WalletUtils.isValidAddress(wallet.address)) return;
 
         //initial check to ensure all assets in this class have the same contract
         AssetContract contract = null;
@@ -867,6 +873,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     public void onStart()
                     {
                         realm = realmManager.getRealmInstance(wallet);
+                        if (!WalletUtils.isValidAddress(wallet.address)) return;
                         RealmToken realmToken = realm.where(RealmToken.class)
                                 .equalTo("address", databaseKey(token))
                                 .equalTo("chainId", network.chainId)

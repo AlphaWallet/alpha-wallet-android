@@ -10,7 +10,6 @@ import android.os.Environment;
 import android.os.FileObserver;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import android.util.SparseArray;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
@@ -20,25 +19,25 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
-import io.realm.RealmResults;
 import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import io.stormbird.token.entity.*;
 import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.entity.ContractType;
+import io.stormbird.wallet.entity.Token;
+import io.stormbird.wallet.entity.TokenFactory;
+import io.stormbird.wallet.entity.Wallet;
 import io.stormbird.wallet.entity.tokenscript.TokenscriptFunction;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenLocalSource;
 import io.stormbird.wallet.repository.TransactionsRealmCache;
 import io.stormbird.wallet.repository.entity.RealmAuxData;
-import io.stormbird.wallet.repository.entity.RealmERC721Token;
-import io.stormbird.wallet.repository.entity.RealmToken;
 import io.stormbird.wallet.ui.HomeActivity;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import org.ethereum.geth.BigInt;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.crypto.WalletUtils;
 import org.xml.sax.SAXException;
 
 import java.io.*;
@@ -1033,12 +1032,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         Completable.complete()
                 .subscribeWith(new DisposableCompletableObserver()
                 {
-                    Realm realm;
+                    Realm realm = null;
 
                     @Override
                     public void onStart()
                     {
                         if (tResult.result == null) tResult.result = "";
+                        if (!WalletUtils.isValidAddress(tokensService.getCurrentAddress())) return;
                         realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress());
                         ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
                         RealmAuxData realmToken = realm.where(RealmAuxData.class)

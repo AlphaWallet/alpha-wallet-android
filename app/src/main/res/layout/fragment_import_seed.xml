@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <io.stormbird.wallet.widget.PasswordInputView
+        android:id="@+id/input_seed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_above="@id/button_holder"
+        android:layout_marginTop="30dp"
+        android:visibility="visible"
+        android:textSize="18sp"
+        custom:minHeight="170"
+        custom:lines="6"
+        custom:label="@string/enter_seed_phrase" />
+
+    <LinearLayout
+        android:id="@+id/button_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_non_english_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/greyfivef"
+            android:autoLink="web"
+            android:linksClickable="true"
+            android:text="@string/seed_phrase_conversion_message"
+            android:textSize="14sp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginBottom="20dp"
+            android:gravity="center_horizontal" />
+
+    <Button
+        android:id="@+id/import_action"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_marginBottom="25dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:background="@color/nasty_green"
+        android:fontFamily="@font/font_semibold"
+        android:text="@string/title_import"
+        android:textAllCaps="true"
+        android:textColor="@color/white"
+        android:textSize="18sp" />
+    </LinearLayout>
+</RelativeLayout>

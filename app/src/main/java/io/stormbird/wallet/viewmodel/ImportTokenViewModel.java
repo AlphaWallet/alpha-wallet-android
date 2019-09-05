@@ -3,11 +3,9 @@ package io.stormbird.wallet.viewmodel;
 import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import io.reactivex.Single;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
@@ -17,8 +15,6 @@ import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 
 import io.stormbird.wallet.service.GasService;
-import org.web3j.crypto.Sign;
-import org.web3j.tx.Contract;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -33,6 +29,7 @@ import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.entity.SalesOrderMalformed;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.token.tools.ParseMagicLink;
+import io.stormbird.wallet.service.KeyService;
 
 import static io.stormbird.token.tools.ParseMagicLink.*;
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
@@ -47,7 +44,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private static final String TAG = "ITVM";
 
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final SetupTokensInteract setupTokensInteract;
@@ -57,6 +54,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private final AssetDefinitionService assetDefinitionService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final GasService gasService;
+    private final KeyService keyService;
 
     private ParseMagicLink parser;
 
@@ -84,7 +82,7 @@ public class ImportTokenViewModel extends BaseViewModel
     @Nullable
     private Disposable getBalanceDisposable;
 
-    ImportTokenViewModel(FindDefaultWalletInteract findDefaultWalletInteract,
+    ImportTokenViewModel(GenericWalletInteract genericWalletInteract,
                          CreateTransactionInteract createTransactionInteract,
                          FetchTokensInteract fetchTokensInteract,
                          SetupTokensInteract setupTokensInteract,
@@ -93,8 +91,9 @@ public class ImportTokenViewModel extends BaseViewModel
                          EthereumNetworkRepositoryType ethereumNetworkRepository,
                          AssetDefinitionService assetDefinitionService,
                          FetchTransactionsInteract fetchTransactionsInteract,
-                         GasService gasService) {
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+                         GasService gasService,
+                         KeyService keyService) {
+        this.genericWalletInteract = genericWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.setupTokensInteract = setupTokensInteract;
@@ -104,6 +103,7 @@ public class ImportTokenViewModel extends BaseViewModel
         this.assetDefinitionService = assetDefinitionService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.gasService = gasService;
+        this.keyService = keyService;
     }
 
     private void initParser()
@@ -129,7 +129,7 @@ public class ImportTokenViewModel extends BaseViewModel
 
     public void prepare(String importDataStr) {
         univeralImportLink = importDataStr;
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onWallet, this::onError);
     }
@@ -668,5 +668,18 @@ public class ImportTokenViewModel extends BaseViewModel
     public void stopGasPriceChecker()
     {
         gasService.stopGasListener();
+    }
+
+    public void getAuthorisation(Activity activity, SignAuthenticationCallback callback)
+    {
+        if (wallet.getValue() != null)
+        {
+            keyService.getAuthenticationForSignature(wallet.getValue(), activity, callback);
+        }
+    }
+
+    public void resetSignDialog()
+    {
+        keyService.resetSigningDialog();
     }
 }

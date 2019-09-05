@@ -15,7 +15,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
@@ -30,7 +29,7 @@ public class AttributeType {
     public String id;
     public int bitshift = 0;
     public TokenDefinition.Syntax syntax;
-    public TokenDefinition.As as;
+    public As as;
     public Map<BigInteger, String> members;
     private TokenDefinition definition;
     public FunctionDefinition function = null;
@@ -91,7 +90,7 @@ public class AttributeType {
                 }
                 switch(origin.getAttribute("contract").toLowerCase()) {
                     case "holding-contract":
-                        as = TokenDefinition.As.Mapping;
+                        setAs(As.Mapping);
                         // TODO: Syntax is not checked
                         //getFunctions(origin);
                         break;
@@ -121,7 +120,7 @@ public class AttributeType {
                         //drop through (no break)
                     case "token-id":
                         //this value is obtained from the token id
-                        as = definition.parseAs(resolve);
+                        setAs(definition.parseAs(resolve));
                         populate(resolve); //check for mappings
                         if (function != null) function.as = definition.parseAs(resolve);
                         if (resolve.hasAttribute("bitmask")) {
@@ -133,7 +132,7 @@ public class AttributeType {
                         if (asTxt.startsWith("e") && Character.isDigit(asTxt.charAt(1)))
                         {
                             bitshift = Integer.parseInt(asTxt.substring(1));
-                            as = TokenDefinition.As.UnsignedInput;
+                            setAs(As.UnsignedInput);
                         }
                         break;
                 }
@@ -151,7 +150,7 @@ public class AttributeType {
                 if (element.getLocalName().equals("mapping"))
                 {
                     members = new HashMap<>();
-                    as = TokenDefinition.As.Mapping;
+                    setAs(As.Mapping);
 
                     NodeList nList = origin.getElementsByTagNameNS(definition.nameSpace, "option");
                     for (int i = 0; i < nList.getLength(); i++) {
@@ -267,7 +266,7 @@ public class AttributeType {
     public String toString(BigInteger data) throws UnsupportedEncodingException
     {
         // TODO: in all cases other than UTF8, syntax should be checked
-        switch (as)
+        switch (getAs())
         {
             case UTF8:
                 return new String(data.toByteArray(), "UTF8");
@@ -300,5 +299,15 @@ public class AttributeType {
             default:
                 throw new NullPointerException("Missing valid 'as' attribute");
         }
+    }
+
+    public As getAs()
+    {
+        return as;
+    }
+
+    public void setAs(As as)
+    {
+        this.as = as;
     }
 }

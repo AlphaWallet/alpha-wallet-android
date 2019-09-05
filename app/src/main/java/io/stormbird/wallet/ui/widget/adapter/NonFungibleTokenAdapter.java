@@ -4,17 +4,9 @@ import android.content.Context;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.view.ViewGroup;
-
-import android.widget.RadioButton;
 import com.bumptech.glide.Glide;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.TicketRange;
 import io.stormbird.wallet.R;
@@ -30,7 +22,10 @@ import io.stormbird.wallet.ui.widget.entity.*;
 import io.stormbird.wallet.ui.widget.holder.*;
 import io.stormbird.wallet.web3.entity.FunctionCallback;
 import io.stormbird.wallet.web3.entity.ScriptFunction;
-import org.ethereum.geth.BigInt;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by James on 9/02/2018.

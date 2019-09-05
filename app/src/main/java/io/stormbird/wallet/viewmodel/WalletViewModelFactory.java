@@ -21,7 +21,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final SendTokenRouter sendTokenRouter;
     private final Erc20DetailRouter erc20DetailRouter;
     private final AssetDisplayRouter assetDisplayRouter;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final AddTokenInteract addTokenInteract;
     private final SetupTokensInteract setupTokensInteract;
     private final AssetDefinitionService assetDefinitionService;
@@ -35,7 +35,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   SendTokenRouter sendTokenRouter,
                                   Erc20DetailRouter erc20DetailRouter,
                                   AssetDisplayRouter assetDisplayRouter,
-                                  FindDefaultWalletInteract findDefaultWalletInteract,
+                                  GenericWalletInteract genericWalletInteract,
                                   AddTokenInteract addTokenInteract,
                                   SetupTokensInteract setupTokensInteract,
                                   AssetDefinitionService assetDefinitionService,
@@ -48,7 +48,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         this.sendTokenRouter = sendTokenRouter;
         this.erc20DetailRouter = erc20DetailRouter;
         this.assetDisplayRouter = assetDisplayRouter;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.addTokenInteract = addTokenInteract;
         this.setupTokensInteract = setupTokensInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -67,7 +67,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 sendTokenRouter,
                 erc20DetailRouter,
                 assetDisplayRouter,
-                findDefaultWalletInteract,
+                genericWalletInteract,
                 addTokenInteract,
                 setupTokensInteract,
                 assetDefinitionService,

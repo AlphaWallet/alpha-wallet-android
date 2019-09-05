@@ -11,6 +11,7 @@ import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.TickerService;
+import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.util.AWEnsResolver;
 import okhttp3.OkHttpClient;
 import org.web3j.abi.*;
@@ -33,6 +34,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import static io.stormbird.token.entity.MagicLinkInfo.getNodeURLByNetworkId;
 import static io.stormbird.wallet.C.BURN_ADDRESS;
 import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
 import static io.stormbird.wallet.util.Utils.isAlNum;
@@ -46,6 +48,7 @@ public class TokenRepository implements TokenRepositoryType {
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TickerService tickerService;
     private final GasService gasService;
+    private final TokensService tokensService;
 
     public static final String INVALID_CONTRACT = "<invalid>";
 
@@ -59,12 +62,14 @@ public class TokenRepository implements TokenRepositoryType {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenLocalSource localSource,
             TickerService tickerService,
-            GasService gasService) {
+            GasService gasService,
+            TokensService tokensService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.localSource = localSource;
         this.tickerService = tickerService;
         this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
         this.gasService = gasService;
+        this.tokensService = tokensService;
 
         web3jNodeServers = new ConcurrentHashMap<>();
         okClient = new OkHttpClient.Builder()
@@ -566,10 +571,26 @@ public class TokenRepository implements TokenRepositoryType {
         BigDecimal balance = BigDecimal.ZERO;
         try
         {
-            balance = getBalance(wallet, tokenInfo);
-            if (token != null && balance.compareTo(BigDecimal.valueOf(NODE_COMMS_ERROR)) == 0)
+            Function function = balanceOf(wallet.address);
+            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
+            String responseValue = callSmartContractFunction(function, tokenInfo.address, network, wallet);
+
+            if (token != null && responseValue == null)
             {
                 balance = token.balance;
+            }
+            else
+            {
+                List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
+                if (response.size() == 1) balance = new BigDecimal(((Uint256) response.get(0)).getValue());
+
+                if (token != null && balance.equals(BigDecimal.valueOf(32)) && responseValue.length() > 66)
+                {
+                    //this is a token returning an array balance. Try ERC875
+                    token.setInterfaceSpec(ContractType.ERC875);
+                    TokensService.setInterfaceSpec(tokenInfo.chainId, tokenInfo.address, ContractType.ERC875);
+                    balance = BigDecimal.ZERO;
+                }
             }
         }
         catch (Exception e)
@@ -630,7 +651,11 @@ public class TokenRepository implements TokenRepositoryType {
 
     private BigDecimal updatePending(Token oldToken, BigDecimal pendingBalance)
     {
-        if (pendingBalance.equals(BigDecimal.valueOf(-1)))
+        if (!tokensService.getCurrentAddress().equals(oldToken.getWallet()))
+        {
+            oldToken.pendingBalance = oldToken.balance;
+        }
+        else if (pendingBalance.equals(BigDecimal.valueOf(-1)))
         {
             oldToken.pendingBalance = oldToken.balance;
         }
@@ -1235,5 +1260,17 @@ public class TokenRepository implements TokenRepositoryType {
     public Disposable updateBlockRead(Token token, Wallet wallet)
     {
         return localSource.storeBlockRead(token, wallet);
+    }
+
+    public static Web3j getWeb3jService(int chainId)
+    {
+        OkHttpClient okClient = new OkHttpClient.Builder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(false)
+                .build();
+        String rpcServerUrl = getNodeURLByNetworkId(chainId);
+        return Web3j.build(new HttpService(rpcServerUrl, okClient, false));
     }
 }

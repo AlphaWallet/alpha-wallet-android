@@ -21,13 +21,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
+import io.stormbird.wallet.widget.SignTransactionDialog;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -38,7 +38,7 @@ import dagger.android.AndroidInjection;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.ui.widget.adapter.NonFungibleTokenAdapter;
 import io.stormbird.wallet.util.KeyboardUtils;
-import io.stormbird.wallet.viewmodel.SellDetailModel;
+import io.stormbird.wallet.viewmodel.SellDetailViewModel;
 import io.stormbird.wallet.viewmodel.SellDetailModelFactory;
 import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.token.entity.TicketRange;
@@ -50,13 +50,14 @@ import static io.stormbird.wallet.C.EXTRA_TOKENID_LIST;
 import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
+import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
 import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
 /**
  * Created by James on 21/02/2018.
  */
 
-public class SellDetailActivity extends BaseActivity implements OnTokenClickListener, Runnable
+public class SellDetailActivity extends BaseActivity implements OnTokenClickListener, Runnable, SignAuthenticationCallback
 {
     private static final int SEND_INTENT_REQUEST_CODE = 2;
     public static final int SET_A_PRICE = 1;
@@ -65,13 +66,12 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
 
     @Inject
     protected SellDetailModelFactory viewModelFactory;
-    protected SellDetailModel viewModel;
+    protected SellDetailViewModel viewModel;
 
     private FinishReceiver finishReceiver;
 
     private Token token;
     private Wallet wallet;
-    private TicketRange ticketRange;
     private NonFungibleTokenAdapter adapter;
     private String ticketIds;
     private String prunedIds;
@@ -102,6 +102,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     private TextView currencyText;
     private boolean activeClick;
     private Handler handler;
+    private PinAuthenticationCallbackInterface authInterface;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -119,7 +120,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         prunedIds = ticketIds;
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
-                .get(SellDetailModel.class);
+                .get(SellDetailViewModel.class);
         viewModel.prepare(token, wallet);
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.ethereumPrice().observe(this, this::onEthereumPrice);
@@ -273,7 +274,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
             case SET_EXPIRY:
                 if (isExpiryDateTimeValid())
                 {
-                    sellTicketLink();
+                    viewModel.getAuthorisation(this, this);
                 }
                 break;
             case SET_MARKET_SALE:
@@ -418,7 +419,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         }
     }
 
-    private void sellTicketLink() {
+    private void sellTicketLinkFinal() {
         String expiryDate = expiryDateEditText.getText().toString();
         String expiryTime = expiryTimeEditText.getText().toString();
         String tempDateString = expiryDate + " " + expiryTime;
@@ -448,7 +449,6 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         }
 
         KeyboardUtils.hideKeyboard(getCurrentFocus());
-        //go back to previous screen
     }
 
     private void sellTicketFinal() {
@@ -550,6 +550,13 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     }
 
     @Override
+    public void onPause()
+    {
+        super.onPause();
+        viewModel.resetSignDialog();
+    }
+
+    @Override
     public void onTokenClick(View view, Token token, List<BigInteger> ids, boolean selected) {
         Context context = view.getContext();
         //TODO: what action should be performed when clicking on a range?
@@ -571,10 +578,20 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS
+                && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
+            requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
+        }
+
         switch (requestCode)
         {
             case SEND_INTENT_REQUEST_CODE:
                 sendBroadcast(new Intent(PRUNE_ACTIVITY));
+                break;
+
+            case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
+                GotAuthorisation(resultCode == RESULT_OK);
                 break;
 
             default:
@@ -586,5 +603,20 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     public void run()
     {
         activeClick = false;
+    }
+
+    @Override
+    public void GotAuthorisation(boolean gotAuth)
+    {
+        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
+        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+        //got authorisation, continue with transaction
+        if (gotAuth) sellTicketLinkFinal();
+    }
+
+    @Override
+    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+    {
+        authInterface = authCallback;
     }
 }

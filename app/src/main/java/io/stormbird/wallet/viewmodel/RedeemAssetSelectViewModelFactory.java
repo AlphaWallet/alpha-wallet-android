@@ -5,7 +5,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.router.RedeemSignatureDisplayRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 
@@ -15,17 +15,17 @@ import io.stormbird.wallet.service.AssetDefinitionService;
 
 public class RedeemAssetSelectViewModelFactory implements ViewModelProvider.Factory
 {
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final RedeemSignatureDisplayRouter redeemSignatureDisplayRouter;
     private final AssetDefinitionService assetDefinitionService;
 
     public RedeemAssetSelectViewModelFactory(
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             RedeemSignatureDisplayRouter redeemSignatureDisplayRouter,
             AssetDefinitionService assetDefinitionService) {
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.redeemSignatureDisplayRouter = redeemSignatureDisplayRouter;
         this.assetDefinitionService = assetDefinitionService;
@@ -34,6 +34,6 @@ public class RedeemAssetSelectViewModelFactory implements ViewModelProvider.Fact
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new RedeemAssetSelectViewModel(findDefaultWalletInteract, findDefaultNetworkInteract, redeemSignatureDisplayRouter, assetDefinitionService);
+        return (T) new RedeemAssetSelectViewModel(genericWalletInteract, findDefaultNetworkInteract, redeemSignatureDisplayRouter, assetDefinitionService);
     }
 }

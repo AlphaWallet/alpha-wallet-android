@@ -13,7 +13,6 @@ import java.util.Map;
 import io.stormbird.wallet.entity.CryptoFunctions;
 import io.stormbird.wallet.entity.Ticket;
 import io.stormbird.wallet.entity.Wallet;
-import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -26,23 +25,20 @@ import okhttp3.RequestBody;
 
 import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
 import static io.stormbird.token.tools.ParseMagicLink.spawnable;
-import static io.stormbird.wallet.service.MarketQueueService.sigFromByteArray;
+import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
 
 public class FeeMasterService
 {
     private final OkHttpClient httpClient;
     private final TransactionRepositoryType transactionRepository;
-    private final PasswordStore passwordStore;
     private ParseMagicLink parser;
 
     private static final String API = "api/";
 
     public FeeMasterService(OkHttpClient httpClient,
-                            TransactionRepositoryType transactionRepository,
-                            PasswordStore passwordStore) {
+                            TransactionRepositoryType transactionRepository) {
         this.httpClient = httpClient;
         this.transactionRepository = transactionRepository;
-        this.passwordStore = passwordStore;
     }
 
     private void initParser()
@@ -97,14 +93,6 @@ public class FeeMasterService
         });
     }
 
-    private Single<byte[]> getTradeSig(Wallet wallet, int[] indicesArray, String contractAddress, BigInteger price, long expiry, int chainId)
-    {
-        initParser();
-        final byte[] tradeBytes = parser.getTradeBytes(indicesArray, contractAddress, price, expiry);
-        return passwordStore.getPassword(wallet)
-                    .flatMap(password -> transactionRepository.getSignature(wallet, tradeBytes, password, chainId));
-    }
-
     private Single<int[]> generateTicketArray(String indices, Ticket ticket)
     {
         return Single.fromCallable(() -> {
@@ -133,9 +121,12 @@ public class FeeMasterService
     private void addSignature(Map<String, String> args, byte[] sig)
     {
         Sign.SignatureData sigData = sigFromByteArray(sig);
-        args.put("r", Numeric.toHexString(sigData.getR()));
-        args.put("s", Numeric.toHexString(sigData.getS()));
-        args.put("v", Integer.toHexString(sigData.getV()));
+        if (sigData != null)
+        {
+            args.put("r", Numeric.toHexString(sigData.getR()));
+            args.put("s", Numeric.toHexString(sigData.getS()));
+            args.put("v", Integer.toHexString(sigData.getV()));
+        }
     }
 
     private Single<Integer> sendFeemasterTransaction(String url, int networkId, String toAddress, long expiry, String indices, byte[] tradeSig) {

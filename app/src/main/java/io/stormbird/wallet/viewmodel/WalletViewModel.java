@@ -23,8 +23,12 @@ import io.stormbird.wallet.router.SendTokenRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.OpenseaService;
 import io.stormbird.wallet.service.TokensService;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -36,12 +40,15 @@ public class WalletViewModel extends BaseViewModel
     private static final int CHECK_OPENSEA_INTERVAL_TIME = 40; //Opensea refresh interval in seconds
     private static final int CHECK_BLOCKSCOUT_INTERVAL_TIME = 30;
     private static final int OPENSEA_RINKEBY_CHECK = 3; //check Rinkeby opensea once per XX opensea checks (ie if interval time is 25 and rinkeby check is 1 in 6, rinkeby refresh time is once per 300 seconds).
+    public static double VALUE_THRESHOLD = 200.0; //$200 USD value is difference between red and grey backup warnings
 
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<BigDecimal> total = new MutableLiveData<>();
     private final MutableLiveData<Token> tokenUpdate = new MutableLiveData<>();
     private final MutableLiveData<Boolean> tokensReady = new MutableLiveData<>();
     private final MutableLiveData<Boolean> fetchKnownContracts = new MutableLiveData<>();
+    private final MutableLiveData<GenericWalletInteract.BackupLevel> backupEvent = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> checkAdapterCount = new MutableLiveData<>();
 
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
@@ -50,7 +57,7 @@ public class WalletViewModel extends BaseViewModel
     private final AssetDisplayRouter assetDisplayRouter;
     private final AddTokenInteract addTokenInteract;
     private final SetupTokensInteract setupTokensInteract;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final OpenseaService openseaService;
     private final TokensService tokensService;
@@ -62,6 +69,7 @@ public class WalletViewModel extends BaseViewModel
     private boolean isVisible = false;
     private int openSeaCheckCounter;
     private Wallet currentWallet;
+    private int backupCheckVal;
 
     private ConcurrentLinkedQueue<ContractResult> unknownAddresses;
 
@@ -78,7 +86,7 @@ public class WalletViewModel extends BaseViewModel
             SendTokenRouter sendTokenRouter,
             Erc20DetailRouter erc20DetailRouter,
             AssetDisplayRouter assetDisplayRouter,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             AddTokenInteract addTokenInteract,
             SetupTokensInteract setupTokensInteract,
             AssetDefinitionService assetDefinitionService,
@@ -92,7 +100,7 @@ public class WalletViewModel extends BaseViewModel
         this.sendTokenRouter = sendTokenRouter;
         this.erc20DetailRouter = erc20DetailRouter;
         this.assetDisplayRouter = assetDisplayRouter;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.addTokenInteract = addTokenInteract;
         this.setupTokensInteract = setupTokensInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -110,7 +118,12 @@ public class WalletViewModel extends BaseViewModel
     }
     public LiveData<Token> tokenUpdate() { return tokenUpdate; }
     public LiveData<Boolean> tokensReady() { return tokensReady; }
+    public LiveData<Boolean> checkAdapterCount() { return checkAdapterCount; }
     public LiveData<Boolean> fetchKnownContracts() { return fetchKnownContracts; }
+    public LiveData<GenericWalletInteract.BackupLevel> backupEvent() { return backupEvent; }
+
+    public String getWalletAddr() { return currentWallet != null ? currentWallet.address : null; }
+    public WalletType getWalletType() { return currentWallet != null ? currentWallet.type : WalletType.KEYSTORE; }
 
     @Override
     protected void onCleared() {
@@ -154,6 +167,7 @@ public class WalletViewModel extends BaseViewModel
         if (currentWallet != null)
         {
             openSeaCheckCounter = 0;
+            backupCheckVal = 0;
             tokensService.setCurrentAddress(currentWallet.address);
             updateTokens = fetchTokensInteract.fetchStoredWithEth(currentWallet)
                     .subscribeOn(Schedulers.newThread())
@@ -169,6 +183,11 @@ public class WalletViewModel extends BaseViewModel
 
     private void onTokens(Token[] cachedTokens)
     {
+        if (cachedTokens.length == 0) //require another reset
+        {
+            currentWallet = null;
+            prepare();
+        }
         tokensService.addTokens(cachedTokens);
         tokensService.requireTokensRefresh();
         tokens.postValue(tokensService.getAllLiveTokens().toArray(new Token[0]));
@@ -259,6 +278,9 @@ public class WalletViewModel extends BaseViewModel
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::storedTokens, this::onError).isDisposed();
+
+            //TODO: Once we start receiving ERC20 tickers check backup requirement if ERC20 received
+            //checkBackup();
         }
     }
 
@@ -294,7 +316,8 @@ public class WalletViewModel extends BaseViewModel
 
     private void checkBalances()
     {
-        if (!currentWallet.address.equals(tokensService.getCurrentAddress())
+        // This checks for an old thread running. Terminate if it is. Possibly destroy the fragment and re-create on wallet change
+        if (!currentWallet.address.equalsIgnoreCase(tokensService.getCurrentAddress())
                 && balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed())
         {
             balanceTimerDisposable.dispose();
@@ -308,19 +331,15 @@ public class WalletViewModel extends BaseViewModel
 
     private void checkTokenUpdates()
     {
-        //if (balanceCheckDisposable == null || balanceCheckDisposable.isDisposed())
-        {
-            Token t = tokensService.getNextInBalanceUpdateQueue();
+        Token t = tokensService.getNextInBalanceUpdateQueue();
 
-            if (t != null)
-            {
-                Log.d("TOKEN", "Updating: " + t.tokenInfo.name + " : " + t.getAddress() + " [" + t.balanceUpdateWeight + "]");
-                balanceCheckDisposable = fetchTokensInteract.updateDefaultBalance(t, currentWallet)
-                        //.flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onTokenUpdate, this::balanceUpdateError, this::checkComplete);
-            }
+        if (t != null)
+        {
+            Log.d("TOKEN", "Updating: " + t.tokenInfo.name + " : " + t.getAddress() + " [" + t.balanceUpdateWeight + "]");
+            balanceCheckDisposable = fetchTokensInteract.updateDefaultBalance(t, currentWallet)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onTokenUpdate, this::balanceUpdateError, this::checkComplete);
         }
     }
 
@@ -347,9 +366,17 @@ public class WalletViewModel extends BaseViewModel
 
     private void onTokenUpdate(Token token)
     {
+        if (backupCheckVal == 0 && token != null && token.hasRealValue() && token.isEthereum() && token.ticker != null)
+        {
+            backupCheckVal = openSeaCheckCounter + 5;
+        }
         balanceCheckDisposable = null;
+        if (token == null) return;
         Token update = tokensService.addToken(token);
-        if (update != null) tokenUpdate.postValue(update);
+        if (update != null)
+        {
+            tokenUpdate.postValue(update);
+        }
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -383,7 +410,7 @@ public class WalletViewModel extends BaseViewModel
     }
 
     @Override
-    public void showErc20TokenDetail(Context context, String address, String symbol, int decimals, Token token) {
+    public void showErc20TokenDetail(Context context, @NotNull String address, String symbol, int decimals, @NotNull Token token) {
         boolean isToken = !address.equalsIgnoreCase(currentWallet.address);
         boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
         erc20DetailRouter.open(context, address, symbol, decimals, isToken, currentWallet, token, hasDefinition);
@@ -404,7 +431,7 @@ public class WalletViewModel extends BaseViewModel
         if (currentWallet == null)
         {
             progress.postValue(true);
-            disposable = findDefaultWalletInteract
+            disposable = genericWalletInteract
                     .find()
                     .subscribe(this::onDefaultWallet, this::onError);
         }
@@ -419,7 +446,7 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
-    private void onDefaultWallet(Wallet wallet) {
+    private void onDefaultWallet(@NotNull Wallet wallet) {
         tokensService.setCurrentAddress(wallet.address);
         currentWallet = wallet;
         fetchTokens();
@@ -464,7 +491,6 @@ public class WalletViewModel extends BaseViewModel
     {
         disposable = fetchTransactionsInteract.queryInterfaceSpecForService(info)
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.chainId, tokenInfo.address), currentWallet))
-                //.flatMap(token -> addTokenInteract.addTokenFunctionData(token, assetDefinitionService))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::finishedImport, this::onTokenAddError);
@@ -481,7 +507,7 @@ public class WalletViewModel extends BaseViewModel
         Log.d("WVM", "Wait for internet");
     }
 
-    public Token getTokenFromService(Token token)
+    public Token getTokenFromService(@NotNull Token token)
     {
         Token serviceToken = tokensService.getToken(token.tokenInfo.chainId, token.getAddress());
         return (serviceToken != null) ? serviceToken : token;
@@ -501,44 +527,105 @@ public class WalletViewModel extends BaseViewModel
         fetchTokens();
     }
 
+    private void checkBackup()
+    {
+        if (getWalletAddr() == null) return;
+        BigDecimal value = BigDecimal.ZERO;
+        //first see if wallet has any value
+        for (Token t : tokensService.getAllTokens())
+        {
+            if (t.hasRealValue() && t.ticker != null && t.hasPositiveBalance())
+            {
+                BigDecimal balance = t.balance.divide(new BigDecimal(Math.pow(10, t.tokenInfo.decimals)));
+                value = value.add(balance.multiply(new BigDecimal(t.ticker.price)));
+            }
+        }
+
+        if (value.compareTo(BigDecimal.ZERO) > 0)
+        {
+            final BigDecimal calcValue = value;
+            genericWalletInteract.getBackupWarning(getWalletAddr())
+                    .map(needsBackup -> calculateBackupWarning(needsBackup, calcValue))
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(backupEvent::postValue, this::onBlockscoutError).isDisposed();
+        }
+    }
+
+    private GenericWalletInteract.BackupLevel calculateBackupWarning(Boolean needsBackup, @NotNull BigDecimal value)
+    {
+        if (!needsBackup)
+        {
+            return GenericWalletInteract.BackupLevel.BACKUP_NOT_REQUIRED;
+        }
+        else if (value.compareTo(BigDecimal.valueOf(VALUE_THRESHOLD)) >= 0)
+        {
+            return GenericWalletInteract.BackupLevel.WALLET_HAS_HIGH_VALUE;
+        }
+        else
+        {
+            return GenericWalletInteract.BackupLevel.WALLET_HAS_LOW_VALUE;
+        }
+    }
+
     /**
      * Check if we need to update opensea: See params in class header
      */
     private void checkOpenSeaUpdate()
     {
-        if (openSeaCheckCounter <= 4) openSeaCheckCounter++;
-        else if (openSeaCheckCounter > 5)
+        if (isVisible) //update at half speed if not visible
         {
-            if (isVisible)
-            {
-                openSeaCheckCounter += 1;
-            }
-
-            int updateCorrection = 1000 / BALANCE_CHECK_INTERVAL_MILLIS;
-
-            if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * updateCorrection) == 0)
-            {
-                NetworkInfo openSeaCheck = ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.MAINNET_ID);
-
-                if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * updateCorrection * OPENSEA_RINKEBY_CHECK) == 0 && ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
-                {
-                    openSeaCheck = ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.RINKEBY_ID);
-                }
-
-                fetchFromOpensea(openSeaCheck);
-            }
-            else if ((openSeaCheckCounter - 7) % (CHECK_BLOCKSCOUT_INTERVAL_TIME * updateCorrection) == 0)
-            {
-                fetchFromBlockscout();
-            }
+            openSeaCheckCounter++;
         }
         else
         {
-            //On user refresh and startup check rinkeby
-            openSeaCheckCounter += 1;
-            //check rinkeby opensea if not filtered out
-            if (ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
-                fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.RINKEBY_ID));
+            openSeaCheckCounter += 2;
         }
+
+        //init events
+        switch (openSeaCheckCounter)
+        {
+            case 4:
+                if (ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
+                    fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.RINKEBY_ID));
+                break;
+            default:
+                break;
+        }
+
+        if (openSeaCheckCounter == backupCheckVal) checkBackup();
+
+        int updateCorrection = 1000 / BALANCE_CHECK_INTERVAL_MILLIS;
+
+        if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * updateCorrection) == 0)
+        {
+            NetworkInfo openSeaCheck = ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.MAINNET_ID);
+
+            if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * updateCorrection * OPENSEA_RINKEBY_CHECK) == 0 && ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
+            {
+                openSeaCheck = ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.RINKEBY_ID);
+            }
+
+            fetchFromOpensea(openSeaCheck);
+        }
+        else if ((openSeaCheckCounter - 8) % (CHECK_BLOCKSCOUT_INTERVAL_TIME * updateCorrection) == 0)
+        {
+            fetchFromBlockscout();
+        }
+    }
+
+    public Disposable setKeyBackupTime(String walletAddr)
+    {
+        return genericWalletInteract.updateBackupTime(walletAddr);
+    }
+
+    public Disposable setKeyWarningDismissTime(String walletAddr)
+    {
+        return genericWalletInteract.updateWarningTime(walletAddr);
+    }
+
+    public Wallet getWallet()
+    {
+        return currentWallet;
     }
 }

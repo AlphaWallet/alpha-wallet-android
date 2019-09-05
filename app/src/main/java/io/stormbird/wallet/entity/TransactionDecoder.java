@@ -13,6 +13,7 @@ import java.util.Map;
 import static io.stormbird.wallet.entity.ContractType.*;
 import static io.stormbird.wallet.entity.TransactionDecoder.ReadState.ARGS;
 import static org.web3j.crypto.Keys.ADDRESS_LENGTH_IN_HEX;
+import static org.web3j.crypto.Keys.PRIVATE_KEY_LENGTH_IN_HEX;
 
 /**
  * Created by James on 2/02/2018.
@@ -304,6 +305,34 @@ public class TransactionDecoder
         ContractType highestType = OTHER;
         int highestCount = 0;
 
+        //improve heuristic:
+        String balanceMethod = Numeric.cleanHexPrefix(buildMethodId("balanceOf(address)"));
+        String isStormbird = Numeric.cleanHexPrefix(buildMethodId("isStormBirdContract()"));
+        String isStormbird2 = Numeric.cleanHexPrefix(buildMethodId("isStormBird()"));
+        String trade = Numeric.cleanHexPrefix(buildMethodId("trade(uint256,uint256[],uint8,bytes32,bytes32)"));
+        String tradeLegacy = Numeric.cleanHexPrefix(buildMethodId("trade(uint256,uint16[],uint8,bytes32,bytes32)"));
+
+        if (input.contains(balanceMethod))
+        {
+            if (input.contains(isStormbird) || input.contains(isStormbird2) || input.contains(tradeLegacy) || input.contains(trade))
+            {
+                if (input.contains(tradeLegacy))
+                {
+                    return ERC875LEGACY;
+                }
+                else
+                {
+                    return ERC875;
+                }
+            }
+        }
+        else
+        {
+            return OTHER;
+        }
+
+        //ERC721/x or ERC20
+
         for (String signature : functionList.keySet())
         {
             String cleanSig = Numeric.cleanHexPrefix(signature);
@@ -326,18 +355,16 @@ public class TransactionDecoder
             }
         }
 
-        if (highestCount >= 2 || (highestCount == 1 && functionCount.size() == 1))
+        if (highestType == ERC721 && functionCount.containsKey(ERC721_LEGACY))
         {
-            if (highestType == ERC721 && functionCount.containsKey(ERC721_LEGACY))
-            {
-                highestType = ERC721_LEGACY;
-            }
-            return highestType;
+            highestType = ERC721_LEGACY;
         }
-        else
+        else if (functionCount.containsKey(ERC20))
         {
-            return OTHER;
+            highestType = ERC20;
         }
+
+        return highestType;
     }
 
     enum ParseStage

@@ -7,6 +7,7 @@ import io.stormbird.wallet.repository.*;
 import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.FeeMasterService;
 import io.stormbird.wallet.service.GasService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;
 
 /**
@@ -18,7 +19,7 @@ public class ImportTokenModule {
 
     @Provides
     ImportTokenViewModelFactory importTokenViewModelFactory(
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
             SetupTokensInteract setupTokensInteract,
@@ -27,19 +28,20 @@ public class ImportTokenModule {
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             AssetDefinitionService assetDefinitionService,
             FetchTransactionsInteract fetchTransactionsInteract,
-            GasService gasService) {
+            GasService gasService,
+            KeyService keyService) {
         return new ImportTokenViewModelFactory(
-                findDefaultWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService);
+                genericWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService, keyService);
     }
 
     @Provides
-    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new FindDefaultWalletInteract(walletRepository);
+    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides
-    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository, PasswordStore passwordStore) {
-        return new CreateTransactionInteract(transactionRepository, passwordStore);
+    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository) {
+        return new CreateTransactionInteract(transactionRepository);
     }
 
     @Provides

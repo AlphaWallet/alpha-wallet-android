@@ -16,9 +16,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.Switch;
-import android.widget.TextView;
+import android.widget.*;
 
 import javax.inject.Inject;
 
@@ -26,26 +24,40 @@ import dagger.android.support.AndroidSupportInjection;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.WalletType;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.util.LocaleUtils;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModel;
 import io.stormbird.wallet.viewmodel.NewSettingsViewModelFactory;
 import io.stormbird.wallet.widget.AWalletConfirmationDialog;
 import io.stormbird.wallet.widget.SelectLocaleDialog;
 
-import static io.stormbird.wallet.C.CHANGED_LOCALE;
+import static io.stormbird.wallet.C.*;
+import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.ui.HomeActivity.RC_ASSET_EXTERNAL_WRITE_PERM;
 
-public class NewSettingsFragment extends Fragment {
+public class NewSettingsFragment extends Fragment
+{
     @Inject
     NewSettingsViewModelFactory newSettingsViewModelFactory;
 
     private NewSettingsViewModel viewModel;
-    private Wallet wallet;
 
     private TextView walletsSubtext;
+    private TextView backupStatusText;
     private TextView localeSubtext;
     private Switch notificationState;
     private LinearLayout layoutEnableXML;
+    private LinearLayout layoutBackup;
+    private Button backupButton;
+    private TextView backupTitle;
+    private TextView backupDetail;
+    private RelativeLayout backupLayoutBackground;
+    private ImageView backupMenuButton;
+    private ImageView backupStatusImage;
+    private View backupPopupAnchor;
+    private LinearLayout layoutBackupKey;
+    private LinearLayout layoutBackupDivider;
 
     @Nullable
     @Override
@@ -53,6 +65,7 @@ public class NewSettingsFragment extends Fragment {
         AndroidSupportInjection.inject(this);
         viewModel = ViewModelProviders.of(this, newSettingsViewModelFactory).get(NewSettingsViewModel.class);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.backUpMessage().observe(this, this::backupWarning);
         viewModel.setLocale(getContext());
 
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
@@ -60,6 +73,8 @@ public class NewSettingsFragment extends Fragment {
         walletsSubtext = view.findViewById(R.id.wallets_subtext);
         localeSubtext = view.findViewById(R.id.locale_lang_subtext);
         notificationState = view.findViewById(R.id.switch_notifications);
+        backupStatusText = view.findViewById(R.id.text_backup_status);
+        backupStatusImage = view.findViewById(R.id.image_backup_status);
 
         TextView helpText = view.findViewById(R.id.text_version);
         try
@@ -84,6 +99,16 @@ public class NewSettingsFragment extends Fragment {
         final LinearLayout layoutManageWallets = view.findViewById(R.id.layout_manage_wallets);
         layoutManageWallets.setOnClickListener(v -> {
             viewModel.showManageWallets(getContext(), false);
+        });
+
+        layoutBackupDivider = view.findViewById(R.id.backup_divider);
+        layoutBackupKey = view.findViewById(R.id.layout_backup_wallet);
+        layoutBackupKey.setOnClickListener(v -> {
+            Wallet wallet = viewModel.defaultWallet().getValue();
+            if (wallet != null)
+            {
+                openBackupActivity(wallet);
+            }
         });
 
         final LinearLayout layoutSwitchnetworks = view.findViewById(R.id.layout_switch_network);
@@ -144,6 +169,15 @@ public class NewSettingsFragment extends Fragment {
             updateNotificationState();
         });
 
+        layoutBackup = view.findViewById(R.id.layout_item_warning);
+        backupTitle = view.findViewById(R.id.text_title);
+        backupDetail = view.findViewById(R.id.text_detail);
+        backupLayoutBackground = view.findViewById(R.id.layout_backup_text);
+        backupButton = view.findViewById(R.id.button_backup);
+        backupMenuButton = view.findViewById(R.id.btn_menu);
+        backupPopupAnchor = view.findViewById(R.id.popup_anchor);
+        layoutBackup.setVisibility(View.GONE);
+
         LinearLayout layoutFacebook = view.findViewById(R.id.layout_facebook);
         layoutFacebook.setOnClickListener(v -> {
             Intent intent;
@@ -168,6 +202,26 @@ public class NewSettingsFragment extends Fragment {
         return view;
     }
 
+    private void openBackupActivity(Wallet wallet)
+    {
+        Intent intent = new Intent(getContext(), BackupKeyActivity.class);
+        intent.putExtra(WALLET, wallet);
+
+        switch (wallet.type)
+        {
+            case HDKEY:
+                intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_HD_KEY);
+                break;
+            case KEYSTORE_LEGACY:
+            case KEYSTORE:
+                intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_KEYSTORE_KEY);
+                break;
+        }
+
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
+    }
+
     private boolean isAppAvailable(String packageName) {
         PackageManager pm = getActivity().getPackageManager();
         try {
@@ -184,8 +238,35 @@ public class NewSettingsFragment extends Fragment {
     }
 
     private void onDefaultWallet(Wallet wallet) {
-        this.wallet = wallet;
         walletsSubtext.setText(wallet.address);
+        switch (wallet.authLevel)
+        {
+            case NOT_SET:
+            case STRONGBOX_NO_AUTHENTICATION:
+            case TEE_NO_AUTHENTICATION:
+                if (wallet.lastBackupTime > 0)
+                {
+                    backupStatusText.setText(R.string.not_locked);
+                    backupStatusImage.setImageResource(R.drawable.ic_orange_bar);
+                }
+                else
+                {
+                    backupStatusText.setText(R.string.back_up_now);
+                    backupStatusImage.setImageResource(R.drawable.ic_red_bar);
+                }
+                break;
+            case TEE_AUTHENTICATION:
+            case STRONGBOX_AUTHENTICATION:
+                backupStatusText.setText(R.string.key_secure);
+                backupStatusImage.setImageResource(R.drawable.ic_green_bar);
+                break;
+        }
+
+        if (wallet.type == WalletType.WATCH)
+        {
+            layoutBackupKey.setVisibility(View.GONE);
+            layoutBackupDivider.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -227,9 +308,77 @@ public class NewSettingsFragment extends Fragment {
         }
     }
 
+    public void backupSeedSuccess()
+    {
+        if (viewModel != null) viewModel.TestWalletBackup();
+        if (layoutBackup != null) layoutBackup.setVisibility(View.GONE);
+    }
+
     private void askWritePermission() {
-        final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        Log.w("SettingsFragment", "Folder write permission is not granted. Requesting permission");
-        ActivityCompat.requestPermissions(getActivity(), permissions, RC_ASSET_EXTERNAL_WRITE_PERM);
+        if (getActivity() != null)
+        {
+            final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            Log.w("SettingsFragment", "Folder write permission is not granted. Requesting permission");
+            ActivityCompat.requestPermissions(getActivity(), permissions, RC_ASSET_EXTERNAL_WRITE_PERM);
+        }
+    }
+
+    private void backupWarning(String s)
+    {
+        if (s.equals(viewModel.defaultWallet().getValue().address))
+        {
+            addBackupNotice(GenericWalletInteract.BackupLevel.WALLET_HAS_HIGH_VALUE);
+        }
+        else
+        {
+            if (layoutBackup != null)
+            {
+                layoutBackup.setVisibility(View.GONE);
+            }
+            //remove the number prompt
+            if (getActivity() != null) ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+            onDefaultWallet(viewModel.defaultWallet().getValue());
+        }
+    }
+
+    void addBackupNotice(GenericWalletInteract.BackupLevel walletValue)
+    {
+        layoutBackup.setVisibility(View.VISIBLE);
+        //current Wallet only
+        Wallet wallet = viewModel.defaultWallet().getValue();
+        if (wallet != null)
+        {
+            backupButton.setText(getString(R.string.back_up_wallet_action, wallet.address.substring(0, 5)));
+            backupButton.setOnClickListener(v -> openBackupActivity(wallet));
+            backupTitle.setText(getString(R.string.wallet_not_backed_up));
+            backupLayoutBackground.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.warning_red));
+            backupButton.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.warning_dark_red));
+            backupDetail.setText(getString(R.string.backup_wallet_detail));
+            if (getActivity() !=null) ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+
+            backupMenuButton.setOnClickListener(v -> {
+                showPopup(backupPopupAnchor, wallet.address);
+            });
+        }
+    }
+
+    private void showPopup(View view, String walletAddress) {
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        View popupView = inflater.inflate(R.layout.popup_remind_later, null);
+        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, true);
+        popupView.setOnClickListener(v -> {
+            //if (getActivity() != null) ((HomeActivity)getActivity()).postponeWalletBackupWarning(walletAddress);
+            viewModel.setIsDismissed(walletAddress, true).subscribe(this::backedUp);
+            popupWindow.dismiss();
+        });
+        popupWindow.showAsDropDown(view, 0, 20);
+    }
+
+    private void backedUp(String walletAddress)
+    {
+        layoutBackup.setVisibility(View.GONE);
+        if (getActivity() != null) ((HomeActivity)getActivity()).postponeWalletBackupWarning(walletAddress);
     }
 }

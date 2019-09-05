@@ -4,9 +4,12 @@ import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 import io.stormbird.wallet.R;
 
@@ -26,10 +29,13 @@ public class AWalletBottomNavigationView extends LinearLayout {
     private final TextView dappBrowserLabel;
     private final TextView walletLabel;
     private final TextView settingsLabel;
+    private final TextView settingsBadge;
 
     private OnBottomNavigationItemSelectedListener listener;
 
     private int selectedItem;
+
+    private ArrayList<String> settingsBadgeKeys = new ArrayList<>();
 
     public AWalletBottomNavigationView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -43,6 +49,8 @@ public class AWalletBottomNavigationView extends LinearLayout {
         dappBrowserLabel = findViewById(R.id.nav_browser_text);
         walletLabel = findViewById(R.id.nav_wallet_text);
         settingsLabel = findViewById(R.id.nav_settings_text);
+
+        settingsBadge = findViewById(R.id.settings_badge);
 
         transactions.setOnClickListener(v -> selectItem(TRANSACTIONS));
         dappBrowser.setOnClickListener(v -> selectItem(DAPP_BROWSER));
@@ -104,5 +112,35 @@ public class AWalletBottomNavigationView extends LinearLayout {
 
     public interface OnBottomNavigationItemSelectedListener {
         boolean onBottomNavigationItemSelected(int index);
+    }
+
+    public void setSettingsBadgeCount(int count) {
+        if (count > 0) {
+            settingsBadge.setVisibility(View.VISIBLE);
+        } else {
+            settingsBadge.setVisibility(View.GONE);
+        }
+        settingsBadge.setText(String.valueOf(count));
+    }
+
+    public void addSettingsBadgeKey(String key) {
+        if (!settingsBadgeKeys.contains(key)) {
+            settingsBadgeKeys.add(key);
+        }
+        showOrHideSettingsBadge();
+    }
+
+    public void removeSettingsBadgeKey(String key) {
+        settingsBadgeKeys.remove(key);
+        showOrHideSettingsBadge();
+    }
+
+    private void showOrHideSettingsBadge() {
+        if (settingsBadgeKeys.size() > 0) {
+            settingsBadge.setVisibility(View.VISIBLE);
+        } else {
+            settingsBadge.setVisibility(View.GONE);
+        }
+        settingsBadge.setText(String.valueOf(settingsBadgeKeys.size()));
     }
 }

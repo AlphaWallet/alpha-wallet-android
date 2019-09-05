@@ -20,6 +20,7 @@ import android.widget.Toast;
 import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 
 import javax.inject.Inject;
 
@@ -318,7 +319,8 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         {
             //generate payment request link
             //EIP681 format
-            BigDecimal weiAmount = Convert.toWei(newAmount, Convert.Unit.ETHER);
+            BigDecimal weiAmount = Convert.toWei(newAmount.replace(",", "."), Convert.Unit.ETHER);
+            System.out.println("AMT: " + weiAmount.toString());
             EIP681Request request = new EIP681Request(displayAddress, networkInfo.chainId, weiAmount);
             String eip681String = request.generateRequest();
             qrImageView.setImageBitmap(QRUtils.createQRImage(this, eip681String, qrImageView.getWidth()));

@@ -1,29 +1,34 @@
 package io.stormbird.wallet.ui;
 
-import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 import dagger.android.support.AndroidSupportInjection;
+import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
-import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.OnTokenClickListener;
 import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
+import io.stormbird.wallet.ui.widget.entity.WarningData;
+import io.stormbird.wallet.ui.widget.holder.WarningHolder;
 import io.stormbird.wallet.util.TabUtils;
 import io.stormbird.wallet.viewmodel.WalletViewModel;
 import io.stormbird.wallet.viewmodel.WalletViewModelFactory;
@@ -36,12 +41,13 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static io.stormbird.wallet.C.ErrorCode.EMPTY_COLLECTION;
+import static io.stormbird.wallet.C.Key.WALLET;
 
 /**
  * Created by justindeguzman on 2/28/18.
  */
 
-public class WalletFragment extends Fragment implements OnTokenClickListener, View.OnClickListener, TokenInterface, Runnable
+public class WalletFragment extends Fragment implements OnTokenClickListener, View.OnClickListener, TokenInterface, Runnable, BackupTokenCallback
 {
     private static final String TAG = "WFRAG";
 
@@ -50,12 +56,10 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     private WalletViewModel viewModel;
 
     private TokensReceiver tokenReceiver;
-    private TextView debugAddr;
 
     private SystemView systemView;
     private ProgressView progressView;
     private TokensAdapter adapter;
-    private FragmentMessenger homeMessager;
     private View selectedToken;
     private Handler handler;
 
@@ -76,7 +80,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         progressView.setWhiteCircle();
 
         RecyclerView list = view.findViewById(R.id.list);
-        debugAddr = view.findViewById(R.id.debug_addr);
 
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
@@ -93,11 +96,15 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         viewModel.tokenUpdate().observe(this, this::onToken);
         viewModel.tokensReady().observe(this, this::tokensReady);
         viewModel.fetchKnownContracts().observe(this, this::fetchKnownContracts);
+        viewModel.backupEvent().observe(this, this::backupEvent);
 
         adapter = new TokensAdapter(getActivity(),this, viewModel.getAssetDefinitionService());
         adapter.setHasStableIds(true);
         list.setLayoutManager(new LinearLayoutManager(getContext()));
         list.setAdapter(adapter);
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeCallback(adapter));
+        itemTouchHelper.attachToRecyclerView(list);
 
         refreshLayout.setOnRefreshListener(this::refreshList);
 
@@ -112,28 +119,10 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         return view;
     }
 
-    public void setTokenInterface(FragmentMessenger messenger)
-    {
-        homeMessager = messenger;
-    }
-
     private void refreshList()
     {
         adapter.setClear();
         viewModel.reloadTokens();
-    }
-
-    private void updateTitle(String s)
-    {
-        debugAddr.setText(s);
-    }
-
-    private void checkTokens(Boolean dummy)
-    {
-        if (adapter.checkTokens())
-        {
-            viewModel.fetchTokens(); //require a full token refresh; number of tokens has changed
-        }
     }
 
     @Override
@@ -253,6 +242,39 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         }
     }
 
+    private void backupEvent(GenericWalletInteract.BackupLevel backupLevel)
+    {
+        if (adapter.hasBackupWarning()) return;
+
+        WarningData wData;
+        switch (backupLevel)
+        {
+            case BACKUP_NOT_REQUIRED:
+                //if (getActivity() != null) ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+                break;
+            case WALLET_HAS_LOW_VALUE:
+                wData = new WarningData(this);
+                wData.title = getString(R.string.time_to_backup_wallet);
+                wData.detail = getString(R.string.recommend_monthly_backup);
+                wData.buttonText = getString(R.string.back_up_wallet_action, viewModel.getWalletAddr().substring(0, 5));
+                wData.colour = ContextCompat.getColor(getContext(), R.color.slate_grey);
+                wData.buttonColour = ContextCompat.getColor(getContext(), R.color.backup_grey);
+                wData.wallet = viewModel.getWallet();
+                adapter.addWarning(wData);
+                break;
+            case WALLET_HAS_HIGH_VALUE:
+                wData = new WarningData(this);
+                wData.title = getString(R.string.wallet_not_backed_up);
+                wData.detail = getString(R.string.not_backed_up_detail);
+                wData.buttonText = getString(R.string.back_up_wallet_action, viewModel.getWalletAddr().substring(0, 5));
+                wData.colour = ContextCompat.getColor(getContext(), R.color.warning_red);
+                wData.buttonColour = ContextCompat.getColor(getContext(), R.color.warning_dark_red);
+                wData.wallet = viewModel.getWallet();
+                adapter.addWarning(wData);
+                break;
+        }
+    }
+
     private void onError(ErrorEnvelope errorEnvelope) {
         if (errorEnvelope.code == EMPTY_COLLECTION) {
             systemView.showEmpty(getString(R.string.no_tokens));
@@ -307,7 +329,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
     private void tokensReady(Boolean dummy)
     {
-        if (homeMessager != null) homeMessager.TokensReady();
+        //if (getActivity() != null) ((HomeActivity)getActivity()).TokensReady();
     }
 
     private List<ContractResult> getAllKnownContractsOnNetwork(int chainId)
@@ -386,5 +408,72 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
             selectedToken.findViewById(R.id.token_layout).setBackgroundResource(R.drawable.background_marketplace_event);
         }
         selectedToken = null;
+    }
+
+    @Override
+    public void BackupClick(Wallet wallet)
+    {
+        Intent intent = new Intent(getContext(), BackupKeyActivity.class);
+        intent.putExtra(WALLET, wallet);
+
+        switch (viewModel.getWalletType())
+        {
+            case HDKEY:
+                intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_HD_KEY);
+                break;
+            case KEYSTORE:
+                intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_KEYSTORE_KEY);
+                break;
+        }
+
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
+    }
+
+    @Override
+    public void remindMeLater(Wallet wallet)
+    {
+        viewModel.setKeyWarningDismissTime(wallet.address).isDisposed();
+        adapter.removeBackupWarning();
+    }
+
+    public void storeWalletBackupTime(String backedUpKey)
+    {
+        if (viewModel != null) viewModel.setKeyBackupTime(backedUpKey).isDisposed();
+        if (adapter != null) adapter.removeBackupWarning();
+    }
+
+    public class SwipeCallback extends ItemTouchHelper.SimpleCallback {
+        private TokensAdapter mAdapter;
+
+        public SwipeCallback(TokensAdapter adapter) {
+            super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+            mAdapter = adapter;
+        }
+
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder viewHolder1) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
+            remindMeLater(viewModel.getWallet());
+        }
+
+//        @Override
+//        public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y)
+//        {
+//            super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
+//        }
+
+        @Override
+        public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+            if (viewHolder instanceof WarningHolder) {
+                return super.getSwipeDirs(recyclerView, viewHolder);
+            } else {
+                return 0;
+            }
+        }
     }
 }

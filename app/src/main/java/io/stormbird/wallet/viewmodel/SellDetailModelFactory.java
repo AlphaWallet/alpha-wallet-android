@@ -6,10 +6,11 @@ import android.support.annotation.NonNull;
 
 import io.stormbird.wallet.interact.CreateTransactionInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.router.AssetDisplayRouter;
 import io.stormbird.wallet.router.SellDetailRouter;
 import io.stormbird.wallet.service.AssetDefinitionService;
+import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.service.MarketQueueService;
 
 /**
@@ -19,33 +20,33 @@ import io.stormbird.wallet.service.MarketQueueService;
 public class SellDetailModelFactory implements ViewModelProvider.Factory {
 
     private FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private FindDefaultWalletInteract findDefaultWalletInteract;
+    private GenericWalletInteract genericWalletInteract;
     private MarketQueueService marketQueueService;
     private CreateTransactionInteract createTransactionInteract;
     private SellDetailRouter sellDetailRouter;
-    private AssetDisplayRouter assetDisplayRouter;
+    private KeyService keyService;
     private AssetDefinitionService assetDefinitionService;
 
     public SellDetailModelFactory(FindDefaultNetworkInteract findDefaultNetworkInteract,
-                                  FindDefaultWalletInteract findDefaultWalletInteract,
+                                  GenericWalletInteract genericWalletInteract,
                                         MarketQueueService marketQueueService,
                                   CreateTransactionInteract createTransactionInteract,
                                   SellDetailRouter sellDetailRouter,
-                                  AssetDisplayRouter assetDisplayRouter,
+                                  KeyService keyService,
                                   AssetDefinitionService assetDefinitionService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.marketQueueService = marketQueueService;
         this.createTransactionInteract = createTransactionInteract;
         this.sellDetailRouter = sellDetailRouter;
-        this.assetDisplayRouter = assetDisplayRouter;
+        this.keyService = keyService;
         this.assetDefinitionService = assetDefinitionService;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new SellDetailModel(findDefaultNetworkInteract, findDefaultWalletInteract, marketQueueService, createTransactionInteract, sellDetailRouter, assetDisplayRouter, assetDefinitionService);
+        return (T) new SellDetailViewModel(findDefaultNetworkInteract, genericWalletInteract, marketQueueService, createTransactionInteract, sellDetailRouter, keyService, assetDefinitionService);
     }
 }
 

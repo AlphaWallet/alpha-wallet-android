@@ -11,10 +11,14 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <uses-feature android:name="android.hardware.fingerprint"
+        android:required="false"/>
 
     <application
         android:name="io.stormbird.wallet.App"
         android:allowBackup="false"
+        android:usesCleartextTraffic="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -177,10 +181,6 @@
             android:label="@string/toolbar_header_help" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.EthereumInfoActivity"
-            android:label="@string/toolbar_ethereum_info" />
-
-        <activity
             android:name="io.stormbird.wallet.ui.zxing.QRScanningActivity"
             android:label="@string/qr_scanner" />
 
@@ -228,6 +228,10 @@
         <activity
             android:name="io.stormbird.wallet.ui.SelectNetworkActivity"
             android:label="Select Network Filters" />
+
+        <activity
+            android:name="io.stormbird.wallet.ui.BackupKeyActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
     </application>
 
 </manifest>

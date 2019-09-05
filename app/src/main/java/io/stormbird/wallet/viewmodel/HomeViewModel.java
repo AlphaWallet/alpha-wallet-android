@@ -6,17 +6,14 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.*;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.annotation.Nullable;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.stormbird.token.entity.MagicLinkData;
 import io.stormbird.token.tools.ParseMagicLink;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
 import io.stormbird.wallet.router.AddTokenRouter;
@@ -28,8 +25,6 @@ import io.stormbird.wallet.util.LocaleUtils;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
@@ -37,12 +32,11 @@ public class HomeViewModel extends BaseViewModel {
     private final String TAG = "HVM";
     public static final String ALPHAWALLET_DIR = "AlphaWallet";
     public static final String ALPHAWALLET_FILE_URL = "https://1x.alphawallet.com/dl/latest.apk";
-    private static final int TIMER_FREQUENCY = 1000;
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
-    private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
+    private final MutableLiveData<String> backUpMessage = new MutableLiveData<>();
 
     private final PreferenceRepositoryType preferenceRepository;
     private final ExternalBrowserRouter externalBrowserRouter;
@@ -50,7 +44,7 @@ public class HomeViewModel extends BaseViewModel {
     private final AddTokenRouter addTokenRouter;
     private final LocaleRepositoryType localeRepository;
     private final AssetDefinitionService assetDefinitionService;
-    private final FindDefaultWalletInteract findDefaultWalletInteract;
+    private final GenericWalletInteract genericWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
 
     private CryptoFunctions cryptoFunctions;
@@ -66,7 +60,7 @@ public class HomeViewModel extends BaseViewModel {
             ExternalBrowserRouter externalBrowserRouter,
             AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             FetchWalletsInteract fetchWalletsInteract) {
         this.preferenceRepository = preferenceRepository;
         this.externalBrowserRouter = externalBrowserRouter;
@@ -74,7 +68,7 @@ public class HomeViewModel extends BaseViewModel {
         this.addTokenRouter = addTokenRouter;
         this.localeRepository = localeRepository;
         this.assetDefinitionService = assetDefinitionService;
-        this.findDefaultWalletInteract = findDefaultWalletInteract;
+        this.genericWalletInteract = genericWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
     }
 
@@ -99,6 +93,10 @@ public class HomeViewModel extends BaseViewModel {
         return installIntent;
     }
 
+    public LiveData<String> backUpMessage() {
+        return backUpMessage;
+    }
+
     public void prepare() {
         progress.postValue(false);
     }
@@ -109,7 +107,7 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     public void showImportLink(Context context, String importData) {
-        disposable = findDefaultWalletInteract
+        disposable = genericWalletInteract
                 .find().toObservable()
                 .filter(wallet -> checkWalletNotEqual(wallet, importData))
                 .subscribeOn(Schedulers.io())
@@ -248,6 +246,12 @@ public class HomeViewModel extends BaseViewModel {
         }
     }
 
+    public void checkIsBackedUp(String walletAddress)
+    {
+        genericWalletInteract.getWalletNeedsBackup(walletAddress)
+                .subscribe(backUpMessage::postValue).isDisposed();
+    }
+
     private void deleteRecursive(File fileDir)
     {
         if (fileDir.isDirectory()) {
@@ -276,5 +280,13 @@ public class HomeViewModel extends BaseViewModel {
             //erase file
             deleteRecursive(file);
         }
+    }
+
+    public boolean isFindWalletAddressDialogShown() {
+        return preferenceRepository.isFindWalletAddressDialogShown();
+    }
+
+    public void setFindWalletAddressDialogShown(boolean isShown) {
+        preferenceRepository.setFindWalletAddressDialogShown(isShown);
     }
 }

@@ -1,7 +1,7 @@
 package io.stormbird.wallet.di;
 
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.WalletRepositoryType;
 import io.stormbird.wallet.router.ExternalBrowserRouter;
@@ -17,11 +17,11 @@ public class TransactionDetailModule {
     @Provides
     TransactionDetailViewModelFactory provideTransactionDetailViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             ExternalBrowserRouter externalBrowserRouter,
             TokensService tokensService) {
         return new TransactionDetailViewModelFactory(
-                findDefaultNetworkInteract, findDefaultWalletInteract, externalBrowserRouter, tokensService);
+                findDefaultNetworkInteract, genericWalletInteract, externalBrowserRouter, tokensService);
     }
 
     @Provides
@@ -36,7 +36,7 @@ public class TransactionDetailModule {
     }
 
     @Provides
-    FindDefaultWalletInteract findDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new FindDefaultWalletInteract(walletRepository);
+    GenericWalletInteract findDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 }

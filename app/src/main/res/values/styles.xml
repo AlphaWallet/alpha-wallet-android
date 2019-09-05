@@ -34,4 +34,13 @@
         <item name="android:textSize">20sp</item>
     </style>
 
+    <style name="AppTheme.Toolbar.WhiteTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textColor">@color/text_black</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="AppTheme.WhiteToolbar" parent="ThemeOverlay.AppCompat.ActionBar">
+        <item name="colorControlNormal">@color/text_black</item>
+    </style>
+
 </resources>

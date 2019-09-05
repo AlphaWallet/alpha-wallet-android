@@ -3,7 +3,6 @@ package io.stormbird.wallet;
 import android.support.annotation.NonNull;
 
 import io.stormbird.wallet.entity.*;
-import io.stormbird.wallet.repository.PasswordStore;
 import io.stormbird.wallet.repository.TransactionRepositoryType;
 import io.stormbird.wallet.service.MarketQueueService;
 
@@ -38,9 +37,6 @@ public class MarketOrderTest
 {
     @Inject
     TransactionRepositoryType transactionRepository;
-
-    @Inject
-    PasswordStore passwordStore;
 
     private ECKeyPair testKey;
     private TradeInstance generatedTrade;
@@ -80,26 +76,6 @@ public class MarketOrderTest
         //roll a new key
         testKey = ECKeyPair.create("Test Key".getBytes());
 
-        //mock the interfaces we need
-        passwordStore = new PasswordStore() {
-            @Override
-            public Single<String> getPassword(Wallet wallet) {
-                return Single.fromCallable(() -> {
-                    return "fake pwd";
-                });
-            }
-
-            @Override
-            public Completable setPassword(Wallet wallet, String password) {
-                return null;
-            }
-
-            @Override
-            public Single<String> generatePassword() {
-                return null;
-            }
-        };
-
         transactionRepository = new TransactionRepositoryType() {
 
             @Override
@@ -115,35 +91,35 @@ public class MarketOrderTest
             }
 
             @Override
-            public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password, int chainId) {
+            public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId) {
                 return null;
             }
 
             @Override
-            public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password, int chainId)
+            public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, String password, int chainId)
+            public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, String password, int chainId)
+            public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId)
             {
                 return null;
             }
 
             @Override
-            public Single<byte[]> getSignature(Wallet wallet, byte[] message, String password, int chainId) {
+            public Single<byte[]> getSignature(Wallet wallet, byte[] message, int chainId) {
                 return null;
             }
 
             @Override
-            public Single<byte[]> getSignatureFast(Wallet wallet, byte[] message, String password, int chainId) {
+            public Single<byte[]> getSignatureFast(Wallet wallet, String password, byte[] message, int chainId) {
                 return Single.fromCallable(() -> {
                     //sign using the local key
                     Sign.SignatureData sigData = Sign.signMessage(message, testKey);
@@ -162,16 +138,6 @@ public class MarketOrderTest
 
                     return sig;
                 });
-            }
-
-            @Override
-            public void unlockAccount(Wallet signer, String signerPassword) {
-
-            }
-
-            @Override
-            public void lockAccount(Wallet signer, String signerPassword) {
-
             }
 
             @Override
@@ -199,7 +165,7 @@ public class MarketOrderTest
             }
         };
 
-        marketService = new MarketQueueService(null, null, transactionRepository, passwordStore);
+        marketService = new MarketQueueService(null, null, transactionRepository);
     }
 
     @Test

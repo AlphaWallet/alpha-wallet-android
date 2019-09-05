@@ -3,9 +3,11 @@
     android:id="@+id/token_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/background_marketplace_event"
     android:clickable="true"
-    android:layout_marginBottom="10dp"
+    android:focusable="true"
+    android:paddingBottom="3dp"
+    android:elevation="3dp"
+    android:layout_marginBottom="6dp"
     android:layout_marginLeft="10dp"
     android:layout_marginRight="10dp">
 
@@ -15,7 +17,7 @@
         android:layout_height="32dp"
         android:layout_marginStart="@dimen/big_margin"
         android:contentDescription="@string/empty"
-        android:src="@mipmap/token_logo"
+        android:src="@drawable/ic_ethereum"
         android:visibility="gone"
         />
 

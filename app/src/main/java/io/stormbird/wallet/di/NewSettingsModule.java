@@ -2,7 +2,7 @@ package io.stormbird.wallet.di;
 
 import dagger.Module;
 import dagger.Provides;
-import io.stormbird.wallet.interact.FindDefaultWalletInteract;
+import io.stormbird.wallet.interact.GenericWalletInteract;
 import io.stormbird.wallet.interact.GetDefaultWalletBalance;
 import io.stormbird.wallet.repository.*;
 import io.stormbird.wallet.router.HelpRouter;
@@ -16,7 +16,7 @@ import io.stormbird.wallet.viewmodel.NewSettingsViewModelFactory;
 class NewSettingsModule {
     @Provides
     NewSettingsViewModelFactory provideNewSettingsViewModelFactory(
-            FindDefaultWalletInteract findDefaultWalletInteract,
+            GenericWalletInteract genericWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             MyAddressRouter myAddressRouter,
             HelpRouter helpRouter,
@@ -28,7 +28,7 @@ class NewSettingsModule {
             TokensService tokensService
     ) {
         return new NewSettingsViewModelFactory(
-                findDefaultWalletInteract,
+                genericWalletInteract,
                 getDefaultWalletBalance,
                 myAddressRouter,
                 helpRouter,
@@ -41,8 +41,8 @@ class NewSettingsModule {
     }
 
     @Provides
-    FindDefaultWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new FindDefaultWalletInteract(walletRepository);
+    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
+        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides

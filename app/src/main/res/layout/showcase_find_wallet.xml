@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:background="@color/white"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="33dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="40dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="21dp"
+            android:gravity="center_horizontal"
+            android:fontFamily="@font/font_regular"
+            android:text="@string/title_find_your_wallet_address"
+            android:textColor="@color/text_black"
+            android:textSize="25sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="23dp"
+            android:fontFamily="@font/font_regular"
+            android:gravity="center_horizontal"
+            android:text="@string/message_find_address"
+            android:textColor="@color/text_dark_gray"
+            android:textSize="17sp" />
+
+        <Button
+            android:id="@+id/btn_close"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/nasty_green"
+            android:elevation="2dp"
+            android:text="@string/action_continue"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="normal" />
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="16dp"
+        android:layout_below="@id/layout"
+        android:layout_alignEnd="@id/layout"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="10dp"
+        android:rotation="180"
+        android:src="@drawable/item_white_triangle" />
+
+
+</RelativeLayout>

@@ -1,17 +1,24 @@
 package io.stormbird.token.tools;
 
-import io.stormbird.token.entity.*;
 import org.junit.Test;
 import org.xml.sax.SAXException;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Locale;
 import java.util.stream.Stream;
-
-import static org.junit.Assert.*;
+import io.stormbird.token.entity.AttributeInterface;
+import io.stormbird.token.entity.AttributeType;
+import io.stormbird.token.entity.ContractAddress;
+import io.stormbird.token.entity.ContractInfo;
+import io.stormbird.token.entity.ParseResult;
+import io.stormbird.token.entity.TransactionResult;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 
 public class TokenDefinitionTest implements AttributeInterface, ParseResult

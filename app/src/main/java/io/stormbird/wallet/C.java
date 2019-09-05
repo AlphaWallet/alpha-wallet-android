@@ -16,6 +16,8 @@ public abstract class C {
     public static final String SOKOL_NETWORK_NAME = "Sokol (Test)";
     public static final String RINKEBY_NETWORK_NAME = "Rinkeby (Test)";
     public static final String GOERLI_NETWORK_NAME = "Görli (Test)";
+    public static final String ARTIS_SIGMA1_NETWORK = "ARTIS sigma1";
+    public static final String ARTIS_TAU1_NETWORK = "ARTIS tau1";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
@@ -30,6 +32,8 @@ public abstract class C {
     public static final String POA_SYMBOL = "POA";
     public static final String ETC_SYMBOL = "ETC";
     public static final String GOERLI_SYMBOL = "GÖETH";
+    public static final String ARTIS_SIGMA1_SYMBOL = "ATS";
+    public static final String ARTIS_TAU1_SYMBOL = "ATS";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
     public static final String ENSCONTRACT = "0x314159265dD8dbb310642f98f50C066173C1259b";

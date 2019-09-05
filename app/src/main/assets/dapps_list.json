@@ -50,5 +50,6 @@
   {"name": "ENS domain manager", "description": "Manage ENS domains", "url": "https://manager.ens.domains", "category": "Tool"},
   {"name": "Humanity", "description": "Human Identity on Ethereum", "url": "https://humanitydao.org", "category": "Social Media"},
   {"name": "DEX.AG", "description": "Trade cryptoassets at the best price", "url": "https://dex.ag", "category": "Exchange"},
-  {"name": "Totle Swap", "description": "Totle automatically finds and acquires the best price across decentralized exchanges for ERC-20 swaps", "url": "https://swap.totle.com", "category": "Exchange"}
+  {"name": "Totle Swap", "description": "Totle automatically finds and acquires the best price across decentralized exchanges for ERC-20 swaps", "url": "https://swap.totle.com", "category": "Exchange"},
+  {"name": "ATS Bridge", "description": "ATS/ATS20 bridge for self transfers of ATS to ATS20", "url": "https://bridge.artis.network/", "category": "Tool"}
 ]

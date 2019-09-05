@@ -77,6 +77,14 @@
                     android:host="goerli.aw.app"
                     android:pathPrefix="/"
                     android:scheme="https" />
+                <data
+                    android:host="artissigma1.aw.app"
+                    android:pathPrefix="/"
+                    android:scheme="https" />
+                <data
+                    android:host="artistau1.aw.app"
+                    android:pathPrefix="/"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
         <meta-data

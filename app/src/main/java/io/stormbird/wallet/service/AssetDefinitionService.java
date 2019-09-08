@@ -27,6 +27,8 @@ import io.stormbird.wallet.entity.ContractType;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.entity.TokenFactory;
 import io.stormbird.wallet.entity.Wallet;
+import io.stormbird.wallet.entity.tokenscript.TokenScriptFile;
+import io.stormbird.wallet.entity.tokenscript.TokenScriptFileData;
 import io.stormbird.wallet.entity.tokenscript.TokenscriptFunction;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenLocalSource;
@@ -67,10 +69,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final Context context;
     private final OkHttpClient okHttpClient;
 
-    private Map<Integer, Map<String, File>> assetDefinitions;
+    private Map<Integer, Map<String, TokenScriptFile>> assetDefinitions;
     private Map<String, Long> assetChecked;                //Mapping of contract address to when they were last fetched from server
     private FileObserver fileObserver;                     //Observer which scans the override directory waiting for file change
-    private Map<String, FileData> fileHashes;                //Mapping of files and hashes.
+    private Map<String, TokenScriptFileData> fileHashes;                //Mapping of files and hashes.
 
     private final NotificationService notificationService;
     private final RealmManager realmManager;
@@ -80,7 +82,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final AlphaWalletService alphaWalletService;
     private TokenDefinition cachedDefinition = null;
     private SparseArray<Map<String, SparseArray<String>>> tokenTypeName;
-    private SparseArray<Map<String, String>> issuerName;
 
     private final TokenscriptFunction tokenscriptUtility;
 
@@ -92,7 +93,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         okHttpClient = client;
         assetChecked = new HashMap<>();
         tokenTypeName = new SparseArray<>();
-        issuerName = new SparseArray<>();
         fileHashes = new ConcurrentHashMap<>();
         notificationService = svs;
         realmManager = rm;
@@ -275,108 +275,39 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             }
         }
 
-        InputStream is = getTokenScriptFileInputStream(chainId, address);
+        TokenScriptFile tf = getTokenScriptFile(chainId, address);
         try
         {
-            if (is != null)
+            if (tf.isValidTokenScript())
             {
-                cachedDefinition = parseFile(is);
+                cachedDefinition = parseFile(tf.getInputStream());
                 result = cachedDefinition;
             }
         }
         catch (NumberFormatException e)
         {
-
+            //no action
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
 
-//        try
-//        {
-//            if (assetDefinitions.containsKey(chainId) && assetDefinitions.get(chainId).containsKey(address))
-//            {
-//                File tokenScriptFile = assetDefinitions.get(chainId).get(address);
-//                if (tokenScriptFile != null)
-//                {
-//                    InputStream is = null;
-//                    if (tokenScriptFile.canRead())
-//                    {
-//                        is = new FileInputStream(tokenScriptFile);
-//                    }
-//                    else
-//                    {
-//                        //try asset directory - NB if no file here then exception thrown
-//                        is = context.getResources().getAssets().open(tokenScriptFile.getName());
-//                    }
-//
-//                    if (is != null)
-//                    {
-//                        cachedDefinition = parseFile(is);
-//                        result = cachedDefinition;
-//                    }
-//                }
-//            }
-//        }
-//        catch (IOException|SAXException e)
-//        {
-//            e.printStackTrace();
-//        }
-//        catch (NumberFormatException e)
-//        {
-//            //unknown file
-//        }
-//        catch (Exception e)
-//        {
-//            e.printStackTrace();
-//        }
-
         return result;
     }
 
-    private String getTokenScriptFileName(int chainId, String address)
+    private TokenScriptFile getTokenScriptFile(int chainId, String address)
     {
         if (assetDefinitions.containsKey(chainId) && assetDefinitions.get(chainId).containsKey(address))
         {
-            return assetDefinitions.get(chainId).get(address).getAbsolutePath();
+            return assetDefinitions.get(chainId).get(address);
         }
         else
         {
-            return null;
+            return new TokenScriptFile();
         }
     }
 
-    private InputStream getTokenScriptFileInputStream(int chainId, String address)
-    {
-        InputStream is = null;
-
-        try
-        {
-            if (assetDefinitions.containsKey(chainId) && assetDefinitions.get(chainId).containsKey(address))
-            {
-                File tokenScriptFile = assetDefinitions.get(chainId).get(address);
-                if (tokenScriptFile != null)
-                {
-                    if (tokenScriptFile.canRead())
-                    {
-                        is = new FileInputStream(tokenScriptFile);
-                    }
-                    else
-                    {
-                        //try asset directory - NB if no file here then exception thrown
-                        is = context.getResources().getAssets().open(tokenScriptFile.getName());
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            //e.printStackTrace();
-        }
-
-        return is;
-    }
 
     /**
      * Get asset definition given contract address
@@ -471,7 +402,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      */
     public List<String> getAllContracts(int networkId)
     {
-        Map<String, File> networkList = assetDefinitions.get(networkId);
+        Map<String, TokenScriptFile> networkList = assetDefinitions.get(networkId);
         if (networkList != null)
         {
             return new ArrayList<>(networkList.keySet());
@@ -493,19 +424,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         int chainId = token.tokenInfo.chainId;
         String address = token.tokenInfo.address;
 
-        String issuer = token.getNetworkName();;
+        String issuer = token.getNetworkName();
 
         TokenDefinition td = getAssetDefinition(chainId, address);
         if (td == null) return issuer;
 
         try
         {
-            FileInputStream is = (FileInputStream) getTokenScriptFileInputStream(chainId, address);
-            String hash = calcMD5(is);
-            //is there a corresponding certificate for this hash
-            FileData fd = getMatchingFileData(hash);
-
-            if (fd != null && fd.sigDescriptor != null && fd.sigDescriptor.result.equals("pass"));
+            TokenScriptFile tsf = getTokenScriptFile(chainId, address);
+            TokenScriptFileData fd = fileHashes.get(tsf.getAbsolutePath());
+            if (tsf.fileUnchanged(fd))
             {
                 issuer = fd.sigDescriptor.keyName;
             }
@@ -659,7 +587,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (assetDefinitions.get(network) == null) assetDefinitions.put(network, new HashMap<>());
         for (String address : newTokenDescriptionAddresses.keySet())
         {
-            assetDefinitions.get(network).put(address, new File(newTokenDescriptionAddresses.get(address).getAbsolutePath()));
+            assetDefinitions.get(network).put(address, new TokenScriptFile(context, newTokenDescriptionAddresses.get(address).getAbsolutePath()));
         }
     }
 
@@ -674,6 +602,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         try (InputStream input = context.getResources().getAssets().open(asset)) {
             TokenDefinition token = parseFile(input);
+            TokenScriptFile tsf = new TokenScriptFile(context, asset);
             ContractInfo holdingContracts = token.contracts.get(token.holdingToken);
             if (holdingContracts != null)
             {
@@ -681,8 +610,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 for (int network : holdingContracts.addresses.keySet())
                 {
                     addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), asset));
-                    FileData fd = new FileData();
-                    fd.hash = calcMD5((FileInputStream)input);
+                    TokenScriptFileData fd = new TokenScriptFileData();
+                    fd.hash = tsf.calcMD5();
                     fd.sigDescriptor = new XMLDsigDescriptor();
                     fd.sigDescriptor.result = "pass";
                     fileHashes.put(asset, fd);
@@ -693,6 +622,19 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             e.printStackTrace();
         }
         return false;
+    }
+
+    public TokenDefinition getTokenDefinition(File file)
+    {
+        try (FileInputStream input = new FileInputStream(file)) {
+            return parseFile(input);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     private boolean addContractAddresses(File file)
@@ -924,13 +866,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             if (s.contains(".xml") || s.contains(".tsml"))
                             {
                                 //form filename
-                                File newTSFile = new File(
+                                TokenScriptFile newTSFile = new TokenScriptFile(context,
                                         Environment.getExternalStorageDirectory()
                                                 + File.separator + ALPHAWALLET_DIR, s);
-                                FileInputStream stream = new FileInputStream(newTSFile);
-                                String hash = calcMD5(stream);
-                                String fileName = newTSFile.getAbsolutePath();
-                                FileData fData = fileHashes.get(fileName);
+
+                                String hash = newTSFile.calcMD5();
+                                TokenScriptFileData fData = fileHashes.get(newTSFile.getAbsolutePath());
                                 if (fData != null)
                                 {
                                     if (fData.hash.equals(hash)) break;
@@ -942,8 +883,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                 }
                                 else
                                 {
-                                    fData = new FileData();
-                                    fileHashes.put(fileName, fData);
+                                    fData = new TokenScriptFileData();
+                                    fileHashes.put(newTSFile.getAbsolutePath(), fData);
                                 }
                                 fData.hash = hash;
                                 if (addContractAddresses(newTSFile))
@@ -952,10 +893,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                     cachedDefinition = null;
                                 }
                             }
-                        }
-                        catch (IOException e)
-                        {
-                            e.printStackTrace();
                         }
                         catch (Exception e)
                         {
@@ -971,46 +908,18 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         fileObserver.startWatching();
     }
 
-    private static String calcMD5(FileInputStream fis) throws IOException, NoSuchAlgorithmException
-    {
-        //FileInputStream fis = new FileInputStream(file);
-        MessageDigest digest = MessageDigest.getInstance("MD5");
-
-        byte[] byteArray = new byte[1024];
-        int bytesCount = 0;
-
-        while ((bytesCount = fis.read(byteArray)) != -1) {
-            digest.update(byteArray, 0, bytesCount);
-        };
-
-        fis.close();
-
-        byte[] bytes = digest.digest();
-
-        //This bytes[] has bytes in decimal format;
-        //Convert it to hexadecimal format
-        StringBuilder sb = new StringBuilder();
-        for (byte aByte : bytes)
-        {
-            sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
-        }
-
-        //return complete hash
-        return sb.toString();
-    }
-
     public void checkTokenscriptEnabledTokens(TokensService tokensService)
     {
         for (int networkId : assetDefinitions.keySet())
         {
-            Map<String, File> defMap = assetDefinitions.get(networkId);
+            Map<String, TokenScriptFile> defMap = assetDefinitions.get(networkId);
             for (String address : defMap.keySet())
             {
                 Token token = tokensService.getToken(networkId, address);
                 if (token != null)
                 {
-                    File tokenDef = defMap.get(address);
-                    if (tokenDef != null && tokenDef.getAbsolutePath().contains(ALPHAWALLET_DIR)) token.hasDebugTokenscript = true;
+                    TokenScriptFile tokenDef = defMap.get(address);
+                    if (tokenDef != null && tokenDef.isDebug()) token.hasDebugTokenscript = true;
                     token.hasTokenScript = true;
                     TokenDefinition td = getAssetDefinition(networkId, address);
                     ContractInfo cInfo = td.contracts.get(td.holdingToken);
@@ -1027,73 +936,30 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             sigDescriptor.result = "fail";
             sigDescriptor.type = SigReturnType.NO_TOKENSCRIPT;
 
-            FileInputStream is = (FileInputStream) getTokenScriptFileInputStream(chainId, contractAddress);
-            if (is != null)
+            TokenScriptFile tsf = getTokenScriptFile(chainId, contractAddress);
+            if (tsf.isValidTokenScript())
             {
-                String hash = calcMD5(is);
-                //is there a corresponding certificate for this hash
-                FileData fd = getMatchingFileData(hash);
-
-                if (fd != null && fd.sigDescriptor != null)
+                TokenScriptFileData fd = fileHashes.get(tsf.getAbsolutePath());
+                if (tsf.fileUnchanged(fd))
                 {
                     return fd.sigDescriptor;
                 }
                 else
                 {
-                    if (fd == null) //create FileData if required
+                    if (fd == null)
                     {
-                        fd = new FileData();
-                        fileHashes.put(getTokenScriptFileName(chainId, contractAddress), fd);
+                        fd = new TokenScriptFileData();
+                        fileHashes.put(tsf.getAbsolutePath(), fd);
                     }
-                    //update the stored value
-                    String definitionFileName = getTokenScriptFileName(chainId, contractAddress);
-                    if (definitionFileName != null)
-                    {
-                        fd.sigDescriptor = alphaWalletService.checkTokenScriptSignature(new File(definitionFileName));
-                        boolean isDebug = definitionFileName.contains(ALPHAWALLET_DIR);
-                        //evaluate type of pass/fail to aid banner display
-                        if (fd.sigDescriptor.result.equals("pass"))
-                        {
-                            if (isDebug) fd.sigDescriptor.type = SigReturnType.DEBUG_SIGNATURE_PASS;
-                            else fd.sigDescriptor.type = SigReturnType.SIGNATURE_PASS;
-                        }
-                        else if (fd.sigDescriptor.subject != null)
-                        {
-                            if (fd.sigDescriptor.subject.contains("Invalid"))
-                            {
-                                if (isDebug) fd.sigDescriptor.type = SigReturnType.DEBUG_SIGNATURE_INVALID;
-                                else fd.sigDescriptor.type = SigReturnType.SIGNATURE_INVALID;
-                            }
-                            else
-                            {
-                                if (isDebug) fd.sigDescriptor.type = SigReturnType.DEBUG_NO_SIGNATURE;
-                                else fd.sigDescriptor.type = SigReturnType.NO_SIGNATURE;
-                            }
-                        }
-                        else
-                        {
-                            if (isDebug) fd.sigDescriptor.type = SigReturnType.DEBUG_NO_SIGNATURE;
-                            else fd.sigDescriptor.type = SigReturnType.NO_SIGNATURE;
-                        }
-                    }
-                    fd.hash = hash;
-
-                    sigDescriptor = fd.sigDescriptor;
+                    fd.sigDescriptor = alphaWalletService.checkTokenScriptSignature(tsf);
+                    tsf.determineSignatureType(fd);
                 }
+                fd.hash = tsf.calcMD5();
+                sigDescriptor = fd.sigDescriptor;
             }
 
             return sigDescriptor;
         });
-    }
-
-    private FileData getMatchingFileData(String hash)
-    {
-        for (FileData data : fileHashes.values())
-        {
-            if (data.hash != null && data.hash.equals(hash)) return data;
-        }
-
-        return null;
     }
 
     /**
@@ -1431,17 +1297,5 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public void clearCache()
     {
         cachedDefinition = null;
-    }
-
-    private class FileData
-    {
-        String hash;
-        XMLDsigDescriptor sigDescriptor;
-
-        FileData()
-        {
-            hash = null;
-            sigDescriptor = null;
-        }
     }
 }

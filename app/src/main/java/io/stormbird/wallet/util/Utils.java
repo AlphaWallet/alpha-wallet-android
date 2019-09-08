@@ -7,10 +7,13 @@ import android.util.TypedValue;
 import android.view.View;
 import android.webkit.URLUtil;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -165,6 +168,22 @@ public class Utils {
             return null;
         }
         return json;
+    }
+
+    public static boolean copyFile(String source, String dest)
+    {
+        try
+        {
+            FileChannel s = new FileInputStream(source).getChannel();
+            FileChannel d = new FileOutputStream(dest).getChannel();
+            d.transferFrom(s, 0, s.size());
+            return true;
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public static boolean isAddressValid(String address)

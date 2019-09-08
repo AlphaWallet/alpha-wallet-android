@@ -28,6 +28,7 @@ import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
 import io.stormbird.wallet.ui.widget.adapter.TransactionsAdapter;
 import io.stormbird.wallet.viewmodel.Erc20DetailViewModel;
 import io.stormbird.wallet.viewmodel.Erc20DetailViewModelFactory;
+import io.stormbird.wallet.widget.CertifiedToolbarView;
 
 import javax.inject.Inject;
 
@@ -59,6 +60,7 @@ public class Erc20DetailActivity extends BaseActivity {
     private TextView noTransactionsSubText;
     private RecyclerView tokenView;
     private RecyclerView recentTransactionsView;
+    private CertifiedToolbarView toolbarView;
 
     private TransactionsAdapter recentTransactionsAdapter;
     private TokensAdapter tokenViewAdapter;
@@ -74,6 +76,7 @@ public class Erc20DetailActivity extends BaseActivity {
         getIntentData();
         myAddress = wallet.address;
         txUpdateCounter = 0;
+        toolbarView = findViewById(R.id.toolbar);
 
         viewModel = ViewModelProviders.of(this, erc20DetailViewModelFactory)
                 .get(Erc20DetailViewModel.class);
@@ -82,48 +85,7 @@ public class Erc20DetailActivity extends BaseActivity {
         viewModel.token().observe(this, this::onTokenData);
         viewModel.tokenTicker().observe(this, this::onTokenTicker);
         viewModel.transactionUpdate().observe(this, this::newTransactions);
-        viewModel.sig().observe(this, this::onSigData);
-    }
-
-    private void onSigData(XMLDsigDescriptor sigData)
-    {
-        findViewById(R.id.certificate_spinner).setVisibility(View.GONE);
-        ImageView lockStatus = findViewById(R.id.image_lock);
-        TextView signatureMessage = findViewById(R.id.text_verified);
-        lockStatus.setVisibility(View.VISIBLE);
-        String certifier = sigData.certificateName;
-        if (certifier == null) certifier = "aw.app";
-
-        switch (sigData.type)
-        {
-            case NO_TOKENSCRIPT:
-                lockStatus.setVisibility(View.GONE);
-                break;
-            case DEBUG_NO_SIGNATURE:
-                lockStatus.setImageResource(R.mipmap.ic_unlocked_debug);
-                signatureMessage.setText(R.string.no_certificate);
-                break;
-            case DEBUG_SIGNATURE_INVALID:
-                lockStatus.setImageResource(R.mipmap.ic_unlocked_debug);
-                signatureMessage.setText(R.string.certificate_fail);
-                break;
-            case DEBUG_SIGNATURE_PASS:
-                lockStatus.setImageResource(R.mipmap.ic_locked_debug);
-                signatureMessage.setText(getString(R.string.verified, certifier));
-                break;
-            case NO_SIGNATURE:
-                lockStatus.setImageResource(R.mipmap.ic_unverified);
-                signatureMessage.setText(R.string.no_certificate);
-                break;
-            case SIGNATURE_INVALID:
-                lockStatus.setImageResource(R.mipmap.ic_unverified);
-                signatureMessage.setText(R.string.certificate_fail);
-                break;
-            case SIGNATURE_PASS:
-                lockStatus.setImageResource(R.mipmap.ic_locked);
-                signatureMessage.setText(getString(R.string.verified, certifier));
-                break;
-        }
+        viewModel.sig().observe(this, toolbarView::onSigData);
     }
 
     private void onTokenTicker(Ticker ticker)

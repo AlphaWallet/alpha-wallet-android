@@ -40,6 +40,8 @@ public class AlphaWalletService
     private ParseMagicLink parser;
 
     private static final String API = "api/";
+    private static final String XML_VERIFIER_ENDPOINT = "https://aw.app/api/v1/verifyXMLDSig";
+    private static final String XML_VERIFIER_PASS = "pass";
     private static MediaType MEDIA_TYPE_TOKENSCRIPT
             = MediaType.parse("text/xml; charset=UTF-8");
 
@@ -74,12 +76,10 @@ public class AlphaWalletService
         }
     }
 
-    /*
-    {"result":"pass",
-    "subject":"CN=skstravel.cn,OU=PositiveSSL,OU=Domain Control Validated",
-    "keyName":"Shankai",
-    "keyType":"SHA256withECDSA",
-    "issuer":"CN=COMODO ECC Domain Validation Secure Server CA,O=COMODO CA Limited,L=Salford,ST=Greater Manchester,C=GB"}
+    /**
+     * Use API to determine tokenscript validity
+     * @param tokenScriptFile
+     * @return
      */
     public XMLDsigDescriptor checkTokenScriptSignature(File tokenScriptFile)
     {
@@ -94,17 +94,19 @@ public class AlphaWalletService
                     .addFormDataPart("file", "tokenscript", body)
                     .build();
 
-            Request request = new Request.Builder().url("https://aw.app/api/v1/verifyXMLDSig")
+            Request request = new Request.Builder().url(XML_VERIFIER_ENDPOINT)
                     .post(requestBody)
                     .build();
 
             okhttp3.Response response = httpClient.newCall(request).execute();
 
             String result = response.body().string();
-            if (!result.contains("\"fail\"")) //check return value doesn't contain "fail" before attempting to gson it
+            JsonObject obj = gson.fromJson(result, JsonObject.class);
+            String queryResult = obj.get("result").getAsString();
+            if (queryResult.equals(XML_VERIFIER_PASS))
             {
                 dsigDescriptor = gson.fromJson(result, XMLDsigDescriptor.class);
-                //interpret issuer
+                //interpret subject to get the primary certifying body
                 String[] certifiers = dsigDescriptor.subject.split(",");
                 if (certifiers[0] != null && certifiers[0].length() > 3 && certifiers[0].startsWith("CN="))
                 {
@@ -113,7 +115,6 @@ public class AlphaWalletService
             }
             else
             {
-                JsonObject obj = gson.fromJson(result, JsonObject.class);
                 dsigDescriptor.subject = obj.get("failureReason").getAsString();
             }
         }

@@ -111,7 +111,7 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
 
     public boolean backPressed()
     {
-        if (password.getVisibility() == View.VISIBLE)
+        if (password != null && password.getVisibility() == View.VISIBLE)
         {
             keystore.setVisibility(View.VISIBLE);
             password.setVisibility(View.GONE);
@@ -188,12 +188,18 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
 
     public void reset()
     {
-        password.setText("");
-        password.setVisibility(View.GONE);
+        if (password != null)
+        {
+            password.setText("");
+            password.setVisibility(View.GONE);
+            passwordText.setVisibility(View.GONE);
+        }
+        if (keystore != null)
+        {
+            keystore.setVisibility(View.VISIBLE);
+            keystore.setError(null);
+            keystore.setText("");
+        }
         updateButtonState(false);
-        keystore.setVisibility(View.VISIBLE);
-        keystore.setError(null);
-        keystore.setText("");
-        passwordText.setVisibility(View.GONE);
     }
 }

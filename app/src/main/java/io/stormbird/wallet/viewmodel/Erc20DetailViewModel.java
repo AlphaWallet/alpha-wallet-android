@@ -12,6 +12,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.entity.SigReturnType;
 import io.stormbird.token.entity.TSAction;
 import io.stormbird.token.entity.XMLDsigDescriptor;
 import io.stormbird.wallet.entity.*;
@@ -290,6 +291,15 @@ public class Erc20DetailViewModel extends BaseViewModel {
         disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(sig::postValue, this::onError);
+                .subscribe(sig::postValue, this::onSigCheckError);
+    }
+
+    private void onSigCheckError(Throwable throwable)
+    {
+        XMLDsigDescriptor failSig = new XMLDsigDescriptor();
+        failSig.result = "fail";
+        failSig.type = SigReturnType.NO_TOKENSCRIPT;
+        failSig.subject = throwable.getMessage();
+        sig.postValue(failSig);
     }
 }

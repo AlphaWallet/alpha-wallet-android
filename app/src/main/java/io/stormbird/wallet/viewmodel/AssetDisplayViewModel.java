@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import io.stormbird.token.entity.SigReturnType;
 import io.stormbird.token.entity.XMLDsigDescriptor;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.FetchTokensInteract;
@@ -233,6 +234,15 @@ public class AssetDisplayViewModel extends BaseViewModel
         disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(sig::postValue, this::onError);
+                .subscribe(sig::postValue, this::onSigCheckError);
+    }
+
+    private void onSigCheckError(Throwable throwable)
+    {
+        XMLDsigDescriptor failSig = new XMLDsigDescriptor();
+        failSig.result = "fail";
+        failSig.type = SigReturnType.NO_TOKENSCRIPT;
+        failSig.subject = throwable.getMessage();
+        sig.postValue(failSig);
     }
 }

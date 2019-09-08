@@ -340,20 +340,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         }
 
         viewModel.checkTokenScriptSignature(data.chainId, data.contractAddress);
-
-//        verifiedLayer.setVisibility(View.VISIBLE);
-//
-//        //TODO: Must be signed
-//        if (viewModel.getAssetDefinitionService().hasDefinition(data.chainId, data.contractAddress) || usingFeeMaster)
-//        {
-//            verified.setVisibility(View.VISIBLE);
-//            textVerified.setVisibility(View.VISIBLE);
-//        }
-//        else
-//        {
-//            unVerified.setVisibility(View.VISIBLE);
-//            textUnverified.setVisibility(View.VISIBLE);
-//        }
     }
 
     private void displayImportAction()

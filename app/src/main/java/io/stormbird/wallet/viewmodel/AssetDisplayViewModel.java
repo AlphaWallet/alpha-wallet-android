@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import io.stormbird.token.entity.SigReturnType;
+import io.stormbird.token.entity.XMLDsigDescriptor;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.FetchTokensInteract;
 import io.stormbird.wallet.interact.FindDefaultNetworkInteract;
@@ -60,6 +62,7 @@ public class AssetDisplayViewModel extends BaseViewModel
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Token> ticket = new MutableLiveData<>();
+    private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -100,6 +103,7 @@ public class AssetDisplayViewModel extends BaseViewModel
     public LiveData<Token> ticket() {
         return ticket;
     }
+    public LiveData<XMLDsigDescriptor> sig() { return sig; }
 
     public void selectAssetIdsToRedeem(Context context, Token token) {
         if (getBalanceDisposable != null) {
@@ -223,5 +227,22 @@ public class AssetDisplayViewModel extends BaseViewModel
     private void openTransferDirectDialog(Intent intent, Token token, String tokenId)
     {
 
+    }
+
+    public void checkTokenScriptValidity(Token token)
+    {
+        disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(sig::postValue, this::onSigCheckError);
+    }
+
+    private void onSigCheckError(Throwable throwable)
+    {
+        XMLDsigDescriptor failSig = new XMLDsigDescriptor();
+        failSig.result = "fail";
+        failSig.type = SigReturnType.NO_TOKENSCRIPT;
+        failSig.subject = throwable.getMessage();
+        sig.postValue(failSig);
     }
 }

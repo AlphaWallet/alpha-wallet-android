@@ -12,10 +12,12 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import io.stormbird.token.entity.MagicLinkInfo;
+import io.stormbird.token.entity.XMLDsigDescriptor;
 import io.stormbird.token.tools.Convert;
 import io.stormbird.wallet.entity.*;
 import java.math.BigDecimal;
@@ -34,6 +36,7 @@ import io.stormbird.wallet.viewmodel.ImportTokenViewModel;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;
 import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.AWalletConfirmationDialog;
+import io.stormbird.wallet.widget.CertifiedToolbarView;
 import io.stormbird.wallet.widget.SignTransactionDialog;
 import io.stormbird.wallet.widget.SystemView;
 import static io.stormbird.token.tools.Convert.getEthString;
@@ -58,18 +61,13 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private String importString;
     private AWalletAlertDialog aDialog;
     private AWalletConfirmationDialog cDialog;
+    private CertifiedToolbarView toolbarView;
 
     private TextView priceETH;
     private TextView priceUSD;
     private TextView priceUSDLabel;
     private TextView importTxt;
     private TextView importHeader;
-
-    private AppCompatRadioButton verified;
-    private AppCompatRadioButton unVerified;
-    private TextView textVerified;
-    private TextView textUnverified;
-    private RelativeLayout verifiedLayer;
 
     private LinearLayout costLayout;
     private int chainId = 0;
@@ -95,19 +93,13 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         priceUSD = findViewById(R.id.textImportPriceUSD);
         priceUSDLabel = findViewById(R.id.fiat_price_txt);
         importHeader = findViewById(R.id.import_header);
+        toolbarView = findViewById(R.id.toolbar);
         priceETH.setVisibility(View.GONE);
         priceUSD.setVisibility(View.GONE);
         priceUSDLabel.setVisibility(View.GONE);
 
         importTxt = findViewById(R.id.textImport);
         costLayout = findViewById(R.id.cost_layout);
-
-        verified = findViewById(R.id.radioVerified);
-        unVerified = findViewById(R.id.radioUnverified);
-        textVerified = findViewById(R.id.verified);
-        textUnverified = findViewById(R.id.unverified);
-        verifiedLayer = findViewById(R.id.verifiedLayer);
-        verifiedLayer.setVisibility(View.GONE);
 
         setTicket(false, true, false);
 
@@ -131,6 +123,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         viewModel.checkContractNetwork().observe(this, this::checkContractNetwork);
         viewModel.ticketNotValid().observe(this, this::onInvalidTicket);
         viewModel.feemasterAvailable().observe(this, this::onFeemasterAvailable);
+        viewModel.sig().observe(this, toolbarView::onSigData);
 
         ticketRange = null;
 
@@ -346,19 +339,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                 break;
         }
 
-        verifiedLayer.setVisibility(View.VISIBLE);
-
-        //TODO: Must be signed
-        if (viewModel.getAssetDefinitionService().hasDefinition(data.chainId, data.contractAddress) || usingFeeMaster)
-        {
-            verified.setVisibility(View.VISIBLE);
-            textVerified.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            unVerified.setVisibility(View.VISIBLE);
-            textUnverified.setVisibility(View.VISIBLE);
-        }
+        viewModel.checkTokenScriptSignature(data.chainId, data.contractAddress);
     }
 
     private void displayImportAction()
@@ -395,11 +376,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         if (available)
         {
             priceETH.setText(R.string.free_import);
-            //is verified by stormbird
-            verified.setVisibility(View.VISIBLE);
-            textVerified.setVisibility(View.VISIBLE);
-            unVerified.setVisibility(View.GONE);
-            textUnverified.setVisibility(View.GONE);
             displayImportAction();
         }
         else

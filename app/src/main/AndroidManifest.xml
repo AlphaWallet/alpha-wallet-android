@@ -90,7 +90,22 @@
                     android:pathPrefix="/"
                     android:scheme="https" />
             </intent-filter>
+            <intent-filter>
+                <data android:scheme="file"
+                    android:mimeType="*/*"
+                    android:pathPattern=".*\\.tsml"
+                    android:host="*"/>
+
+                <data android:scheme="content" android:pathPattern=".*\\.tsml" android:mimeType="application/*"/>
+                <data android:scheme="content" android:pathPattern=".*\\.xml" android:mimeType="application/*"/>
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
         </activity>
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="7ef307cf90661ead3689e253fe8831d7e216fc5b" />

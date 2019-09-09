@@ -583,5 +583,10 @@
     <string name="welcome_to_alphawallet">Welcome to AlphaWallet</string>
     <string name="logo">AlphaWallet Logo</string>
     <string name="lock_seed_phrase">LOCK SEED PHRASE</string>
+    <string name="verified">Verified by %1$s</string>
+    <string name="no_certificate">No Certificate</string>
+    <string name="certificate_fail">Invalid Certificate</string>
     <string name="no_key">No Key found</string>
+    <string name="title_enable_debug">Local Scripts Not Enabled</string>
+    <string name="need_to_enable_debug">To use local TokenScripts you need to enable TokenScript override. Go to Settings, then click \'Enable TokenScript Override\'.</string>
 </resources>

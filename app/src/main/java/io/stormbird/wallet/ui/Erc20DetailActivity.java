@@ -14,11 +14,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import dagger.android.AndroidInjection;
 import io.stormbird.token.entity.TSAction;
+import io.stormbird.token.entity.XMLDsigDescriptor;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
@@ -26,6 +28,7 @@ import io.stormbird.wallet.ui.widget.adapter.TokensAdapter;
 import io.stormbird.wallet.ui.widget.adapter.TransactionsAdapter;
 import io.stormbird.wallet.viewmodel.Erc20DetailViewModel;
 import io.stormbird.wallet.viewmodel.Erc20DetailViewModelFactory;
+import io.stormbird.wallet.widget.CertifiedToolbarView;
 
 import javax.inject.Inject;
 
@@ -57,6 +60,7 @@ public class Erc20DetailActivity extends BaseActivity {
     private TextView noTransactionsSubText;
     private RecyclerView tokenView;
     private RecyclerView recentTransactionsView;
+    private CertifiedToolbarView toolbarView;
 
     private TransactionsAdapter recentTransactionsAdapter;
     private TokensAdapter tokenViewAdapter;
@@ -72,6 +76,7 @@ public class Erc20DetailActivity extends BaseActivity {
         getIntentData();
         myAddress = wallet.address;
         txUpdateCounter = 0;
+        toolbarView = findViewById(R.id.toolbar);
 
         viewModel = ViewModelProviders.of(this, erc20DetailViewModelFactory)
                 .get(Erc20DetailViewModel.class);
@@ -80,6 +85,7 @@ public class Erc20DetailActivity extends BaseActivity {
         viewModel.token().observe(this, this::onTokenData);
         viewModel.tokenTicker().observe(this, this::onTokenTicker);
         viewModel.transactionUpdate().observe(this, this::newTransactions);
+        viewModel.sig().observe(this, toolbarView::onSigData);
     }
 
     private void onTokenTicker(Ticker ticker)
@@ -126,6 +132,9 @@ public class Erc20DetailActivity extends BaseActivity {
         if (viewModel.hasAction(token)) {
             setupAction();
         }
+
+        findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE);
+        viewModel.checkTokenScriptValidity(token);
     }
 
     private void setupAction()
@@ -250,15 +259,6 @@ public class Erc20DetailActivity extends BaseActivity {
             sendBtn.setVisibility(View.GONE);
             receiveBtn.setVisibility(View.GONE);
         }
-        else if (hasDefinition)
-        {
-            findViewById(R.id.text_confirmed).setVisibility(View.VISIBLE);
-            findViewById(R.id.text_unconfirmed).setVisibility(View.GONE);
-        }
-        else
-        {
-            findViewById(R.id.layout_confirmed).setVisibility(View.GONE);
-        }
     }
 
     private void addTokenPage() {
@@ -275,6 +275,7 @@ public class Erc20DetailActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_qr, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

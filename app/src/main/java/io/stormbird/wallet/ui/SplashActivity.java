@@ -12,6 +12,9 @@ import android.preference.PreferenceManager;
 import android.view.View;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
+
+import java.io.File;
+
 import dagger.android.AndroidInjection;
 import io.fabric.sdk.android.Fabric;
 import io.stormbird.token.entity.SalesOrderMalformed;
@@ -28,6 +31,7 @@ import io.stormbird.wallet.router.ImportWalletRouter;
 import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.viewmodel.SplashViewModel;
 import io.stormbird.wallet.viewmodel.SplashViewModelFactory;
+import io.stormbird.wallet.widget.AWalletAlertDialog;
 import io.stormbird.wallet.widget.SignTransactionDialog;
 
 import javax.inject.Inject;
@@ -42,6 +46,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
 
     private String importData;
     private PinAuthenticationCallbackInterface authInterface;
+    private String importPath = null;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -67,6 +72,10 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         if (data != null)
         {
             importData = data.toString();
+            if (importData.startsWith("content://"))
+            {
+                importPath = data.getPath();// data.getPath();
+            }
         }
         else
         {
@@ -160,10 +169,34 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
                 }
                 catch (SalesOrderMalformed ignored) { }
             }
+            else if (importPath != null)
+            {
+                if (splashViewModel.checkDebugDirectory())
+                {
+                    splashViewModel.importScriptFile(this, importPath);
+                }
+                else
+                {
+                    displayEnableDebugSupport();
+                }
+            }
 
             new HomeRouter().open(this, true);
             finish();
         }
+    }
+
+    private void displayEnableDebugSupport()
+    {
+        AWalletAlertDialog aDialog = new AWalletAlertDialog(this);
+        aDialog.setTitle(R.string.title_enable_debug);
+        aDialog.setIcon(AWalletAlertDialog.ERROR);
+        aDialog.setMessage(R.string.need_to_enable_debug);
+        aDialog.setButtonText(R.string.ok);
+        aDialog.setButtonListener(v -> {
+            aDialog.dismiss();
+        });
+        aDialog.show();
     }
 
     @Override

@@ -6,13 +6,18 @@ import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import io.reactivex.Scheduler;
+import io.stormbird.token.entity.SigReturnType;
+import io.stormbird.token.entity.XMLDsigDescriptor;
+import io.stormbird.token.tools.TokenDefinition;
+import io.stormbird.token.tools.XMLDSigVerifier;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.TokenRepository;
+import io.stormbird.wallet.service.AlphaWalletService;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.FeeMasterService;
 
 import io.stormbird.wallet.service.GasService;
 
@@ -48,7 +53,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final SetupTokensInteract setupTokensInteract;
-    private final FeeMasterService feeMasterService;
+    private final AlphaWalletService alphaWalletService;
     private final AddTokenInteract addTokenInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final AssetDefinitionService assetDefinitionService;
@@ -69,6 +74,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private final MutableLiveData<Boolean> ticketNotValid = new MutableLiveData<>();
     private final MutableLiveData<Boolean> feemasterAvailable = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> txError = new MutableLiveData<>();
+    private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
 
     private MagicLinkData importOrder;
     private String univeralImportLink;
@@ -86,7 +92,7 @@ public class ImportTokenViewModel extends BaseViewModel
                          CreateTransactionInteract createTransactionInteract,
                          FetchTokensInteract fetchTokensInteract,
                          SetupTokensInteract setupTokensInteract,
-                         FeeMasterService feeMasterService,
+                         AlphaWalletService alphaWalletService,
                          AddTokenInteract addTokenInteract,
                          EthereumNetworkRepositoryType ethereumNetworkRepository,
                          AssetDefinitionService assetDefinitionService,
@@ -97,7 +103,7 @@ public class ImportTokenViewModel extends BaseViewModel
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
         this.setupTokensInteract = setupTokensInteract;
-        this.feeMasterService = feeMasterService;
+        this.alphaWalletService = alphaWalletService;
         this.addTokenInteract = addTokenInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.assetDefinitionService = assetDefinitionService;
@@ -125,6 +131,7 @@ public class ImportTokenViewModel extends BaseViewModel
     public LiveData<Boolean> ticketNotValid() { return ticketNotValid; }
     public LiveData<Boolean> feemasterAvailable() { return feemasterAvailable; }
     public LiveData<ErrorEnvelope> txError() { return txError; }
+    public LiveData<XMLDsigDescriptor> sig() { return sig; }
     public double getUSDPrice() { return ethToUsd; }
 
     public void prepare(String importDataStr) {
@@ -166,6 +173,8 @@ public class ImportTokenViewModel extends BaseViewModel
             importOrder.ownerAddress = parser.getOwnerKey(importOrder);
             //see if we picked up a network from the link
             checkContractNetwork.postValue(importOrder.contractAddress);
+            //simultaneously check certificate
+            //assetDefinitionService.getSignatureData(importOrder.chainId, importOrder.contractAddress);
         }
         catch (SalesOrderMalformed e)
         {
@@ -479,7 +488,7 @@ public class ImportTokenViewModel extends BaseViewModel
         {
             initParser();
             MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
-            disposable = feeMasterService.handleFeemasterImport(url, wallet.getValue(), network.getValue().chainId, order)
+            disposable = alphaWalletService.handleFeemasterImport(url, wallet.getValue(), network.getValue().chainId, order)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::processFeemasterResult, this::onTransactionError);
@@ -560,7 +569,7 @@ public class ImportTokenViewModel extends BaseViewModel
 
     public void checkFeemaster(String feemasterServer)
     {
-        disposable = feeMasterService.checkFeemasterService(feemasterServer, network.getValue().chainId, importOrder.contractAddress)
+        disposable = alphaWalletService.checkFeemasterService(feemasterServer, network.getValue().chainId, importOrder.contractAddress)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::handleFeemasterAvailability, this::onFeeMasterError);
@@ -681,5 +690,23 @@ public class ImportTokenViewModel extends BaseViewModel
     public void resetSignDialog()
     {
         keyService.resetSigningDialog();
+    }
+
+    public void checkTokenScriptSignature(final int chainId, final String address)
+    {
+        disposable = assetDefinitionService.getAssetdefinitionASync(chainId, address)
+                .flatMap(def -> assetDefinitionService.getSignatureData(chainId, address))
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(sig::postValue, this::onSigError);
+    }
+
+    private void onSigError(Throwable throwable)
+    {
+        XMLDsigDescriptor failSig = new XMLDsigDescriptor();
+        failSig.result = "fail";
+        failSig.type = SigReturnType.NO_TOKENSCRIPT;
+        failSig.subject = throwable.getMessage();
+        sig.postValue(failSig);
     }
 }

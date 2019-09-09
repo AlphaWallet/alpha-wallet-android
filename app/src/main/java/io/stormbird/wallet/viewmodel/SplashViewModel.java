@@ -7,16 +7,22 @@ import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import io.stormbird.token.tools.TokenDefinition;
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.entity.tokenscript.TokenScriptFile;
 import io.stormbird.wallet.interact.FetchWalletsInteract;
 import io.stormbird.wallet.repository.LocaleRepositoryType;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
+import io.stormbird.wallet.service.AssetDefinitionService;
 import io.stormbird.wallet.service.KeyService;
+import io.stormbird.wallet.util.Utils;
 
+import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -25,6 +31,7 @@ import java.util.List;
 
 import static io.stormbird.wallet.C.DOWNLOAD_READY;
 import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
 import static io.stormbird.wallet.viewmodel.HomeViewModel.ALPHAWALLET_FILE_URL;
 
 public class SplashViewModel extends ViewModel
@@ -32,6 +39,7 @@ public class SplashViewModel extends ViewModel
     private final FetchWalletsInteract fetchWalletsInteract;
     private final PreferenceRepositoryType preferenceRepository;
     private final LocaleRepositoryType localeRepository;
+    private final AssetDefinitionService assetDefinitionService;
     private final KeyService keyService;
 
     private MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
@@ -40,11 +48,13 @@ public class SplashViewModel extends ViewModel
     SplashViewModel(FetchWalletsInteract fetchWalletsInteract,
                     PreferenceRepositoryType preferenceRepository,
                     LocaleRepositoryType localeRepository,
-                    KeyService keyService) {
+                    KeyService keyService,
+                    AssetDefinitionService assetDefinitionService) {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.keyService = keyService;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     public void setLocale(Context context) {
@@ -205,8 +215,43 @@ public class SplashViewModel extends ViewModel
         }
         else
         {
-            //TODO: Relax key creation params (ie authentication) slightly to ensure a key is always created
             wallets.postValue(new Wallet[0]);
         }
+    }
+
+
+    public void importScriptFile(Context ctx, String importData)
+    {
+        try
+        {
+            importData = importData.replace("/media", Environment.getExternalStorageDirectory().getAbsolutePath());
+
+            TokenScriptFile testFile = new TokenScriptFile(ctx, importData);
+            if (testFile.exists() && testFile.canRead())
+            {
+                TokenDefinition td = assetDefinitionService.getTokenDefinition(testFile);
+                if (td != null)
+                {
+                    //valid tokenscript file, import to debug area
+                    String newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next();
+                    newFileName = newFileName + "-" + testFile.calcMD5() + ".tsml";
+                    newFileName = Environment.getExternalStorageDirectory() + File.separator + ALPHAWALLET_DIR + File.separator + newFileName;
+                    Utils.copyFile(importData, newFileName);
+                    //listener system picks up the new file automatically
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean checkDebugDirectory()
+    {
+        File directory = new File(Environment.getExternalStorageDirectory()
+                + File.separator + ALPHAWALLET_DIR);
+
+        return directory.exists();
     }
 }

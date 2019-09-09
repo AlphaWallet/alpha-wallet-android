@@ -256,6 +256,12 @@ public class TokenDefinition {
         }
     }
 
+    //Empty definition
+    public TokenDefinition()
+    {
+        holdingToken = null;
+    }
+
     public TokenDefinition(InputStream xmlAsset, Locale locale, ParseResult result) throws IOException, SAXException {
         this.locale = locale;
         /* guard input from bad programs which creates Locale not following ISO 639 */

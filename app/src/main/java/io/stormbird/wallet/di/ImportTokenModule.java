@@ -4,8 +4,8 @@ import dagger.Module;
 import dagger.Provides;
 import io.stormbird.wallet.interact.*;
 import io.stormbird.wallet.repository.*;
+import io.stormbird.wallet.service.AlphaWalletService;
 import io.stormbird.wallet.service.AssetDefinitionService;
-import io.stormbird.wallet.service.FeeMasterService;
 import io.stormbird.wallet.service.GasService;
 import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.viewmodel.ImportTokenViewModelFactory;
@@ -23,7 +23,7 @@ public class ImportTokenModule {
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
             SetupTokensInteract setupTokensInteract,
-            FeeMasterService feeMasterService,
+            AlphaWalletService alphaWalletService,
             AddTokenInteract addTokenInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             AssetDefinitionService assetDefinitionService,
@@ -31,7 +31,7 @@ public class ImportTokenModule {
             GasService gasService,
             KeyService keyService) {
         return new ImportTokenViewModelFactory(
-                genericWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, feeMasterService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService, keyService);
+                genericWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, alphaWalletService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService, keyService);
     }
 
     @Provides

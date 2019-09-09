@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 
-import io.stormbird.wallet.C;
 import io.stormbird.wallet.repository.EthereumNetworkRepository;
 import io.stormbird.wallet.repository.EthereumNetworkRepositoryType;
 import io.stormbird.wallet.repository.PreferenceRepositoryType;
@@ -167,9 +166,10 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	FeeMasterService provideFeemasterService(OkHttpClient okHttpClient,
-											 TransactionRepositoryType transactionRepository) {
-		return new FeeMasterService(okHttpClient, transactionRepository);
+    AlphaWalletService provideFeemasterService(OkHttpClient okHttpClient,
+                                               TransactionRepositoryType transactionRepository,
+											   Gson gson) {
+		return new AlphaWalletService(okHttpClient, transactionRepository, gson);
 	}
 
 	@Singleton
@@ -187,8 +187,8 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, Context ctx, NotificationService notificationService, RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, TokensService tokensService, TokenLocalSource tls) {
-		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, ethereumNetworkRepository, tokensService, tls);
+	AssetDefinitionService provideAssetDefinitionService(OkHttpClient okHttpClient, Context ctx, NotificationService notificationService, RealmManager realmManager, EthereumNetworkRepositoryType ethereumNetworkRepository, TokensService tokensService, TokenLocalSource tls, AlphaWalletService alphaService) {
+		return new AssetDefinitionService(okHttpClient, ctx, notificationService, realmManager, ethereumNetworkRepository, tokensService, tls, alphaService);
 	}
 
 	@Singleton

@@ -1,5 +1,6 @@
 package io.stormbird.wallet.repository;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -73,16 +74,18 @@ public class TransactionRepository implements TransactionRepositoryType {
 		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
 
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
-		.flatMap(nonce -> accountKeystoreService.signTransaction(from, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, chainId))
-		.flatMap(signedMessage -> Single.fromCallable( () -> {
-			EthSendTransaction raw = web3j
+			.flatMap(nonce -> accountKeystoreService.signTransaction(from, toAddress, subunitAmount, gasPrice, gasLimit, nonce.longValue(), data, chainId))
+			.flatMap(signedMessage -> Single.fromCallable( () -> {
+				EthSendTransaction raw = web3j
 					.ethSendRawTransaction(Numeric.toHexString(signedMessage))
 					.send();
 			if (raw.hasError()) {
 			    throw new Exception(raw.getError().getMessage());
 			}
 			return raw.getTransactionHash();
-		})).subscribeOn(Schedulers.io());
+		}))
+		.flatMap(txHash -> storeUnconfirmedTransaction(from, txHash, toAddress, subunitAmount, gasPrice, chainId, data != null ? Numeric.toHexString(data) : "0x"))
+		.subscribeOn(Schedulers.io());
 	}
 
 	@Override
@@ -103,9 +106,35 @@ public class TransactionRepository implements TransactionRepositoryType {
 					}
 					txData.txHash = raw.getTransactionHash();
 					return txData;
-				})).subscribeOn(Schedulers.io());
+				}))
+				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, toAddress, subunitAmount, gasPrice, chainId, data != null ? Numeric.toHexString(data) : "0x"))
+				.subscribeOn(Schedulers.io());
 	}
 
+	private Single<TransactionData> storeUnconfirmedTransaction(Wallet from, TransactionData txData, String toAddress, BigInteger value, BigInteger gasPrice, int chainId, String data)
+	{
+		return Single.fromCallable(() -> {
+			Transaction newTx = new Transaction(txData.txHash, "0", "0", System.currentTimeMillis()/1000, 0, from.address, toAddress, value.toString(10), "0", gasPrice.toString(10), data,
+					"0", chainId, new TransactionOperation[0]);
+			inDiskCache.putTransaction(from, newTx);
+
+			return txData;
+		});
+	}
+
+	private Single<String> storeUnconfirmedTransaction(Wallet from, String txHash, String toAddress, BigInteger value, BigInteger gasPrice, int chainId, String data)
+	{
+		return Single.fromCallable(() -> {
+
+			Transaction newTx = new Transaction(txHash, "0", "0", System.currentTimeMillis()/1000, 0, from.address, toAddress, value.toString(10), "0", gasPrice.toString(10), data,
+					"0", chainId, new TransactionOperation[0]);
+			inDiskCache.putTransaction(from, newTx);
+
+			return txHash;
+		});
+	}
+
+	// Called for constructors
 	@Override
 	public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId) {
 		final Web3j web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(chainId).rpcServerUrl));
@@ -121,7 +150,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 						throw new Exception(raw.getError().getMessage());
 					}
 					return raw.getTransactionHash();
-				})).subscribeOn(Schedulers.io());
+				}))
+				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, "", BigInteger.ZERO, gasPrice, chainId, data))
+				.subscribeOn(Schedulers.io());
 	}
 
 	@Override
@@ -143,7 +174,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 					}
 					txData.txHash = raw.getTransactionHash();
 					return txData;
-				})).subscribeOn(Schedulers.io());
+				}))
+				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, "", BigInteger.ZERO, gasPrice, chainId, data))
+				.subscribeOn(Schedulers.io());
 	}
 
 	private Single<RawTransaction> getRawTransaction(BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, BigInteger value, String data)

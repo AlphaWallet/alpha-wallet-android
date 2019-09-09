@@ -9,6 +9,8 @@ import android.text.format.DateFormat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import io.stormbird.wallet.R;
@@ -16,6 +18,7 @@ import io.stormbird.wallet.entity.*;
 import io.stormbird.wallet.interact.FetchTransactionsInteract;
 import io.stormbird.wallet.service.TokensService;
 import io.stormbird.wallet.ui.widget.OnTransactionClickListener;
+import io.stormbird.wallet.util.LocaleUtils;
 import io.stormbird.wallet.util.Utils;
 
 import java.util.Calendar;
@@ -41,6 +44,8 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     private final ImageView typeIcon;
     private final TextView supplimental;
     private final TokensService tokensService;
+    private final ProgressBar pendingSpinner;
+    private final RelativeLayout transactionBackground;
     private final FetchTransactionsInteract transactionsInteract;
 
     private Transaction transaction;
@@ -61,6 +66,8 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         value = findViewById(R.id.value);
         chainName = findViewById(R.id.text_chain_name);
         supplimental = findViewById(R.id.supplimental);
+        pendingSpinner = findViewById(R.id.pending_spinner);
+        transactionBackground = findViewById(R.id.layout_background);
         tokensService = service;
         transactionsInteract = interact;
 
@@ -85,6 +92,8 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         }
 
         value.setVisibility(View.VISIBLE);
+        if (pendingSpinner != null) pendingSpinner.setVisibility(View.GONE);
+        typeIcon.setVisibility(View.VISIBLE);
         Token token = tokensService.getToken(transaction.chainId, defaultAddress);
         String tokenSymbol = "";
         if (token != null)
@@ -101,6 +110,11 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         {
             chainName.setVisibility(View.GONE);
         }
+
+        if (date != null) setDate();
+
+        if (transaction.blockNumber != null && transaction.blockNumber.equals("0")) { fillPending(); return; }
+        if (transactionBackground != null) transactionBackground.setBackgroundResource(R.drawable.background_marketplace_event);
 
         boolean txSuccess = (transaction.error != null && transaction.error.equals("0"));
         // If operations include token transfer, display token transfer instead
@@ -125,13 +139,37 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         {
             fillERC20(txSuccess, transaction);
         }
+    }
 
-        if (date != null) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-            calendar.setTime(new Date(transaction.timeStamp * 1000));
-            date.setText(DateFormat.format("dd MMM yyyy", calendar));
+    private void setDate()
+    {
+        Date txDate = LocaleUtils.getLocalDateFromTimestamp(transaction.timeStamp);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        calendar.setTime(txDate);
+        date.setText(DateFormat.format("dd MMM yyyy", calendar));
+    }
+
+    private void fillPending()
+    {
+        transactionBackground.setBackgroundResource(R.drawable.background_pending_transaction);
+        pendingSpinner.setVisibility(View.VISIBLE);
+        typeIcon.setVisibility(View.GONE);
+        type.setText(R.string.pending_transaction);
+        String valueStr = getValueStr(transaction.value, true, getString(R.string.eth), 18);
+        value.setText(valueStr);
+        value.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+        value.setVisibility(View.VISIBLE);
+
+        if (transaction.to.length() == 0)
+        {
+            address.setText(R.string.ticket_contract_constructor);
         }
+        else
+        {
+            address.setText(transaction.to);
+        }
+
     }
 
     private void fillERC875(boolean txSuccess, Transaction trans, ERC875ContractTransaction ct)
@@ -239,6 +277,13 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
 
         setSuccessIndicator(txSuccess, "");
 
+        valueStr = getValueStr(valueStr, isSent, symbol, decimals);
+
+        this.value.setText(valueStr);
+    }
+
+    private String getValueStr(String valueStr, boolean isSent, String symbol, long decimals)
+    {
         if (valueStr.equals("0")) {
             valueStr = "0 " + symbol;
         } else {
@@ -250,7 +295,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             valueStr = valueStr + " " + symbol;
         }
 
-        this.value.setText(valueStr);
+        return valueStr;
     }
 
     private void fillERC20(boolean txSuccess,

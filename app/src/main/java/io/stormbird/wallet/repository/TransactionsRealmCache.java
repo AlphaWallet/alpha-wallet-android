@@ -117,15 +117,17 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 instance.beginTransaction();
                 for (Transaction transaction : transactions)
                 {
-                    if (isBadTransaction(transaction) || alreadyRecorded(instance, transaction.hash))
-                    {
-                        continue;
-                    }
+                    if (isBadTransaction(transaction)) continue;
+                    RealmTransaction realmTx = instance.where(RealmTransaction.class)
+                            .equalTo("hash", transaction.hash)
+                            .findFirst();
+
+                    if (realmTx != null && !realmTx.getBlockNumber().equals("0")) continue;
+                    if (realmTx == null) realmTx = instance.createObject(RealmTransaction.class, transaction.hash);
 
                     try
                     {
-                        RealmTransaction item = instance.createObject(RealmTransaction.class, transaction.hash);
-                        fill(instance, item, transaction);
+                        fill(instance, realmTx, transaction);
                     }
                     catch (io.realm.exceptions.RealmPrimaryKeyConstraintException e)
                     {
@@ -140,13 +142,35 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         });
     }
 
+    @Override
+    public void putTransaction(Wallet wallet, Transaction tx)
+    {
+        try (Realm instance = realmManager.getRealmInstance(wallet))
+        {
+            if (!alreadyRecorded(instance, tx.hash))
+            {
+                instance.beginTransaction();
+
+                RealmTransaction item = instance.createObject(RealmTransaction.class, tx.hash);
+                fill(instance, item, tx);
+
+                instance.commitTransaction();
+            }
+        }
+        catch (Exception e)
+        {
+            //do not record
+            e.printStackTrace();
+        }
+    }
+
     private boolean alreadyRecorded(Realm instance, String hash)
     {
         RealmTransaction realmTx = instance.where(RealmTransaction.class)
                 .equalTo("hash", hash)
                 .findFirst();
 
-        return realmTx != null;
+        return realmTx != null && !realmTx.getBlockNumber().equals("0");
     }
 
     private boolean isBadTransaction(Transaction transaction)

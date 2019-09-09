@@ -255,6 +255,7 @@ public class TransactionsViewModel extends BaseViewModel
     private void onUpdateTransactions(Transaction[] transactions, Token token)
     {
         fetchTransactionDisposable = null;
+        boolean pendingUpdate = false;
         Log.d("TRANSACTION", "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
 
         token.lastTxCheck = System.currentTimeMillis();
@@ -264,10 +265,12 @@ public class TransactionsViewModel extends BaseViewModel
         for (int i = 0; i < transactions.length - 1; i++)
         {
             Transaction tx = transactions[i];
-            if (!txMap.containsKey(tx.hash))
+            Transaction oldTx = txMap.get(tx.hash);
+            if (!txMap.containsKey(tx.hash) || oldTx.blockNumber.equals("0"))
             {
                 newTxs.add(tx);
                 txMap.put(tx.hash, tx);
+                if (oldTx != null && oldTx.blockNumber.equals("0")) pendingUpdate = true;
             }
         }
 
@@ -275,6 +278,7 @@ public class TransactionsViewModel extends BaseViewModel
         {
             Log.d(TAG, "Found " + transactions.length + " Network transactions");
             newTransactions.postValue(newTxs.toArray(new Transaction[0]));
+            if (pendingUpdate) refreshAdapter.postValue(true);
             //store new transactions, so they will appear in the transaction view, then update the view
             disposable = fetchTransactionsInteract.storeTransactions(wallet.getValue(), newTxs.toArray(new Transaction[0]))
                     .subscribeOn(Schedulers.io())

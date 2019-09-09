@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_background"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/background_marketplace_event"
@@ -18,6 +19,17 @@
         android:layout_marginStart="@dimen/big_margin"
         android:contentDescription="@string/empty"
         android:src="@drawable/ic_arrow_downward_black_24dp" />
+
+    <ProgressBar
+        android:id="@+id/pending_spinner"
+        android:visibility="gone"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:indeterminateTint="@color/colorPrimaryDark"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="@dimen/big_margin"
+        android:contentDescription="@string/empty"/>
 
     <LinearLayout
         android:layout_width="match_parent"

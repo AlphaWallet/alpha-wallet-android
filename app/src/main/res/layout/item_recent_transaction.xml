@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_background"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -27,20 +28,34 @@
         android:paddingStart="20dp"
         android:paddingEnd="20dp">
 
+        <LinearLayout
+            android:id="@+id/layout_icon_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="10dp">
+
         <ImageView
             android:id="@+id/type_icon"
             android:layout_width="18sp"
             android:layout_height="18sp"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="10dp"
             android:src="@drawable/ic_arrow_downward_black_24dp" />
+
+        <ProgressBar
+            android:id="@+id/pending_spinner"
+            android:visibility="gone"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:indeterminateTint="@color/colorPrimaryDark"
+            android:contentDescription="@string/empty"/>
+        </LinearLayout>
 
         <TextView
             android:id="@+id/type"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toEndOf="@id/type_icon"
+            android:layout_toEndOf="@id/layout_icon_holder"
             android:fontFamily="@font/font_regular"
             android:maxLines="1"
             android:text="Sent"
@@ -57,7 +72,7 @@
             android:ellipsize="end"
             android:fontFamily="@font/font_light"
             android:maxLines="1"
-            android:text="Pending Transaction ..."
+            android:text="@string/pending_transaction"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
             android:textColor="@color/text_dark_gray"
             android:textSize="12sp"

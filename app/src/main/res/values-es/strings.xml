@@ -182,4 +182,5 @@
     <string name="logo">AlphaWallet Logo</string>
     <string name="lock_seed_phrase">LOCK SEED PHRASE</string>
     <string name="no_key">No Key found</string>
+    <string name="pending_transaction">Pending Transaction ...</string>
 </resources>

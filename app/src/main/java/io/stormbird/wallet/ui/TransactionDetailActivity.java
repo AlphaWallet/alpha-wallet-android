@@ -9,6 +9,7 @@ import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import io.stormbird.wallet.C;
@@ -56,6 +57,13 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         toolbar();
         setTitle(R.string.empty);
 
+        String blockNumber = transaction.blockNumber;
+        if (transaction.blockNumber.equals("0"))
+        {
+            blockNumber = getString(R.string.status_pending);
+            findViewById(R.id.pending_spinner).setVisibility(View.VISIBLE);
+        }
+
         BigDecimal gasFee = new BigDecimal(transaction.gasUsed).multiply(new BigDecimal(transaction.gasPrice));
         amount = findViewById(R.id.amount);
         ((TextView) findViewById(R.id.from)).setText(transaction.from);
@@ -63,7 +71,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         ((TextView) findViewById(R.id.gas_fee)).setText(BalanceUtils.weiToEth(gasFee).toPlainString());
         ((TextView) findViewById(R.id.txn_hash)).setText(transaction.hash);
         ((TextView) findViewById(R.id.txn_time)).setText(getDate(transaction.timeStamp));
-        ((TextView) findViewById(R.id.block_number)).setText(transaction.blockNumber);
+        ((TextView) findViewById(R.id.block_number)).setText(blockNumber);
         findViewById(R.id.more_detail).setOnClickListener(this);
 
         viewModel = ViewModelProviders.of(this, transactionDetailViewModelFactory)

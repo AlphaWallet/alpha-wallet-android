@@ -30,12 +30,8 @@ import java.security.cert.CertificateException;
 import java.util.*;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
-import static io.stormbird.wallet.entity.WalletType.HDKEY;
-import static io.stormbird.wallet.entity.WalletType.KEYSTORE;
-import static io.stormbird.wallet.entity.WalletType.KEYSTORE_LEGACY;
-import static io.stormbird.wallet.entity.WalletType.NOT_DEFINED;
+import static io.stormbird.wallet.entity.Operation.*;
 import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
-import static io.stormbird.wallet.service.KeyService.Operation.*;
 import static io.stormbird.wallet.service.KeystoreAccountService.KEYSTORE_FOLDER;
 import static io.stormbird.wallet.service.LegacyKeystore.getLegacyPassword;
 
@@ -52,13 +48,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     //This value determines the time interval between the user swiping away the backup warning notice and it re-appearing
     public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000 * 60 * 60 * 24 * 30; //30 days //1000 * 60 * 3; //3 minutes for testing
-
-    //Used mainly for re-entrant encrypt/decrypt operations for types of keys
-    public enum Operation
-    {
-        CREATE_HD_KEY, FETCH_MNEMONIC, IMPORT_HD_KEY, CHECK_AUTHENTICATION, SIGN_DATA,
-        UPGRADE_HD_KEY, CREATE_KEYSTORE_KEY, UPGRADE_KEYSTORE_KEY, CREATE_PRIVATE_KEY
-    }
 
     public enum AuthenticationLevel
     {
@@ -742,6 +731,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     private void checkAuthentication(Operation operation)
     {
+        //first check if the phone is unlocked
         String dialogTitle;
         switch (operation)
         {
@@ -761,10 +751,10 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 break;
         }
 
-        signDialog = new SignTransactionDialog(activity, operation.ordinal(), dialogTitle, null);
+        signDialog = new SignTransactionDialog(activity, operation, dialogTitle, null);
         signDialog.setCanceledOnTouchOutside(false);
         signDialog.setCancelListener(v -> {
-            authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation.ordinal());
+            authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation);
         });
         signDialog.setOnDismissListener(v -> {
             signDialog = null;
@@ -775,24 +765,23 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
 
     @Override
-    public void CompleteAuthentication(int callbackId)
+    public void CompleteAuthentication(Operation callbackId)
     {
         authenticatePass(callbackId);
     }
 
     @Override
-    public void FailedAuthentication(int taskCode)
+    public void FailedAuthentication(Operation taskCode)
     {
         authenticateFail("Authentication fail", AuthenticationFailType.PIN_FAILED, taskCode);
     }
 
     @Override
-    public void authenticatePass(int callbackId)
+    public void authenticatePass(Operation operation)
     {
         if (signDialog != null && signDialog.isShowing())
             signDialog.dismiss();
         //resume key operation
-        Operation operation = Operation.values()[callbackId];
         switch (operation)
         {
             case CREATE_HD_KEY: //Note: not currently used: may be used if we create an HD key with authentication
@@ -832,7 +821,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     }
 
     @Override
-    public void authenticateFail(String fail, AuthenticationFailType failType, int callbackId)
+    public void authenticateFail(String fail, AuthenticationFailType failType, Operation callbackId)
     {
         System.out.println("AUTH FAIL: " + failType.ordinal());
 
@@ -857,7 +846,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 break;
         }
 
-        if (callbackId == Operation.UPGRADE_HD_KEY.ordinal())
+        if (callbackId == UPGRADE_HD_KEY)
         {
             signCallback.GotAuthorisation(false);
         }
@@ -923,8 +912,25 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
      *
      * @param callbackId
      */
-    private void showInsecure(int callbackId)
+    private void showInsecure(Operation callbackId)
     {
+        //only show the 'not secure' message on certain occasions. Otherwise just pass through.
+        switch (callbackId)
+        {
+            case CREATE_HD_KEY:
+            case IMPORT_HD_KEY:
+            case CREATE_PRIVATE_KEY:
+            case CREATE_KEYSTORE_KEY:
+            case UPGRADE_KEYSTORE_KEY:
+            case UPGRADE_HD_KEY:
+                //warn user their phone is insecure
+                break;
+            default:
+                //proceed to use key, don't show unlocked warning
+                authenticatePass(callbackId);
+                return;
+        }
+
         AWalletAlertDialog dialog = new AWalletAlertDialog(activity);
         dialog.setIcon(AWalletAlertDialog.ERROR);
         dialog.setTitle(R.string.device_insecure);
@@ -932,7 +938,20 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         dialog.setButtonText(R.string.action_continue);
         dialog.setCanceledOnTouchOutside(false);
         dialog.setButtonListener(v -> {
-            cancelAuthentication();
+            //proceed with operation
+            switch (callbackId)
+            {
+                case UPGRADE_KEYSTORE_KEY:
+                case UPGRADE_HD_KEY:
+                    //dismiss sign dialog & cancel authentication
+                    if (signDialog != null && signDialog.isShowing())
+                        signDialog.dismiss();
+                    cancelAuthentication();
+                    break;
+                default:
+                    authenticatePass(callbackId);
+                    break;
+            }
             dialog.dismiss();
         });
         dialog.show();

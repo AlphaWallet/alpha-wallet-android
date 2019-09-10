@@ -187,4 +187,7 @@
     <string name="no_key">No Key found</string>
     <string name="title_enable_debug">Local Scripts Not Enabled</string>
     <string name="need_to_enable_debug">To use local TokenScripts you need to enable TokenScript override. Go to Settings, then click \'Enable TokenScript Override\'.</string>
+    <string name="too_many_fails">Too many fingerprint fails. Use PIN or wait 30 seconds</string>
+    <string name="no_fingerprint_enrolled">No fingerprints Enrolled. Use PIN</string>
+    <string name="cannot_process_fingerprint">Unable to process fingerprint. Use PIN</string>
 </resources>

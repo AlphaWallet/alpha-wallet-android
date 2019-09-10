@@ -91,7 +91,7 @@ import static android.app.Activity.RESULT_OK;
 import static io.stormbird.wallet.C.RESET_TOOLBAR;
 import static io.stormbird.wallet.C.RESET_WALLET;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
-import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
+import static io.stormbird.wallet.entity.Operation.SIGN_DATA;
 import static io.stormbird.wallet.ui.zxing.QRScanningActivity.DENY_PERMISSION;
 import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 
@@ -1100,8 +1100,8 @@ public class DappBrowserFragment extends Fragment implements
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
-        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
+        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
 
         if (gotAuth)
         {

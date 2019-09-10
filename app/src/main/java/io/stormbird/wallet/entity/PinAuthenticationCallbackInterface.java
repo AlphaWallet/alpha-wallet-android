@@ -6,6 +6,6 @@ package io.stormbird.wallet.entity;
  */
 public interface PinAuthenticationCallbackInterface
 {
-    void CompleteAuthentication(int taskCode);
-    void FailedAuthentication(int taskCode);
+    void CompleteAuthentication(Operation taskCode);
+    void FailedAuthentication(Operation taskCode);
 }

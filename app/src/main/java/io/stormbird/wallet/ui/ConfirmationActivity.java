@@ -39,7 +39,7 @@ import static io.stormbird.wallet.C.ETH_SYMBOL;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
 import static io.stormbird.wallet.entity.ConfirmationType.ETH;
 import static io.stormbird.wallet.entity.ConfirmationType.WEB3TRANSACTION;
-import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
+import static io.stormbird.wallet.entity.Operation.SIGN_DATA;
 import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 
 public class ConfirmationActivity extends BaseActivity implements SignAuthenticationCallback {
@@ -522,8 +522,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
-        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
+        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
         //got authorisation, continue with transaction
         if (gotAuth) finaliseTransaction();
     }

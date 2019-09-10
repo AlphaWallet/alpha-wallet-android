@@ -49,7 +49,7 @@ import java.util.Map;
 
 import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.entity.CryptoFunctions.sigFromByteArray;
-import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
+import static io.stormbird.wallet.entity.Operation.SIGN_DATA;
 import static io.stormbird.wallet.ui.DappBrowserFragment.PERSONAL_MESSAGE_PREFIX;
 
 /**
@@ -630,8 +630,8 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
-        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
+        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
 
         if (gotAuth)
         {

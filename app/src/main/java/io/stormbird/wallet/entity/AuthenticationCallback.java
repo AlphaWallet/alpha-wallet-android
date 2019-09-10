@@ -7,6 +7,6 @@ package io.stormbird.wallet.entity;
 
 public interface AuthenticationCallback
 {
-    void authenticatePass(int callbackId);
-    void authenticateFail(String fail, AuthenticationFailType failType, int callbackId);
+    void authenticatePass(Operation callbackId);
+    void authenticateFail(String fail, AuthenticationFailType failType, Operation callbackId);
 }

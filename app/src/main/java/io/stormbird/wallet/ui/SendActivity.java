@@ -119,7 +119,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         if (result != null)
         {
             //restore payment request
-            validateEIP681Request(result);
+            validateEIP681Request(result, true);
         }
     }
 
@@ -191,7 +191,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     {
         token = t;
         setupTokenContent();
-        validateEIP681Request(currentResult);
+        validateEIP681Request(currentResult, false);
         currentResult = null;
     }
 
@@ -271,7 +271,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                                     break;
                                 case "ethereum":
                                     //EIP681 protocol
-                                    validateEIP681Request(result);
+                                    validateEIP681Request(result, false);
                                     break;
                                 default:
                                     break;
@@ -339,7 +339,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         dialog.show();
     }
 
-    private void validateEIP681Request(QrUrlResult result)
+    private void validateEIP681Request(QrUrlResult result, boolean overrideNetwork)
     {
         if (dialog != null) dialog.dismiss();
         //check chain
@@ -351,12 +351,15 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         }
         else
         {
-            //chain ID indicator
-            Utils.setChainColour(chainName, result.chainId);
-            chainName.setText(info.name);
-            currentChain = result.chainId;
-            amountInput.onClear();
-            viewModel.startGasPriceChecker(result.chainId);
+            //change chain if this is a scan from outside send page
+            if (overrideNetwork)
+            {
+                Utils.setChainColour(chainName, result.chainId);
+                chainName.setText(info.name);
+                currentChain = result.chainId;
+                amountInput.onClear();
+                viewModel.startGasPriceChecker(result.chainId);
+            }
         }
 
         TextView sendText = findViewById(R.id.text_payment_request);

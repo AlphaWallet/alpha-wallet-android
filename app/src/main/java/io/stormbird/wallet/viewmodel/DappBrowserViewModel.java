@@ -212,7 +212,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         dAppFunction.DAppReturn(s.getBytes(), msg);
     }
 
-    public void openConfirmation(Context context, Web3Transaction transaction, String requesterURL, NetworkInfo networkInfo)
+    public void openConfirmation(Activity context, Web3Transaction transaction, String requesterURL, NetworkInfo networkInfo)
     {
         String networkName = networkInfo.name;
         boolean mainNet = networkInfo.isMainNetwork;

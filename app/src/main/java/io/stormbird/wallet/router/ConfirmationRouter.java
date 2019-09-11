@@ -1,6 +1,7 @@
 package io.stormbird.wallet.router;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import io.stormbird.token.tools.Convert;
@@ -30,7 +31,8 @@ public class ConfirmationRouter {
         context.startActivity(intent);
     }
 
-    public void open(Context context, Web3Transaction transaction, String networkName, boolean isMainNet, String requesterURL, int chainId)
+    //Sign transaction for dapp browser
+    public void open(Activity context, Web3Transaction transaction, String networkName, boolean isMainNet, String requesterURL, int chainId)
     {
         Intent intent = new Intent(context, ConfirmationActivity.class);
         intent.putExtra(C.EXTRA_WEB3TRANSACTION, transaction);
@@ -40,8 +42,8 @@ public class ConfirmationRouter {
         intent.putExtra(C.EXTRA_NETWORK_MAINNET, isMainNet);
         intent.putExtra(C.EXTRA_CONTRACT_NAME, requesterURL);
         intent.putExtra(C.EXTRA_NETWORKID, chainId);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        context.startActivityForResult(intent, C.REQUEST_TRANSACTION_CALLBACK);
     }
 
     public void openERC721Transfer(Context context, String to, String tokenId, String contractAddress, String name, String tokenName, String ensDetails, int chainId)

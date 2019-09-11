@@ -731,13 +731,30 @@ public class DappBrowserFragment extends Fragment implements
         if ((transaction.recipient.equals(Address.EMPTY) && transaction.payload != null) // Constructor
             || (!transaction.recipient.equals(Address.EMPTY) && (transaction.payload != null || transaction.value != null))) // Raw or Function TX
         {
-            viewModel.openConfirmation(getContext(), transaction, url, networkInfo);
+            viewModel.openConfirmation(getActivity(), transaction, url, networkInfo);
         }
         else
         {
             //display transaction error
             onInvalidTransaction(transaction);
             web3.onSignCancel(transaction);
+        }
+    }
+
+    //return from the openConfirmation above
+    public void handleTransactionCallback(int resultCode, Intent data)
+    {
+        if (data == null) return;
+        if (resultCode == RESULT_OK)
+        {
+            Web3Transaction web3Tx = data.getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
+            String hashData = data.getStringExtra(C.EXTRA_TRANSACTION_DATA);
+            web3.onSignTransactionSuccessful(web3Tx, hashData);
+        }
+        else
+        {
+            Web3Transaction web3Tx = data.getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
+            web3.onSignCancel(web3Tx);
         }
     }
     

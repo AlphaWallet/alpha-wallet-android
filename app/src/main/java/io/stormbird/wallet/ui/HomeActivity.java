@@ -87,6 +87,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public static final int RC_ASSET_NOTIFICATION_PERM = 224;
 
     public static final int DAPP_BARCODE_READER_REQUEST_CODE = 1;
+    public static final int DAPP_TRANSACTION_SEND_REQUEST = 2;
 
     public HomeActivity()
     {
@@ -819,6 +820,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 if (data != null) keyBackup = data.getStringExtra("Key");
                 if (resultCode == RESULT_OK) backupWalletSuccess(keyBackup);
                 else backupWalletFail(keyBackup);
+                break;
+            case C.REQUEST_TRANSACTION_CALLBACK:
+                dappBrowserFragment.handleTransactionCallback(resultCode, data);
                 break;
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
                 switch (getSelectedItem())

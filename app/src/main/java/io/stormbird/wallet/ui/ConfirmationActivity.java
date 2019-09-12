@@ -417,12 +417,11 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         });
         dialog.setOnDismissListener(v -> {
             dialog.dismiss();
-            Intent intent = new Intent(C.SIGN_DAPP_TRANSACTION);
+            Intent intent = new Intent();
             intent.putExtra(C.EXTRA_WEB3TRANSACTION, transaction);
             intent.putExtra(C.EXTRA_HEXDATA, txData.signature);
-            intent.putExtra(C.EXTRA_SUCCESS, true);
-            sendBroadcast(intent);
-
+            intent.putExtra(C.EXTRA_TRANSACTION_DATA, txData.txHash);
+            setResult(RESULT_OK, intent);
             finish();
         });
         dialog.show();
@@ -490,11 +489,11 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
             dialog.dismiss();
             if (confirmationType == WEB3TRANSACTION)
             {
-                Intent intent = new Intent(C.SIGN_DAPP_TRANSACTION);
+                Intent intent = new Intent();
                 intent.putExtra(C.EXTRA_WEB3TRANSACTION, transaction);
                 intent.putExtra(C.EXTRA_HEXDATA, "0x0000"); //Placeholder signature - transaction failed
                 intent.putExtra(C.EXTRA_SUCCESS, false);
-                sendBroadcast(intent);
+                setResult(RESULT_CANCELED, intent);
             }
             finish();
         });

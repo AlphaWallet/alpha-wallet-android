@@ -105,11 +105,11 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 			new NetworkInfo(ARTIS_SIGMA1_NETWORK, ARTIS_SIGMA1_SYMBOL, ARTIS_SIGMA1_RPC_URL,
 							"https://explorer.sigma1.artis.network/tx/", ARTIS_SIGMA1_ID, false,
 							ARTIS_SIGMA1_RPC_URL,
-							"https://explorer.sigma1.artis.network/", ETHEREUM_TICKER_NAME, ""),
+							"https://explorer.sigma1.artis.network/", ARTIS_SIGMA_TICKER, ""),
 			new NetworkInfo(ARTIS_TAU1_NETWORK, ARTIS_TAU1_SYMBOL, ARTIS_TAU1_RPC_URL,
 							"https://explorer.tau1.artis.network/tx/", ARTIS_TAU1_ID, false,
 							ARTIS_TAU1_RPC_URL,
-							"https://explorer.tau1.artis.network/", ETHEREUM_TICKER_NAME, ""),
+							"https://explorer.tau1.artis.network/", ARTIS_SIGMA_TICKER, ""),
 	};
 
 	private final PreferenceRepositoryType preferences;
@@ -228,9 +228,25 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	@Override
     public Single<Ticker> getTicker(int chainId) {
     	NetworkInfo network = networkMap.get(chainId);
-        return Single.fromObservable(tickerService
-                .fetchTickerPrice(network.tickerId));
+    	switch (network.tickerId)
+		{
+			case ARTIS_SIGMA_TICKER:
+				return tickerService.convertPair("EUR", "USD")
+						.map(this::getSigmaTicker);
+			default:
+				return Single.fromObservable(tickerService
+						.fetchTickerPrice(network.tickerId));
+		}
     }
+
+	private Ticker getSigmaTicker(double rate)
+	{
+		Ticker artisTicker = new Ticker();
+		artisTicker.percentChange24h = "0.00";
+		double conversion = (1.0/13.7603)*rate; //13.7603 ATS = 1 EUR
+		artisTicker.price_usd = String.valueOf(conversion);
+		return artisTicker;
+	}
 
 	public static boolean hasRealValue(int chainId)
 	{
@@ -240,6 +256,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 			case EthereumNetworkRepository.POA_ID:
 			case EthereumNetworkRepository.CLASSIC_ID:
 			case EthereumNetworkRepository.XDAI_ID:
+            case EthereumNetworkRepository.ARTIS_SIGMA1_ID:
 				return true;
 
 			default:

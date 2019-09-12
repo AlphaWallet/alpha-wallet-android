@@ -49,7 +49,6 @@ public class RepositoriesModule {
 	@Singleton
     @Provides
     TickerService provideTickerService(OkHttpClient httpClient, Gson gson) {
-	    //return new TrustWalletTickerService(httpClient, gson);
 		return new CoinmarketcapTickerService(httpClient, gson);
     }
 

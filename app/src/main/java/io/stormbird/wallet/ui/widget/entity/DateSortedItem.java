@@ -3,6 +3,8 @@ package io.stormbird.wallet.ui.widget.entity;
 import android.text.format.DateUtils;
 
 import io.stormbird.wallet.ui.widget.holder.TransactionDateHolder;
+import io.stormbird.wallet.util.LocaleUtils;
+import io.stormbird.wallet.util.Utils;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -29,12 +31,6 @@ public class DateSortedItem extends TimestampSortedItem<Date> {
     }
 
     public static DateSortedItem round(long timeStampInSec) {
-        Calendar calendar = Calendar.getInstance(TimeZone.getDefault()); //Display transactions in phone's native time
-        calendar.setTimeInMillis(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
-        calendar.set(Calendar.MILLISECOND, 999);
-        calendar.set(Calendar.SECOND, 59);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        return new DateSortedItem(calendar.getTime());
+        return new DateSortedItem(LocaleUtils.getLocalDateFromTimestamp(timeStampInSec));
     }
 }

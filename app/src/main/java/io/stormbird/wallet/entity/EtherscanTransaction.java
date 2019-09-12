@@ -57,7 +57,7 @@ public class EtherscanTransaction
             //add a constructor here
             o = generateERC875Op();
             TransactionContract ct = o[0].contract;
-            ct.setOperation(TransactionType.CONSTRUCTOR);// R.string.ticket_contract_constructor);
+            ct.setOperation(TransactionType.CONSTRUCTOR);
             ct.address = contractAddress;
             ct.setType(-3);// indicate that we need to load the contract
             o[0].value = "";

@@ -522,7 +522,11 @@ public class Token implements Parcelable
         String name = null;
         try
         {
-            if (transaction.operations != null && transaction.operations.length > 0)
+            if (transaction.blockNumber != null && transaction.blockNumber.equals("0"))
+            {
+                name = ctx.getString(R.string.status_pending);
+            }
+            else if (transaction.operations != null && transaction.operations.length > 0)
             {
                 TransactionOperation operation = transaction.operations[0];
                 name = operation.getOperationName(ctx);

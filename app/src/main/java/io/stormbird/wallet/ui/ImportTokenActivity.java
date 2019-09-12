@@ -43,7 +43,7 @@ import static io.stormbird.token.tools.Convert.getEthString;
 import static io.stormbird.token.tools.ParseMagicLink.currencyLink;
 import static io.stormbird.token.tools.ParseMagicLink.spawnable;
 import static io.stormbird.wallet.C.IMPORT_STRING;
-import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
+import static io.stormbird.wallet.entity.Operation.SIGN_DATA;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
@@ -637,8 +637,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
-        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
+        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
         viewModel.performImport();
         onProgress(true);
     }

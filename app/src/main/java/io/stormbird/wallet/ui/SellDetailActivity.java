@@ -50,7 +50,7 @@ import static io.stormbird.wallet.C.EXTRA_TOKENID_LIST;
 import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.C.Key.WALLET;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
-import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
+import static io.stormbird.wallet.entity.Operation.SIGN_DATA;
 import static io.stormbird.wallet.ui.ImportTokenActivity.getUsdString;
 
 /**
@@ -608,8 +608,8 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
-        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
+        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
         //got authorisation, continue with transaction
         if (gotAuth) sellTicketLinkFinal();
     }

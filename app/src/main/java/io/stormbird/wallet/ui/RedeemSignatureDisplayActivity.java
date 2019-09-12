@@ -32,7 +32,7 @@ import javax.inject.Inject;
 
 import static io.stormbird.wallet.C.Key.*;
 import static io.stormbird.wallet.C.PRUNE_ACTIVITY;
-import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
+import static io.stormbird.wallet.entity.Operation.SIGN_DATA;
 
 /**
  * Created by James on 24/01/2018.
@@ -202,8 +202,8 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
-        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
+        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
         if (gotAuth) viewModel.updateSignature(wallet);
         else dialogKeyNotAvailableError();
     }

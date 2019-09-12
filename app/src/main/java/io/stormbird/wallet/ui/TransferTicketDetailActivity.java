@@ -52,7 +52,7 @@ import java.util.Locale;
 import static io.stormbird.wallet.C.*;
 import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.C.Key.WALLET;
-import static io.stormbird.wallet.service.KeyService.Operation.SIGN_DATA;
+import static io.stormbird.wallet.entity.Operation.SIGN_DATA;
 import static io.stormbird.wallet.ui.zxing.QRScanningActivity.DENY_PERMISSION;
 import static io.stormbird.wallet.widget.AWalletAlertDialog.ERROR;
 
@@ -353,8 +353,8 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
             @Override
             public void GotAuthorisation(boolean gotAuth)
             {
-                if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
-                else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+                if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
+                else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
 
                 if (gotAuth) viewModel.generateUniversalLink(token.getTicketIndices(ticketIds), token.getAddress(), calculateExpiryTime());
             }
@@ -696,8 +696,8 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
             @Override
             public void GotAuthorisation(boolean gotAuth)
             {
-                if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA.ordinal());
-                else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA.ordinal());
+                if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
+                else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
 
                 if (gotAuth) transferTicketFinal();
             }

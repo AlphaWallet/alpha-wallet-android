@@ -23,6 +23,7 @@ import android.widget.*;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.AuthenticationCallback;
 import io.stormbird.wallet.entity.AuthenticationFailType;
+import io.stormbird.wallet.entity.Operation;
 
 import static android.hardware.fingerprint.FingerprintManager.*;
 
@@ -35,7 +36,7 @@ public class SignTransactionDialog extends BottomSheetDialog
     public static final int REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 123;
 
     protected Activity context;
-    private int callBackId;
+    private Operation callBackId;
     private final ImageView fingerprint;
     private final TextView cancel;
     private final TextView usePin;
@@ -43,7 +44,7 @@ public class SignTransactionDialog extends BottomSheetDialog
     private final String unlockTitle;
     private final String unlockDetail;
 
-    public SignTransactionDialog(@NonNull Activity activity, int callBackId, String msg, String desc)
+    public SignTransactionDialog(@NonNull Activity activity, Operation callBackId, String msg, String desc)
     {
         super(activity);
         context = activity;
@@ -102,7 +103,7 @@ public class SignTransactionDialog extends BottomSheetDialog
         KeyguardManager mKeyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
         Intent intent = mKeyguardManager.createConfirmDeviceCredentialIntent(unlockTitle, unlockDetail);
         if (intent != null) {
-            context.startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + callBackId);
+            context.startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + callBackId.ordinal());
         }
     }
 
@@ -126,22 +127,22 @@ public class SignTransactionDialog extends BottomSheetDialog
                         removeFingerprintGraphic();
                         break;
                     case FINGERPRINT_ERROR_LOCKOUT:
-                        fingerprintError.setText("Too many fingerprint fails. Use PIN or wait 30 seconds");
+                        fingerprintError.setText(R.string.too_many_fails);
                         fingerprintError.setVisibility(View.VISIBLE);
                         break;
                     case FINGERPRINT_ERROR_LOCKOUT_PERMANENT:
-                        fingerprintError.setText("Too many fingerprint fails. Use PIN or wait 30 seconds");
+                        fingerprintError.setText(R.string.too_many_fails);
                         fingerprintError.setVisibility(View.VISIBLE);
                         break;
                     case FINGERPRINT_ERROR_NO_FINGERPRINTS:
-                        fingerprintError.setText("No fingerprints Enrolled. Use PIN");
+                        fingerprintError.setText(R.string.no_fingerprint_enrolled);
                         fingerprintError.setVisibility(View.VISIBLE);
                         break;
                     case FINGERPRINT_ERROR_TIMEOUT:
                         //safe to ignore
                         break;
                     case FINGERPRINT_ERROR_UNABLE_TO_PROCESS:
-                        fingerprintError.setText("Unable to process fingerprint. Use PIN");
+                        fingerprintError.setText(R.string.cannot_process_fingerprint);
                         fingerprintError.setVisibility(View.VISIBLE);
                         break;
                 }

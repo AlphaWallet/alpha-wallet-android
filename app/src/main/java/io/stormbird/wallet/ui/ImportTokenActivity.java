@@ -554,7 +554,22 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         }
         else
         {
-            viewModel.performImport();
+            //needs gas, so require auth first
+            SignAuthenticationCallback cb = new SignAuthenticationCallback()
+            {
+                @Override
+                public void GotAuthorisation(boolean gotAuth)
+                {
+                    viewModel.performImport();
+                }
+
+                @Override
+                public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
+                {
+                    authInterface = authCallback;
+                }
+            };
+            viewModel.getAuthorisation(this, cb);
         }
     }
 

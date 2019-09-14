@@ -10,6 +10,6 @@ import io.reactivex.Single;
 public interface TickerService {
 
     Observable<Ticker> fetchTickerPrice(String ticker);
-
+    Single<Double> convertPair(String currency1, String currency2);
     Single<TokenTicker[]> fetchTokenTickers(Token[] tokens, String currency);
 }

@@ -1,6 +1,7 @@
 package io.stormbird.wallet.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -8,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import dagger.android.AndroidInjection;
 import io.stormbird.token.entity.TSAction;
@@ -28,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.stormbird.wallet.C.Key.TICKET;
+import static io.stormbird.wallet.C.Key.WALLET;
 
 /**
  * Created by James on 2/04/2019.
@@ -82,26 +85,34 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
 
     private void setupFunctions()
     {
-        Button[] buttons = new Button[3];
-        buttons[1] = findViewById(R.id.button_use);
-        buttons[0] = findViewById(R.id.button_sell);
-        buttons[2] = findViewById(R.id.button_transfer);
+        final LinearLayout auxButtons = findViewById(R.id.buttons_aux);
+        final Button[] buttons = new Button[6];
+        buttons[0] = findViewById(R.id.button_use);
+        buttons[4] = findViewById(R.id.button_sell);
+        buttons[1] = findViewById(R.id.button_action1);
+        buttons[2] = findViewById(R.id.button_action2);
+        buttons[3] = findViewById(R.id.button_action3);
+        buttons[5] = findViewById(R.id.button_transfer);
 
-        for (Button b : buttons) { b.setOnClickListener(this); }
+        for (Button b : buttons) b.setOnClickListener(this);
 
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
-        if (functions != null)
+        if (functions != null && functions.size() > 0)
         {
             int index = 0;
-            for (String name : functions.keySet())
+            for (String function : functions.keySet())
             {
-                buttons[index++].setText(name);
+                buttons[index].setVisibility(View.VISIBLE);
+                buttons[index].setText(function);
+                if (index == 1) auxButtons.setVisibility(View.VISIBLE);
+                if (index == 4) break;
+                index++;
             }
         }
 
         if (!token.isERC875())
         {
-            buttons[1].setVisibility(View.GONE);
+            buttons[4].setVisibility(View.GONE);
         }
     }
 
@@ -125,33 +136,29 @@ public class TokenFunctionActivity extends BaseActivity implements View.OnClickL
     @Override
     public void onClick(View v)
     {
-        switch (v.getId())
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        //this will be the user function
+        String buttonText = ((Button) v).getText().toString();
+        if (functions.containsKey(buttonText))
         {
-            case R.id.button_use:
+            viewModel.showFunction(this, token, buttonText, idList);
+        }
+        else
+        {
+            switch (v.getId())
             {
-                viewModel.selectRedeemToken(this, token, idList);
-            }
-            break;
-            case R.id.button_sell:
-            {
-                Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
-                //this will be the user function
-                if (functions == null || functions.size() == 0)
-                {
+                case R.id.button_use:
+                    viewModel.selectRedeemToken(this, token, idList);
+                    break;
+                case R.id.button_sell:
                     viewModel.openUniversalLink(this, token, token.intArrayToString(idList, false));
-                }
-                else
-                {
-                    String buttonText = ((Button) v).getText().toString();
-                    viewModel.showFunction(this, token, buttonText, idList);
-                }
+                    break;
+                case R.id.button_transfer:
+                    viewModel.showTransferToken(this, token, token.intArrayToString(idList, false));
+                    break;
+                default:
+                    break;
             }
-            break;
-            case R.id.button_transfer:
-            {
-                viewModel.showTransferToken(this, token, token.intArrayToString(idList, false));
-            }
-            break;
         }
     }
 

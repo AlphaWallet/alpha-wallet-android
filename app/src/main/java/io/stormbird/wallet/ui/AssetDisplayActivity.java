@@ -16,6 +16,7 @@ import javax.inject.Inject;
 
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import dagger.android.AndroidInjection;
@@ -112,11 +113,7 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
             findViewById(R.id.button_sell).setVisibility(View.GONE);
         }
 
-        findViewById(R.id.button_transfer).setOnClickListener(this);
-        findViewById(R.id.button_use).setOnClickListener(this);
-
         list.setLayoutManager(new LinearLayoutManager(this));
-        findViewById(R.id.button_sell).setOnClickListener(this);
         list.setAdapter(adapter);
         list.setHapticFeedbackEnabled(true);
 
@@ -144,9 +141,17 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
     {
         findViewById(R.id.layoutButtons).setVisibility(View.GONE);
 
-        final Button[] buttons = new Button[3];
-        buttons[1] = findViewById(R.id.button_use);
-        buttons[0] = findViewById(R.id.button_sell);
+        LinearLayout auxButtons = findViewById(R.id.buttons_aux);
+
+        final Button[] buttons = new Button[6];
+        buttons[0] = findViewById(R.id.button_use);
+        buttons[4] = findViewById(R.id.button_sell);
+        buttons[1] = findViewById(R.id.button_action1);
+        buttons[2] = findViewById(R.id.button_action2);
+        buttons[3] = findViewById(R.id.button_action3);
+        buttons[5] = findViewById(R.id.button_transfer);
+
+        for (Button b : buttons) b.setOnClickListener(this);
 
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         if (functions != null && functions.size() > 0)
@@ -156,6 +161,8 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
             {
                 buttons[index].setVisibility(View.VISIBLE);
                 buttons[index].setText(function);
+                if (index == 1) auxButtons.setVisibility(View.VISIBLE);
+                if (index == 4) break;
                 index++;
             }
         }
@@ -224,18 +231,29 @@ public class AssetDisplayActivity extends BaseActivity implements OnTokenClickLi
             activeClick = true;
             handler.postDelayed(this, 500);
 
-            switch (v.getId())
+            Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+            //this will be the user function
+            String buttonText = ((Button) v).getText().toString();
+            if (functions.containsKey(buttonText))
             {
-                case R.id.button_transfer:
+                handleUseClick(buttonText, v.getId());
+            }
+            else
+            {
+                switch (v.getId())
                 {
-                    viewModel.showTransferToken(this, token, selection);
+                    case R.id.button_use:
+                        viewModel.selectRedeemTokens(this, token, selection);
+                        break;
+                    case R.id.button_sell:
+                        viewModel.sellTicketRouter(this, token, token.intArrayToString(selection, false));
+                        break;
+                    case R.id.button_transfer:
+                        viewModel.showTransferToken(this, token, selection);
+                        break;
+                    default:
+                        break;
                 }
-                break;
-
-                default:
-                    Button b = findViewById(v.getId());
-                    handleUseClick(b.getText().toString(), v.getId());
-                    break;
             }
         }
     }

@@ -24,16 +24,87 @@
             android:layout_alignParentEnd="true"
             tools:visibility="gone" />
 
-
         <LinearLayout
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_gravity="center"
-            android:background="@color/button_green"
             android:visibility="visible"
-            android:orientation="horizontal">
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/buttons_aux"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:layout_gravity="center"
+                android:background="@color/button_green"
+                android:layout_marginBottom="1dp"
+                android:visibility="gone"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/button_action1"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/selector_button"
+                    android:fontFamily="@font/font_regular"
+                    android:gravity="center"
+                    android:paddingBottom="15dp"
+                    android:paddingTop="15dp"
+                    android:text="@string/action_use"
+                    android:visibility="gone"
+                    android:textAllCaps="false"
+                    android:textColor="@color/button_text_color"
+                    android:textSize="20sp" />
+
+                <include layout="@layout/button_divider" />
+
+                <Button
+                    android:id="@+id/button_action2"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/selector_button"
+                    android:fontFamily="@font/font_regular"
+                    android:gravity="center"
+                    android:paddingBottom="15dp"
+                    android:paddingTop="15dp"
+                    android:text="@string/action_sell"
+                    android:textAllCaps="false"
+                    android:visibility="gone"
+                    android:textColor="@color/button_text_color"
+                    android:textSize="20sp" />
+
+                <include layout="@layout/button_divider" />
+
+                <Button
+                    android:id="@+id/button_action3"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/selector_button"
+                    android:fontFamily="@font/font_regular"
+                    android:gravity="center"
+                    android:paddingBottom="15dp"
+                    android:paddingTop="15dp"
+                    android:text="@string/action_transfer"
+                    android:textAllCaps="false"
+                    android:visibility="gone"
+                    android:textColor="@color/button_text_color"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:layout_gravity="center"
+                android:background="@color/button_green"
+                android:visibility="visible"
+                android:orientation="horizontal">
 
             <Button
                 android:id="@+id/button_use"
@@ -86,6 +157,7 @@
                 android:textAllCaps="false"
                 android:textColor="@color/button_text_color"
                 android:textSize="20sp" />
+            </LinearLayout>
         </LinearLayout>
 
         <RelativeLayout

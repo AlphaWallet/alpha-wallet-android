@@ -7,12 +7,15 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.Map;
+
+import io.stormbird.token.entity.TSAction;
 import io.stormbird.token.entity.XMLDsigDescriptor;
 import io.stormbird.wallet.R;
 
 public class CertifiedToolbarView extends android.support.v7.widget.Toolbar
 {
-    private Context context;
+    private final Context context;
 
     public CertifiedToolbarView(Context ctx)
     {

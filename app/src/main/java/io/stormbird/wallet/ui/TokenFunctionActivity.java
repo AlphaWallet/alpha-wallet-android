@@ -84,31 +84,6 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         viewModel.getCurrentWallet();
     }
 
-    private void setupFunctions()
-    {
-        Button[] buttons = new Button[3];
-        buttons[1] = findViewById(R.id.button_use);
-        buttons[0] = findViewById(R.id.button_sell);
-        buttons[2] = findViewById(R.id.button_transfer);
-
-        //for (Button b : buttons) { b.setOnClickListener(this); }
-
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
-        if (functions != null)
-        {
-            int index = 0;
-            for (String name : functions.keySet())
-            {
-                buttons[index++].setText(name);
-            }
-        }
-
-        if (!token.isERC875())
-        {
-            buttons[1].setVisibility(View.GONE);
-        }
-    }
-
     @Override
     public void onResume()
     {
@@ -138,37 +113,6 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     {
         tokenView.callToJS("refresh()");
     }
-
-    /*
-
-    @Override
-    public void onClick(View v)
-    {
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
-        //this will be the user function
-        String buttonText = ((Button) v).getText().toString();
-        if (functions != null && functions.containsKey(buttonText))
-        {
-            viewModel.showFunction(this, token, buttonText, idList);
-        }
-        else
-        {
-            switch (v.getId())
-            {
-                case R.id.button_use:
-                    viewModel.selectRedeemToken(this, token, idList);
-                    break;
-                case R.id.button_sell:
-                    viewModel.openUniversalLink(this, token, token.intArrayToString(idList, false));
-                    break;
-                case R.id.button_transfer:
-                    viewModel.showTransferToken(this, token, token.intArrayToString(idList, false));
-                    break;
-            }
-        }
-    }
-
-     */
 
     @Override
     public void selectRedeemTokens(List<BigInteger> selection)

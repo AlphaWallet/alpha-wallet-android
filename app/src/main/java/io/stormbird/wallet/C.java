@@ -19,7 +19,7 @@ public abstract class C {
     public static final String RINKEBY_NETWORK_NAME = "Rinkeby (Test)";
     public static final String GOERLI_NETWORK_NAME = "Görli (Test)";
     public static final String ARTIS_SIGMA1_NETWORK = "ARTIS sigma1";
-    public static final String ARTIS_TAU1_NETWORK = "ARTIS tau1";
+    public static final String ARTIS_TAU1_NETWORK = "ARTIS tau1 (Test)";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";

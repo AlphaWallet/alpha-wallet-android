@@ -126,10 +126,10 @@ public class DappBrowserFragment extends Fragment implements
     private DappBrowserSuggestionsAdapter adapter;
     private URLLoadReceiver URLReceiver;
 
-    private Fragment dappHomeFragment;
-    private Fragment myDappsFragment;
-    private Fragment discoverDappsFragment;
-    private Fragment browserHistoryFragment;
+    private final Fragment dappHomeFragment;
+    private final Fragment myDappsFragment;
+    private final Fragment discoverDappsFragment;
+    private final Fragment browserHistoryFragment;
 
     private Toolbar toolbar;
     private ImageView back;
@@ -157,13 +157,17 @@ public class DappBrowserFragment extends Fragment implements
         SIGN_PERSONAL_MESSAGE, SIGN_MESSAGE
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public DappBrowserFragment()
+    {
         dappHomeFragment = new DappHomeFragment();
         myDappsFragment = new MyDappsFragment();
         discoverDappsFragment = new DiscoverDappsFragment();
         browserHistoryFragment = new BrowserHistoryFragment();
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -223,91 +227,58 @@ public class DappBrowserFragment extends Fragment implements
 
     @Override
     public void onAttachFragment(Fragment fragment) {
-        if (fragment instanceof DappHomeFragment) {
-            DappHomeFragment f = (DappHomeFragment) fragment;
-            f.setCallbacks(this, this);
-        }
-        if (fragment instanceof DiscoverDappsFragment) {
-            DiscoverDappsFragment f = (DiscoverDappsFragment) fragment;
-            f.setCallbacks(this);
-        }
-        if (fragment instanceof MyDappsFragment) {
-            MyDappsFragment f = (MyDappsFragment) fragment;
-            f.setCallbacks(this);
-        }
-        if (fragment instanceof BrowserHistoryFragment) {
-            BrowserHistoryFragment f = (BrowserHistoryFragment) fragment;
-            f.setCallbacks(this, this);
+        if (fragment.getTag() != null)
+        {
+            switch (fragment.getTag())
+            {
+                case DAPP_HOME:
+                    ((DappHomeFragment) fragment).setCallbacks(this, this);
+                    break;
+                case DISCOVER_DAPPS:
+                    ((DiscoverDappsFragment) fragment).setCallbacks(this);
+                    break;
+                case MY_DAPPS:
+                    ((MyDappsFragment) fragment).setCallbacks(this);
+                    break;
+                case HISTORY:
+                    ((BrowserHistoryFragment) fragment).setCallbacks(this, this);
+                    break;
+                default:
+                    //no init
+                    break;
+            }
         }
     }
 
     private void attachFragment(Fragment fragment, String tag) {
-        if (tag != null && getContext() != null && getChildFragmentManager().findFragmentByTag(tag) == null)
+        if (tag != null && getHost() != null && getChildFragmentManager().findFragmentByTag(tag) == null)
         {
-            switch (tag)
-            {
-                case DAPP_HOME:
-                {
-                    DappHomeFragment f = (DappHomeFragment) fragment;
-                    showFragment(f, tag);
-                    break;
-                }
-                case DISCOVER_DAPPS:
-                {
-                    DiscoverDappsFragment f = (DiscoverDappsFragment) fragment;
-                    showFragment(f, tag);
-                    break;
-                }
-                case MY_DAPPS:
-                {
-                    MyDappsFragment f = (MyDappsFragment) fragment;
-                    showFragment(f, tag);
-                    break;
-                }
-                case HISTORY:
-                {
-                    BrowserHistoryFragment f = (BrowserHistoryFragment) fragment;
-                    showFragment(f, tag);
-                    break;
-                }
-                default:
-                    showFragment(fragment, tag);
-                    break;
-            }
+            showFragment(fragment, tag);
         }
     }
 
     private void attachFragment(String tag) {
-        if (tag != null && getContext() != null && getChildFragmentManager().findFragmentByTag(tag) == null)
+        if (tag != null && getHost() != null && getChildFragmentManager().findFragmentByTag(tag) == null)
         {
+            Fragment f = null;
             switch (tag)
             {
                 case DAPP_HOME:
-                {
-                    DappHomeFragment f = new DappHomeFragment();
-                    showFragment(f, tag);
+                    f = dappHomeFragment;
                     lastHomeTag = DAPP_HOME;
                     break;
-                }
                 case DISCOVER_DAPPS:
-                {
-                    DiscoverDappsFragment f = new DiscoverDappsFragment();
-                    showFragment(f, tag);
+                    f = discoverDappsFragment;
                     break;
-                }
                 case MY_DAPPS:
-                {
-                    MyDappsFragment f = new MyDappsFragment();
-                    showFragment(f, tag);
+                    f = myDappsFragment;
                     break;
-                }
                 case HISTORY:
-                {
-                    BrowserHistoryFragment f = new BrowserHistoryFragment();
-                    showFragment(f, tag);
+                    f = browserHistoryFragment;
                     break;
-                }
             }
+
+            if (f != null) showFragment(f, tag);
         }
     }
 
@@ -318,7 +289,6 @@ public class DappBrowserFragment extends Fragment implements
                 .commit();
 
         setBackForwardButtons();
-        back.setOnClickListener(v -> goToPreviousPage());
     }
 
     private void detachFragments(boolean detachHome) {
@@ -820,17 +790,18 @@ public class DappBrowserFragment extends Fragment implements
             detachFragments(true);
             loadSessionUrl(-1);
         }
-        else if (lastHomeTag != null && !currentFragment.equals(DAPP_HOME))//back into the dappBrowser fragments
+        else
         {
             detachFragments(true);
-            attachFragment(lastHomeTag);
-            lastHomeTag = DAPP_HOME;
-        }
-        else if (lastHomeTag == null)
-        {
-            detachFragments(true);
-            attachFragment(DAPP_HOME);
-            lastHomeTag = DAPP_HOME;
+            if (lastHomeTag != null && !lastHomeTag.equals(DAPP_HOME))
+            {
+                attachFragment(lastHomeTag);
+                lastHomeTag = DAPP_HOME;
+            }
+            else
+            {
+                attachFragment(DAPP_HOME);
+            }
         }
     }
 

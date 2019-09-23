@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 import static io.stormbird.token.entity.MagicLinkInfo.getNodeURLByNetworkId;
 import static io.stormbird.wallet.C.BURN_ADDRESS;
+import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
 import static io.stormbird.wallet.util.Utils.isAlNum;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
@@ -582,7 +583,7 @@ public class TokenRepository implements TokenRepositoryType {
             else
             {
                 List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
-                if (response.size() == 1) balance = new BigDecimal(((Uint256) response.get(0)).getValue());
+                if (response.size() > 0) balance = new BigDecimal(((Uint256) response.get(0)).getValue());
 
                 if (token != null && balance.equals(BigDecimal.valueOf(32)) && responseValue.length() > 66)
                 {
@@ -1212,6 +1213,36 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Single<ContractType> determineCommonType(TokenInfo tokenInfo)
+    {
+        return Single.fromCallable(() -> {
+            ContractType returnType = ContractType.OTHER;
+            try
+            {
+                Function function = balanceOf(ZERO_ADDRESS);
+                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
+                String responseValue = callSmartContractFunction(function, tokenInfo.address, network, new Wallet(ZERO_ADDRESS));
+                if (responseValue != null)
+                {
+                    List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
+                    if (response.size() == 1) returnType = ContractType.ERC20;
+                    else if (response.size() > 1)
+                    {
+                        BigDecimal balance = new BigDecimal(((Uint256) response.get(0)).getValue());
+                        if (balance.equals(BigDecimal.valueOf(32)) && responseValue.length() > 66) returnType = ContractType.ERC875;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                //
+            }
+
+            return returnType;
+        });
+    }
+
+    @Override
     public Single<String> resolveProxyAddress(TokenInfo tokenInfo)
     {
         return Single.fromCallable(() -> {
@@ -1220,7 +1251,7 @@ public class TokenRepository implements TokenRepositoryType {
             {
                 NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
                 String received = getContractData(networkInfo, tokenInfo.address, addrParam("implementation"), "");
-                if (received != null && isValidAddress(received))
+                if (received != null && isValidAddress(received) && !received.equals(ZERO_ADDRESS))
                 {
                     contractAddress = received;
                 }

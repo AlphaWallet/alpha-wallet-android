@@ -14,17 +14,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
-import com.google.api.Distribution;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.stormbird.token.entity.TSAction;
-import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
-import io.stormbird.wallet.entity.ERC721Token;
 import io.stormbird.wallet.entity.StandardFunctionInterface;
 import io.stormbird.wallet.entity.Token;
 import io.stormbird.wallet.service.AssetDefinitionService;
@@ -320,5 +317,22 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
         buttonCount++;
         if (functionName.length() > 14) addNewButtonLine();
         return button;
+    }
+
+    public void setupFunctionList(StandardFunctionInterface functionInterface, List<String> functionList)
+    {
+        callStandardFunctions = functionInterface;
+        if (functions == null) functions = new HashMap<>();
+        functions.clear();
+        removeAllViews();
+        TSAction dummyAction = new TSAction();
+
+        //add a new view in
+        addNewButtonLine();
+        for (String func : functionList)
+        {
+            addButton(func);
+            functions.put(func, dummyAction);
+        }
     }
 }

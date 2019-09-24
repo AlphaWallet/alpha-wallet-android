@@ -63,6 +63,7 @@ public class FetchTransactionsInteract {
             case ERC875:
                 //requires additional handling to determine if it's Legacy type, but safe to return ERC875 for now:
                 transactionRepository.queryInterfaceSpec(tokenInfo.address, tokenInfo)
+                        .subscribeOn(Schedulers.io())
                         .subscribe(actualType -> TokensService.setInterfaceSpec(tokenInfo.chainId, tokenInfo.address, actualType)).isDisposed();
                 return Single.fromCallable(() -> type);
             default:

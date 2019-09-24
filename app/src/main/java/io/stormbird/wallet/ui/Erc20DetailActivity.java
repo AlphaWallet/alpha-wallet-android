@@ -29,16 +29,18 @@ import io.stormbird.wallet.ui.widget.adapter.TransactionsAdapter;
 import io.stormbird.wallet.viewmodel.Erc20DetailViewModel;
 import io.stormbird.wallet.viewmodel.Erc20DetailViewModelFactory;
 import io.stormbird.wallet.widget.CertifiedToolbarView;
+import io.stormbird.wallet.widget.FunctionButtonBar;
 
 import javax.inject.Inject;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Map;
 
 import static io.stormbird.wallet.C.Key.TICKET;
 import static io.stormbird.wallet.C.Key.WALLET;
 
-public class Erc20DetailActivity extends BaseActivity {
+public class Erc20DetailActivity extends BaseActivity implements StandardFunctionInterface {
     @Inject
     Erc20DetailViewModelFactory erc20DetailViewModelFactory;
     Erc20DetailViewModel viewModel;
@@ -53,8 +55,7 @@ public class Erc20DetailActivity extends BaseActivity {
     private Wallet wallet;
     private Token token;
 
-    private Button sendBtn;
-    private Button receiveBtn;
+    private FunctionButtonBar functionBar;
     private ProgressBar progressBar;
     private LinearLayout noTransactionsLayout;
     private TextView noTransactionsSubText;
@@ -125,46 +126,19 @@ public class Erc20DetailActivity extends BaseActivity {
         tokenViewAdapter.setTokens(tokens);
         tokenView.setAdapter(tokenViewAdapter);
 
-        if (viewModel.hasIFrame(token)) {
-            addTokenPage();
-        }
-
-        if (viewModel.hasAction(token)) {
-            setupAction();
-        }
+        setupButtons();
 
         findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE);
         viewModel.checkTokenScriptValidity(token);
     }
 
-    private void setupAction()
+    private void setupButtons()
     {
-        final Map<String, TSAction> actions = viewModel.getActions(token);
-        if (actions != null)
+        if (wallet.type != WalletType.WATCH)
         {
-            final Button[] buttons = new Button[3];
-            buttons[0] = findViewById(R.id.button_action1);
-            buttons[1] = findViewById(R.id.button_action2);
-            buttons[2] = findViewById(R.id.button_action3);
-            findViewById(R.id.layoutActionButtons).setVisibility(View.VISIBLE);
-
-            int index = 0;
-            for (String action : actions.keySet())
-            {
-                Button actionButton = buttons[index++];
-                actionButton.setVisibility(View.VISIBLE);
-                actionButton.setText(action);
-                actionButton.setOnClickListener(view -> {
-                    //open function page
-                    Intent intent = new Intent(this, FunctionActivity.class);
-                    intent.putExtra(TICKET, token);
-                    intent.putExtra(WALLET, wallet);
-                    intent.putExtra(C.EXTRA_STATE, action);
-                    intent.putExtra(C.EXTRA_TOKEN_ID, BigInteger.ZERO.toString(16));
-                    intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                    startActivity(intent);
-                });
-            }
+            functionBar = findViewById(R.id.layoutButtons);
+            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null);
+            functionBar.revealButtons();
         }
     }
 
@@ -243,22 +217,6 @@ public class Erc20DetailActivity extends BaseActivity {
         }
 
         progressBar = findViewById(R.id.progress_bar);
-
-        sendBtn = findViewById(R.id.button_send);
-        sendBtn.setOnClickListener(v -> {
-            viewModel.showSendToken(this, myAddress, token);
-        });
-
-        receiveBtn = findViewById(R.id.button_receive);
-        receiveBtn.setOnClickListener(v -> {
-            viewModel.showMyAddress(this, wallet, token);
-        });
-
-        if (wallet.type == WalletType.WATCH)
-        {
-            sendBtn.setVisibility(View.GONE);
-            receiveBtn.setVisibility(View.GONE);
-        }
     }
 
     private void addTokenPage() {
@@ -320,5 +278,29 @@ public class Erc20DetailActivity extends BaseActivity {
         super.onResume();
         viewModel.prepare(token);
         viewModel.startEthereumTicker(token);
+    }
+
+    @Override
+    public void handleTokenScriptFunction(String function, List<BigInteger> selection)
+    {
+        Intent intent = new Intent(this, FunctionActivity.class);
+        intent.putExtra(TICKET, token);
+        intent.putExtra(WALLET, wallet);
+        intent.putExtra(C.EXTRA_STATE, function);
+        intent.putExtra(C.EXTRA_TOKEN_ID, BigInteger.ZERO.toString(16));
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        startActivity(intent);
+    }
+
+    @Override
+    public void showSend()
+    {
+        viewModel.showSendToken(this, myAddress, token);
+    }
+
+    @Override
+    public void showReceive()
+    {
+        viewModel.showMyAddress(this, wallet, token);
     }
 }

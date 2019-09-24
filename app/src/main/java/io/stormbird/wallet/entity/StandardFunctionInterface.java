@@ -7,11 +7,11 @@ import io.stormbird.token.entity.TSAction;
 
 public interface StandardFunctionInterface
 {
-    void selectRedeemTokens(List<BigInteger> selection);
-    void sellTicketRouter(List<BigInteger> selection);
-    void showTransferToken(List<BigInteger> selection);
-    void showSend();
-    void showReceive();
-    void displayTokenSelectionError(TSAction action);
+    default void selectRedeemTokens(List<BigInteger> selection) { };
+    default void sellTicketRouter(List<BigInteger> selection) { };
+    default void showTransferToken(List<BigInteger> selection) { };
+    default void showSend() { };
+    default void showReceive() { };
+    default void displayTokenSelectionError(TSAction action) { };
     void handleTokenScriptFunction(String function, List<BigInteger> selection);
 }

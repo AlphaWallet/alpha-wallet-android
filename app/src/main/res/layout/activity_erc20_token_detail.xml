@@ -16,6 +16,8 @@
         android:focusableInTouchMode="true"
         android:visibility="visible">
 
+        <include layout="@layout/layout_function_buttons" />
+
         <LinearLayout
             android:id="@+id/layoutActionButtons"
             android:layout_width="match_parent"
@@ -77,6 +79,7 @@
             android:gravity="center"
             android:orientation="horizontal"
             android:paddingBottom="20dp"
+            android:visibility="gone"
             android:paddingEnd="20dp"
             android:paddingStart="20dp"
             android:paddingTop="20dp">
@@ -129,7 +132,7 @@
                 android:gravity="center"
                 android:paddingBottom="15dp"
                 android:paddingTop="15dp"
-                android:text="Receive"
+                android:text="@string/action_receive"
                 android:textAllCaps="false"
                 android:textColor="@color/button_text_color"
                 android:textSize="16sp" />
@@ -139,7 +142,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/layoutActionButtons">
+        android:layout_above="@id/layoutButtons">
 
         <LinearLayout
             android:id="@+id/allz"

@@ -133,6 +133,18 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     }
 
     @Override
+    public void showSend()
+    {
+
+    }
+
+    @Override
+    public void showReceive()
+    {
+
+    }
+
+    @Override
     public void displayTokenSelectionError(TSAction action)
     {
 

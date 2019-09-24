@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<io.stormbird.wallet.widget.CertifiedToolbarView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.alphawallet.app.widget.CertifiedToolbarView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
@@ -81,4 +81,4 @@
     </RelativeLayout>
 
 
-</io.stormbird.wallet.widget.CertifiedToolbarView>
+</com.alphawallet.app.widget.CertifiedToolbarView>

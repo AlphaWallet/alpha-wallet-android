@@ -79,7 +79,7 @@
         android:layout_height="?actionBarSize"
         android:layout_gravity="center"
         android:background="@color/button_green"
-        android:visibility="visible"
+        android:visibility="gone"
         android:orientation="horizontal">
 
         <Button

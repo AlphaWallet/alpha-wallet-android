@@ -13,7 +13,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.google.api.Distribution;
 
@@ -66,9 +65,22 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
         callStandardFunctions = functionInterface;
         adapter = adp;
         functions = assetSvs.getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        removeAllViews();
 
         //add a new view in
         addNewButtonLine();
+        int intrinsicButtonCount = getStaticButtonCount(token);
+        int functionButtonCount = getFunctionButtonCount();
+
+        if (functions != null && functions.size() > 0)
+        {
+            for (String function : functions.keySet())
+            {
+                addButton(function);
+                functionButtonCount--;
+                if ((functionButtonCount + intrinsicButtonCount) == 3) addNewButtonLine();
+            }
+        }
 
         switch (token.getInterfaceSpec())
         {
@@ -85,54 +97,37 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
                 break;
             case ERC875:
             case ERC875LEGACY:
-                addButton(R.string.action_transfer);
                 addButton(R.string.action_use);
+                addButton(R.string.action_transfer);
                 addButton(R.string.action_sell);
                 break;
         }
 
-        if (functions != null && functions.size() > 0)
+        findViewById(R.id.layoutButtons).setVisibility(View.GONE);
+    }
+
+    private int getFunctionButtonCount()
+    {
+        if (functions != null && functions.size() > 0) return functions.size();
+        else return 0;
+    }
+
+    private int getStaticButtonCount(Token token)
+    {
+        switch (token.getInterfaceSpec())
         {
-            for (String function : functions.keySet())
-            {
-                addButton(function);
-            }
+            case ERC20:
+            case ETHEREUM:
+                return 2;
+            case ERC721:
+            case ERC721_LEGACY:
+                return 1;
+            case ERC875:
+            case ERC875LEGACY:
+                return 3;
+            default:
+                return 0;
         }
-
-
-
-//        findViewById(R.id.layoutButtons).setVisibility(View.GONE);
-//
-//        LinearLayout auxButtons = findViewById(R.id.buttons_aux);
-//
-//        final Button[] buttons = new Button[6];
-//        buttons[0] = findViewById(R.id.button_use);
-//        buttons[1] = findViewById(R.id.button_sell);
-//        buttons[2] = findViewById(R.id.button_action1);
-//        buttons[3] = findViewById(R.id.button_action2);
-//        buttons[4] = findViewById(R.id.button_action3);
-//        buttons[5] = findViewById(R.id.button_transfer);
-//
-//        for (Button b : buttons) b.setOnClickListener(this);
-//
-//
-//
-//        if (functions != null && functions.size() > 0)
-//        {
-//            int index = 0;
-//            for (String function : functions.keySet())
-//            {
-//                while(index < 5 && buttons[index].getVisibility() != View.GONE)
-//                {
-//                    index++;
-//                }
-//                buttons[index].setVisibility(View.VISIBLE);
-//                buttons[index].setText(function);
-//                if (index == 2) auxButtons.setVisibility(View.VISIBLE);
-//                if (index == 4) break;
-//                index++;
-//            }
-//        }
     }
 
     public void revealButtons()
@@ -162,8 +157,10 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
                         callStandardFunctions.sellTicketRouter(selection);
                         break;
                     case R.string.action_send:
+                        callStandardFunctions.showSend();
                         break;
                     case R.string.action_receive:
+                        callStandardFunctions.showReceive();
                         break;
                     case R.string.action_transfer:
                         callStandardFunctions.showTransferToken(selection);
@@ -302,6 +299,7 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
     private Button addButton(String functionName)
     {
         if (buttonCount >= 3) addNewButtonLine();
+        if (functionName.length() > 14 && buttonCount > 1) addNewButtonLine();
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(0,0,4,0);
         params.weight = 1;
@@ -311,7 +309,7 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
         button.setGravity(Gravity.CENTER);
         button.setBackgroundResource(R.drawable.selector_round_button);
         button.setTextColor(context.getColor(R.color.button_text_color));
-        button.setElevation(3.0f);
+        button.setElevation(4.0f);
         button.setPadding(0,15,0,15);
         button.setLayoutParams(params);
         button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
@@ -320,6 +318,7 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
         button.setTypeface(typeface);
         currentHolder.addView(button);
         buttonCount++;
+        if (functionName.length() > 14) addNewButtonLine();
         return button;
     }
 }

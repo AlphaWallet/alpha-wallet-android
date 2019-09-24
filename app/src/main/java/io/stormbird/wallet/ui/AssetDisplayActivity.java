@@ -202,18 +202,6 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     }
 
     @Override
-    public void showSend()
-    {
-
-    }
-
-    @Override
-    public void showReceive()
-    {
-
-    }
-
-    @Override
     public void displayTokenSelectionError(TSAction action)
     {
         if (dialog == null) dialog = new AWalletAlertDialog(this);

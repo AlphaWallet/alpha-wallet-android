@@ -18,231 +18,110 @@
 
         <include layout="@layout/layout_function_buttons" />
 
-        <LinearLayout
-            android:id="@+id/layoutActionButtons"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/layoutButtons"
-            android:layout_gravity="center"
-            android:background="@color/white"
-            android:gravity="center"
-            android:visibility="gone"
-            android:orientation="horizontal"
-            android:paddingEnd="20dp"
-            android:paddingStart="20dp"
-            android:paddingTop="20dp">
-
-            <Button
-                android:id="@+id/button_action1"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="1"
-                android:background="@drawable/selector_round_button"
-                android:enabled="true"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="center"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                android:text=""
-                android:textAllCaps="false"
-                android:textColor="@color/button_text_color"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/button_action2"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/selector_round_button"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="center"
-                android:paddingBottom="15dp"
-                android:visibility="gone"
-                android:paddingTop="15dp"
-                android:text=""
-                android:textAllCaps="false"
-                android:textColor="@color/button_text_color"
-                android:textSize="16sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/layoutButtons"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_gravity="center"
-            android:background="@color/white"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:paddingBottom="20dp"
-            android:visibility="gone"
-            android:paddingEnd="20dp"
-            android:paddingStart="20dp"
-            android:paddingTop="20dp">
-
-            <Button
-                android:id="@+id/button_action3"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="0dp"
-                android:visibility="gone"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="1"
-                android:background="@drawable/selector_round_button"
-                android:enabled="true"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="center"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                android:text=""
-                android:textAllCaps="false"
-                android:textColor="@color/button_text_color"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/button_send"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="1"
-                android:background="@drawable/selector_round_button"
-                android:enabled="true"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="center"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                android:text="@string/action_send"
-                android:textAllCaps="false"
-                android:textColor="@color/button_text_color"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/button_receive"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/selector_round_button"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="center"
-                android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                android:text="@string/action_receive"
-                android:textAllCaps="false"
-                android:textColor="@color/button_text_color"
-                android:textSize="16sp" />
-
-        </LinearLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/layoutButtons">
-
-        <LinearLayout
-            android:id="@+id/allz"
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/token_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="50dp"
-                android:fontFamily="@font/font_regular"
-                android:text="@string/recent_transactions"
-                android:textColor="@color/text_dark_gray"
-                android:textSize="18sp" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="15dp"
-                android:background="@color/super_light_grey" />
+            android:layout_above="@id/layoutButtons">
 
             <LinearLayout
-                android:id="@+id/layout_transactions"
+                android:id="@+id/allz"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="100dp"
                 android:orientation="vertical">
 
-                <ProgressBar
-                    android:id="@+id/progress_bar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="20dp" />
-
                 <android.support.v7.widget.RecyclerView
-                    android:id="@+id/list"
+                    android:id="@+id/token_view"
                     android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:visibility="gone" />
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="50dp"
+                    android:fontFamily="@font/font_regular"
+                    android:text="@string/recent_transactions"
+                    android:textColor="@color/text_dark_gray"
+                    android:textSize="18sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="15dp"
+                    android:background="@color/super_light_grey" />
 
                 <LinearLayout
-                    android:id="@+id/layout_no_recent_transactions"
+                    android:id="@+id/layout_transactions"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="100dp"
+                    android:orientation="vertical">
+
+                    <ProgressBar
+                        android:id="@+id/progress_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="20dp" />
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/layout_no_recent_transactions"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/no_recent_transactions"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginTop="20dp"
+                            android:fontFamily="@font/font_light"
+                            android:text="@string/no_recent_transactions"
+                            android:textColor="@color/text_dark_gray"
+                            android:textSize="18sp" />
+
+                        <TextView
+                            android:id="@+id/no_recent_transactions_subtext"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:fontFamily="@font/font_regular"
+                            android:text="@string/no_recent_transactions_subtext"
+                            android:textColor="@color/text_dark_gray"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_iframe"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:clickable="true"
                     android:orientation="vertical"
                     android:visibility="gone">
 
-                    <TextView
-                        android:id="@+id/no_recent_transactions"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginBottom="10dp"
-                        android:layout_marginTop="20dp"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/no_recent_transactions"
-                        android:textColor="@color/text_dark_gray"
-                        android:textSize="18sp" />
+                    <WebView
+                        android:id="@+id/iframe"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
 
-                    <TextView
-                        android:id="@+id/no_recent_transactions_subtext"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:fontFamily="@font/font_regular"
-                        android:text="@string/no_recent_transactions_subtext"
-                        android:textColor="@color/text_dark_gray"
-                        android:textSize="13sp" />
+                    </WebView>
+
                 </LinearLayout>
 
             </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_iframe"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="5dp"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:clickable="true"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <WebView
-                    android:id="@+id/iframe"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                </WebView>
-
-            </LinearLayout>
-
-        </LinearLayout>
         </ScrollView>
 
     </RelativeLayout>

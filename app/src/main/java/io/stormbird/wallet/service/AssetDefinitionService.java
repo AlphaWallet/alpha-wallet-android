@@ -922,8 +922,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     if (tokenDef != null && tokenDef.isDebug()) token.hasDebugTokenscript = true;
                     token.hasTokenScript = true;
                     TokenDefinition td = getAssetDefinition(networkId, address);
-                    ContractInfo cInfo = td.contracts.get(td.holdingToken);
-                    if (cInfo != null) checkCorrectInterface(token, cInfo.contractInterface);
+                    if (td != null)
+                    {
+                        ContractInfo cInfo = td.contracts.get(td.holdingToken);
+                        if (cInfo != null) checkCorrectInterface(token, cInfo.contractInterface);
+                    }
                 }
             }
         }

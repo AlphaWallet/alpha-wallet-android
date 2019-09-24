@@ -43,6 +43,7 @@ import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,8 +57,8 @@ import static io.stormbird.wallet.ui.DappBrowserFragment.PERSONAL_MESSAGE_PREFIX
  * Created by James on 4/04/2019.
  * Stormbird in Singapore
  */
-public class FunctionActivity extends BaseActivity implements View.OnClickListener, FunctionCallback,
-        Runnable, PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback
+public class FunctionActivity extends BaseActivity implements FunctionCallback,
+        PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback, StandardFunctionInterface
 {
     @Inject
     protected TokenFunctionViewModelFactory viewModelFactory;
@@ -70,7 +71,6 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     private SystemView systemView;
     private Web3TokenView tokenView;
     private ProgressBar waitSpinner;
-    private Handler handler;
     private SignMessageDialog dialog;
     private String functionEffect;
     private Map<String, String> args = new HashMap<>();
@@ -78,6 +78,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     private AWalletAlertDialog alertDialog;
     private Message<String> messageToSign;
     private PinAuthenticationCallbackInterface authInterface;
+    private FunctionButtonBar functionBar;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
@@ -206,7 +207,6 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
                 .get(TokenFunctionViewModel.class);
         systemView = findViewById(R.id.system_view);
         ProgressView progressView = findViewById(R.id.progress_view);
-        handler = new Handler();
         systemView.hide();
         progressView.hide();
 
@@ -223,25 +223,13 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
 
     private void setupFunctions()
     {
-        Button[] buttons = new Button[3];
-        buttons[0] = findViewById(R.id.button_use);
-        buttons[1] = findViewById(R.id.button_sell);
-        buttons[2] = findViewById(R.id.button_transfer);
+        functionBar = findViewById(R.id.layoutButtons);
+        List<String> funcList = new ArrayList<>();
 
-        for (Button b : buttons)
-        {
-            b.setVisibility(View.GONE);
-            b.setOnClickListener(this);
-        }
+        funcList.add(actionMethod);
 
-        buttons[0].setVisibility(View.VISIBLE);
-        buttons[0].setText(R.string.action_confirm);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        handler.postDelayed(this, 1000);
+        functionBar.setupFunctionList(this, funcList);
+        functionBar.revealButtons();
     }
 
     @Override
@@ -254,26 +242,10 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onClick(View v)
-    {
-        switch (v.getId())
-        {
-            //get challenge from the source
-            case R.id.button_use:
-                //Sign is default, if there's a transaction then push this
-                args.clear();
-                handleConfirmClick();
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void handleConfirmClick()
+    private void handleConfirmClick(String function)
     {
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
-        TSAction action = functions.get(actionMethod);
+        TSAction action = functions.get(function);
 
         if (action.function != null)
         {
@@ -522,7 +494,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
                     StringBuilder sb = new StringBuilder();
                     for (char ch : html.toCharArray()) if (ch!='\"') sb.append(ch);
                     args.put(value, sb.toString());
-                    handleConfirmClick();
+                    handleConfirmClick(actionMethod);
                 }
         );
     }
@@ -531,12 +503,6 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     public void signMessage(byte[] sign, DAppFunction dAppFunction, Message<String> message)
     {
         viewModel.signMessage(sign, dAppFunction, message, token.tokenInfo.chainId);
-    }
-
-    @Override
-    public void run()
-    {
-
     }
 
     @Override
@@ -667,5 +633,12 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
     {
         authInterface = authCallback;
+    }
+
+    @Override
+    public void handleTokenScriptFunction(String function, List<BigInteger> selection)
+    {
+        args.clear();
+        handleConfirmClick(function);
     }
 }

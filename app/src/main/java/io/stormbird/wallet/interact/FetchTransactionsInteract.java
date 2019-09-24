@@ -57,7 +57,6 @@ public class FetchTransactionsInteract {
     {
         switch (type)
         {
-            default:
             case ERC20:
             case ERC721:
                 return Single.fromCallable(() -> type);
@@ -66,6 +65,10 @@ public class FetchTransactionsInteract {
                 transactionRepository.queryInterfaceSpec(tokenInfo.address, tokenInfo)
                         .subscribe(actualType -> TokensService.setInterfaceSpec(tokenInfo.chainId, tokenInfo.address, actualType)).isDisposed();
                 return Single.fromCallable(() -> type);
+            default:
+                //Token wasn't any of the easily determinable ones, use constructor to analyse
+                return tokenRepository.resolveProxyAddress(tokenInfo) //resolve proxy address to find base constructor and analyse
+                        .flatMap(address -> transactionRepository.queryInterfaceSpec(address, tokenInfo));
         }
     }
 

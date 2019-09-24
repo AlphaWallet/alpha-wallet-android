@@ -1189,6 +1189,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenScriptResult.addPair(attrs, "contractAddress", token.tokenInfo.address);
         TokenScriptResult.addPair(attrs, "chainId", String.valueOf(token.tokenInfo.chainId));
         TokenScriptResult.addPair(attrs, "tokenId", tokenId);
+        TokenScriptResult.addPair(attrs, "ownerAddress", token.getWallet());
 
         if (token.isEthereum())
         {

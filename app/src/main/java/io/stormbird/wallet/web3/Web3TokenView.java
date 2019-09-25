@@ -13,6 +13,7 @@ import android.util.Log;
 import android.webkit.*;
 import io.stormbird.token.entity.MagicLinkInfo;
 import io.stormbird.wallet.R;
+import io.stormbird.wallet.entity.tokenscript.TokenScriptRenderCallback;
 import io.stormbird.wallet.web3.entity.*;
 import okhttp3.HttpUrl;
 
@@ -118,6 +119,11 @@ public class Web3TokenView extends WebView
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             post(() -> evaluateJavascript(function, value -> Log.d("WEB_VIEW", value)));
         }
+    }
+
+    public void TScallToJS(String fName, String script, TokenScriptRenderCallback cb)
+    {
+        post(() -> evaluateJavascript(script, value -> cb.callToJSComplete(fName)));
     }
 
     private void callbackToJS(long callbackId, String function, String param) {

@@ -19,6 +19,7 @@ import io.stormbird.token.tools.Numeric;
 import io.stormbird.wallet.C;
 import io.stormbird.wallet.R;
 import io.stormbird.wallet.entity.*;
+import io.stormbird.wallet.entity.tokenscript.TokenScriptRenderCallback;
 import io.stormbird.wallet.service.KeyService;
 import io.stormbird.wallet.util.KeyboardUtils;
 import io.stormbird.wallet.util.Utils;
@@ -58,7 +59,7 @@ import static io.stormbird.wallet.ui.DappBrowserFragment.PERSONAL_MESSAGE_PREFIX
  * Stormbird in Singapore
  */
 public class FunctionActivity extends BaseActivity implements FunctionCallback,
-        PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback, StandardFunctionInterface
+        PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback, StandardFunctionInterface, TokenScriptRenderCallback
 {
     @Inject
     protected TokenFunctionViewModelFactory viewModelFactory;
@@ -242,7 +243,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         return super.onOptionsItemSelected(item);
     }
 
-    private void handleConfirmClick(String function)
+    private void completeTokenscriptFunction(String function)
     {
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         TSAction action = functions.get(function);
@@ -313,37 +314,40 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         {
             AttributeType attr = action.attributeTypes.get(e.ref);
             if (attr == null) return true;
-
-            switch (attr.as)
+            if (attr.userInput)
             {
-                case UTF8:
-                    break;
-                case Unsigned:
-                    break;
-                case Signed:
-                    break;
-                case Mapping:
-                    break;
-                case Boolean:
-                    break;
-                case UnsignedInput:
-                    //do we have a mapping?
-                    String valueFromInput = args.get(e.ref);
-                    if (valueFromInput == null)
-                    {
-                        //fetch mapping
-                        args.put(e.ref, "__searching");
-                        getInput(e.ref);
-                        return false;
-                    }
-                    else if (valueFromInput.equals("__searching"))
-                    {
-                        //display error
-                        System.out.println("ERROR!!!");
-                        resolved = false;
-                    }
-                    else
-                    {
+                return getUserInput(attr, e, resolved);
+            }
+        }
+
+        return resolved;
+    }
+
+    private boolean getUserInput(AttributeType attr, TokenscriptElement e, boolean resolved)
+    {
+        String valueFromInput = args.get(e.ref);
+        if (valueFromInput == null)
+        {
+            //fetch mapping
+            args.put(e.ref, "__searching"); // indicate search TokenScript rendered page for user input
+            getInput(e.ref);
+            resolved = false;
+        }
+        else if (valueFromInput.equals("__searching")) //second pass through, still searching - error.
+        {
+            //display error
+            resolved = false;
+        }
+        else
+        {
+            try
+            {
+                switch (attr.as)
+                {
+                    //UTF8, Unsigned, Signed, Mapping, Boolean, UnsignedInput, TokenId
+                    case Unsigned:
+                    case Signed:
+                    case UnsignedInput:
                         BigDecimal unsignedValue = new BigDecimal(valueFromInput);
                         //handle value
                         functionEffect = unsignedValue.toString();
@@ -353,13 +357,33 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                         }
                         args.put(e.ref, unsignedValue.toString());
                         e.value = unsignedValue.toString();
-                    }
-                    break;
-                case TokenId:
-                    break;
-                default:
-                    resolved = false;
-                    break;
+                        break;
+                    case UTF8:
+                        e.value = valueFromInput;
+                        break;
+                    case Mapping:
+                        //makes no sense as input
+                        break;
+                    case Boolean:
+                        //attempt to decode
+                        if (valueFromInput.equalsIgnoreCase("true") || valueFromInput.equals("1"))
+                        {
+                            e.value = "TRUE";
+                        }
+                        else
+                        {
+                            e.value = "FALSE";
+                        }
+                        args.put(e.ref, e.value);
+                        break;
+                    case TokenId:
+                        break;
+                }
+            }
+            catch (Exception excp)
+            {
+                excp.printStackTrace();
+                resolved = false;
             }
         }
 
@@ -494,7 +518,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                     StringBuilder sb = new StringBuilder();
                     for (char ch : html.toCharArray()) if (ch!='\"') sb.append(ch);
                     args.put(value, sb.toString());
-                    handleConfirmClick(actionMethod);
+                    completeTokenscriptFunction(actionMethod);
                 }
         );
     }
@@ -639,6 +663,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
         args.clear();
-        handleConfirmClick(function);
+        //run the onConfirm JS and await callback
+        tokenView.TScallToJS(function, "onConfirm" + "('sig')", this);
+    }
+
+    @Override
+    public void callToJSComplete(String function)
+    {
+        completeTokenscriptFunction(function);
     }
 }

@@ -178,7 +178,7 @@ public class AssetDisplayViewModel extends BaseViewModel
 
     public void sellTicketRouter(Context context, Token token, String tokenIds) {
         Intent intent = new Intent(context, SellDetailActivity.class);
-        intent.putExtra(WALLET, new Wallet(token.getWallet()));
+        intent.putExtra(WALLET, defaultWallet.getValue());
         intent.putExtra(TICKET, token);
         intent.putExtra(EXTRA_TOKENID_LIST, tokenIds);
         intent.putExtra(EXTRA_STATE, SellDetailActivity.SET_A_PRICE);
@@ -207,7 +207,7 @@ public class AssetDisplayViewModel extends BaseViewModel
     public void showTransferToken(Context ctx, Token token, List<BigInteger> selection)
     {
         Intent intent = new Intent(ctx, TransferTicketDetailActivity.class);
-        intent.putExtra(WALLET, new Wallet(token.getWallet()));
+        intent.putExtra(WALLET, defaultWallet.getValue());
         intent.putExtra(TICKET, token);
 
         if (token instanceof ERC721Token)

@@ -33,6 +33,7 @@ public class AttributeType {
     public Map<BigInteger, String> members;
     private TokenDefinition definition;
     public FunctionDefinition function = null;
+    public boolean userInput = false;
 
     public AttributeType(Element attr, TokenDefinition def)
     {
@@ -128,11 +129,17 @@ public class AttributeType {
                         }
                         break;
                     case "user-entry":
+                        userInput = true;
                         String asTxt = resolve.getAttribute("as");
                         if (asTxt.startsWith("e") && Character.isDigit(asTxt.charAt(1)))
                         {
                             bitshift = Integer.parseInt(asTxt.substring(1));
                             setAs(As.UnsignedInput);
+                        }
+                        else
+                        {
+                            bitshift = 0;
+                            setAs(definition.parseAs(resolve));
                         }
                         break;
                 }

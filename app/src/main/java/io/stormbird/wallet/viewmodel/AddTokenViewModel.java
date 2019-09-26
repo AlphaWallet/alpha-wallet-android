@@ -244,19 +244,40 @@ public class AddTokenViewModel extends BaseViewModel {
         return networkIds;
     }
 
-    public void testNetworks(String address)
+    public void testNetworks(String address, NetworkInfo networkInfo)
     {
         testAddress = address;
         foundNetwork = false;
         networkCount = ethereumNetworkRepository.getAvailableNetworkList().length;
-        //test all the networks
-        scanNetworksDisposable = Observable.fromCallable(this::getNetworkIds)
-                .flatMapIterable(networkId -> networkId)
-                .filter(networkId -> !foundNetwork)
-                .flatMap(networkId -> fetchTokensInteract.getContractResponse(testAddress, networkId, "name"))
+        //first test the network selected, then do all the others
+        scanNetworksDisposable = fetchTokensInteract.getContractResponse(testAddress, networkInfo.chainId, "name")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::testNetworkResult, this::onTestError);
+                .subscribe(this::checkSelectedNetwork, this::onTestError);
+    }
+
+    private void checkSelectedNetwork(ContractResult result)
+    {
+        if (!result.name.equals(TokenRepository.INVALID_CONTRACT))
+        {
+            foundNetwork = true;
+            switchNetwork.postValue(result.chainId);
+            setupToken(result.chainId, testAddress);
+        }
+        else
+        {
+            //test all the other networks
+            List<Integer> networkIds = getNetworkIds();
+            networkIds.remove((Integer)result.chainId);
+
+            scanNetworksDisposable = Observable.fromCallable(() -> networkIds)
+                    .flatMapIterable(networkId -> networkId)
+                    .filter(networkId -> !foundNetwork)
+                    .flatMap(networkId -> fetchTokensInteract.getContractResponse(testAddress, networkId, "name"))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::testNetworkResult, this::onTestError);
+        }
     }
 
     private void onTestError(Throwable throwable)

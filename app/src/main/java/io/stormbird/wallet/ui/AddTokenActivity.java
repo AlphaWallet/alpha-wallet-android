@@ -280,7 +280,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
             lastCheck = address;
             chainName.setVisibility(View.GONE);
             showProgress(true);
-            viewModel.testNetworks(address);
+            viewModel.testNetworks(address, networkInfo);
         }
     }
 
@@ -357,7 +357,11 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == InputAddressView.BARCODE_READER_REQUEST_CODE) {
+        if (requestCode == C.REQUEST_SELECT_NETWORK && resultCode == RESULT_OK) {
+            int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, 1);
+            setupNetwork(networkId);
+        }
+        else if (requestCode == InputAddressView.BARCODE_READER_REQUEST_CODE) {
             switch (resultCode)
             {
                 case FullScannerFragment.SUCCESS:

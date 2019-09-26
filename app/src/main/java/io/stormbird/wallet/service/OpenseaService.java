@@ -64,7 +64,7 @@ public class OpenseaService {
             Asset asset = new Gson().fromJson(assets.getJSONObject(i).toString(), Asset.class);
             if (asset != null && (asset.getAssetContract().getSchemaName() == null
                                 || asset.getAssetContract().getSchemaName().length() == 0
-                                || asset.getAssetContract().getSchemaName().contains("721"))) //filter ERC721
+                                || asset.getAssetContract().getSchemaName().equalsIgnoreCase("ERC721"))) //filter ERC721
             {
                 Token token = foundTokens.get(asset.getAssetContract().getAddress());
                 if (token == null)

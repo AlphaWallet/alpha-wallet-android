@@ -873,7 +873,7 @@ public class TokenRepository implements TokenRepositoryType {
         StringBuilder sb = new StringBuilder();
         for (char ch : name.toCharArray())
         {
-            if (Character.isLetterOrDigit(ch) || Character.isSpaceChar(ch) || Character.isWhitespace(ch))
+            if (ch >= 0x20 && ch <= 0x7E) //valid ASCII character
             {
                 sb.append(ch);
             }

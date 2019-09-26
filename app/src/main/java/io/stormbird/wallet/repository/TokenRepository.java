@@ -860,10 +860,26 @@ public class TokenRepository implements TokenRepositoryType {
                     data = Arrays.copyOfRange(data, 0, index + 1);
                 }
                 name = new String(data, "UTF-8");
+                //now filter out any 'bad' chars
+                name = filterAscii(name);
             }
         }
 
         return name;
+    }
+
+    private String filterAscii(String name)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (char ch : name.toCharArray())
+        {
+            if (Character.isLetterOrDigit(ch) || Character.isSpaceChar(ch) || Character.isWhitespace(ch))
+            {
+                sb.append(ch);
+            }
+        }
+
+        return sb.toString();
     }
 
     private String getName(String address, NetworkInfo network) throws Exception {

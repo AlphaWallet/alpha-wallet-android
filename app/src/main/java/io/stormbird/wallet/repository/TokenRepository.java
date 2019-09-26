@@ -1225,11 +1225,17 @@ public class TokenRepository implements TokenRepositoryType {
                 if (responseValue != null)
                 {
                     List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
-                    if (response.size() == 1) returnType = ContractType.ERC20;
-                    else if (response.size() > 1)
+                    if (response.size() > 0)
                     {
                         BigDecimal balance = new BigDecimal(((Uint256) response.get(0)).getValue());
-                        if (balance.equals(BigDecimal.valueOf(32)) && responseValue.length() > 66) returnType = ContractType.ERC875;
+                        if (balance.equals(BigDecimal.valueOf(0x20)) && responseValue.length() > 66)
+                        {
+                            returnType = ContractType.ERC875;
+                        }
+                        else
+                        {
+                            returnType = ContractType.ERC20;
+                        }
                     }
                 }
             }

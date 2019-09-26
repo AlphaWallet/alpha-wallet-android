@@ -62,20 +62,24 @@ public class OpenseaService {
         for (int i = 0; i < assets.length(); i++)
         {
             Asset asset = new Gson().fromJson(assets.getJSONObject(i).toString(), Asset.class);
-
-            Token token = foundTokens.get(asset.getAssetContract().getAddress());
-            if (token == null)
+            if (asset != null && (asset.getAssetContract().getSchemaName() == null
+                                || asset.getAssetContract().getSchemaName().length() == 0
+                                || asset.getAssetContract().getSchemaName().contains("721"))) //filter ERC721
             {
-                String tokenName = asset.getAssetContract().getName();
-                String tokenSymbol = asset.getAssetContract().getSymbol();
+                Token token = foundTokens.get(asset.getAssetContract().getAddress());
+                if (token == null)
+                {
+                    String tokenName = asset.getAssetContract().getName();
+                    String tokenSymbol = asset.getAssetContract().getSymbol();
 
-                TokenInfo tInfo = new TokenInfo(asset.getAssetContract().getAddress(), tokenName, tokenSymbol, 0, true, networkId);
-                token = new ERC721Token(tInfo, null, System.currentTimeMillis(), networkName, ContractType.ERC721);
-                token.setTokenWallet(address);
-                foundTokens.put(asset.getAssetContract().getAddress(), token);
+                    TokenInfo tInfo = new TokenInfo(asset.getAssetContract().getAddress(), tokenName, tokenSymbol, 0, true, networkId);
+                    token = new ERC721Token(tInfo, null, System.currentTimeMillis(), networkName, ContractType.ERC721);
+                    token.setTokenWallet(address);
+                    foundTokens.put(asset.getAssetContract().getAddress(), token);
+                }
+
+                ((ERC721Token) token).tokenBalance.add(asset);
             }
-
-            ((ERC721Token) token).tokenBalance.add(asset);
         }
 
         return foundTokens.values().toArray(new Token[0]);

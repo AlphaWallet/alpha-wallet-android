@@ -40,6 +40,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public static final String EMPTY_BALANCE = "\u2014\u2014";
 
     public final TextView symbol;
+    public final TextView symbolAux;
     public final TextView balanceEth;
     public final TextView balanceCurrency;
     public final ImageView icon;
@@ -68,6 +69,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
         icon = findViewById(R.id.icon);
         symbol = findViewById(R.id.symbol);
+        symbolAux = findViewById(R.id.symbolAux);
         balanceEth = findViewById(R.id.balance_eth);
         balanceCurrency = findViewById(R.id.balance_currency);
         text24Hours = findViewById(R.id.text_24_hrs);
@@ -100,6 +102,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
         try
         {
+            symbolAux.setVisibility(View.GONE);
             tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             blockchain.setText(getString(R.string.blockchain, token.getNetworkName()));
             chainName.setText(token.getNetworkName());

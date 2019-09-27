@@ -596,4 +596,5 @@
     <string name="action_receive">Receive</string>
     <string name="tokenscript_error">TokenScript Element Error</string>
     <string name="tokenscript_error_detail">Error in TokenScript element: %1$s</string>
+    <string name="tokenscript_element_not_present">function input \'%1$s\' not found in HTML elements.</string>
 </resources>

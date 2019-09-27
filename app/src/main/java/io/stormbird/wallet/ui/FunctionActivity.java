@@ -336,8 +336,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         else if (valueFromInput.equals("__searching")) //second pass through, still searching - error.
         {
             //display error, basic script error reporting
-            String details = attr.name;
-            if (attr.id != null && attr.id.length() > 0) details += " (" + attr.id + ")";
+            String attrDetails = e.ref + " (" + attr.name + ")";
+            String details = getString(R.string.tokenscript_element_not_present, attrDetails);
             tokenscriptError(details);
             resolved = false;
         }

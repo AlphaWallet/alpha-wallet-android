@@ -16,6 +16,7 @@ import io.stormbird.wallet.util.AWEnsResolver;
 import okhttp3.OkHttpClient;
 import org.web3j.abi.*;
 import org.web3j.abi.datatypes.*;
+import org.web3j.abi.datatypes.generated.Bytes4;
 import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
@@ -36,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 import static io.stormbird.token.entity.MagicLinkInfo.getNodeURLByNetworkId;
 import static io.stormbird.wallet.C.BURN_ADDRESS;
+import static io.stormbird.wallet.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static io.stormbird.wallet.repository.EthereumNetworkRepository.MAINNET_ID;
 import static io.stormbird.wallet.util.Utils.isAlNum;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
@@ -51,6 +53,10 @@ public class TokenRepository implements TokenRepositoryType {
     private final TokensService tokensService;
 
     public static final String INVALID_CONTRACT = "<invalid>";
+
+    public static final BigInteger INTERFACE_CRYPTOKITTIES = new BigInteger ("9a20483d", 16);
+    public static final BigInteger INTERFACE_OFFICIAL_ERC721 = new BigInteger ("80ac58cd", 16);
+    public static final BigInteger INTERFACE_OLD_ERC721 = new BigInteger ("6466353c", 16);
 
     private static final int NODE_COMMS_ERROR = -1;
     private static final int CONTRACT_BALANCE_NULL = -2;
@@ -582,7 +588,7 @@ public class TokenRepository implements TokenRepositoryType {
             else
             {
                 List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
-                if (response.size() == 1) balance = new BigDecimal(((Uint256) response.get(0)).getValue());
+                if (response.size() > 0) balance = new BigDecimal(((Uint256) response.get(0)).getValue());
 
                 if (token != null && balance.equals(BigDecimal.valueOf(32)) && responseValue.length() > 66)
                 {
@@ -807,7 +813,7 @@ public class TokenRepository implements TokenRepositoryType {
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, network, temp);
 
-        if (responseValue == null)
+        if (responseValue == null || responseValue.equals("0x"))
         {
             if (type instanceof Boolean)
             {
@@ -837,7 +843,14 @@ public class TokenRepository implements TokenRepositoryType {
         }
         else
         {
-            return null;
+            if (type instanceof Boolean)
+            {
+                return (T)Boolean.FALSE;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 
@@ -936,6 +949,13 @@ public class TokenRepository implements TokenRepositoryType {
         return new Function("name",
                 Arrays.<Type>asList(),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+    }
+
+    private static org.web3j.abi.datatypes.Function supportsInterface(BigInteger value) {
+        return new org.web3j.abi.datatypes.Function(
+                "supportsInterface",
+                Arrays.<Type>asList(new Bytes4(Numeric.toBytesPadded(value, 4))),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function stringParam(String param) {
@@ -1228,6 +1248,54 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Single<ContractType> determineCommonType(TokenInfo tokenInfo)
+    {
+        return Single.fromCallable(() -> {
+            ContractType returnType = ContractType.OTHER;
+            try
+            {
+                Function function = balanceOf(ZERO_ADDRESS);
+                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
+                String responseValue = callSmartContractFunction(function, tokenInfo.address, network, new Wallet(ZERO_ADDRESS));
+                List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
+                returnType = findContractTypeFromResponse(responseValue, response, tokenInfo);
+            }
+            catch (Exception e)
+            {
+                //
+            }
+
+            return returnType;
+        });
+    }
+
+    private ContractType findContractTypeFromResponse(String responseValue, List<Type> response, TokenInfo tokenInfo) throws Exception
+    {
+        ContractType returnType = ContractType.OTHER;
+
+        if (response.size() > 0)
+        {
+            BigDecimal balance = new BigDecimal(((Uint256) response.get(0)).getValue());
+            if (balance.equals(BigDecimal.valueOf(0x20)) && responseValue.length() > 66)
+            {
+                returnType = ContractType.ERC875;
+            }
+            else
+            {
+                //could be either ERC721 or ERC20
+                //try some interface values
+                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
+                if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OFFICIAL_ERC721), Boolean.TRUE)) returnType = ContractType.ERC721;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_CRYPTOKITTIES), Boolean.TRUE)) returnType = ContractType.ERC721_LEGACY;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OLD_ERC721), Boolean.TRUE)) returnType = ContractType.ERC721_LEGACY;
+                else returnType = ContractType.ERC20;
+            }
+        }
+
+        return returnType;
+    }
+
+    @Override
     public Single<String> resolveProxyAddress(TokenInfo tokenInfo)
     {
         return Single.fromCallable(() -> {
@@ -1236,7 +1304,7 @@ public class TokenRepository implements TokenRepositoryType {
             {
                 NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
                 String received = getContractData(networkInfo, tokenInfo.address, addrParam("implementation"), "");
-                if (received != null && isValidAddress(received))
+                if (received != null && isValidAddress(received) && !received.equals(ZERO_ADDRESS))
                 {
                     contractAddress = received;
                 }

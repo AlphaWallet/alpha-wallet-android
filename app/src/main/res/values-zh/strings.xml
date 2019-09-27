@@ -458,4 +458,7 @@
     <string name="no_fingerprint_enrolled">No fingerprints Enrolled. Use PIN</string>
     <string name="cannot_process_fingerprint">Unable to process fingerprint. Use PIN</string>
     <string name="action_receive">Receive</string>
+    <string name="tokenscript_error">TokenScript Element Error</string>
+    <string name="tokenscript_error_detail">Error in TokenScript element: %1$s</string>
+    <string name="tokenscript_element_not_present">function input \'%1$s\' not found in HTML elements.</string>
 </resources>

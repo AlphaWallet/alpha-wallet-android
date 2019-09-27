@@ -39,6 +39,7 @@ public class AttributeType {
     {
         definition = def;
         id = attr.getAttribute("id");
+        as = As.Unsigned; //default value
         try {
             switch (attr.getAttribute("syntax")) { // We don't validate syntax here; schema does it.
                 case "1.3.6.1.4.1.1466.115.121.1.6":
@@ -114,6 +115,7 @@ public class AttributeType {
             if (node.getNodeType() == Node.ELEMENT_NODE)
             {
                 Element resolve = (Element) node;
+                setAs(definition.parseAs(resolve));
                 switch (node.getLocalName())
                 {
                     case "ethereum":

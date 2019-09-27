@@ -335,7 +335,10 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
         else if (valueFromInput.equals("__searching")) //second pass through, still searching - error.
         {
-            //display error
+            //display error, basic script error reporting
+            String attrDetails = e.ref + " (" + attr.name + ")";
+            String details = getString(R.string.tokenscript_element_not_present, attrDetails);
+            tokenscriptError(details);
             resolved = false;
         }
         else
@@ -489,6 +492,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void errorInvalidAddress(String address)
     {
+        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(AWalletAlertDialog.ERROR);
         alertDialog.setTitle(R.string.error_invalid_address);
@@ -500,10 +504,23 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void errorInsufficientFunds(Token currency)
     {
+        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(AWalletAlertDialog.ERROR);
         alertDialog.setTitle(R.string.error_insufficient_funds);
         alertDialog.setMessage(getString(R.string.current_funds, currency.getCorrectedBalance(currency.tokenInfo.decimals), currency.tokenInfo.symbol));
+        alertDialog.setButtonText(R.string.button_ok);
+        alertDialog.setButtonListener(v ->alertDialog.dismiss());
+        alertDialog.show();
+    }
+
+    private void tokenscriptError(String elementName)
+    {
+        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
+        alertDialog = new AWalletAlertDialog(this);
+        alertDialog.setIcon(AWalletAlertDialog.ERROR);
+        alertDialog.setTitle(R.string.tokenscript_error);
+        alertDialog.setMessage(getString(R.string.tokenscript_error_detail, elementName));
         alertDialog.setButtonText(R.string.button_ok);
         alertDialog.setButtonListener(v ->alertDialog.dismiss());
         alertDialog.show();
@@ -517,7 +534,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                 html -> {
                     StringBuilder sb = new StringBuilder();
                     for (char ch : html.toCharArray()) if (ch!='\"') sb.append(ch);
-                    args.put(value, sb.toString());
+                    if (!html.equals("null")) args.put(value, sb.toString());
                     completeTokenscriptFunction(actionMethod);
                 }
         );

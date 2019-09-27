@@ -135,6 +135,8 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
     @Override
     public void onClick(View v)
     {
+        if (!(v instanceof Button)) return; //ignore non-button click
+
         if (!activeClick)
         {
             activeClick = true;
@@ -296,7 +298,7 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
     private Button addButton(String functionName)
     {
         if (buttonCount >= 3) addNewButtonLine();
-        if (functionName.length() > 14 && buttonCount > 1) addNewButtonLine();
+        if (functionName != null && functionName.length() > 14 && buttonCount > 1) addNewButtonLine();
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(0,0,4,0);
         params.weight = 1;
@@ -315,7 +317,7 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
         button.setTypeface(typeface);
         currentHolder.addView(button);
         buttonCount++;
-        if (functionName.length() > 14) addNewButtonLine();
+        if (functionName != null && functionName.length() > 14) addNewButtonLine();
         return button;
     }
 

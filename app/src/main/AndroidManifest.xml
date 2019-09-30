@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     android:targetSandboxVersion="1"
     xmlns:tools="http://schemas.android.com/tools"
-    package="io.stormbird.wallet">
+    package="com.alphawallet.app">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -16,7 +16,7 @@
         android:required="false"/>
 
     <application
-        android:name="io.stormbird.wallet.App"
+        android:name="com.alphawallet.app.App"
         android:allowBackup="false"
         android:usesCleartextTraffic="true"
         android:hardwareAccelerated="true"
@@ -29,7 +29,7 @@
         android:theme="@style/AppTheme.NoActionBar"
         tools:replace="android:name, android:theme, android:allowBackup">
         <activity
-            android:name="io.stormbird.wallet.ui.SplashActivity"
+            android:name=".ui.SplashActivity"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -121,100 +121,100 @@
         </provider>
 
         <activity
-            android:name="io.stormbird.wallet.ui.WalletsActivity"
+            android:name=".ui.WalletsActivity"
             android:label="@string/title_account_list" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.ImportWalletActivity"
+            android:name=".ui.ImportWalletActivity"
             android:label="@string/title_import"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.TransactionDetailActivity"
+            android:name=".ui.TransactionDetailActivity"
             android:label="@string/title_transaction_details" />
         <activity
-            android:name="io.stormbird.wallet.ui.MyAddressActivity"
+            android:name=".ui.MyAddressActivity"
             android:label="@string/title_my_address" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.SendActivity"
+            android:name=".ui.SendActivity"
             android:label="@string/title_activity_send"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.ConfirmationActivity"
+            android:name=".ui.ConfirmationActivity"
             android:label="@string/title_activity_confirmation" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.AddTokenActivity"
+            android:name=".ui.AddTokenActivity"
             android:label="@string/title_add_token" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.AssetDisplayActivity"
+            android:name=".ui.AssetDisplayActivity"
             android:label="@string/title_use_token" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.RedeemSignatureDisplayActivity"
+            android:name=".ui.RedeemSignatureDisplayActivity"
             android:label="@string/title_use_token" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.GasSettingsActivity"
+            android:name=".ui.GasSettingsActivity"
             android:label="@string/title_send_settings" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.SellTicketActivity"
+            android:name=".ui.SellTicketActivity"
             android:label="@string/create_sell_order" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.SellDetailActivity"
+            android:name=".ui.SellDetailActivity"
             android:label="@string/action_sell"
             android:windowSoftInputMode="adjustPan" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.RedeemAssetSelectActivity"
+            android:name=".ui.RedeemAssetSelectActivity"
             android:label="@string/title_redeem" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.HomeActivity"
+            android:name=".ui.HomeActivity"
             android:label="@string/toolbar_header_wallet"
             android:windowSoftInputMode="adjustPan" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.ImportTokenActivity"
+            android:name=".ui.ImportTokenActivity"
             android:label="@string/title_import_token" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.TransferTicketActivity"
+            android:name=".ui.TransferTicketActivity"
             android:label="@string/label_transfer_ticket" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.TransferTicketDetailActivity"
+            android:name=".ui.TransferTicketDetailActivity"
             android:label="@string/label_transfer_ticket_detail" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.HelpActivity"
+            android:name=".ui.HelpActivity"
             android:label="@string/toolbar_header_help" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.zxing.QRScanningActivity"
+            android:name=".ui.zxing.QRScanningActivity"
             android:label="@string/qr_scanner" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.TokenDetailActivity"
+            android:name=".ui.TokenDetailActivity"
             android:label="@string/token_details" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.Erc20DetailActivity"
+            android:name=".ui.Erc20DetailActivity"
             android:label="@string/erc20_details" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.TokenFunctionActivity"
+            android:name=".ui.TokenFunctionActivity"
             android:label="@string/token_function" />
 
-        <activity android:name=".ui.FunctionActivity"
+        <activity android:name="com.alphawallet.app.ui.FunctionActivity"
             android:label="@string/token_function" />
 
-        <!--<service android:name="io.stormbird.wallet.service.AlphaWalletFirebaseMessagingService">-->
+        <!--<service android:name="AlphaWalletFirebaseMessagingService">-->
         <!--<intent-filter>-->
         <!--<action android:name="com.google.firebase.MESSAGING_EVENT" />-->
         <!--</intent-filter>-->
@@ -233,19 +233,19 @@
         <!--android:resource="@color/colorAccent" />-->
 
         <activity
-            android:name="io.stormbird.wallet.ui.WalletActionsActivity"
+            android:name=".ui.WalletActionsActivity"
             android:label="Wallet Actions" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.AddEditDappActivity"
+            android:name=".ui.AddEditDappActivity"
             android:label="Add DApp" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.SelectNetworkActivity"
+            android:name=".ui.SelectNetworkActivity"
             android:label="Select Network Filters" />
 
         <activity
-            android:name="io.stormbird.wallet.ui.BackupKeyActivity"
+            android:name=".ui.BackupKeyActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
     </application>
 

@@ -38,12 +38,12 @@
             android:orientation="vertical"
             android:padding="5dp">
 
-            <io.stormbird.wallet.web3.Web3TokenView
+            <com.alphawallet.app.web3.Web3TokenView
                 android:id="@+id/web3_tokenview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-            </io.stormbird.wallet.web3.Web3TokenView>
+            </com.alphawallet.app.web3.Web3TokenView>
 
             <ProgressBar
                 android:id="@+id/progress_element"

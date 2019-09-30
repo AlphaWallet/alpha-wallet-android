@@ -7,7 +7,7 @@
     android:background="@color/colorPrimaryDark"
     android:orientation="vertical">
 
-    <io.stormbird.wallet.widget.ProgressView
+    <com.alphawallet.app.widget.ProgressView
         android:id="@+id/progress_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -44,7 +44,7 @@
             android:layout_height="match_parent" />
     </android.support.v4.widget.SwipeRefreshLayout>
 
-    <io.stormbird.wallet.widget.SystemView
+    <com.alphawallet.app.widget.SystemView
         android:id="@+id/system_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

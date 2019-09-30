@@ -14,13 +14,13 @@
         android:gravity="center_horizontal"
         android:padding="4dp">
 
-        <io.stormbird.wallet.web3.Web3TokenView
+        <com.alphawallet.app.web3.Web3TokenView
             android:id="@+id/token_frame"
             android:adjustViewBounds="true"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        </io.stormbird.wallet.web3.Web3TokenView>
+        </com.alphawallet.app.web3.Web3TokenView>
 
         <ProgressBar
             android:id="@+id/progress_element"

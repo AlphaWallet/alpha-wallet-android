@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<io.stormbird.wallet.widget.FunctionButtonBar xmlns:android="http://schemas.android.com/apk/res/android"
+<com.alphawallet.app.widget.FunctionButtonBar xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layoutButtons"
     android:layout_width="match_parent"
@@ -135,4 +135,4 @@
             android:textColor="@color/button_text_color"
             android:textSize="20sp" />
     </LinearLayout>
-</io.stormbird.wallet.widget.FunctionButtonBar>
+</com.alphawallet.app.widget.FunctionButtonBar>

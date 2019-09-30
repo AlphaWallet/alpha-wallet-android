@@ -43,5 +43,6 @@ public interface TokenRepositoryType {
 
     Disposable updateBlockRead(Token token, Wallet wallet);
     Single<String> resolveProxyAddress(TokenInfo tokenInfo);
+    Single<ContractType> determineCommonType(TokenInfo tokenInfo);
     Single<Token[]> addERC20(Wallet wallet, Token[] tokens);
 }

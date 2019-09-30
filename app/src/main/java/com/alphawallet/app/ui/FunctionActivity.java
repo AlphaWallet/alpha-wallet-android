@@ -15,7 +15,9 @@ import android.widget.ProgressBar;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.OnSignPersonalMessageListener;
@@ -28,6 +30,8 @@ import com.alphawallet.app.web3.entity.PageReadyCallback;
 import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+
+import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.*;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.app.C;
@@ -52,6 +56,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,8 +69,8 @@ import static com.alphawallet.app.entity.Operation.SIGN_DATA;
  * Created by James on 4/04/2019.
  * Stormbird in Singapore
  */
-public class FunctionActivity extends BaseActivity implements View.OnClickListener, FunctionCallback,
-        Runnable, PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback
+public class FunctionActivity extends BaseActivity implements FunctionCallback,
+        PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback, StandardFunctionInterface, TokenScriptRenderCallback
 {
     @Inject
     protected TokenFunctionViewModelFactory viewModelFactory;
@@ -78,7 +83,6 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     private SystemView systemView;
     private Web3TokenView tokenView;
     private ProgressBar waitSpinner;
-    private Handler handler;
     private SignMessageDialog dialog;
     private String functionEffect;
     private Map<String, String> args = new HashMap<>();
@@ -86,6 +90,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     private AWalletAlertDialog alertDialog;
     private Message<String> messageToSign;
     private PinAuthenticationCallbackInterface authInterface;
+    private FunctionButtonBar functionBar;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
@@ -214,7 +219,6 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
                 .get(TokenFunctionViewModel.class);
         systemView = findViewById(R.id.system_view);
         ProgressView progressView = findViewById(R.id.progress_view);
-        handler = new Handler();
         systemView.hide();
         progressView.hide();
 
@@ -231,25 +235,13 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
 
     private void setupFunctions()
     {
-        Button[] buttons = new Button[3];
-        buttons[0] = findViewById(R.id.button_use);
-        buttons[1] = findViewById(R.id.button_sell);
-        buttons[2] = findViewById(R.id.button_transfer);
+        functionBar = findViewById(R.id.layoutButtons);
+        List<String> funcList = new ArrayList<>();
 
-        for (Button b : buttons)
-        {
-            b.setVisibility(View.GONE);
-            b.setOnClickListener(this);
-        }
+        funcList.add(actionMethod);
 
-        buttons[0].setVisibility(View.VISIBLE);
-        buttons[0].setText(R.string.action_confirm);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        handler.postDelayed(this, 1000);
+        functionBar.setupFunctionList(this, funcList);
+        functionBar.revealButtons();
     }
 
     @Override
@@ -262,26 +254,10 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onClick(View v)
-    {
-        switch (v.getId())
-        {
-            //get challenge from the source
-            case R.id.button_use:
-                //Sign is default, if there's a transaction then push this
-                args.clear();
-                handleConfirmClick();
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void handleConfirmClick()
+    private void completeTokenscriptFunction(String function)
     {
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
-        TSAction action = functions.get(actionMethod);
+        TSAction action = functions.get(function);
 
         if (action.function != null)
         {
@@ -349,37 +325,43 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
         {
             AttributeType attr = action.attributeTypes.get(e.ref);
             if (attr == null) return true;
-
-            switch (attr.as)
+            if (attr.userInput)
             {
-                case UTF8:
-                    break;
-                case Unsigned:
-                    break;
-                case Signed:
-                    break;
-                case Mapping:
-                    break;
-                case Boolean:
-                    break;
-                case UnsignedInput:
-                    //do we have a mapping?
-                    String valueFromInput = args.get(e.ref);
-                    if (valueFromInput == null)
-                    {
-                        //fetch mapping
-                        args.put(e.ref, "__searching");
-                        getInput(e.ref);
-                        return false;
-                    }
-                    else if (valueFromInput.equals("__searching"))
-                    {
-                        //display error
-                        System.out.println("ERROR!!!");
-                        resolved = false;
-                    }
-                    else
-                    {
+                return getUserInput(attr, e, resolved);
+            }
+        }
+
+        return resolved;
+    }
+
+    private boolean getUserInput(AttributeType attr, TokenscriptElement e, boolean resolved)
+    {
+        String valueFromInput = args.get(e.ref);
+        if (valueFromInput == null)
+        {
+            //fetch mapping
+            args.put(e.ref, "__searching"); // indicate search TokenScript rendered page for user input
+            getInput(e.ref);
+            resolved = false;
+        }
+        else if (valueFromInput.equals("__searching")) //second pass through, still searching - error.
+        {
+            //display error, basic script error reporting
+            String attrDetails = e.ref + " (" + attr.name + ")";
+            String details = getString(R.string.tokenscript_element_not_present, attrDetails);
+            tokenscriptError(details);
+            resolved = false;
+        }
+        else
+        {
+            try
+            {
+                switch (attr.as)
+                {
+                    //UTF8, Unsigned, Signed, Mapping, Boolean, UnsignedInput, TokenId
+                    case Unsigned:
+                    case Signed:
+                    case UnsignedInput:
                         BigDecimal unsignedValue = new BigDecimal(valueFromInput);
                         //handle value
                         functionEffect = unsignedValue.toString();
@@ -389,13 +371,33 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
                         }
                         args.put(e.ref, unsignedValue.toString());
                         e.value = unsignedValue.toString();
-                    }
-                    break;
-                case TokenId:
-                    break;
-                default:
-                    resolved = false;
-                    break;
+                        break;
+                    case UTF8:
+                        e.value = valueFromInput;
+                        break;
+                    case Mapping:
+                        //makes no sense as input
+                        break;
+                    case Boolean:
+                        //attempt to decode
+                        if (valueFromInput.equalsIgnoreCase("true") || valueFromInput.equals("1"))
+                        {
+                            e.value = "TRUE";
+                        }
+                        else
+                        {
+                            e.value = "FALSE";
+                        }
+                        args.put(e.ref, e.value);
+                        break;
+                    case TokenId:
+                        break;
+                }
+            }
+            catch (Exception excp)
+            {
+                excp.printStackTrace();
+                resolved = false;
             }
         }
 
@@ -501,6 +503,7 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
 
     private void errorInvalidAddress(String address)
     {
+        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(AWalletAlertDialog.ERROR);
         alertDialog.setTitle(R.string.error_invalid_address);
@@ -512,10 +515,23 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
 
     private void errorInsufficientFunds(Token currency)
     {
+        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(AWalletAlertDialog.ERROR);
         alertDialog.setTitle(R.string.error_insufficient_funds);
         alertDialog.setMessage(getString(R.string.current_funds, currency.getCorrectedBalance(currency.tokenInfo.decimals), currency.tokenInfo.symbol));
+        alertDialog.setButtonText(R.string.button_ok);
+        alertDialog.setButtonListener(v ->alertDialog.dismiss());
+        alertDialog.show();
+    }
+
+    private void tokenscriptError(String elementName)
+    {
+        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
+        alertDialog = new AWalletAlertDialog(this);
+        alertDialog.setIcon(AWalletAlertDialog.ERROR);
+        alertDialog.setTitle(R.string.tokenscript_error);
+        alertDialog.setMessage(getString(R.string.tokenscript_error_detail, elementName));
         alertDialog.setButtonText(R.string.button_ok);
         alertDialog.setButtonListener(v ->alertDialog.dismiss());
         alertDialog.show();
@@ -529,8 +545,8 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
                 html -> {
                     StringBuilder sb = new StringBuilder();
                     for (char ch : html.toCharArray()) if (ch!='\"') sb.append(ch);
-                    args.put(value, sb.toString());
-                    handleConfirmClick();
+                    if (!html.equals("null")) args.put(value, sb.toString());
+                    completeTokenscriptFunction(actionMethod);
                 }
         );
     }
@@ -539,12 +555,6 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     public void signMessage(byte[] sign, DAppFunction dAppFunction, Message<String> message)
     {
         viewModel.signMessage(sign, dAppFunction, message, token.tokenInfo.chainId);
-    }
-
-    @Override
-    public void run()
-    {
-
     }
 
     @Override
@@ -675,5 +685,19 @@ public class FunctionActivity extends BaseActivity implements View.OnClickListen
     public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
     {
         authInterface = authCallback;
+    }
+
+    @Override
+    public void handleTokenScriptFunction(String function, List<BigInteger> selection)
+    {
+        args.clear();
+        //run the onConfirm JS and await callback
+        tokenView.TScallToJS(function, "onConfirm" + "('sig')", this);
+    }
+
+    @Override
+    public void callToJSComplete(String function)
+    {
+        completeTokenscriptFunction(function);
     }
 }

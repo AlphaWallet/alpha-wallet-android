@@ -2,6 +2,7 @@
   {"name": "State of the ÐApps", "description": "Directory of Decentralized Applications", "url": "https://www.stateofthedapps.com/", "category": "Directory"},
   {"name": "BulkSender", "description": "Batch sending of tokens", "url": "https://bulksender.app/", "category": "Finance"},
   {"name": "Loanscan", "description": "Get the best return for your Tokens", "url": "https://loanscan.io/", "category": "Finance"},
+  {"name": "Fuse Studio", "description": "Turning communities into economies", "url": "https://studio.fusenet.io/", "category": "Finance"},
   {"name": "Axie Infinity", "description": "Collect and raise fantasy creatures", "url": "https://axieinfinity.com/", "category": "Game"},
   {"name": "ChickenHunt", "description": "character-growing IDLE game", "url": "https://chickenhunt.io/", "category": "Game"},
   {"name": "CryptoCare", "description": "Social Impact Collectibles", "url": "https://cryptocare.tech/adopt/cryptocare", "category": "Game"},
@@ -51,5 +52,7 @@
   {"name": "Humanity", "description": "Human Identity on Ethereum", "url": "https://humanitydao.org", "category": "Social Media"},
   {"name": "DEX.AG", "description": "Trade cryptoassets at the best price", "url": "https://dex.ag", "category": "Exchange"},
   {"name": "Totle Swap", "description": "Totle automatically finds and acquires the best price across decentralized exchanges for ERC-20 swaps", "url": "https://swap.totle.com", "category": "Exchange"},
-  {"name": "ATS Bridge", "description": "ATS/ATS20 bridge for self transfers of ATS to ATS20", "url": "https://bridge.artis.network/", "category": "Tool"}
+  {"name": "ATS Bridge", "description": "ATS/ATS20 bridge for self transfers of ATS to ATS20", "url": "https://bridge.artis.network/", "category": "Tool"},
+  {"name": "dForce USDx", "description": "A decentralized and synthetic indexed stablecoin with interest bearing capability", "url": "https://usdx.dforce.network/", "category": "Finance"},
+  {"name": "LENDF.ME", "description": "Algorithmic money markets for dForce USDx", "url": "https://www.lendf.me/", "category": "Finance"}
 ]

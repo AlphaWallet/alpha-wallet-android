@@ -574,7 +574,7 @@
     <string name="skip_upgrade">Skip Upgrade</string>
     <string name="lock_keystore_upgrade">Lock your Keystore to increase security</string>
     <string name="title_backup_seed">Backup Seed Phrase</string>
-    <string name="invalid_keystore">Invalid Keystore Import</string>
+    <string name="invalid_keystore">Invalid Keystore JSON</string>
     <string name="invalid_private_key">Invalid Private Key</string>
     <string name="reimport_wallet_detail">Wallet %1$s already exists, do you wish to re-import the wallet?</string>
     <string name="reimport_wallet_title">Re-Import Wallet?</string>
@@ -593,4 +593,8 @@
     <string name="too_many_fails">Too many fingerprint fails. Use PIN or wait 30 seconds</string>
     <string name="no_fingerprint_enrolled">No fingerprints Enrolled. Use PIN</string>
     <string name="cannot_process_fingerprint">Unable to process fingerprint. Use PIN</string>
+    <string name="action_receive">Receive</string>
+    <string name="tokenscript_error">TokenScript Element Error</string>
+    <string name="tokenscript_error_detail">Error in TokenScript element: %1$s</string>
+    <string name="tokenscript_element_not_present">function input \'%1$s\' not found in HTML elements.</string>
 </resources>

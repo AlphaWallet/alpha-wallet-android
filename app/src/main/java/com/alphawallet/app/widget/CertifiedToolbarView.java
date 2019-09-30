@@ -12,7 +12,7 @@ import com.alphawallet.app.R;
 
 public class CertifiedToolbarView extends android.support.v7.widget.Toolbar
 {
-    private Context context;
+    private final Context context;
 
     public CertifiedToolbarView(Context ctx)
     {

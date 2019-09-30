@@ -8,7 +8,6 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
-
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -52,8 +51,29 @@ public class FetchTransactionsInteract {
 
     public Single<ContractType> queryInterfaceSpec(TokenInfo tokenInfo)
     {
-        return  tokenRepository.resolveProxyAddress(tokenInfo)
-                .flatMap(address -> transactionRepository.queryInterfaceSpec(address, tokenInfo));
+        //can resolve erc20, erc721 and erc875 from a getbalance check and look at decimals. Otherwise try more esoteric
+        return tokenRepository.determineCommonType(tokenInfo)
+                .flatMap(type -> additionalHandling(type, tokenInfo));
+    }
+
+    private Single<ContractType> additionalHandling(ContractType type, TokenInfo tokenInfo)
+    {
+        switch (type)
+        {
+            case ERC20:
+            case ERC721:
+                return Single.fromCallable(() -> type);
+            case ERC875:
+                //requires additional handling to determine if it's Legacy type, but safe to return ERC875 for now:
+                transactionRepository.queryInterfaceSpec(tokenInfo.address, tokenInfo)
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(actualType -> TokensService.setInterfaceSpec(tokenInfo.chainId, tokenInfo.address, actualType)).isDisposed();
+                return Single.fromCallable(() -> type);
+            default:
+                //Token wasn't any of the easily determinable ones, use constructor to analyse
+                return tokenRepository.resolveProxyAddress(tokenInfo) //resolve proxy address to find base constructor and analyse
+                        .flatMap(address -> transactionRepository.queryInterfaceSpec(address, tokenInfo));
+        }
     }
 
     public Transaction fetchCached(String walletAddress, String hash)

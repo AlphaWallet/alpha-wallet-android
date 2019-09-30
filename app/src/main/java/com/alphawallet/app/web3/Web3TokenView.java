@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.webkit.*;
 
+import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
@@ -16,6 +17,12 @@ import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
 import com.alphawallet.token.entity.MagicLinkInfo;
+import okhttp3.HttpUrl;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
 
 /**
  * Created by James on 3/04/2019.
@@ -114,6 +121,11 @@ public class Web3TokenView extends WebView
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             post(() -> evaluateJavascript(function, value -> Log.d("WEB_VIEW", value)));
         }
+    }
+
+    public void TScallToJS(String fName, String script, TokenScriptRenderCallback cb)
+    {
+        post(() -> evaluateJavascript(script, value -> cb.callToJSComplete(fName)));
     }
 
     private void callbackToJS(long callbackId, String function, String param) {

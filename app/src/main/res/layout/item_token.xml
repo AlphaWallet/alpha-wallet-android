@@ -88,9 +88,9 @@
                 android:id="@+id/balance_eth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="2dp"
+                android:layout_marginEnd="2dp"
                 android:fontFamily="@font/font_light"
-                android:text="8888888"
+                android:text="0"
                 android:textColor="@color/text_black"
                 android:textSize="21sp" />
 
@@ -98,7 +98,7 @@
                 android:id="@+id/balance_eth_pending"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/balance_eth"
+                android:layout_toEndOf="@+id/balance_eth"
                 android:layout_alignParentTop="true"
                 android:fontFamily="@font/font_light"
                 android:text=""
@@ -109,10 +109,22 @@
                 android:id="@+id/symbol"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/balance_eth_pending"
+                android:layout_toEndOf="@+id/balance_eth_pending"
                 android:layout_marginStart="3dp"
                 android:fontFamily="@font/font_light"
                 android:text="@string/ethereum"
+                android:textColor="@color/text_black"
+                android:textSize="21sp" />
+
+            <TextView
+                android:id="@+id/symbolAux"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/balance_eth"
+                android:layout_marginTop="1dp"
+                android:fontFamily="@font/font_light"
+                android:lines="1"
+                android:visibility="gone"
                 android:textColor="@color/text_black"
                 android:textSize="21sp" />
 
@@ -155,7 +167,7 @@
                 android:id="@+id/issuer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="2dp"
+                android:layout_marginEnd="2dp"
                 android:fontFamily="@font/font_semibold"
                 android:text="@string/ethereum"
                 android:textColor="@color/colorPrimaryDark"

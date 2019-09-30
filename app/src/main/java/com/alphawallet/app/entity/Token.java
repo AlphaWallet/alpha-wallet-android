@@ -3,6 +3,7 @@ package com.alphawallet.app.entity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.view.View;
 
 import com.alphawallet.app.interact.SetupTokensInteract;
@@ -252,6 +253,18 @@ public class Token implements Parcelable
             holder.contractSeparator.setVisibility(View.VISIBLE);
             holder.contractType.setText(R.string.erc20);
             holder.layoutValueDetails.setVisibility(View.GONE);
+
+            //For tokens with a long balance, wrap the name onto a new line so as not to appear cluttered
+            if (value.length() > 8)
+            {
+                holder.symbol.setText("");
+                String symbolStr = tokenInfo.symbol != null ? tokenInfo.symbol.toUpperCase() : "";
+                holder.symbolAux.setVisibility(View.VISIBLE);
+                holder.symbolAux.setText(TextUtils.isEmpty(tokenInfo.name)
+                        ? symbolStr
+                        : getFullName());
+            }
+
             //currently we don't collect the value of ERC20 tokens
             //TODO: get ticker for ERC20 tokens
         }

@@ -26,13 +26,12 @@ import java.util.regex.Pattern;
 public class ImportKeystoreFragment extends Fragment implements View.OnClickListener, TextWatcher
 {
     private static final OnImportKeystoreListener dummyOnImportKeystoreListener = (k, p) -> {};
-    private static final String validator = "[^a-z^A-Z^0-9^{^}^\"^:^,^-]";
+    private static final Pattern keystore_json = Pattern.compile("[\\n\\r\\t\" a-zA-Z0-9{}:,-]{10,}", Pattern.MULTILINE);
 
     private PasswordInputView keystore;
     private PasswordInputView password;
     private Button importButton;
     private TextView passwordText;
-    private Pattern pattern;
     @NonNull
     private OnImportKeystoreListener onImportKeystoreListener = dummyOnImportKeystoreListener;
 
@@ -61,8 +60,6 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
         updateButtonState(false);
         keystore.getEditText().addTextChangedListener(this);
         password.getEditText().addTextChangedListener(this);
-
-        pattern = Pattern.compile(validator, Pattern.MULTILINE);
     }
 
     @Override
@@ -150,27 +147,10 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
         if (keystore.isErrorState()) keystore.setError(null);
         if (password.isErrorState()) password.setError(null);
         if (password.getVisibility() == View.GONE)
-        {
-            String txt = keystore.getText().toString();
-            if (txt.length() > 0)
-            {
-                boolean validKeystore = true;
-                //first check
-                final Matcher matcher = pattern.matcher(txt);
-                if (matcher.find()) validKeystore = false;
-
-                if (!validKeystore)
-                {
-                    keystore.setError("Keystore file contains invalid characters");
-                }
-
-                if (txt.length() < 10) validKeystore = false;
-                updateButtonState(validKeystore);
-            }
-            else
-            {
-                updateButtonState(false);
-            }
+        { // currently user entering keystore JSON
+            final Matcher pattern = keystore_json.matcher(keystore.getText().toString());
+            keystore.setError(pattern.matches()?null:getString(R.string.invalid_keystore));
+            updateButtonState(pattern.matches());
         }
         else
         {

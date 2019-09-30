@@ -36,6 +36,9 @@ public abstract class TokenscriptFunction
 {
     public Function generateTransactionFunction(String walletAddr, BigInteger tokenId, TokenDefinition definition, FunctionDefinition function, AttributeInterface attrIf)
     {
+        //pre-parse tokenId.
+        if (tokenId.bitCount() > 256) tokenId = tokenId.or(BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE)); //truncate tokenId too large
+
         List<Type> params = new ArrayList<Type>();
         List<TypeReference<?>> returnTypes = new ArrayList<TypeReference<?>>();
         for (MethodArg arg : function.parameters)

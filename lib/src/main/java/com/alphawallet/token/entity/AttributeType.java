@@ -33,11 +33,13 @@ public class AttributeType {
     public Map<BigInteger, String> members;
     private TokenDefinition definition;
     public FunctionDefinition function = null;
+    public boolean userInput = false;
 
     public AttributeType(Element attr, TokenDefinition def)
     {
         definition = def;
         id = attr.getAttribute("id");
+        as = As.Unsigned; //default value
         try {
             switch (attr.getAttribute("syntax")) { // We don't validate syntax here; schema does it.
                 case "1.3.6.1.4.1.1466.115.121.1.6":
@@ -113,6 +115,7 @@ public class AttributeType {
             if (node.getNodeType() == Node.ELEMENT_NODE)
             {
                 Element resolve = (Element) node;
+                setAs(definition.parseAs(resolve));
                 switch (node.getLocalName())
                 {
                     case "ethereum":
@@ -128,11 +131,17 @@ public class AttributeType {
                         }
                         break;
                     case "user-entry":
+                        userInput = true;
                         String asTxt = resolve.getAttribute("as");
                         if (asTxt.startsWith("e") && Character.isDigit(asTxt.charAt(1)))
                         {
                             bitshift = Integer.parseInt(asTxt.substring(1));
                             setAs(As.UnsignedInput);
+                        }
+                        else
+                        {
+                            bitshift = 0;
+                            setAs(definition.parseAs(resolve));
                         }
                         break;
                 }

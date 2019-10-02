@@ -59,6 +59,7 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.security.SignatureException;
 
 import javax.inject.Inject;
@@ -108,6 +109,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
     public static final String CURRENT_FRAGMENT = "currentFragment";
     private static final String CURRENT_URL = "urlInBar";
+
+    private static final String MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
+
+    static byte[] getEthereumMessagePrefix(int messageLength) {
+        return MESSAGE_PREFIX.concat(String.valueOf(messageLength)).getBytes();
+    }
 
     @Inject
     DappBrowserViewModelFactory dappBrowserViewModelFactory;
@@ -662,13 +669,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             dialog = new SignMessageDialog(getActivity(), message);
             dialog.setAddress(wallet.address);
-            dialog.setMessage(Hex.hexToUtf8(message.value));
+            String signString = Hex.hexToUtf8(message.value);
+            //Analyse if this is an ISO-8859-1 string, otherwise show the hex
+            if (!Charset.forName("ISO-8859-1").newEncoder().canEncode(signString)) signString = message.value;
+            dialog.setMessage(signString);
             dialog.setOnApproveListener(v -> {
-                String convertedMessage = Hex.hexToUtf8(message.value);
-                String signMessage = PERSONAL_MESSAGE_PREFIX
-                        + convertedMessage.length()
-                        + convertedMessage;
-                messageBytes = signMessage.getBytes();
+                messageBytes = getEthereumMessage(Numeric.hexStringToByteArray(message.value));
                 viewModel.getAuthorisation(wallet, getActivity(), this);
             });
             dialog.setOnRejectListener(v -> {
@@ -683,6 +689,16 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             // if a user comes across this message they can report to the dapp writer
             onSignError(e.getMessage());
         }
+    }
+
+    static byte[] getEthereumMessage(byte[] message) {
+        byte[] prefix = getEthereumMessagePrefix(message.length);
+
+        byte[] result = new byte[prefix.length + message.length];
+        System.arraycopy(prefix, 0, result, 0, prefix.length);
+        System.arraycopy(message, 0, result, prefix.length, message.length);
+
+        return result;
     }
 
     @Override

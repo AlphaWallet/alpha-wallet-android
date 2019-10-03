@@ -123,12 +123,14 @@ public class Web3TokenView extends WebView
         }
     }
 
+    @JavascriptInterface
     public void TScallToJS(String fName, String script, TokenScriptRenderCallback cb)
     {
-        post(() -> evaluateJavascript(script, value -> cb.callToJSComplete(fName)));
+        post(() -> evaluateJavascript(script, value -> cb.callToJSComplete(fName, value)));
     }
 
-    private void callbackToJS(long callbackId, String function, String param) {
+    @JavascriptInterface
+    public void callbackToJS(long callbackId, String function, String param) {
         String callback = String.format(function, callbackId, param);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));

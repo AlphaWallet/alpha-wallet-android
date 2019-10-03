@@ -2,6 +2,7 @@ package com.alphawallet.app.ui.widget.holder;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Base64;
@@ -105,6 +106,7 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
             public void DAppError(Throwable error, Message<String> message) {
                 tokenView.onSignCancel(message);
                 dialog.dismiss();
+                functionCallback.functionFailed();
             }
 
             @Override
@@ -113,6 +115,7 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
                 signHex = Numeric.cleanHexPrefix(signHex);
                 tokenView.onSignPersonalMessageSuccessful(message, signHex);
                 dialog.dismiss();
+                functionCallback.functionSuccess();
             }
         };
 

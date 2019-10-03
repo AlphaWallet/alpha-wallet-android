@@ -166,6 +166,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return optimised;
     }
 
+    @Override
+    public String getWalletAddr()
+    {
+        return tokensService.getCurrentAddress();
+    }
+
     /**
      * Fetch attributes from local storage; not using contract lookup
      * @param token

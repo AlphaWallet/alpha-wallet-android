@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.alphawallet.app.entity.DAppFunction;
@@ -91,6 +92,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private Message<String> messageToSign;
     private PinAuthenticationCallbackInterface authInterface;
     private FunctionButtonBar functionBar;
+    private Handler handler;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
@@ -271,10 +273,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             {
                 handleFunction(action);
             }
-        }
-        else
-        {
-            tokenView.callToJS("onConfirm" + "('sig')");
         }
     }
 
@@ -558,6 +556,30 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
+    public void functionSuccess()
+    {
+        if (handler == null) handler = new Handler();
+        LinearLayout successOverlay = findViewById(R.id.layout_success_overlay);
+        if (successOverlay != null) successOverlay.setVisibility(View.VISIBLE);
+        handler.postDelayed(closer, 1000);
+    }
+
+    private Runnable closer = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            finish();
+        }
+    };
+
+    @Override
+    public void functionFailed()
+    {
+
+    }
+
+    @Override
     public void onPageLoaded()
     {
 
@@ -660,6 +682,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                 {
                     tokenView.onSignCancel(message);
                     dialog.dismiss();
+                    functionFailed();
                 }
 
                 @Override
@@ -670,6 +693,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                     tokenView.onSignPersonalMessageSuccessful(message, signHex);
                     testRecoverAddressFromSignature(message.value, signHex);
                     dialog.dismiss();
+                    functionSuccess();
                 }
             };
 
@@ -696,7 +720,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void callToJSComplete(String function)
+    public void callToJSComplete(String function, String result)
     {
         completeTokenscriptFunction(function);
     }

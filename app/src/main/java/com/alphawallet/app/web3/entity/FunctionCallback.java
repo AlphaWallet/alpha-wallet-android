@@ -9,4 +9,6 @@ import com.alphawallet.app.entity.DAppFunction;
 public interface FunctionCallback
 {
     void signMessage(byte[] sign, DAppFunction dAppFunction, Message<String> message);
+    void functionSuccess();
+    void functionFailed();
 }

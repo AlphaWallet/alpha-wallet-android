@@ -38,6 +38,7 @@ public abstract class TokenscriptFunction
     {
         //pre-parse tokenId.
         if (tokenId.bitCount() > 256) tokenId = tokenId.or(BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE)); //truncate tokenId too large
+        if (walletAddr == null) walletAddr = ZERO_ADDRESS;
 
         List<Type> params = new ArrayList<Type>();
         List<TypeReference<?>> returnTypes = new ArrayList<TypeReference<?>>();
@@ -204,7 +205,7 @@ public abstract class TokenscriptFunction
             }
             TransactionResult transactionResult = new TransactionResult(useAddress.chainId, useAddress.address, tokenId, attr);
             // 1: create transaction call
-            org.web3j.abi.datatypes.Function transaction = generateTransactionFunction(ZERO_ADDRESS, tokenId, definition, attr.function, attrIf);
+            org.web3j.abi.datatypes.Function transaction = generateTransactionFunction(attrIf.getWalletAddr(), tokenId, definition, attr.function, attrIf);
             // 2: create web3 connection
             OkHttpClient okClient = new OkHttpClient.Builder()
                     .connectTimeout(5, TimeUnit.SECONDS)

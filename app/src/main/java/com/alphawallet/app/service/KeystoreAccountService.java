@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
+import static com.alphawallet.app.service.KeyService.FAILED_SIGNATURE;
 
 public class KeystoreAccountService implements AccountKeystoreService
 {
@@ -217,11 +218,14 @@ public class KeystoreAccountService implements AccountKeystoreService
                     dataStr
                     );
 
-            byte[] signData = TransactionEncoder.encode(rtx);
+            byte chainIdByte = (byte)(chainId & 0xFF);
+
+            byte[] signData = TransactionEncoder.encode(rtx, chainIdByte);
             byte[] signatureBytes = keyService.signData(signer, signData);
             Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
-            if (sigData == null) return "0000".getBytes();
-            else return encode(rtx, sigData);
+            if (sigData == null) return FAILED_SIGNATURE.getBytes();
+            Sign.SignatureData eip155SignatureData = TransactionEncoder.createEip155SignatureData(sigData, chainIdByte);
+            return encode(rtx, eip155SignatureData);
         })
         .subscribeOn(Schedulers.io());
     }

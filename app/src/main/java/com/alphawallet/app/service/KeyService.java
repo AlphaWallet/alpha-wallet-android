@@ -54,7 +54,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_NONE;
     private static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding";
     private static final int AUTHENTICATION_DURATION_SECONDS = 30;
-    private static final String FAILED_SIGNATURE = "00000000000000000000000000000000000000000000000000000000000000000";
+    public  static final String FAILED_SIGNATURE = "00000000000000000000000000000000000000000000000000000000000000000";
 
     //This value determines the time interval between the user swiping away the backup warning notice and it re-appearing
     public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000 * 60 * 60 * 24 * 30; //30 days //1000 * 60 * 3; //3 minutes for testing

@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
+import static com.alphawallet.app.service.KeyService.FAILED_SIGNATURE;
 
 public class TransactionRepository implements TransactionRepositoryType {
 
@@ -208,7 +209,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	{
 		return Single.fromCallable(() -> {
 			Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
-			if (sigData == null) return "0000".getBytes();
+			if (sigData == null) return FAILED_SIGNATURE.getBytes();
 			return encode(rtx, sigData);
 		});
 	}

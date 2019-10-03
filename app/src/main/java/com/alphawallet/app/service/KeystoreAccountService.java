@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
+import static com.alphawallet.app.service.KeyService.FAILED_SIGNATURE;
 
 public class KeystoreAccountService implements AccountKeystoreService
 {
@@ -217,11 +218,29 @@ public class KeystoreAccountService implements AccountKeystoreService
                     dataStr
                     );
 
-            byte[] signData = TransactionEncoder.encode(rtx);
-            byte[] signatureBytes = keyService.signData(signer, signData);
-            Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
-            if (sigData == null) return "0000".getBytes();
-            else return encode(rtx, sigData);
+            //TODO: Remove this branch once web3j 4.5.0 is released which upgrades chainId from 1 byte to 8 bytes to handle chainId > 255
+            if (chainId > 255)
+            {
+                //old code to be removed
+                byte[] signData = TransactionEncoder.encode(rtx);
+                byte[] signatureBytes = keyService.signData(signer, signData);
+                Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
+                if (sigData == null) return FAILED_SIGNATURE.getBytes();
+                else return encode(rtx, sigData);
+            }
+            else
+            {
+                //This is the code to use once web3j 4.5.0 is released and the project is upgraded to use it.
+                //TODO: remove this line
+                byte chainIdByte = (byte) (chainId & 0xFF);
+
+                byte[] signData = TransactionEncoder.encode(rtx, chainIdByte); //TODO: pass in chainId directly
+                byte[] signatureBytes = keyService.signData(signer, signData);
+                Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
+                if (sigData == null) return FAILED_SIGNATURE.getBytes();
+                Sign.SignatureData eip155SignatureData = TransactionEncoder.createEip155SignatureData(sigData, chainIdByte); //TODO: pass in chainId directly
+                return encode(rtx, eip155SignatureData);
+            }
         })
         .subscribeOn(Schedulers.io());
     }

@@ -7,10 +7,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Window;
 import android.webkit.*;
 
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.web3.entity.TypedData;
@@ -75,9 +77,6 @@ public class Web3TokenView extends WebView
         setInitialScale(0);
         clearCache(true);
 
-
-        setWebChromeClient(new WebChromeClient());
-
         addJavascriptInterface(new SignCallbackJSInterface(
                 this,
                 innerOnSignTransactionListener,
@@ -94,8 +93,23 @@ public class Web3TokenView extends WebView
         System.out.println(data);
     }
 
-    public void setWalletAddress(@NonNull Address address) {
+    public void setWalletAddress(@NonNull Address address)
+    {
         jsInjectorClient.setWalletAddress(address);
+    }
+
+    public void setupWindowCallback(@NonNull FunctionCallback callback)
+    {
+        setWebChromeClient(
+                new WebChromeClient()
+                {
+                    @Override
+                    public void onCloseWindow(WebView window)
+                    {
+                        callback.functionSuccess();
+                    }
+                }
+        );
     }
 
     public void setChainId(int chainId) {

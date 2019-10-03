@@ -107,6 +107,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
         tokenView.setChainId(token.tokenInfo.chainId);
         tokenView.setWalletAddress(new Address(token.getWallet()));
+        tokenView.setupWindowCallback(this);
         tokenView.setRpcUrl(token.tokenInfo.chainId);
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSignPersonalMessageListener(this);
@@ -693,7 +694,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                     tokenView.onSignPersonalMessageSuccessful(message, signHex);
                     testRecoverAddressFromSignature(message.value, signHex);
                     dialog.dismiss();
-                    functionSuccess();
                 }
             };
 

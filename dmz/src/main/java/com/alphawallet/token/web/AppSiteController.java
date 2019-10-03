@@ -64,6 +64,7 @@ import com.alphawallet.token.web.Ethereum.TransactionHandler;
 import com.alphawallet.token.web.Service.CryptoFunctions;
 import static com.alphawallet.token.tools.Convert.getEthString;
 import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
+import static com.alphawallet.token.web.Ethereum.TokenscriptFunction.ZERO_ADDRESS;
 
 @Controller
 @SpringBootApplication
@@ -495,6 +496,12 @@ public class AppSiteController implements AttributeInterface
     public boolean resolveOptimisedAttr(ContractAddress contract, AttributeType attr, TransactionResult transactionResult)
     {
         return false;
+    }
+
+    @Override
+    public String getWalletAddr()
+    {
+        return ZERO_ADDRESS;
     }
 
     /**

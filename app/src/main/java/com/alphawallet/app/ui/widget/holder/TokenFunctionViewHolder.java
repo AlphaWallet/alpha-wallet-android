@@ -53,6 +53,7 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
         tokenView.setRpcUrl(token.tokenInfo.chainId);
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSignPersonalMessageListener(this);
+        tokenView.setupWindowCallback(callback);
         functionCallback = callback;
         assetDefinitionService = service;
     }
@@ -115,7 +116,6 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
                 signHex = Numeric.cleanHexPrefix(signHex);
                 tokenView.onSignPersonalMessageSuccessful(message, signHex);
                 dialog.dismiss();
-                functionCallback.functionSuccess();
             }
         };
 

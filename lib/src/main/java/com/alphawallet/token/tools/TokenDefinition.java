@@ -93,6 +93,16 @@ public class TokenDefinition {
             case "utf8":
             case "": //no type specified, return string
                 return As.UTF8;
+            case "bytes":
+                return As.Bytes;
+            case "e18":
+                return As.e18;
+            case "e8":
+                return As.e8;
+            case "e4":
+                return As.e4;
+            case "e2":
+                return As.e2;
             case "bool":
                 return As.Boolean;
             case "mapping":

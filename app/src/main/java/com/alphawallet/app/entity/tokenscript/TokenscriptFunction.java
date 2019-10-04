@@ -52,22 +52,7 @@ public abstract class TokenscriptFunction
             resolveReference(arg, tokenId, definition, attrIf);
             switch (arg.parameterType)
             {
-                case "e18":
-                    BigInteger e18 = new BigInteger(BalanceUtils.EthToWei(arg.element.value));
-                    params.add(new Uint(e18));
-                    break;
-                case "e8":
-                    BigInteger e8 =  BalanceUtils.baseToSubunit(arg.element.value, 8);
-                    params.add(new Uint(e8));
-                    break;
-                case "e4":
-                    BigInteger e4 =  BalanceUtils.baseToSubunit(arg.element.value, 4);
-                    params.add(new Uint(e4));
-                    break;
-                case "e2":
-                    BigInteger e2 =  BalanceUtils.baseToSubunit(arg.element.value, 2);
-                    params.add(new Uint(e2));
-                    break;
+
                 case "int":
                     params.add(new Int(new BigInteger(arg.element.value)));
                     break;
@@ -396,6 +381,7 @@ public abstract class TokenscriptFunction
         }
         switch (function.syntax)
         {
+            //not used as of now
             case Boolean:
             case Integer:
             case NumericString:

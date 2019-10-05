@@ -10,11 +10,20 @@ public class ContractResult
 {
     public String name;
     public int chainId;
+    public ContractType type;
 
     public ContractResult(String n, int chain)
     {
         name = n;
         chainId = chain;
+        type = null;
+    }
+
+    public ContractResult(String n, int chain, ContractType t)
+    {
+        name = n;
+        chainId = chain;
+        type = t;
     }
 
     public static void addIfNotInList(List<ContractResult> contractList, ContractResult candidate)

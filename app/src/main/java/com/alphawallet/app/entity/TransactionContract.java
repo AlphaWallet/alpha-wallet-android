@@ -133,6 +133,10 @@ public class TransactionContract implements Parcelable {
             int operationType = Integer.parseInt(name.substring(1));
             result = ctx.getString(TransactionLookup.typeToName(TransactionType.values()[operationType]));
         }
+        else if (name != null && name.length() > 0)
+        {
+            result = name;
+        }
         return result;
     }
 

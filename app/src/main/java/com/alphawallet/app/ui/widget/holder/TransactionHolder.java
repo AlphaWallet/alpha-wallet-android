@@ -318,7 +318,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
 
         String supplimentalTxt = "";
 
-        boolean isSent = from.toLowerCase().equals(defaultAddress);
+        boolean isSent = from.toLowerCase().equals(defaultAddress.toLowerCase());
         String operationName = token != null ? token.getOperationName(transaction, getContext()) : null;
         if (operationName == null) operationName = isSent ? getString(R.string.sent) : getString(R.string.received);
         type.setText(operationName);

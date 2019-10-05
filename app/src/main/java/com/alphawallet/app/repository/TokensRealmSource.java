@@ -44,7 +44,7 @@ public class TokensRealmSource implements TokenLocalSource {
 
     public static final String TAG = "TLS";
     public static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
-    private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 1 * DateUtils.MINUTE_IN_MILLIS;
+    private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
     private static final String COINMARKETCAP_IMAGE_URL = "https://files.coinmarketcap.com/static/img/coins/128x128/%s.png";
 
     private final RealmManager realmManager;

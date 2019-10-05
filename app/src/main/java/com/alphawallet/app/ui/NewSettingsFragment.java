@@ -148,7 +148,7 @@ public class NewSettingsFragment extends Fragment
             }
             try
             {
-                startActivity(intent);
+                getActivity().startActivity(intent);
             }
             catch (Exception e)
             {
@@ -169,7 +169,7 @@ public class NewSettingsFragment extends Fragment
             }
             try
             {
-                startActivity(intent);
+                getActivity().startActivity(intent);
             }
             catch (Exception e)
             {
@@ -206,7 +206,7 @@ public class NewSettingsFragment extends Fragment
             }
             try
             {
-                startActivity(intent);
+                getActivity().startActivity(intent);
             }
             catch (Exception e)
             {

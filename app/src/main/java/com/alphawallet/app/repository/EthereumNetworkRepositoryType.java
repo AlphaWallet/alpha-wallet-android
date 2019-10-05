@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Ticker;
+import com.alphawallet.app.entity.TokenTicker;
 
 import io.reactivex.Single;
 
@@ -23,7 +24,7 @@ public interface EthereumNetworkRepositoryType {
 
 	void addOnChangeDefaultNetwork(OnNetworkChangeListener onNetworkChanged);
 
-	Single<Ticker> getTicker(int chainId);
+	Single<Ticker> getTicker(int chainId, TokenTicker tTicker);
 
 	String getNameById(int id);
 

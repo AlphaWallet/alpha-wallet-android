@@ -2,6 +2,7 @@ package com.alphawallet.app.repository;
 
 import io.reactivex.disposables.Disposable;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.TokenTicker;
 import com.alphawallet.app.entity.Wallet;
@@ -23,8 +24,8 @@ public interface TokenLocalSource {
     Single<Token[]> fetchERC721Tokens(Wallet wallet);
     Single<Token> fetchEnabledToken(NetworkInfo networkInfo, Wallet wallet, String address);
     Single<Token[]> fetchEnabledTokensWithBalance(Wallet wallet);
-    Completable saveTickers(NetworkInfo network, Wallet wallet, TokenTicker[] tokenTickers);
-    Single<TokenTicker[]> fetchTickers(NetworkInfo network, Wallet wallet, Token[] tokens);
+    Single<Token> saveTicker(NetworkInfo network, Wallet wallet, Token token);
+    Single<TokenTicker> fetchTicker(NetworkInfo network, Wallet wallet, Token tokens);
 
     Disposable setTokenTerminated(Token token, NetworkInfo network, Wallet wallet);
 

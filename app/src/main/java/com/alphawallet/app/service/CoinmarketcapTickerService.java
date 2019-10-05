@@ -1,9 +1,40 @@
 package com.alphawallet.app.service;
 
+import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.BlockscoutValue;
+import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.repository.TokenRepositoryType;
 import com.google.gson.Gson;
 import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.TokenTicker;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthCall;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableOperator;
@@ -21,32 +52,95 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 
+import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.CLASSIC_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.GOERLI_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.KOVAN_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.MAINNET_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.POA_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.RINKEBY_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.ROPSTEN_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.SOKOL_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.XDAI_ID;
+import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
+
 
 public class CoinmarketcapTickerService implements TickerService
 {
 
-    private static final String COINMARKET_API_URL = "https://api.coinmarketcap.com";
+    private static final String COINMARKET_API_URL = "https://pro-api.coinmarketcap.com";
+    private static final String MEDIANIZER = "0x729D19f657BD0614b4985Cf1D82531c67569197B";
 
     private final OkHttpClient httpClient;
     private final Gson gson;
-    private CoinmarketApiClient coinmarketApiClient;
 
     public CoinmarketcapTickerService(OkHttpClient httpClient, Gson gson)
     {
         this.httpClient = httpClient;
         this.gson = gson;
-        buildApiClient(COINMARKET_API_URL);
-    }
-
-    private void buildApiClient(String baseUrl)
-    {
-        coinmarketApiClient = new Retrofit.Builder().baseUrl(baseUrl).client(httpClient).addConverterFactory(GsonConverterFactory.create(gson)).addCallAdapterFactory(RxJava2CallAdapterFactory.create()).build().create(CoinmarketApiClient.class);
     }
 
     @Override
-    public Observable<Ticker> fetchTickerPrice(String ticker)
+    public Single<Map<Integer, Ticker>> fetchTickerPrice(String ticker)
     {
-        return coinmarketApiClient.fetchTickerPrice(ticker).lift(apiError(gson)).map(r -> r[0]).subscribeOn(Schedulers.io());
+        Map<Integer, Ticker> tickers = new HashMap<>();
+        final String keyAPI = BuildConfig.CoinmarketCapAPI;
+        return Single.fromCallable(() -> {
+            Request request = new Request.Builder()
+                    .url(COINMARKET_API_URL + "/v1/cryptocurrency/quotes/latest?symbol=ETH,ETC,DAI,POA")
+                    .get()
+                    .addHeader("X-CMC_PRO_API_KEY", keyAPI)
+                    .build();
+            okhttp3.Response response = httpClient.newCall(request).execute();
+            if (response.code()/200 == 1)
+            {
+                String result = response.body().string();
+                JSONObject stateData = new JSONObject(result);
+                JSONObject data = stateData.getJSONObject("data");
+                JSONObject eth = data.getJSONObject("ETH");
+                Ticker ethTicker = decodeTicker(eth);
+                tickers.put(MAINNET_ID, ethTicker);
+                tickers.put(RINKEBY_ID, ethTicker);
+                tickers.put(ROPSTEN_ID, ethTicker);
+                tickers.put(KOVAN_ID, ethTicker);
+                tickers.put(GOERLI_ID, ethTicker);
+                JSONObject etc = data.getJSONObject("ETC");
+                tickers.put(CLASSIC_ID, decodeTicker(etc));
+                JSONObject dai = data.getJSONObject("DAI");
+                tickers.put(XDAI_ID, decodeTicker(dai));
+                JSONObject poa = data.getJSONObject("POA");
+                tickers.put(POA_ID, decodeTicker(poa));
+                tickers.put(SOKOL_ID, decodeTicker(poa));
+            }
+
+            return tickers;
+        });
+    }
+
+    private Ticker decodeTicker(JSONObject eth)
+    {
+        Ticker ticker = new Ticker();
+        try
+        {
+            ticker.id = eth.getString("id");
+            ticker.name = eth.getString("name");
+            ticker.symbol = eth.getString("symbol");
+            JSONObject quote = eth.getJSONObject("quote");
+            JSONObject usdData = quote.getJSONObject("USD");
+            BigDecimal change = new BigDecimal(usdData.getString("percent_change_24h"));
+            ticker.percentChange24h = change.setScale(3, RoundingMode.DOWN).toString();
+            ticker.price_usd = usdData.getString("price");
+        }
+        catch (JSONException j)
+        {
+            j.printStackTrace();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return ticker;
     }
 
     @Override
@@ -55,16 +149,59 @@ public class CoinmarketcapTickerService implements TickerService
         return Single.just(new TokenTicker[0]);
     }
 
+    @Override
+    public Single<Ticker> fetchEthPrice(NetworkInfo networkInfo, Ticker ticker)
+    {
+        return Single.fromCallable(() -> {
+            //create a function
+            double usdValue = getUSDPrice();
+            ticker.price_usd = String.valueOf(usdValue);
+
+            return ticker;
+        });
+    }
+
+    @Override
+    public Single<Ticker> fetchBlockScoutPrice(NetworkInfo networkInfo, final Ticker ticker)
+    {
+        return Single.fromCallable(() -> {
+            Ticker retTicker = ticker;
+            try
+            {
+                Request request = new Request.Builder().url("https://blockscout.com/" + networkInfo.blockscoutAPI + "/api?module=stats&action=ethprice").get().build();
+                okhttp3.Response response = httpClient.newCall(request).execute();
+
+                if (response != null && response.code()/200 == 1)
+                {
+                    if (retTicker == null)
+                    {
+                        retTicker = new Ticker();
+                        retTicker.id = String.valueOf(networkInfo.chainId);
+                        retTicker.percentChange24h = "0";
+                    }
+                    String result = response.body().string();
+                    JSONObject stateData = new JSONObject(result);
+                    JSONObject resultData = stateData.getJSONObject("result");
+                    if (resultData != null)
+                    {
+                        BlockscoutValue val = gson.fromJson(resultData.toString(), BlockscoutValue.class);
+                        retTicker.price_usd = String.valueOf(val.ethusd);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                //
+            }
+
+            return retTicker;
+        });
+    }
+
     private static @NonNull
     <T> ApiErrorOperator<T> apiError(Gson gson)
     {
         return new ApiErrorOperator<>();
-    }
-
-    public interface CoinmarketApiClient
-    {
-        @GET("/v1/ticker/{ticker}")
-        Observable<Response<Ticker[]>> fetchTickerPrice(@Path("ticker") String ticker);
     }
 
     private final static class ApiErrorOperator<T> implements ObservableOperator<T, Response<T>>
@@ -133,5 +270,56 @@ public class CoinmarketcapTickerService implements TickerService
         });
     }
 
+    private String callSmartContractFunction(Web3j web3j,
+                                             Function function, String contractAddress) throws Exception {
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        try
+        {
+            org.web3j.protocol.core.methods.request.Transaction transaction
+                    = createEthCallTransaction(ZERO_ADDRESS, contractAddress, encodedFunction);
+            EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+
+            return response.getValue();
+        }
+        catch (IOException e)
+        {
+            //Connection error. Use cached value
+            return null;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private double getUSDPrice() throws Exception {
+        Web3j web3j = TokenRepository.getWeb3jService(MAINNET_ID);
+        org.web3j.abi.datatypes.Function function = read();
+        String responseValue = callSmartContractFunction(web3j, function, MEDIANIZER);
+
+        BigDecimal usdRaw = BigDecimal.ZERO;
+
+        if (responseValue == null) return usdRaw.doubleValue();
+
+        List<Type> response = FunctionReturnDecoder.decode(
+                responseValue, function.getOutputParameters());
+
+        if (response.size() > 0)
+        {
+            usdRaw = new BigDecimal(((Uint256) response.get(0)).getValue());
+            usdRaw = usdRaw.divide(new BigDecimal(Math.pow(10, 18)));
+        }
+
+        return usdRaw.doubleValue();
+    }
+
+    private static org.web3j.abi.datatypes.Function read() {
+        return new org.web3j.abi.datatypes.Function(
+                "read",
+                Arrays.<Type>asList(),
+                Collections.singletonList(new TypeReference<Uint256>() {}));
+    }
 
 }

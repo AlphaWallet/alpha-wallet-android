@@ -38,8 +38,8 @@ android {
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 74
-        versionName "2.11.0"
+        versionCode 76
+        versionName "2.12.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         buildConfigField 'int', 'DB_VERSION', '4'
@@ -49,12 +49,19 @@ android {
         }
     }
     buildTypes {
+        def CoinmarketCapAPI = "CoinmarketCapAPI"
+        def COINMARKET_CAP_KEY = "\"obtain-api-key-from-coinmarketcap-com\""
+        if (project.hasProperty("coinmarketcapAPI")) {
+            COINMARKET_CAP_KEY= coinmarketcapAPI
+        }
         debug {
+            buildConfigField "String", CoinmarketCapAPI, COINMARKET_CAP_KEY
             minifyEnabled false
 //            proguardFiles getDefaultProguardFile('proguard-android.txt'),
 //                    'proguard-rules.pro'
         }
         release {
+            buildConfigField "String", CoinmarketCapAPI, COINMARKET_CAP_KEY
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

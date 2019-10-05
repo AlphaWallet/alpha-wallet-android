@@ -250,55 +250,6 @@ public class TokenRepository implements TokenRepositoryType {
                 .toObservable();
     }
 
-    private SingleTransformer<Token[], Token[]> attachTicker(NetworkInfo network, Wallet wallet) {
-        return upstream -> upstream.flatMap(tokens ->
-                Single.zip(
-                        Single.just(tokens),
-                        getTickers(network, wallet, tokens),
-                        (data, tokenTickers) -> {
-                            for (Token token : data) {
-                                for (TokenTicker ticker : tokenTickers) {
-                                    if (token.tokenInfo.address.equals(ticker.contract)) {
-                                        token.ticker = ticker;
-                                    }
-                                }
-                            }
-                            return data;
-                        }));
-    }
-
-    private SingleTransformer<Token[], Token[]> attachTickerStored(NetworkInfo network, Wallet wallet) {
-        return upstream -> upstream.flatMap(tokens ->
-                Single.zip(
-                        Single.just(tokens),
-                        getTickersStored(network, wallet, tokens),
-                        (data, tokenTickers) -> {
-                            for (Token token : data) {
-                                for (TokenTicker ticker : tokenTickers) {
-                                    if (token.tokenInfo.address.equals(ticker.contract)) {
-                                        token.ticker = ticker;
-                                    }
-                                }
-                            }
-                            return data;
-                        }));
-    }
-
-    private Single<TokenTicker[]> getTickersStored(NetworkInfo network, Wallet wallet, Token[] tokens) {
-        return localSource.fetchTickers(network, wallet, tokens);
-    }
-
-    private Single<TokenTicker[]> getTickers(NetworkInfo network, Wallet wallet, Token[] tokens) {
-        return localSource.fetchTickers(network, wallet, tokens)
-                .onErrorResumeNext(throwable -> tickerService
-                        .fetchTokenTickers(tokens, "USD")
-                        .onErrorResumeNext(thr -> Single.just(new TokenTicker[0])))
-                .flatMapCompletable(tokenTickers -> localSource.saveTickers(network, wallet, tokenTickers))
-                .andThen(localSource
-                        .fetchTickers(network, wallet, tokens)
-                        .onErrorResumeNext(thr -> Single.just(new TokenTicker[0])));
-    }
-
     @Override
     public Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType interfaceSpec)
     {
@@ -721,11 +672,15 @@ public class TokenRepository implements TokenRepositoryType {
                         return oldToken;
                     }
                 })
-                .flatMap(token -> ethereumNetworkRepository.getTicker(network.chainId)
+                .flatMap(token -> localSource.fetchTicker(network, wallet, token)
+                        .flatMap(ticker -> ethereumNetworkRepository.getTicker(network.chainId, ticker))
                         .map(ticker -> {
                             token.ticker = new TokenTicker(String.valueOf(network.chainId), wallet.address, ticker.price_usd, ticker.percentChange24h, null);
                             return token;
-                        }).onErrorResumeNext(throwable -> Single.just(token)));
+                        })
+                        .flatMap(ttoken -> localSource.saveTicker(network, wallet, ttoken))
+                        .doOnError(throwable -> { System.out.println(throwable.getMessage()); })
+                        .onErrorResumeNext(throwable -> Single.just(token)));
     }
 
     /**
@@ -746,7 +701,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<Ticker> getEthTicker(int chainId)
     {
-        return ethereumNetworkRepository.getTicker(chainId);
+        return ethereumNetworkRepository.getTicker(chainId, null);
     }
 
     private BigDecimal getBalance(Wallet wallet, TokenInfo tokenInfo) throws Exception {

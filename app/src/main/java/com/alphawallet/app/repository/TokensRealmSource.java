@@ -44,7 +44,7 @@ public class TokensRealmSource implements TokenLocalSource {
 
     public static final String TAG = "TLS";
     public static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
-    private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
+    private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 1 * DateUtils.MINUTE_IN_MILLIS;
     private static final String COINMARKETCAP_IMAGE_URL = "https://files.coinmarketcap.com/static/img/coins/128x128/%s.png";
 
     private final RealmManager realmManager;
@@ -245,80 +245,67 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Completable saveTickers(NetworkInfo network, Wallet wallet, TokenTicker[] tokenTickers) {
-        return Completable.fromAction(() -> {
-            Realm realm = null;
-            try {
-                realm = realmManager.getRealmInstance(wallet);
-                if (!WalletUtils.isValidAddress(wallet.address)) return;
+    public Single<Token> saveTicker(NetworkInfo network, Wallet wallet, final Token token) {
+        return Single.fromCallable(() -> {
+            try (Realm realm = realmManager.getRealmInstance(wallet))
+            {
+                if (!WalletUtils.isValidAddress(wallet.address)) return token;
                 TransactionsRealmCache.addRealm();
                 realm.beginTransaction();
                 long now = System.currentTimeMillis();
-                for (TokenTicker tokenTicker : tokenTickers) {
-                    RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
-                            .equalTo("contract", tokenTicker.contract)
-                            .equalTo("chainId", network.chainId)
-                            .findFirst();
-                    if (realmItem == null) {
-                        realmItem = realm.createObject(RealmTokenTicker.class, tokenTicker.contract);
-                        realmItem.setCreatedTime(now);
-                    }
-                    realmItem.setId(tokenTicker.id);
-                    realmItem.setPercentChange24h(tokenTicker.percentChange24h);
-                    realmItem.setPrice(tokenTicker.price);
-                    realmItem.setImage(TextUtils.isEmpty(tokenTicker.image)
-                            ? String.format(COINMARKETCAP_IMAGE_URL, tokenTicker.id)
-                            : tokenTicker.image);
-                    realmItem.setUpdatedTime(now);
+                String tickerName = token.getAddress() + "-" + token.tokenInfo.chainId;
+                RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
+                        .equalTo("contract", tickerName)
+                        .findFirst();
+                if (realmItem == null) {
+                    realmItem = realm.createObject(RealmTokenTicker.class, tickerName);
+                    realmItem.setCreatedTime(now);
                 }
+                realmItem.setId(token.ticker.id);
+                realmItem.setPercentChange24h(token.ticker.percentChange24h);
+                realmItem.setPrice(token.ticker.price);
+                realmItem.setImage(TextUtils.isEmpty(token.ticker.image)
+                        ? String.format(COINMARKETCAP_IMAGE_URL, token.ticker.id)
+                        : token.ticker.image);
+                realmItem.setUpdatedTime(now);
                 realm.commitTransaction();
-            } catch (Exception ex) {
-                if (realm != null && realm.isInTransaction()) {
-                    realm.cancelTransaction();
-                }
-            } finally {
-                if (realm != null) {
-                    realm.close();
-                    TransactionsRealmCache.subRealm();
-                }
             }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            return token;
         });
     }
 
     @Override
-    public Single<TokenTicker[]> fetchTickers(NetworkInfo network, Wallet wallet, Token[] tokens) {
+    public Single<TokenTicker> fetchTicker(NetworkInfo network, Wallet wallet, Token token) {
         return Single.fromCallable(() -> {
             ArrayList<TokenTicker> tokenTickers = new ArrayList<>();
-            Realm realm = null;
-            try {
-                realm = realmManager.getRealmInstance(wallet);
-                realm.beginTransaction();
+            try (Realm realm = realmManager.getRealmInstance(wallet))
+            {
                 long minCreatedTime = System.currentTimeMillis() - ACTUAL_TOKEN_TICKER_INTERVAL;
                 RealmResults<RealmTokenTicker> rawItems = realm.where(RealmTokenTicker.class)
+                        .equalTo("contract", token.getAddress() + "-" + token.tokenInfo.chainId)
                         .greaterThan("updatedTime", minCreatedTime)
-                        .equalTo("chainId", network.chainId)
                         .findAll();
                 int len = rawItems.size();
-                for (int i = 0; i < len; i++) {
+                for (int i = 0; i < len; i++)
+                {
                     RealmTokenTicker rawItem = rawItems.get(i);
-                    if (rawItem != null) {
-                        tokenTickers.add(new TokenTicker(
-                                rawItem.getId(),
-                                rawItem.getContract(),
-                                rawItem.getPrice(),
-                                rawItem.getPercentChange24h(),
-                                rawItem.getImage()));
+                    if (rawItem != null)
+                    {
+                        tokenTickers.add(new TokenTicker(rawItem.getId(), rawItem.getContract(), rawItem.getPrice(), rawItem.getPercentChange24h(), rawItem.getImage()));
                     }
                 }
-                realm.commitTransaction();
-            } finally {
-                if (realm != null) {
-                    realm.close();
-                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
             }
             return tokenTickers.size() == 0
-                    ? null
-                    : tokenTickers.toArray(new TokenTicker[tokenTickers.size()]);
+                    ? new TokenTicker("0", "0", "0", "0", null)
+                    : tokenTickers.get(0);
         });
     }
 

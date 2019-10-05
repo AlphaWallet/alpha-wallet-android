@@ -3,6 +3,7 @@ package com.alphawallet.app.repository;
 import android.text.TextUtils;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.TokenTicker;
 import com.alphawallet.app.util.Utils;
 
 import org.web3j.protocol.Web3j;
@@ -57,6 +58,9 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	private static final String SOKOL_BLOCKSCOUT = "poa/sokol";
 	private static final String KOVAN_BLOCKSCOUT = "eth/kovan";
 	private static final String GOERLI_BLOCKSCOUT = "eth/goerli";
+
+	private Map<Integer, Ticker> ethTickers = new ConcurrentHashMap<>();
+	private Map<Integer, Long> ethTickerTimes = new ConcurrentHashMap<>();
 
 	private final Map<Integer, NetworkInfo> networkMap;
 
@@ -226,7 +230,17 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	}
 
 	@Override
-    public Single<Ticker> getTicker(int chainId) {
+    public Single<Ticker> getTicker(int chainId, TokenTicker tTicker) {
+    	if (tTicker != null && !tTicker.percentChange24h.equals("0.00") && !tTicker.percentChange24h.equals("0")) return Single.fromCallable(() -> {
+    		Ticker ticker = new Ticker();
+    		ticker.id = tTicker.id;
+    		ticker.price_usd = tTicker.price;
+    		ticker.percentChange24h = tTicker.percentChange24h;
+    		ticker.symbol = getNetworkByChain(chainId).symbol;
+    		ethTickers.put(chainId, ticker);
+    		return ticker;
+    	});
+
     	NetworkInfo network = networkMap.get(chainId);
     	switch (network.tickerId)
 		{
@@ -234,8 +248,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 				return tickerService.convertPair("EUR", "USD")
 						.map(this::getSigmaTicker);
 			default:
-				return Single.fromObservable(tickerService
-						.fetchTickerPrice(network.tickerId));
+				return updateTicker(network);
 		}
     }
 
@@ -262,5 +275,100 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 			default:
 				return false;
 		}
+	}
+
+	private Single<Ticker> updateTicker(NetworkInfo networkInfo)
+	{
+		Ticker ticker = ethTickers.get(networkInfo.chainId);
+		if (ticker != null)
+		{
+			if (ethTickerTimes.containsKey(networkInfo.chainId))
+			{
+				long lastTry = ethTickerTimes.get(networkInfo.chainId);
+				if (System.currentTimeMillis() - lastTry < 5000 * 60) return Single.fromCallable(() -> ticker); //reduce network traffic
+			}
+
+			//just update the price
+			switch (networkInfo.chainId)
+			{
+				case CLASSIC_ID:
+				case POA_ID:
+				case XDAI_ID:
+					return tickerService.fetchBlockScoutPrice(networkInfo, ticker)
+							.map(newTicker -> updateTicker(networkInfo.chainId, newTicker));
+				case MAINNET_ID:
+					return tickerService.fetchEthPrice(networkInfo, ticker)
+							.map(newTicker -> updateTicker(networkInfo.chainId, newTicker));
+				default:
+					return Single.fromCallable(() -> ethTickers.get(networkInfo.chainId));
+			}
+		}
+		else
+		{
+			switch (networkInfo.chainId)
+			{
+				case MAINNET_ID:
+					return tickerService.fetchTickerPrice(networkInfo.tickerId)
+							.map(this::updateTickers);
+				case XDAI_ID:
+					return tickerService.fetchBlockScoutPrice(networkInfo, ticker);
+				case POA_ID:
+				case CLASSIC_ID:
+				default:
+					return blankTicker(networkInfo);
+			}
+		}
+	}
+
+	private Ticker updateTickers(Map<Integer, Ticker> newTickers)
+	{
+		for (Integer chainId : newTickers.keySet())
+		{
+			Ticker ticker = newTickers.get(chainId);
+			ethTickers.put(chainId, ticker);
+			ethTickerTimes.put(chainId, System.currentTimeMillis());
+		}
+
+		return ethTickers.get(MAINNET_ID);
+	}
+
+	private Single<Ticker> blankTicker(NetworkInfo networkInfo)
+	{
+		return Single.fromCallable(() -> {
+			Ticker tempTicker = new Ticker();
+			tempTicker.id = String.valueOf(networkInfo.chainId);
+			tempTicker.percentChange24h = "0";
+			tempTicker.price_usd = "0.00";
+			return tempTicker;
+		});
+	}
+
+	private Single<Ticker> mirrorMainnet(NetworkInfo networkInfo)
+	{
+		Ticker ticker = ethTickers.get(MAINNET_ID);
+		if (ticker != null) return Single.fromCallable(() -> ticker);
+		else return blankTicker(networkInfo);
+	}
+
+	private Ticker updateTicker(int chainId, Ticker newTicker)
+	{
+		ethTickers.put(chainId, newTicker);
+		ethTickerTimes.put(chainId, System.currentTimeMillis());
+		switch (chainId)
+		{
+			case MAINNET_ID:
+				ethTickers.put(chainId, newTicker);
+				ethTickers.put(GOERLI_ID, newTicker);
+				ethTickers.put(RINKEBY_ID, newTicker);
+				ethTickers.put(ROPSTEN_ID, newTicker);
+				ethTickers.put(KOVAN_ID, newTicker);
+				break;
+			case POA_ID:
+				ethTickers.put(SOKOL_ID, newTicker);
+				break;
+			default:
+				break;
+		}
+		return newTicker;
 	}
 }

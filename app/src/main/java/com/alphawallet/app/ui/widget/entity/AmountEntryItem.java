@@ -146,8 +146,9 @@ public class AmountEntryItem
             double amount;
             if (!amountEditText.getText().toString().isEmpty()) {
                 amount = Double.parseDouble(amountEditText.getText().toString());
+                amount += 1.0;
             } else {
-                amount = 0;
+                amount = 1.0;
             }
             amountEditText.setText(String.valueOf(amount));
             callback.amountChanged(String.valueOf(amount));
@@ -157,9 +158,9 @@ public class AmountEntryItem
         quantityDownBtn.setOnClickListener(v -> {
             double amount;
             if (!amountEditText.getText().toString().isEmpty()
-                    && Double.parseDouble(amountEditText.getText().toString()) >= 1) {
+                    && Double.parseDouble(amountEditText.getText().toString()) >= 1.0) {
                 amount = Double.parseDouble(amountEditText.getText().toString());
-                amount--;
+                amount -= 1.0;
             } else {
                 amount = 0;
             }

@@ -93,6 +93,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private PinAuthenticationCallbackInterface authInterface;
     private FunctionButtonBar functionBar;
     private Handler handler;
+    private boolean isClosing;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
@@ -224,6 +225,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         ProgressView progressView = findViewById(R.id.progress_view);
         systemView.hide();
         progressView.hide();
+        isClosing = false;
 
         //expose the webview and remove the token 'card' background
         findViewById(R.id.layout_webwrapper).setBackgroundResource(R.drawable.background_card);
@@ -405,6 +407,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void handleFunction(TSAction action)
     {
+        if (isClosing) return;
         if (action.function.tx != null && (action.function.method == null || action.function.method.length() == 0)
                 && (action.function.parameters == null || action.function.parameters.size() == 0))
         {
@@ -442,8 +445,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             //finished resolving attributes, blank definition cache so definition is re-loaded when next needed
             viewModel.getAssetDefinitionService().clearCache();
 
-            viewModel.confirmTransaction(this, cAddr.chainId, functionData, null,
-                    cAddr.address, actionMethod, functionEffect, value);
+            viewModel.confirmTransaction(this, cAddr.chainId, functionData, null, cAddr.address, actionMethod, functionEffect, value);
         }
     }
 
@@ -559,6 +561,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void functionSuccess()
     {
+        isClosing = true;
         if (handler == null) handler = new Handler();
         LinearLayout successOverlay = findViewById(R.id.layout_success_overlay);
         if (successOverlay != null) successOverlay.setVisibility(View.VISIBLE);
@@ -577,7 +580,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void functionFailed()
     {
-
+        System.out.println("FAIL");
     }
 
     @Override
@@ -714,6 +717,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
+        isClosing = false;
         args.clear();
         //run the onConfirm JS and await callback
         tokenView.TScallToJS(function, "onConfirm" + "('sig')", this);

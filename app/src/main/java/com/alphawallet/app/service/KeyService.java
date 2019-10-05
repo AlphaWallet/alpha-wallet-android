@@ -761,6 +761,13 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 break;
         }
 
+        //see if unlock is required
+        if (!requiresUnlock())
+        {
+            signCallback.GotAuthorisation(true);
+            return;
+        }
+
         signDialog = new SignTransactionDialog(activity, operation, dialogTitle, null);
         signDialog.setCanceledOnTouchOutside(false);
         signDialog.setCancelListener(v -> {
@@ -1204,9 +1211,30 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         return securityStatus == SecurityStatus.HAS_STRONGBOX;
     }
 
+    private boolean requiresUnlock()
+    {
+        try
+        {
+            unpackMnemonic();
+        }
+        catch (UserNotAuthenticatedException e)
+        {
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     public void resetSigningDialog()
     {
-        if (signDialog != null) signDialog.dismiss();
+        if (signDialog != null && signDialog.isShowing())
+        {
+            signDialog.dismiss();
+        }
         signDialog = null;
     }
 

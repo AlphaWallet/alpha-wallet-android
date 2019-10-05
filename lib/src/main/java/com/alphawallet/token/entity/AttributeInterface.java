@@ -11,4 +11,6 @@ public interface AttributeInterface
     TransactionResult getFunctionResult(ContractAddress contract, AttributeType attr, BigInteger tokenId);
     TransactionResult storeAuxData(TransactionResult tResult);
     boolean resolveOptimisedAttr(ContractAddress contract, AttributeType attr, TransactionResult transactionResult);
+
+    String getWalletAddr();
 }

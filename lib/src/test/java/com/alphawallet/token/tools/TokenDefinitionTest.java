@@ -112,6 +112,12 @@ public class TokenDefinitionTest implements AttributeInterface, ParseResult
     }
 
     @Override
+    public String getWalletAddr()
+    {
+        return "0x00000000000000000000";
+    }
+
+    @Override
     public void parseMessage(ParseResultId parseResult)
     {
         switch (parseResult)

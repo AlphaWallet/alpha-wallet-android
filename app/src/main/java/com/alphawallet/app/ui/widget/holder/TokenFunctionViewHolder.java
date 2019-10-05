@@ -2,6 +2,7 @@ package com.alphawallet.app.ui.widget.holder;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Base64;
@@ -52,6 +53,7 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
         tokenView.setRpcUrl(token.tokenInfo.chainId);
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSignPersonalMessageListener(this);
+        tokenView.setupWindowCallback(callback);
         functionCallback = callback;
         assetDefinitionService = service;
     }
@@ -105,6 +107,7 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
             public void DAppError(Throwable error, Message<String> message) {
                 tokenView.onSignCancel(message);
                 dialog.dismiss();
+                functionCallback.functionFailed();
             }
 
             @Override

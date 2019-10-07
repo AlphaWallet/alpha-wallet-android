@@ -991,6 +991,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 if (attr.function == null) continue;
                 FunctionDefinition fd = attr.function;
                 ContractInfo cInfo = fd.contract;
+                if (cInfo == null || cInfo.addresses == null) continue;
                 List<String> addresses = cInfo.addresses.get(token.tokenInfo.chainId);
 
                 if (addresses != null)

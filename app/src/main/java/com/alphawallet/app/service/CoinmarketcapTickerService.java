@@ -85,7 +85,7 @@ public class CoinmarketcapTickerService implements TickerService
     }
 
     @Override
-    public Single<Map<Integer, Ticker>> fetchTickerPrice(String ticker)
+    public Single<Map<Integer, Ticker>> fetchCMCTickers()
     {
         Map<Integer, Ticker> tickers = new HashMap<>();
         final String keyAPI = BuildConfig.CoinmarketCapAPI;

@@ -143,9 +143,11 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 		updatedTickers = false;
 
 		this.tickerService.fetchAmberData()
+				.map(this::updateTickers)
+				.flatMap(ticker -> this.tickerService.fetchCMCTickers())
 				.observeOn(Schedulers.io())
 				.subscribeOn(Schedulers.newThread())
-				.subscribe(this::updateTickers).isDisposed();
+				.subscribe(this::updateCMCTickers).isDisposed();
 	}
 
 	private NetworkInfo getByName(String name) {
@@ -372,6 +374,20 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 		}
 
 		return ethTickers.get(MAINNET_ID);
+	}
+
+	private void updateCMCTickers(Map<Integer, Ticker> newTickers)
+	{
+		for (Integer chainId : newTickers.keySet())
+		{
+			Ticker ticker = newTickers.get(chainId);
+			Ticker oTicker = ethTickers.get(chainId);
+			if (oTicker == null || oTicker.percentChange24h.equals("0.00"))
+			{
+				ethTickers.put(chainId, ticker);
+				ethTickerTimes.put(chainId, System.currentTimeMillis());
+			}
+		}
 	}
 
 	private Single<Ticker> blankTicker(NetworkInfo networkInfo)

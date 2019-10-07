@@ -11,7 +11,7 @@ import io.reactivex.Single;
 
 public interface TickerService {
 
-    Single<Map<Integer, Ticker>> fetchTickerPrice(String ticker);
+    Single<Map<Integer, Ticker>> fetchCMCTickers();
     Single<Double> convertPair(String currency1, String currency2);
     Single<TokenTicker[]> fetchTokenTickers(Token[] tokens, String currency);
     Single<Ticker> fetchEthPrice(NetworkInfo networkInfo, Ticker ticker);

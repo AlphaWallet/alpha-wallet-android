@@ -3,7 +3,9 @@ package com.alphawallet.app.repository;
 import android.text.TextUtils;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.TokenTicker;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.Utils;
 
 import org.web3j.protocol.Web3j;
@@ -19,6 +21,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class EthereumNetworkRepository implements EthereumNetworkRepositoryType {
 
@@ -61,6 +65,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 
 	private Map<Integer, Ticker> ethTickers = new ConcurrentHashMap<>();
 	private Map<Integer, Long> ethTickerTimes = new ConcurrentHashMap<>();
+	private boolean updatedTickers;
 
 	private final Map<Integer, NetworkInfo> networkMap;
 
@@ -134,6 +139,13 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 		{
 			networkMap.put(network.chainId, network);
 		}
+
+		updatedTickers = false;
+
+		this.tickerService.fetchAmberData()
+				.observeOn(Schedulers.io())
+				.subscribeOn(Schedulers.newThread())
+				.subscribe(this::updateTickers).isDisposed();
 	}
 
 	private NetworkInfo getByName(String name) {
@@ -230,6 +242,25 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 	}
 
 	@Override
+	public Single<Token> attachTokenTicker(Token token)
+	{
+		return tickerService.attachTokenTicker(token);
+	}
+
+	@Override
+	public Single<Token[]> attachTokenTickers(Token[] tokens)
+	{
+		updatedTickers = true;
+		return tickerService.attachTokenTickers(tokens);
+	}
+
+	@Override
+	public TokenTicker getTokenTicker(Token token)
+	{
+		return tickerService.getTokenTicker(token);
+	}
+
+	@Override
     public Single<Ticker> getTicker(int chainId, TokenTicker tTicker) {
     	if (tTicker != null && !tTicker.percentChange24h.equals("0.00") && !tTicker.percentChange24h.equals("0")) return Single.fromCallable(() -> {
     		Ticker ticker = new Ticker();
@@ -282,7 +313,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 		Ticker ticker = ethTickers.get(networkInfo.chainId);
 		if (ticker != null)
 		{
-			if (ethTickerTimes.containsKey(networkInfo.chainId))
+			if (!ticker.price_usd.equals("0.00") && ethTickerTimes.containsKey(networkInfo.chainId))
 			{
 				long lastTry = ethTickerTimes.get(networkInfo.chainId);
 				if (System.currentTimeMillis() - lastTry < 5000 * 60) return Single.fromCallable(() -> ticker); //reduce network traffic
@@ -293,6 +324,7 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 			{
 				case CLASSIC_ID:
 				case POA_ID:
+				case SOKOL_ID:
 				case XDAI_ID:
 					return tickerService.fetchBlockScoutPrice(networkInfo, ticker)
 							.map(newTicker -> updateTicker(networkInfo.chainId, newTicker));
@@ -308,14 +340,16 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 			switch (networkInfo.chainId)
 			{
 				case MAINNET_ID:
-					return tickerService.fetchTickerPrice(networkInfo.tickerId)
-							.map(this::updateTickers);
+					return blankTicker(networkInfo);
 				case XDAI_ID:
 					return tickerService.fetchBlockScoutPrice(networkInfo, ticker);
-				case POA_ID:
 				case CLASSIC_ID:
 				default:
 					return blankTicker(networkInfo);
+				case POA_ID:
+				case SOKOL_ID:
+					return tickerService.fetchBlockScoutPrice(networkInfo, ticker)
+							.map(newTicker -> updateTicker(networkInfo.chainId, newTicker));
 			}
 		}
 	}
@@ -329,25 +363,29 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 			ethTickerTimes.put(chainId, System.currentTimeMillis());
 		}
 
+		if (newTickers.size() == 0)
+		{
+			for (NetworkInfo network : NETWORKS)
+			{
+				ethTickers.put(network.chainId, getBlankTicker(network));
+			}
+		}
+
 		return ethTickers.get(MAINNET_ID);
 	}
 
 	private Single<Ticker> blankTicker(NetworkInfo networkInfo)
 	{
-		return Single.fromCallable(() -> {
-			Ticker tempTicker = new Ticker();
-			tempTicker.id = String.valueOf(networkInfo.chainId);
-			tempTicker.percentChange24h = "0";
-			tempTicker.price_usd = "0.00";
-			return tempTicker;
-		});
+		return Single.fromCallable(() -> getBlankTicker(networkInfo));
 	}
 
-	private Single<Ticker> mirrorMainnet(NetworkInfo networkInfo)
+	private Ticker getBlankTicker(NetworkInfo networkInfo)
 	{
-		Ticker ticker = ethTickers.get(MAINNET_ID);
-		if (ticker != null) return Single.fromCallable(() -> ticker);
-		else return blankTicker(networkInfo);
+		Ticker tempTicker = new Ticker();
+		tempTicker.id = String.valueOf(networkInfo.chainId);
+		tempTicker.percentChange24h = "0";
+		tempTicker.price_usd = "0.00";
+		return tempTicker;
 	}
 
 	private Ticker updateTicker(int chainId, Ticker newTicker)
@@ -370,5 +408,11 @@ public class EthereumNetworkRepository implements EthereumNetworkRepositoryType 
 				break;
 		}
 		return newTicker;
+	}
+
+	@Override
+	public boolean checkTickers()
+	{
+		return !updatedTickers && tickerService.hasTickers();
 	}
 }

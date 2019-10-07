@@ -336,6 +336,7 @@ public class WalletViewModel extends BaseViewModel
         checkTokenUpdates();
         checkUnknownAddresses();
         checkOpenSeaUpdate();
+        checkTickers();
     }
 
     private void checkTokenUpdates()
@@ -574,6 +575,17 @@ public class WalletViewModel extends BaseViewModel
         else
         {
             return GenericWalletInteract.BackupLevel.WALLET_HAS_LOW_VALUE;
+        }
+    }
+
+    private void checkTickers()
+    {
+        if (ethereumNetworkRepository.checkTickers())
+        {
+            ethereumNetworkRepository.attachTokenTickers(tokensService.getAllLiveTokens().toArray(new Token[0]))
+                    .observeOn(Schedulers.newThread())
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(tokens::postValue).isDisposed();
         }
     }
 

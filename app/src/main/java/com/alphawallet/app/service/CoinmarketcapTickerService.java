@@ -1,7 +1,10 @@
 package com.alphawallet.app.service;
 
+import android.util.Log;
+
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.AmberDataElement;
 import com.alphawallet.app.entity.BlockscoutValue;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
@@ -73,6 +76,7 @@ public class CoinmarketcapTickerService implements TickerService
 
     private final OkHttpClient httpClient;
     private final Gson gson;
+    private Map<String, Ticker> erc20Tickers;
 
     public CoinmarketcapTickerService(OkHttpClient httpClient, Gson gson)
     {
@@ -115,6 +119,128 @@ public class CoinmarketcapTickerService implements TickerService
 
             return tickers;
         });
+    }
+
+    @Override
+    public Single<Token> attachTokenTicker(Token token)
+    {
+        return Single.fromCallable(() -> {
+            if (token != null && erc20Tickers != null && token.tokenInfo.chainId == MAINNET_ID)
+            {
+                attachTokenTicker(token, erc20Tickers.get(token.tokenInfo.address.toLowerCase()));
+            }
+
+            return token;
+        });
+    }
+
+    @Override
+    public Single<Token[]> attachTokenTickers(Token[] tokens)
+    {
+        return Single.fromCallable(() -> {
+            for (Token token : tokens)
+            {
+                if (token != null && erc20Tickers != null && token.tokenInfo.chainId == MAINNET_ID)
+                {
+                    attachTokenTicker(token, erc20Tickers.get(token.tokenInfo.address.toLowerCase()));
+                }
+            }
+
+            return tokens;
+        });
+    }
+
+    private void attachTokenTicker(Token token, Ticker ticker)
+    {
+        if (token != null && ticker != null)
+        {
+            token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), token.tokenInfo.address, ticker.price_usd, ticker.percentChange24h, null);
+        }
+    }
+
+    @Override
+    public TokenTicker getTokenTicker(Token token)
+    {
+        if (token != null && erc20Tickers != null && token.tokenInfo.chainId == MAINNET_ID)
+        {
+            Ticker ticker = erc20Tickers.get(token.getAddress());
+            if (ticker != null) token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), token.tokenInfo.address, ticker.price_usd, ticker.percentChange24h, null);
+            return token.ticker;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean hasTickers()
+    {
+        return erc20Tickers != null;
+    }
+
+    @Override
+    public Single<Map<Integer, Ticker>> fetchAmberData()
+    {
+        Map<Integer, Ticker> tickers = new HashMap<>();
+        final String keyAPI = BuildConfig.AmberdataAPI;
+        return Single.fromCallable(() -> {
+            Request request = new Request.Builder()
+                    .url("https://web3api.io/api/v1/market/rankings")
+                    .get()
+                    .addHeader("x-api-key", keyAPI)
+                    .build();
+            okhttp3.Response response = httpClient.newCall(request).execute();
+            if (response.code()/200 == 1)
+            {
+                String result = response.body().string();
+                JSONObject stateData = new JSONObject(result);
+                JSONObject payload = stateData.getJSONObject("payload");
+                JSONArray data = payload.getJSONArray("data");
+                AmberDataElement[] elements = gson.fromJson(data.toString(), AmberDataElement[].class);
+                Ticker ticker;
+                for (AmberDataElement e : elements)
+                {
+                    ticker = tickerFromAmber(e);
+                    switch (e.symbol)
+                    {
+                        case "eth":
+                            tickers.put(MAINNET_ID, ticker);
+                            tickers.put(RINKEBY_ID, ticker);
+                            tickers.put(ROPSTEN_ID, ticker);
+                            tickers.put(KOVAN_ID, ticker);
+                            tickers.put(GOERLI_ID, ticker);
+                            break;
+                        case "DAI":
+                            tickers.put(XDAI_ID, ticker);
+                            break;
+                        case "etc":
+                            tickers.put(CLASSIC_ID, ticker);
+                            break;
+                    }
+
+                    if (e.address != null && e.specifications != null && e.specifications.length > 0 && e.specifications[0].equals("ERC20"))
+                    {
+                        if (erc20Tickers == null) erc20Tickers = new HashMap<>();
+                        erc20Tickers.put(e.address, ticker);
+                    }
+                }
+            }
+
+            return tickers;
+        });
+    }
+
+    private Ticker tickerFromAmber(AmberDataElement e)
+    {
+        Ticker ticker = new Ticker();
+        ticker.price_usd = String.valueOf(e.currentPrice);
+        ticker.id = e.blockchain.blockchainId;
+        BigDecimal change = new BigDecimal(e.changeInPriceDaily);
+        ticker.percentChange24h = change.setScale(3, RoundingMode.DOWN).toString();
+        ticker.symbol = e.symbol;
+        ticker.name = e.name;
+        return ticker;
     }
 
     private Ticker decodeTicker(JSONObject eth)

@@ -190,4 +190,11 @@ public class SignTransactionDialog extends BottomSheetDialog
     public void setCancelListener(View.OnClickListener listener) {
         cancel.setOnClickListener(listener);
     }
+
+    @Override
+    public void onDetachedFromWindow()
+    {
+        super.onDetachedFromWindow();
+        if (isShowing()) dismiss();
+    }
 }

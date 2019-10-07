@@ -762,7 +762,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         }
 
         //see if unlock is required
-        if (!requiresUnlock())
+        if (!requiresUnlock() && signCallback != null)
         {
             signCallback.GotAuthorisation(true);
             return;

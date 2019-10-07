@@ -112,18 +112,24 @@ public class TokenDefinition {
     public String getLocalisedString(Element nameContainer, String tagName) {
         NodeList nList = nameContainer.getElementsByTagNameNS(nameSpace, tagName);
         Element name;
+        String nonLocalised = null;
         for (int i = 0; i < nList.getLength(); i++) {
             name = (Element) nList.item(i);
             String langAttr = getLocalisationLang(name);
             if (langAttr.equals(locale.getLanguage())) {
                 return name.getTextContent();
             }
+            else if (langAttr.equals("en")) nonLocalised = name.getTextContent();
         }
-        /* no matching language found. return the first tag's content */
-        name = (Element) nList.item(0);
-        // TODO: catch the indice out of bound exception and throw it again suggesting dev to check schema
-        if (name != null) return name.getTextContent();
-        else return null;
+
+        if (nonLocalised != null) return nonLocalised;
+        else
+        {
+            name = (Element) nList.item(0);
+            // TODO: catch the indice out of bound exception and throw it again suggesting dev to check schema
+            if (name != null) return name.getTextContent();
+            else return null;
+        }
     }
 
     Node getLocalisedNode(Element nameContainer, String tagName) {
@@ -137,7 +143,7 @@ public class TokenDefinition {
             if (langAttr.equals(locale.getLanguage())) {
                 return name;
             }
-            else if (langAttr.length() == 0)
+            else if (nonLocalised == null && (langAttr.equals("") || langAttr.equals("en")))
             {
                 nonLocalised = name;
             }
@@ -159,7 +165,7 @@ public class TokenDefinition {
                 {
                     return n.getTextContent();
                 }
-                else if (langAttr.equals(""))
+                else if (nonLocalised == null && (langAttr.equals("") || langAttr.equals("en")))
                 {
                     nonLocalised = n.getTextContent();
                 }
@@ -201,58 +207,6 @@ public class TokenDefinition {
         }
 
         return "";
-    }
-
-    Node getLocalisedContent(Node container, String tagName)
-    {
-        NodeList nList = container.getChildNodes();
-        Node node;
-        Node fallback = null;
-
-        for (int i = 0; i < nList.getLength(); i++)
-        {
-            node = nList.item(i);
-            switch (node.getNodeType())
-            {
-                case Node.TEXT_NODE:
-                    break;
-                case ELEMENT_NODE:
-                    fallback = node;
-                    if (node.getLocalName().equals(tagName))
-                    {
-                        Element element = (Element)node;
-                        String currentNodeLang = null;
-                        if (node.hasAttributes())
-                        {
-                            Node attr = node.getAttributes().item(0);
-                            if (attr.getLocalName().equals("lang"))
-                            {
-                                currentNodeLang = attr.getTextContent();
-                            }
-                        }
-                        if (currentNodeLang == null || currentNodeLang.length() == 0) currentNodeLang = (new Locale(element.getAttribute("lang"))).getLanguage();
-                        if (currentNodeLang.equals(locale.getLanguage()))
-                        {
-                            return node;
-                        }
-                    }
-                    break;
-            }
-        }
-
-        return fallback;
-    }
-
-    private String getTextContent(Element element)
-    {
-        if (element.getChildNodes().getLength() > 0 && element.getChildNodes().item(0).getNodeType() == Node.TEXT_NODE)
-        {
-            return element.getChildNodes().item(0).getTextContent();
-        }
-        else
-        {
-            return null;
-        }
     }
 
     //Empty definition
@@ -397,7 +351,7 @@ public class TokenDefinition {
         for (String lang: attrEntry.keySet())
         {
             if (lang.equals(locale.getLanguage())) return attrEntry.get(lang);
-            if (lang.equals("")) bestGuess = attrEntry.get(lang);
+            if (lang.equals("") || (lang.equals("en"))) bestGuess = attrEntry.get(lang);
         }
 
         if (bestGuess == null) bestGuess = attrEntry.values().iterator().next(); //first non-localised locale

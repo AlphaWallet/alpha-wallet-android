@@ -32,6 +32,7 @@ import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SelectLocaleDialog;
+import com.crashlytics.android.Crashlytics;
 
 import static com.alphawallet.app.C.*;
 import static com.alphawallet.app.C.Key.WALLET;
@@ -145,7 +146,15 @@ public class NewSettingsFragment extends Fragment
             if (isAppAvailable(C.TELEGRAM_PACKAGE_NAME)) {
                 intent.setPackage(C.TELEGRAM_PACKAGE_NAME);
             }
-            startActivity(intent);
+            try
+            {
+                getActivity().startActivity(intent);
+            }
+            catch (Exception e)
+            {
+                Crashlytics.logException(e);
+                e.printStackTrace();
+            }
         });
 
         final LinearLayout layoutTwitter = view.findViewById(R.id.layout_twitter);
@@ -158,7 +167,15 @@ public class NewSettingsFragment extends Fragment
             } catch (Exception e) {
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse(C.AWALLET_TWITTER_URL));
             }
-            startActivity(intent);
+            try
+            {
+                getActivity().startActivity(intent);
+            }
+            catch (Exception e)
+            {
+                Crashlytics.logException(e);
+                e.printStackTrace();
+            }
         });
 
         final LinearLayout layoutNotifications = view.findViewById(R.id.layout_notification_settings);
@@ -187,7 +204,15 @@ public class NewSettingsFragment extends Fragment
             } catch (Exception e) {
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse(C.AWALLET_FACEBOOK_URL));
             }
-            startActivity(intent);
+            try
+            {
+                getActivity().startActivity(intent);
+            }
+            catch (Exception e)
+            {
+                Crashlytics.logException(e);
+                e.printStackTrace();
+            }
         });
 
         layoutEnableXML = view.findViewById(R.id.layout_xml_override);

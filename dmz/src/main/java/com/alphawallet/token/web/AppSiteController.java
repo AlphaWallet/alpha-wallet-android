@@ -178,7 +178,7 @@ public class AppSiteController implements AttributeInterface
             e.printStackTrace();
         }
 
-        tokenscriptFunction.resolveAttributes(firstTokenId, this, cAddr, definition)
+        tokenscriptFunction.resolveAttributes(ZERO_ADDRESS, firstTokenId, this, cAddr, definition)
                 .forEach(attr -> TokenScriptResult.addPair(tokenData, attr.id, attr.text))
                 .isDisposed();
 

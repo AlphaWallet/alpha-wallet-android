@@ -467,9 +467,12 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         tokenSymbolText = findViewById(R.id.symbol);
         chainName = findViewById(R.id.text_chain_name);
 
+        String symbol = TextUtils.isEmpty(token.tokenInfo.symbol) ? "" : token.tokenInfo.symbol.toUpperCase();
+
         tokenSymbolText.setText(TextUtils.isEmpty(token.tokenInfo.name)
-                ? token.tokenInfo.symbol.toUpperCase()
-                : getString(R.string.token_name, token.tokenInfo.name, token.tokenInfo.symbol.toUpperCase()));
+                ? symbol
+                : symbol.length() > 0 ? getString(R.string.token_name, token.tokenInfo.name, symbol)
+                    : token.tokenInfo.name);
 
         TokenInfo tokenInfo = token.tokenInfo;
         BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));

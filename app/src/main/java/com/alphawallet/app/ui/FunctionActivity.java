@@ -9,16 +9,15 @@ import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
+import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.OnSignPersonalMessageListener;
@@ -27,17 +26,14 @@ import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
-
 import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.*;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -45,13 +41,10 @@ import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
-
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
-
 import javax.inject.Inject;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -61,7 +54,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
@@ -364,17 +356,39 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                     case Signed:
                     case UnsignedInput:
                         BigDecimal unsignedValue = new BigDecimal(valueFromInput);
-                        //handle value
-                        functionEffect = unsignedValue.toString();
-                        if (attr.bitshift > 0)
-                        {
-                            unsignedValue = unsignedValue.movePointRight(attr.bitshift);
-                        }
                         args.put(e.ref, unsignedValue.toString());
                         e.value = unsignedValue.toString();
                         break;
                     case UTF8:
                         e.value = valueFromInput;
+                        break;
+                    case Bytes:
+                        //apply bitmask to user entry and shift it because bytes is the other way round
+                        BigInteger userEntry;
+                        if(valueFromInput.matches("-?[0-9a-fA-F]+")) {
+                            userEntry = new BigInteger(valueFromInput, 16);
+                        } else {
+                            userEntry = new BigInteger(valueFromInput);
+                        }
+                        BigInteger val = userEntry.and(attr.bitmask).shiftRight(attr.bitshift);
+                        e.value = val.toString(16);
+                        args.put(e.ref, e.value);
+                        break;
+                    case e18:
+                        e.value = BalanceUtils.EthToWei(valueFromInput);
+                        args.put(e.ref, e.value);
+                        break;
+                    case e8:
+                        e.value = new BigInteger(valueFromInput).multiply(new BigInteger("8")).toString();
+                        args.put(e.ref, e.value);
+                        break;
+                    case e4:
+                        e.value = new BigInteger(valueFromInput).multiply(new BigInteger("4")).toString();
+                        args.put(e.ref, e.value);
+                        break;
+                    case e2:
+                        e.value = new BigInteger(valueFromInput).multiply(new BigInteger("2")).toString();
+                        args.put(e.ref, e.value);
                         break;
                     case Mapping:
                         //makes no sense as input

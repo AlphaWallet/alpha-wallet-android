@@ -742,6 +742,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                 break;
             case ENTER_JSON_BACKUP:
             case SET_JSON_PASSWORD:
+                inputView = findViewById(R.id.input_password);
                 viewModel.exportWallet(wallet, mnemonic, inputView.getText().toString());
                 break;
             case SHOW_SEED_PHRASE:

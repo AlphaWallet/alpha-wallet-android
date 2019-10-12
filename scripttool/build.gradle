@@ -1,0 +1,53 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+
+mainClassName = 'com.alphawallet.scripttool.Main'
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    baseName = 'script-tool'
+    version =  '0.1.0'
+    manifest {
+        attributes(
+                'Main-Class': 'com.alphawallet.scripttool.Main'
+        )
+    }
+}
+
+version = '1.0'
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',
+                'Implementation-Version': version,
+                'Main-Class': 'com.alphawallet.scripttool.Main'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile 'org.web3j:core:4.5.0'
+    testImplementation 'junit:junit:4.12'
+    compile project(path: ':lib')
+}
+
+run {
+    args = ["-file", "fifa.xml", "-address", "0x901dbb9771d30124bd25b2f86ef4d8c6c135d948"]
+}
+
+application {
+    executableDir = 'bin'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.5'
+}

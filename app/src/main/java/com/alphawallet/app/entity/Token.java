@@ -189,7 +189,9 @@ public class Token implements Parcelable
     {
         if (isTerminated()) return SetupTokensInteract.EXPIRED_CONTRACT;
         if (isBad()) return SetupTokensInteract.UNKNOWN_CONTRACT;
-        return tokenInfo.name + (tokenInfo.symbol != null && tokenInfo.symbol.length() > 0 ? "(" + tokenInfo.symbol.toUpperCase() + ")" : "");
+        String name = tokenInfo.name == null ? "" : tokenInfo.name;
+        String symbol = tokenInfo.symbol == null ? "" : "(" + tokenInfo.symbol.toUpperCase() + ")";
+        return name + symbol;
     }
 
     public String getFullName(AssetDefinitionService assetDefinition, int count)

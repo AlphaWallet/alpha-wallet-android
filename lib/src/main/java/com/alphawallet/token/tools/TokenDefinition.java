@@ -35,8 +35,8 @@ public class TokenDefinition {
     public static final String TOKENSCRIPT_REPO_SERVER = "https://repo.tokenscript.org/";
 
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";
-    private static final String TOKENSCRIPT = "http://tokenscript.org/" + TOKENSCRIPT_CURRENT_SCHEMA + "/tokenscript";
-    private static final String TOKENSCRIPTBASE = "http://tokenscript.org/";
+    private static final String TOKENSCRIPT_NAMESPACE = "http://tokenscript.org/" + TOKENSCRIPT_CURRENT_SCHEMA + "/tokenscript";
+    private static final String TOKENSCRIPT_BASE_URL = "http://tokenscript.org/";
 
     /* the following are incorrect, waiting to be further improved
      with suitable XML, because none of these String typed class variables
@@ -384,11 +384,11 @@ public class TokenDefinition {
                 try
                 {
                     Node thisAttr = n.getAttributes().item(j);
-                    if (thisAttr.getNodeValue().contains(TOKENSCRIPTBASE))
+                    if (thisAttr.getNodeValue().contains(TOKENSCRIPT_BASE_URL))
                     {
                         nameSpace = thisAttr.getNodeValue();
 
-                        int dateIndex = nameSpace.indexOf(TOKENSCRIPTBASE) + TOKENSCRIPTBASE.length();
+                        int dateIndex = nameSpace.indexOf(TOKENSCRIPT_BASE_URL) + TOKENSCRIPT_BASE_URL.length();
                         int lastSeparator = nameSpace.lastIndexOf("/");
                         if ((lastSeparator - dateIndex) == 7)
                         {

@@ -32,6 +32,7 @@ import org.web3j.protocol.core.methods.response.EthCall;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -90,31 +91,40 @@ public class CoinmarketcapTickerService implements TickerService
         Map<Integer, Ticker> tickers = new HashMap<>();
         final String keyAPI = BuildConfig.CoinmarketCapAPI;
         return Single.fromCallable(() -> {
-            Request request = new Request.Builder()
-                    .url(COINMARKET_API_URL + "/v1/cryptocurrency/quotes/latest?symbol=ETH,ETC,DAI,POA")
-                    .get()
-                    .addHeader("X-CMC_PRO_API_KEY", keyAPI)
-                    .build();
-            okhttp3.Response response = httpClient.newCall(request).execute();
-            if (response.code()/200 == 1)
+            try
             {
-                String result = response.body().string();
-                JSONObject stateData = new JSONObject(result);
-                JSONObject data = stateData.getJSONObject("data");
-                JSONObject eth = data.getJSONObject("ETH");
-                Ticker ethTicker = decodeTicker(eth);
-                tickers.put(MAINNET_ID, ethTicker);
-                tickers.put(RINKEBY_ID, ethTicker);
-                tickers.put(ROPSTEN_ID, ethTicker);
-                tickers.put(KOVAN_ID, ethTicker);
-                tickers.put(GOERLI_ID, ethTicker);
-                JSONObject etc = data.getJSONObject("ETC");
-                tickers.put(CLASSIC_ID, decodeTicker(etc));
-                JSONObject dai = data.getJSONObject("DAI");
-                tickers.put(XDAI_ID, decodeTicker(dai));
-                JSONObject poa = data.getJSONObject("POA");
-                tickers.put(POA_ID, decodeTicker(poa));
-                tickers.put(SOKOL_ID, decodeTicker(poa));
+                Request request = new Request.Builder()
+                        .url(COINMARKET_API_URL + "/v1/cryptocurrency/quotes/latest?symbol=ETH,ETC,DAI,POA")
+                        .get()
+                        .addHeader("X-CMC_PRO_API_KEY", keyAPI)
+                        .build();
+                okhttp3.Response response = httpClient.newCall(request)
+                        .execute();
+                if (response.code() / 200 == 1)
+                {
+                    String result = response.body()
+                            .string();
+                    JSONObject stateData = new JSONObject(result);
+                    JSONObject data      = stateData.getJSONObject("data");
+                    JSONObject eth       = data.getJSONObject("ETH");
+                    Ticker     ethTicker = decodeTicker(eth);
+                    tickers.put(MAINNET_ID, ethTicker);
+                    tickers.put(RINKEBY_ID, ethTicker);
+                    tickers.put(ROPSTEN_ID, ethTicker);
+                    tickers.put(KOVAN_ID, ethTicker);
+                    tickers.put(GOERLI_ID, ethTicker);
+                    JSONObject etc = data.getJSONObject("ETC");
+                    tickers.put(CLASSIC_ID, decodeTicker(etc));
+                    JSONObject dai = data.getJSONObject("DAI");
+                    tickers.put(XDAI_ID, decodeTicker(dai));
+                    JSONObject poa = data.getJSONObject("POA");
+                    tickers.put(POA_ID, decodeTicker(poa));
+                    tickers.put(SOKOL_ID, decodeTicker(poa));
+                }
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
             }
 
             return tickers;
@@ -185,46 +195,55 @@ public class CoinmarketcapTickerService implements TickerService
         Map<Integer, Ticker> tickers = new HashMap<>();
         final String keyAPI = BuildConfig.AmberdataAPI;
         return Single.fromCallable(() -> {
-            Request request = new Request.Builder()
-                    .url("https://web3api.io/api/v1/market/rankings")
-                    .get()
-                    .addHeader("x-api-key", keyAPI)
-                    .build();
-            okhttp3.Response response = httpClient.newCall(request).execute();
-            if (response.code()/200 == 1)
+            try
             {
-                String result = response.body().string();
-                JSONObject stateData = new JSONObject(result);
-                JSONObject payload = stateData.getJSONObject("payload");
-                JSONArray data = payload.getJSONArray("data");
-                AmberDataElement[] elements = gson.fromJson(data.toString(), AmberDataElement[].class);
-                Ticker ticker;
-                for (AmberDataElement e : elements)
+                Request request = new Request.Builder()
+                        .url("https://web3api.io/api/v1/market/rankings")
+                        .get()
+                        .addHeader("x-api-key", keyAPI)
+                        .build();
+                okhttp3.Response response = httpClient.newCall(request)
+                        .execute();
+                if (response.code() / 200 == 1)
                 {
-                    ticker = tickerFromAmber(e);
-                    switch (e.symbol)
+                    String result = response.body()
+                            .string();
+                    JSONObject         stateData = new JSONObject(result);
+                    JSONObject         payload   = stateData.getJSONObject("payload");
+                    JSONArray          data      = payload.getJSONArray("data");
+                    AmberDataElement[] elements  = gson.fromJson(data.toString(), AmberDataElement[].class);
+                    Ticker             ticker;
+                    for (AmberDataElement e : elements)
                     {
-                        case "eth":
-                            tickers.put(MAINNET_ID, ticker);
-                            tickers.put(RINKEBY_ID, ticker);
-                            tickers.put(ROPSTEN_ID, ticker);
-                            tickers.put(KOVAN_ID, ticker);
-                            tickers.put(GOERLI_ID, ticker);
-                            break;
-                        case "DAI":
-                            tickers.put(XDAI_ID, ticker);
-                            break;
-                        case "etc":
-                            tickers.put(CLASSIC_ID, ticker);
-                            break;
-                    }
+                        ticker = tickerFromAmber(e);
+                        switch (e.symbol)
+                        {
+                            case "eth":
+                                tickers.put(MAINNET_ID, ticker);
+                                tickers.put(RINKEBY_ID, ticker);
+                                tickers.put(ROPSTEN_ID, ticker);
+                                tickers.put(KOVAN_ID, ticker);
+                                tickers.put(GOERLI_ID, ticker);
+                                break;
+                            case "DAI":
+                                tickers.put(XDAI_ID, ticker);
+                                break;
+                            case "etc":
+                                tickers.put(CLASSIC_ID, ticker);
+                                break;
+                        }
 
-                    if (e.address != null && e.specifications != null && e.specifications.length > 0 && e.specifications[0].equals("ERC20"))
-                    {
-                        if (erc20Tickers == null) erc20Tickers = new HashMap<>();
-                        erc20Tickers.put(e.address, ticker);
+                        if (e.address != null && e.specifications != null && e.specifications.length > 0 && e.specifications[0].equals("ERC20"))
+                        {
+                            if (erc20Tickers == null) erc20Tickers = new HashMap<>();
+                            erc20Tickers.put(e.address, ticker);
+                        }
                     }
                 }
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
             }
 
             return tickers;

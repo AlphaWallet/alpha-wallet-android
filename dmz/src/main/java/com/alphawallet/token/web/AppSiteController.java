@@ -406,38 +406,6 @@ public class AppSiteController implements AttributeInterface
         return addrMap;
     }
 
-    @GetMapping(value = "/0x{address}", produces = MediaType.TEXT_XML_VALUE) // TODO: use regexp 0x[0-9a-fA-F]{20}
-    public @ResponseBody String getContractBehaviour(@PathVariable("address") String address)
-            throws IOException, NoHandlerFoundException
-    {
-        StringBuilder tokenDefinitionList = new StringBuilder();
-        /* TODO: should parse the address, do checksum, store in a byte160 */
-        address = "0x" + address.toLowerCase();
-        //find all potential hits
-        for (int networkId : addresses.keySet())
-        {
-            if (addresses.get(networkId).containsKey(address))
-            {
-                File file = addresses.get(networkId).get(address);
-                try (FileInputStream in = new FileInputStream(file)) {
-                    /* TODO: check XML's encoding and serve a charset according to the encoding */
-                    tokenDefinitionList.append("Network: ").append(MagicLinkInfo.getNetworkNameById(networkId));
-                    tokenDefinitionList.append(IOUtils.toString(in, "utf8"));
-                    tokenDefinitionList.append("-----------------------");
-                }
-            }
-        }
-
-        if (tokenDefinitionList.length() == 0)
-        {
-            throw new NoHandlerFoundException("GET", "/" + address, new HttpHeaders());
-        }
-        else
-        {
-            return tokenDefinitionList.toString();
-        }
-    }
-
     private String loadFile(String fileName) {
         byte[] buffer = new byte[0];
         try {

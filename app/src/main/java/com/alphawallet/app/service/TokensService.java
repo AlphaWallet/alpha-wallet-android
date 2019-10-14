@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.alphawallet.app.repository.EthereumNetworkRepository.MAINNET_ID;
+
 public class TokensService
 {
     private final Map<String, SparseArray<Token>> tokenMap = new ConcurrentHashMap<>();
@@ -66,6 +68,7 @@ public class TokensService
                 focusToken = t;
             }
 
+            if (!t.isEthereum()) t.ticker = ethereumNetworkRepository.getTokenTicker(t);
             addToken(t.tokenInfo.chainId, t);
             return t;
         }

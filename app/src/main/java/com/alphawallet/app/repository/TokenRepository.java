@@ -526,7 +526,7 @@ public class TokenRepository implements TokenRepositoryType {
                 e.printStackTrace();
                 return token;
             }
-        });
+        }).flatMap(ethereumNetworkRepository::attachTokenTicker);
     }
 
     /**

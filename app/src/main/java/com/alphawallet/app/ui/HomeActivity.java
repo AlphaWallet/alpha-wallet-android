@@ -591,6 +591,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         //viewModel.upgradeWallet(keyAddress);
     }
 
+    public void ResetDappBrowser()
+    {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .detach(dappBrowserFragment)
+                .attach(dappBrowserFragment)
+                .commit();
+    }
+
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
         public ScreenSlidePagerAdapter(FragmentManager fm) {
             super(fm);

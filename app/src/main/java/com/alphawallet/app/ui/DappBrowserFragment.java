@@ -180,6 +180,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         super.onResume();
         if (currentFragment == null) currentFragment = DAPP_HOME;
         attachFragment(currentFragment);
+        if (web3 == null && getActivity() != null) //trigger reload
+        {
+            ((HomeActivity)getActivity()).ResetDappBrowser();
+        }
     }
 
     @Nullable

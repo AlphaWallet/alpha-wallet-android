@@ -109,7 +109,7 @@ public class AppSiteController implements AttributeInterface
             throws IOException, SAXException, NoHandlerFoundException
     {
         String domain = request.getServerName();
-        ParseMagicLink parser = new ParseMagicLink(cryptoFunctions);
+        ParseMagicLink parser = new ParseMagicLink(cryptoFunctions, null);
         MagicLinkData data;
         model.addAttribute("base64", universalLink);
 
@@ -533,6 +533,6 @@ public class AppSiteController implements AttributeInterface
             result.put("failureReason", XMLDsigVerificationResult.failureReason);
             status = HttpStatus.BAD_REQUEST;
         }
-        return new ResponseEntity<String>(result.toString(), status);
+        return new ResponseEntity<String>(result.toJson(), status);
     }
 }

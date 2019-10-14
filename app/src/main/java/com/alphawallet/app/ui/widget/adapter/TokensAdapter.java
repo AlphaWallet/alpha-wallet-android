@@ -263,7 +263,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         String tokenName = token.getFullName();
         if(token.isEthereum()) return token.tokenInfo.chainId;
         if(token.isBad()) return 99999999;
-        if(token.tokenInfo.name == null || token.tokenInfo.name.length() < 2)
+        if(tokenName.length() == 0)
         {
             return Integer.MAX_VALUE;
         }

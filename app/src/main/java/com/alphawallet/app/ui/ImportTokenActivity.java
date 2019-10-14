@@ -14,6 +14,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.token.entity.MagicLinkInfo;
 import com.alphawallet.token.tools.Convert;
 
@@ -34,7 +36,6 @@ import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Ticket;
 import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.viewmodel.ImportTokenViewModel;
 import com.alphawallet.app.viewmodel.ImportTokenViewModelFactory;
@@ -169,7 +170,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private void onNetwork(NetworkInfo networkInfo)
     {
         chainId = networkInfo.chainId;
-        String domain = MagicLinkInfo.getMagicLinkDomainFromNetworkId(chainId);
+        String domain = EthereumNetworkRepository.getMagicLinkDomainFromNetworkId(chainId);
         paymasterUrlPrefix = MagicLinkInfo.formPaymasterURLPrefixFromDomain(domain);
         TextView networkText = findViewById(R.id.textNetworkName);
         networkText.setText(networkInfo.name);
@@ -613,7 +614,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                 {
                     //could be magicLink
                     CryptoFunctions cryptoFunctions = new CryptoFunctions();
-                    ParseMagicLink parser = new ParseMagicLink(cryptoFunctions);
+                    ParseMagicLink parser = new ParseMagicLink(cryptoFunctions, EthereumNetworkRepository.extraChains());
                     MagicLinkData order = parser.parseUniversalLink(text.toString());
                     if (isValidAddress(order.contractAddress) && order.indices.length > 0)
                     {

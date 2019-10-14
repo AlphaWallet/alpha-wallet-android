@@ -18,6 +18,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
@@ -33,7 +34,7 @@ import com.alphawallet.token.tools.ParseMagicLink;
 
 public class UniversalLinkTest
 {
-    private static ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
+    private static ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
 
     final String[] links = { "https://aw.app/AAAAAFroO8yg2x-t8XoYKvHWEk8mRcRZuarNIgwNDg9OYA205_-QZURILYlNp6astOo-RkQMSSefIzMWHKdjcGsc3kAaHfHYi7rrLTgmUfAMaQjFB_u8G0EbB8HewJwDAA==",
             "https://aw.app/AB6EgFroX2xm8IymiSAXpF2m-3kqjpRvy-PYZRQVFhcYAlMtOEau6TvoUT-lN5HoxjxlErC2T0LJ-1u4DmORCdoVs-UNTIL33W_OJ6jGJy2ocqEyWBmV-RiYPIzQlHq0mwE=",

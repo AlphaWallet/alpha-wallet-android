@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.alphawallet.app.repository.EthereumNetworkRepository.MAINNET_ID;
-
 public class TokensService
 {
     private final Map<String, SparseArray<Token>> tokenMap = new ConcurrentHashMap<>();
@@ -514,6 +512,11 @@ public class TokensService
         {
             e.printStackTrace();
         }
+    }
+
+    public List<Integer> getNetworkFilters()
+    {
+        return networkFilter;
     }
 
     public void requireTokensRefresh()

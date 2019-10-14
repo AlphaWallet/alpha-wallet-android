@@ -164,7 +164,7 @@ public class CoinmarketcapTickerService implements TickerService
     {
         if (token != null && ticker != null)
         {
-            token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), token.tokenInfo.address, ticker.price_usd, ticker.percentChange24h, null);
+            token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), token.tokenInfo.address, ticker.price_usd, ticker.percentChange24h, "USD", null);
         }
     }
 
@@ -174,7 +174,7 @@ public class CoinmarketcapTickerService implements TickerService
         if (token != null && erc20Tickers != null && token.tokenInfo.chainId == MAINNET_ID)
         {
             Ticker ticker = erc20Tickers.get(token.getAddress());
-            if (ticker != null) token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), token.tokenInfo.address, ticker.price_usd, ticker.percentChange24h, null);
+            if (ticker != null) token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), token.tokenInfo.address, ticker.price_usd, ticker.percentChange24h, "USD", null);
             return token.ticker;
         }
         else

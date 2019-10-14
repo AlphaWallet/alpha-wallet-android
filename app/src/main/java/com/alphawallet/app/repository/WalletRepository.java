@@ -154,9 +154,9 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<Integer> storeWallets(Wallet[] wallets, boolean isMainNet)
+	public Single<Wallet[]> storeWallets(Wallet[] wallets)
 	{
-		return walletDataRealmSource.storeWallets(wallets, isMainNet);
+		return walletDataRealmSource.storeWallets(wallets);
 	}
 
 	@Override

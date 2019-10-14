@@ -1,6 +1,8 @@
 package com.alphawallet.app;
 
 import org.junit.Test;
+
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
@@ -20,7 +22,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class UniversalLinkTypeTest
 {
-    private static ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
+    private static ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
 
     /**
      * these values give the key format, ie

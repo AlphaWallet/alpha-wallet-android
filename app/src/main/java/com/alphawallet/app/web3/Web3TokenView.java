@@ -7,24 +7,20 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Window;
-import android.webkit.*;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-
-import com.alphawallet.token.entity.MagicLinkInfo;
-import okhttp3.HttpUrl;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
 
 /**
  * Created by James on 3/04/2019.
@@ -117,7 +113,7 @@ public class Web3TokenView extends WebView
     }
 
     public void setRpcUrl(@NonNull int chainId) {
-        jsInjectorClient.setRpcUrl(MagicLinkInfo.getNodeURLByNetworkId(chainId));
+        jsInjectorClient.setRpcUrl(EthereumNetworkRepository.getNodeURLByNetworkId(chainId));
     }
 
     public void onSignPersonalMessageSuccessful(Message message, String signHex) {

@@ -615,7 +615,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             {
                 deleteKey(currentWallet.address);
                 throw new ServiceErrorException(
-                        ServiceErrorException.FAIL_TO_SAVE_IV_FILE,
+                        ServiceErrorException.ServiceErrorCode.FAIL_TO_SAVE_IV_FILE,
                         "Failed to saveTokens the iv file for: " + currentWallet.address + "iv");
             }
 
@@ -629,7 +629,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             {
                 deleteKey(currentWallet.address);
                 throw new ServiceErrorException(
-                        ServiceErrorException.KEY_STORE_ERROR,
+                        ServiceErrorException.ServiceErrorCode.KEY_STORE_ERROR,
                         "Failed to saveTokens the file for: " + currentWallet.address);
             }
 

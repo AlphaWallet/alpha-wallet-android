@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+
 import org.web3j.crypto.WalletUtils;
 
 public class Utils {
@@ -111,6 +112,9 @@ public class Utils {
             case EthereumNetworkRepository.ARTIS_TAU1_ID:
                 view.setBackgroundResource(R.drawable.background_artis_tau1);
                 break;
+            default:
+                EthereumNetworkRepository.setChainColour(view, chainId);
+                break;
         }
     }
 
@@ -143,8 +147,10 @@ public class Utils {
                 view.setBackgroundResource(R.drawable.item_xdai_circle);
                 break;
             case EthereumNetworkRepository.MAINNET_ID:
-            default:
                 view.setBackgroundResource(R.drawable.item_eth_circle);
+                break;
+            default:
+                EthereumNetworkRepository.setChainCircle(view, chainId);
                 break;
 
         }

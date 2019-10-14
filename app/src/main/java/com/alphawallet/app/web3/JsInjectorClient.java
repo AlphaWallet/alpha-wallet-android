@@ -6,6 +6,7 @@ import android.support.annotation.RawRes;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.web3.entity.Address;
 
 import java.io.IOException;
@@ -15,9 +16,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.alphawallet.token.entity.MagicLinkInfo;
 import com.alphawallet.app.R;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
@@ -121,7 +120,7 @@ public class JsInjectorClient {
     String injectWeb3TokenInit(Context ctx, String view, String tokenContent)
     {
         String initSrc = loadFile(ctx, R.raw.init_token);
-        initSrc = String.format(initSrc, tokenContent, walletAddress, MagicLinkInfo.getNodeURLByNetworkId(chainId), chainId);
+        initSrc = String.format(initSrc, tokenContent, walletAddress, EthereumNetworkRepository.getNodeURLByNetworkId(chainId), chainId);
         //now insert this source into the view
         return injectJSembed(view, initSrc);
     }

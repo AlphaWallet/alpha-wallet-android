@@ -31,6 +31,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.google.gson.Gson;
 import com.alphawallet.app.ui.widget.OnDappClickListener;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
@@ -1016,7 +1017,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     {
         try
         {
-            ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
+            ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
             if (parser.parseUniversalLink(data).chainId > 0) //see if it's a valid link
             {
                 //handle magic link import

@@ -13,6 +13,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Ticket;
 import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -100,7 +101,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     {
         if (parser == null)
         {
-            parser = new ParseMagicLink(new CryptoFunctions());
+            parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
         }
     }
 

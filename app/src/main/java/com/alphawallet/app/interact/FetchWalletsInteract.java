@@ -30,8 +30,8 @@ public class FetchWalletsInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<Integer> storeWallets(Wallet[] wallets, boolean isMainNet) {
-        return accountRepository.storeWallets(wallets, isMainNet);
+    public Single<Wallet[]> storeWallets(Wallet[] wallets) {
+        return accountRepository.storeWallets(wallets);
     }
 
     public Single<Wallet> getWallet(String keyAddress)

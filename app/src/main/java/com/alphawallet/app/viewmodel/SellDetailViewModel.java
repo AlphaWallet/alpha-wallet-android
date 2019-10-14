@@ -11,15 +11,15 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.ui.SellDetailActivity;
-
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.SellDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.MarketQueueService;
+import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
 
@@ -67,7 +67,7 @@ public class SellDetailViewModel extends BaseViewModel {
     {
         if (parser == null)
         {
-            parser = new ParseMagicLink(new CryptoFunctions());
+            parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
         }
     }
 

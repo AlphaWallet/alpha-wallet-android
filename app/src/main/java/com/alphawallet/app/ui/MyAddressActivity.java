@@ -17,6 +17,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.entity.AmountEntryItem;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRUtils;
@@ -36,7 +38,6 @@ import com.alphawallet.app.entity.EIP681Request;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.viewmodel.MyAddressViewModelFactory;
 
@@ -281,7 +282,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
 
     private void setupContractData()
     {
-        if (token != null && !token.isEthereum())
+        if (token != null && !token.isEthereum() && VisibilityFilter.showContractAddress(token))
         {
             findViewById(R.id.text_contract_address).setVisibility(View.VISIBLE);
             findViewById(R.id.layout_contract).setVisibility(View.VISIBLE);

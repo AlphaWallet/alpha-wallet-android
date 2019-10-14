@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
@@ -26,8 +28,6 @@ import org.web3j.utils.Numeric;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.alphawallet.app.repository.EthereumNetworkRepository.MAINNET_ID;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private static final String TAG = "TKNADAPTER";
@@ -179,8 +179,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         checkLiveToken(token);
         if (canDisplayToken(token))
         {
-            items.add(new TokenSortedItem(token, calculateWeight(token)));
-            if (!internal)
+            int added = items.add(new TokenSortedItem(token, calculateWeight(token)));
+            if (!internal || added > 0)
                 notifyDataSetChanged();
         }
         else
@@ -237,11 +237,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 break;
         }
 
-        //Add token to display list if it's the base currency, or if it has balance
-        return allowThroughFilter &&  //Add token to display list if it's the base currency, or if it has balance
-                ((token.isEthereum() && token.tokenInfo.chainId == MAINNET_ID) ||
-                        (!token.isTerminated() && !token.isBad() &&
-                                (token.hasDebugTokenscript || token.hasPositiveBalance())));
+        return VisibilityFilter.filterToken(token, allowThroughFilter);
     }
 
     private void populateTokens(Token[] tokens)
@@ -261,7 +257,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         int weight = 1000; //ensure base eth types are always displayed first
         String tokenName = token.getFullName();
-        if(token.isEthereum()) return token.tokenInfo.chainId;
+        int override = EthereumNetworkRepository.getPriorityOverride(token);
+        if (override > 0) return override;
         if(token.isBad()) return 99999999;
         if(tokenName.length() == 0)
         {

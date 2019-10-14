@@ -13,7 +13,6 @@ import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.ServiceErrorException;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.Ticket;
@@ -27,16 +26,19 @@ import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.SetupTokensInteract;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
-
-import com.alphawallet.token.entity.SigReturnType;
-import com.alphawallet.token.entity.XMLDsigDescriptor;
-
 import com.alphawallet.app.service.AlphaWalletService;
 import com.alphawallet.app.service.AssetDefinitionService;
-
 import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.KeyService;
+import com.alphawallet.token.entity.MagicLinkData;
+import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.entity.SigReturnType;
+import com.alphawallet.token.entity.TicketRange;
+import com.alphawallet.token.entity.XMLDsigDescriptor;
+import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -47,14 +49,13 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import com.alphawallet.token.entity.MagicLinkData;
-import com.alphawallet.token.entity.SalesOrderMalformed;
-import com.alphawallet.token.entity.TicketRange;
-import com.alphawallet.token.tools.ParseMagicLink;
-import com.alphawallet.app.service.KeyService;
 
-import static com.alphawallet.token.tools.ParseMagicLink.*;
 import static com.alphawallet.app.entity.MagicLinkParcel.generateReverseTradeData;
+import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
+import static com.alphawallet.token.tools.ParseMagicLink.customizable;
+import static com.alphawallet.token.tools.ParseMagicLink.normal;
+import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
+import static com.alphawallet.token.tools.ParseMagicLink.unassigned;
 
 /**
  * Created by James on 9/03/2018.
@@ -132,7 +133,7 @@ public class ImportTokenViewModel extends BaseViewModel
     {
         if (parser == null)
         {
-            parser = new ParseMagicLink(new CryptoFunctions());
+            parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
         }
     }
 
@@ -444,17 +445,7 @@ public class ImportTokenViewModel extends BaseViewModel
     }
 
     public void onTransactionError(Throwable throwable) {
-        if (throwable.getCause() instanceof ServiceErrorException)
-        {
-            if (((ServiceErrorException) throwable.getCause()).code == C.ErrorCode.ALREADY_ADDED)
-            {
-                txError.postValue(new ErrorEnvelope(C.ErrorCode.ALREADY_ADDED, null));
-            }
-        }
-        else
-        {
-            txError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
-        }
+        txError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
     }
 
     public void performImport()

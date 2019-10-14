@@ -274,15 +274,32 @@
                     android:text="@string/unknown_balance_without_symbol"
                     android:textSize="15sp" />
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:fontFamily="@font/font_regular"
-                    android:text="@string/usd_value"
-                    android:textAllCaps="true"
-                    android:textColor="@color/light_gray"
-                    android:textSize="11sp" />
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/currency_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/font_regular"
+                        android:text=""
+                        android:textAllCaps="true"
+                        android:textColor="@color/light_gray"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="2dp"
+                        android:fontFamily="@font/font_regular"
+                        android:text="@string/value"
+                        android:textAllCaps="true"
+                        android:textColor="@color/light_gray"
+                        android:textSize="11sp" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

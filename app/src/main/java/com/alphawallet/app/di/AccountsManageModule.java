@@ -12,6 +12,7 @@ import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.WalletsViewModelFactory;
 
 import dagger.Module;
@@ -30,7 +31,8 @@ class AccountsManageModule {
 			FetchTokensInteract fetchTokensInteract,
 			FindDefaultNetworkInteract findDefaultNetworkInteract,
 			KeyService keyService,
-			GasService gasService)
+			GasService gasService,
+			TokensService tokensService)
 	{
 		return new WalletsViewModelFactory(setDefaultWalletInteract,
 										   fetchWalletsInteract,
@@ -40,7 +42,8 @@ class AccountsManageModule {
 										   fetchTokensInteract,
 										   findDefaultNetworkInteract,
 										   keyService,
-										   gasService);
+				gasService,
+				tokensService);
 	}
 
 	@Provides

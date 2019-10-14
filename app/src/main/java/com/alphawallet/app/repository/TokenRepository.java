@@ -14,6 +14,7 @@ import com.alphawallet.app.entity.TokenFactory;
 import com.alphawallet.app.entity.TokenInfo;
 import com.alphawallet.app.entity.TokenTicker;
 import com.alphawallet.app.entity.TransferFromEventResponse;
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.Utils;
@@ -52,7 +53,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
-import static com.alphawallet.token.entity.MagicLinkInfo.getNodeURLByNetworkId;
 import static com.alphawallet.app.repository.EthereumNetworkRepository.MAINNET_ID;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -104,15 +104,17 @@ public class TokenRepository implements TokenRepositoryType {
     private void buildWeb3jClient(NetworkInfo networkInfo)
     {
         HttpService publicNodeService = new HttpService(networkInfo.rpcServerUrl, okClient, false);
+        EthereumNetworkRepository.addRequiredCredentials(networkInfo.chainId, publicNodeService);
         web3jNodeServers.put(networkInfo.chainId, Web3j.build(publicNodeService));
     }
 
     private Web3j getService(int chainId)
     {
-        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
-        if (!web3jNodeServers.containsKey(chainId) && network != null)
+        NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(chainId);
+        if (!web3jNodeServers.containsKey(chainId) && networkInfo != null)
         {
-            HttpService publicNodeService = new HttpService(network.rpcServerUrl, okClient, false);
+            HttpService publicNodeService = new HttpService(networkInfo.rpcServerUrl, okClient, false);
+            EthereumNetworkRepository.addRequiredCredentials(chainId, publicNodeService);
             web3jNodeServers.put(chainId, Web3j.build(publicNodeService));
         }
 
@@ -276,10 +278,15 @@ public class TokenRepository implements TokenRepositoryType {
         newToken.setTokenWallet(wallet.address);
 
         if (newToken.hasPositiveBalance()) newToken.walletUIUpdateRequired = true;
+        newToken.ticker = ethereumNetworkRepository.getTokenTicker(newToken);
 
-        return localSource.saveToken(
-                wallet,
-                newToken);
+        return localSource.saveToken(wallet, newToken);
+    }
+
+    private Token addTokenTicker(Token newToken, Ticker ticker)
+    {
+        newToken.ticker = new TokenTicker(ticker, newToken.getAddress(), null);
+        return newToken;
     }
 
     private String callStringFunction(String method, String address, NetworkInfo network, BigInteger tokenId)
@@ -675,7 +682,7 @@ public class TokenRepository implements TokenRepositoryType {
                 .flatMap(token -> localSource.fetchTicker(network, wallet, token)
                         .flatMap(ticker -> ethereumNetworkRepository.getTicker(network.chainId, ticker))
                         .map(ticker -> {
-                            token.ticker = new TokenTicker(String.valueOf(network.chainId), wallet.address, ticker.price_usd, ticker.percentChange24h, null);
+                            token.ticker = new TokenTicker(String.valueOf(network.chainId), wallet.address, ticker.price_usd, ticker.percentChange24h, "USD", null);
                             return token;
                         })
                         .flatMap(ttoken -> localSource.saveTicker(network, wallet, ttoken))
@@ -1220,7 +1227,8 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<ContractType> determineCommonType(TokenInfo tokenInfo)
     {
         return Single.fromCallable(() -> {
-            ContractType returnType = ContractType.OTHER;
+            ContractType returnType = VisibilityFilter.checkKnownTokens(tokenInfo);
+            if (returnType != ContractType.OTHER) return returnType;
             try
             {
                 Function function = balanceOf(ZERO_ADDRESS);
@@ -1323,7 +1331,9 @@ public class TokenRepository implements TokenRepositoryType {
                 .writeTimeout(5, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(false)
                 .build();
-        String rpcServerUrl = getNodeURLByNetworkId(chainId);
-        return Web3j.build(new HttpService(rpcServerUrl, okClient, false));
+        String rpcServerUrl = EthereumNetworkRepository.getNodeURLByNetworkId(chainId);
+        HttpService publicNodeService = new HttpService(rpcServerUrl, okClient, false);
+        EthereumNetworkRepository.addRequiredCredentials(chainId, publicNodeService);
+        return Web3j.build(publicNodeService);
     }
 }

@@ -41,14 +41,6 @@ android {
         versionCode 77
         versionName "2.12.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
-        buildConfigField 'int', 'DB_VERSION', '4'
-
-        ndk {
-            abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
-        }
-    }
-    buildTypes {
         def CoinmarketCapAPI = "CoinmarketCapAPI"
         def AmberdataAPI = "AmberdataAPI"
         def COINMARKET_CAP_KEY = "\"obtain-api-key-from-coinmarketcap-com\""
@@ -59,16 +51,30 @@ android {
         if (project.hasProperty("amberdataAPI")) {
             AMBERDATA_API_KEY = amberdataAPI
         }
+
+        buildConfigField 'int', 'DB_VERSION', '5'
+        buildConfigField "String", CoinmarketCapAPI, COINMARKET_CAP_KEY
+        buildConfigField "String", AmberdataAPI, AMBERDATA_API_KEY
+
+        ndk {
+            abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
+        }
+    }
+    flavorDimensions "targetting"
+    productFlavors {
+	awallet {
+		dimension "targetting"
+        versionCode 79
+        versionName "2.12.3"
+	}
+    }
+    buildTypes {
         debug {
-            buildConfigField "String", CoinmarketCapAPI, COINMARKET_CAP_KEY
-            buildConfigField "String", AmberdataAPI, AMBERDATA_API_KEY
             minifyEnabled false
 //            proguardFiles getDefaultProguardFile('proguard-android.txt'),
 //                    'proguard-rules.pro'
         }
         release {
-            buildConfigField "String", CoinmarketCapAPI, COINMARKET_CAP_KEY
-            buildConfigField "String", AmberdataAPI, AMBERDATA_API_KEY
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

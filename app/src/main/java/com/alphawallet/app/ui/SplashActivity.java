@@ -10,13 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
-import com.crashlytics.android.Crashlytics;
-import com.crashlytics.android.core.CrashlyticsCore;
 
-import dagger.android.AndroidInjection;
-import io.fabric.sdk.android.Fabric;
-import com.alphawallet.token.entity.SalesOrderMalformed;
-import com.alphawallet.token.tools.ParseMagicLink;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
@@ -24,6 +18,7 @@ import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
@@ -32,8 +27,15 @@ import com.alphawallet.app.viewmodel.SplashViewModel;
 import com.alphawallet.app.viewmodel.SplashViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
+import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.tools.ParseMagicLink;
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
 
 import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import io.fabric.sdk.android.Fabric;
 
 import static com.alphawallet.app.C.IMPORT_REQUEST_CODE;
 
@@ -158,7 +160,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
             {
                 try
                 {
-                    ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
+                    ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
                     if (parser.parseUniversalLink(importData).chainId > 0)
                     {
                         new ImportTokenRouter().open(this, importData);

@@ -15,6 +15,7 @@ import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TokensService;
 
 public class WalletsViewModelFactory implements ViewModelProvider.Factory {
     private final SetDefaultWalletInteract setDefaultWalletInteract;
@@ -26,6 +27,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
     private final HomeRouter homeRouter;
     private final KeyService keyService;
     private final GasService gasService;
+    private final TokensService tokensService;
 
     @Inject
     public WalletsViewModelFactory(
@@ -37,7 +39,8 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
             FetchTokensInteract fetchTokensInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             KeyService keyService,
-            GasService gasService) {
+            GasService gasService,
+            TokensService tokensService) {
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.genericWalletInteract = genericWalletInteract;
@@ -47,6 +50,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.keyService = keyService;
         this.gasService = gasService;
+        this.tokensService = tokensService;
     }
 
     @NonNull
@@ -61,6 +65,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
                 fetchTokensInteract,
                 findDefaultNetworkInteract,
                 keyService,
-                gasService);
+                gasService,
+                tokensService);
     }
 }

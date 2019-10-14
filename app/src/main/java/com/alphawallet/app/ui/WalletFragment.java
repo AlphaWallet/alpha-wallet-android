@@ -25,6 +25,7 @@ import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.TokenInterface;
 import com.alphawallet.app.entity.TokensReceiver;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.WarningData;
@@ -35,7 +36,6 @@ import dagger.android.support.AndroidSupportInjection;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
 import com.alphawallet.app.widget.ProgressView;
@@ -338,40 +338,10 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         //if (getActivity() != null) ((HomeActivity)getActivity()).TokensReady();
     }
 
-    private List<ContractResult> getAllKnownContractsOnNetwork(int chainId)
-    {
-        int index = 0;
-        List<ContractResult> result = new ArrayList<>();
-        switch (chainId)
-        {
-            case EthereumNetworkRepository.XDAI_ID:
-                index = R.array.xDAI;
-                break;
-            case EthereumNetworkRepository.MAINNET_ID:
-                index = R.array.MainNet;
-                break;
-            default:
-                break;
-        }
-
-        if (index > 0)
-        {
-            String[] strArray = getResources().getStringArray(R.array.MainNet);
-            for (String addr : strArray)
-            {
-                result.add(new ContractResult(addr, EthereumNetworkRepository.MAINNET_ID));
-            }
-        }
-
-        return result;
-    }
-
     private void fetchKnownContracts(Boolean notUsed)
     {
         //fetch list of contracts for this network from the XML contract directory
-        List<ContractResult> knownContracts = new ArrayList<>(getAllKnownContractsOnNetwork(EthereumNetworkRepository.MAINNET_ID));
-        knownContracts.addAll(getAllKnownContractsOnNetwork(EthereumNetworkRepository.XDAI_ID));
-
+        List<ContractResult> knownContracts = EthereumNetworkRepository.getAllKnownContracts(getContext(), viewModel.getChainFilters());
         viewModel.checkKnownContracts(knownContracts);
     }
 

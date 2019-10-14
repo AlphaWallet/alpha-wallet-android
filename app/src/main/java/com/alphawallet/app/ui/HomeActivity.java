@@ -32,6 +32,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.github.florent37.tutoshowcase.TutoShowcase;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
@@ -305,7 +307,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     CharSequence clipText = clipItem.getText();
                     if (clipText != null && clipText.length() > 60 && clipText.length() < 400)
                     {
-                        ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions());
+                        ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
                         if (parser.parseUniversalLink(clipText.toString()).chainId > 0) //see if it's a valid link
                         {
                             //let's try to import the link

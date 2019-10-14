@@ -244,14 +244,21 @@ public class GasService implements ContractGasProvider
 
     private void setCurrentPrice(int chainId)
     {
-        switch (chainId)
+        if (EthereumNetworkRepository.hasGasOverride(chainId))
         {
-            case EthereumNetworkRepository.XDAI_ID:
-                currentGasPrice = new BigInteger(C.DEFAULT_XDAI_GAS_PRICE);
-                break;
-            default:
-                currentGasPrice = new BigInteger(C.DEFAULT_GAS_PRICE);
-                break;
+            currentGasPrice = EthereumNetworkRepository.gasOverrideValue(chainId);
+        }
+        else
+        {
+            switch (chainId)
+            {
+                case EthereumNetworkRepository.XDAI_ID:
+                    currentGasPrice = new BigInteger(C.DEFAULT_XDAI_GAS_PRICE);
+                    break;
+                default:
+                    currentGasPrice = new BigInteger(C.DEFAULT_GAS_PRICE);
+                    break;
+            }
         }
     }
 }

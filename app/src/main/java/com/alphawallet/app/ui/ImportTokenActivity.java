@@ -169,7 +169,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private void onNetwork(NetworkInfo networkInfo)
     {
         chainId = networkInfo.chainId;
-        String domain = MagicLinkInfo.getMagicLinkDomainFromNetworkId(chainId);
+        String domain = EthereumNetworkRepository.getMagicLinkDomainFromNetworkId(chainId);
         paymasterUrlPrefix = MagicLinkInfo.formPaymasterURLPrefixFromDomain(domain);
         TextView networkText = findViewById(R.id.textNetworkName);
         networkText.setText(networkInfo.name);
@@ -613,7 +613,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                 {
                     //could be magicLink
                     CryptoFunctions cryptoFunctions = new CryptoFunctions();
-                    ParseMagicLink parser = new ParseMagicLink(cryptoFunctions);
+                    ParseMagicLink parser = new ParseMagicLink(cryptoFunctions, EthereumNetworkRepository.extraChains());
                     MagicLinkData order = parser.parseUniversalLink(text.toString());
                     if (isValidAddress(order.contractAddress) && order.indices.length > 0)
                     {

@@ -121,7 +121,7 @@ public class JsInjectorClient {
     String injectWeb3TokenInit(Context ctx, String view, String tokenContent)
     {
         String initSrc = loadFile(ctx, R.raw.init_token);
-        initSrc = String.format(initSrc, tokenContent, walletAddress, MagicLinkInfo.getNodeURLByNetworkId(chainId), chainId);
+        initSrc = String.format(initSrc, tokenContent, walletAddress, EthereumNetworkRepository.getNodeURLByNetworkId(chainId), chainId);
         //now insert this source into the view
         return injectJSembed(view, initSrc);
     }

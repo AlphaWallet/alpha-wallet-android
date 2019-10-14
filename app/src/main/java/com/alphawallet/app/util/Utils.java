@@ -111,6 +111,9 @@ public class Utils {
             case EthereumNetworkRepository.ARTIS_TAU1_ID:
                 view.setBackgroundResource(R.drawable.background_artis_tau1);
                 break;
+            default:
+                EthereumNetworkRepository.setChainColour(view, chainId);
+                break;
         }
     }
 
@@ -143,8 +146,10 @@ public class Utils {
                 view.setBackgroundResource(R.drawable.item_xdai_circle);
                 break;
             case EthereumNetworkRepository.MAINNET_ID:
-            default:
                 view.setBackgroundResource(R.drawable.item_eth_circle);
+                break;
+            default:
+                EthereumNetworkRepository.setChainCircle(view, chainId);
                 break;
 
         }

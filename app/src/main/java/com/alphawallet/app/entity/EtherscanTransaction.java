@@ -4,6 +4,7 @@ package com.alphawallet.app.entity;
 import android.content.Context;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.TokensService;
 
 import com.alphawallet.token.tools.Numeric;
@@ -49,7 +50,7 @@ public class EtherscanTransaction
         TransactionOperation[] o;
         TransactionInput f = null;
         if (decoder == null) decoder = new TransactionDecoder();
-        if (parser == null) parser = new ParseMagicLink(new CryptoFunctions());
+        if (parser == null) parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
 
         if (contractAddress.length() > 0)
         {

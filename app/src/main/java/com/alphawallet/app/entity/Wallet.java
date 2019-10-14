@@ -18,6 +18,7 @@ public class Wallet implements Parcelable {
     public long lastBackupTime;
     public KeyService.AuthenticationLevel authLevel;
     public long walletCreationTime;
+    public String balanceSymbol;
 
 	public Wallet(String address) {
 		this.address = address;
@@ -28,6 +29,7 @@ public class Wallet implements Parcelable {
 		this.lastBackupTime = 0;
 		this.authLevel = KeyService.AuthenticationLevel.NOT_SET;
 		this.walletCreationTime = 0;
+		this.balanceSymbol = "";
 	}
 
 	private Wallet(Parcel in)
@@ -42,6 +44,7 @@ public class Wallet implements Parcelable {
 		t = in.readInt();
 		authLevel = KeyService.AuthenticationLevel.values()[t];
 		walletCreationTime = in.readLong();
+		balanceSymbol = in.readString();
 	}
 
 	public void setWalletType(WalletType wType)
@@ -81,12 +84,13 @@ public class Wallet implements Parcelable {
 		parcel.writeLong(lastBackupTime);
 		parcel.writeInt(authLevel.ordinal());
 		parcel.writeLong(walletCreationTime);
+		parcel.writeString(balanceSymbol);
 	}
 
-	public void setWalletBalance(BigDecimal balanceBD)
+	public void setWalletBalance(Token token)
 	{
-		 balance = BalanceUtils.weiToEth(balanceBD)
-				.setScale(4, RoundingMode.HALF_DOWN)
-				.stripTrailingZeros().toPlainString();
+		int decimals = token.tokenInfo != null ? token.tokenInfo.decimals : 18;
+		balanceSymbol = token.tokenInfo != null ? token.tokenInfo.symbol : "ETH";
+		balance = Token.getScaledValue(token.balance, decimals, false);
 	}
 }

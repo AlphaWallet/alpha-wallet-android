@@ -20,7 +20,7 @@ public class MagicLinkInfo
     private static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
 
     //domains for DMZ
-    private static final String mainnetMagicLinkDomain = "aw.app";
+    public static final String mainnetMagicLinkDomain = "aw.app";
     private static final String legacyMagicLinkDomain = "app.awallet.io";
     private static final String classicMagicLinkDomain = "classic.aw.app";
     private static final String callistoMagicLinkDomain = "callisto.aw.app";

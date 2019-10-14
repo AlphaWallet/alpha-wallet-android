@@ -82,13 +82,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     }
 
     public void onError(Throwable throwable) {
-        if (throwable.getCause() instanceof ServiceErrorException) {
-            if (((ServiceErrorException) throwable.getCause()).code == C.ErrorCode.ALREADY_ADDED){
-                error.postValue(new ErrorEnvelope(C.ErrorCode.ALREADY_ADDED, null));
-            }
-        } else {
-            error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
-        }
+        error.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
     }
 
     public void onSeed(String walletAddress, KeyService.AuthenticationLevel level)

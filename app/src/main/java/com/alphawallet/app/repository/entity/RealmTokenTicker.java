@@ -12,6 +12,7 @@ public class RealmTokenTicker extends RealmObject {
     private String id;
     private String image;
     private long updatedTime;
+    private String currencySymbol;
 
     public String getId() {
         return id;
@@ -67,5 +68,15 @@ public class RealmTokenTicker extends RealmObject {
 
     public void setUpdatedTime(long updatedTime) {
         this.updatedTime = updatedTime;
+    }
+
+    public String getCurrencySymbol()
+    {
+        return currencySymbol;
+    }
+
+    public void setCurrencySymbol(String currencySymbol)
+    {
+        this.currencySymbol = currencySymbol;
     }
 }

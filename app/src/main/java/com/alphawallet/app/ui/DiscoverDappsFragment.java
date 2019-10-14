@@ -48,6 +48,14 @@ public class DiscoverDappsFragment extends Fragment {
     private void onDappAdded(DApp dapp) {
         List<DApp> myDapps = DappBrowserUtils.getMyDapps(getContext());
         dapp.setAdded(true);
+        for (DApp d : myDapps)
+        {
+            if (d.getName() != null && d.getUrl() != null && d.getName().equals(dapp.getName())
+                    && d.getUrl().equals(dapp.getUrl()))
+            {
+                return;
+            }
+        }
         myDapps.add(dapp);
         DappBrowserUtils.saveToPrefs(getContext(), myDapps);
     }

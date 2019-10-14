@@ -276,6 +276,7 @@ public class Token implements Parcelable
             holder.textAppreciationSub.setText(R.string.appreciation);
             holder.fillCurrency(ethBalance, ticker);
             holder.text24HoursSub.setText(R.string.twenty_four_hours);
+            holder.currencyLabel.setText(ticker.priceSymbol);
         }
 
         holder.balanceEth.setVisibility(View.VISIBLE);
@@ -570,21 +571,29 @@ public class Token implements Parcelable
         return getScaledValue(balance, tokenInfo.decimals);
     }
 
-    public static String getScaledValue(BigDecimal value, long decimals)
+    public static String getScaledValue(BigDecimal value, long decimals) { return getScaledValue(value, decimals, false); }
+
+    public static String getScaledValue(BigDecimal value, long decimals, boolean stripZeros)
     {
         value = value.divide(new BigDecimal(Math.pow(10, decimals)));
         int scale = 4;
         if (value.equals(BigDecimal.ZERO))
         {
-            return "0";
+            if (stripZeros) return "0";
+            else return "0.0000";
         }
         if (value.abs().compareTo(BigDecimal.valueOf(0.0001)) < 0)
         {
-            return "~0.00"; // very small amount of eth
+            if (stripZeros) return "~0.00";
+            else return "0.0000";
+        }
+        else if (stripZeros)
+        {
+            return value.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
         }
         else
         {
-            return value.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
+            return value.setScale(scale, RoundingMode.HALF_DOWN).toPlainString();
         }
     }
 
@@ -671,7 +680,7 @@ public class Token implements Parcelable
 
     protected String addSuffix(String result, Transaction transaction)
     {
-        if (transaction.from.equals(tokenWallet))
+        if (transaction.from.equalsIgnoreCase(tokenWallet.toLowerCase()))
         {
             result = "-" + result;
         }
@@ -796,8 +805,10 @@ public class Token implements Parcelable
 
         long currentTime = System.currentTimeMillis();
 
-        //ensure chain transactions fomr the wallet are checked on a regular basis.
-        if (isEthereum() && hasPositiveBalance() && (currentTime - lastTxCheck) > 60*1000) //need to check main chains once per minute
+        long multiplier = isEthereum() || EthereumNetworkRepository.isPriorityToken(this) ? 1 : 5;
+
+        //ensure chain transactions for the wallet are checked on a regular basis.
+        if (EthereumNetworkRepository.hasTicker(this) && hasPositiveBalance() && (currentTime - lastTxCheck) > multiplier*60*1000) //need to check main chains once per minute
         {
             lastTxCheck = currentTime; //don't check again
             requiresUpdate = true;

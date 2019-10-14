@@ -287,7 +287,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                         }
                         else //try magiclink
                         {
-                            ParseMagicLink magicParser = new ParseMagicLink(new CryptoFunctions());
+                            ParseMagicLink magicParser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
                             try
                             {
                                 if (magicParser.parseUniversalLink(barcode).chainId > 0) //see if it's a valid link

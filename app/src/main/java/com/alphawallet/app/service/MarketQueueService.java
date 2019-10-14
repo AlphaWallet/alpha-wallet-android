@@ -2,6 +2,7 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 
 import org.json.JSONArray;
@@ -74,7 +75,7 @@ public class MarketQueueService {
         {
             cryptoFunctions = new CryptoFunctions();
             //TODO get network properly if need be
-            parser = new ParseMagicLink(cryptoFunctions);
+            parser = new ParseMagicLink(cryptoFunctions, EthereumNetworkRepository.extraChains());
         }
     }
 

@@ -14,6 +14,8 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.token.entity.MagicLinkData;
 
 import java.math.BigDecimal;
@@ -107,5 +109,29 @@ public class FetchTokensInteract {
         pair.order = so;
         pair.balance = token.getArrayBalance();
         return pair;
+    }
+
+    public Observable<Token> fetchBaseCurrencyBalance(NetworkInfo info, ContractResult overrideToken, Wallet wallet, TokensService service)
+    {
+        Token token;
+        if (overrideToken.type == ContractType.ETHEREUM)
+        {
+            return fetchEth(info, wallet);
+        }
+        else
+        {
+            //fetch an erc20 balance, first get a template token (note that we don't read this token's balance,
+            // but use it to query the balance of the token elsewhere).
+            token = service.getToken(overrideToken.chainId, overrideToken.name);
+        }
+
+        if (token != null)
+        {
+            return tokenRepository.fetchActiveTokenBalance(wallet.address, token).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+        }
+        else
+        {
+            return Observable.fromCallable(() -> new Token(null, BigDecimal.ZERO, System.currentTimeMillis(), "eth", ContractType.ETHEREUM));
+        }
     }
 }

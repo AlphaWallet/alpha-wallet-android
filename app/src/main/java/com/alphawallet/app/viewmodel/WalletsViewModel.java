@@ -7,7 +7,24 @@ import android.content.Context;
 import android.util.Log;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.CreateWalletCallbackInterface;
+import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.interact.FetchTokensInteract;
+import com.alphawallet.app.interact.FetchWalletsInteract;
+import com.alphawallet.app.interact.FindDefaultNetworkInteract;
+import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.interact.SetDefaultWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.router.HomeRouter;
+import com.alphawallet.app.router.ImportWalletRouter;
+import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
 
 import org.web3j.protocol.Web3j;
@@ -25,23 +42,6 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-
-import com.alphawallet.app.entity.CreateWalletCallbackInterface;
-import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.interact.FetchTokensInteract;
-import com.alphawallet.app.interact.FetchWalletsInteract;
-import com.alphawallet.app.interact.FindDefaultNetworkInteract;
-import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.interact.SetDefaultWalletInteract;
-import com.alphawallet.app.router.HomeRouter;
-import com.alphawallet.app.router.ImportWalletRouter;
-import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.service.KeyService;
-
 import okhttp3.OkHttpClient;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
@@ -60,6 +60,7 @@ public class WalletsViewModel extends BaseViewModel
 
     private final ImportWalletRouter importWalletRouter;
     private final HomeRouter homeRouter;
+    private final TokensService tokensService;
 
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -83,7 +84,8 @@ public class WalletsViewModel extends BaseViewModel
             FetchTokensInteract fetchTokensInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             KeyService keyService,
-            GasService gasService)
+            GasService gasService,
+            TokensService tokensService)
     {
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
@@ -94,6 +96,7 @@ public class WalletsViewModel extends BaseViewModel
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.keyService = keyService;
         this.gasService = gasService;
+        this.tokensService = tokensService;
 
         executorService = Executors.newFixedThreadPool(10);
     }
@@ -276,12 +279,13 @@ public class WalletsViewModel extends BaseViewModel
      */
     private void getWalletsBalance(Wallet[] wallets)
     {
-        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(EthereumNetworkRepository.MAINNET_ID);
+        ContractResult override = EthereumNetworkRepository.getOverrideToken();
+        NetworkInfo    network  = findDefaultNetworkInteract.getNetworkInfo(override.chainId); //findDefaultNetworkInteract.getNetworkInfo(EthereumNetworkRepository.MAINNET_ID);
 
         disposable = fetchWalletList(wallets)
                 .flatMapIterable(wallet -> wallet) //iterate through each wallet
                 .map(this::addWalletToMap)
-                .flatMap(wallet -> fetchTokensInteract.fetchEth(network, wallet)) //fetch wallet balance
+                .flatMap(wallet -> fetchTokensInteract.fetchBaseCurrencyBalance(network, override, wallet, tokensService)) //fetch wallet balance
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::updateWallet, this::onError, this::updateBalances);
@@ -289,12 +293,12 @@ public class WalletsViewModel extends BaseViewModel
 
     private void updateWallet(Token token)
     {
-        if (walletBalances.containsKey(token.getAddress()))
+        if (walletBalances.containsKey(token.getWallet().toLowerCase()))
         {
-            Wallet wallet = walletBalances.get(token.getAddress());
+            Wallet wallet = walletBalances.get(token.getWallet().toLowerCase());
             if (wallet != null)
             {
-                wallet.setWalletBalance(token.balance);
+                wallet.setWalletBalance(token);
                 //update wallet balance
                 updateBalance.postValue(wallet);
             }
@@ -314,15 +318,15 @@ public class WalletsViewModel extends BaseViewModel
     private void storeWallets(Wallet[] wallets)
     {
         //write wallets to DB
-        disposable = fetchWalletsInteract.storeWallets(wallets, currentNetwork.isMainNetwork)
+        disposable = fetchWalletsInteract.storeWallets(wallets)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onStored, this::onError);
     }
 
-    private void onStored(Integer count)
+    private void onStored(Wallet[] wallets)
     {
-        Log.d(TAG, "Stored " + count + " Wallets");
+        Log.d(TAG, "Stored " + wallets.length + " Wallets");
     }
 
     private Observable<List<Wallet>> fetchWalletList(Wallet[] wallets)

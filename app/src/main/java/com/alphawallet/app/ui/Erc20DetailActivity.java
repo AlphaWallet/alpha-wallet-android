@@ -103,7 +103,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     {
         if (token != null && tokenViewAdapter != null) //might be a delayed return after user closed screen
         {
-            token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), token.getAddress(), ticker.price_usd, ticker.percentChange24h, null);
+            token.ticker = new TokenTicker(ticker, token.getAddress(), null);
+            //token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), token.getAddress(), ticker.price_usd, ticker.percentChange24h, null);
             Token[] tokens = {token};
             tokenViewAdapter.setTokens(tokens);
             tokenViewAdapter.notifyDataSetChanged();

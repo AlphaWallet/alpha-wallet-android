@@ -11,6 +11,7 @@ import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.ui.HomeActivity;
@@ -128,7 +129,7 @@ public class HomeViewModel extends BaseViewModel {
                 cryptoFunctions = new CryptoFunctions();
             }
             if (parser == null) {
-                parser = new ParseMagicLink(cryptoFunctions);
+                parser = new ParseMagicLink(cryptoFunctions, EthereumNetworkRepository.extraChains());
             }
 
             MagicLinkData data = parser.parseUniversalLink(importData);

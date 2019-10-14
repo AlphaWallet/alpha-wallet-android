@@ -4,28 +4,23 @@ import android.support.annotation.Nullable;
 
 public class ServiceErrorException extends Exception {
 
-    public static final int UNKNOWN_ERROR = -1;
-    public static final int INVALID_DATA = 1;
-    public static final int KEY_STORE_ERROR = 1001;
-    public static final int FAIL_TO_SAVE_IV_FILE = 1002;
-    public static final int KEY_STORE_SECRET = 1003;
-    public static final int USER_NOT_AUTHENTICATED = 1004;
-    public static final int KEY_IS_GONE = 1005;
-    public static final int IV_OR_ALIAS_NO_ON_DISK = 1006;
-    public static final int INVALID_KEY = 1007;
+    public enum ServiceErrorCode {
+        UNKNOWN_ERROR, INVALID_DATA, KEY_STORE_ERROR, FAIL_TO_SAVE_IV_FILE, KEY_STORE_SECRET, USER_NOT_AUTHENTICATED, KEY_IS_GONE,
+        IV_OR_ALIAS_NO_ON_DISK, INVALID_KEY
+    }
 
-    public final int code;
+    public final ServiceErrorCode code;
 
-    public ServiceErrorException(int code, @Nullable String message, Throwable throwable) {
+    public ServiceErrorException(ServiceErrorCode code, @Nullable String message, Throwable throwable) {
         super(message, throwable);
         this.code = code;
     }
 
-    public ServiceErrorException(int code, @Nullable String message) {
+    public ServiceErrorException(ServiceErrorCode code, @Nullable String message) {
         this(code, message, null);
     }
 
-    public ServiceErrorException(int code) {
+    public ServiceErrorException(ServiceErrorCode code) {
         this(code, null);
     }
 }

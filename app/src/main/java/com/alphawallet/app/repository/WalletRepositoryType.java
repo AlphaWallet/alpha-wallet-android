@@ -30,7 +30,7 @@ public interface WalletRepositoryType {
 
     Single<BigDecimal> balanceInWei(Wallet wallet);
 
-    Single<Integer> storeWallets(Wallet[] wallets, boolean isMainNet);
+    Single<Wallet[]> storeWallets(Wallet[] wallets);
 
     Single<Wallet> storeWallet(Wallet wallet);
     Single<Wallet> updateWalletData(Wallet wallet);

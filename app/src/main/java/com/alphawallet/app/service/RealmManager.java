@@ -9,6 +9,7 @@ import java.util.Map;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.exceptions.RealmMigrationNeededException;
 
 public class RealmManager {
 
@@ -24,16 +25,33 @@ public class RealmManager {
     }
 
     private Realm getRealmInstance(String name) {
-        RealmConfiguration config = realmConfigurations.get(name);
-        if (config == null) {
-            config = new RealmConfiguration.Builder()
-                    .name(name)
-                    .schemaVersion(BuildConfig.DB_VERSION)
-                    .deleteRealmIfMigrationNeeded()
-                    .build();
-            realmConfigurations.put(name, config);
+        try
+        {
+            RealmConfiguration config = realmConfigurations.get(name);
+            if (config == null)
+            {
+                config = new RealmConfiguration.Builder().name(name)
+                        .schemaVersion(BuildConfig.DB_VERSION)
+                        .migration(new AWRealmMigration())
+                        .build();
+                realmConfigurations.put(name, config);
+            }
+            return Realm.getInstance(config);
         }
-        return Realm.getInstance(config);
+        catch (RealmMigrationNeededException e)
+        {
+            //we require a realm migration, but this wasn't provided.
+            RealmConfiguration config = realmConfigurations.get(name);
+            if (config == null)
+            {
+                config = new RealmConfiguration.Builder().name(name)
+                        .schemaVersion(BuildConfig.DB_VERSION)
+                        .deleteRealmIfMigrationNeeded()
+                        .build();
+                realmConfigurations.put(name, config);
+            }
+            return Realm.getInstance(config);
+        }
     }
 
     private String getName(NetworkInfo networkInfo, Wallet wallet) {

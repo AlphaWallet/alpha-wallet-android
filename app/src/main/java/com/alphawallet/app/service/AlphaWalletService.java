@@ -2,6 +2,7 @@ package com.alphawallet.app.service;
 
 import android.util.Log;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.alphawallet.app.repository.TransactionRepositoryType;
@@ -58,7 +59,7 @@ public class AlphaWalletService
     {
         if (parser == null)
         {
-            parser = new ParseMagicLink(new CryptoFunctions());
+            parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
         }
     }
 

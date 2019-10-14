@@ -73,8 +73,9 @@ public class RepositoriesModule {
 	@Provides
 	EthereumNetworkRepositoryType provideEthereumNetworkRepository(
             PreferenceRepositoryType preferenceRepository,
-            TickerService tickerService) {
-		return new EthereumNetworkRepository(preferenceRepository, tickerService);
+            TickerService tickerService,
+			Context context) {
+		return new EthereumNetworkRepository(preferenceRepository, tickerService, context);
 	}
 
 	@Singleton

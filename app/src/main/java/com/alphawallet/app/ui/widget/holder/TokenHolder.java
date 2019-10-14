@@ -47,6 +47,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final TextView text24HoursSub;
     public final TextView textAppreciationSub;
     public final TextView contractType;
+    public final TextView currencyLabel;
     public final TextView chainName;
     public final TextView textPending;
     public final TextView textIncomplete;
@@ -69,6 +70,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         symbolAux = findViewById(R.id.symbolAux);
         balanceEth = findViewById(R.id.balance_eth);
         balanceCurrency = findViewById(R.id.balance_currency);
+        currencyLabel = findViewById(R.id.currency_label);
         text24Hours = findViewById(R.id.text_24_hrs);
         textAppreciation = findViewById(R.id.text_appreciation);
         issuer = findViewById(R.id.issuer);

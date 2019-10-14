@@ -20,6 +20,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QrUrlResult;
 import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.TokenInfo;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.QRURLParser;
@@ -400,7 +401,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                         }
                         else //try magiclink
                         {
-                            ParseMagicLink magicParser = new ParseMagicLink(new CryptoFunctions());
+                            ParseMagicLink magicParser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
                             try
                             {
                                 if (magicParser.parseUniversalLink(barcode).chainId > 0) //see if it's a valid link

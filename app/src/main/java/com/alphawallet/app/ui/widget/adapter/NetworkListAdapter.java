@@ -15,6 +15,7 @@ import java.util.List;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 
 public class NetworkListAdapter extends ArrayAdapter<NetworkItem> {
@@ -55,7 +56,8 @@ public class NetworkListAdapter extends ArrayAdapter<NetworkItem> {
 
         if (!singleItem) {
             for (NetworkItem item : data) {
-                if (item.getName().equals(C.ETHEREUM_NETWORK_NAME)) {
+                if (VisibilityFilter.isPrimaryNetwork(item))
+                {
                     item.setSelected(true);
                     break;
                 }
@@ -90,7 +92,7 @@ public class NetworkListAdapter extends ArrayAdapter<NetworkItem> {
                         networkItem.setSelected(false);
                     }
                     dataSet.get(position).setSelected(true);
-                } else if (!dataSet.get(position).getName().equals(C.ETHEREUM_NETWORK_NAME)) {
+                } else if (!dataSet.get(position).getName().equals(VisibilityFilter.primaryNetworkName())) {
                     if (dataSet.get(position).isSelected()) {
                         dataSet.get(position).setSelected(false);
                     } else {
@@ -107,6 +109,12 @@ public class NetworkListAdapter extends ArrayAdapter<NetworkItem> {
             } else {
                 int resource = singleItem ? R.drawable.ic_checkbox : R.drawable.button_square_unchecked;
                 viewHolder.checkbox.setImageResource(resource);
+            }
+
+            if (!singleItem && dataSet.get(position).getName().equals(VisibilityFilter.primaryNetworkName()))
+            {
+                viewHolder.checkbox.setAlpha(0.5f);
+                viewHolder.name.setAlpha(0.5f);
             }
         }
 

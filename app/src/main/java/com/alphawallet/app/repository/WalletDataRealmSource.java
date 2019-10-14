@@ -130,9 +130,8 @@ public class WalletDataRealmSource {
         return wallet;
     }
 
-    public Single<Integer> storeWallets(Wallet[] wallets, boolean mainNet) {
+    public Single<Wallet[]> storeWallets(Wallet[] wallets) {
         return Single.fromCallable(() -> {
-            Integer updated = 0;
             try (Realm realm = realmManager.getWalletDataRealmInstance()) {
                 realm.beginTransaction();
 
@@ -144,23 +143,21 @@ public class WalletDataRealmSource {
                     if (realmWallet == null) {
                         realmWallet = realm.createObject(RealmWalletData.class, wallet.address);
                         realmWallet.setENSName(wallet.ENSname);
-                        if (mainNet) realmWallet.setBalance(wallet.balance);
+                        realmWallet.setBalance(wallet.balance);
                         realmWallet.setName(wallet.name);
-                        updated++;
                     } else {
-                        if (mainNet && (realmWallet.getBalance() == null || !wallet.balance.equals(realmWallet.getENSName())))
+                        if (realmWallet.getBalance() == null || !wallet.balance.equals(realmWallet.getENSName()))
                             realmWallet.setBalance(wallet.balance);
                         if (wallet.ENSname != null && (realmWallet.getENSName() == null || !wallet.ENSname.equals(realmWallet.getENSName())))
                             realmWallet.setENSName(wallet.ENSname);
                         realmWallet.setName(wallet.name);
-                        updated++;
                     }
                 }
                 realm.commitTransaction();
             } catch (Exception e) {
                 Log.e(TAG, "storeWallets: " + e.getMessage(), e);
             }
-            return updated;
+            return wallets;
         });
     }
 

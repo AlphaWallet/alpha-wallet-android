@@ -6,9 +6,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.alphawallet.token.entity.*;
+
+import static com.alphawallet.token.entity.MagicLinkInfo.mainnetMagicLinkDomain;
 
 /**
  * Created by James on 21/02/2018.
@@ -29,9 +33,22 @@ public class ParseMagicLink
     private static final String CURRENCY_LINK_PREFIX = "XDAIDROP";
     private CryptoFunctionsInterface cryptoInterface;
 
-    public ParseMagicLink(CryptoFunctionsInterface cryptInf)
+    private Map<Integer, ChainSpec> extraChains;
+
+    public ParseMagicLink(CryptoFunctionsInterface cryptInf, List<ChainSpec> chains)
     {
         cryptoInterface = cryptInf;
+        if (chains != null)
+        {
+            extraChains = new HashMap<>();
+            for (ChainSpec cs : chains) extraChains.put(cs.chainId, cs);
+        }
+    }
+
+    public void addChain(ChainSpec chain)
+    {
+        if (extraChains == null) extraChains = new HashMap<>();
+        extraChains.put(chain.chainId, chain);
     }
 
     public MessageData readByteMessage(byte[] message, byte[] sig, int ticketCount) throws SalesOrderMalformed
@@ -78,6 +95,11 @@ public class ParseMagicLink
     {
         int chainId = MagicLinkInfo.identifyChainId(link);
         String magicLinkUrlPrefix = MagicLinkInfo.getMagicLinkDomainFromNetworkId(chainId);
+        if (chainId == 0 && extraChains != null)
+        {
+            chainId = identifyChain(link);
+            if (chainId > 0) magicLinkUrlPrefix = extraChains.get(chainId).urlPrefix;
+        }
 
         int offset = link.indexOf(magicLinkUrlPrefix);
         if (offset > -1)
@@ -94,6 +116,30 @@ public class ParseMagicLink
         {
             throw new SalesOrderMalformed("Invalid link format");
         }
+    }
+
+    private int identifyChain(String link)
+    {
+        int dSlash = link.indexOf("://");
+        int chainId = 0;
+        //split out the chainId from the magiclink
+        int index = link.indexOf(mainnetMagicLinkDomain);
+
+        if (index > 0 && dSlash > 0)
+        {
+            String domain = link.substring(dSlash+3, index + mainnetMagicLinkDomain.length());
+            for (ChainSpec cs : extraChains.values())
+            {
+                int prefix = link.indexOf(cs.urlPrefix);
+                if (prefix > 0)
+                {
+                    chainId = cs.chainId;
+                    break;
+                }
+            }
+        }
+
+        return chainId;
     }
 
     private MagicLinkData getDataFromLinks(MagicLinkData data, EthereumReadBuffer ds) throws IOException
@@ -393,8 +439,18 @@ public class ParseMagicLink
         byte[] completeLink = new byte[message.length + signature.length];
         System.arraycopy(message, 0, completeLink, 0, message.length);
         System.arraycopy(signature, 0, completeLink, message.length, signature.length);
+        String magiclinkPrefix;
+        if (extraChains != null && extraChains.containsKey(chainId))
+        {
+            magiclinkPrefix = extraChains.get(chainId).urlPrefix;
+        }
+        else
+        {
+            magiclinkPrefix = MagicLinkInfo.generatePrefix(chainId);
+        }
+
         StringBuilder sb = new StringBuilder();
-        sb.append(MagicLinkInfo.generatePrefix(chainId));
+        sb.append(magiclinkPrefix);
         byte[] b64 = cryptoInterface.Base64Encode(completeLink);
         sb.append(new String(b64));
         //this trade can be claimed by anyone who pushes the transaction through and has the sig

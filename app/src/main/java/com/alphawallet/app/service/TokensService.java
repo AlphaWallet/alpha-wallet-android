@@ -66,6 +66,7 @@ public class TokensService
                 focusToken = t;
             }
 
+            if (!t.isEthereum()) t.ticker = ethereumNetworkRepository.getTokenTicker(t);
             addToken(t.tokenInfo.chainId, t);
             return t;
         }
@@ -511,6 +512,11 @@ public class TokensService
         {
             e.printStackTrace();
         }
+    }
+
+    public List<Integer> getNetworkFilters()
+    {
+        return networkFilter;
     }
 
     public void requireTokensRefresh()

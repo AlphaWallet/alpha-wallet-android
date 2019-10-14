@@ -22,6 +22,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -266,7 +267,10 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_settings, menu);
+        if (!EthereumNetworkRepository.hasGasOverride(chainId))
+        {
+            getMenuInflater().inflate(R.menu.menu_settings, menu);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -473,7 +477,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         BigDecimal networkFeeBD = new BigDecimal(gasSettings
                                                          .gasPrice.multiply(gasSettings.gasLimit));
 
-        String networkFee = BalanceUtils.weiToEth(networkFeeBD).toPlainString() + " " + C.ETH_SYMBOL;
+        String networkFee = BalanceUtils.weiToEth(networkFeeBD).toPlainString() + " " + viewModel.getNetworkSymbol(chainId);
         networkFeeText.setText(networkFee);
 
         if (confirmationType == WEB3TRANSACTION)

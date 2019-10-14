@@ -268,6 +268,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         ? String.format(COINMARKETCAP_IMAGE_URL, token.ticker.id)
                         : token.ticker.image);
                 realmItem.setUpdatedTime(now);
+                realmItem.setCurrencySymbol(token.ticker.priceSymbol);
                 realm.commitTransaction();
             }
             catch (Exception e)
@@ -295,7 +296,9 @@ public class TokensRealmSource implements TokenLocalSource {
                     RealmTokenTicker rawItem = rawItems.get(i);
                     if (rawItem != null)
                     {
-                        tokenTickers.add(new TokenTicker(rawItem.getId(), rawItem.getContract(), rawItem.getPrice(), rawItem.getPercentChange24h(), rawItem.getImage()));
+                        String currencySymbol = rawItem.getCurrencySymbol();
+                        if (currencySymbol == null || currencySymbol.length() == 0) currencySymbol = "USD";
+                        tokenTickers.add(new TokenTicker(rawItem.getId(), rawItem.getContract(), rawItem.getPrice(), rawItem.getPercentChange24h(), rawItem.getCurrencySymbol(), rawItem.getImage()));
                     }
                 }
             }
@@ -304,7 +307,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 e.printStackTrace();
             }
             return tokenTickers.size() == 0
-                    ? new TokenTicker("0", "0", "0", "0", null)
+                    ? new TokenTicker("0", "0", "0", "0", "USD", null)
                     : tokenTickers.get(0);
         });
     }

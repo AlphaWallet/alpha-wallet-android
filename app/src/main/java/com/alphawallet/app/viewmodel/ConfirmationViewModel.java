@@ -6,12 +6,15 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Intent;
 import android.net.Uri;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ConfirmationType;
 import com.alphawallet.app.entity.GasSettings;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.ConfirmationActivity;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -233,9 +236,15 @@ public class ConfirmationViewModel extends BaseViewModel {
         return findDefaultNetworkInteract.getNetworkName(chainId);
     }
 
+    public String getNetworkSymbol(int chainId)
+    {
+        NetworkInfo networkInfo = findDefaultNetworkInteract.getNetworkInfo(chainId);
+        return networkInfo != null ? networkInfo.symbol : C.ETH_SYMBOL;
+    }
+
     public void showMoreDetails(Activity ctx, String toAddress, int chainId)
     {
-        Uri etherscanLink = Uri.parse(MagicLinkInfo.getEtherscanURLbyNetwork(chainId))
+        Uri etherscanLink = Uri.parse(EthereumNetworkRepository.getEtherscanURLbyNetwork(chainId))
                 .buildUpon()
                 .appendEncodedPath("address")
                 .appendEncodedPath(toAddress)

@@ -6,6 +6,8 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.crashlytics.android.Crashlytics;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractResult;
@@ -203,6 +205,11 @@ public class WalletViewModel extends BaseViewModel
         fetchKnownContracts.postValue(true);
     }
 
+    public List<Integer> getChainFilters()
+    {
+        return tokensService.getNetworkFilters();
+    }
+
     private void onTokenFetchError(Throwable throwable)
     {
         //We encountered an unknown issue during token fetch
@@ -316,6 +323,8 @@ public class WalletViewModel extends BaseViewModel
      */
     private void updateTokenBalances()
     {
+        VisibilityFilter.addPriorityTokens(unknownAddresses, tokensService);
+        checkUnknownAddresses(true);
         if (balanceTimerDisposable == null || balanceTimerDisposable.isDisposed())
         {
             balanceTimerDisposable = Observable.interval(0, BALANCE_CHECK_INTERVAL_MILLIS, TimeUnit.MILLISECONDS)
@@ -334,7 +343,7 @@ public class WalletViewModel extends BaseViewModel
         }
 
         checkTokenUpdates();
-        checkUnknownAddresses();
+        checkUnknownAddresses(false);
         checkOpenSeaUpdate();
     }
 
@@ -484,7 +493,7 @@ public class WalletViewModel extends BaseViewModel
         unknownAddresses.addAll(tokensService.reduceToUnknown(knownContracts));
     }
 
-    private void checkUnknownAddresses()
+    private void checkUnknownAddresses(boolean refresh)
     {
         ContractResult contract = unknownAddresses.poll();
         if (contract != null)
@@ -492,22 +501,23 @@ public class WalletViewModel extends BaseViewModel
             disposable = setupTokensInteract.addToken(contract.name, contract.chainId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.computation())
-                    .subscribe(this::resolvedToken, this::onTokenAddError);
+                    .subscribe(tokenInfo -> resolvedToken(tokenInfo, refresh), this::onTokenAddError);
         }
     }
 
-    private void resolvedToken(TokenInfo info)
+    private void resolvedToken(TokenInfo info, boolean refresh)
     {
         disposable = fetchTransactionsInteract.queryInterfaceSpecForService(info)
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.chainId, tokenInfo.address), currentWallet))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::finishedImport, this::onTokenAddError);
+                .subscribe(token -> finishedImport(token, refresh), this::onTokenAddError);
     }
 
-    private void finishedImport(Token token)
+    private void finishedImport(Token token, boolean refresh)
     {
         tokensService.addToken(token);
+        if (refresh) tokenUpdate.postValue(token);
     }
 
     private void onTokenAddError(Throwable throwable)

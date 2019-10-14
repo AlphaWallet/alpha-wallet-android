@@ -272,12 +272,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         //try cache
         if (cachedDefinition != null)
         {
-            for (String contractName : cachedDefinition.contracts.keySet())
+            //only match holding token
+            ContractInfo holdingContracts = cachedDefinition.contracts.get(cachedDefinition.holdingToken);
+            if (holdingContracts != null && holdingContracts.addresses.containsKey(chainId))
             {
-                if (cachedDefinition.contracts.get(contractName).addresses.containsKey(chainId)
-                    && cachedDefinition.contracts.get(contractName).addresses.get(chainId).contains(address))
+                for (String addr : holdingContracts.addresses.get(chainId))
                 {
-                    return cachedDefinition;
+                    if (addr.equalsIgnoreCase(address.toLowerCase())) return cachedDefinition;
                 }
             }
         }

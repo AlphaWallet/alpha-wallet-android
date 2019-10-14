@@ -61,6 +61,8 @@ import org.web3j.crypto.Sign;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.SignatureException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 

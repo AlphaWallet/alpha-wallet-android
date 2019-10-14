@@ -60,10 +60,10 @@ android {
             abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
         }
     }
-    flavorDimensions "branding"
+    flavorDimensions "targetting"
     productFlavors {
 	awallet {
-		dimension "branding"
+		dimension "targetting"
         versionCode 79
         versionName "2.12.3"
 	}

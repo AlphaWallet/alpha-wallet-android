@@ -338,8 +338,8 @@
     <integer name="viewfinder_border_width">15</integer>
     <integer name="viewfinder_border_length">160</integer>
     <string name="qr_scanner">QR Scanner</string>
-    <string name="dialog_title_select_locale">Select Locale:</string>
-    <string name="settings_locale_lang">Locale</string>
+    <string name="dialog_title_select_locale">Select Language:</string>
+    <string name="settings_locale_lang">Change Language</string>
     <string name="ticket_redeem">Redeem</string>
     <string name="ticket_receive_from">Receive From</string>
     <string name="ticket_transfer_to">Transfer</string>

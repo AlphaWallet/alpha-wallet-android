@@ -479,7 +479,14 @@ public abstract class TokenscriptFunction
             {
                 res = res.substring(2);
             }
-            val = new BigInteger(res, 16);
+            try
+            {
+                val = new BigInteger(res, 16);
+            }
+            catch (NumberFormatException e)
+            {
+                val = BigInteger.ZERO;
+            }
         }
         return new TokenScriptResult.Attribute(attr.id, attr.name, val, res);
     }

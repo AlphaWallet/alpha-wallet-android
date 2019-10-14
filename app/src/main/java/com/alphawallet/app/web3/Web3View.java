@@ -13,10 +13,13 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.webkit.*;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+
+import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -46,18 +49,14 @@ public class Web3View extends WebView {
 
     public Web3View(@NonNull Context context) {
         super(context);
-        init();
     }
 
     public Web3View(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init();
     }
 
     public Web3View(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-
-        init();
     }
 
     @Override
@@ -71,10 +70,10 @@ public class Web3View extends WebView {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private void init() {
+    public void init() {
         jsInjectorClient = new JsInjectorClient(getContext());
         webViewClient = new Web3ViewClient(jsInjectorClient, new UrlHandlerManager());
-        WebSettings webSettings = super.getSettings();
+        WebSettings webSettings = getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
         webSettings.setBuiltInZoomControls(true);
@@ -83,23 +82,15 @@ public class Web3View extends WebView {
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setDomStorageEnabled(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            WebView.setWebContentsDebuggingEnabled(true);
-        }
-
+        webSettings.setUserAgentString(webSettings.getUserAgentString()
+                                               + "AlphaWallet(Platform=Android&AppVersion=" + BuildConfig.VERSION_NAME + ")");
+        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
         addJavascriptInterface(new SignCallbackJSInterface(
                 this,
                 innerOnSignTransactionListener,
                 innerOnSignMessageListener,
                 innerOnSignPersonalMessageListener,
                 innerOnSignTypedMessageListener), "alpha");
-
-        super.setWebViewClient(webViewClient);
-    }
-
-    @Override
-    public WebSettings getSettings() {
-        return new WrapWebSettings(super.getSettings());
     }
 
     public void setWalletAddress(@NonNull Address address) {
@@ -302,6 +293,14 @@ public class Web3View extends WebView {
                     || internalClient.shouldOverrideUrlLoading(view, url);
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.M)
+        @Override
+        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+            loadingError = true;
+            if (externalClient != null)
+                externalClient.onReceivedError(view, request, error);
+        }
+
         @Override
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl)
         {
@@ -340,6 +339,15 @@ public class Web3View extends WebView {
                 response = internalClient.shouldInterceptRequest(view, request);
             }
             return response;
+        }
+    }
+
+    private static boolean isJson(String value) {
+        try {
+            JSONObject stateData = new JSONObject(value);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 }

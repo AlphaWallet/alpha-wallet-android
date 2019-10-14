@@ -2,9 +2,9 @@ package com.alphawallet.app.di;
 
 import android.content.Context;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.google.gson.Gson;
 
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.SharedPreferenceRepository;

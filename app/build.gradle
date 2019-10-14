@@ -38,8 +38,8 @@ android {
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 76
-        versionName "2.12.1"
+        versionCode 77
+        versionName "2.12.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         buildConfigField 'int', 'DB_VERSION', '5'
@@ -62,7 +62,10 @@ android {
         def COINMARKET_CAP_KEY = "\"obtain-api-key-from-coinmarketcap-com\""
         def AMBERDATA_API_KEY = "\"obtain-api-key-from-amberdata-io\"";
         if (project.hasProperty("coinmarketcapAPI")) {
-            COINMARKET_CAP_KEY= coinmarketcapAPI
+            COINMARKET_CAP_KEY = coinmarketcapAPI
+        }
+        if (project.hasProperty("amberdataAPI")) {
+            AMBERDATA_API_KEY = amberdataAPI
         }
         if (project.hasProperty("amberdataAPI")) {
             AMBERDATA_API_KEY = amberdataAPI

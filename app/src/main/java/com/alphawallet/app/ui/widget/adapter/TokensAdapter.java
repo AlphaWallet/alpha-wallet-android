@@ -7,9 +7,9 @@ import android.util.Log;
 import android.view.ViewGroup;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
@@ -28,8 +28,6 @@ import org.web3j.utils.Numeric;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.alphawallet.app.repository.EthereumNetworkRepository.MAINNET_ID;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private static final String TAG = "TKNADAPTER";
@@ -262,7 +260,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         int override = EthereumNetworkRepository.getPriorityOverride(token);
         if (override > 0) return override;
         if(token.isBad()) return 99999999;
-        if(token.tokenInfo.name == null || token.tokenInfo.name.length() < 2)
+        if(tokenName.length() == 0)
         {
             return Integer.MAX_VALUE;
         }

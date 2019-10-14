@@ -6,6 +6,7 @@ import android.support.annotation.RawRes;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.web3.entity.Address;
 
 import java.io.IOException;
@@ -15,9 +16,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.alphawallet.token.entity.MagicLinkInfo;
 import com.alphawallet.app.R;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 
 import okhttp3.Headers;
 import okhttp3.HttpUrl;

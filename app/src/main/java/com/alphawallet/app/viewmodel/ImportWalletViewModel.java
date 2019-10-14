@@ -4,9 +4,9 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.alphawallet.app.C;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.widget.OnSetWatchWalletListener;
 import com.alphawallet.app.util.AWEnsResolver;
@@ -22,7 +22,6 @@ import io.reactivex.schedulers.Schedulers;
 
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ImportWalletCallback;
-import com.alphawallet.app.entity.ServiceErrorException;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.ImportWalletInteract;
 import com.alphawallet.app.service.GasService;

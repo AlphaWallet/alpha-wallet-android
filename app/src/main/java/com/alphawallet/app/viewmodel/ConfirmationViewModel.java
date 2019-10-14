@@ -19,7 +19,6 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.ConfirmationActivity;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
-import com.alphawallet.token.entity.MagicLinkInfo;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;

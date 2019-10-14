@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.crashlytics.android.Crashlytics;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractResult;
@@ -22,7 +23,6 @@ import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.SetupTokensInteract;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 
 import io.reactivex.Observable;
@@ -345,6 +345,7 @@ public class WalletViewModel extends BaseViewModel
         checkTokenUpdates();
         checkUnknownAddresses(false);
         checkOpenSeaUpdate();
+        checkTickers();
     }
 
     private void checkTokenUpdates()
@@ -584,6 +585,17 @@ public class WalletViewModel extends BaseViewModel
         else
         {
             return GenericWalletInteract.BackupLevel.WALLET_HAS_LOW_VALUE;
+        }
+    }
+
+    private void checkTickers()
+    {
+        if (ethereumNetworkRepository.checkTickers())
+        {
+            ethereumNetworkRepository.attachTokenTickers(tokensService.getAllLiveTokens().toArray(new Token[0]))
+                    .observeOn(Schedulers.newThread())
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(tokens::postValue).isDisposed();
         }
     }
 

@@ -14,6 +14,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.token.entity.MagicLinkInfo;
 import com.alphawallet.token.tools.Convert;
 
@@ -34,7 +36,6 @@ import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Ticket;
 import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.viewmodel.ImportTokenViewModel;
 import com.alphawallet.app.viewmodel.ImportTokenViewModelFactory;

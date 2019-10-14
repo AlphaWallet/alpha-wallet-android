@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+
 import org.web3j.crypto.WalletUtils;
 
 public class Utils {

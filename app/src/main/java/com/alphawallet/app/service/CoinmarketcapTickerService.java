@@ -32,6 +32,7 @@ import org.web3j.protocol.core.methods.response.EthCall;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,15 +57,15 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
-import static com.alphawallet.app.repository.EthereumNetworkBase.CLASSIC_ID;
-import static com.alphawallet.app.repository.EthereumNetworkBase.GOERLI_ID;
-import static com.alphawallet.app.repository.EthereumNetworkBase.KOVAN_ID;
-import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.app.repository.EthereumNetworkBase.POA_ID;
-import static com.alphawallet.app.repository.EthereumNetworkBase.RINKEBY_ID;
-import static com.alphawallet.app.repository.EthereumNetworkBase.ROPSTEN_ID;
-import static com.alphawallet.app.repository.EthereumNetworkBase.SOKOL_ID;
-import static com.alphawallet.app.repository.EthereumNetworkBase.XDAI_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.CLASSIC_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.GOERLI_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.KOVAN_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.MAINNET_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.POA_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.RINKEBY_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.ROPSTEN_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.SOKOL_ID;
+import static com.alphawallet.app.repository.EthereumNetworkRepository.XDAI_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 
@@ -92,15 +93,21 @@ public class CoinmarketcapTickerService implements TickerService
         return Single.fromCallable(() -> {
             try
             {
-                Request request = new Request.Builder().url(COINMARKET_API_URL + "/v1/cryptocurrency/quotes/latest?symbol=ETH,ETC,DAI,POA").get().addHeader("X-CMC_PRO_API_KEY", keyAPI).build();
-                okhttp3.Response response = httpClient.newCall(request).execute();
+                Request request = new Request.Builder()
+                        .url(COINMARKET_API_URL + "/v1/cryptocurrency/quotes/latest?symbol=ETH,ETC,DAI,POA")
+                        .get()
+                        .addHeader("X-CMC_PRO_API_KEY", keyAPI)
+                        .build();
+                okhttp3.Response response = httpClient.newCall(request)
+                        .execute();
                 if (response.code() / 200 == 1)
                 {
-                    String result = response.body().string();
+                    String result = response.body()
+                            .string();
                     JSONObject stateData = new JSONObject(result);
-                    JSONObject data = stateData.getJSONObject("data");
-                    JSONObject eth = data.getJSONObject("ETH");
-                    Ticker ethTicker = decodeTicker(eth);
+                    JSONObject data      = stateData.getJSONObject("data");
+                    JSONObject eth       = data.getJSONObject("ETH");
+                    Ticker     ethTicker = decodeTicker(eth);
                     tickers.put(MAINNET_ID, ethTicker);
                     tickers.put(RINKEBY_ID, ethTicker);
                     tickers.put(ROPSTEN_ID, ethTicker);
@@ -115,7 +122,7 @@ public class CoinmarketcapTickerService implements TickerService
                     tickers.put(SOKOL_ID, decodeTicker(poa));
                 }
             }
-            catch (Exception e)
+            catch (IOException e)
             {
                 e.printStackTrace();
             }
@@ -190,16 +197,22 @@ public class CoinmarketcapTickerService implements TickerService
         return Single.fromCallable(() -> {
             try
             {
-                Request request = new Request.Builder().url("https://web3api.io/api/v1/market/rankings").get().addHeader("x-api-key", keyAPI).build();
-                okhttp3.Response response = httpClient.newCall(request).execute();
+                Request request = new Request.Builder()
+                        .url("https://web3api.io/api/v1/market/rankings")
+                        .get()
+                        .addHeader("x-api-key", keyAPI)
+                        .build();
+                okhttp3.Response response = httpClient.newCall(request)
+                        .execute();
                 if (response.code() / 200 == 1)
                 {
-                    String result = response.body().string();
-                    JSONObject stateData = new JSONObject(result);
-                    JSONObject payload = stateData.getJSONObject("payload");
-                    JSONArray data = payload.getJSONArray("data");
-                    AmberDataElement[] elements = gson.fromJson(data.toString(), AmberDataElement[].class);
-                    Ticker ticker;
+                    String result = response.body()
+                            .string();
+                    JSONObject         stateData = new JSONObject(result);
+                    JSONObject         payload   = stateData.getJSONObject("payload");
+                    JSONArray          data      = payload.getJSONArray("data");
+                    AmberDataElement[] elements  = gson.fromJson(data.toString(), AmberDataElement[].class);
+                    Ticker             ticker;
                     for (AmberDataElement e : elements)
                     {
                         ticker = tickerFromAmber(e);
@@ -228,7 +241,7 @@ public class CoinmarketcapTickerService implements TickerService
                     }
                 }
             }
-            catch (Exception e)
+            catch (IOException e)
             {
                 e.printStackTrace();
             }

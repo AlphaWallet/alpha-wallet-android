@@ -56,14 +56,26 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
     {
         super.onViewCreated(view, savedInstanceState);
 
-        watchAddress = view.findViewById(R.id.input_watch_address);
-        importButton = view.findViewById(R.id.import_action);
+        setupView();
+    }
+
+    private void setupView()
+    {
+        watchAddress = getActivity().findViewById(R.id.input_watch_address);
+        importButton = getActivity().findViewById(R.id.import_action);
         importButton.setOnClickListener(this);
         watchAddress.getEditText().addTextChangedListener(this);
         updateButtonState(false);
         pattern = Pattern.compile(validator, Pattern.MULTILINE);
 
         watchAddress.setLayoutListener(getActivity(), this);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        if (watchAddress == null && getActivity() != null) setupView();
     }
 
     @Override

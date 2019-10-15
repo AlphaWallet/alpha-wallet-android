@@ -50,13 +50,18 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        keystore = view.findViewById(R.id.input_keystore);
-        password = view.findViewById(R.id.input_password);
-        passwordText = view.findViewById(R.id.text_password_notice);
-        importText = view.findViewById(R.id.import_text);
+        setupView();
+    }
+
+    private void setupView()
+    {
+        keystore = getActivity().findViewById(R.id.input_keystore);
+        password = getActivity().findViewById(R.id.input_password);
+        passwordText = getActivity().findViewById(R.id.text_password_notice);
+        importText = getActivity().findViewById(R.id.import_text);
         passwordText.setVisibility(View.GONE);
         password.setVisibility(View.GONE);
-        importButton = view.findViewById(R.id.import_action);
+        importButton = getActivity().findViewById(R.id.import_action);
         importButton.setOnClickListener(this);
         updateButtonState(false);
         keystore.getEditText().addTextChangedListener(this);
@@ -64,6 +69,13 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
 
         keystore.setLayoutListener(getActivity(), this);
         password.setLayoutListener(getActivity(), this);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        if (keystore == null && getActivity() != null) setupView();
     }
 
     @Override

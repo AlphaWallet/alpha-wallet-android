@@ -49,10 +49,14 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setupView();
+    }
 
-        privateKey = view.findViewById(R.id.input_private_key);
-        importButton = view.findViewById(R.id.import_action);
-        buttonHolder = view.findViewById(R.id.button_holder);
+    private void setupView()
+    {
+        privateKey = getActivity().findViewById(R.id.input_private_key);
+        importButton = getActivity().findViewById(R.id.import_action);
+        buttonHolder = getActivity().findViewById(R.id.button_holder);
         importButton.setOnClickListener(this);
         privateKey.getEditText().addTextChangedListener(this);
         updateButtonState(false);
@@ -64,6 +68,13 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
     @Override
     public void onClick(View view) {
         handleKey(view);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        if (privateKey == null && getActivity() != null) setupView();
     }
 
     private void handleKey(View view)

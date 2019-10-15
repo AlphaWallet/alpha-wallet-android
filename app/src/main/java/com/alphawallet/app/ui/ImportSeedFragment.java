@@ -51,8 +51,13 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        seedPhrase = view.findViewById(R.id.input_seed);
-        importButton = view.findViewById(R.id.import_action);
+        setupView();
+    }
+
+    private void setupView()
+    {
+        seedPhrase = getActivity().findViewById(R.id.input_seed);
+        importButton = getActivity().findViewById(R.id.import_action);
         importButton.setOnClickListener(this);
         seedPhrase.getEditText().addTextChangedListener(this);
         updateButtonState(false);
@@ -61,10 +66,17 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         String lang = Locale.getDefault().getDisplayLanguage();
         if (lang.equalsIgnoreCase("English")) //remove language hint for English locale
         {
-            view.findViewById(R.id.text_non_english_hint).setVisibility(View.GONE);
+            getActivity().findViewById(R.id.text_non_english_hint).setVisibility(View.GONE);
         }
 
         seedPhrase.setLayoutListener(getActivity(), this);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        if (seedPhrase == null && getActivity() != null) setupView();
     }
 
     @Override

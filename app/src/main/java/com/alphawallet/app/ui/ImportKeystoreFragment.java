@@ -9,21 +9,19 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.alphawallet.app.ui.widget.OnImportKeystoreListener;
-
 import com.alphawallet.app.R;
-
+import com.alphawallet.app.ui.widget.OnImportKeystoreListener;
+import com.alphawallet.app.widget.LayoutCallbackListener;
 import com.alphawallet.app.widget.PasswordInputView;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class ImportKeystoreFragment extends Fragment implements View.OnClickListener, TextWatcher
+public class ImportKeystoreFragment extends Fragment implements View.OnClickListener, TextWatcher, LayoutCallbackListener
 {
     private static final OnImportKeystoreListener dummyOnImportKeystoreListener = (k, p) -> {};
     private static final Pattern keystore_json = Pattern.compile("[\\n\\r\\t\" a-zA-Z0-9{}:,-]{10,}", Pattern.MULTILINE);
@@ -32,6 +30,8 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
     private PasswordInputView password;
     private Button importButton;
     private TextView passwordText;
+    private TextView importText;
+
     @NonNull
     private OnImportKeystoreListener onImportKeystoreListener = dummyOnImportKeystoreListener;
 
@@ -53,6 +53,7 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
         keystore = view.findViewById(R.id.input_keystore);
         password = view.findViewById(R.id.input_password);
         passwordText = view.findViewById(R.id.text_password_notice);
+        importText = view.findViewById(R.id.import_text);
         passwordText.setVisibility(View.GONE);
         password.setVisibility(View.GONE);
         importButton = view.findViewById(R.id.import_action);
@@ -60,6 +61,9 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
         updateButtonState(false);
         keystore.getEditText().addTextChangedListener(this);
         password.getEditText().addTextChangedListener(this);
+
+        keystore.setLayoutListener(getActivity(), this);
+        password.setLayoutListener(getActivity(), this);
     }
 
     @Override
@@ -79,8 +83,8 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
         if (getContext() != null) importButton.setBackgroundColor(getContext().getColor(colorId));
     }
 
-    @Override
-    public void onClick(View view) {
+    private void handleKeypress(View view)
+    {
         if (password.getVisibility() == View.GONE)
         {
             keystore.setVisibility(View.GONE);
@@ -95,6 +99,11 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
             String password = this.password.getText().toString();
             onImportKeystoreListener.onKeystore(keystore, password);
         }
+    }
+
+    @Override
+    public void onClick(View view) {
+        handleKeypress(view);
     }
 
     public String getKeystore()
@@ -147,10 +156,14 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
         if (keystore.isErrorState()) keystore.setError(null);
         if (password.isErrorState()) password.setError(null);
         if (password.getVisibility() == View.GONE)
-        { // currently user entering keystore JSON
-            final Matcher pattern = keystore_json.matcher(keystore.getText().toString());
-            keystore.setError(pattern.matches()?null:getString(R.string.invalid_keystore));
-            updateButtonState(pattern.matches());
+        {  // currently user entering keystore JSON
+            String keyStoreEntry = keystore.getText().toString();
+            if (keyStoreEntry.length() > 0)
+            {
+                final Matcher pattern = keystore_json.matcher(keyStoreEntry);
+                keystore.setError(pattern.matches() ? null : getString(R.string.invalid_keystore));
+                updateButtonState(pattern.matches());
+            }
         }
         else
         {
@@ -181,5 +194,25 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
             keystore.setText("");
         }
         updateButtonState(false);
+    }
+
+    @Override
+    public void onLayoutShrunk()
+    {
+        if (importText != null && importText.getVisibility() == View.VISIBLE) importText.setVisibility(View.GONE);
+        if (importButton != null && importButton.getVisibility() == View.VISIBLE) importButton.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onLayoutExpand()
+    {
+        if (importText != null && importText.getVisibility() == View.GONE) importText.setVisibility(View.VISIBLE);
+        if (importButton != null && importButton.getVisibility() == View.GONE) importButton.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onInputDoneClick(View view)
+    {
+        handleKeypress(view);
     }
 }

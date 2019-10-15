@@ -1,15 +1,20 @@
 package com.alphawallet.app.widget;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.support.v4.content.ContextCompat;
+import android.text.InputType;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -20,9 +25,9 @@ import com.alphawallet.app.util.Utils;
 
 import com.alphawallet.app.R;
 
-public class PasswordInputView extends LinearLayout
+public class PasswordInputView extends LinearLayout implements TextView.OnEditorActionListener
 {
-    private Context context;
+    private final Context context;
 
     private TextView label;
     private TextView error;
@@ -35,8 +40,10 @@ public class PasswordInputView extends LinearLayout
     private String inputType;
     private int minHeight;
     private int innerPadding;
-    private int buttonSrc;
     private String imeOptions;
+    private Activity activity;
+    private LayoutCallbackListener callbackListener;
+    private long lastLayoutChange;
 
     public PasswordInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -52,6 +59,15 @@ public class PasswordInputView extends LinearLayout
 
         setInputType();
         setMinHeight();
+    }
+
+    public void setLayoutListener(Activity a, LayoutCallbackListener callback)
+    {
+        lastLayoutChange = 0;
+        activity = a;
+        callbackListener = callback;
+        getViewTreeObserver().addOnGlobalLayoutListener(screenLayoutListener);
+        getEditText().setOnEditorActionListener(this);
     }
 
     public EditText getEditText()
@@ -139,6 +155,7 @@ public class PasswordInputView extends LinearLayout
                 }
                 case "actionDone": {
                     editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                    editText.setRawInputType(InputType.TYPE_CLASS_TEXT);
                     break;
                 }
             }
@@ -207,6 +224,40 @@ public class PasswordInputView extends LinearLayout
     public boolean isErrorState()
     {
         return error.getVisibility() == View.VISIBLE;
+    }
+
+    private ViewTreeObserver.OnGlobalLayoutListener screenLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
+        @Override
+        public void onGlobalLayout() {
+            DisplayMetrics metrics = new DisplayMetrics();
+            if (activity == null || callbackListener == null) return;
+            if (getVisibility() == View.GONE) return;
+
+            activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            float logicalDensity = metrics.density;
+
+            //get height of input box
+            int inputBoxHeight = editText.getMeasuredHeight();
+            int dpHeight = (int) Math.ceil(inputBoxHeight / logicalDensity);
+
+            if (dpHeight < (minHeight - 20))
+            {
+                callbackListener.onLayoutShrunk();
+            }
+            else if (System.currentTimeMillis() - lastLayoutChange > 2000)
+            {
+                callbackListener.onLayoutExpand();
+            }
+
+            lastLayoutChange = System.currentTimeMillis();
+        }
+    };
+
+    @Override
+    public boolean onEditorAction(TextView view, int i, KeyEvent keyEvent)
+    {
+        if (callbackListener != null) callbackListener.onInputDoneClick(view);
+        return true;
     }
 }
 

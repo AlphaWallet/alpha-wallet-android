@@ -17,6 +17,7 @@ import com.alphawallet.app.util.Utils;
 
 import com.alphawallet.app.R;
 
+import com.alphawallet.app.widget.LayoutCallbackListener;
 import com.alphawallet.app.widget.PasswordInputView;
 
 import java.util.regex.Matcher;
@@ -26,7 +27,7 @@ import java.util.regex.Pattern;
  * Created by James on 26/07/2019.
  * Stormbird in Sydney
  */
-public class SetWatchWalletFragment extends Fragment implements View.OnClickListener, TextWatcher
+public class SetWatchWalletFragment extends Fragment implements View.OnClickListener, TextWatcher, LayoutCallbackListener
 {
     private static final OnSetWatchWalletListener dummyWatchWalletListener = key -> {
     };
@@ -61,10 +62,17 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
         watchAddress.getEditText().addTextChangedListener(this);
         updateButtonState(false);
         pattern = Pattern.compile(validator, Pattern.MULTILINE);
+
+        watchAddress.setLayoutListener(getActivity(), this);
     }
 
     @Override
     public void onClick(View view)
+    {
+        handleWatchAddress(view);
+    }
+
+    private void handleWatchAddress(View view)
     {
         watchAddress.setError(null);
         String value = watchAddress.getText().toString();
@@ -139,5 +147,23 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
     public void setAddress(String address)
     {
         watchAddress.getEditText().setText(address);
+    }
+
+    @Override
+    public void onLayoutShrunk()
+    {
+        if (importButton != null && importButton.getVisibility() == View.VISIBLE) importButton.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onLayoutExpand()
+    {
+        if (importButton != null && importButton.getVisibility() == View.GONE) importButton.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onInputDoneClick(View view)
+    {
+        handleWatchAddress(view);
     }
 }

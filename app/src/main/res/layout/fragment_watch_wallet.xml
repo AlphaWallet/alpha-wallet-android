@@ -22,6 +22,7 @@
             android:textSize="18sp"
             custom:minHeight="90"
             custom:lines="2"
+            custom:imeOptions="actionDone"
             custom:label="@string/watch_wallet" />
 
         <TextView

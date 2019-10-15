@@ -11,11 +11,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.alphawallet.app.ui.widget.OnImportSeedListener;
 
 import com.alphawallet.app.R;
 
+import com.alphawallet.app.widget.LayoutCallbackListener;
 import com.alphawallet.app.widget.PasswordInputView;
 
 import java.util.Locale;
@@ -23,9 +25,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class ImportSeedFragment extends Fragment implements View.OnClickListener, TextWatcher
+public class ImportSeedFragment extends Fragment implements View.OnClickListener, TextWatcher, LayoutCallbackListener
 {
-
     private static final OnImportSeedListener dummyOnImportSeedListener = (s, c) -> {};
     private static final String validator = "[^a-z^A-Z^ ]";
 
@@ -57,15 +58,22 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         updateButtonState(false);
         pattern = Pattern.compile(validator, Pattern.MULTILINE);
 
-        Locale locale = Locale.getDefault();
-        if (locale.toString().startsWith("en_")) //remove language hint for English locale
+        String lang = Locale.getDefault().getDisplayLanguage();
+        if (lang.equalsIgnoreCase("English")) //remove language hint for English locale
         {
             view.findViewById(R.id.text_non_english_hint).setVisibility(View.GONE);
         }
+
+        seedPhrase.setLayoutListener(getActivity(), this);
     }
 
     @Override
     public void onClick(View view) {
+        processSeed(view);
+    }
+
+    private void processSeed(View view)
+    {
         this.seedPhrase.setError(null);
         String newMnemonic = seedPhrase.getText().toString();
         if (TextUtils.isEmpty(newMnemonic)) {
@@ -125,5 +133,23 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         {
             updateButtonState(false);
         }
+    }
+
+    @Override
+    public void onLayoutShrunk()
+    {
+        if (importButton != null && importButton.getVisibility() == View.VISIBLE) importButton.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onLayoutExpand()
+    {
+        if (importButton != null && importButton.getVisibility() == View.GONE) importButton.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onInputDoneClick(View view)
+    {
+        processSeed(view);
     }
 }

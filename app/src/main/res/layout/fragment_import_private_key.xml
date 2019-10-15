@@ -21,6 +21,7 @@
         android:layout_marginTop="30dp"
         android:textSize="18sp"
         custom:minHeight="90"
+        custom:imeOptions="actionDone"
         custom:lines="2"
         custom:label="@string/enter_private_key" />
 

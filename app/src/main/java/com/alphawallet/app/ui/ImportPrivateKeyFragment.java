@@ -11,9 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.alphawallet.app.ui.widget.OnImportPrivateKeyListener;
 
+import com.alphawallet.app.widget.LayoutCallbackListener;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.app.R;
 
@@ -22,7 +24,7 @@ import com.alphawallet.app.widget.PasswordInputView;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ImportPrivateKeyFragment extends Fragment implements View.OnClickListener, TextWatcher
+public class ImportPrivateKeyFragment extends Fragment implements View.OnClickListener, TextWatcher, LayoutCallbackListener
 {
     private static final OnImportPrivateKeyListener dummyOnImportPrivateKeyListener = key -> { };
     private static final String validator = "[^a-f^A-F^0-9]";
@@ -31,6 +33,7 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
     private Button importButton;
     private OnImportPrivateKeyListener onImportPrivateKeyListener = dummyOnImportPrivateKeyListener;
     private Pattern pattern;
+    private LinearLayout buttonHolder;
 
     public static ImportPrivateKeyFragment create() {
         return new ImportPrivateKeyFragment();
@@ -49,14 +52,22 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
 
         privateKey = view.findViewById(R.id.input_private_key);
         importButton = view.findViewById(R.id.import_action);
+        buttonHolder = view.findViewById(R.id.button_holder);
         importButton.setOnClickListener(this);
         privateKey.getEditText().addTextChangedListener(this);
         updateButtonState(false);
         pattern = Pattern.compile(validator, Pattern.MULTILINE);
+
+        privateKey.setLayoutListener(getActivity(), this);
     }
 
     @Override
     public void onClick(View view) {
+        handleKey(view);
+    }
+
+    private void handleKey(View view)
+    {
         privateKey.setError(null);
         String value = privateKey.getText().toString();
 
@@ -129,5 +140,23 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
     {
         String value = privateKey.getText().toString();
         return Numeric.cleanHexPrefix(value.replaceAll("\\s+", "")); //remove whitespace and leading 0x
+    }
+
+    @Override
+    public void onLayoutShrunk()
+    {
+        if (buttonHolder != null && buttonHolder.getVisibility() == View.VISIBLE) buttonHolder.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onLayoutExpand()
+    {
+        if (buttonHolder != null && buttonHolder.getVisibility() == View.GONE) buttonHolder.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onInputDoneClick(View view)
+    {
+        handleKey(view);
     }
 }

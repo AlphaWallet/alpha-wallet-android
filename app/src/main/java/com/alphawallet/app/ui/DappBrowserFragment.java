@@ -132,6 +132,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private AWalletAlertDialog resultDialog;
     private DappBrowserSuggestionsAdapter adapter;
     private URLLoadReceiver URLReceiver;
+    private String loadOnInit;
 
     private final Fragment dappHomeFragment;
     private final Fragment myDappsFragment;
@@ -200,11 +201,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         URLReceiver = new URLLoadReceiver(getActivity(), this);
 
         lastHomeTag = DAPP_HOME;
+        loadOnInit = null;
 
         // Load url from a link within the app
         if (getArguments() != null && getArguments().getString("url") != null) {
             String url = getArguments().getString("url");
-            loadUrl(url);
+            loadOnInit = url;
         } else {
             String prevFragment = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(CURRENT_FRAGMENT, null);
             String prevUrl = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(CURRENT_URL, null);
@@ -222,12 +224,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 }
 
                 if (lastUrl.length() > 0)
-                    loadUrl(lastUrl);
+                    loadOnInit = lastUrl;
             }
             else if (prevFragment != null)
             {
                 attachFragment(prevFragment);
-                if (prevUrl != null && prevFragment.equals(DAPP_BROWSER) && prevUrl.length() > 0) loadUrl(prevUrl);
+                if (prevUrl != null && prevFragment.equals(DAPP_BROWSER) && prevUrl.length() > 0) loadOnInit = prevUrl;
             } else {
                 attachFragment(DAPP_HOME);
             }
@@ -556,7 +558,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     private void setupWeb3() {
-        web3.init();
         web3.setActivity(getActivity());
         web3.setChainId(networkInfo.chainId);
         web3.setRpcUrl(networkInfo.rpcServerUrl);
@@ -594,6 +595,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         web3.setOnSignPersonalMessageListener(this);
         web3.setOnSignTransactionListener(this);
         web3.setOnSignTypedMessageListener(this);
+
+        if (loadOnInit != null)
+        {
+            loadUrl(loadOnInit);
+            loadOnInit = null;
+        }
     }
 
     @Override

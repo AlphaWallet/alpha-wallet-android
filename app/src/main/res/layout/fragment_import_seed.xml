@@ -15,6 +15,7 @@
         android:visibility="visible"
         android:textSize="18sp"
         custom:minHeight="170"
+        custom:imeOptions="actionDone"
         custom:lines="6"
         custom:label="@string/enter_seed_phrase" />
 
@@ -54,5 +55,14 @@
         android:textAllCaps="true"
         android:textColor="@color/white"
         android:textSize="18sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/bottom_marker"
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:visibility="invisible"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
     </LinearLayout>
 </RelativeLayout>

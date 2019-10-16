@@ -660,6 +660,11 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 if (useAuthentication) authLevel = AuthenticationLevel.STRONGBOX_AUTHENTICATION;
                 else authLevel = AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
             }
+            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && tryInitStrongBoxKey(keyGenerator, keyAddress, false))
+            {
+                Log.d(TAG, "Using Strongbox");
+                authLevel = AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
+            }
             else if (tryInitTEEKey(keyGenerator, keyAddress, useAuthentication))
             {
                 //fallback to non Strongbox
@@ -709,6 +714,11 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         catch (StrongBoxUnavailableException e)
         {
             Log.d(TAG, "Android 9 device doesn't have StrongBox");
+            return false;
+        }
+        catch (InvalidAlgorithmParameterException e)
+        {
+            Log.d(TAG, "Strongbox with no auth");
             return false;
         }
 
@@ -1001,16 +1011,23 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
         random.nextBytes(newPassword);
 
-        boolean success = storeEncryptedBytes(newPassword, true);  //because we'll now only ever be importing keystore, always create with Auth
-        if (!success) newPassword = null;
-        switch (operation)
+        boolean success = storeEncryptedBytes(newPassword, true);  //because we'll now only ever be importing keystore, always create with Auth if possible
+
+        if (!success)
         {
-            case CREATE_KEYSTORE_KEY:
-                importCallback.KeystoreValidated(new String(newPassword), authLevel);
-                break;
-            case CREATE_PRIVATE_KEY:
-                importCallback.KeyValidated(new String(newPassword), authLevel);
-                break;
+            AuthorisationFailMessage(context.getString(R.string.please_enable_security));
+        }
+        else
+        {
+            switch (operation)
+            {
+                case CREATE_KEYSTORE_KEY:
+                    importCallback.KeystoreValidated(new String(newPassword), authLevel);
+                    break;
+                case CREATE_PRIVATE_KEY:
+                    importCallback.KeyValidated(new String(newPassword), authLevel);
+                    break;
+            }
         }
     }
 

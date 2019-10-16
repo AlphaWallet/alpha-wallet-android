@@ -1,42 +1,53 @@
 package com.alphawallet.app.widget;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.support.v4.content.ContextCompat;
+import android.text.InputType;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.util.Utils;
 
 import com.alphawallet.app.R;
 
-public class PasswordInputView extends LinearLayout
+public class PasswordInputView extends LinearLayout implements TextView.OnEditorActionListener
 {
-    private Context context;
+    private final Context context;
 
     private TextView label;
     private TextView error;
     private EditText editText;
     private CheckBox togglePassword;
     private TextView instruction;
+    private RelativeLayout container;
 
     private int labelResId;
     private int lines;
     private String inputType;
     private int minHeight;
     private int innerPadding;
-    private int buttonSrc;
     private String imeOptions;
+    private Activity activity;
+    private LayoutCallbackListener callbackListener;
+    private View bottomMarker;
 
     public PasswordInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -54,6 +65,16 @@ public class PasswordInputView extends LinearLayout
         setMinHeight();
     }
 
+    public void setLayoutListener(Activity a, LayoutCallbackListener callback, View bm)
+    {
+        activity = a;
+        callbackListener = callback;
+        getViewTreeObserver().addOnGlobalLayoutListener(screenLayoutListener);
+        getEditText().setOnEditorActionListener(this);
+
+        bottomMarker = bm;
+    }
+
     public EditText getEditText()
     {
         return editText;
@@ -66,6 +87,7 @@ public class PasswordInputView extends LinearLayout
         label.setText(labelResId);
         error = findViewById(R.id.error);
         editText = findViewById(R.id.edit_text);
+        container = findViewById(R.id.box_layout);
         instruction = findViewById(R.id.instruction);
         if (labelResId != R.string.empty) label.setVisibility(View.VISIBLE);
         togglePassword = findViewById(R.id.toggle_password);
@@ -139,6 +161,7 @@ public class PasswordInputView extends LinearLayout
                 }
                 case "actionDone": {
                     editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                    editText.setRawInputType(InputType.TYPE_CLASS_TEXT);
                     break;
                 }
             }
@@ -207,6 +230,40 @@ public class PasswordInputView extends LinearLayout
     public boolean isErrorState()
     {
         return error.getVisibility() == View.VISIBLE;
+    }
+
+    private ViewTreeObserver.OnGlobalLayoutListener screenLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
+        @Override
+        public void onGlobalLayout()
+        {
+            if (activity == null || callbackListener == null || bottomMarker == null) return;
+
+            int contentViewBottom = activity.getWindow()
+                    .findViewById(Window.ID_ANDROID_CONTENT)
+                    .getBottom();
+
+            if (contentViewBottom == 0) return;
+
+            int[] location = new int[2];
+            bottomMarker.getLocationOnScreen(location);
+            int actionLocation = location[1];
+
+            if (actionLocation < (contentViewBottom - 200))
+            {
+                callbackListener.onLayoutShrunk();
+            }
+            else
+            {
+                callbackListener.onLayoutExpand();
+            }
+        }
+    };
+
+    @Override
+    public boolean onEditorAction(TextView view, int i, KeyEvent keyEvent)
+    {
+        if (callbackListener != null) callbackListener.onInputDoneClick(view);
+        return true;
     }
 }
 

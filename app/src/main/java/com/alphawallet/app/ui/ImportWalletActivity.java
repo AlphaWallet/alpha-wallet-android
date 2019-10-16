@@ -99,6 +99,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
 
         ViewPager viewPager = findViewById(R.id.viewPager);
         viewPager.setAdapter(new TabPagerAdapter(getSupportFragmentManager(), pages));
+        viewPager.setOffscreenPageLimit(4);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }

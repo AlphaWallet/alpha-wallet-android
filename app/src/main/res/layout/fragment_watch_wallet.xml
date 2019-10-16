@@ -9,7 +9,7 @@
         android:id="@+id/input_view_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/import_action"
+        android:layout_above="@id/import_action_ww"
         android:layout_alignParentTop="true"
         android:orientation="vertical">
 
@@ -22,6 +22,7 @@
             android:textSize="18sp"
             custom:minHeight="90"
             custom:lines="2"
+            custom:imeOptions="actionDone"
             custom:label="@string/watch_wallet" />
 
         <TextView
@@ -35,7 +36,7 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/import_action"
+        android:id="@+id/import_action_ww"
         style="@style/Widget.AppCompat.Button.Borderless.Colored"
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
@@ -50,5 +51,14 @@
         android:textAllCaps="true"
         android:textColor="@color/white"
         android:textSize="18sp" />
+
+    <LinearLayout
+        android:id="@+id/bottom_marker_ww"
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:visibility="invisible"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
+    </LinearLayout>
 
 </RelativeLayout>

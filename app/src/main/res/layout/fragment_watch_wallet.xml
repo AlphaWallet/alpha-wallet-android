@@ -9,7 +9,7 @@
         android:id="@+id/input_view_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/import_action"
+        android:layout_above="@id/import_action_ww"
         android:layout_alignParentTop="true"
         android:orientation="vertical">
 

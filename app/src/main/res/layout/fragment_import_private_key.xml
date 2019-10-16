@@ -9,7 +9,7 @@
         android:id="@+id/input_view_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/button_holder"
+        android:layout_above="@id/button_holder_pk"
         android:layout_alignParentTop="true"
         android:orientation="vertical">
 

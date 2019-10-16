@@ -62,6 +62,8 @@ import org.web3j.crypto.Sign;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.SignatureException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -131,6 +133,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private AWalletAlertDialog resultDialog;
     private DappBrowserSuggestionsAdapter adapter;
     private URLLoadReceiver URLReceiver;
+    private String loadOnInit;
 
     private final Fragment dappHomeFragment;
     private final Fragment myDappsFragment;
@@ -199,11 +202,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         URLReceiver = new URLLoadReceiver(getActivity(), this);
 
         lastHomeTag = DAPP_HOME;
+        loadOnInit = null;
 
         // Load url from a link within the app
         if (getArguments() != null && getArguments().getString("url") != null) {
             String url = getArguments().getString("url");
-            loadUrl(url);
+            loadOnInit = url;
         } else {
             String prevFragment = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(CURRENT_FRAGMENT, null);
             String prevUrl = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(CURRENT_URL, null);
@@ -221,12 +225,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 }
 
                 if (lastUrl.length() > 0)
-                    loadUrl(lastUrl);
+                    loadOnInit = lastUrl;
             }
             else if (prevFragment != null)
             {
                 attachFragment(prevFragment);
-                if (prevUrl != null && prevFragment.equals(DAPP_BROWSER) && prevUrl.length() > 0) loadUrl(prevUrl);
+                if (prevUrl != null && prevFragment.equals(DAPP_BROWSER) && prevUrl.length() > 0) loadOnInit = prevUrl;
             } else {
                 attachFragment(DAPP_HOME);
             }
@@ -360,7 +364,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private void initView(View view) {
         web3 = view.findViewById(R.id.web3view);
-        web3.setActivity(getActivity());
         progressBar = view.findViewById(R.id.progressBar);
         urlTv = view.findViewById(R.id.url_tv);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);
@@ -556,12 +559,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     private void setupWeb3() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
-        }
+        web3.setActivity(getActivity());
         web3.setChainId(networkInfo.chainId);
-        String rpcURL = networkInfo.rpcServerUrl;
-        web3.setRpcUrl(rpcURL);
+        web3.setRpcUrl(networkInfo.rpcServerUrl);
         web3.setWalletAddress(new Address(wallet.address));
 
         web3.setWebChromeClient(new WebChromeClient() {
@@ -596,6 +596,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         web3.setOnSignPersonalMessageListener(this);
         web3.setOnSignTransactionListener(this);
         web3.setOnSignTypedMessageListener(this);
+
+        if (loadOnInit != null)
+        {
+            loadUrl(loadOnInit);
+            loadOnInit = null;
+        }
     }
 
     @Override
@@ -886,7 +892,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         this.currentFragment = DAPP_BROWSER;
         cancelSearchSession();
         if (checkForMagicLink(urlText)) return true;
-        web3.loadUrl(Utils.formatUrl(urlText));
+        web3.loadUrl(Utils.formatUrl(urlText), getWeb3Headers());
         urlTv.setText(Utils.formatUrl(urlText));
         web3.requestFocus();
         viewModel.setLastUrl(getContext(), urlText);
@@ -896,6 +902,21 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             current.sendBroadcast(new Intent(RESET_TOOLBAR));
         }
         return true;
+    }
+
+    /* Required for CORS requests */
+    private Map<String, String> getWeb3Headers()
+    {
+        //headers
+        return new HashMap<String, String>() {{
+            put("Connection", "close");
+            put("Content-Type", "text/plain");
+            put("Access-Control-Allow-Origin", "*");
+            put("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS");
+            put("Access-Control-Max-Age", "600");
+            put("Access-Control-Allow-Credentials", "true");
+            put("Access-Control-Allow-Headers", "accept, authorization, Content-Type");
+        }};
     }
 
     public void reloadPage() {
@@ -1086,7 +1107,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         Log.i("Touch", "SCROLL: " + web3.getScrollY());
         if (web3.getScrollY() == 0)
         {
-            web3.reload();
+            loadUrl(web3.getUrl());
         }
     }
 

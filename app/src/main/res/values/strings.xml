@@ -598,4 +598,5 @@
     <string name="tokenscript_error_detail">Error in TokenScript element: %1$s</string>
     <string name="tokenscript_element_not_present">function input \'%1$s\' not found in HTML elements.</string>
     <string name="value">VALUE</string>
+    <string name="please_enable_security">Unable to create key. Try enabling security on your phone.</string>
 </resources>

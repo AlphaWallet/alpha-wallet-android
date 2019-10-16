@@ -61,14 +61,14 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
         importText = getActivity().findViewById(R.id.import_text);
         passwordText.setVisibility(View.GONE);
         password.setVisibility(View.GONE);
-        importButton = getActivity().findViewById(R.id.import_action);
+        importButton = getActivity().findViewById(R.id.import_action_ks);
         importButton.setOnClickListener(this);
         updateButtonState(false);
         keystore.getEditText().addTextChangedListener(this);
         password.getEditText().addTextChangedListener(this);
 
-        keystore.setLayoutListener(getActivity(), this);
-        password.setLayoutListener(getActivity(), this);
+        keystore.setLayoutListener(getActivity(), this, getActivity().findViewById(R.id.bottom_marker_ks));
+        password.setLayoutListener(getActivity(), this, getActivity().findViewById(R.id.bottom_marker_ks));
     }
 
     @Override
@@ -211,15 +211,15 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
     @Override
     public void onLayoutShrunk()
     {
-        if (importText != null && importText.getVisibility() == View.VISIBLE) importText.setVisibility(View.GONE);
-        if (importButton != null && importButton.getVisibility() == View.VISIBLE) importButton.setVisibility(View.GONE);
+        if (importText != null) importText.setVisibility(View.GONE);
+        if (importButton != null) importButton.setVisibility(View.GONE);
     }
 
     @Override
     public void onLayoutExpand()
     {
-        if (importText != null && importText.getVisibility() == View.GONE) importText.setVisibility(View.VISIBLE);
-        if (importButton != null && importButton.getVisibility() == View.GONE) importButton.setVisibility(View.VISIBLE);
+        if (importText != null) importText.setVisibility(View.VISIBLE);
+        if (importButton != null) importButton.setVisibility(View.VISIBLE);
     }
 
     @Override

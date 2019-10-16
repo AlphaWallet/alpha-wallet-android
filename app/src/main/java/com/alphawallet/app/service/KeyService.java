@@ -667,7 +667,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 if (useAuthentication) authLevel = AuthenticationLevel.TEE_AUTHENTICATION;
                 else authLevel = AuthenticationLevel.TEE_NO_AUTHENTICATION;
             }
-            else if (tryInitTEEKey(keyGenerator, keyAddress, false))
+            else if (tryInitTEEKey(keyGenerator, keyAddress))
             {
                 Log.d(TAG, "Using Hardware security TEE without authentication");
                 authLevel = AuthenticationLevel.TEE_NO_AUTHENTICATION;
@@ -726,6 +726,28 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                                       .setKeySize(256)
                                       .setUserAuthenticationRequired(useAuthentication)
                                       .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
+                                      .setRandomizedEncryptionRequired(true)
+                                      .setEncryptionPaddings(PADDING)
+                                      .build());
+        }
+        catch (IllegalStateException | InvalidAlgorithmParameterException e)
+        {
+            //couldn't create the key because of no lock
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean tryInitTEEKey(KeyGenerator keyGenerator, String keyAddress)
+    {
+        try
+        {
+            keyGenerator.init(new KeyGenParameterSpec.Builder(
+                    keyAddress,
+                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                                      .setBlockModes(BLOCK_MODE)
+                                      .setKeySize(256)
                                       .setRandomizedEncryptionRequired(true)
                                       .setEncryptionPaddings(PADDING)
                                       .build());
@@ -1001,16 +1023,23 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
         random.nextBytes(newPassword);
 
-        boolean success = storeEncryptedBytes(newPassword, true);  //because we'll now only ever be importing keystore, always create with Auth
-        if (!success) newPassword = null;
-        switch (operation)
+        boolean success = storeEncryptedBytes(newPassword, true);  //because we'll now only ever be importing keystore, always create with Auth if possible
+
+        if (!success)
         {
-            case CREATE_KEYSTORE_KEY:
-                importCallback.KeystoreValidated(new String(newPassword), authLevel);
-                break;
-            case CREATE_PRIVATE_KEY:
-                importCallback.KeyValidated(new String(newPassword), authLevel);
-                break;
+            AuthorisationFailMessage(context.getString(R.string.please_enable_security));
+        }
+        else
+        {
+            switch (operation)
+            {
+                case CREATE_KEYSTORE_KEY:
+                    importCallback.KeystoreValidated(new String(newPassword), authLevel);
+                    break;
+                case CREATE_PRIVATE_KEY:
+                    importCallback.KeyValidated(new String(newPassword), authLevel);
+                    break;
+            }
         }
     }
 

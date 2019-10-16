@@ -69,7 +69,7 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
             getActivity().findViewById(R.id.text_non_english_hint).setVisibility(View.GONE);
         }
 
-        seedPhrase.setLayoutListener(getActivity(), this);
+        seedPhrase.setLayoutListener(getActivity(), this, getActivity().findViewById(R.id.bottom_marker));
     }
 
     @Override
@@ -150,13 +150,13 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
     @Override
     public void onLayoutShrunk()
     {
-        if (importButton != null && importButton.getVisibility() == View.VISIBLE) importButton.setVisibility(View.GONE);
+        if (importButton != null) importButton.setVisibility(View.GONE);
     }
 
     @Override
     public void onLayoutExpand()
     {
-        if (importButton != null && importButton.getVisibility() == View.GONE) importButton.setVisibility(View.VISIBLE);
+        if (importButton != null) importButton.setVisibility(View.VISIBLE);
     }
 
     @Override

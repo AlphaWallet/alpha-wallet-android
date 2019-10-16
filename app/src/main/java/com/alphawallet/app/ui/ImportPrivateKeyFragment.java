@@ -55,14 +55,14 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
     private void setupView()
     {
         privateKey = getActivity().findViewById(R.id.input_private_key);
-        importButton = getActivity().findViewById(R.id.import_action);
-        buttonHolder = getActivity().findViewById(R.id.button_holder);
+        importButton = getActivity().findViewById(R.id.import_action_pk);
+        buttonHolder = getActivity().findViewById(R.id.button_holder_pk);
         importButton.setOnClickListener(this);
         privateKey.getEditText().addTextChangedListener(this);
         updateButtonState(false);
         pattern = Pattern.compile(validator, Pattern.MULTILINE);
 
-        privateKey.setLayoutListener(getActivity(), this);
+        privateKey.setLayoutListener(getActivity(), this, getActivity().findViewById(R.id.bottom_marker_pk));
     }
 
     @Override
@@ -156,13 +156,13 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
     @Override
     public void onLayoutShrunk()
     {
-        if (buttonHolder != null && buttonHolder.getVisibility() == View.VISIBLE) buttonHolder.setVisibility(View.GONE);
+        if (buttonHolder != null) buttonHolder.setVisibility(View.GONE);
     }
 
     @Override
     public void onLayoutExpand()
     {
-        if (buttonHolder != null && buttonHolder.getVisibility() == View.GONE) buttonHolder.setVisibility(View.VISIBLE);
+        if (buttonHolder != null) buttonHolder.setVisibility(View.VISIBLE);
     }
 
     @Override

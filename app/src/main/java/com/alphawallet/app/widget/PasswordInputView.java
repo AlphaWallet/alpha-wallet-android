@@ -15,10 +15,13 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.util.Utils;
@@ -34,6 +37,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
     private EditText editText;
     private CheckBox togglePassword;
     private TextView instruction;
+    private RelativeLayout container;
 
     private int labelResId;
     private int lines;
@@ -43,7 +47,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
     private String imeOptions;
     private Activity activity;
     private LayoutCallbackListener callbackListener;
-    private long lastLayoutChange;
+    private View bottomMarker;
 
     public PasswordInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -61,13 +65,14 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
         setMinHeight();
     }
 
-    public void setLayoutListener(Activity a, LayoutCallbackListener callback)
+    public void setLayoutListener(Activity a, LayoutCallbackListener callback, View bm)
     {
-        lastLayoutChange = 0;
         activity = a;
         callbackListener = callback;
         getViewTreeObserver().addOnGlobalLayoutListener(screenLayoutListener);
         getEditText().setOnEditorActionListener(this);
+
+        bottomMarker = bm;
     }
 
     public EditText getEditText()
@@ -82,6 +87,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
         label.setText(labelResId);
         error = findViewById(R.id.error);
         editText = findViewById(R.id.edit_text);
+        container = findViewById(R.id.box_layout);
         instruction = findViewById(R.id.instruction);
         if (labelResId != R.string.empty) label.setVisibility(View.VISIBLE);
         togglePassword = findViewById(R.id.toggle_password);
@@ -228,28 +234,28 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
 
     private ViewTreeObserver.OnGlobalLayoutListener screenLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
         @Override
-        public void onGlobalLayout() {
-            DisplayMetrics metrics = new DisplayMetrics();
-            if (activity == null || callbackListener == null) return;
-            if (getVisibility() == View.GONE) return;
+        public void onGlobalLayout()
+        {
+            if (activity == null || callbackListener == null || bottomMarker == null) return;
 
-            activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-            float logicalDensity = metrics.density;
+            int contentViewBottom = activity.getWindow()
+                    .findViewById(Window.ID_ANDROID_CONTENT)
+                    .getBottom();
 
-            //get height of input box
-            int inputBoxHeight = editText.getMeasuredHeight();
-            int dpHeight = (int) Math.ceil(inputBoxHeight / logicalDensity);
+            if (contentViewBottom == 0) return;
 
-            if (dpHeight < (minHeight - 20))
+            int[] location = new int[2];
+            bottomMarker.getLocationOnScreen(location);
+            int actionLocation = location[1];
+
+            if (actionLocation < (contentViewBottom - 200))
             {
                 callbackListener.onLayoutShrunk();
             }
-            else if (System.currentTimeMillis() - lastLayoutChange > 2000)
+            else
             {
                 callbackListener.onLayoutExpand();
             }
-
-            lastLayoutChange = System.currentTimeMillis();
         }
     };
 

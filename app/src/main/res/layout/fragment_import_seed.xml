@@ -56,4 +56,13 @@
         android:textColor="@color/white"
         android:textSize="18sp" />
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/bottom_marker"
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:visibility="invisible"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
+    </LinearLayout>
 </RelativeLayout>

@@ -660,6 +660,11 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 if (useAuthentication) authLevel = AuthenticationLevel.STRONGBOX_AUTHENTICATION;
                 else authLevel = AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
             }
+            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && tryInitStrongBoxKey(keyGenerator, keyAddress, false))
+            {
+                Log.d(TAG, "Using Strongbox");
+                authLevel = AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
+            }
             else if (tryInitTEEKey(keyGenerator, keyAddress, useAuthentication))
             {
                 //fallback to non Strongbox
@@ -667,7 +672,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 if (useAuthentication) authLevel = AuthenticationLevel.TEE_AUTHENTICATION;
                 else authLevel = AuthenticationLevel.TEE_NO_AUTHENTICATION;
             }
-            else if (tryInitTEEKey(keyGenerator, keyAddress))
+            else if (tryInitTEEKey(keyGenerator, keyAddress, false))
             {
                 Log.d(TAG, "Using Hardware security TEE without authentication");
                 authLevel = AuthenticationLevel.TEE_NO_AUTHENTICATION;
@@ -711,6 +716,11 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             Log.d(TAG, "Android 9 device doesn't have StrongBox");
             return false;
         }
+        catch (InvalidAlgorithmParameterException e)
+        {
+            Log.d(TAG, "Strongbox with no auth");
+            return false;
+        }
 
         return true;
     }
@@ -726,28 +736,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                                       .setKeySize(256)
                                       .setUserAuthenticationRequired(useAuthentication)
                                       .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
-                                      .setRandomizedEncryptionRequired(true)
-                                      .setEncryptionPaddings(PADDING)
-                                      .build());
-        }
-        catch (IllegalStateException | InvalidAlgorithmParameterException e)
-        {
-            //couldn't create the key because of no lock
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean tryInitTEEKey(KeyGenerator keyGenerator, String keyAddress)
-    {
-        try
-        {
-            keyGenerator.init(new KeyGenParameterSpec.Builder(
-                    keyAddress,
-                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                                      .setBlockModes(BLOCK_MODE)
-                                      .setKeySize(256)
                                       .setRandomizedEncryptionRequired(true)
                                       .setEncryptionPaddings(PADDING)
                                       .build());

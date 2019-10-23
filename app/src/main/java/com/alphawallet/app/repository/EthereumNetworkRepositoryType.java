@@ -5,6 +5,7 @@ import org.web3j.protocol.Web3j;
 import java.math.BigInteger;
 import java.util.List;
 
+import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.Token;
@@ -36,4 +37,6 @@ public interface EthereumNetworkRepositoryType {
     void setFilterNetworkList(int[] networkList);
 
 	boolean checkTickers();
+
+	List<ContractResult> getAllKnownContracts(List<Integer> networkFilters);
 }

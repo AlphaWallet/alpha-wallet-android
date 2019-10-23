@@ -13,9 +13,11 @@ import java.util.List;
 
 public class EthereumNetworkRepository extends EthereumNetworkBase
 {
-    public EthereumNetworkRepository(PreferenceRepositoryType preferenceRepository, TickerService tickerService, Context context)
+    private final Context context;
+    public EthereumNetworkRepository(PreferenceRepositoryType preferenceRepository, TickerService tickerService, Context ctx)
     {
-        super(preferenceRepository, tickerService, new NetworkInfo[0]);
+        super(preferenceRepository, tickerService, new NetworkInfo[0], true);
+        context = ctx;
     }
 
     public static void setChainColour(View view, int chainId)
@@ -35,9 +37,7 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
 
     public static List<Integer> addDefaultNetworks()
     {
-        List<Integer> defaultFilter = new ArrayList<>();
-        defaultFilter.add(EthereumNetworkRepository.MAINNET_ID);
-        return defaultFilter;
+        return new ArrayList<>(EthereumNetworkRepository.MAINNET_ID);
     }
 
     public static String getNodeURLByNetworkId(int networkId) {
@@ -52,5 +52,11 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
     public static String getEtherscanURLbyNetwork(int networkId)
     {
         return EthereumNetworkBase.getEtherscanURLbyNetwork(networkId);
+    }
+
+    @Override
+    public List<ContractResult> getAllKnownContracts(List<Integer> networkFilters)
+    {
+        return EthereumNetworkBase.getAllKnownContracts(context, networkFilters);
     }
 }

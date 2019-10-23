@@ -57,9 +57,7 @@ public class WalletViewModel extends BaseViewModel
     private final MutableLiveData<BigDecimal> total = new MutableLiveData<>();
     private final MutableLiveData<Token> tokenUpdate = new MutableLiveData<>();
     private final MutableLiveData<Boolean> tokensReady = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> fetchKnownContracts = new MutableLiveData<>();
     private final MutableLiveData<GenericWalletInteract.BackupLevel> backupEvent = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> checkAdapterCount = new MutableLiveData<>();
 
     private final FetchTokensInteract fetchTokensInteract;
     private final AddTokenRouter addTokenRouter;
@@ -129,8 +127,6 @@ public class WalletViewModel extends BaseViewModel
     }
     public LiveData<Token> tokenUpdate() { return tokenUpdate; }
     public LiveData<Boolean> tokensReady() { return tokensReady; }
-    public LiveData<Boolean> checkAdapterCount() { return checkAdapterCount; }
-    public LiveData<Boolean> fetchKnownContracts() { return fetchKnownContracts; }
     public LiveData<GenericWalletInteract.BackupLevel> backupEvent() { return backupEvent; }
 
     public String getWalletAddr() { return currentWallet != null ? currentWallet.address : null; }
@@ -202,12 +198,6 @@ public class WalletViewModel extends BaseViewModel
         tokensService.addTokens(cachedTokens);
         tokensService.requireTokensRefresh();
         tokens.postValue(tokensService.getAllLiveTokens().toArray(new Token[0]));
-        fetchKnownContracts.postValue(true);
-    }
-
-    public List<Integer> getChainFilters()
-    {
-        return tokensService.getNetworkFilters();
     }
 
     private void onTokenFetchError(Throwable throwable)
@@ -232,6 +222,7 @@ public class WalletViewModel extends BaseViewModel
      */
     private void fetchFromOpensea(NetworkInfo checkNetwork)
     {
+        if (checkNetwork == null) return;
         Log.d("OPENSEA", "Fetch from opensea : " + checkNetwork.getShortName());
         updateTokens = openseaService.getTokens(currentWallet.address, checkNetwork.chainId, checkNetwork.getShortName())
                 //openseaService.getTokens("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63")
@@ -323,8 +314,8 @@ public class WalletViewModel extends BaseViewModel
      */
     private void updateTokenBalances()
     {
-        VisibilityFilter.addPriorityTokens(unknownAddresses, tokensService);
-        checkUnknownAddresses(true);
+        unknownAddresses.addAll(ethereumNetworkRepository.getAllKnownContracts(tokensService.getNetworkFilters()));
+        checkUnknownAddresses();
         if (balanceTimerDisposable == null || balanceTimerDisposable.isDisposed())
         {
             balanceTimerDisposable = Observable.interval(0, BALANCE_CHECK_INTERVAL_MILLIS, TimeUnit.MILLISECONDS)
@@ -343,7 +334,7 @@ public class WalletViewModel extends BaseViewModel
         }
 
         checkTokenUpdates();
-        checkUnknownAddresses(false);
+        checkUnknownAddresses();
         checkOpenSeaUpdate();
         checkTickers();
     }
@@ -494,7 +485,7 @@ public class WalletViewModel extends BaseViewModel
         unknownAddresses.addAll(tokensService.reduceToUnknown(knownContracts));
     }
 
-    private void checkUnknownAddresses(boolean refresh)
+    private void checkUnknownAddresses()
     {
         ContractResult contract = unknownAddresses.poll();
         if (contract != null)
@@ -502,23 +493,23 @@ public class WalletViewModel extends BaseViewModel
             disposable = setupTokensInteract.addToken(contract.name, contract.chainId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.computation())
-                    .subscribe(tokenInfo -> resolvedToken(tokenInfo, refresh), this::onTokenAddError);
+                    .subscribe(this::resolvedToken, this::onTokenAddError);
         }
     }
 
-    private void resolvedToken(TokenInfo info, boolean refresh)
+    private void resolvedToken(TokenInfo info)
     {
         disposable = fetchTransactionsInteract.queryInterfaceSpecForService(info)
                 .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.chainId, tokenInfo.address), currentWallet))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(token -> finishedImport(token, refresh), this::onTokenAddError);
+                .subscribe(this::finishedImport, this::onTokenAddError);
     }
 
-    private void finishedImport(Token token, boolean refresh)
+    private void finishedImport(Token token)
     {
         tokensService.addToken(token);
-        if (refresh) tokenUpdate.postValue(token);
+        if (EthereumNetworkRepository.isPriorityToken(token)) tokenUpdate.postValue(token);
     }
 
     private void onTokenAddError(Throwable throwable)

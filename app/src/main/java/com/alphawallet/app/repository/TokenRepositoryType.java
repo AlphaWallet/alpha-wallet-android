@@ -7,6 +7,7 @@ import com.alphawallet.app.entity.SubscribeWrapper;
 import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.TokenInfo;
+import com.alphawallet.app.entity.TokenTicker;
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
 
@@ -33,6 +34,7 @@ public interface TokenRepositoryType {
     Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
     Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType interfaceSpec);
     Single<Ticker> getEthTicker(int chainId);
+    Single<TokenTicker> getTokenTicker(Token token);
     Single<Token> getEthBalance(NetworkInfo network, Wallet wallet);
     Single<BigInteger> fetchLatestBlockNumber(int chainId);
 

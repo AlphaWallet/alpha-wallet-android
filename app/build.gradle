@@ -38,8 +38,8 @@ android {
         applicationId "io.stormbird.wallet"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 77
-        versionName "2.12.2"
+        versionCode 79
+        versionName "2.13.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         def CoinmarketCapAPI = "CoinmarketCapAPI"
         def AmberdataAPI = "AmberdataAPI"
@@ -64,8 +64,8 @@ android {
     productFlavors {
 	awallet {
 		dimension "targetting"
-        versionCode 79
-        versionName "2.12.3"
+        versionCode 80
+        versionName "2.13.0"
 	}
     }
     buildTypes {

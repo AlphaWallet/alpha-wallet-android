@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 
+import com.alphawallet.app.entity.TokenTicker;
 import com.alphawallet.app.util.BalanceUtils;
 
 import io.reactivex.Observable;
@@ -18,6 +19,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AmountUpdateCallback;
 import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.repository.TokenRepositoryType;
+import com.alphawallet.app.entity.Token;
 
 import java.util.concurrent.TimeUnit;
 
@@ -44,6 +46,8 @@ public class AmountEntryItem
     private boolean usdInput = false;
     private final boolean hasRealValue;
     private final int chainId;
+    private final int decimals;
+    private TokenTicker lastTicker;
 
     private LinearLayout tokenEquivalentLayout;
     private TextView tokenEquivalent;
@@ -62,14 +66,24 @@ public class AmountEntryItem
         if (disposable != null && !disposable.isDisposed()) disposable.dispose();
     }
 
-    public AmountEntryItem(Activity activity, TokenRepositoryType tokenRepository, String symbol, boolean isEth, int chainId, boolean hasRealValue)
+    public AmountEntryItem(Activity activity, TokenRepositoryType tokenRepository, Token token)
     {
         currentEthPrice = 0.0;
         this.tokenRepository = tokenRepository;
         this.callback = (AmountUpdateCallback)activity;
         amountError = activity.findViewById(R.id.amount_error);
-        this.chainId = chainId;
-        this.hasRealValue = hasRealValue;
+        if (token != null)
+        {
+            this.chainId = token.tokenInfo.chainId;
+            this.hasRealValue = token.hasRealValue();
+            this.decimals = token.tokenInfo.decimals;
+        }
+        else
+        {
+            chainId = 0;
+            hasRealValue = false;
+            decimals = 18;
+        }
 
         amountEditText = activity.findViewById(R.id.edit_amount);
         amountEditText.addTextChangedListener(new TextWatcher() {
@@ -106,13 +120,13 @@ public class AmountEntryItem
         usdLabel = activity.findViewById(R.id.amount_edit_usd_symbol);
 
         tokenSymbolLabel = activity.findViewById(R.id.amount_edit_token_symbol);
-        tokenSymbolLabel.setText(symbol);
+        if (token != null) tokenSymbolLabel.setText(token.tokenInfo.symbol);
 
         tokenEquivalentLayout = activity.findViewById(R.id.layout_token_equivalent_value);
         tokenEquivalent = activity.findViewById(R.id.text_token_value);
         tokenEquivalent.setText("0 ");
         tokenEquivalentSymbol = activity.findViewById(R.id.text_token_symbol);
-        tokenEquivalentSymbol.setText(symbol);
+        tokenEquivalentSymbol.setText(token.tokenInfo.symbol);
         usdValue = activity.findViewById(R.id.text_usd_value);
 
         switchBtn = activity.findViewById(R.id.img_switch_usd_eth);
@@ -168,46 +182,12 @@ public class AmountEntryItem
             callback.amountChanged(String.valueOf(amount));
         });
 
-        if (isEth)
-        {
-            startEthereumTicker();
-            switchBtn.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            usdValue.setVisibility(View.GONE);
-            quantityUpBtn.setVisibility(View.VISIBLE);
-            quantityDownBtn.setVisibility(View.VISIBLE);
-        }
+        if (token != null) startEthereumTicker(token);
     }
 
     private void updateEquivalentValue() throws NumberFormatException
     {
-        String amountStr = amountEditText.getText().toString();
-        if (usdInput) {
-            String tokenAmountEquivalent = ethEquivalent(amountStr);
-            tokenEquivalent.setText(tokenAmountEquivalent);
-
-            double equivalent = 0.0;
-
-            if (amountStr.length() > 0) {
-                double amount = Double.parseDouble(amountStr);
-                equivalent = amount / currentEthPrice;
-            }
-
-            callback.amountChanged(String.valueOf(equivalent));
-        } else
-        {
-            if (amountStr.length() == 0)
-                amountStr = "0";
-            if (isValidAmount(amountStr))
-            {
-                String usdEquivStr = "US$ " + getUsdString(Double.parseDouble(amountStr) * currentEthPrice);
-                if (!hasRealValue) usdEquivStr = "(TEST) " + usdEquivStr;
-                usdValue.setText(usdEquivStr);
-            }
-            callback.amountChanged(amountStr);
-        }
+        updateValues(lastTicker);
     }
 
     private String getEthValue()
@@ -239,7 +219,7 @@ public class AmountEntryItem
             double equivalent = 0.0;
             double amount = Double.parseDouble(amountStr);
             equivalent = amount / currentEthPrice;
-            result = getEthString(equivalent);
+            result = getEthString(equivalent, decimals);
         }
 
         return result;
@@ -247,46 +227,71 @@ public class AmountEntryItem
 
     public void setAmount(String value)
     {
-        try
-        {
-            if (usdInput)
-            {
-                tokenEquivalent.setText(ethEquivalent(value));
-            }
-            else
-            {
-                if (isValidAmount(value))
-                {
-                    String usdEquivStr = "US$ " + getUsdString(Double.valueOf(value) * currentEthPrice);
-                    if (!hasRealValue)
-                        usdEquivStr = "(TEST) " + usdEquivStr;
-                    usdValue.setText(usdEquivStr);
-                }
-            }
-        }
-        catch (NumberFormatException e)
-        {
-            //
-        }
+        updateValues(lastTicker);
     }
 
-    public void startEthereumTicker()
+    public void startEthereumTicker(Token token)
     {
         disposable = Observable.interval(0, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> tokenRepository
-                        .getEthTicker(chainId)
+                        .getTokenTicker(token)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onTicker, this::onError)).subscribe();
     }
 
-    private void onTicker(Ticker ticker)
+    private void onTicker(TokenTicker ticker)
     {
-        if (ticker != null && ticker.price_usd != null)
+        lastTicker = ticker;
+        if (ticker != null)
         {
-            currentEthPrice = Double.valueOf(ticker.price_usd);
+            switchBtn.setVisibility(View.VISIBLE);
+            currentEthPrice = Double.valueOf(ticker.price);
             //now update UI
             setAmount(amountEditText.getText().toString());
+            String currencyLabel = ticker.priceSymbol + getCurrencyLabel(ticker.priceSymbol);
+            usdLabel.setText(currencyLabel);
+            updateValues(lastTicker);
+        }
+        else
+        {
+            switchBtn.setVisibility(View.GONE);
+            usdValue.setVisibility(View.GONE);
+            quantityUpBtn.setVisibility(View.VISIBLE);
+            quantityDownBtn.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void updateValues(TokenTicker ticker)
+    {
+        if (ticker == null) return;
+        String amountStr = amountEditText.getText().toString();
+        if (usdInput)
+        {
+            String tokenAmountEquivalent = ethEquivalent(amountStr);
+            tokenEquivalent.setText(tokenAmountEquivalent);
+
+            double equivalent = 0.0;
+
+            if (amountStr.length() > 0)
+            {
+                double amount = Double.parseDouble(amountStr);
+                equivalent = amount / currentEthPrice;
+            }
+
+            callback.amountChanged(String.valueOf(equivalent));
+        }
+        else
+        {
+            if (amountStr.length() == 0) amountStr = "0";
+            if (isValidAmount(amountStr))
+            {
+                String usdEquivStr = ticker.priceSymbol + " " + getUsdString(Double.parseDouble(amountStr) * currentEthPrice);
+                //String usdEquivStr = "US$ " + getUsdString(Double.parseDouble(amountStr) * currentEthPrice);
+                if (!hasRealValue) usdEquivStr = "(TEST) " + usdEquivStr;
+                usdValue.setText(usdEquivStr);
+            }
+            callback.amountChanged(amountStr);
         }
     }
 
@@ -301,7 +306,9 @@ public class AmountEntryItem
 
     private void onError(Throwable throwable)
     {
-
+        usdValue.setVisibility(View.GONE);
+        quantityUpBtn.setVisibility(View.VISIBLE);
+        quantityDownBtn.setVisibility(View.VISIBLE);
     }
 
     public boolean checkValidAmount()
@@ -328,5 +335,26 @@ public class AmountEntryItem
     public void setAmountText(String ethAmount)
     {
         amountEditText.setText(ethAmount);
+    }
+
+    //utility function
+    private String getCurrencyLabel(String currencySymbol)
+    {
+        switch (currencySymbol)
+        {
+            case "GBP":
+                return "£";
+            case "EUR":
+                return "€";
+            case "CNY":
+            case "JPY":
+                return "¥";
+            case "THB":
+                return "฿";
+            case "VND":
+                return "₫";
+            default:
+                return "$";
+        }
     }
 }

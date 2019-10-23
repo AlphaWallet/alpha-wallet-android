@@ -114,7 +114,10 @@ public class NetworkListAdapter extends ArrayAdapter<NetworkItem> {
             if (!singleItem && dataSet.get(position).getName().equals(VisibilityFilter.primaryNetworkName()))
             {
                 viewHolder.checkbox.setAlpha(0.5f);
-                viewHolder.name.setAlpha(0.5f);
+            }
+            else
+            {
+                viewHolder.checkbox.setAlpha(1.0f);
             }
         }
 

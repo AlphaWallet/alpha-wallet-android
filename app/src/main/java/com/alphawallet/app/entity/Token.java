@@ -868,4 +868,22 @@ public class Token implements Parcelable
     }
 
     public boolean isERC875() { return false; }
+
+    public BigDecimal getCorrectedAmount(String newAmount)
+    {
+        if (newAmount == null || newAmount.length() == 0) return BigDecimal.ZERO;
+
+        try
+        {
+            BigDecimal bd = new BigDecimal(newAmount);
+            BigDecimal factor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
+            //.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros();
+            return bd.multiply(factor).setScale(0, RoundingMode.HALF_UP).stripTrailingZeros();
+        }
+        catch (Exception e)
+        {
+            //
+        }
+        return BigDecimal.ZERO;
+    }
 }

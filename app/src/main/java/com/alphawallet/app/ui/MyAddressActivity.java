@@ -17,6 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alphawallet.app.entity.TokenTicker;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.entity.AmountEntryItem;
@@ -160,7 +161,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (token == null || token.isEthereum()) //Currently only allow request for native chain currency, can get here via routes where token is not set.
+        if (token == null || token.isEthereum() || EthereumNetworkRepository.isPriorityToken(token)) //Currently only allow request for native chain currency, can get here via routes where token is not set.
         {
             getMenuInflater().inflate(R.menu.menu_receive, menu);
         }
@@ -193,16 +194,16 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         //Generate QR link for receive payment.
         //Initially just generate simple payment.
         //need ticker so user can see how much $USD the value is
+        //get token ticker
+        if (token == null) token = EthereumNetworkRepository.getBlankOverrideToken(networkInfo);
+        //viewModel.startEthereumTicker(token);
         currentMode = MODE_POS;
         selectAddress.setVisibility(View.GONE);
         inputAmount.setVisibility(View.VISIBLE);
         amountInput = new AmountEntryItem(
                 this,
                 viewModel.getTokenRepository(),
-                networkInfo.symbol,
-                true,
-                networkInfo.chainId,
-                EthereumNetworkRepository.hasRealValue(networkInfo.chainId));
+                token);
         amountInput.getValue();
         selectNetworkLayout.setVisibility(View.VISIBLE);
     }
@@ -291,6 +292,11 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
             contractAddress.setText(token.getAddress());
             contractCopy.setOnClickListener(v -> copyContract());
         }
+        else
+        {
+            findViewById(R.id.text_contract_address).setVisibility(View.GONE);
+            findViewById(R.id.layout_contract).setVisibility(View.GONE);
+        }
     }
 
     private void copyContract()
@@ -322,8 +328,23 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
             //EIP681 format
             BigDecimal weiAmount = Convert.toWei(newAmount.replace(",", "."), Convert.Unit.ETHER);
             System.out.println("AMT: " + weiAmount.toString());
-            EIP681Request request = new EIP681Request(displayAddress, networkInfo.chainId, weiAmount);
-            String eip681String = request.generateRequest();
+            EIP681Request request;
+            String eip681String;
+            if (token.isEthereum())
+            {
+                request = new EIP681Request(displayAddress, networkInfo.chainId, weiAmount);
+                eip681String = request.generateRequest();
+            }
+            else if (token.isERC20())
+            {
+                weiAmount = token.getCorrectedAmount(newAmount);
+                request = new EIP681Request(displayAddress, token.getAddress(), networkInfo.chainId, weiAmount);
+                eip681String = request.generateERC20Request();
+            }
+            else
+            {
+                return;
+            }
             qrImageView.setImageBitmap(QRUtils.createQRImage(this, eip681String, qrImageView.getWidth()));
         }
     }

@@ -78,6 +78,12 @@ public class TransactionDetailViewModel extends BaseViewModel {
         return null;
     }
 
+    public boolean hasEtherscanDetail(Transaction tx)
+    {
+        NetworkInfo networkInfo = networkInteract.getNetworkInfo(tx.chainId);
+        return networkInfo.etherscanUrl != null && networkInfo.etherscanUrl.length() != 0;
+    }
+
     public String getNetworkName(int chainId)
     {
         return networkInteract.getNetworkName(chainId);

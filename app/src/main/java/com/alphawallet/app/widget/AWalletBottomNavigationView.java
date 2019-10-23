@@ -1,6 +1,7 @@
 package com.alphawallet.app.widget;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -77,19 +78,19 @@ public class AWalletBottomNavigationView extends LinearLayout {
         switch (index) {
             case TRANSACTIONS:
                 transactions.setImageResource(R.drawable.ic_transactions_active);
-                transactionsLabel.setTextColor(Color.parseColor("#1899c2"));
+                transactionsLabel.setTextColor(getResources().getColor(R.color.colorPrimary, getContext().getTheme()));
                 break;
             case DAPP_BROWSER:
                 dappBrowser.setImageResource(R.drawable.ic_browser_active);
-                dappBrowserLabel.setTextColor(Color.parseColor("#1899c2"));
+                dappBrowserLabel.setTextColor(getResources().getColor(R.color.colorPrimary, getContext().getTheme()));
                 break;
             case WALLET:
                 wallet.setImageResource(R.drawable.ic_wallet_active);
-                walletLabel.setTextColor(Color.parseColor("#1899c2"));
+                walletLabel.setTextColor(getResources().getColor(R.color.colorPrimary, getContext().getTheme()));
                 break;
             case SETTINGS:
                 settings.setImageResource(R.drawable.ic_settings_active);
-                settingsLabel.setTextColor(Color.parseColor("#1899c2"));
+                settingsLabel.setTextColor(getResources().getColor(R.color.colorPrimary, getContext().getTheme()));
                 break;
         }
     }
@@ -104,10 +105,10 @@ public class AWalletBottomNavigationView extends LinearLayout {
         wallet.setImageResource(R.drawable.ic_wallet);
         settings.setImageResource(R.drawable.ic_settings);
         //reset text colour
-        transactionsLabel.setTextColor(Color.parseColor("#8a000000"));
-        dappBrowserLabel.setTextColor(Color.parseColor("#8a000000"));
-        walletLabel.setTextColor(Color.parseColor("#8a000000"));
-        settingsLabel.setTextColor(Color.parseColor("#8a000000"));
+        transactionsLabel.setTextColor(getContext().getColor(R.color.unselected_grey));
+        dappBrowserLabel.setTextColor(getContext().getColor(R.color.unselected_grey));
+        walletLabel.setTextColor(getContext().getColor(R.color.unselected_grey));
+        settingsLabel.setTextColor(getContext().getColor(R.color.unselected_grey));
     }
 
     public interface OnBottomNavigationItemSelectedListener {

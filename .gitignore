@@ -15,6 +15,7 @@ app/mapping.txt
 app/seeds.txt
 app/unused.txt
 app/full-r8-config.txt
+app/awallet
 
 # Files for the Dalvik VM
 *.dex

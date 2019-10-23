@@ -146,7 +146,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
         setTitle(R.string.empty);
 
-        setupNetwork(1);
+        setupNetwork(EthereumNetworkRepository.getOverrideToken().chainId);
         viewModel.prepare();
     }
 

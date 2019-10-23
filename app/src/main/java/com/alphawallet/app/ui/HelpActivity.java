@@ -9,9 +9,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.LinearLayout;
 
 import android.widget.Toast;
+
+import com.alphawallet.app.entity.MediaLinks;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.lambdainvoker.LambdaFunctionException;
 import com.amazonaws.mobileconnectors.lambdainvoker.LambdaInvokerFactory;
@@ -35,6 +38,7 @@ public class HelpActivity extends BaseActivity {
     @Inject
     HelpViewModelFactory helpViewModelFactory;
     private HelpViewModel viewModel;
+    private WebView webView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,26 +51,29 @@ public class HelpActivity extends BaseActivity {
         RecyclerView list = findViewById(R.id.list_help);
         list.setLayoutManager(new LinearLayoutManager(this));
         HelpAdapter adapter = new HelpAdapter();
+        webView = findViewById(R.id.webview);
 
         /* Placeholder only */
         int[] questions = {
                 R.string.help_question1,
                 R.string.help_question2,
                 R.string.help_question3,
-                //R.string.help_question4,
-                R.string.help_question5,
+                R.string.help_question4,
+                R.string.help_question5
         };
 
         int[] answers = {
                 R.string.what_is_eth,
                 R.string.why_alphawallet_eth,
                 R.string.how_i_get_money,
-                R.string.how_i_transfer_into_wallet,
+                R.string.what_is_seed_phrase,
+                R.string.how_i_transfer_into_wallet
         };
 
+        adapter.setWebView(webView);
         List<HelpItem> helpItems = new ArrayList<>();
         for (int i = 0; i < questions.length; i++) {
-            helpItems.add(new HelpItem(getString(questions[i]), getString(answers[i])));
+            if (getString(questions[i]).length() > 0) helpItems.add(new HelpItem(getString(questions[i]), getString(answers[i])));
         }
         adapter.setHelpItems(helpItems);
 
@@ -88,8 +95,8 @@ public class HelpActivity extends BaseActivity {
     {
         final String at = "@";
         String uriText =
-                "mailto:feedback+android" + at + "alphawallet.com" +
-                        "?subject=" + Uri.encode("Hi guys. I've been using AlphaWallet") +
+                "mailto:" + MediaLinks.AWALLET_EMAIL1 + at + MediaLinks.AWALLET_EMAIL2 +
+                        "?subject=" + Uri.encode(MediaLinks.AWALLET_SUBJECT) +
                         "&body=" + Uri.encode("");
 
         Uri uri = Uri.parse(uriText);
@@ -100,6 +107,7 @@ public class HelpActivity extends BaseActivity {
     }
 
     public void onClick(View v) {
+        /*
         // Create an instance of CognitoCachingCredentialsProvider
         CognitoCachingCredentialsProvider cognitoProvider = new CognitoCachingCredentialsProvider(
                 this.getApplicationContext(), "cn-north-1:44edb8ae-67c1-40de-b70d-ae9db5581e6e", Regions.CN_NORTH_1);
@@ -139,7 +147,7 @@ public class HelpActivity extends BaseActivity {
                 // Do a toast
                 Toast.makeText(HelpActivity.this, response.getTrustAddress(), Toast.LENGTH_LONG).show();
             }
-        }.execute(request);
+        }.execute(request);*/
     }
 
 }

@@ -78,7 +78,7 @@ public class OpenseaService {
                     foundTokens.put(asset.getAssetContract().getAddress(), token);
                 }
 
-                ((ERC721Token) token).tokenBalance.add(asset);
+                ((ERC721Token) token).addAssetToTokenBalanceAssets(asset);
             }
         }
 

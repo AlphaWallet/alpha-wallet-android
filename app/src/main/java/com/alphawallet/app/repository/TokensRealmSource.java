@@ -596,7 +596,7 @@ public class TokensRealmSource implements TokenLocalSource {
         String contractSymbol = null;
         String schemaName = null;
 
-        for (Asset asset : e.tokenBalance)
+        for (Asset asset : e.getTokenAssets())
         {
             if (address != null)
             {
@@ -641,7 +641,7 @@ public class TokensRealmSource implements TokenLocalSource {
             realmToken.setSymbol(contractSymbol);
             realmToken.setAddedTime(currentTime.getTime());
             realmToken.setSchemaName(schemaName);
-            realmToken.setTokenIdList(e.tokenBalance);
+            realmToken.setTokenIdList(e.getTokenAssets());
             realmToken.setChainId(token.tokenInfo.chainId);
             realmToken.setContractType(token.getInterfaceSpec().ordinal());
         }
@@ -650,7 +650,7 @@ public class TokensRealmSource implements TokenLocalSource {
             //update balance if changed
             List<String> tokenBalance = realmToken.getTokenIdList();
             boolean needsUpdate = false;
-            if (tokenBalance.size() != e.tokenBalance.size())
+            if (tokenBalance.size() != e.getTokenAssets().size())
             {
                 needsUpdate = true;
             }
@@ -658,7 +658,7 @@ public class TokensRealmSource implements TokenLocalSource {
             {
                 for (int i = 0; i < tokenBalance.size(); i++)
                 {
-                    if (!tokenBalance.get(i).equals(e.tokenBalance.get(i).getTokenId()))
+                    if (!tokenBalance.get(i).equals(e.getTokenAssets().get(i).getTokenId()))
                         needsUpdate = true;
                 }
             }
@@ -670,12 +670,12 @@ public class TokensRealmSource implements TokenLocalSource {
 
                 //update balance
                 realmToken.setAddedTime(currentTime.getTime());
-                realmToken.setTokenIdList(e.tokenBalance);
+                realmToken.setTokenIdList(e.getTokenAssets());
             }
         }
 
         //now create the assets inside this
-        for (Asset asset : e.tokenBalance)
+        for (Asset asset : e.getTokenAssets())
         {
             RealmERC721Asset realmAsset = realm.where(RealmERC721Asset.class)
                     .equalTo("tokenIdAddr", RealmERC721Asset.tokenIdAddrName(asset.getTokenId(), dbKey))

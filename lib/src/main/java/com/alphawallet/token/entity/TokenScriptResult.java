@@ -1,7 +1,10 @@
 package com.alphawallet.token.entity;
 
+import com.google.gson.Gson;
+
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,18 +51,6 @@ public class TokenScriptResult
         }
     }
 
-    public static void addPair(StringBuilder attrs, Attribute attr)
-    {
-        attrs.append(attr.id);
-        attrs.append(": ");
-
-        attrs.append("\"");
-        attrs.append(attr.text);
-        attrs.append("\"");
-
-        attrs.append(",\n");
-    }
-
     public static <T> void addPair(StringBuilder attrs, String attrId, T attrValue)
     {
         attrs.append(attrId);
@@ -74,6 +65,12 @@ public class TokenScriptResult
             attrs.append("\"");
             attrs.append(((BigInteger)attrValue).toString(10));
             attrs.append("\"");
+        }
+        else if (attrValue instanceof List)
+        {
+            attrs.append("\'");
+            attrs.append(new Gson().toJson(attrValue));
+            attrs.append("\'");
         }
         else
         {

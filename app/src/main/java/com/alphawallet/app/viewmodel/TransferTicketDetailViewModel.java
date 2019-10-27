@@ -252,7 +252,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     {
         //first find the asset within the token
         Asset asset = null;
-        for (Asset a : ((ERC721Token) token).tokenBalance)
+        for (Asset a : ((ERC721Token) token).getTokenAssets())
         {
             if (a.getTokenId().equals(tokenId))
             {

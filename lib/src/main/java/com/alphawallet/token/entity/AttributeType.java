@@ -24,7 +24,8 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
  */
 
 public class AttributeType {
-    public BigInteger bitmask;    // TODO: BigInteger !== BitInt. Test edge conditions.
+    //default the bitmask to 32 bytes represented
+    public BigInteger bitmask = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);    // TODO: BigInteger !== BitInt. Test edge conditions.
     public String name;  // TODO: should be polyglot because user change change language in the run
     public String id;
     public int bitshift = 0;
@@ -72,7 +73,6 @@ public class AttributeType {
         } catch (NullPointerException e) { // missing <syntax>
             syntax = TokenDefinition.Syntax.DirectoryString; // 1.3.6.1.4.1.1466.115.121.1.15
         }
-        bitmask = null;
         for(Node node = attr.getFirstChild();
             node!=null; node=node.getNextSibling()){
             if (node.getNodeType() == Node.ELEMENT_NODE) {

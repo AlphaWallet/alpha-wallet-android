@@ -1207,7 +1207,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    private void addOpenSeaAttributes(StringBuilder attrs, ERC721Token erc721Token, BigInteger tokenId)
+    private void addOpenSeaAttributes(StringBuilder attrs, Token erc721Token, BigInteger tokenId)
     {
         Asset tokenAsset = erc721Token.getAssetForToken(tokenId.toString());
         if(tokenAsset == null) return;
@@ -1240,7 +1240,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         if(token instanceof ERC721Token)
         {
-            addOpenSeaAttributes(attrs, (ERC721Token) token, tokenId);
+            addOpenSeaAttributes(attrs, token, tokenId);
         }
 
         if (token.isEthereum())

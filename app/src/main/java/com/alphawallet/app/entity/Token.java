@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.interact.SetupTokensInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
@@ -128,6 +129,14 @@ public class Token implements Parcelable
 
     public String getFullBalance() {
         return getStringBalance();
+    }
+
+    public Asset getAssetForToken(String tokenId) {
+        return null;
+    }
+
+    public void addAssetToTokenBalanceAssets(Asset asset) {
+        //only for ERC721, see override in ERC721Token
     }
 
     public static final Creator<Token> CREATOR = new Creator<Token>() {
@@ -282,6 +291,10 @@ public class Token implements Parcelable
         }
 
         holder.balanceEth.setVisibility(View.VISIBLE);
+    }
+
+    public List<Asset> getTokenAssets() {
+        return null;
     }
 
     public List<Integer> ticketIdStringToIndexList(String userList)

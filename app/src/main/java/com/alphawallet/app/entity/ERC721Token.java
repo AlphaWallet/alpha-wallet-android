@@ -46,14 +46,17 @@ public class ERC721Token extends Token implements Parcelable
         setInterfaceSpec(type);
     }
 
+    @Override
     public List<Asset> getTokenAssets() {
         return tokenBalanceAssets;
     }
 
+    @Override
     public void addAssetToTokenBalanceAssets(Asset asset) {
         tokenBalanceAssets.add(asset);
     }
 
+    @Override
     public Asset getAssetForToken(String tokenId) {
         for(Asset asset : tokenBalanceAssets)
         {

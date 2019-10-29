@@ -135,7 +135,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         int weight = 1; //use the same order we receive from OpenSea
 
         // populate the ERC721 items
-        for (Asset asset : ((ERC721Token)token).getTokenAssets())
+        for (Asset asset : token.getTokenAssets())
         {
             if (ticketId == null || ticketId.equals(asset.getTokenId()))
             {

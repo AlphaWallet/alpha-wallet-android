@@ -10,20 +10,25 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.TokenInfo;
 import com.alphawallet.app.entity.TokenTicker;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ChainSpec;
 import com.alphawallet.token.entity.MagicLinkInfo;
 
+import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.http.HttpService;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -135,13 +140,18 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     private Map<Integer, Long> ethTickerTimes = new ConcurrentHashMap<>();
     private boolean updatedTickers;
 
-    public EthereumNetworkBase(PreferenceRepositoryType preferenceRepository, TickerService tickerService, NetworkInfo[] additionalNetworks)
+    EthereumNetworkBase(PreferenceRepositoryType preferenceRepository, TickerService tickerService, NetworkInfo[] additionalNetworks, boolean useTestNets)
     {
         this.preferences = preferenceRepository;
         this.tickerService = tickerService;
-        NETWORKS = (NetworkInfo[]) Array.newInstance(NetworkInfo.class, additionalNetworks.length + DEFAULT_NETWORKS.length);
-        System.arraycopy(additionalNetworks, 0, NETWORKS, 0, additionalNetworks.length);
-        System.arraycopy(DEFAULT_NETWORKS, 0, NETWORKS, additionalNetworks.length, DEFAULT_NETWORKS.length);
+        List<NetworkInfo> networks = new ArrayList<>();
+
+        addNetworks(additionalNetworks, networks, true);
+        addNetworks(DEFAULT_NETWORKS, networks, true);
+        addNetworks(additionalNetworks, networks, false);
+        if (useTestNets) addNetworks(DEFAULT_NETWORKS, networks, false);
+
+        NETWORKS = networks.toArray(new NetworkInfo[0]);
 
         defaultNetwork = getByName(preferences.getDefaultNetwork());
         if (defaultNetwork == null) {
@@ -160,6 +170,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(this::updateTickers).isDisposed();
+    }
+
+    private void addNetworks(NetworkInfo[] networks, List<NetworkInfo> result, boolean withValue)
+    {
+        for (NetworkInfo network : networks)
+        {
+            if (EthereumNetworkRepository.hasRealValue(network.chainId) == withValue) result.add(network);
+        }
     }
 
     private NetworkInfo getByName(String name) {
@@ -526,15 +544,46 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return tickerService.attachTokenTickers(tokens);
     }
 
+    public static int decimalOverride(String address, int chainId)
+    {
+        return 0;
+    }
+
     @Override
     public TokenTicker getTokenTicker(Token token)
     {
-        return tickerService.getTokenTicker(token);
+        return tickerService.getTokenTicker(token, ethTickers);
     }
 
     @Override
     public boolean checkTickers()
     {
         return !updatedTickers && tickerService.hasTickers();
+    }
+
+    public static String defaultDapp()
+    {
+        return null;
+    }
+
+    public static Token getBlankOverrideToken(NetworkInfo networkInfo)
+    {
+        return createCurrencyToken(networkInfo);
+    }
+
+    private static Token createCurrencyToken(NetworkInfo network)
+    {
+        TokenInfo tokenInfo = new TokenInfo(Address.DEFAULT.toString(), network.name, network.symbol, 18, true, network.chainId);
+        BigDecimal balance = BigDecimal.ZERO;
+        Token eth = new Token(tokenInfo, balance, 0, network.getShortName(), ContractType.ETHEREUM); //create with zero time index to ensure it's updated immediately
+        eth.setTokenWallet(Address.DEFAULT.toString());
+        eth.setIsEthereum();
+        eth.pendingBalance = balance;
+        return eth;
+    }
+
+    public static Token getBlankOverrideToken()
+    {
+        return null;
     }
 }

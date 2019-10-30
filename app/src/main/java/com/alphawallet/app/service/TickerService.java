@@ -20,5 +20,5 @@ public interface TickerService {
     Single<Token> attachTokenTicker(Token token);
     Single<Token[]> attachTokenTickers(Token[] tokens);
     boolean hasTickers();
-    TokenTicker getTokenTicker(Token token);
+    TokenTicker getTokenTicker(Token token, Map<Integer, Ticker> ethTickers);
 }

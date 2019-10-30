@@ -101,7 +101,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         viewModel.refreshTokens().observe(this, this::refreshTokens);
         viewModel.tokenUpdate().observe(this, this::onToken);
         viewModel.tokensReady().observe(this, this::tokensReady);
-        viewModel.fetchKnownContracts().observe(this, this::fetchKnownContracts);
         viewModel.backupEvent().observe(this, this::backupEvent);
 
         adapter = new TokensAdapter(getActivity(),this, viewModel.getAssetDefinitionService());
@@ -336,13 +335,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     private void tokensReady(Boolean dummy)
     {
         //if (getActivity() != null) ((HomeActivity)getActivity()).TokensReady();
-    }
-
-    private void fetchKnownContracts(Boolean notUsed)
-    {
-        //fetch list of contracts for this network from the XML contract directory
-        List<ContractResult> knownContracts = EthereumNetworkRepository.getAllKnownContracts(getContext(), viewModel.getChainFilters());
-        viewModel.checkKnownContracts(knownContracts);
     }
 
     @Override

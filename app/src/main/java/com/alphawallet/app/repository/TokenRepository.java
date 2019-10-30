@@ -711,6 +711,12 @@ public class TokenRepository implements TokenRepositoryType {
         return ethereumNetworkRepository.getTicker(chainId, null);
     }
 
+    @Override
+    public Single<TokenTicker> getTokenTicker(Token token)
+    {
+        return Single.fromCallable(() -> ethereumNetworkRepository.getTokenTicker(token));
+    }
+
     private BigDecimal getBalance(Wallet wallet, TokenInfo tokenInfo) throws Exception {
         Function function = balanceOf(wallet.address);
         NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
@@ -893,6 +899,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private int getDecimals(String address, NetworkInfo network) throws Exception {
+        if (EthereumNetworkRepository.decimalOverride(address, network.chainId) > 0) return EthereumNetworkRepository.decimalOverride(address, network.chainId);
         org.web3j.abi.datatypes.Function function = decimalsOf();
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, network, temp);

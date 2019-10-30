@@ -118,10 +118,10 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         setupAddressEditField();
 
         if (token.addressMatches(myAddress)) {
-            amountInput = new AmountEntryItem(this, tokenRepository, symbol, true, currentChain, token.hasRealValue());
+            amountInput = new AmountEntryItem(this, tokenRepository, token);
         } else {
             //currently we don't evaluate ERC20 token value. TODO: Should we?
-            amountInput = new AmountEntryItem(this, tokenRepository, symbol, false, currentChain, token.hasRealValue());
+            amountInput = new AmountEntryItem(this, tokenRepository, token);
         }
 
         if (result != null)
@@ -385,7 +385,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                 sendText.setText(R.string.transfer_request);
                 token = viewModel.getToken(result.chainId, wallet.address);
                 toAddressEditText.setText(result.getAddress());
-                amountInput = new AmountEntryItem(this, tokenRepository, viewModel.getNetworkInfo(result.chainId).symbol, true, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
+                amountInput = new AmountEntryItem(this, tokenRepository, token);
                 amountInput.setAmountText(ethAmount);
                 amountInput.setAmount(ethAmount);
                 setupTokenContent();
@@ -402,7 +402,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                 else if (resultToken.isERC20())
                 {
                     //ERC20 send request
-                    amountInput = new AmountEntryItem(this, tokenRepository, resultToken.tokenInfo.symbol, false, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
+                    amountInput = new AmountEntryItem(this, tokenRepository, resultToken);
                     amountInput.setAmountText(result.tokenAmount.toString());
                     toAddressEditText.setText(result.functionToAddress);
                     sendText.setVisibility(View.VISIBLE);
@@ -412,7 +412,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
             case FUNCTION_CALL:
                 //Generic function
-                amountInput = new AmountEntryItem(this, tokenRepository, "", false, result.chainId, EthereumNetworkRepository.hasRealValue(result.chainId));
+                amountInput = new AmountEntryItem(this, tokenRepository, null);
                 amountInput.setAmountText(result.functionDetail);
                 if (result.functionToAddress != null) toAddressEditText.setText(result.functionToAddress);
                 break;

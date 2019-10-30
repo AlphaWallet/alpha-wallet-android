@@ -126,11 +126,7 @@ public abstract class C {
     public static final String TELEGRAM_PACKAGE_NAME = "org.telegram.messenger";
     public static final String TWITTER_PACKAGE_NAME = "com.twitter.android";
     public static final String FACEBOOK_PACKAGE_NAME = "com.facebook.katana";
-    public static final String AWALLET_TELEGRAM_URL = "https://t.me/AlphaWalletGroup";
-    public static final String AWALLET_TWITTER_ID = "twitter://user?user_id=938624096123764736";
-    public static final String AWALLET_FACEBOOK_ID = "fb://page/1958651857482632";
-    public static final String AWALLET_TWITTER_URL = "https://twitter.com/AlphaWallet";
-    public static final String AWALLET_FACEBOOK_URL = "https://www.facebook.com/AlphaWallet/";
+    public static final String LINKEDIN_PACKAGE_NAME = "com.linkedin.android";
 
     public interface ErrorCode {
         int UNKNOWN = 1;

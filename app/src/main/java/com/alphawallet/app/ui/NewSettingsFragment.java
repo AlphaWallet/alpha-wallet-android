@@ -18,6 +18,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 
+import com.alphawallet.app.entity.MediaLinks;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.LocaleUtils;
 
 import javax.inject.Inject;
@@ -140,32 +142,67 @@ public class NewSettingsFragment extends Fragment
         });
 
         final LinearLayout layoutTelegram = view.findViewById(R.id.layout_telegram);
-        layoutTelegram.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse(C.AWALLET_TELEGRAM_URL));
-            if (isAppAvailable(C.TELEGRAM_PACKAGE_NAME)) {
-                intent.setPackage(C.TELEGRAM_PACKAGE_NAME);
-            }
-            try
-            {
-                getActivity().startActivity(intent);
-            }
-            catch (Exception e)
-            {
-                Crashlytics.logException(e);
-                e.printStackTrace();
-            }
-        });
+        if (MediaLinks.AWALLET_TELEGRAM_URL != null)
+        {
+            layoutTelegram.setOnClickListener(v -> {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(MediaLinks.AWALLET_TELEGRAM_URL));
+                if (isAppAvailable(C.TELEGRAM_PACKAGE_NAME))
+                {
+                    intent.setPackage(C.TELEGRAM_PACKAGE_NAME);
+                }
+                try
+                {
+                    getActivity().startActivity(intent);
+                }
+                catch (Exception e)
+                {
+                    Crashlytics.logException(e);
+                    e.printStackTrace();
+                }
+            });
+        }
+        else
+        {
+            layoutTelegram.setVisibility(View.GONE);
+        }
+
+        final LinearLayout layoutLinkedIn = view.findViewById(R.id.layout_linkedin);
+        if (MediaLinks.AWALLET_LINKEDIN_URL != null)
+        {
+            layoutLinkedIn.setOnClickListener(v -> {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(MediaLinks.AWALLET_LINKEDIN_URL));
+                if (isAppAvailable(C.LINKEDIN_PACKAGE_NAME))
+                {
+                    intent.setPackage(C.LINKEDIN_PACKAGE_NAME);
+                }
+                try
+                {
+                    getActivity().startActivity(intent);
+                }
+                catch (Exception e)
+                {
+                    Crashlytics.logException(e);
+                    e.printStackTrace();
+                }
+            });
+        }
+        else
+        {
+            layoutLinkedIn.setVisibility(View.GONE);
+        }
 
         final LinearLayout layoutTwitter = view.findViewById(R.id.layout_twitter);
         layoutTwitter.setOnClickListener(v -> {
             Intent intent;
             try {
                 getActivity().getPackageManager().getPackageInfo(C.TWITTER_PACKAGE_NAME, 0);
-                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(C.AWALLET_TWITTER_ID));
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_TWITTER_URL));
+                //intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_TWITTER_ID));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             } catch (Exception e) {
-                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(C.AWALLET_TWITTER_URL));
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_TWITTER_URL));
             }
             try
             {
@@ -200,9 +237,10 @@ public class NewSettingsFragment extends Fragment
             Intent intent;
             try {
                 getActivity().getPackageManager().getPackageInfo(C.FACEBOOK_PACKAGE_NAME, 0);
-                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(C.AWALLET_FACEBOOK_ID));
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_FACEBOOK_URL));
+                //intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_FACEBOOK_ID));
             } catch (Exception e) {
-                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(C.AWALLET_FACEBOOK_URL));
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_FACEBOOK_URL));
             }
             try
             {
@@ -216,7 +254,7 @@ public class NewSettingsFragment extends Fragment
         });
 
         layoutEnableXML = view.findViewById(R.id.layout_xml_override);
-        if (checkWritePermission() == false) {
+        if (checkWritePermission() == false && EthereumNetworkRepository.extraChains() == null) {
             layoutEnableXML.setVisibility(View.VISIBLE);
             layoutEnableXML.setOnClickListener(v -> {
                 //ask OS to ask user if we can use the 'AlphaWallet' directory
@@ -325,7 +363,7 @@ public class NewSettingsFragment extends Fragment
 
     public void refresh() {
         if (layoutEnableXML != null) {
-            if (checkWritePermission()) {
+            if (checkWritePermission() || EthereumNetworkRepository.extraChains() != null) {
                 layoutEnableXML.setVisibility(View.GONE);
             } else {
                 layoutEnableXML.setVisibility(View.VISIBLE);

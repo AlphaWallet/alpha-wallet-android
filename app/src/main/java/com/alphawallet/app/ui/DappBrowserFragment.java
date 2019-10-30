@@ -4,7 +4,6 @@ import android.animation.LayoutTransition;
 import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -211,6 +210,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         } else {
             String prevFragment = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(CURRENT_FRAGMENT, null);
             String prevUrl = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(CURRENT_URL, null);
+
             if (savedInstanceState != null)
             {
                 currentFragment = savedInstanceState.getString(CURRENT_FRAGMENT, "");
@@ -226,6 +226,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
                 if (lastUrl.length() > 0)
                     loadOnInit = lastUrl;
+            }
+            else if (EthereumNetworkRepository.defaultDapp() != null)
+            {
+                currentFragment = DAPP_BROWSER;
+                loadOnInit = EthereumNetworkRepository.defaultDapp();
             }
             else if (prevFragment != null)
             {
@@ -256,6 +261,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                     break;
                 case HISTORY:
                     ((BrowserHistoryFragment) fragment).setCallbacks(this, this);
+                    break;
+                case DAPP_BROWSER:
                     break;
                 default:
                     //no init

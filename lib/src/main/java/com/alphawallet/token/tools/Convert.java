@@ -75,6 +75,14 @@ public final class Convert {
         return df.format(ethPrice);
     }
 
+    public static String getEthString(double ethFiatValue, int decimals)
+    {
+        DecimalFormat df = new DecimalFormat("0.#####");
+        df.setRoundingMode(RoundingMode.CEILING);
+        df.setMaximumFractionDigits(decimals);
+        return df.format(ethFiatValue);
+    }
+
     public static String getEthStringSzabo(BigInteger szabo)
     {
         BigDecimal ethPrice = fromWei(toWei(new BigDecimal(szabo), Unit.SZABO), Unit.ETHER);

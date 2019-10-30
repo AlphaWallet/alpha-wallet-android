@@ -111,6 +111,20 @@ public class FetchTokensInteract {
         return pair;
     }
 
+    public Observable<Token> fetchBaseCurrencyBalance(NetworkInfo info, Token overrideToken, Wallet wallet)
+    {
+        if (overrideToken == null || overrideToken.getInterfaceSpec() == ContractType.ETHEREUM)
+        {
+            return fetchEth(info, wallet);
+        }
+        else
+        {
+            return tokenRepository.fetchActiveTokenBalance(wallet.address, overrideToken)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread());
+        }
+    }
+
     public Observable<Token> fetchBaseCurrencyBalance(NetworkInfo info, ContractResult overrideToken, Wallet wallet, TokensService service)
     {
         Token token;

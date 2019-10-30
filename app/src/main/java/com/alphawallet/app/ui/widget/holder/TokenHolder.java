@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.Utils;
 
 import com.alphawallet.app.R;
@@ -57,6 +58,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     private final TextView blockchain;
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
+    private final LinearLayout extendedInfo;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
@@ -85,6 +87,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         chainName = findViewById(R.id.text_chain_name);
         pendingText = findViewById(R.id.balance_eth_pending);
         tokenLayout = findViewById(R.id.token_layout);
+        extendedInfo = findViewById(R.id.layout_extended_info);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
     }
@@ -115,6 +118,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
             animateTextWhileWaiting();
             token.setupContent(this, assetDefinition);
+            if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
             setPending();
         } catch (Exception ex) {
             fillEmpty();

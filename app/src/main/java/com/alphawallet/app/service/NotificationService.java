@@ -46,7 +46,7 @@ public class NotificationService
 
             CharSequence name = context.getString(R.string.app_name);
             String description = context.getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_MAX;
+            int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
             channel.setSound(notification, attr);
@@ -79,7 +79,7 @@ public class NotificationService
                 .setSound(notification, 1)
                 .setAutoCancel(true)
                 .setCategory(NotificationCompat.CATEGORY_EVENT)
-                .setPriority(NotificationCompat.PRIORITY_MAX);
+                .setPriority(priority);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         notificationManager.notify(NOTIFICATION_ID, builder.build());
     }

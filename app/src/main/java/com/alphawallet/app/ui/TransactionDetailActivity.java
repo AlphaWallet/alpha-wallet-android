@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
@@ -77,6 +78,12 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         ((TextView) findViewById(R.id.block_number)).setText(blockNumber);
         findViewById(R.id.more_detail).setOnClickListener(this);
 
+        if (transaction.operations != null && transaction.operations.length > 0)
+        {
+            TransactionOperation op = transaction.operations[0];
+            if (op != null && op.to != null) ((TextView) findViewById(R.id.to)).setText(op.to);
+        }
+
         viewModel = ViewModelProviders.of(this, transactionDetailViewModelFactory)
                 .get(TransactionDetailViewModel.class);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
@@ -109,6 +116,8 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         {
             findViewById(R.id.transaction_name).setVisibility(View.GONE);
         }
+
+        if (!viewModel.hasEtherscanDetail(transaction)) findViewById(R.id.more_detail).setVisibility(View.GONE);
     }
 
     private void onDefaultWallet(Wallet wallet) {

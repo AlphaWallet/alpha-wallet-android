@@ -6,6 +6,9 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
+
+import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.alphawallet.app.C;
@@ -150,7 +153,10 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
-        disposable = fetchTokensInteract.fetchEth(defaultNetwork.getValue(), wallet)
+        //get the balance token
+        Token override = EthereumNetworkRepository.getBlankOverrideToken();
+
+        disposable = fetchTokensInteract.fetchBaseCurrencyBalance(defaultNetwork.getValue(), override, wallet)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::updateBalance, this::onError);

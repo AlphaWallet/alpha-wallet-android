@@ -3,6 +3,7 @@ package com.alphawallet.app.ui.widget.adapter;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.HelpItem;
@@ -14,6 +15,8 @@ import com.alphawallet.app.ui.widget.holder.HelpHolder;
 import java.util.List;
 
 public class HelpAdapter extends RecyclerView.Adapter<BinderViewHolder> {
+
+    private WebView webView;
 
     public HelpAdapter() {
     }
@@ -73,7 +76,7 @@ public class HelpAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public BinderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         BinderViewHolder holder = null;
 
-        holder = new HelpHolder(R.layout.item_help, parent);
+        holder = new HelpHolder(R.layout.item_help, parent, webView);
 
         return holder;
     }
@@ -86,5 +89,10 @@ public class HelpAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     @Override
     public int getItemCount() {
         return items.size();
+    }
+
+    public void setWebView(WebView w)
+    {
+        webView = w;
     }
 }

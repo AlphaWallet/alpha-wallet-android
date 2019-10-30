@@ -169,11 +169,18 @@ public class CoinmarketcapTickerService implements TickerService
     }
 
     @Override
-    public TokenTicker getTokenTicker(Token token)
+    public TokenTicker getTokenTicker(Token token, Map<Integer, Ticker> ethTickers)
     {
-        if (token != null && erc20Tickers != null && token.tokenInfo.chainId == MAINNET_ID)
+        if (token == null) return null;
+        else if (token.isERC20() && erc20Tickers != null && token.tokenInfo.chainId == MAINNET_ID)
         {
             Ticker ticker = erc20Tickers.get(token.getAddress());
+            if (ticker != null) token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), token.tokenInfo.address, ticker.price_usd, ticker.percentChange24h, "USD", null);
+            return token.ticker;
+        }
+        else if (token.isEthereum())
+        {
+            Ticker ticker = ethTickers.get(token.tokenInfo.chainId);
             if (ticker != null) token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), token.tokenInfo.address, ticker.price_usd, ticker.percentChange24h, "USD", null);
             return token.ticker;
         }

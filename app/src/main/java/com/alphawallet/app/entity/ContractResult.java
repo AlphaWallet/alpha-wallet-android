@@ -26,6 +26,11 @@ public class ContractResult
         type = t;
     }
 
+    public boolean equals(Token token)
+    {
+        return (token != null && name != null && name.equalsIgnoreCase(token.getAddress()) && chainId == token.tokenInfo.chainId);
+    }
+
     public static void addIfNotInList(List<ContractResult> contractList, ContractResult candidate)
     {
         boolean inList = false;

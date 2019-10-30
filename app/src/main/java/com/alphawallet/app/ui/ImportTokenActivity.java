@@ -594,7 +594,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     public static String getUsdString(double usdPrice)
     {
-        DecimalFormat df = new DecimalFormat("#,###.00");
+        DecimalFormat df = new DecimalFormat("#,##0.00");
         df.setRoundingMode(RoundingMode.CEILING);
         return df.format(usdPrice);
     }

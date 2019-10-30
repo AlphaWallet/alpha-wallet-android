@@ -31,30 +31,52 @@ import com.alphawallet.app.R;
  */
 public class ERC721Token extends Token implements Parcelable
 {
-    public List<Asset> tokenBalance;
+    private List<Asset> tokenBalanceAssets;
 
     public ERC721Token(TokenInfo tokenInfo, List<Asset> balanceList, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         if (balanceList != null)
         {
-            tokenBalance = balanceList;
+            tokenBalanceAssets = balanceList;
         }
         else
         {
-            tokenBalance = new ArrayList<>();
+            tokenBalanceAssets = new ArrayList<>();
         }
         setInterfaceSpec(type);
     }
 
+    @Override
+    public List<Asset> getTokenAssets() {
+        return tokenBalanceAssets;
+    }
+
+    @Override
+    public void addAssetToTokenBalanceAssets(Asset asset) {
+        tokenBalanceAssets.add(asset);
+    }
+
+    @Override
+    public Asset getAssetForToken(String tokenId) {
+        for(Asset asset : tokenBalanceAssets)
+        {
+            if(asset.getTokenId().equals(tokenId))
+            {
+                return asset;
+            }
+        }
+        return null;
+    }
+
     private ERC721Token(Parcel in) {
         super(in);
-        tokenBalance = new ArrayList<>();
+        tokenBalanceAssets = new ArrayList<>();
         //read in the element list
         int size = in.readInt();
         for (; size > 0; size--)
         {
             Asset asset = in.readParcelable(Asset.class.getClassLoader());
-            tokenBalance.add(asset);
+            tokenBalanceAssets.add(asset);
         }
     }
 
@@ -73,8 +95,8 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeInt(tokenBalance.size());
-        for (Asset asset : tokenBalance)
+        dest.writeInt(tokenBalanceAssets.size());
+        for (Asset asset : tokenBalanceAssets)
         {
             dest.writeParcelable(asset, flags);
         }
@@ -90,7 +112,7 @@ public class ERC721Token extends Token implements Parcelable
     public void setupContent(TokenHolder holder, AssetDefinitionService definition)
     {
         //721 Balance
-        int balance = tokenBalance.size();
+        int balance = tokenBalanceAssets.size();
 
         holder.balanceEth.setText(String.valueOf(balance));
         holder.issuer.setText(R.string.ethereum);
@@ -141,7 +163,7 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public int getTicketCount()
     {
-        return tokenBalance.size();
+        return tokenBalanceAssets.size();
     }
 
     @Override
@@ -149,7 +171,7 @@ public class ERC721Token extends Token implements Parcelable
     {
         boolean firstItem = true;
         StringBuilder sb = new StringBuilder();
-        for (Asset item : tokenBalance)
+        for (Asset item : tokenBalanceAssets)
         {
             if (!firstItem) sb.append(",");
             sb.append(item.getTokenId());
@@ -198,7 +220,7 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public boolean hasPositiveBalance()
     {
-        return tokenBalance != null && tokenBalance.size() > 0;
+        return tokenBalanceAssets != null && tokenBalanceAssets.size() > 0;
     }
 
     @Override
@@ -210,7 +232,7 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public void zeroiseBalance()
     {
-        tokenBalance.clear();
+        tokenBalanceAssets.clear();
     }
 
     @Override

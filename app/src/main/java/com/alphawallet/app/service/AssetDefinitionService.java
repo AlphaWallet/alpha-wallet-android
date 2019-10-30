@@ -11,16 +11,59 @@ import android.os.FileObserver;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.SparseArray;
-
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.ERC721Token;
+import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.TokenFactory;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
+import com.alphawallet.app.entity.tokenscript.TokenScriptFileData;
+import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
-
+import com.alphawallet.token.entity.AttributeInterface;
+import com.alphawallet.token.entity.AttributeType;
+import com.alphawallet.token.entity.ContractAddress;
+import com.alphawallet.token.entity.ContractInfo;
+import com.alphawallet.token.entity.FunctionDefinition;
+import com.alphawallet.token.entity.MethodArg;
+import com.alphawallet.token.entity.NonFungibleToken;
+import com.alphawallet.token.entity.ParseResult;
+import com.alphawallet.token.entity.SigReturnType;
+import com.alphawallet.token.entity.TSAction;
+import com.alphawallet.token.entity.TokenScriptResult;
+import com.alphawallet.token.entity.TransactionResult;
+import com.alphawallet.token.entity.XMLDsigDescriptor;
+import com.alphawallet.token.tools.TokenDefinition;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.crypto.WalletUtils;
+import org.xml.sax.SAXException;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -30,31 +73,8 @@ import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.exceptions.RealmPrimaryKeyConstraintException;
-import com.alphawallet.token.entity.*;
-import com.alphawallet.token.tools.TokenDefinition;
-
-import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
-import com.alphawallet.app.entity.tokenscript.TokenScriptFileData;
-import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.crypto.WalletUtils;
-import org.xml.sax.SAXException;
-
-import java.io.*;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
 import static android.os.FileObserver.ALL_EVENTS;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
@@ -1187,13 +1207,28 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
+    private void addOpenSeaAttributes(StringBuilder attrs, Token erc721Token, BigInteger tokenId)
+    {
+        Asset tokenAsset = erc721Token.getAssetForToken(tokenId.toString());
+        if(tokenAsset == null) return;
+        TokenScriptResult.addPair(attrs, "background_colour", tokenAsset.getBackgroundColor());
+        TokenScriptResult.addPair(attrs, "image_preview_url", tokenAsset.getImagePreviewUrl());
+        TokenScriptResult.addPair(attrs, "description", tokenAsset.getDescription());
+        TokenScriptResult.addPair(attrs, "external_link", tokenAsset.getExternalLink());
+        TokenScriptResult.addPair(attrs, "background_colour", tokenAsset.getBackgroundColor());
+        TokenScriptResult.addPair(attrs, "traits", tokenAsset.getTraits());
+    }
+
     public StringBuilder getTokenAttrs(Token token, BigInteger tokenId, int count)
     {
         StringBuilder attrs = new StringBuilder();
 
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         String name = token.getTokenTitle();
-        if (definition != null && definition.getTokenName(1) != null) name = definition.getTokenName(1);
+        if (definition != null && definition.getTokenName(1) != null)
+        {
+            name = definition.getTokenName(1);
+        }
 
         TokenScriptResult.addPair(attrs, "name", name);
         TokenScriptResult.addPair(attrs, "symbol", token.tokenInfo.symbol);
@@ -1202,6 +1237,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenScriptResult.addPair(attrs, "chainId", String.valueOf(token.tokenInfo.chainId));
         TokenScriptResult.addPair(attrs, "tokenId", tokenId);
         TokenScriptResult.addPair(attrs, "ownerAddress", token.getWallet());
+
+        if(token instanceof ERC721Token)
+        {
+            addOpenSeaAttributes(attrs, token, tokenId);
+        }
 
         if (token.isEthereum())
         {

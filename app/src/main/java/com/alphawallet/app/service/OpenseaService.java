@@ -77,8 +77,8 @@ public class OpenseaService {
                     token.setTokenWallet(address);
                     foundTokens.put(asset.getAssetContract().getAddress(), token);
                 }
-
-                ((ERC721Token) token).tokenBalance.add(asset);
+                //This will actually go to the ERC721 Token method definition
+                token.addAssetToTokenBalanceAssets(asset);
             }
         }
 

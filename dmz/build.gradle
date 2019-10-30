@@ -40,6 +40,6 @@ dependencies {
 }
 
 bootRun {
-	main = 'io.stormbird.token.web.AppSiteController'
+	main = 'com.alphawallet.token.web.AppSiteController'
 }
 

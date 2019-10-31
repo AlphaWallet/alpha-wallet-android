@@ -61,6 +61,7 @@ public class NewSettingsFragment extends Fragment
     private View backupPopupAnchor;
     private LinearLayout layoutBackupKey;
     private LinearLayout layoutBackupDivider;
+    private TextView backupText;
 
     @Nullable
     @Override
@@ -78,6 +79,7 @@ public class NewSettingsFragment extends Fragment
         notificationState = view.findViewById(R.id.switch_notifications);
         backupStatusText = view.findViewById(R.id.text_backup_status);
         backupStatusImage = view.findViewById(R.id.image_backup_status);
+        backupText = view.findViewById(R.id.backup_text);
 
         TextView helpText = view.findViewById(R.id.text_version);
         try
@@ -281,6 +283,21 @@ public class NewSettingsFragment extends Fragment
                 break;
         }
 
+        //override if this is an upgrade
+        switch (wallet.authLevel)
+        {
+            case NOT_SET:
+            case STRONGBOX_NO_AUTHENTICATION:
+            case TEE_NO_AUTHENTICATION:
+                if (wallet.lastBackupTime > 0)
+                {
+                    intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.UPGRADE_KEY);
+                }
+                break;
+            default:
+                break;
+        }
+
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
     }
@@ -309,17 +326,20 @@ public class NewSettingsFragment extends Fragment
             case TEE_NO_AUTHENTICATION:
                 if (wallet.lastBackupTime > 0)
                 {
+                    backupText.setText(R.string.action_upgrade_key);
                     backupStatusText.setText(R.string.not_locked);
                     backupStatusImage.setImageResource(R.drawable.ic_orange_bar);
                 }
                 else
                 {
+                    backupText.setText(R.string.back_up_this_wallet);
                     backupStatusText.setText(R.string.back_up_now);
                     backupStatusImage.setImageResource(R.drawable.ic_red_bar);
                 }
                 break;
             case TEE_AUTHENTICATION:
             case STRONGBOX_AUTHENTICATION:
+                backupText.setText(R.string.back_up_this_wallet);
                 backupStatusText.setText(R.string.key_secure);
                 backupStatusImage.setImageResource(R.drawable.ic_green_bar);
                 break;

@@ -753,13 +753,16 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     {
         //first check if the phone is unlocked
         String dialogTitle;
+        boolean requireUnlock = false;
         switch (operation)
         {
+            case UPGRADE_HD_KEY:
+            case UPGRADE_KEYSTORE_KEY:
+                requireUnlock = true;
+                //drop through
             case IMPORT_HD_KEY:
             case CREATE_HD_KEY:
-            case UPGRADE_HD_KEY:
             case CREATE_KEYSTORE_KEY:
-            case UPGRADE_KEYSTORE_KEY:
             case CREATE_PRIVATE_KEY:
                 dialogTitle = context.getString(R.string.provide_authentication);
                 break;
@@ -772,7 +775,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         }
 
         //see if unlock is required
-        if (!requiresUnlock() && signCallback != null)
+        if (!requireUnlock && !requiresUnlock() && signCallback != null)
         {
             signCallback.GotAuthorisation(true);
             return;

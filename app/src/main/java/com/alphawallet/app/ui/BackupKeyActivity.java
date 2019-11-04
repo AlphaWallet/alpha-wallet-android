@@ -118,6 +118,9 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                 DisplayKeyFailureDialog("Export Private key not yet implemented");
                 //TODO: Not yet implemented
                 break;
+            case UPGRADE_KEY:
+                setupUpgradeKey(false);
+                break;
         }
     }
 
@@ -133,15 +136,18 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         }
     }
 
-    private void setupUpgradeKey()
+    private void setupUpgradeKey(boolean showSuccess)
     {
         setContentView(R.layout.activity_backup);
         initViews();
 
         successOverlay = findViewById(R.id.layout_success_overlay);
-        if (successOverlay != null) successOverlay.setVisibility(View.VISIBLE);
-        handler = new Handler();
-        handler.postDelayed(this, 1000);
+        if (successOverlay != null && showSuccess)
+        {
+            successOverlay.setVisibility(View.VISIBLE);
+            handler = new Handler();
+            handler.postDelayed(this, 1000);
+        }
 
         setTitle(getString(R.string.empty));
         state = BackupState.UPGRADE_KEY_SECURITY;
@@ -509,7 +515,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             case STRONGBOX_NO_AUTHENTICATION:
             case TEE_NO_AUTHENTICATION:
                 //improve key security
-                setupUpgradeKey();
+                setupUpgradeKey(true);
                 break;
             default:
                 finishBackupSuccess(true);
@@ -931,7 +937,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     public enum BackupOperationType
     {
-        UNDEFINED, BACKUP_HD_KEY, BACKUP_KEYSTORE_KEY, SHOW_SEED_PHRASE, EXPORT_PRIVATE_KEY
+        UNDEFINED, BACKUP_HD_KEY, BACKUP_KEYSTORE_KEY, SHOW_SEED_PHRASE, EXPORT_PRIVATE_KEY, UPGRADE_KEY
     }
 
 //                switch (operation)

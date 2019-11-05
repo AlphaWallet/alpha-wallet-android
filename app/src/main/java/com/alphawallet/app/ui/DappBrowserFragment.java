@@ -729,15 +729,28 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void onSignTransaction(Web3Transaction transaction, String url)
     {
-        //minimum for transaction to be valid: recipient and value or payload
-        if ((transaction.recipient.equals(Address.EMPTY) && transaction.payload != null) // Constructor
-            || (!transaction.recipient.equals(Address.EMPTY) && (transaction.payload != null || transaction.value != null))) // Raw or Function TX
+        try
         {
-            viewModel.openConfirmation(getActivity(), transaction, url, networkInfo);
+            //minimum for transaction to be valid: recipient and value or payload
+            if ((transaction.recipient.equals(Address.EMPTY) && transaction.payload != null) // Constructor
+                    || (!transaction.recipient.equals(Address.EMPTY) && (transaction.payload != null || transaction.value != null))) // Raw or Function TX
+            {
+                viewModel.openConfirmation(getActivity(), transaction, url, networkInfo);
+            }
+            else
+            {
+                //display transaction error
+                onInvalidTransaction(transaction);
+                web3.onSignCancel(transaction);
+            }
         }
-        else
+        catch (android.os.TransactionTooLargeException e)
         {
-            //display transaction error
+            transactionTooLarge();
+            web3.onSignCancel(transaction);
+        }
+        catch (Exception e)
+        {
             onInvalidTransaction(transaction);
             web3.onSignCancel(transaction);
         }
@@ -790,7 +803,24 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         resultDialog.show();
     }
 
-    private void onInvalidTransaction(Web3Transaction transaction) {
+    private void transactionTooLarge()
+    {
+        if (getActivity() == null) return;
+        resultDialog = new AWalletAlertDialog(getActivity());
+        resultDialog.setIcon(AWalletAlertDialog.ERROR);
+        resultDialog.setTitle(getString(R.string.transaction_too_large));
+        resultDialog.setMessage(getString(R.string.unable_to_handle_tx));
+
+        resultDialog.setButtonText(R.string.button_ok);
+        resultDialog.setButtonListener(v -> {
+            resultDialog.dismiss();
+        });
+        resultDialog.setCancelable(true);
+        resultDialog.show();
+    }
+
+    private void onInvalidTransaction(Web3Transaction transaction)
+    {
         if (getActivity() == null) return;
         resultDialog = new AWalletAlertDialog(getActivity());
         resultDialog.setIcon(AWalletAlertDialog.ERROR);

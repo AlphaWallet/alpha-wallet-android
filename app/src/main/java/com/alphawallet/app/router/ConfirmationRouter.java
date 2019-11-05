@@ -4,6 +4,7 @@ package com.alphawallet.app.router;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.TransactionTooLargeException;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.ui.ConfirmationActivity;
@@ -35,7 +36,7 @@ public class ConfirmationRouter {
     }
 
     //Sign transaction for dapp browser
-    public void open(Activity context, Web3Transaction transaction, String networkName, boolean isMainNet, String requesterURL, int chainId)
+    public void open(Activity context, Web3Transaction transaction, String networkName, boolean isMainNet, String requesterURL, int chainId) throws TransactionTooLargeException
     {
         Intent intent = new Intent(context, ConfirmationActivity.class);
         intent.putExtra(C.EXTRA_WEB3TRANSACTION, transaction);

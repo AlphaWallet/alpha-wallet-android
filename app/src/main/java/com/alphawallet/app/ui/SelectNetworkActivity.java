@@ -104,12 +104,7 @@ public class SelectNetworkActivity extends BaseActivity {
                 list.add(new NetworkItem(info.name, info.chainId, intList.contains(info.chainId)));
             }
         }
-
-        if (list.size() < 1)
-        {
-            list.add(new NetworkItem(info.name, info.chainId, intList.contains(info.chainId)));
-        }
-
+        
         adapter = new NetworkListAdapter(this, list, selectedChainId, singleItem);
         listView.setAdapter(adapter);
         listView.setDividerHeight(0);

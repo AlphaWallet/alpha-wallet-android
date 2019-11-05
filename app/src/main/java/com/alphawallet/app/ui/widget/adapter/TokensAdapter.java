@@ -193,7 +193,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 {
                     TokenSortedItem tsi = (TokenSortedItem) si;
                     Token thisToken = tsi.value;
-                    if (thisToken.getAddress().equals(token.getAddress()) && thisToken.tokenInfo.chainId == token.tokenInfo.chainId)
+                    if (canDisplayToken(thisToken) && thisToken.getAddress().equals(token.getAddress()) && thisToken.tokenInfo.chainId == token.tokenInfo.chainId)
                     {
                         Log.d(TAG, "REMOVE: " + token.getFullName());
                         items.removeItemAt(i);
@@ -211,7 +211,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         if (token == null) return false;
         //Add token to display list if it's the base currency, or if it has balance
-        boolean allowThroughFilter = true;
+        boolean allowThroughFilter = VisibilityFilter.filterToken(token, true);
 
         switch (filterType)
         {
@@ -237,7 +237,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 break;
         }
 
-        return VisibilityFilter.filterToken(token, allowThroughFilter);
+        return allowThroughFilter;
     }
 
     private void populateTokens(Token[] tokens)

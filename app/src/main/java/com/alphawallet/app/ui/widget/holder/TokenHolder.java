@@ -2,6 +2,7 @@ package com.alphawallet.app.ui.widget.holder;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -59,6 +60,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
     private final LinearLayout extendedInfo;
+    private Handler handler;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
@@ -229,12 +231,24 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         balanceCurrency.setText(EMPTY_BALANCE);
     }
 
+    private Runnable clearElevation = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            tokenLayout.setElevation(3);
+            handler = null;
+        }
+    };
+
     @Override
     public void onClick(View v) {
         if (onTokenClickListener != null) {
             tokenLayout.setElevation(0.0f);
             tokenLayout.setBackgroundResource(R.drawable.background_light_grey);
             onTokenClickListener.onTokenClick(v, token, null, true);
+            handler = new Handler();
+            handler.postDelayed(clearElevation, 2000);
         }
     }
 

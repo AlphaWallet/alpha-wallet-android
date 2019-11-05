@@ -1088,6 +1088,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         newToken.setTokenWallet(token.getWallet());
         newToken.walletUIUpdateRequired = true;
         newToken.updateBlancaTime = 0;
+        newToken.transferPreviousData(token);
+
 
         tokenLocalSource.saveToken(new Wallet(token.getWallet()), newToken)
                 .subscribeOn(Schedulers.io())

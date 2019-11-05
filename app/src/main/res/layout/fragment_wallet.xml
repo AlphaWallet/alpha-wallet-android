@@ -1,11 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/colorTheme"
     android:orientation="vertical">
+
+    <android.support.design.widget.TabLayout
+        android:id="@+id/tab_layout"
+        style="@style/TabLayoutStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:background="@drawable/background_tab_layout"
+        app:tabBackground="@color/transparent"
+        app:tabContentStart="20dp"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="@color/tealish"
+        app:tabIndicatorFullWidth="true"
+        app:tabMode="fixed"
+        app:tabSelectedTextColor="@color/tealish"
+        app:tabTextAppearance="@style/TabTextAppearance"
+        app:tabTextColor="@color/grey_8d">
+
+    </android.support.design.widget.TabLayout>
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/greyffive"
+        android:layout_below="@id/tab_layout"
+        android:paddingTop="10dp"
+        android:paddingBottom="3dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <com.alphawallet.app.widget.ProgressView
         android:id="@+id/progress_view"
@@ -14,35 +49,6 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         tools:visibility="gone" />
-
-    <android.support.design.widget.TabLayout
-        android:id="@+id/tab_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:tabMode="scrollable"
-        app:tabContentStart="20dp"
-        app:tabBackground="@color/transparent"
-        app:tabIndicatorColor="@color/white"
-        android:background="@drawable/background_tab_layout"
-        app:tabTextColor="@color/translucentWhite"
-        app:tabSelectedTextColor="@color/white"
-        android:layout_gravity="top">
-
-    </android.support.design.widget.TabLayout>
-
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:layout_below="@id/tab_layout"
-        android:id="@+id/refresh_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="10dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </android.support.v4.widget.SwipeRefreshLayout>
 
     <com.alphawallet.app.widget.SystemView
         android:id="@+id/system_view"

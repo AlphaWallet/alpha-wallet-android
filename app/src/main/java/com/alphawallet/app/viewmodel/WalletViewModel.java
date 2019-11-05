@@ -371,7 +371,17 @@ public class WalletViewModel extends BaseViewModel
                 .filter(Token::walletUIUpdateRequired)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(tokenUpdate::postValue, this::onError);
+                .subscribe(this::tokensUpdateSingle, this::onError);
+    }
+
+    private void tokensUpdateSingle(Token token)
+    {
+        if (token.getAddress().equals("0x16baf0de678e52367adc69fd067e5edd1d33e3bf"))
+        {
+            System.out.println("YOLESS");
+        }
+
+        tokenUpdate.postValue(token);
     }
 
     private void onTokenUpdate(Token token)

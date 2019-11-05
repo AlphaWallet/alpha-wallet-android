@@ -3,12 +3,13 @@
     android:id="@+id/layout_background"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="1dp"
     android:background="@drawable/background_marketplace_event"
+    android:elevation="1dp"
     android:orientation="horizontal"
-    android:paddingBottom="3dp"
-    android:elevation="2dp"
-    android:layout_marginBottom="6dp"
-    android:paddingTop="@dimen/normal_margin">
+    android:paddingTop="@dimen/normal_margin"
+    android:minHeight="60dp"
+    android:paddingBottom="3dp">
 
     <ImageView
         android:id="@+id/type_icon"
@@ -20,23 +21,12 @@
         android:contentDescription="@string/empty"
         android:src="@drawable/ic_arrow_downward_black_24dp" />
 
-    <ProgressBar
-        android:id="@+id/pending_spinner"
-        android:visibility="gone"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:indeterminateTint="@color/colorPrimaryDark"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="@dimen/big_margin"
-        android:contentDescription="@string/empty"/>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_marginStart="72dp"
+        android:layout_marginStart="59dp"
         android:layout_toStartOf="@+id/valueLayout"
         android:orientation="vertical">
 
@@ -50,8 +40,8 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_light"
                 android:maxLines="1"
-                android:textAppearance="?attr/textAppearanceListItem"
-                android:text="Sent" />
+                android:text="Sent"
+                android:textAppearance="?attr/textAppearanceListItem" />
 
             <TextView
                 android:id="@+id/supplimental"
@@ -59,9 +49,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:maxLines="1"
+                android:text=""
                 android:textAppearance="?attr/textAppearanceListItem"
-                android:textSize="12sp"
-                android:text="" />
+                android:textSize="12sp" />
         </LinearLayout>
 
         <TextView
@@ -72,9 +62,9 @@
             android:ellipsize="end"
             android:fontFamily="@font/font_light"
             android:maxLines="1"
+            android:text="Transaction pending ..."
             android:textAppearance="?attr/textAppearanceListItemSecondary"
-            android:textSize="12sp"
-            android:text="Transaction pending ..." />
+            android:textSize="12sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -92,16 +82,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_semibold"
-            android:textColor="@color/colorAccent"
-            android:text="..." />
+            android:text="..."
+            android:textColor="@color/colorAccent" />
 
         <TextView
             android:id="@+id/text_chain_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
             android:background="@drawable/background_status_pending"
             android:fontFamily="@font/font_bold"
-            android:layout_marginTop="2dp"
             android:padding="2dp"
             android:text="@string/action_clear"
             android:textColor="@color/white"
@@ -109,4 +99,15 @@
             android:visibility="visible" />
 
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/pending_spinner"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="@dimen/big_margin"
+        android:contentDescription="@string/empty"
+        android:indeterminateTint="@color/colorPrimaryDark"
+        android:visibility="gone" />
 </RelativeLayout>

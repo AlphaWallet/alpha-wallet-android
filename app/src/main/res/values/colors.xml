@@ -5,11 +5,12 @@
 	<color name="white">#FFFFFFFF</color>
 	<color name="black">#313849</color>
 
-	<color name="colorPrimary">#54C1E3</color>
+	<color name="colorPrimary">#FFFFFF</color>
 	<!--<color name="colorPrimaryDark">#1E76CE</color>-->
-	<color name="colorPrimaryDark">#54C1E3</color>
+	<color name="colorPrimaryDark">#707070</color>
 	<color name="colorAccent">#54C1E3</color>
 	<color name="colorPrimaryLight">#AA54C1E3</color>
+	<color name="colorTheme">#FFFFFF</color>
     <!--<color name="title">#89000000</color>-->
 	<color name="secondary_text">#40000000</color>
 
@@ -42,6 +43,7 @@
 	<color name="greye5">#e5e5e5</color>
 	<color name="greyc2">#c2c2c2</color>
 	<color name="greyf9">#f9f9f9</color>
+	<color name="grey76">#767676</color>
 	<color name="grey_faint">#332a2a2a</color>
 	<color name="grey_faint2">#33c2c2c2</color>
 	<color name="grey2">#2a2a2a</color>
@@ -53,6 +55,7 @@
 	<color name="card_outer">#1e000000</color>
 	<color name="grey_bar">#ebebeb</color>
 	<color name="unselected_grey">#8a000000</color>
+	<color name="greyffive">#f5f5f5</color>
 
 
 	<color name="onboarding_indicator_unselected">#d8d8d8</color>
@@ -85,4 +88,38 @@
 	<color name="goerli">#BBAE9A</color>
 	<color name="artis_sigma1">#53A271</color>
 	<color name="artis_tau1">#F97599</color>
+
+	<color name="water_blue">#1899c2</color>
+	<color name="bluish">#2784af</color>
+	<color name="dark_sky_blue">#54c1e3</color>
+	<color name="brown_grey">#9b9b9b</color>
+	<color name="dark_sky_blue_two">#3f8bd7</color>
+	<color name="windows_blue">#38a0c0</color>
+	<color name="brown_grey_two">#979797</color>
+	<color name="black_54">#8a000000</color>
+	<color name="teal_blue">#0091b1</color>
+	<color name="very_light_pink">#e0e0e0</color>
+	<color name="very_light_pink_two">#c2c2c2</color>
+	<color name="brown_grey_three">#999999</color>
+	<color name="copper">#c94726</color>
+	<color name="blueberry">#5838a3</color>
+	<color name="darkish_green">#378937</color>
+	<color name="butterscotch">#fdb03d</color>
+	<color name="bluish_two">#2a86af</color>
+	<color name="black_12">#1e000000</color>
+	<color name="light_grey">#dddddd</color>
+	<color name="orangey_red">#ff3b30</color>
+	<color name="tangerine">#ff9500</color>
+	<color name="marigold">#ffcc00</color>
+	<color name="weird_green">#4cd964</color>
+	<color name="robin_s_egg">#5ac8fa</color>
+	<color name="deep_sky_blue">#007aff</color>
+	<color name="warm_blue">#5856d6</color>
+	<color name="reddish_pink">#ff2d55</color>
+	<color name="pale_grey">#efeff4</color>
+	<color name="pale_lilac">#e5e5ea</color>
+	<color name="light_blue_grey">#d1d1d6</color>
+	<color name="light_blue_grey_two">#c7c7cc</color>
+	<color name="blue_grey">#8e8e93</color>
+	<color name="grey_8d">#8d8d8d</color>
 </resources>

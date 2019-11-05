@@ -120,7 +120,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         isVisible = true;
 
         viewModel.clearProcess();
-
         return view;
     }
 
@@ -190,8 +189,8 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
             }
         });
 
-        TabUtils.changeTabsFont(getContext(), tabLayout);
-        TabUtils.reflex(tabLayout);
+        //TabUtils.changeTabsFont(getContext(), tabLayout);
+        //TabUtils.reflex(tabLayout);
     }
 
     private void onTotal(BigDecimal totalInCurrency) {

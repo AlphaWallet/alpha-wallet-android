@@ -3,9 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp">
+    android:background="@color/greyffive"
+    android:paddingLeft="1dp"
+    android:paddingRight="1dp">
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/refresh_layout"

@@ -4,7 +4,7 @@
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/colorPrimary"
     android:contentInsetEnd="0dp"
     android:contentInsetLeft="0dp"
     android:contentInsetRight="0dp"
@@ -31,7 +31,7 @@
             android:fontFamily="@font/font_light"
             android:gravity="center"
             android:singleLine="true"
-            android:textColor="@color/white"
+            android:textColor="@color/colorPrimaryDark"
             android:textSize="25sp" />
 
         <LinearLayout
@@ -51,7 +51,7 @@
                 android:layout_height="24dp"
                 android:layout_gravity="center"
                 android:visibility="gone"
-                android:indeterminateTint="@color/white"/>
+                android:indeterminateTint="@color/colorPrimaryDark"/>
 
             <ImageView
                 android:id="@+id/image_lock"
@@ -73,7 +73,7 @@
                 android:paddingRight="4dp"
                 android:singleLine="true"
                 android:text=""
-                android:textColor="@color/white"
+                android:textColor="@color/colorPrimaryDark"
                 android:textSize="16sp" />
 
         </LinearLayout>

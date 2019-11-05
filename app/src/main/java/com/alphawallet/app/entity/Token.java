@@ -235,19 +235,13 @@ public class Token implements Parcelable
             ethBalance = balance.divide(new BigDecimal(Math.pow(10, tokenInfo.decimals)));
             //fractional value. How to represent?
             value = getMinimalString(ethBalance.toPlainString());
-            if (value.length() > 6)
+            if (ethBalance.compareTo(BigDecimal.valueOf(0.000001)) < 0)
             {
-                holder.balanceEth.setText(R.string.dust_value);
-            }
-            else
-            {
-                holder.balanceEth.setText(value);
+                value = holder.getString(R.string.dust_value);
             }
         }
-        else
-        {
-            holder.balanceEth.setText(value);
-        }
+
+        holder.balanceEth.setText(value);
 
         if (isEthereum())
         {

@@ -8,8 +8,8 @@
     android:paddingBottom="3dp"
     android:elevation="3dp"
     android:layout_marginBottom="6dp"
-    android:layout_marginLeft="10dp"
-    android:layout_marginRight="10dp">
+    android:layout_marginLeft="1dp"
+    android:layout_marginRight="1dp">
 
     <ImageView
         android:id="@+id/icon"
@@ -38,22 +38,6 @@
         android:visibility="gone" />
 
     <TextView
-        android:id="@+id/text_chain_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:background="@drawable/background_status_pending"
-        android:fontFamily="@font/font_bold"
-        android:padding="2dp"
-        android:text="@string/action_clear"
-        android:textColor="@color/white"
-        android:textSize="12sp"
-        android:visibility="visible" />
-
-    <TextView
         android:id="@+id/status_incomplete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -74,14 +58,14 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:orientation="vertical"
-        android:paddingBottom="20dp"
-        android:paddingLeft="23dp"
-        android:paddingRight="23dp"
-        android:paddingTop="20dp">
+        android:paddingBottom="10dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="2dp"
+        android:paddingTop="9dp">
 
         <RelativeLayout
             android:id="@+id/layout_balance"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
             <TextView
@@ -89,17 +73,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="2dp"
-                android:fontFamily="@font/font_light"
+                android:fontFamily="@font/font_regular"
                 android:text="0"
                 android:textColor="@color/text_black"
-                android:textSize="21sp" />
+                android:textSize="25sp" />
 
             <TextView
                 android:id="@+id/balance_eth_pending"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@+id/balance_eth"
                 android:layout_alignParentTop="true"
+                android:layout_toEndOf="@id/balance_eth"
                 android:fontFamily="@font/font_light"
                 android:text=""
                 android:textColor="@color/cancel_red"
@@ -109,24 +93,40 @@
                 android:id="@+id/symbol"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@+id/balance_eth_pending"
                 android:layout_marginStart="3dp"
-                android:fontFamily="@font/font_light"
+                android:layout_toStartOf="@id/text_chain_name"
+                android:layout_toEndOf="@id/balance_eth_pending"
+                android:fontFamily="@font/font_regular"
                 android:text="@string/ethereum"
                 android:textColor="@color/text_black"
-                android:textSize="21sp" />
+                android:textSize="25sp" />
 
             <TextView
                 android:id="@+id/symbolAux"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/balance_eth"
+                android:layout_below="@id/balance_eth"
                 android:layout_marginTop="1dp"
-                android:fontFamily="@font/font_light"
+                android:fontFamily="@font/font_regular"
                 android:lines="1"
-                android:visibility="gone"
                 android:textColor="@color/text_black"
-                android:textSize="21sp" />
+                android:textSize="25sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/text_chain_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="2dp"
+                android:background="@drawable/background_status_pending"
+                android:fontFamily="@font/font_bold"
+                android:padding="2dp"
+                android:text="@string/action_clear"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:visibility="visible" />
 
         </RelativeLayout>
 
@@ -161,44 +161,44 @@
                     android:layout_marginTop="2dp"
                     android:background="@color/colorPrimaryDark" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/issuer"
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="11sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/font_semibold"
+                    android:text="@string/issuer"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="11sp" />
 
-            <TextView
-                android:id="@+id/issuer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="2dp"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/ethereum"
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="11sp" />
+                <TextView
+                    android:id="@+id/issuer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="2dp"
+                    android:fontFamily="@font/font_semibold"
+                    android:text="@string/ethereum"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="11sp" />
 
-            <View
-                android:id="@+id/contract_seperator"
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="2dp"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginTop="2dp"
-                android:background="@color/colorPrimaryDark"
-                android:visibility="gone" />
+                <View
+                    android:id="@+id/contract_seperator"
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginTop="2dp"
+                    android:background="@color/colorPrimaryDark"
+                    android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/contract_type"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/erc20"
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="11sp"
-                android:visibility="gone" />
+                <TextView
+                    android:id="@+id/contract_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/font_semibold"
+                    android:text="@string/erc20"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="11sp"
+                    android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
 
@@ -207,6 +207,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
+            android:layout_marginEnd="10dp"
             android:background="@drawable/background_top_border"
             android:baselineAligned="false"
             android:orientation="horizontal"

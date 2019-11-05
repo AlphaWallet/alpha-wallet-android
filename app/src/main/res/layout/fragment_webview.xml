@@ -8,7 +8,7 @@
         android:id="@+id/address_bar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimaryDark"
+        android:background="@color/colorPrimary"
         android:theme="@style/AppTheme.Toolbar"
         app:contentInsetEnd="0dp"
         app:contentInsetLeft="0dp"

@@ -9,6 +9,8 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.service.TickerService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class EthereumNetworkRepository extends EthereumNetworkBase
@@ -37,7 +39,7 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
 
     public static List<Integer> addDefaultNetworks()
     {
-        return new ArrayList<>(EthereumNetworkRepository.MAINNET_ID);
+        return new ArrayList<>(Collections.singletonList(EthereumNetworkRepository.MAINNET_ID));
     }
 
     public static String getNodeURLByNetworkId(int networkId) {

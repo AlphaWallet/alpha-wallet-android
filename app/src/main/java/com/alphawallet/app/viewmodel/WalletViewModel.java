@@ -8,7 +8,9 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.TokenRepositoryType;
 import com.crashlytics.android.Crashlytics;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractResult;
@@ -71,6 +73,8 @@ public class WalletViewModel extends BaseViewModel
     private final OpenseaService openseaService;
     private final TokensService tokensService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
+    private final TokenRepositoryType tokenRepository;
+    private final ChangeTokenEnableInteract changeTokenEnableInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
     private final MutableLiveData<Map<String, String>> currentWalletBalance = new MutableLiveData<>();
@@ -102,6 +106,8 @@ public class WalletViewModel extends BaseViewModel
             TokensService tokensService,
             OpenseaService openseaService,
             FetchTransactionsInteract fetchTransactionsInteract,
+            TokenRepositoryType tokenRepository,
+            ChangeTokenEnableInteract changeTokenEnableInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository)
     {
         this.fetchTokensInteract = fetchTokensInteract;
@@ -116,6 +122,8 @@ public class WalletViewModel extends BaseViewModel
         this.openseaService = openseaService;
         this.tokensService = tokensService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
+        this.tokenRepository = tokenRepository;
+        this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
     }
 
@@ -649,5 +657,9 @@ public class WalletViewModel extends BaseViewModel
     public Wallet getWallet()
     {
         return currentWallet;
+    }
+
+    public void setTokenEnabled(Token token, boolean enabled) {
+        changeTokenEnableInteract.setEnable(currentWallet, token, enabled);
     }
 }

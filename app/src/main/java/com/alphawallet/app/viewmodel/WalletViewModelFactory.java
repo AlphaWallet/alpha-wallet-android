@@ -6,12 +6,14 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import com.alphawallet.app.interact.AddTokenInteract;
+import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.SetupTokensInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 
+import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.Erc20DetailRouter;
@@ -33,6 +35,8 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final OpenseaService openseaService;
     private final TokensService tokensService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
+    private final TokenRepositoryType tokenRepository;
+    private final ChangeTokenEnableInteract changeTokenEnableInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
     public WalletViewModelFactory(FetchTokensInteract fetchTokensInteract,
@@ -47,6 +51,8 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   TokensService tokensService,
                                   OpenseaService openseaService,
                                   FetchTransactionsInteract fetchTransactionsInteract,
+                                  TokenRepositoryType tokenRepository,
+                                  ChangeTokenEnableInteract changeTokenEnableInteract,
                                   EthereumNetworkRepositoryType ethereumNetworkRepository) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
@@ -60,6 +66,8 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         this.openseaService = openseaService;
         this.tokensService = tokensService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
+        this.tokenRepository = tokenRepository;
+        this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
     }
 
@@ -79,6 +87,8 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 tokensService,
                 openseaService,
                 fetchTransactionsInteract,
+                tokenRepository,
+                changeTokenEnableInteract,
                 ethereumNetworkRepository);
     }
 }

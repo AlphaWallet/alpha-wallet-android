@@ -247,6 +247,10 @@
         <activity
             android:name=".ui.BackupKeyActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
+
+        <activity
+            android:name=".ui.TokenManagementActivity"
+            android:label="Token Management" />
     </application>
 
 </manifest>

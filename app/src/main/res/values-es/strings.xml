@@ -199,4 +199,5 @@
     <string name="linkedin">LinkedIn</string>
     <string name="please_enable_security">Unable to create key. Try enabling security on your phone.</string>
     <string name="what_is_seed_phrase">A seed phrase, seed recovery phrase or backup seed phrase is a list of words which store all the information needed to recover a Bitcoin wallet. Wallet software will typically generate a seed phrase and instruct the user to write it down on paper.</string>
+    <string name="token_management">Token Management</string>
 </resources>

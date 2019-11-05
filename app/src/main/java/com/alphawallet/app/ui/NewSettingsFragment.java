@@ -63,6 +63,8 @@ public class NewSettingsFragment extends Fragment
     private LinearLayout layoutBackupDivider;
     private TextView backupText;
 
+    private Wallet wallet;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -120,6 +122,13 @@ public class NewSettingsFragment extends Fragment
         layoutSwitchnetworks.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), SelectNetworkActivity.class);
             intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
+            getActivity().startActivity(intent);
+        });
+
+        final LinearLayout layoutTokenManagement = view.findViewById(R.id.layout_token_management);
+        layoutTokenManagement.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), TokenManagementActivity.class);
+            intent.putExtra("wallet_address", wallet.address);
             getActivity().startActivity(intent);
         });
 
@@ -318,6 +327,7 @@ public class NewSettingsFragment extends Fragment
     }
 
     private void onDefaultWallet(Wallet wallet) {
+        this.wallet = wallet;
         walletsSubtext.setText(wallet.address);
         switch (wallet.authLevel)
         {

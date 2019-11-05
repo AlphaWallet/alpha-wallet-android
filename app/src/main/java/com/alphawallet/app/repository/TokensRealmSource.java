@@ -12,10 +12,16 @@ import com.alphawallet.app.entity.TokenFactory;
 import com.alphawallet.app.entity.TokenInfo;
 import com.alphawallet.app.entity.TokenTicker;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.opensea.AssetContract;
+import com.alphawallet.app.entity.opensea.Trait;
 import com.alphawallet.app.repository.entity.RealmERC721Asset;
 import com.alphawallet.app.repository.entity.RealmERC721Token;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
+import com.alphawallet.app.service.RealmManager;
+
+import org.web3j.crypto.WalletUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,12 +37,6 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import io.realm.exceptions.RealmException;
-
-import com.alphawallet.app.entity.opensea.Asset;
-import com.alphawallet.app.entity.opensea.AssetContract;
-import com.alphawallet.app.entity.opensea.Trait;
-import com.alphawallet.app.service.RealmManager;
-import org.web3j.crypto.WalletUtils;
 
 import static com.alphawallet.app.interact.SetupTokensInteract.EXPIRED_CONTRACT;
 
@@ -193,7 +193,7 @@ public class TokensRealmSource implements TokenLocalSource {
             {
                 RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
                         .sort("addedTime", Sort.ASCENDING)
-                        .equalTo("isEnabled", true)
+//                        .equalTo("isEnabled", true)
                         .findAll();
 
                 return convertBalance(realmItems, System.currentTimeMillis(), wallet);
@@ -319,7 +319,7 @@ public class TokensRealmSource implements TokenLocalSource {
             token.tokenInfo.isEnabled = isEnabled;
             realm = realmManager.getRealmInstance(wallet);
             RealmToken realmToken = realm.where(RealmToken.class)
-                    .equalTo("address", token.tokenInfo.address)
+                    .equalTo("name", token.tokenInfo.name)
                     .findFirst();
 
             TransactionsRealmCache.addRealm();

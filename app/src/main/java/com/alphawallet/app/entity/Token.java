@@ -893,4 +893,25 @@ public class Token implements Parcelable
         }
         return BigDecimal.ZERO;
     }
+
+    @Override
+    public boolean equals(Object v)
+    {
+        boolean retVal = false;
+
+        if (v instanceof Token) {
+            Token t = (Token) v;
+            retVal = t != null && tokenInfo.chainId == t.tokenInfo.chainId && getAddress().equals(t.getAddress());
+        }
+
+        return retVal;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 7;
+        hash = 17 * hash + (this.tokenInfo.name != null ? this.tokenInfo.name.hashCode() : 0);
+        return hash;
+    }
 }

@@ -104,6 +104,20 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 //            contractSeparator.setVisibility(View.GONE);
 //        }
 
+        if (this.token != null && !this.token.tokenInfo.isEnabled) {
+            tokenLayout.setVisibility(View.GONE);
+            tokenLayout.setLayoutParams(new ViewGroup.LayoutParams(0, 0));
+        } else {
+            tokenLayout.setVisibility(View.VISIBLE);
+            ViewGroup.MarginLayoutParams marginLayoutParams = new ViewGroup.MarginLayoutParams(tokenLayout.getLayoutParams());
+            int left = Utils.dp2px(getContext(), 10);
+            int right = Utils.dp2px(getContext(), 10);
+            int top = Utils.dp2px(getContext(), 0);
+            int bottom = Utils.dp2px(getContext(), 10);
+            marginLayoutParams.setMargins(left, top, right, bottom);
+            tokenLayout.setLayoutParams(marginLayoutParams);
+        }
+
         try
         {
             symbolAux.setVisibility(View.GONE);

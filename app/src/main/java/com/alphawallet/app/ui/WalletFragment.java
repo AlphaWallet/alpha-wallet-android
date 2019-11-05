@@ -18,33 +18,34 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupTokenCallback;
-import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.TokenInterface;
 import com.alphawallet.app.entity.TokensReceiver;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.WarningData;
+import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.util.TabUtils;
-
-import dagger.android.support.AndroidSupportInjection;
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
 
-import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import dagger.android.support.AndroidSupportInjection;
 
 import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 import static com.alphawallet.app.C.Key.WALLET;
@@ -241,7 +242,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
     private void onTokens(Token[] tokens)
     {
-        if (tokens != null)
+        if (tokens != null && tokens.length > 0)
         {
             adapter.setTokens(tokens);
         }
@@ -426,22 +427,19 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-            remindMeLater(viewModel.getWallet());
+            if (viewHolder instanceof WarningHolder) {
+                remindMeLater(viewModel.getWallet());
+            } else {
+                if (viewHolder instanceof TokenHolder) {
+                    Token token = ((TokenHolder) viewHolder).token;
+                    viewModel.setTokenEnabled(token, false);
+                }
+            }
         }
-
-//        @Override
-//        public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y)
-//        {
-//            super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
-//        }
 
         @Override
         public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-            if (viewHolder instanceof WarningHolder) {
-                return super.getSwipeDirs(recyclerView, viewHolder);
-            } else {
-                return 0;
-            }
+            return super.getSwipeDirs(recyclerView, viewHolder);
         }
     }
 }

@@ -2,11 +2,13 @@ package com.alphawallet.app.di;
 
 
 import com.alphawallet.app.interact.AddTokenInteract;
+import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.SetupTokensInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
@@ -38,6 +40,8 @@ public class WalletModule {
             TokensService tokensService,
             OpenseaService openseaService,
             FetchTransactionsInteract fetchTransactionsInteract,
+            TokenRepositoryType tokenRepository,
+            ChangeTokenEnableInteract changeTokenEnableInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository) {
         return new WalletViewModelFactory(
                 fetchTokensInteract,
@@ -52,6 +56,8 @@ public class WalletModule {
                 tokensService,
                 openseaService,
                 fetchTransactionsInteract,
+                tokenRepository,
+                changeTokenEnableInteract,
                 ethereumNetworkRepository);
     }
 
@@ -94,6 +100,11 @@ public class WalletModule {
     @Provides
     SetupTokensInteract provideSetupTokensInteract(TokenRepositoryType tokenRepository) {
         return new SetupTokensInteract(tokenRepository);
+    }
+
+    @Provides
+    ChangeTokenEnableInteract provideChangeTokenEnableInteract(TokenRepositoryType tokenRepository) {
+        return new ChangeTokenEnableInteract(tokenRepository);
     }
 
     @Provides

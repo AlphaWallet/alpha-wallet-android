@@ -122,4 +122,5 @@
 	<color name="light_blue_grey_two">#c7c7cc</color>
 	<color name="blue_grey">#8e8e93</color>
 	<color name="grey_8d">#8d8d8d</color>
+    <color name="greyf3">#f3f4f5</color>
 </resources>

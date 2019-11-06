@@ -9,13 +9,25 @@
     <include layout="@layout/layout_network_switch_toolbar" />
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorPrimaryDark"
+        android:orientation="vertical"/>
+
+    <RelativeLayout
         android:id="@+id/layout_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/background_card"
-        android:orientation="vertical"
         android:paddingLeft="15dp"
         android:paddingRight="15dp">
+
+        <LinearLayout
+            android:id="@+id/holding_view"
+            android:layout_alignParentTop="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/layout_select_address"
@@ -44,36 +56,6 @@
                 android:text="@string/scan_qr_label"
                 android:textColor="@color/text_black"
                 android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/address"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="10dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/background_round_grey"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="center"
-                android:padding="15dp"
-                android:textSize="13sp" />
-
-            <Button
-                android:id="@+id/copy_action"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:background="@drawable/background_round_primary"
-                android:fontFamily="@font/font_regular"
-                android:paddingBottom="10dp"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:paddingTop="10dp"
-                android:text="@string/copy_wallet_address"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
 
         </LinearLayout>
 
@@ -109,20 +91,40 @@
 
         </LinearLayout>
 
+        </LinearLayout>
+
         <ImageView
             android:id="@+id/qr_image"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/holding_view"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/big_margin"
             android:src="@drawable/ic_autorenew_black_24dp" />
 
         <TextView
+            android:id="@+id/address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/qr_image"
+            android:layout_gravity="center_horizontal"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/background_round_grey"
+            android:fontFamily="@font/font_semibold"
+            android:gravity="center"
+            android:padding="15dp"
+            android:textSize="13sp" />
+
+        <TextView
             android:id="@+id/text_contract_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/qr_image"
             android:text="@string/contract_address"
             android:layout_gravity="center_horizontal"
+            android:layout_centerHorizontal="true"
             android:layout_marginBottom="5dp"
             android:fontFamily="@font/font_regular"
             android:textAllCaps="true"
@@ -132,11 +134,11 @@
 
         <LinearLayout
             android:id="@+id/layout_contract"
+            android:layout_below="@id/text_contract_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_centerHorizontal="true"
             android:background="@drawable/background_quantity"
-            android:gravity="center_horizontal"
             android:orientation="horizontal"
             android:padding="5dp"
             android:visibility="gone">
@@ -168,5 +170,7 @@
 
         </LinearLayout>
 
-    </LinearLayout>
+        <include layout="@layout/layout_function_buttons" />
+
+    </RelativeLayout>
 </LinearLayout>

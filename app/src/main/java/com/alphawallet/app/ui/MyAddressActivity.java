@@ -17,6 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TokenTicker;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -28,6 +29,9 @@ import com.alphawallet.app.util.Utils;
 import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -41,10 +45,11 @@ import com.alphawallet.app.entity.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.viewmodel.MyAddressViewModelFactory;
+import com.alphawallet.app.widget.FunctionButtonBar;
 
 import static com.alphawallet.app.C.Key.WALLET;
 
-public class MyAddressActivity extends BaseActivity implements View.OnClickListener, AmountUpdateCallback
+public class MyAddressActivity extends BaseActivity implements View.OnClickListener, AmountUpdateCallback, StandardFunctionInterface
 {
     public static final String KEY_ADDRESS = "key_address";
     public static final String KEY_MODE = "mode";
@@ -62,17 +67,17 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     private ImageView qrImageView;
     private TextView titleView;
     private TextView address;
-    private Button copyButton;
     private LinearLayout inputAmount;
     private LinearLayout selectAddress;
     private TextView currentNetwork;
     private RelativeLayout selectNetworkLayout;
     private View networkIcon;
-    private LinearLayout layoutHolder;
+    private RelativeLayout layoutHolder;
     private AmountEntryItem amountInput = null;
     private NetworkInfo networkInfo;
     private int currentMode = MODE_ADDRESS;
     private int overrideNetwork;
+    private FunctionButtonBar functionBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,6 +90,9 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         getInfo();
         getPreviousMode();
         setupContractData();
+
+        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.copy_wallet_address));
+        functionBar.setupFunctions(this, functions);
 
         viewModel.prepare();
     }
@@ -105,19 +113,17 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         toolbar();
         setTitle(getString(R.string.empty));
         titleView = findViewById(R.id.title_my_address);
-        copyButton = findViewById(R.id.copy_action);
         currentNetwork = findViewById(R.id.current_network);
         selectNetworkLayout = findViewById(R.id.select_network_layout);
         selectNetworkLayout.setOnClickListener(v -> selectNetwork());
         inputAmount = findViewById(R.id.layout_define_request);
         selectAddress = findViewById(R.id.layout_select_address);
         address =  findViewById(R.id.address);
-        copyButton.setOnClickListener(this);
         qrImageView = findViewById(R.id.qr_image);
-        inputAmount = findViewById(R.id.layout_define_request);
         selectAddress = findViewById(R.id.layout_select_address);
         layoutHolder = findViewById(R.id.layout_holder);
         networkIcon = findViewById(R.id.network_icon);
+        functionBar = findViewById(R.id.layoutButtons);
     }
 
     private void initViewModel() {
@@ -196,8 +202,8 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         //need ticker so user can see how much $USD the value is
         //get token ticker
         if (token == null) token = EthereumNetworkRepository.getBlankOverrideToken(networkInfo);
-        //viewModel.startEthereumTicker(token);
         currentMode = MODE_POS;
+        address.setVisibility(View.GONE);
         selectAddress.setVisibility(View.GONE);
         inputAmount.setVisibility(View.VISIBLE);
         amountInput = new AmountEntryItem(
@@ -205,6 +211,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
                 viewModel.getTokenRepository(),
                 token);
         amountInput.getValue();
+        functionBar.setVisibility(View.GONE);
         selectNetworkLayout.setVisibility(View.VISIBLE);
     }
 
@@ -220,7 +227,9 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
             amountInput.onClear();
             amountInput = null;
         }
+        address.setVisibility(View.VISIBLE);
         onWindowFocusChanged(true);
+        functionBar.setVisibility(View.VISIBLE);
     }
 
     private void selectNetwork() {
@@ -277,7 +286,6 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
 
         displayAddress = wallet.address;
         titleView.setText(R.string.my_wallet_address);
-        copyButton.setText(R.string.copy_wallet_address);
         address.setText(displayAddress);
     }
 
@@ -346,6 +354,24 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
                 return;
             }
             qrImageView.setImageBitmap(QRUtils.createQRImage(this, eip681String, qrImageView.getWidth()));
+        }
+    }
+
+    @Override
+    public void handleClick(int view)
+    {
+        switch (view)
+        {
+            case R.string.copy_wallet_address:
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText(KEY_ADDRESS, displayAddress);
+                if (clipboard != null) {
+                    clipboard.setPrimaryClip(clip);
+                }
+                Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                break;
         }
     }
 }

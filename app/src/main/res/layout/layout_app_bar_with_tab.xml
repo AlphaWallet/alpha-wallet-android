@@ -31,10 +31,10 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:layout_gravity="center"
-            android:fontFamily="@font/font_light"
+            android:fontFamily="@font/font_semibold"
             android:gravity="center"
             android:text="@string/title_import"
-            android:textColor="@color/white"
+            android:textColor="@color/colorPrimaryDark"
             android:textSize="25sp" />
 
 
@@ -44,9 +44,15 @@
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        app:tabBackground="@drawable/selector_tab"
-        app:tabIndicatorColor="@null"
-        app:tabSelectedTextColor="@color/colorPrimaryDark"
-        app:tabTextColor="@color/white" />
+        android:layout_gravity="top"
+        android:background="@drawable/background_tab_layout"
+        app:tabBackground="@color/transparent"
+        app:tabContentStart="20dp"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="@color/tealish"
+        app:tabIndicatorFullWidth="true"
+        app:tabMode="fixed"
+        app:tabSelectedTextColor="@color/tealish"
+        app:tabTextAppearance="@style/TabTextAppearance"
+        app:tabTextColor="@color/grey_8d" />
 </android.support.design.widget.AppBarLayout>

@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top"
         android:background="@drawable/background_tab_layout"
-        app:tabBackground="@color/transparent"
+        app:tabBackground="@color/white"
         app:tabContentStart="20dp"
         app:tabGravity="fill"
         app:tabIndicatorColor="@color/tealish"
@@ -26,13 +26,19 @@
 
     </android.support.design.widget.TabLayout>
 
+    <View
+        android:id="@+id/spacer_view"
+        android:layout_below="@id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/greydd"/>
+
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/greyffive"
-        android:layout_below="@id/tab_layout"
-        android:paddingTop="10dp"
+        android:layout_below="@id/spacer_view"
         android:paddingBottom="3dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 

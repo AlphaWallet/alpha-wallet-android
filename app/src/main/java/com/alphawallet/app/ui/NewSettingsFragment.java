@@ -60,7 +60,7 @@ public class NewSettingsFragment extends Fragment
     private ImageView backupStatusImage;
     private View backupPopupAnchor;
     private LinearLayout layoutBackupKey;
-    private LinearLayout layoutBackupDivider;
+    private View layoutBackupDivider;
     private TextView backupText;
 
     @Nullable

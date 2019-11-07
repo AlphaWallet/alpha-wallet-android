@@ -66,7 +66,7 @@
                 android:fontFamily="@font/font_regular"
                 android:text="0"
                 android:textColor="@color/text_black"
-                android:textSize="25sp" />
+                android:textSize="24sp" />
 
             <TextView
                 android:id="@+id/balance_eth_pending"
@@ -99,6 +99,7 @@
                 android:layout_marginTop="1dp"
                 android:fontFamily="@font/font_regular"
                 android:lines="1"
+                android:text=""
                 android:textColor="@color/text_black"
                 android:textSize="25sp"
                 android:visibility="gone" />

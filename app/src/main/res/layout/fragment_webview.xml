@@ -92,15 +92,13 @@
         </RelativeLayout>
     </android.support.v7.widget.Toolbar>
 
-    <LinearLayout
+    <View
         android:id="@+id/spacer_bar"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/grey76"
+        android:background="@color/greydd"
         android:layout_below="@id/address_bar"
-        android:orientation="vertical">
-
-    </LinearLayout>
+        android:orientation="vertical"/>
 
     <ProgressBar
         android:id="@+id/progressBar"

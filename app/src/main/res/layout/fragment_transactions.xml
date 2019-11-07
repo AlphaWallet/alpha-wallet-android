@@ -7,15 +7,23 @@
     android:paddingLeft="1dp"
     android:paddingRight="1dp">
 
+    <View
+        android:id="@+id/spacer_view"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/greydd"/>
+
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/refresh_layout"
+        android:layout_below="@id/spacer_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"/>
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <com.alphawallet.app.widget.SystemView

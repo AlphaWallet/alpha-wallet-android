@@ -120,7 +120,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         if (date != null) setDate();
 
         if (transaction.blockNumber != null && transaction.blockNumber.equals("0")) { fillPending(); return; }
-        if (transactionBackground != null) transactionBackground.setBackgroundResource(R.drawable.background_token_border);
+        if (transactionBackground != null) transactionBackground.setBackgroundResource(R.color.white);
 
         boolean txSuccess = (transaction.error != null && transaction.error.equals("0"));
         // If operations include token transfer, display token transfer instead

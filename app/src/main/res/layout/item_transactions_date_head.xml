@@ -3,7 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:gravity="center">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/greye5"/>
 
     <TextView
         android:id="@+id/title"
@@ -17,4 +23,9 @@
         android:textColor="@color/grey76"
         android:textSize="15sp"
         tools:text="Jan, 09 2017" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/greye5"/>
 </LinearLayout>

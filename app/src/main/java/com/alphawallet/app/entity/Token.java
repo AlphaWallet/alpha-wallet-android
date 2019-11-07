@@ -246,7 +246,6 @@ public class Token implements Parcelable
         if (isEthereum())
         {
             holder.textAppreciationSub.setText(R.string.appreciation);
-            holder.icon.setVisibility(View.GONE);
             holder.text24HoursSub.setText(R.string.twenty_four_hours);
             holder.contractType.setVisibility(View.GONE);
             holder.contractSeparator.setVisibility(View.GONE);

@@ -42,7 +42,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final TextView symbolAux;
     public final TextView balanceEth;
     public final TextView balanceCurrency;
-    public final ImageView icon;
     public final TextView text24Hours;
     public final TextView textAppreciation;
     public final TextView issuer;
@@ -69,7 +68,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     {
         super(resId, parent);
 
-        icon = findViewById(R.id.icon);
         symbol = findViewById(R.id.symbol);
         symbolAux = findViewById(R.id.symbolAux);
         balanceEth = findViewById(R.id.balance_eth);
@@ -107,7 +105,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         try
         {
             symbolAux.setVisibility(View.GONE);
-            tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
+            //tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             blockchain.setText(getString(R.string.blockchain, token.getNetworkName()));
             chainName.setText(token.getNetworkName());
             Utils.setChainColour(chainName, token.tokenInfo.chainId);
@@ -236,7 +234,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         @Override
         public void run()
         {
-            tokenLayout.setElevation(1.0f);
+            tokenLayout.setElevation(0.0f);
             handler = null;
         }
     };
@@ -244,8 +242,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     @Override
     public void onClick(View v) {
         if (onTokenClickListener != null) {
-            tokenLayout.setElevation(-3.0f);
-            tokenLayout.setBackgroundResource(R.drawable.background_light_grey);
+            tokenLayout.setElevation(-10.0f);
+            //tokenLayout.setBackgroundResource(R.drawable.background_light_grey);
             onTokenClickListener.onTokenClick(v, token, null, true);
             handler = new Handler();
             handler.postDelayed(clearElevation, 800);

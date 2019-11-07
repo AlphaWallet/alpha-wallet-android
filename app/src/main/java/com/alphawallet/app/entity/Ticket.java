@@ -179,9 +179,9 @@ public class Ticket extends Token implements Parcelable
             tokenHolder.contractType.setText(R.string.erc875);
         }
 
-        tokenHolder.balanceEth.setText(String.valueOf(getTicketCount()));
-        tokenHolder.layoutValueDetails.setVisibility(View.GONE);
-        tokenHolder.symbol.setText(getFullName(asset, getTicketCount())); //override name text
+        String composite = getTicketCount() + " " + getFullName(asset, getTicketCount());
+
+        tokenHolder.balanceEth.setText(composite);
     }
 
     @Override

@@ -16,6 +16,7 @@ import java.util.List;
 public class EthereumNetworkRepository extends EthereumNetworkBase
 {
     private final Context context;
+
     public EthereumNetworkRepository(PreferenceRepositoryType preferenceRepository, TickerService tickerService, Context ctx)
     {
         super(preferenceRepository, tickerService, new NetworkInfo[0], true);

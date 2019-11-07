@@ -3,6 +3,7 @@ package com.alphawallet.app.entity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.view.View;
 
 import com.alphawallet.app.entity.opensea.Asset;
@@ -123,6 +124,8 @@ public class ERC721Token extends Token implements Parcelable
         holder.contractType.setText(R.string.erc721);
 
         holder.balanceEth.setVisibility(View.VISIBLE);
+
+        addTokenName(holder);
     }
 
     @Override

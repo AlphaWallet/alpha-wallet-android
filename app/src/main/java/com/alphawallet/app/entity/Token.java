@@ -230,7 +230,7 @@ public class Token implements Parcelable
     public void setupContent(TokenHolder holder, AssetDefinitionService definition)
     {
         BigDecimal ethBalance = getCorrectedBalance(4);
-        String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
+        String     value      = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
         if (ethBalance.compareTo(BigDecimal.ZERO) == 0 && balance.compareTo(BigDecimal.ZERO) > 0)
         {
             ethBalance = balance.divide(new BigDecimal(Math.pow(10, tokenInfo.decimals)));
@@ -258,20 +258,9 @@ public class Token implements Parcelable
             holder.contractSeparator.setVisibility(View.VISIBLE);
             holder.contractType.setText(R.string.erc20);
             holder.layoutValueDetails.setVisibility(View.GONE);
-
-            //simple heuristic to split the name up.
-
-            //For tokens with a long balance, wrap the name onto a new line so as not to appear cluttered
-            if (value.length() > 8)
-            {
-                holder.symbol.setText("");
-                String symbolStr = tokenInfo.symbol != null ? tokenInfo.symbol.toUpperCase() : "";
-                holder.symbolAux.setVisibility(View.VISIBLE);
-                holder.symbolAux.setText(TextUtils.isEmpty(tokenInfo.name)
-                        ? symbolStr
-                        : getFullName());
-            }
         }
+
+        addTokenName(holder);
 
         //populate ticker if we have it
         if (ticker != null)
@@ -284,6 +273,18 @@ public class Token implements Parcelable
         }
 
         holder.balanceEth.setVisibility(View.VISIBLE);
+    }
+
+    void addTokenName(TokenHolder holder)
+    {
+        String balance = holder.balanceEth.getText().toString();
+        String symbolStr = tokenInfo.symbol != null ? tokenInfo.symbol.toUpperCase() : "";
+        String nameTxt = TextUtils.isEmpty(tokenInfo.name)
+                         ? symbolStr
+                         : getFullName();
+
+        String composite = balance + " " + nameTxt;
+        holder.balanceEth.setText(composite);
     }
 
     public List<Asset> getTokenAssets() {

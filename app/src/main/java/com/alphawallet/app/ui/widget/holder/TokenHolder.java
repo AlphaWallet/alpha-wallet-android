@@ -1,13 +1,19 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
@@ -38,8 +44,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public static final int VIEW_TYPE = 1005;
     public static final String EMPTY_BALANCE = "\u2014\u2014";
 
-    public final TextView symbol;
-    public final TextView symbolAux;
     public final TextView balanceEth;
     public final TextView balanceCurrency;
     public final TextView text24Hours;
@@ -68,9 +72,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     {
         super(resId, parent);
 
-        symbol = findViewById(R.id.symbol);
-        symbolAux = findViewById(R.id.symbolAux);
-        balanceEth = findViewById(R.id.balance_eth);
+        balanceEth = findViewById(R.id.eth_data);
         balanceCurrency = findViewById(R.id.balance_currency);
         currencyLabel = findViewById(R.id.currency_label);
         text24Hours = findViewById(R.id.text_24_hrs);
@@ -98,17 +100,12 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
         try
         {
-            symbolAux.setVisibility(View.GONE);
             //tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             blockchain.setText(getString(R.string.blockchain, token.getNetworkName()));
             chainName.setText(token.getNetworkName());
             Utils.setChainColour(chainName, token.tokenInfo.chainId);
             String displayTxt = assetDefinition.getIssuerName(token);
             issuer.setText(displayTxt);
-            String symbolStr = token.tokenInfo.symbol != null ? token.tokenInfo.symbol.toUpperCase() : "";
-            symbol.setText(TextUtils.isEmpty(token.tokenInfo.name)
-                        ? symbolStr
-                        : token.getFullName());
 
             animateTextWhileWaiting();
             token.setupContent(this, assetDefinition);

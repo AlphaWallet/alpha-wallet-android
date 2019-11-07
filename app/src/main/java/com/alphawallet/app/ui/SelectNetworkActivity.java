@@ -17,6 +17,7 @@ import javax.inject.Inject;
 
 import android.widget.TextView;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.adapter.NetworkListAdapter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 import com.alphawallet.app.util.Utils;
@@ -90,13 +91,20 @@ public class SelectNetworkActivity extends BaseActivity {
             intList.add(MAINNET_ID);
         }
 
+        //if active networks is empty ensure mainnet is displayed
+        if (activeNetworks.size() == 0)
+        {
+            activeNetworks.add(MAINNET_ID);
+            intList.add(MAINNET_ID);
+        }
+
         for (NetworkInfo info : viewModel.getNetworkList()) {
             if (!singleItem || activeNetworks.contains(info.chainId))
             {
                 list.add(new NetworkItem(info.name, info.chainId, intList.contains(info.chainId)));
             }
         }
-
+        
         adapter = new NetworkListAdapter(this, list, selectedChainId, singleItem);
         listView.setAdapter(adapter);
         listView.setDividerHeight(0);
@@ -115,16 +123,18 @@ public class SelectNetworkActivity extends BaseActivity {
 
     private void handleSetNetworks()
     {
+        Integer[] filterList = adapter.getSelectedItems();
+        if (filterList.length == 0) filterList = EthereumNetworkRepository.addDefaultNetworks().toArray(new Integer[0]);
         if (singleItem)
         {
             Intent intent = new Intent();
-            intent.putExtra(C.EXTRA_CHAIN_ID, adapter.getSelectedItems()[0]);
+            intent.putExtra(C.EXTRA_CHAIN_ID, filterList[0]);
             setResult(RESULT_OK, intent);
             finish();
         }
         else
         {
-            viewModel.setFilterNetworks(adapter.getSelectedItems());
+            viewModel.setFilterNetworks(filterList);
             sendBroadcast(new Intent(C.RESET_WALLET));
             finish();
         }

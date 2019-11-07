@@ -5,6 +5,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
+import android.os.TransactionTooLargeException;
 import android.preference.PreferenceManager;
 
 import com.alphawallet.app.entity.ContractResult;
@@ -222,7 +223,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         dAppFunction.DAppReturn(s.getBytes(), msg);
     }
 
-    public void openConfirmation(Activity context, Web3Transaction transaction, String requesterURL, NetworkInfo networkInfo)
+    public void openConfirmation(Activity context, Web3Transaction transaction, String requesterURL, NetworkInfo networkInfo) throws TransactionTooLargeException
     {
         String networkName = networkInfo.name;
         boolean mainNet = networkInfo.isMainNetwork;

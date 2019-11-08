@@ -78,7 +78,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private LinearLayout costLayout;
     private int chainId = 0;
     private boolean usingFeeMaster = false;
-    private String paymasterUrlPrefix = "https://paymaster.stormbird.sg/api";
+    private String paymasterUrlPrefix = "https://paymaster.stormbird.sg/api/";
     private final String TAG = "ITA";
     private PinAuthenticationCallbackInterface authInterface;
 
@@ -170,8 +170,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private void onNetwork(NetworkInfo networkInfo)
     {
         chainId = networkInfo.chainId;
-        String domain = EthereumNetworkRepository.getMagicLinkDomainFromNetworkId(chainId);
-        paymasterUrlPrefix = MagicLinkInfo.formPaymasterURLPrefixFromDomain(domain);
         TextView networkText = findViewById(R.id.textNetworkName);
         networkText.setText(networkInfo.name);
     }

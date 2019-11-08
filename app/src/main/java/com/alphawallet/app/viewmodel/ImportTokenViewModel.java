@@ -94,7 +94,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
 
     private MagicLinkData importOrder;
-    private String univeralImportLink;
+    private String universalImportLink;
     private Token importToken;
     private List<BigInteger> availableBalance = new ArrayList<>();
     private double ethToUsd = 0;
@@ -152,7 +152,7 @@ public class ImportTokenViewModel extends BaseViewModel
     public double getUSDPrice() { return ethToUsd; }
 
     public void prepare(String importDataStr) {
-        univeralImportLink = importDataStr;
+        universalImportLink = importDataStr;
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onWallet, this::onError);
@@ -185,7 +185,7 @@ public class ImportTokenViewModel extends BaseViewModel
         try
         {
             currentRange = null;
-            importOrder = parser.parseUniversalLink(univeralImportLink);
+            importOrder = parser.parseUniversalLink(universalImportLink);
             //ecrecover the owner
             importOrder.ownerAddress = parser.getOwnerKey(importOrder);
             //see if we picked up a network from the link
@@ -453,7 +453,7 @@ public class ImportTokenViewModel extends BaseViewModel
         try
         {
             initParser();
-            MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
+            MagicLinkData order = parser.parseUniversalLink(universalImportLink);
             //calculate gas settings
             final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
             GasSettings settings = gasService.getGasSettings(tradeData, true, importOrder.chainId);
@@ -470,7 +470,7 @@ public class ImportTokenViewModel extends BaseViewModel
     {
         try
         {
-            MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
+            MagicLinkData order = parser.parseUniversalLink(universalImportLink);
             //ok let's try to drive this guy through
             final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
             Log.d(TAG, "Approx value of trade: " + order.price);
@@ -494,7 +494,7 @@ public class ImportTokenViewModel extends BaseViewModel
         try
         {
             initParser();
-            MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
+            MagicLinkData order = parser.parseUniversalLink(universalImportLink);
             disposable = alphaWalletService.handleFeemasterImport(url, wallet.getValue(), network.getValue().chainId, order)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

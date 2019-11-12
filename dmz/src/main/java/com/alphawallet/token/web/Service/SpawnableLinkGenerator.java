@@ -15,11 +15,12 @@ class SpawnableLinkGenerator {
     private static List<BigInteger> tokens = new ArrayList<>();
     private static final String contractAddress = "0x86a2390e15c287d4cb22768d4d1069ef82b7c27b";
     private static ParseMagicLink parseMagicLink = new ParseMagicLink(new CryptoFunctions(), null);
+    //TODO set private key & chain id
     private static final BigInteger privateKey = BigInteger.TEN;
     private static final int chainId = 3;
 
     // Time todo put in right format & set each time
-    private static final long timestamp = System.currentTimeMillis(); //"20180706210000+0300";
+    private static final String date = "20200706210000+0300";
     // Cities
     private static final long COPENHAGEN = 1;
     private static final long SAINT_PETERSBERG = 2;
@@ -69,12 +70,12 @@ class SpawnableLinkGenerator {
 
 
     public static void main(String[] args) throws SalesOrderMalformed {
-        //set token ids here
-        new SpawnableLinkGenerator(timestamp, LONDON, PARKEN_STADIUM, TEAM_A, TEAM_B, 10);
+        //TODO set token ids here
+        new SpawnableLinkGenerator(date, LONDON, PARKEN_STADIUM, TEAM_A, TEAM_B, 10);
     }
 
     private SpawnableLinkGenerator(
-            long date,
+            String date,
             long city,
             long venue,
             String teamA,
@@ -83,21 +84,24 @@ class SpawnableLinkGenerator {
     ) throws SalesOrderMalformed {
         // Set values here
         setTokenIds(date, city, venue, teamA, teamB, THE_CLUB, quantity);
-        createSpawnableLink();
+        createSpawnableLink(5);
     }
 
-    private void createSpawnableLink() throws SalesOrderMalformed {
+    private void createSpawnableLink(int quantity) throws SalesOrderMalformed {
         byte[] message = parseMagicLink.getSpawnableBytes(tokens, contractAddress, BigInteger.ZERO, expiry);
         byte[] signature = signMagicLink(message);
         byte[] linkData = ParseMagicLink.generateSpawnableLeadingLinkBytes(tokens, contractAddress, BigInteger.ZERO, expiry);
         String link = parseMagicLink.completeUniversalLink(chainId, linkData, signature);
-        System.out.println(link);
+        while(quantity > 0) {
+            System.out.println(link);
+            quantity--;
+        }
     }
 
-    private void setTokenIds(long date, long city, long venue, String teamA, String teamB, long category, int quantity)
+    private void setTokenIds(String date, long city, long venue, String teamA, String teamB, long category, int quantity)
     {
         String tokenId = "";
-        tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(date), 38);
+        tokenId += Numeric.toHexStringNoPrefixZeroPadded(Numeric.toBigInt(date.getBytes()), 38);
         tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(city), 2);
         tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(venue), 2);
         tokenId += Numeric.toHexStringNoPrefixZeroPadded(Numeric.toBigInt(teamA.getBytes()), 6);
@@ -106,7 +110,7 @@ class SpawnableLinkGenerator {
         tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(category), 2);
         tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(numero), 4);
         //pad the final zeros on
-        tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.ZERO, 4);
+        tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.ZERO, 2);
         BigInteger token = new BigInteger(tokenId, 16);
         while(quantity > 0) {
             tokens.add(token);

@@ -205,7 +205,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
         if (transactions.length > 0)
         {
-            int txCount = recentTransactionsAdapter.updateRecentTransactions(transactions);
+            recentTransactionsAdapter.addTransactions(transactions);
             noTransactionsLayout.setVisibility(View.GONE);
             recentTransactionsAdapter.notifyDataSetChanged();
         }
@@ -228,18 +228,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         }
 
         progressBar = findViewById(R.id.progress_bar);
-    }
-
-    private void addTokenPage() {
-        LinearLayout viewWrapper = findViewById(R.id.layout_iframe);
-        try {
-            WebView iFrame = findViewById(R.id.iframe);
-            String tokenData = viewModel.getTokenData(token);
-            iFrame.loadData(tokenData, "text/html", "UTF-8");
-            viewWrapper.setVisibility(View.VISIBLE);
-        } catch (Exception e) {
-            viewWrapper.setVisibility(View.GONE);
-        }
     }
 
     @Override

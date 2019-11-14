@@ -1,15 +1,19 @@
 package com.alphawallet.app.ui;
 
+import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,10 +21,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TokenTicker;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.ui.QRScanning.DisplayUtils;
 import com.alphawallet.app.ui.widget.entity.AmountEntryItem;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRUtils;
@@ -56,6 +62,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     public static final String OVERRIDE_DEFAULT = "override";
     public static final int MODE_ADDRESS = 100;
     public static final int MODE_POS = 101;
+    public static final int MODE_CONTRACT = 102;
 
     @Inject
     MyAddressViewModelFactory myAddressViewModelFactory;
@@ -78,40 +85,43 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     private int currentMode = MODE_ADDRESS;
     private int overrideNetwork;
     private FunctionButtonBar functionBar;
+    private int screenWidth;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        screenWidth = (int) ((float)DisplayUtils.getScreenResolution(this).x * 0.8f);
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         overrideNetwork = 0;
-        setContentView(R.layout.activity_my_address);
-        initViews();
-        initViewModel();
         getInfo();
-        getPreviousMode();
-        setupContractData();
 
-        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.copy_wallet_address));
-        functionBar.setupFunctions(this, functions);
+        getPreviousMode();
 
         viewModel.prepare();
     }
 
     private void getPreviousMode() {
         Intent intent = getIntent();
-        if (intent != null) {
+        if (token != null && token.isNonFungible())
+        {
+            showContract();
+        }
+        else if (intent != null) {
             int mode = intent.getIntExtra(KEY_MODE, MODE_ADDRESS);
             if (mode == MODE_POS) {
                 overrideNetwork = intent.getIntExtra(OVERRIDE_DEFAULT, 1);
                 networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(overrideNetwork);
                 showPointOfSaleMode();
             }
+            else
+            {
+                showAddress();
+            }
         }
     }
 
     private void initViews() {
         toolbar();
-        setTitle(getString(R.string.empty));
         titleView = findViewById(R.id.title_my_address);
         currentNetwork = findViewById(R.id.current_network);
         selectNetworkLayout = findViewById(R.id.select_network_layout);
@@ -124,6 +134,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         layoutHolder = findViewById(R.id.layout_holder);
         networkIcon = findViewById(R.id.network_icon);
         functionBar = findViewById(R.id.layoutButtons);
+        qrImageView.setBackgroundResource(R.color.white);
     }
 
     private void initViewModel() {
@@ -167,10 +178,27 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        if (token == null || token.isEthereum() || EthereumNetworkRepository.isPriorityToken(token)) //Currently only allow request for native chain currency, can get here via routes where token is not set.
+        getMenuInflater().inflate(R.menu.menu_receive, menu);
+        //only pay when token null, eth or erc20
+        if (token != null && token.isNonFungible() || currentMode == MODE_POS)// || EthereumNetworkRepository.isPriorityToken(token)) //Currently only allow request for native chain currency, can get here via routes where token is not set.
         {
-            getMenuInflater().inflate(R.menu.menu_receive, menu);
+            menu.findItem(R.id.action_receive_payment)
+                    .setVisible(false);
         }
+        //if dev mode, and token is not ethereum show contract
+        boolean devMode = (checkWritePermission() && EthereumNetworkRepository.extraChains() == null);
+        if (devMode && token == null || token.isEthereum() || currentMode == MODE_CONTRACT) //only is developer mode
+        {        //remove contract address
+            menu.findItem(R.id.action_show_contract)
+                    .setVisible(false);
+        }
+
+        if (currentMode == MODE_ADDRESS)
+        {
+            menu.findItem(R.id.action_my_address)
+                    .setVisible(false);
+        }
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -179,28 +207,32 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     {
         switch (item.getItemId())
         {
-            case R.id.action_receive_payment: {
-                switch (currentMode)
-                {
-                    case MODE_ADDRESS:
-                        showPointOfSaleMode();
-                        break;
-                    case MODE_POS:
-                        showAddress();
-                        break;
-                }
+            case R.id.action_receive_payment:
+                showPointOfSaleMode();
                 break;
-            }
+            case R.id.action_show_contract:
+                showContract();
+                break;
+            case R.id.action_my_address:
+                showAddress();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
     private void showPointOfSaleMode() {
+        setContentView(R.layout.activity_eip681);
+        initViews();
+        initViewModel();
+        getInfo();
         //Generate QR link for receive payment.
         //Initially just generate simple payment.
         //need ticker so user can see how much $USD the value is
         //get token ticker
+        findViewById(R.id.toolbar_title).setVisibility(View.GONE);
+        setTitle("");
+        titleView.setVisibility(View.VISIBLE);
         if (token == null) token = EthereumNetworkRepository.getBlankOverrideToken(networkInfo);
         currentMode = MODE_POS;
         address.setVisibility(View.GONE);
@@ -216,20 +248,48 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     }
 
     private void showAddress() {
+        getInfo();
+        setContentView(R.layout.activity_my_address);
+        initViews();
+        initViewModel();
+        findViewById(R.id.toolbar_title).setVisibility(View.VISIBLE);
+
+        if (amountInput != null)
+        {
+            amountInput.onClear();
+            amountInput = null;
+        }
+
+        setTitle(getString(R.string.my_wallet_address));
+        address.setText(displayAddress);
         currentMode = MODE_ADDRESS;
         selectNetworkLayout.setVisibility(View.GONE);
         if (getCurrentFocus() != null) {
             KeyboardUtils.hideKeyboard(getCurrentFocus());
         }
-        selectAddress.setVisibility(View.VISIBLE);
-        inputAmount.setVisibility(View.GONE);
-        if (amountInput != null) {
-            amountInput.onClear();
-            amountInput = null;
-        }
         address.setVisibility(View.VISIBLE);
         onWindowFocusChanged(true);
         functionBar.setVisibility(View.VISIBLE);
+        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.copy_wallet_address));
+        functionBar.setupFunctions(this, functions);
+    }
+
+    private void showContract()
+    {
+        getInfo();
+        setContentView(R.layout.activity_contract_address);
+        initViews();
+        initViewModel();
+        findViewById(R.id.toolbar_title).setVisibility(View.VISIBLE);
+
+        currentMode = MODE_CONTRACT;
+        displayAddress = token.getAddress();
+        setTitle(getString(R.string.contract_address));
+        address.setText(token.getAddress());
+        onWindowFocusChanged(true);
+        functionBar.setVisibility(View.VISIBLE);
+        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.copy_contract_address));
+        functionBar.setupFunctions(this, functions);
     }
 
     private void selectNetwork() {
@@ -269,8 +329,8 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
             if (amountInput == null)
             {
                 getInfo();
-                qrImageView.setImageBitmap(QRUtils.createQRImage(this, displayAddress, qrImageView.getWidth()));
-                //qrImageView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in)); //<-- check if this is causing the load delay (it was)
+                qrImageView.setImageBitmap(QRUtils.createQRImage(this, displayAddress, screenWidth));
+                qrImageView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in)); //<-- check if this is causing the load delay (it was)
             }
             else
             {
@@ -284,37 +344,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
 
-        displayAddress = wallet.address;
-        titleView.setText(R.string.my_wallet_address);
-        address.setText(displayAddress);
-    }
-
-    private void setupContractData()
-    {
-        if (token != null && !token.isEthereum() && VisibilityFilter.showContractAddress(token))
-        {
-            findViewById(R.id.text_contract_address).setVisibility(View.VISIBLE);
-            findViewById(R.id.layout_contract).setVisibility(View.VISIBLE);
-            TextView contractAddress = findViewById(R.id.contract_address);
-            Button contractCopy = findViewById(R.id.copy_contract_action);
-            contractAddress.setText(token.getAddress());
-            contractCopy.setOnClickListener(v -> copyContract());
-        }
-        else
-        {
-            findViewById(R.id.text_contract_address).setVisibility(View.GONE);
-            findViewById(R.id.layout_contract).setVisibility(View.GONE);
-        }
-    }
-
-    private void copyContract()
-    {
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, token.getAddress());
-        if (clipboard != null) {
-            clipboard.setPrimaryClip(clip);
-        }
-        Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
+        if (currentMode != MODE_CONTRACT) displayAddress = wallet.address;
     }
 
     @Override
@@ -327,10 +357,15 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
     }
 
+    private boolean checkWritePermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
     @Override
     public void amountChanged(String newAmount)
     {
-        if (newAmount != null && newAmount.length() > 0 && Character.isDigit(newAmount.charAt(0)))
+        if (token != null && newAmount != null && newAmount.length() > 0 && Character.isDigit(newAmount.charAt(0)))
         {
             //generate payment request link
             //EIP681 format
@@ -353,7 +388,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
             {
                 return;
             }
-            qrImageView.setImageBitmap(QRUtils.createQRImage(this, eip681String, qrImageView.getWidth()));
+            qrImageView.setImageBitmap(QRUtils.createQRImage(this, eip681String, screenWidth));
         }
     }
 
@@ -363,6 +398,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         switch (view)
         {
             case R.string.copy_wallet_address:
+            case R.string.copy_contract_address:
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText(KEY_ADDRESS, displayAddress);
                 if (clipboard != null) {

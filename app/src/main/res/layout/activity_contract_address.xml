@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    android:orientation="vertical">
+
+    <include layout="@layout/layout_network_switch_toolbar" />
+
+    <RelativeLayout
+        android:id="@+id/layout_holder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/background_card"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp">
+
+        <TextView
+            android:id="@+id/text_scan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/font_regular"
+            android:layout_marginTop="20dp"
+            android:layout_alignParentTop="true"
+            android:gravity="center"
+            android:text="@string/scan_qr_label"
+            android:textColor="@color/text_black"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:id="@+id/contract_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/text_scan"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_ethereum"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Contract Address"
+            android:textSize="16sp"/>
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/qr_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/contract_info"
+            android:layout_above="@id/address"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="30dp"
+            android:src="@drawable/ic_ethereum" />
+
+        <TextView
+            android:id="@+id/address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/layoutButtons"
+            android:layout_gravity="center_horizontal"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/background_round_grey"
+            android:fontFamily="@font/font_semibold"
+            android:gravity="center"
+            android:padding="15dp"
+            android:textSize="13sp" />
+
+        <include layout="@layout/layout_function_buttons" />
+
+    </RelativeLayout>
+</LinearLayout>

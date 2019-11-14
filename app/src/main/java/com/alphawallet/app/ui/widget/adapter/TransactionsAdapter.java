@@ -142,12 +142,12 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
     public int updateTransactions(Transaction[] transactions)
     {
         if (transactions.length == 0) return 0;
-        int oldSize = items.size();
 
         items.beginBatchedUpdates();
         for (Transaction transaction : transactions)
         {
-            TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp);
+            boolean isPending = transaction.blockNumber.equals("0");
+            TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp, isPending);
             TransactionSortedItem sortedItem = new TransactionSortedItem(
                     TransactionHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);
             items.add(sortedItem);
@@ -155,22 +155,19 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         }
 
         items.endBatchedUpdates();
-        return items.size() - oldSize;
+        return transactions.length;
     }
 
     public void addNewTransactions(Transaction[] transactions)
     {
         if (transactions.length == 0) return;
-        DateSortedItem lastDate = items.size() > 0 ? (DateSortedItem)items.get(0) : null;
+        //DateSortedItem lastDate = items.size() > 0 ? (DateSortedItem)items.get(0) : null;
         int itemsChanged = updateTransactions(transactions);
+        //update top 10 transactions or less
         if (itemsChanged > 0)
         {
-            int startItem = 0;
-            if (lastDate != null && lastDate.areItemsTheSame(items.get(0)))
-            {
-                startItem = 1;
-            }
-            notifyItemRangeChanged(startItem, items.size() - startItem);
+            itemsChanged = items.size() < 10 ? items.size() : 10;
+            notifyItemRangeChanged(0, itemsChanged);
         }
     }
 
@@ -179,10 +176,12 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         items.beginBatchedUpdates();
         for (Transaction transaction : transactions)
         {
-            TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp);
+            boolean isPending = transaction.blockNumber.equals("0");
+            TransactionMeta data = new TransactionMeta(transaction.hash, transaction.timeStamp, isPending);
             TransactionSortedItem sortedItem = new TransactionSortedItem(
                     TransactionHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);
                 items.add(sortedItem);
+            items.add(DateSortedItem.round(transaction.timeStamp));
         }
         items.endBatchedUpdates();
         notifyDataSetChanged();

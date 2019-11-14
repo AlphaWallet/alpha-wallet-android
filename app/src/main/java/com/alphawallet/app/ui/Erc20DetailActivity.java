@@ -205,7 +205,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
         if (transactions.length > 0)
         {
-            int txCount = recentTransactionsAdapter.updateRecentTransactions(transactions);
+            recentTransactionsAdapter.addTransactions(transactions);
             noTransactionsLayout.setVisibility(View.GONE);
             recentTransactionsAdapter.notifyDataSetChanged();
         }

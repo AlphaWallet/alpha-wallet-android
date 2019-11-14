@@ -20,16 +20,28 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
     {
         if (other.tags.contains(IS_TIMESTAMP_TAG))
         {
+            TransactionMeta oldTx;
+            TransactionMeta newTx;
             TimestampSortedItem otherTimestamp = (TimestampSortedItem) other;
-            //we were getting an instance where two transactions went through on the same
-            //block - so the timestamp was the same. The display flickered between the two transactions.
-            if (this.getTimestamp().equals(otherTimestamp.getTimestamp()))
+            //first see if this is a replacement TX
+            if (viewType == TransactionHolder.VIEW_TYPE && viewType == other.viewType)
             {
-                TransactionMeta oldTx = value;
-                TransactionMeta newTx = (TransactionMeta) other.value;
+                oldTx = value;
+                newTx = (TransactionMeta) other.value;
 
-                //just compare the transaction hash instead
-                return oldTx.hash.compareTo(newTx.hash);
+                // Check if this is a written block replacing a pending block
+                if (oldTx.hash.equals(newTx.hash)) return 0; // match
+
+                //we were getting an instance where two transactions went through on the same
+                //block - so the timestamp was the same. The display flickered between the two transactions.
+                if (this.getTimestamp().equals(otherTimestamp.getTimestamp()))
+                {
+                    return oldTx.hash.compareTo(newTx.hash);
+                }
+                else
+                {
+                    return super.compare(other);
+                }
             }
             else
             {
@@ -51,7 +63,15 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
                 TransactionMeta oldTx = value;
                 TransactionMeta newTx = (TransactionMeta) newItem.value;
 
-                return oldTx.hash.equals(newTx.hash);
+                if (oldTx.hash.equals(newTx.hash))
+                {
+                    System.out.println("yoless");
+                }
+
+                boolean hashMatch = oldTx.hash.equals(newTx.hash);
+                boolean pendingMatch = oldTx.isPending == newTx.isPending;
+
+                return hashMatch && pendingMatch;
             }
             else
             {
@@ -73,6 +93,11 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
             {
                 TransactionMeta oldTx = value;
                 TransactionMeta newTx = (TransactionMeta) other.value;
+
+                if (oldTx.hash.equals(newTx.hash))
+                {
+                    System.out.println("yoless");
+                }
 
                 return oldTx.hash.equals(newTx.hash);
             }

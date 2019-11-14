@@ -471,4 +471,5 @@
     <string name="certificate_details">Certificate Details</string>
     <string name="signature_details">Signature details</string>
     <string name="copy_contract_address">Copy Contract Address</string>
+    <string name="self">Self</string>
 </resources>

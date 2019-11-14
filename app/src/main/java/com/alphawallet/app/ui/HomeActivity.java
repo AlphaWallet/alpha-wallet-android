@@ -180,6 +180,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
         systemView = findViewById(R.id.system_view);
+        findViewById(R.id.toolbar).setBackgroundResource(R.color.colorPrimary);
 
         RecyclerView list = findViewById(R.id.list);
 

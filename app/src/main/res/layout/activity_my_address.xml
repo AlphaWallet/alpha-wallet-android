@@ -8,12 +8,6 @@
 
     <include layout="@layout/layout_network_switch_toolbar" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/colorPrimaryDark"
-        android:orientation="vertical"/>
-
     <RelativeLayout
         android:id="@+id/layout_holder"
         android:layout_width="match_parent"
@@ -22,153 +16,43 @@
         android:paddingLeft="15dp"
         android:paddingRight="15dp">
 
-        <LinearLayout
-            android:id="@+id/holding_view"
+        <TextView
+            android:id="@+id/text_scan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/font_regular"
+            android:layout_marginTop="20dp"
             android:layout_alignParentTop="true"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-        <LinearLayout
-            android:id="@+id/layout_select_address"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/title_my_address"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="10dp"
-                android:layout_marginTop="20dp"
-                android:fontFamily="@font/font_light"
-                android:gravity="center"
-                android:text="@string/my_wallet_address"
-                android:textColor="@color/text_black"
-                android:textSize="25sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_light"
-                android:gravity="center"
-                android:text="@string/scan_qr_label"
-                android:textColor="@color/text_black"
-                android:textSize="16sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/layout_define_request"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="10dp"
-                android:layout_marginTop="20dp"
-                android:fontFamily="@font/font_light"
-                android:gravity="center"
-                android:text="@string/generate_payment_request"
-                android:textColor="@color/text_black"
-                android:textSize="25sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_light"
-                android:gravity="center"
-                android:text="@string/enter_the_requested_amount"
-                android:textColor="@color/text_black"
-                android:textSize="16sp" />
-
-            <include layout="@layout/item_input_amount" />
-
-        </LinearLayout>
-
-        </LinearLayout>
+            android:gravity="center"
+            android:text="@string/scan_qr_label"
+            android:textColor="@color/text_black"
+            android:textSize="16sp" />
 
         <ImageView
             android:id="@+id/qr_image"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/holding_view"
+            android:layout_below="@id/text_scan"
+            android:layout_above="@id/address"
+            android:layout_centerInParent="true"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/big_margin"
-            android:src="@drawable/ic_autorenew_black_24dp" />
+            android:layout_marginTop="30dp"
+            android:src="@drawable/ic_ethereum" />
 
         <TextView
             android:id="@+id/address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/qr_image"
+            android:layout_above="@id/layoutButtons"
             android:layout_gravity="center_horizontal"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="20dp"
             android:layout_marginTop="5dp"
             android:background="@drawable/background_round_grey"
             android:fontFamily="@font/font_semibold"
             android:gravity="center"
             android:padding="15dp"
             android:textSize="13sp" />
-
-        <TextView
-            android:id="@+id/text_contract_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/qr_image"
-            android:text="@string/contract_address"
-            android:layout_gravity="center_horizontal"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="5dp"
-            android:fontFamily="@font/font_regular"
-            android:textAllCaps="true"
-            android:textColor="@color/light_gray"
-            android:visibility="gone"
-            android:textSize="10sp"/>
-
-        <LinearLayout
-            android:id="@+id/layout_contract"
-            android:layout_below="@id/text_contract_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:background="@drawable/background_quantity"
-            android:orientation="horizontal"
-            android:padding="5dp"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/contract_address"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/background_round_grey"
-                android:fontFamily="@font/font_semibold"
-                android:gravity="center"
-                android:padding="5dp"
-                android:text=""
-                android:textSize="12sp" />
-
-            <Button
-                android:id="@+id/copy_contract_action"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/background_round_primary"
-                android:fontFamily="@font/font_regular"
-                android:text="Copy"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
-                android:textSize="16sp" />
-
-        </LinearLayout>
 
         <include layout="@layout/layout_function_buttons" />
 

@@ -264,7 +264,6 @@ public class AmountEntryItem
 
     private void updateValues(TokenTicker ticker)
     {
-        if (ticker == null) return;
         String amountStr = amountEditText.getText().toString();
         if (usdInput)
         {
@@ -284,7 +283,7 @@ public class AmountEntryItem
         else
         {
             if (amountStr.length() == 0) amountStr = "0";
-            if (isValidAmount(amountStr))
+            if (ticker != null && isValidAmount(amountStr))
             {
                 String usdEquivStr = ticker.priceSymbol + " " + getUsdString(Double.parseDouble(amountStr) * currentEthPrice);
                 //String usdEquivStr = "US$ " + getUsdString(Double.parseDouble(amountStr) * currentEthPrice);

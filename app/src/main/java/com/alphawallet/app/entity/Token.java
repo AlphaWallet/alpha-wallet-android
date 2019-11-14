@@ -875,6 +875,8 @@ public class Token implements Parcelable
     }
 
     public boolean isERC875() { return false; }
+    public boolean isERC721() { return false; }
+    public boolean isNonFungible() { return false; }
 
     public BigDecimal getCorrectedAmount(String newAmount)
     {
@@ -892,5 +894,11 @@ public class Token implements Parcelable
             //
         }
         return BigDecimal.ZERO;
+    }
+
+    public String getShortName()
+    {
+        if (isTerminated() || isBad()) return "";
+        return tokenInfo.name != null ? tokenInfo.name : tokenInfo.symbol != null ? tokenInfo.symbol : "";
     }
 }

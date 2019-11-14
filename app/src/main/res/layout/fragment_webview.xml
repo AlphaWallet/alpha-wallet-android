@@ -8,7 +8,7 @@
         android:id="@+id/address_bar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
+        android:background="@drawable/background_bottom_border"
         android:theme="@style/AppTheme.Toolbar"
         app:contentInsetEnd="0dp"
         app:contentInsetLeft="0dp"
@@ -92,20 +92,12 @@
         </RelativeLayout>
     </android.support.v7.widget.Toolbar>
 
-    <View
-        android:id="@+id/spacer_bar"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/greydd"
-        android:layout_below="@id/address_bar"
-        android:orientation="vertical"/>
-
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="3dp"
-        android:layout_below="@id/spacer_bar"
+        android:layout_below="@id/address_bar"
         android:indeterminate="false"
         android:progressDrawable="@drawable/background_horizontal_progress" />
 

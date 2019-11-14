@@ -238,6 +238,9 @@ public class ERC721Token extends Token implements Parcelable
         tokenBalanceAssets.clear();
     }
 
+    public boolean isERC721() { return true; }
+    public boolean isNonFungible() { return true; }
+
     @Override
     public boolean requiresTransactionRefresh()
     {

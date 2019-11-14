@@ -11,7 +11,7 @@
         android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/greye5"/>
+        android:background="@color/onboarding_indicator_unselected"/>
 
     <ScrollView
         android:layout_below="@id/top_bar"

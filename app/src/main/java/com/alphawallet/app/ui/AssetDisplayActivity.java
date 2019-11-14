@@ -73,7 +73,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         setContentView(R.layout.activity_asset_display);
         toolbar();
 
-        setTitle(getString(R.string.empty));
+        setTitle(token.getShortName());
         systemView = findViewById(R.id.system_view);
         systemView.hide();
         progressView = findViewById(R.id.progress_view);
@@ -112,7 +112,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
      */
     private void onSigData(XMLDsigDescriptor sigData)
     {
-        toolbarView.onSigData(sigData);
+        toolbarView.onSigData(sigData, this);
         adapter.notifyItemChanged(0); //notify issuer update
     }
 

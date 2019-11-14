@@ -4,7 +4,7 @@
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
-    android:background="@color/colorPrimary"
+    android:background="@drawable/background_bottom_border"
     android:contentInsetEnd="0dp"
     android:contentInsetLeft="0dp"
     android:contentInsetRight="0dp"
@@ -23,27 +23,28 @@
 
         <TextView
             android:id="@+id/toolbar_title"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
+            android:layout_toEndOf="@id/layout_verified"
             android:layout_gravity="center"
             android:ellipsize="end"
             android:fontFamily="@font/font_light"
             android:gravity="center"
             android:singleLine="true"
             android:textColor="@color/colorPrimaryDark"
-            android:textSize="25sp" />
+            android:textSize="20sp" />
 
         <LinearLayout
             android:id="@+id/layout_verified"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:animateLayoutChanges="true"
             android:visibility="visible"
             android:orientation="horizontal"
             android:layout_centerVertical="true"
             android:layout_gravity="center_vertical"
-            android:gravity="end">
+            android:gravity="start">
 
             <ProgressBar
                 android:id="@+id/certificate_spinner"
@@ -61,20 +62,20 @@
                 android:visibility="gone"
                 android:src="@mipmap/ic_locked"/>
 
-            <TextView
-                android:id="@+id/text_verified"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="start"
-                android:ellipsize="end"
-                android:fontFamily="@font/font_light"
-                android:gravity="center_vertical"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                android:singleLine="true"
-                android:text=""
-                android:textColor="@color/colorPrimaryDark"
-                android:textSize="16sp" />
+<!--            <TextView-->
+<!--                android:id="@+id/text_verified"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:layout_gravity="start"-->
+<!--                android:ellipsize="end"-->
+<!--                android:fontFamily="@font/font_light"-->
+<!--                android:gravity="center_vertical"-->
+<!--                android:paddingLeft="4dp"-->
+<!--                android:paddingRight="4dp"-->
+<!--                android:singleLine="true"-->
+<!--                android:text=""-->
+<!--                android:textColor="@color/colorPrimaryDark"-->
+<!--                android:textSize="16sp" />-->
 
         </LinearLayout>
 

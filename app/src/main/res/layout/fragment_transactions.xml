@@ -12,7 +12,7 @@
         android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/greydd"/>
+        android:background="@color/onboarding_indicator_unselected"/>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/refresh_layout"

@@ -467,4 +467,8 @@
     <string name="what_is_seed_phrase">A seed phrase, seed recovery phrase or backup seed phrase is a list of words which store all the information needed to recover a Bitcoin wallet. Wallet software will typically generate a seed phrase and instruct the user to write it down on paper.</string>
     <string name="transaction_too_large">Transaction Too Large</string>
     <string name="unable_to_handle_tx">Transaction payload is too large</string>
+    <string name="show_token_contract">Show Token Contract</string>
+    <string name="certificate_details">Certificate Details</string>
+    <string name="signature_details">Signature details</string>
+    <string name="copy_contract_address">Copy Contract Address</string>
 </resources>

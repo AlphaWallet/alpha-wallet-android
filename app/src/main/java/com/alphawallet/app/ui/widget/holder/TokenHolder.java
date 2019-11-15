@@ -118,7 +118,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
                         ? symbolStr
                         : token.getFullName());
 
-            animateTextWhileWaiting();
+            if (token.ticker != null) animateTextWhileWaiting();
             token.setupContent(this, assetDefinition);
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
             setPending();
@@ -157,7 +157,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
     public void fillCurrency(BigDecimal ethBalance, TokenTicker ticker) {
         stopTextAnimation();
-        BigDecimal usdBalance = ethBalance.multiply(new BigDecimal(ticker.price)).setScale(2, RoundingMode.HALF_DOWN);
+        BigDecimal usdBalance = ethBalance.multiply(new BigDecimal(ticker.price)).setScale(2, RoundingMode.DOWN);
         String converted = getUsdString(usdBalance.doubleValue());
         String formattedPercents = "";
         int color = Color.RED;

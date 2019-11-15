@@ -88,11 +88,13 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     {
         if (walletAddress == null)
         {
+            progress.postValue(false);
             System.out.println("ERROR");
             badSeed.postValue(true);
         }
         else
         {
+            progress.postValue(true);
             //begin key storage process
             disposable = importWalletInteract.storeHDWallet(walletAddress, level, ensResolver)
                     .subscribeOn(Schedulers.io())

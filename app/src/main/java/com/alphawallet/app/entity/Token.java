@@ -271,6 +271,10 @@ public class Token implements Parcelable
             holder.text24HoursSub.setText(R.string.twenty_four_hours);
             holder.currencyLabel.setText(ticker.priceSymbol);
         }
+        else
+        {
+            holder.layoutValueDetails.setVisibility(View.GONE);
+        }
 
         holder.balanceEth.setVisibility(View.VISIBLE);
     }

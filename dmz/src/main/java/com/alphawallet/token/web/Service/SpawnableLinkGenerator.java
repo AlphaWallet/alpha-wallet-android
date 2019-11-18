@@ -13,7 +13,7 @@ import java.util.List;
 class SpawnableLinkGenerator {
 
     private static List<BigInteger> tokens = new ArrayList<>();
-    private static final String contractAddress = "0x86a2390e15c287d4cb22768d4d1069ef82b7c27b";
+    private static final String contractAddress = "0xE4Eb58eB8D83043a875d7Cfd557a269c413702Ed";
     private static ParseMagicLink parseMagicLink = new ParseMagicLink(new CryptoFunctions(), null);
     //TODO set private key & chain id
     private static final BigInteger privateKey = BigInteger.TEN;

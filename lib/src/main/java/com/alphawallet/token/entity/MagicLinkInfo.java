@@ -251,9 +251,4 @@ public class MagicLinkInfo
     {
         return "https://" + getMagicLinkDomainFromNetworkId(chainId) + "/";
     }
-
-    public static String formPaymasterURLPrefixFromDomain(String domain)
-    {
-        return "https://" + domain + ":80/api/";
-    }
 }

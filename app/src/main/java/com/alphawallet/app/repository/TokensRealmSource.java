@@ -5,12 +5,12 @@ import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.ERC721Token;
+import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenFactory;
-import com.alphawallet.app.entity.TokenInfo;
-import com.alphawallet.app.entity.TokenTicker;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenFactory;
+import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.entity.RealmERC721Asset;
 import com.alphawallet.app.repository.entity.RealmERC721Token;

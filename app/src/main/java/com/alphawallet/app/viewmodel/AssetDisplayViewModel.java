@@ -8,9 +8,9 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.ERC721Token;
+import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.ui.RedeemAssetSelectActivity;
 import com.alphawallet.app.ui.SellDetailActivity;

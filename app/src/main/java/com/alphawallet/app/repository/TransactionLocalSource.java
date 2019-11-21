@@ -1,6 +1,6 @@
 package com.alphawallet.app.repository;
 
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 

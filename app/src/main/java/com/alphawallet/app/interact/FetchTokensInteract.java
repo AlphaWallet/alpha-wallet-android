@@ -5,8 +5,8 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.OrderContractAddressPair;
 import com.alphawallet.app.entity.Ticker;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenInfo;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.TokenRepositoryType;
 

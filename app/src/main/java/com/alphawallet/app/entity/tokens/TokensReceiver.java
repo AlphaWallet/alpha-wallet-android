@@ -1,4 +1,4 @@
-package com.alphawallet.app.entity;
+package com.alphawallet.app.entity.tokens;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;

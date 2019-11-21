@@ -1,7 +1,7 @@
 package com.alphawallet.app.interact;
 
 import com.alphawallet.app.repository.TokenRepositoryType;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 
 import io.reactivex.Completable;

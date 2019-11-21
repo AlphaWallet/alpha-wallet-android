@@ -1,6 +1,8 @@
 package com.alphawallet.app.entity;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;

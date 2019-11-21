@@ -81,7 +81,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.SignTransactionInterface;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.entity.URLLoadReceiver;
 import com.alphawallet.app.entity.Wallet;

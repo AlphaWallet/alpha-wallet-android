@@ -8,7 +8,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ConfirmationType;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.ui.ConfirmationActivity;

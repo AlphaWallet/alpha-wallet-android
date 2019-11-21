@@ -11,7 +11,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.BaseViewCallback;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ServiceException;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import io.reactivex.disposables.Disposable;
 
 public class BaseViewModel extends ViewModel

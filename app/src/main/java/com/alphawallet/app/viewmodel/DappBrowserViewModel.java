@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.os.TransactionTooLargeException;
 import android.preference.PreferenceManager;
 
-import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -19,7 +18,7 @@ import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Ticker;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.ui.AddEditDappActivity;

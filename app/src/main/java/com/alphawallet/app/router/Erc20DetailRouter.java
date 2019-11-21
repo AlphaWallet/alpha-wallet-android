@@ -6,7 +6,7 @@ import android.content.Intent;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.ui.Erc20DetailActivity;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 
 public class Erc20DetailRouter {

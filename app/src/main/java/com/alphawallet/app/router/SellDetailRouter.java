@@ -5,7 +5,7 @@ import android.content.Intent;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.ui.SellDetailActivity;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 
 /**

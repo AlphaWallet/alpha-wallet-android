@@ -23,8 +23,8 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.Utils;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenTicker;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 

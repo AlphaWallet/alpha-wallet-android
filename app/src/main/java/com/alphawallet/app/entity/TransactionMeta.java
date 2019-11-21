@@ -15,10 +15,12 @@ public class TransactionMeta
 {
     public final String hash;
     public final long timeStamp;
+    public final boolean isPending;
 
-    public TransactionMeta(String hash, long timeStamp)
+    public TransactionMeta(String hash, long timeStamp, boolean pending)
     {
         this.hash = hash;
         this.timeStamp = timeStamp;
+        this.isPending = pending;
     }
 }

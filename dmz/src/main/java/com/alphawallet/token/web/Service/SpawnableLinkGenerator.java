@@ -57,7 +57,7 @@ class SpawnableLinkGenerator {
     private static final long MATCH_NUMBER = 1;
 
     // Numero or sequence number TODO set each time
-    private static final long numero = 1;
+    private static long numero = 0;
 
     // Categories
     private static final long THE_CLUB = 1;
@@ -100,19 +100,20 @@ class SpawnableLinkGenerator {
 
     private void setTokenIds(String date, long city, long venue, String teamA, String teamB, long category, int quantity)
     {
-        String tokenId = "";
-        tokenId += Numeric.toHexStringNoPrefixZeroPadded(Numeric.toBigInt(date.getBytes()), 38);
-        tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(city), 2);
-        tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(venue), 2);
-        tokenId += Numeric.toHexStringNoPrefixZeroPadded(Numeric.toBigInt(teamA.getBytes()), 6);
-        tokenId += Numeric.toHexStringNoPrefixZeroPadded(Numeric.toBigInt(teamB.getBytes()), 6);
-        tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(MATCH_NUMBER), 2);
-        tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(category), 2);
-        tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(numero), 4);
-        //pad the final zeros on
-        tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.ZERO, 2);
-        BigInteger token = new BigInteger(tokenId, 16);
         while(quantity > 0) {
+            String tokenId = "";
+            tokenId += Numeric.toHexStringNoPrefixZeroPadded(Numeric.toBigInt(date.getBytes()), 38);
+            tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(city), 2);
+            tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(venue), 2);
+            tokenId += Numeric.toHexStringNoPrefixZeroPadded(Numeric.toBigInt(teamA.getBytes()), 6);
+            tokenId += Numeric.toHexStringNoPrefixZeroPadded(Numeric.toBigInt(teamB.getBytes()), 6);
+            tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(MATCH_NUMBER), 2);
+            tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(category), 2);
+            // Must increment the numero to change the token id as 721 can only map one token to one address
+            tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(numero++), 4);
+            //pad the final zeros on
+            tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.ZERO, 2);
+            BigInteger token = new BigInteger(tokenId, 16);
             tokens.add(token);
             quantity--;
         }

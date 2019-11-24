@@ -245,7 +245,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         this.onTokenClickListener = onTokenClickListener;
     }
 
-    private void animateTextWhileWaiting() {
+    public void animateTextWhileWaiting() {
         Animation anim = new AlphaAnimation(0.0f, 1.0f);
         anim.setDuration(450);
         anim.setStartOffset(20);
@@ -261,5 +261,12 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         text24Hours.clearAnimation();
         textAppreciation.clearAnimation();
         balanceCurrency.clearAnimation();
+    }
+
+    public void emptyTicker()
+    {
+        text24Hours.setText(R.string.unknown_balance_without_symbol);
+        textAppreciation.setText(R.string.unknown_balance_without_symbol);
+        balanceCurrency.setText(R.string.unknown_balance_without_symbol);
     }
 }

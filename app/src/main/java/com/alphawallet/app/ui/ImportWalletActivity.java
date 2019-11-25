@@ -349,7 +349,11 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     @Override
     public void WalletValidated(String address, KeyService.AuthenticationLevel level)
     {
-        if (address == null) keyImportError(getString(R.string.import_error));
+        if (address == null)
+        {
+            onProgress(false);
+            keyImportError(getString(R.string.import_error));
+        }
         else importWalletViewModel.onSeed(address, level);
     }
 

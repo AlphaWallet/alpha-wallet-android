@@ -57,9 +57,9 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet, int maxTransactions) {
+	public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet, int maxTransactions, List<Integer> networkFilters) {
 		Log.d(TAG, "Fetching Cached TX: " + wallet.address);
-		return fetchFromCache(wallet, maxTransactions)
+		return fetchFromCache(wallet, maxTransactions, networkFilters)
 				.observeOn(Schedulers.newThread())
 				.toObservable();
 	}
@@ -235,8 +235,8 @@ public class TransactionRepository implements TransactionRepositoryType {
 		return accountKeystoreService.signTransactionFast(wallet, password, message, chainId);
 	}
 
-	private Single<Transaction[]> fetchFromCache(Wallet wallet, int maxTransactions) {
-	    return inDiskCache.fetchTransaction(wallet, maxTransactions);
+	private Single<Transaction[]> fetchFromCache(Wallet wallet, int maxTransactions, List<Integer> networkFilters) {
+	    return inDiskCache.fetchTransaction(wallet, maxTransactions, networkFilters);
     }
 
 	private Single<Transaction[]> fetchFromNetwork(NetworkInfo networkInfo, String tokenAddress, long lastBlock, String userAddress) {

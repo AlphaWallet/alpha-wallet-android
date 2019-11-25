@@ -3,7 +3,7 @@ package com.alphawallet.app.service;
 import android.util.Log;
 
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.Ticket;
+import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TransactionRepositoryType;

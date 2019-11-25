@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.alphawallet.app.entity.tokens.Token;
+
 /* weiwu: I think this is what intended:
    a transaction is a single unit of logic or work, sometimes made up of multiple operations.
  */

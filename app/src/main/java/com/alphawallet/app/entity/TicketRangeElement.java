@@ -1,5 +1,6 @@
 package com.alphawallet.app.entity;
 
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
 
 import java.math.BigInteger;

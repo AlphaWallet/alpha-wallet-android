@@ -19,7 +19,7 @@ import dagger.android.AndroidInjection;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.FinishReceiver;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModel;
 import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModelFactory;
 import com.alphawallet.app.widget.ProgressView;

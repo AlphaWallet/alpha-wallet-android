@@ -1,6 +1,6 @@
 package com.alphawallet.app.service;
 
-import com.alphawallet.app.entity.TokenInfo;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 
 import io.reactivex.Observable;
 

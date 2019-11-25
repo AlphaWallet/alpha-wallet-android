@@ -1,19 +1,14 @@
 package com.alphawallet.app.service;
 
-import android.util.Log;
-
 import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AmberDataElement;
 import com.alphawallet.app.entity.BlockscoutValue;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.TokenRepository;
-import com.alphawallet.app.repository.TokenRepositoryType;
 import com.google.gson.Gson;
 import com.alphawallet.app.entity.Ticker;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenTicker;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,7 +16,6 @@ import org.json.JSONObject;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
@@ -32,29 +26,20 @@ import org.web3j.protocol.core.methods.response.EthCall;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.SocketTimeoutException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.reactivex.Observable;
 import io.reactivex.ObservableOperator;
 import io.reactivex.Observer;
 import io.reactivex.Single;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.observers.DisposableObserver;
-import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.GET;
-import retrofit2.http.Path;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.repository.EthereumNetworkRepository.CLASSIC_ID;

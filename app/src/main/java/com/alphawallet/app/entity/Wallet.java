@@ -3,11 +3,8 @@ package com.alphawallet.app.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.util.BalanceUtils;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 public class Wallet implements Parcelable {
     public final String address;

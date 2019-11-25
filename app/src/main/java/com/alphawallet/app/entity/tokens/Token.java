@@ -1,4 +1,4 @@
-package com.alphawallet.app.entity;
+package com.alphawallet.app.entity.tokens;
 
 import android.content.Context;
 import android.os.Parcel;
@@ -6,6 +6,9 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.interact.SetupTokensInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -874,7 +877,9 @@ public class Token implements Parcelable
         return tokenInfo.name;
     }
 
-    public boolean isERC875() { return false; }
+    public boolean isERC875() {
+        return false;
+    }
 
     public BigDecimal getCorrectedAmount(String newAmount)
     {

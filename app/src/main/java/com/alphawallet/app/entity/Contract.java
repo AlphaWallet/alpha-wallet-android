@@ -5,6 +5,8 @@ package com.alphawallet.app.entity;
  * Stormbird in Singapore
  */
 
+import com.alphawallet.app.entity.tokens.TokenInfo;
+
 import java.math.BigDecimal;
 
 /**

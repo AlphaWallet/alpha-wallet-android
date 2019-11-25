@@ -17,8 +17,8 @@ import com.alphawallet.app.ui.ImportTokenActivity;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenInfo;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
 
 import com.alphawallet.app.router.ConfirmationRouter;

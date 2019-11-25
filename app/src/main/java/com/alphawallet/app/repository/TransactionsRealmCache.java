@@ -3,7 +3,7 @@ package com.alphawallet.app.repository;
 import android.util.Log;
 
 import com.alphawallet.app.entity.ERC875ContractTransaction;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionContract;
 import com.alphawallet.app.entity.TransactionOperation;

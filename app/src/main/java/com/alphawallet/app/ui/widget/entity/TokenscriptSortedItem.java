@@ -1,7 +1,7 @@
 package com.alphawallet.app.ui.widget.entity;
 
 import com.alphawallet.app.ui.widget.holder.TokenscriptViewHolder;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 
 /**
  * Created by James on 31/05/2019.

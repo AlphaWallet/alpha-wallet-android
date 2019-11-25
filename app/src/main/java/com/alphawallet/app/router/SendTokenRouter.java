@@ -7,7 +7,7 @@ import android.content.Intent;
 import com.alphawallet.app.C;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.entity.QrUrlResult;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 
 public class SendTokenRouter {

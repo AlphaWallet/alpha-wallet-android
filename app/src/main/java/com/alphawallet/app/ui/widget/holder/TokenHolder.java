@@ -23,8 +23,8 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.Utils;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenTicker;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 
@@ -55,11 +55,12 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final TextView textIncomplete;
     public final View contractSeparator;
     public final LinearLayout layoutValueDetails;
+    public final LinearLayout extendedInfo;
+    public final TextView blockchain;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
-    private final TextView blockchain;
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
-    private final LinearLayout extendedInfo;
+
     private Handler handler;
 
     public Token token;
@@ -97,15 +98,10 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     @Override
     public void bind(@Nullable Token data, @NonNull Bundle addition) {
         this.token = data;
-//        if (! data.isERC20())
-//        {
-//            // TODO: apply styles for none ERC20 contracts
-//            contractType.setVisibility(View.GONE);
-//            contractSeparator.setVisibility(View.GONE);
-//        }
 
         try
         {
+            icon.setVisibility(View.GONE);
             symbolAux.setVisibility(View.GONE);
             tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             blockchain.setText(getString(R.string.blockchain, token.getNetworkName()));

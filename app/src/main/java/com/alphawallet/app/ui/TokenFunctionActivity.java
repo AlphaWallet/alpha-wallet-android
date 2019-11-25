@@ -2,12 +2,9 @@ package com.alphawallet.app.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -21,7 +18,7 @@ import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.widget.ProgressView;
@@ -30,7 +27,6 @@ import com.alphawallet.app.widget.SystemView;
 import javax.inject.Inject;
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Map;
 
 import static com.alphawallet.app.C.Key.TICKET;
 

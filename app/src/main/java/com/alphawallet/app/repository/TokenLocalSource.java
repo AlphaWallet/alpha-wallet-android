@@ -2,9 +2,8 @@ package com.alphawallet.app.repository;
 
 import io.reactivex.disposables.Disposable;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Ticker;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenTicker;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.entity.Wallet;
 
 import java.util.Map;

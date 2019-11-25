@@ -16,7 +16,7 @@ import android.widget.LinearLayout;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
@@ -93,7 +93,7 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
                 addButton(R.string.action_transfer);
                 break;
             case ERC875:
-            case ERC875LEGACY:
+            case ERC875_LEGACY:
                 addButton(R.string.action_use);
                 addButton(R.string.action_transfer);
                 addButton(R.string.action_sell);
@@ -120,7 +120,7 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
             case ERC721_LEGACY:
                 return 1;
             case ERC875:
-            case ERC875LEGACY:
+            case ERC875_LEGACY:
                 return 3;
             default:
                 return 0;

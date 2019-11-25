@@ -19,13 +19,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.alphawallet.app.entity.BackupTokenCallback;
-import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenInterface;
-import com.alphawallet.app.entity.TokensReceiver;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInterface;
+import com.alphawallet.app.entity.tokens.TokensReceiver;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.WarningData;

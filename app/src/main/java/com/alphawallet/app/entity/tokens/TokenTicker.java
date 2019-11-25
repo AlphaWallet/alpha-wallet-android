@@ -1,8 +1,9 @@
-package com.alphawallet.app.entity;
+package com.alphawallet.app.entity.tokens;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.alphawallet.app.entity.Ticker;
 import com.google.gson.annotations.SerializedName;
 
 public class TokenTicker implements Parcelable {

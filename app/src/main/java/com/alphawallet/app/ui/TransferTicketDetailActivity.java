@@ -22,13 +22,13 @@ import android.view.WindowManager;
 import android.widget.*;
 
 import com.alphawallet.app.entity.ENSCallback;
-import com.alphawallet.app.entity.ERC721Token;
+import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.Ticket;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Ticket;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteUrlAdapter;

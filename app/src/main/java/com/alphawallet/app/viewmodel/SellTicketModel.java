@@ -7,7 +7,7 @@ import android.support.annotation.Nullable;
 
 import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;

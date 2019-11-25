@@ -18,7 +18,7 @@ import com.alphawallet.app.util.KittyUtils;
 
 import com.alphawallet.app.R;
 
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.opensea.Trait;

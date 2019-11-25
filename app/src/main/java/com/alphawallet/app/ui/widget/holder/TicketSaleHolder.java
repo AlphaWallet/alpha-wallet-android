@@ -11,7 +11,7 @@ import android.widget.CompoundButton;
 
 import android.widget.RelativeLayout;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.OnTokenCheckListener;
 import com.alphawallet.token.entity.TicketRange;

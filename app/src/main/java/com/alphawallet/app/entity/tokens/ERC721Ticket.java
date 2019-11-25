@@ -147,16 +147,15 @@ public class ERC721Ticket extends Token implements Parcelable {
         tokenHolder.balanceCurrency.setText("--");
         tokenHolder.textAppreciation.setText("--");
 
-        tokenHolder.contractType.setVisibility(View.VISIBLE);
-        tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
-        if (contractType == ContractType.ERC875_LEGACY)
-        {
-            tokenHolder.contractType.setText(R.string.erc875legacy);
-        }
-        else
-        {
-            tokenHolder.contractType.setText(R.string.erc875);
-        }
+        tokenHolder.issuer.setText(R.string.ethereum);
+        tokenHolder.contractType.setVisibility(View.GONE);
+        tokenHolder.contractSeparator.setVisibility(View.GONE);
+        tokenHolder.layoutValueDetails.setVisibility(View.GONE);
+        tokenHolder.icon.setVisibility(View.GONE);
+        tokenHolder.icon.setImageResource(R.drawable.ic_ethereum);
+        tokenHolder.chainName.setVisibility(View.GONE);
+        tokenHolder.extendedInfo.setVisibility(View.VISIBLE);
+        tokenHolder.blockchain.setVisibility(View.GONE);
 
         tokenHolder.balanceEth.setText(String.valueOf(getTicketCount()));
         tokenHolder.layoutValueDetails.setVisibility(View.GONE);
@@ -184,30 +183,6 @@ public class ERC721Ticket extends Token implements Parcelable {
     public List<Integer> ticketIdStringToIndexList(String userList)
     {
         return null;
-    }
-
-    /**
-     * Routine to blank a ticket on a page. It can be static because it doesn't use any class members
-     * It will throw an exception if given an activity page with no ticket on it
-     * @param activity
-     * @param blankingString
-     */
-    public static void blankTicketHolder(int blankingString, BaseActivity activity)
-    {
-        try
-        {
-            TextView textAmount = activity.findViewById(R.id.amount);
-            TextView textTicketName = activity.findViewById(R.id.name);
-            TextView textVenue = activity.findViewById(R.id.venue);
-
-            textAmount.setText("");
-            textTicketName.setText(blankingString);
-            textVenue.setText("");
-        }
-        catch (Exception e)
-        {
-            Log.d("TICKET", e.getMessage());
-        }
     }
 
     private void blankTicketExtra(View activity)
@@ -407,11 +382,6 @@ public class ERC721Ticket extends Token implements Parcelable {
     }
 
     @Override
-    public boolean isToken() {
-        return false;
-    }
-
-    @Override
     protected String addSuffix(String result, Transaction transaction)
     {
         return result;
@@ -441,7 +411,7 @@ public class ERC721Ticket extends Token implements Parcelable {
     }
 
     /**
-     * Detect a change of balance for ERC875 balance
+     * Detect a change of balance for ERC721 balance
      * @param balanceArray
      * @return
      */
@@ -475,4 +445,9 @@ public class ERC721Ticket extends Token implements Parcelable {
     public boolean isERC875() {
         return false;
     }
+    @Override
+    public boolean isToken() {
+        return false;
+    }
+
 }

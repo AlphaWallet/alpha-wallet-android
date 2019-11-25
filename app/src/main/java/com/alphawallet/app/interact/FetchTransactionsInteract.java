@@ -62,6 +62,8 @@ public class FetchTransactionsInteract {
         {
             case ERC20:
             case ERC721:
+            case ERC721_LEGACY:
+            case ERC721_TICKET:
                 return Single.fromCallable(() -> type);
             case ERC875:
                 //requires additional handling to determine if it's Legacy type, but safe to return ERC875 for now:

@@ -45,7 +45,7 @@ public class QRSelectionTest
 
     private class QREncoding
     {
-        List<Integer> indices = new ArrayList<>();
+        List<BigInteger> indices = new ArrayList<>();
         SignaturePair sigPair;
     }
 
@@ -61,8 +61,7 @@ public class QRSelectionTest
         transactionRepository = new TransactionRepositoryType()
         {
             @Override
-            public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet, int maxTransactions)
-            {
+            public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet, int maxTransactions, List<Integer> networkFilters) {
                 return null;
             }
 
@@ -155,7 +154,7 @@ public class QRSelectionTest
         {
             @Override
             //TODO: Sign message here not in the additional field
-            public Single<MessagePair> getMessage(List<Integer> indexList, String contract)
+            public Single<MessagePair> getMessage(List<BigInteger> indexList, String contract, ContractType contractType)
             {
                 return Single.fromCallable(() -> {
                     String selectionStr = SignaturePair.generateSelection(indexList);
@@ -191,14 +190,14 @@ public class QRSelectionTest
             {
                 if (k.testBit(radix))
                 {
-                    qr.indices.add(radix + 1);
+                    qr.indices.add(BigInteger.valueOf(radix + 1));
                     k = k.clearBit(radix);
                 }
                 radix++;
             }
 
             MessagePair messagePair = signatureGenerateInteract
-                    .getMessage(qr.indices, CONTRACT_ADDR).blockingGet();
+                    .getMessage(qr.indices, CONTRACT_ADDR, ContractType.ERC875).blockingGet();
 
             byte[] sig = transactionRepository
                     .getSignatureFast(null, "hackintosh", messagePair.message.getBytes(), 1).blockingGet();

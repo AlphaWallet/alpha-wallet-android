@@ -214,10 +214,10 @@ public class Ticket extends Token implements Parcelable
      * @param ticketIds
      * @return
      */
-    public List<Integer> ticketIdListToIndexList(List<BigInteger> ticketIds)
+    public List<BigInteger> ticketIdListToIndexList(List<BigInteger> ticketIds)
     {
         //read given indicies and convert into internal format, error checking to ensure
-        List<Integer> idList = new ArrayList<>();
+        List<BigInteger> idList = new ArrayList<>();
 
         try
         {
@@ -228,9 +228,9 @@ public class Ticket extends Token implements Parcelable
                     int index = balanceArray.indexOf(id);
                     if (index > -1)
                     {
-                        if (!idList.contains(index)) //just make sure they didn't already add this one
+                        if (!idList.contains(BigInteger.valueOf(index))) //just make sure they didn't already add this one
                         {
-                            idList.add(index);
+                            idList.add(BigInteger.valueOf(index));
                         }
                     }
                     else

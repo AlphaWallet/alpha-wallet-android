@@ -1,5 +1,7 @@
 package com.alphawallet.app.entity;
 
+import org.web3j.utils.Numeric;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,31 +56,40 @@ public class SignaturePair
         return selectionStr + signatureStr;
     }
 
+    //should only be one by one for now
+    public static String generateSelection721Tickets(List<BigInteger> tokenIds) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for(BigInteger token: tokenIds) {
+            stringBuilder.append(Numeric.toHexStringNoPrefix(token));
+            stringBuilder.append(",");
+        }
+        return stringBuilder.substring(0, stringBuilder.length() - 1);
+    }
+
     /**
      * Generate a compact string representation of the indices of an
      * ERC875 asset.  Notice that this function is not used in this
      * class. It is used to return the selectionStr to be used as a
      * parameter of the constructor */
-    public static String generateSelection(List<Integer> indexList)
+    public static String generateSelection(List<BigInteger> indexList)
     {
-        String selection = null;
         Collections.sort(indexList); // just to find the lowest value
         // since sorting is not needed to make the bitFieldLookup
-        Integer lowestValue = indexList.get(0);
+        BigInteger lowestValue = indexList.get(0);
         final int NIBBLE = 4;
-        int zeroCount = lowestValue / NIBBLE;
+        int zeroCount = lowestValue.divide(BigInteger.valueOf(NIBBLE)).intValue();
         // now reduce the index to base of this value
         int correctionFactor = zeroCount * NIBBLE;
         // TODO: Check for highest value out of range of bitfield. Like this:
-        Integer highestValue = indexList.get(indexList.size() - 1);
+        BigInteger highestValue = indexList.get(indexList.size() - 1);
 
 
         /* the method here is easier to express with matrix programming like this:
         indexList = indexList - correctionFactor # reduce every element of the list by an int
         selection = sum(2^indexList)             # raise every element and add the result back */
         BigInteger bitFieldLookup = BigInteger.ZERO;
-        for (Integer i : indexList) {
-            BigInteger adder = BigInteger.valueOf(2).pow(i - correctionFactor);
+        for (BigInteger i : indexList) {
+            BigInteger adder = BigInteger.valueOf(2).pow(i.intValue() - correctionFactor);
             bitFieldLookup = bitFieldLookup.add(adder);
         }
         String truncatedValueDecimal = bitFieldLookup.toString(10); //decimal of reduced bitfield
@@ -89,7 +100,7 @@ public class SignaturePair
         String formatZeros = "%1$0" + TRAILING_ZEROES_SIZE + "d";
         sb.append(String.format(formatDecimals, truncatedValueDecimal.length()));
         sb.append(String.format(formatZeros, zeroCount));
-        sb.append(String.valueOf(truncatedValueDecimal));
+        sb.append(truncatedValueDecimal);
 
         return sb.toString();
     }

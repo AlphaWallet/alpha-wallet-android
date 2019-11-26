@@ -63,7 +63,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private final MutableLiveData<Boolean> signRequest = new MutableLiveData<>();
 
     private Disposable memPoolSubscription;
-    private List<Integer> ticketIndicies;
+    private List<BigInteger> tickets;
     private Token token;
 
     @Nullable
@@ -151,9 +151,9 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
             //See if our indices got burned
             if (balance != null)
             {
-                for (Integer index : this.ticketIndicies)
+                for (BigInteger index : this.tickets)
                 {
-                    if (!balance.get(index).equals(BigInteger.ZERO))
+                    if (!balance.get(index.intValue()).equals(BigInteger.ZERO))
                     {
                         allBurned = false;
                         break;
@@ -182,7 +182,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
                     .subscribe();
         }
 
-        ticketIndicies.clear();
+        tickets.clear();
         burnNotice.postValue(true);
     }
 
@@ -202,7 +202,14 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     public void prepare(String address, Token ticket, TicketRange ticketRange) {
         this.address = address;
         token = ticket;
-        this.ticketIndicies = ((Ticket)ticket).ticketIdListToIndexList(ticketRange.tokenIds);
+        if(ticket instanceof Ticket)
+        {
+            this.tickets = ((Ticket)ticket).ticketIdListToIndexList(ticketRange.tokenIds);
+        }
+        else
+        {
+            this.tickets = ticketRange.tokenIds;
+        }
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -217,7 +224,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     public void updateSignature(Wallet wallet)
     {
         signatureGenerateInteract
-                .getMessage(ticketIndicies, token.getAddress())
+                .getMessage(tickets, token.getAddress(), this.token.getInterfaceSpec())
                 .subscribe(pair -> onSignMessage(pair, wallet), this::onError);
     }
 
@@ -270,9 +277,9 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         for (Uint16 indexVal : burnList)
         {
             Integer index = indexVal.getValue().intValue();
-            if (ticketIndicies.contains(index))
+            if (tickets.contains(index))
             {
-                ticketIndicies.remove(index);
+                tickets.remove(index);
             }
         }
     }
@@ -280,7 +287,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private void onSaved()
     {
         //display 'burn complete'
-        if (ticketIndicies.size() == 0)
+        if (tickets.size() == 0)
         {
             ticketsBurned();
         }

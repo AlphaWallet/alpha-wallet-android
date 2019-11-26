@@ -1067,7 +1067,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 cType = ContractType.ERC721;
                 break;
             case "erc721Ticket":
-                cType = ERC721_TICKET;
+                cType = ContractType.ERC721_TICKET;
                 break;
             case "ethereum":
                 cType = ContractType.CURRENCY;

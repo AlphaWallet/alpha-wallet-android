@@ -76,6 +76,7 @@ import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import static android.os.FileObserver.ALL_EVENTS;
+import static com.alphawallet.app.entity.ContractType.ERC721_TICKET;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
 
@@ -1064,6 +1065,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 break;
             case "erc721":
                 cType = ContractType.ERC721;
+                break;
+            case "erc721Ticket":
+                cType = ContractType.ERC721_TICKET;
                 break;
             case "ethereum":
                 cType = ContractType.CURRENCY;

@@ -92,9 +92,9 @@ public class ContractTransactionHolder extends BinderViewHolder<Transaction> imp
         if (!TextUtils.isEmpty(error)) {
             typeIcon.setImageResource(R.drawable.ic_error_outline_black_24dp);
         } else if (isSent) {
-            typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
-        } else {
             typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+        } else {
+            typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
         }
         address.setText(isSent ? to : from);
         value.setTextColor(ContextCompat.getColor(getContext(), isSent ? R.color.red : R.color.green));

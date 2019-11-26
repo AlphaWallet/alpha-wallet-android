@@ -187,7 +187,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         }
         //if dev mode, and token is not ethereum show contract
         boolean devMode = (checkWritePermission() && EthereumNetworkRepository.extraChains() == null);
-        if (devMode && token == null || token.isEthereum() || currentMode == MODE_CONTRACT) //only is developer mode
+        if (!devMode || token == null || token.isEthereum() || currentMode == MODE_CONTRACT)
         {        //remove contract address
             menu.findItem(R.id.action_show_contract)
                     .setVisible(false);

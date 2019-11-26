@@ -17,7 +17,6 @@
     app:popupTheme="@style/AppTheme.PopupOverlay"
     app:titleTextAppearance="@style/AppTheme.Toolbar.Title">
 
-
     <TextView
         android:id="@+id/toolbar_title"
         android:layout_width="wrap_content"
@@ -31,7 +30,6 @@
         android:paddingRight="15dp"
         android:singleLine="true"
         android:textColor="@color/semi_dark_grey"
-        android:textSize="25sp" />
-
+        android:textSize="20sp" />
 
 </android.support.v7.widget.Toolbar>

@@ -32,7 +32,7 @@
             android:fontFamily="@font/font_light"
             android:gravity="center"
             android:singleLine="true"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="@color/semi_dark_grey"
             android:textSize="20sp" />
 
         <LinearLayout

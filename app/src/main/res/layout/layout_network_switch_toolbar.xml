@@ -28,8 +28,8 @@
         android:paddingLeft="2dp"
         android:paddingRight="2dp"
         android:singleLine="true"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="25sp"
+        android:textColor="@color/semi_dark_grey"
+        android:textSize="20sp"
         android:visibility="gone" />
 
     <RelativeLayout

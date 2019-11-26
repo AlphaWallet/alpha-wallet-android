@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.view.ViewGroup;
+
+import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.bumptech.glide.Glide;
 import com.alphawallet.app.ui.widget.entity.AssetInstanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.AssetSortedItem;
@@ -63,6 +65,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         openseaService = opensea;
         if (t instanceof Ticket) setToken(t);
         if (t instanceof ERC721Token) setERC721Tokens(t, null);
+        if (t instanceof ERC721Ticket) setERC721Tickets(t);
     }
 
     public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token token, String ticketIds, AssetDefinitionService service, OpenseaService opensea)
@@ -73,6 +76,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         if (token.isERC875()) setTokenRange(token, ticketIds);
         openseaService = opensea;
         if (token instanceof ERC721Token) setERC721Tokens(token, ticketIds);
+        if (token instanceof ERC721Ticket) setERC721Tickets(token);
     }
 
     public NonFungibleTokenAdapter(Token token, String displayIds, AssetDefinitionService service)
@@ -143,6 +147,27 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
                 assetCount++;
             }
         }
+        items.endBatchedUpdates();
+    }
+
+    protected void setERC721Tickets(Token token)
+    {
+        if (!(token instanceof ERC721Ticket)) return;
+        items.beginBatchedUpdates();
+        items.clear();
+        items.add(new TokenBalanceSortedItem(token));
+        assetCount = token.getArrayBalance().size();
+        int holderType = TokenIdSortedItem.VIEW_TYPE;
+
+        if (assetService.hasTokenView(token.tokenInfo.chainId, token.getAddress()))
+        {
+            containsScripted = true;
+            holderType = AssetInstanceSortedItem.VIEW_TYPE;
+        }
+
+        List<TicketRangeElement> sortedList = generateSortedList(assetService, token, token.getArrayBalance()); //generate sorted list
+        addSortedItems(sortedList, token, holderType); //insert sorted items into view
+
         items.endBatchedUpdates();
     }
 

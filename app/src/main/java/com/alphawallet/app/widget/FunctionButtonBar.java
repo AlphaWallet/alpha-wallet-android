@@ -92,6 +92,10 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
             case ERC721_LEGACY:
                 addButton(R.string.action_transfer);
                 break;
+            case ERC721_TICKET:
+                addButton(R.string.action_use);
+                addButton(R.string.action_transfer);
+                break;
             case ERC875:
             case ERC875_LEGACY:
                 addButton(R.string.action_use);
@@ -119,6 +123,8 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
             case ERC721:
             case ERC721_LEGACY:
                 return 1;
+            case ERC721_TICKET:
+                return 2;
             case ERC875:
             case ERC875_LEGACY:
                 return 3;

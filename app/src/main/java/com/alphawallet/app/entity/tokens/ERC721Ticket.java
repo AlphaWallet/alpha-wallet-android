@@ -450,4 +450,14 @@ public class ERC721Ticket extends Token implements Parcelable {
         return false;
     }
 
+    @Override
+    public List<BigInteger> getTicketsAsBigIntList(String ticketIds) {
+        List<BigInteger> tokenIds = new ArrayList<>();
+        String[] tickets = ticketIds.split(",");
+        for(String ticket: tickets) {
+            tokenIds.add(new BigInteger(ticket, 16));
+        }
+        return tokenIds;
+    }
+
 }

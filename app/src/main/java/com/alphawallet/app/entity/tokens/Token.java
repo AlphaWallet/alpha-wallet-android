@@ -536,6 +536,7 @@ public class Token implements Parcelable
     }
     public void checkIsMatchedInXML(AssetDefinitionService assetService) { }
     public int[] getTicketIndices(String ticketIds) { return new int[0]; }
+    public List<BigInteger> getTicketsAsBigIntList(String ticketIds) { return new ArrayList<>(); }
     public boolean unspecifiedSpec() { return contractType == ContractType.NOT_SET; }
 
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx, boolean iconified) { }

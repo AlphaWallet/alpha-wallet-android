@@ -70,6 +70,18 @@ public class ERC721Ticket extends Token implements Parcelable {
         }
     }
 
+    public static final Creator<ERC721Ticket> CREATOR = new Creator<ERC721Ticket>() {
+        @Override
+        public ERC721Ticket createFromParcel(Parcel in) {
+            return new ERC721Ticket(in);
+        }
+
+        @Override
+        public ERC721Ticket[] newArray(int size) {
+            return new ERC721Ticket[size];
+        }
+    };
+
     @Override
     public String getStringBalance() {
         return intArrayToString(balanceArray, false);

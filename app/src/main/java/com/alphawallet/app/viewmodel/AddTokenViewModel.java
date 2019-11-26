@@ -280,6 +280,7 @@ public class AddTokenViewModel extends BaseViewModel {
             //test all the other networks
             List<Integer> networkIds = getNetworkIds();
             networkIds.remove((Integer)result.chainId);
+            networkCount--;
 
             scanNetworksDisposable = Observable.fromCallable(() -> networkIds)
                     .flatMapIterable(networkId -> networkId)

@@ -41,6 +41,7 @@ import com.alphawallet.app.ui.widget.OnTokenClickListener;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -63,20 +64,20 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         token = t;
         clickThrough = true;
         openseaService = opensea;
-        if (t instanceof Ticket) setToken(t);
-        if (t instanceof ERC721Token) setERC721Tokens(t, null);
-        if (t instanceof ERC721Ticket) setERC721Tickets(t);
+        if (token.isERC875()) setToken(t);
+        else if (token instanceof ERC721Token) setERC721Tokens(token, null);
+        else if (token instanceof ERC721Ticket) setERC721Tickets(token, null);
     }
 
-    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token token, String ticketIds, AssetDefinitionService service, OpenseaService opensea)
+    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, String ticketIds, AssetDefinitionService service, OpenseaService opensea)
     {
         super(tokenClickListener, service);
         assetCount = 0;
-        this.token = token;
-        if (token.isERC875()) setTokenRange(token, ticketIds);
+        token = t;
         openseaService = opensea;
-        if (token instanceof ERC721Token) setERC721Tokens(token, ticketIds);
-        if (token instanceof ERC721Ticket) setERC721Tickets(token);
+        if (token.isERC875()) setTokenRange(token, ticketIds);
+        else if (token instanceof ERC721Token) setERC721Tokens(token, ticketIds);
+        else if (token instanceof ERC721Ticket) setERC721Tickets(token, ticketIds);
     }
 
     public NonFungibleTokenAdapter(Token token, String displayIds, AssetDefinitionService service)
@@ -150,7 +151,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         items.endBatchedUpdates();
     }
 
-    protected void setERC721Tickets(Token token)
+    protected void setERC721Tickets(Token token, String ticketId) //ticketId is used when transfering single tickets
     {
         if (!(token instanceof ERC721Ticket)) return;
         items.beginBatchedUpdates();
@@ -165,7 +166,17 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
             holderType = AssetInstanceSortedItem.VIEW_TYPE;
         }
 
-        List<TicketRangeElement> sortedList = generateSortedList(assetService, token, token.getArrayBalance()); //generate sorted list
+        List<BigInteger> tokensToDisplay;
+        if (ticketId == null)
+        {
+            tokensToDisplay = token.getArrayBalance();
+        }
+        else
+        {
+            tokensToDisplay = new ArrayList<>(Collections.singletonList(new BigInteger(ticketId)));
+        }
+
+        List<TicketRangeElement> sortedList = generateSortedList(assetService, token, tokensToDisplay); //generate sorted list
         addSortedItems(sortedList, token, holderType); //insert sorted items into view
 
         items.endBatchedUpdates();

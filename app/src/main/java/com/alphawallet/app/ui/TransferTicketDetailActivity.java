@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.*;
 
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.ENSCallback;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.ErrorEnvelope;
@@ -369,7 +370,17 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
                 if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
                 else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
 
-                if (gotAuth) viewModel.generateUniversalLink(token.getTicketIndices(ticketIds), token.getAddress(), calculateExpiryTime());
+                if (gotAuth)
+                {
+                    if(token.getInterfaceSpec().equals(ContractType.ERC721_TICKET))
+                    {
+                        viewModel.generateSpawnLink(token.getTicketsAsBigIntList(ticketIds), token.getAddress(), calculateExpiryTime());
+                    }
+                    else
+                    {
+                        viewModel.generateUniversalLink(token.getTicketIndices(ticketIds), token.getAddress(), calculateExpiryTime());
+                    }
+                }
             }
 
             @Override

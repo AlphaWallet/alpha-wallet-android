@@ -2,6 +2,7 @@ package com.alphawallet.app.entity.tokenscript;
 
 import io.reactivex.Observable;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.token.entity.*;
 import com.alphawallet.token.tools.TokenDefinition;
@@ -525,7 +526,7 @@ public abstract class TokenscriptFunction
                     .retryOnConnectionFailure(false)
                     .build();
 
-            HttpService nodeService = new HttpService(MagicLinkInfo.getNodeURLByNetworkId(useAddress.chainId), okClient, false);
+            HttpService nodeService = new HttpService(EthereumNetworkRepository.getNodeURLByNetworkId(useAddress.chainId), okClient, false);
 
             Web3j web3j = Web3j.build(nodeService);
 

@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.alphawallet.token.entity.BadContract;
+import com.alphawallet.token.web.Service.EthRPCNodes;
 
 import okhttp3.OkHttpClient;
 
@@ -33,7 +34,7 @@ public class TransactionHandler
 
     public TransactionHandler(int networkId)
     {
-        String nodeURL = MagicLinkInfo.getNodeURLByNetworkId(networkId);
+        String nodeURL = EthRPCNodes.getNodeURLByNetworkId(networkId);
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(20, TimeUnit.SECONDS);
         builder.readTimeout(20, TimeUnit.SECONDS);

@@ -3,6 +3,8 @@ package com.alphawallet.token.web.Ethereum;
 import io.reactivex.Observable;
 import com.alphawallet.token.entity.*;
 import com.alphawallet.token.tools.TokenDefinition;
+import com.alphawallet.token.web.Service.EthRPCNodes;
+
 import okhttp3.OkHttpClient;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
@@ -608,7 +610,7 @@ public abstract class TokenscriptFunction
                     .retryOnConnectionFailure(false)
                     .build();
 
-            HttpService nodeService = new HttpService(MagicLinkInfo.getNodeURLByNetworkId(useAddress.chainId), okClient, false);
+            HttpService nodeService = new HttpService(EthRPCNodes.getNodeURLByNetworkId(useAddress.chainId), okClient, false);
 
             Web3j web3j = Web3j.build(nodeService);
 

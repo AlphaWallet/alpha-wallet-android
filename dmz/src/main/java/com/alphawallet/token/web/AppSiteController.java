@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -88,6 +89,7 @@ public class AppSiteController implements AttributeInterface
     private final MagicLinkData magicLinkData = new MagicLinkData();
     private final TokenscriptFunction tokenscriptFunction = new TokenscriptFunction() { };
     private static Path repoDir;
+    private static String infuraKey = "da3717f25f824cc1baa32d812386d93f";
 
     @GetMapping(value = "/apple-app-site-association", produces = "application/json")
     @ResponseBody
@@ -372,6 +374,8 @@ public class AppSiteController implements AttributeInterface
                 System.out.println(" ------------");
             });
         }
+
+        loadInfuraKey();
 	}
 
     private static void addContractAddresses(Path path) {
@@ -534,5 +538,32 @@ public class AppSiteController implements AttributeInterface
             status = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<String>(result.toJson(), status);
+    }
+
+    private static void loadInfuraKey()
+    {
+        try (InputStream input = new FileInputStream("../gradle.properties")) {
+
+            Properties prop = new Properties();
+
+            if (input == null) {
+                return;
+            }
+
+            //load a properties file from class path, inside static method
+            prop.load(input);
+
+            //get the property value and print it out
+            infuraKey = prop.getProperty("infuraAPI");
+
+        } catch (IOException ex) {
+            System.out.println("Locate gradle.properties");
+            ex.printStackTrace();
+        }
+    }
+
+    public static String getInfuraKey()
+    {
+        return infuraKey;
     }
 }

@@ -225,7 +225,7 @@ public class TransactionsViewModel extends BaseViewModel
             Log.d(TAG, "Fetch start");
 
             fetchTransactionDisposable =
-                    fetchTransactionsInteract.fetchCached(wallet, MAX_DISPLAYABLE_TRANSACTIONS)
+                    fetchTransactionsInteract.fetchCached(wallet, MAX_DISPLAYABLE_TRANSACTIONS, tokensService.getNetworkFilters())
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(this::onTransactions, this::onError, this::startEventTimer);
@@ -350,32 +350,6 @@ public class TransactionsViewModel extends BaseViewModel
     public void showDetails(Context context, Transaction transaction) {
         transactionDetailRouter.open(context, transaction);
     }
-
-    /**
-     * Detect any termination function. If we see one of these there's no need to do any further checking for this token
-     * @param //transactions
-     * @return
-     */
-//    private Transaction[] checkForContractTerminator(Transaction[] transactions)
-//    {
-//        if (transactions.length == 0) return transactions;
-//
-//        for (int index = transactions.length - 1; index >= 0; index--)
-//        {
-//            Transaction tx = transactions[index];
-//            TransactionContract ct = tx == null ?
-//                    null : tx.getOperation();
-//            if (ct != null && ct.getOperationType() == TransactionType.TERMINATE_CONTRACT)
-//            {
-//                Token t = tokensService.getToken(tx.chainId, tx.to);
-//                if (t != null) setupTokensInteract.terminateToken(tokensService.getToken(t.tokenInfo.chainId, t.getAddress()),
-//                                                                  defaultWallet().getValue(), defaultNetwork().getValue());
-//                tokensService.setTerminationFlag();
-//                break;
-//            }
-//        }
-//        return transactions;
-//    }
 
     public TokensService getTokensService()
     {

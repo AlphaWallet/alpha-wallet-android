@@ -14,6 +14,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import com.alphawallet.app.service.TokensService;
 
+import java.util.List;
+
 public class FetchTransactionsInteract {
 
     private final TransactionRepositoryType transactionRepository;
@@ -25,9 +27,9 @@ public class FetchTransactionsInteract {
         this.tokenRepository = tokenRepositoryType;
     }
 
-    public Observable<Transaction[]> fetchCached(Wallet wallet, int maxTransactions) {
+    public Observable<Transaction[]> fetchCached(Wallet wallet, int maxTransactions, List<Integer> networkFilters) {
         return transactionRepository
-                .fetchCachedTransactions(wallet, maxTransactions)
+                .fetchCachedTransactions(wallet, maxTransactions, networkFilters)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

@@ -37,7 +37,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     }
 
 	@Override
-	public Single<Transaction[]> fetchTransaction(Wallet wallet, int maxTransactions) {
+	public Single<Transaction[]> fetchTransaction(Wallet wallet, int maxTransactions, List<Integer> networkFilters) {
         return Single.fromCallable(() -> {
             try (Realm instance = realmManager.getRealmInstance(wallet))
             {
@@ -45,7 +45,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                         .sort("timeStamp", Sort.DESCENDING)
                         .findAll();
                 Log.d(TAG, "Found " + txs.size() + " TX Results");
-                return convertCount(txs, maxTransactions);
+                return convertCount(txs, maxTransactions, networkFilters);
             }
             catch (Exception e)
             {
@@ -253,13 +253,21 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         return result;
     }
 
-    private Transaction[] convertCount(RealmResults<RealmTransaction> items, int maxTransactions) {
+    private Transaction[] convertCount(RealmResults<RealmTransaction> items, int maxTransactions, List<Integer> networkFilters) {
+        List<Transaction> retrievedTransactions = new ArrayList<>();
         int len = items.size() > maxTransactions ? maxTransactions : items.size();
-        Transaction[] result = new Transaction[len];
-        for (int i = 0; i < len; i++) {
-            result[i] = convert(items.get(i));
+        for (RealmTransaction item : items)
+        {
+            Transaction tx = convert(item);
+            if (networkFilters.contains(tx.chainId))
+            {
+                retrievedTransactions.add(tx);
+            }
+
+            if (retrievedTransactions.size() >= len) break;
         }
-        return result;
+
+        return retrievedTransactions.toArray(new Transaction[0]);
     }
 
     private Transaction convert(RealmTransaction rawItem) {

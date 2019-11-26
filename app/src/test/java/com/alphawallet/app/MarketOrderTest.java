@@ -20,6 +20,7 @@ import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -62,11 +63,6 @@ public class MarketOrderTest
                 // this prevents StackOverflowErrors when scheduling with a delay
                 return super.scheduleDirect(run, 0, unit);
             }
-
-//            @Override
-//            public Worker createWorker() {
-//                return new ExecutorScheduler.ExecutorWorker(Runnable::run);
-//            }
         };
 
         RxJavaPlugins.setInitIoSchedulerHandler(scheduler -> immediate);
@@ -86,8 +82,7 @@ public class MarketOrderTest
         transactionRepository = new TransactionRepositoryType() {
 
             @Override
-            public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet, int maxTransactions)
-            {
+            public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet, int maxTransactions, List<Integer> networkFilters) {
                 return null;
             }
 

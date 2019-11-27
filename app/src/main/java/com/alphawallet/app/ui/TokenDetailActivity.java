@@ -84,12 +84,6 @@ public class TokenDetailActivity extends BaseActivity {
         setNameAndDesc(asset);
         setExternalLink(asset);
         setTraits(asset);
-
-//        if (token instanceof ERC721Token)
-//        {
-//            findViewById(R.id.button_transfer).setVisibility(View.GONE);
-//        }
-
         findViewById(R.id.button_transfer).setOnClickListener(v -> {
             openTransferDirectDialog();
         });

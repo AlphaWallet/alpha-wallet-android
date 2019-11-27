@@ -19,8 +19,6 @@ import com.alphawallet.token.entity.TicketRange;
  */
 public class TicketRangeParcel implements Parcelable
 {
-    //public final int seatStart;
-    //public int seatCount;
     public TicketRange range;
 
     public TicketRangeParcel(TicketRange t)

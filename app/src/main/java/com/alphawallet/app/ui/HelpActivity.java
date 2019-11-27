@@ -83,12 +83,6 @@ public class HelpActivity extends BaseActivity {
         contactUs.setOnClickListener(v -> {
             helpIntent();
         });
-
-//        TextView textForceCrash = findViewById(R.id.test_crash);
-//        textForceCrash.setOnClickListener(v -> {
-//            Crashlytics.log("Test Crash Log");
-//            Crashlytics.getInstance().crash();
-//        });
     }
 
     private void helpIntent()

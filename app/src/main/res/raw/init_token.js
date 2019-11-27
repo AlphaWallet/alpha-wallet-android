@@ -15,15 +15,6 @@ function executeCallback (id, error, value) {
     delete window.web3CallBacks[id]
 }
 
-// class TokenScriptDef {
-//         constructor(addr, tokenDef) {
-//           this.address = addr;
-//           this.token = tokenDef;
-//         }
-//       }
-//
-// var web3 = new TokenScriptDef(walletAddress, _currentTokenInstance)
-
 web3 = {
     personal: {
         sign: function (msgParams, cb) {

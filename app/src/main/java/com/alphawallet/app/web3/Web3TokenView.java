@@ -63,7 +63,6 @@ public class Web3TokenView extends WebView
         webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setDisplayZoomControls(false);
-        //webSettings.setLoadWithOverviewMode(false);
         webSettings.setDomStorageEnabled(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

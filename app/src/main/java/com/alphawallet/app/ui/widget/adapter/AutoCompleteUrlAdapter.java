@@ -139,7 +139,6 @@ public class AutoCompleteUrlAdapter extends ArrayAdapter<String>
 
     public void addDAppURL(String url)
     {
-//        if (url.contains(DAPP_DEFAULT_URL)) return;
         // don't record the homepage
 
         String checkVal = url.replaceFirst("^(http[s]?://www\\.|http[s]?://|www\\.)","");

@@ -136,10 +136,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         if (ticketSendIndexList == null || ticketSendIndexList.length == 0)
             return; //TODO: Display error message
 
-        //For testing:
-        //GenerateSpawnLink(new ArrayList<BigInteger>(), contractAddress, expiry);
-        //GenerateDispensoryLink(expiry);
-
         //NB tradeBytes is the exact bytes the ERC875 contract builds to check the valid order.
         //This is what we must sign.
         byte[] tradeBytes = parser.getTradeBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, expiry);

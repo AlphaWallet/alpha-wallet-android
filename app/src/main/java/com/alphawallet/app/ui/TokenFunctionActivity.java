@@ -78,7 +78,6 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         toolbar();
         setTitle(getString(R.string.token_function));
 
-        //setupFunctions();
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
         viewModel.getCurrentWallet();
     }

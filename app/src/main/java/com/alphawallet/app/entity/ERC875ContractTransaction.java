@@ -78,7 +78,6 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         operation = TransactionType.values()[typeCode];
         type = in.readInt();
         otherParty = in.readString();
-        //operationDisplayName = in.readString();
         int arrayCount = in.readInt();
         indices = new ArrayList<>();
         if (arrayCount > 0)

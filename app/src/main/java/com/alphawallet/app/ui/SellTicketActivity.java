@@ -125,12 +125,6 @@ public class SellTicketActivity extends BaseActivity implements OnTokenClickList
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.action_next: {
-//                onNext();
-//            }
-//            break;
-//        }
         return super.onOptionsItemSelected(item);
     }
 

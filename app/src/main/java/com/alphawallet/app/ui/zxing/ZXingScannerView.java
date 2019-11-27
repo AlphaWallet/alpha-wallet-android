@@ -33,7 +33,6 @@ public class ZXingScannerView extends BarcodeScannerView
     {
         ALL_FORMATS.add(BarcodeFormat.QR_CODE);
         ALL_FORMATS.add(BarcodeFormat.AZTEC);
-        //ALL_FORMATS.add(BarcodeFormat.MAXICODE);
     }
 
     public ZXingScannerView(Context context) {

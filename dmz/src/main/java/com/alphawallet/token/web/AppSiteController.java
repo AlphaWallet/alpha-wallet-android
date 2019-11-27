@@ -383,7 +383,7 @@ public class AppSiteController implements AttributeInterface
             TokenDefinition token = new TokenDefinition(input, new Locale("en"), null);
             ContractInfo holdingContracts = token.contracts.get(token.holdingToken);
             if (holdingContracts != null)
-                holdingContracts.addresses.keySet().stream().forEach(network -> addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), path.toString()))); //map.put(network, networkAddresses(holdingContracts.addresses.get(network), path.toString())));
+                holdingContracts.addresses.keySet().stream().forEach(network -> addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), path.toString())));
         } catch (IOException | SAXException e) {
             throw new RuntimeException(e); // make it safe to use in stream
         }

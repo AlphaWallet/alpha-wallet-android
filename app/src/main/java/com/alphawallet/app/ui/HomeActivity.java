@@ -244,25 +244,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-//    public void showFindWalletAddressDialog() {
-//        if (!viewModel.isFindWalletAddressDialogShown()) {
-//            findWalletAddressDialog = TutoShowcase.from(this);
-//            findWalletAddressDialog.setContentView(R.layout.showcase_find_wallet)
-//                    .onClickContentView(R.id.btn_close, view -> {
-//                        findWalletAddressDialog.dismiss();
-//                        findWalletAddressDialog = null;
-//                    })
-//                    .on(R.id.layout_nav_settings)
-//                    .addCircle()
-//                    .onClick(v -> {
-//                        findWalletAddressDialog.dismiss();
-//                        findWalletAddressDialog = null;
-//                    })
-//                    .show();
-//            viewModel.setFindWalletAddressDialogShown(true);
-//        }
-//    }
-
     private void onWalletName(String name) {
         if (name != null && !name.isEmpty()) {
             walletTitle = name;

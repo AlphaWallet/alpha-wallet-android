@@ -17,7 +17,6 @@ public class SellTicketRouter
         Intent intent = new Intent(context, SellTicketActivity.class);
         intent.putExtra(C.Key.TICKET, token);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        //intent.putExtra(TICKET_RANGE, range);
         context.startActivity(intent);
     }
 }

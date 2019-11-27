@@ -62,8 +62,5 @@ public class TokenSortedItem extends SortedItem<Token> {
         {
             return false;
         }
-
-//        return other.viewType == TokenHolder.VIEW_TYPE
-//                && ((TokenSortedItem) other).value.tokenInfo.address.equalsIgnoreCase(value.tokenInfo.address);
     }
 }

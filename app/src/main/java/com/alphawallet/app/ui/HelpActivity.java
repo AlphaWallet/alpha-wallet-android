@@ -2,25 +2,16 @@ package com.alphawallet.app.ui;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 
-import android.widget.Toast;
-
 import com.alphawallet.app.entity.MediaLinks;
-import com.amazonaws.auth.CognitoCachingCredentialsProvider;
-import com.amazonaws.mobileconnectors.lambdainvoker.LambdaFunctionException;
-import com.amazonaws.mobileconnectors.lambdainvoker.LambdaInvokerFactory;
-import com.amazonaws.regions.Regions;
 import com.alphawallet.app.ui.widget.adapter.HelpAdapter;
-import com.alphawallet.app.util.TrustAddressGenerator;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.HelpItem;
@@ -83,12 +74,6 @@ public class HelpActivity extends BaseActivity {
         contactUs.setOnClickListener(v -> {
             helpIntent();
         });
-
-//        TextView textForceCrash = findViewById(R.id.test_crash);
-//        textForceCrash.setOnClickListener(v -> {
-//            Crashlytics.log("Test Crash Log");
-//            Crashlytics.getInstance().crash();
-//        });
     }
 
     private void helpIntent()

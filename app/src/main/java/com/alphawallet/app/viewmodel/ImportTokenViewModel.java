@@ -15,10 +15,10 @@ import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Ticker;
-import com.alphawallet.app.entity.Ticket;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenFactory;
-import com.alphawallet.app.entity.TokenInfo;
+import com.alphawallet.app.entity.tokens.Ticket;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenFactory;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
@@ -94,7 +94,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
 
     private MagicLinkData importOrder;
-    private String univeralImportLink;
+    private String universalImportLink;
     private Token importToken;
     private List<BigInteger> availableBalance = new ArrayList<>();
     private double ethToUsd = 0;
@@ -152,7 +152,7 @@ public class ImportTokenViewModel extends BaseViewModel
     public double getUSDPrice() { return ethToUsd; }
 
     public void prepare(String importDataStr) {
-        univeralImportLink = importDataStr;
+        universalImportLink = importDataStr;
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onWallet, this::onError);
@@ -185,13 +185,11 @@ public class ImportTokenViewModel extends BaseViewModel
         try
         {
             currentRange = null;
-            importOrder = parser.parseUniversalLink(univeralImportLink);
+            importOrder = parser.parseUniversalLink(universalImportLink);
             //ecrecover the owner
             importOrder.ownerAddress = parser.getOwnerKey(importOrder);
             //see if we picked up a network from the link
             checkContractNetwork.postValue(importOrder.contractAddress);
-            //simultaneously check certificate
-            //assetDefinitionService.getSignatureData(importOrder.chainId, importOrder.contractAddress);
         }
         catch (SalesOrderMalformed e)
         {
@@ -453,7 +451,7 @@ public class ImportTokenViewModel extends BaseViewModel
         try
         {
             initParser();
-            MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
+            MagicLinkData order = parser.parseUniversalLink(universalImportLink);
             //calculate gas settings
             final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
             GasSettings settings = gasService.getGasSettings(tradeData, true, importOrder.chainId);
@@ -470,7 +468,7 @@ public class ImportTokenViewModel extends BaseViewModel
     {
         try
         {
-            MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
+            MagicLinkData order = parser.parseUniversalLink(universalImportLink);
             //ok let's try to drive this guy through
             final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
             Log.d(TAG, "Approx value of trade: " + order.price);
@@ -494,7 +492,7 @@ public class ImportTokenViewModel extends BaseViewModel
         try
         {
             initParser();
-            MagicLinkData order = parser.parseUniversalLink(univeralImportLink);
+            MagicLinkData order = parser.parseUniversalLink(universalImportLink);
             disposable = alphaWalletService.handleFeemasterImport(url, wallet.getValue(), network.getValue().chainId, order)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

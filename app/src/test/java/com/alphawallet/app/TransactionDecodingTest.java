@@ -54,8 +54,6 @@ public class TransactionDecodingTest {
             for (String testInput : inputTestList) {
                 i = t.decodeInput(testInput);
                 if (i != null && i.functionData != null) {
-                    //System.out.println("Function: " + i.functionData.functionName);
-
                     switch (i.functionData.functionName) {
                         case "trade":
                             assertEquals(3, i.sigData.size());

@@ -14,7 +14,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.entity.ERC875ContractTransaction;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionLookup;
 import com.alphawallet.app.entity.TransactionMeta;
@@ -278,7 +278,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
                 typeIcon.setImageResource(R.drawable.ic_transactions);
                 value.setTextColor(ContextCompat.getColor(getContext(), R.color.warning_dark_red));
             }
-            else if (!isSent)
+            if (!isSent)
             {
                 typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
             }
@@ -323,17 +323,26 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         Token token = tokensService.getToken(transaction.chainId, operation.contract.address);
 
         String from = operation.from;
-
         String supplimentalTxt = "";
 
         boolean isSent = from.toLowerCase().equals(defaultAddress.toLowerCase());
         String operationName = token != null ? token.getOperationName(transaction, getContext()) : null;
         if (operationName == null) operationName = isSent ? getString(R.string.sent) : getString(R.string.received);
         type.setText(operationName);
+        boolean self = false;
+
+        value.setTextColor(ContextCompat.getColor(getContext(), isSent ? R.color.red : R.color.green));
 
         if (txSuccess)
         {
-            if (!isSent)
+            if (operation.from.equalsIgnoreCase(operation.to))
+            {
+                self = true;
+                type.setText(R.string.self);
+                typeIcon.setImageResource(R.drawable.ic_transactions);
+                value.setTextColor(ContextCompat.getColor(getContext(), R.color.warning_dark_red));
+            }
+            else if (!isSent)
             {
                 typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
             }
@@ -344,8 +353,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         }
 
         address.setText(name);
-        value.setTextColor(ContextCompat.getColor(getContext(), isSent ? R.color.red : R.color.green));
-
         setSuccessIndicator(txSuccess, supplimentalTxt);
 
         String valueStr;
@@ -355,7 +362,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         }
         else
         {
-            valueStr = getValueStr(operation.value, isSent, symbol, decimals, from.equalsIgnoreCase(operation.to));
+            valueStr = getValueStr(operation.value, isSent, symbol, decimals, self);
         }
 
         this.value.setText(valueStr);

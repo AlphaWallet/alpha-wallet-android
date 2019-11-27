@@ -242,12 +242,12 @@ public class TransactionDecoder
     private void setupKnownFunctions()
     {
         functionList = new HashMap<>();
-        addFunction("transferFrom(address,address,uint16[])", ContractType.ERC875LEGACY, false);
-        addFunction("transfer(address,uint16[])", ContractType.ERC875LEGACY, false);
-        addFunction("trade(uint256,uint16[],uint8,bytes32,bytes32)", ContractType.ERC875LEGACY, true);
-        addFunction("passTo(uint256,uint16[],uint8,bytes32,bytes32,address)", ContractType.ERC875LEGACY, true);
-        addFunction("loadNewTickets(bytes32[])", ContractType.ERC875LEGACY, false);
-        addFunction("balanceOf(address)", ContractType.ERC875LEGACY, false);
+        addFunction("transferFrom(address,address,uint16[])", ContractType.ERC875_LEGACY, false);
+        addFunction("transfer(address,uint16[])", ContractType.ERC875_LEGACY, false);
+        addFunction("trade(uint256,uint16[],uint8,bytes32,bytes32)", ContractType.ERC875_LEGACY, true);
+        addFunction("passTo(uint256,uint16[],uint8,bytes32,bytes32,address)", ContractType.ERC875_LEGACY, true);
+        addFunction("loadNewTickets(bytes32[])", ContractType.ERC875_LEGACY, false);
+        addFunction("balanceOf(address)", ContractType.ERC875_LEGACY, false);
 
         addFunction("transfer(address,uint256)", ContractType.ERC20, false);
         addFunction("transfer(address,uint)", ContractType.ERC20, false);
@@ -316,7 +316,7 @@ public class TransactionDecoder
             {
                 if (input.contains(tradeLegacy))
                 {
-                    return ContractType.ERC875LEGACY;
+                    return ContractType.ERC875_LEGACY;
                 }
                 else
                 {

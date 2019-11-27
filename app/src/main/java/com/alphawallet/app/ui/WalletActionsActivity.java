@@ -216,7 +216,6 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
                 else
                 {
                     exportJSON(wallet);
-                    //startExport(wallet);
                 }
                 break;
             }

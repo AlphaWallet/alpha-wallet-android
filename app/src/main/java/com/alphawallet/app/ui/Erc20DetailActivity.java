@@ -12,16 +12,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.WebView;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Ticker;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenTicker;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
@@ -31,7 +29,6 @@ import com.alphawallet.app.ui.widget.adapter.TransactionsAdapter;
 import dagger.android.AndroidInjection;
 
 import com.alphawallet.app.widget.FunctionButtonBar;
-import com.alphawallet.token.entity.TSAction;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -44,7 +41,6 @@ import javax.inject.Inject;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Map;
 
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;

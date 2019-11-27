@@ -13,9 +13,9 @@ import android.support.v4.app.NotificationCompat;
 import android.util.SparseArray;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.ERC721Token;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenFactory;
+import com.alphawallet.app.entity.tokens.ERC721Token;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
@@ -1064,6 +1064,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 break;
             case "erc721":
                 cType = ContractType.ERC721;
+                break;
+            case "erc721Ticket":
+                cType = ContractType.ERC721_TICKET;
                 break;
             case "ethereum":
                 cType = ContractType.CURRENCY;

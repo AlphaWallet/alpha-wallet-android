@@ -141,7 +141,6 @@ public class WalletRepository implements WalletRepositoryType
 	public Single<BigDecimal> balanceInWei(Wallet wallet)
 	{
 		return Single.fromCallable(() -> {
-			//return BigDecimal.valueOf(15.995).movePointRight(18);
 			try
 			{
 				return new BigDecimal(Web3j.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl, httpClient, false)).ethGetBalance(wallet.address, DefaultBlockParameterName.PENDING).send().getBalance());

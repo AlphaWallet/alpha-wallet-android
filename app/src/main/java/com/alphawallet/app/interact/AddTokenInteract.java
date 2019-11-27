@@ -1,8 +1,8 @@
 package com.alphawallet.app.interact;
 
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenInfo;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.TokenRepositoryType;
 

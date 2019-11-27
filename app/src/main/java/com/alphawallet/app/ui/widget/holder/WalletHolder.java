@@ -118,7 +118,6 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		}
 
 		walletSelected.setVisibility(addition.getBoolean(IS_DEFAULT_ADDITION, false) ? View.VISIBLE : View.GONE);
-		//defaultAction.setChecked(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		container.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		currency.setText(wallet.balanceSymbol);
 

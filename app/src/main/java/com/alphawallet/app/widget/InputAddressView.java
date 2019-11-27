@@ -36,8 +36,6 @@ public class InputAddressView extends LinearLayout {
         scanQrIcon.setOnClickListener(v -> {
             Intent intent = new Intent(context, QRScanningActivity.class);
             ((Activity) context).startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
-//            Intent intent = new Intent(context, BarcodeCaptureActivity.class);
-//            ((Activity) context).startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
         });
     }
 

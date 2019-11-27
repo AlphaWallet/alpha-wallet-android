@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.Wallet;

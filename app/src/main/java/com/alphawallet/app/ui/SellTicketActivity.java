@@ -18,8 +18,8 @@ import com.alphawallet.app.util.BalanceUtils;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.FinishReceiver;
-import com.alphawallet.app.entity.Ticket;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Ticket;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.viewmodel.SellTicketModel;
 import com.alphawallet.app.viewmodel.SellTicketModelFactory;
 import com.alphawallet.app.widget.ProgressView;
@@ -125,12 +125,6 @@ public class SellTicketActivity extends BaseActivity implements OnTokenClickList
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.action_next: {
-//                onNext();
-//            }
-//            break;
-//        }
         return super.onOptionsItemSelected(item);
     }
 

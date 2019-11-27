@@ -5,7 +5,7 @@ import android.content.Intent;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.ui.AssetDisplayActivity;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 
 /**
  * Created by James on 22/01/2018.

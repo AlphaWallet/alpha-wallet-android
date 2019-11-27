@@ -1,13 +1,12 @@
 package com.alphawallet.token.web;
 
 import com.github.cliftonlabs.json_simple.JsonObject;
-import org.apache.commons.io.IOUtils;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -40,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -88,6 +88,7 @@ public class AppSiteController implements AttributeInterface
     private final MagicLinkData magicLinkData = new MagicLinkData();
     private final TokenscriptFunction tokenscriptFunction = new TokenscriptFunction() { };
     private static Path repoDir;
+    private static String infuraKey = "da3717f25f824cc1baa32d812386d93f";
 
     @GetMapping(value = "/apple-app-site-association", produces = "application/json")
     @ResponseBody
@@ -372,6 +373,8 @@ public class AppSiteController implements AttributeInterface
                 System.out.println(" ------------");
             });
         }
+
+        loadInfuraKey();
 	}
 
     private static void addContractAddresses(Path path) {
@@ -379,7 +382,7 @@ public class AppSiteController implements AttributeInterface
             TokenDefinition token = new TokenDefinition(input, new Locale("en"), null);
             ContractInfo holdingContracts = token.contracts.get(token.holdingToken);
             if (holdingContracts != null)
-                holdingContracts.addresses.keySet().stream().forEach(network -> addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), path.toString()))); //map.put(network, networkAddresses(holdingContracts.addresses.get(network), path.toString())));
+                holdingContracts.addresses.keySet().stream().forEach(network -> addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), path.toString())));
         } catch (IOException | SAXException e) {
             throw new RuntimeException(e); // make it safe to use in stream
         }
@@ -534,5 +537,32 @@ public class AppSiteController implements AttributeInterface
             status = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<String>(result.toJson(), status);
+    }
+
+    private static void loadInfuraKey()
+    {
+        try (InputStream input = new FileInputStream("../gradle.properties")) {
+
+            Properties prop = new Properties();
+
+            if (input == null) {
+                return;
+            }
+
+            //load a properties file from class path, inside static method
+            prop.load(input);
+
+            //get the property value and print it out
+            infuraKey = prop.getProperty("infuraAPI");
+
+        } catch (IOException ex) {
+            System.out.println("Locate gradle.properties");
+            ex.printStackTrace();
+        }
+    }
+
+    public static String getInfuraKey()
+    {
+        return infuraKey;
     }
 }

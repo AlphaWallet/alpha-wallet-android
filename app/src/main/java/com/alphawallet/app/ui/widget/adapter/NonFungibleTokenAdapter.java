@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.view.ViewGroup;
+
+import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.bumptech.glide.Glide;
 import com.alphawallet.app.ui.widget.entity.AssetInstanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.AssetSortedItem;
@@ -28,10 +30,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ERC721Token;
-import com.alphawallet.app.entity.Ticket;
+import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.TicketRangeElement;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.OpenseaService;
@@ -39,6 +40,7 @@ import com.alphawallet.app.ui.widget.OnTokenClickListener;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -61,18 +63,19 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         token = t;
         clickThrough = true;
         openseaService = opensea;
-        if (t instanceof Ticket) setToken(t);
-        if (t instanceof ERC721Token) setERC721Tokens(t, null);
+        if (token.isERC875() || token.isERC721Ticket()) setToken(t);
+        else if (token instanceof ERC721Token) setERC721Tokens(token, null);
     }
 
-    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token token, String ticketIds, AssetDefinitionService service, OpenseaService opensea)
+    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, String ticketIds, AssetDefinitionService service, OpenseaService opensea)
     {
         super(tokenClickListener, service);
         assetCount = 0;
-        this.token = token;
-        if (token.isERC875()) setTokenRange(token, ticketIds);
+        token = t;
         openseaService = opensea;
-        if (token instanceof ERC721Token) setERC721Tokens(token, ticketIds);
+        if (token.isERC875()) setTokenRange(token, ticketIds);
+        else if (token instanceof ERC721Token) setERC721Tokens(token, ticketIds);
+        else if (token instanceof ERC721Ticket) setERC721Tickets(token, ticketIds);
     }
 
     public NonFungibleTokenAdapter(Token token, String displayIds, AssetDefinitionService service)
@@ -146,6 +149,37 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         items.endBatchedUpdates();
     }
 
+    protected void setERC721Tickets(Token token, String ticketId) //ticketId is used when transfering single tickets
+    {
+        if (!(token instanceof ERC721Ticket)) return;
+        items.beginBatchedUpdates();
+        items.clear();
+        items.add(new TokenBalanceSortedItem(token));
+        assetCount = token.getArrayBalance().size();
+        int holderType = TokenIdSortedItem.VIEW_TYPE;
+
+        if (assetService.hasTokenView(token.tokenInfo.chainId, token.getAddress()))
+        {
+            containsScripted = true;
+            holderType = AssetInstanceSortedItem.VIEW_TYPE;
+        }
+
+        List<BigInteger> tokensToDisplay;
+        if (ticketId == null)
+        {
+            tokensToDisplay = token.getArrayBalance();
+        }
+        else
+        {
+            tokensToDisplay = new ArrayList<>(Collections.singletonList(new BigInteger(ticketId)));
+        }
+
+        List<TicketRangeElement> sortedList = generateSortedList(assetService, token, tokensToDisplay); //generate sorted list
+        addSortedItems(sortedList, token, holderType); //insert sorted items into view
+
+        items.endBatchedUpdates();
+    }
+
     public int getTicketRangeCount() {
         int count = 0;
         if (currentRange != null) {
@@ -178,7 +212,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         items.clear();
         items.add(new TokenBalanceSortedItem(t));
         assetCount = t.getTicketCount();
-        if (t instanceof Ticket) addRanges(t);
+        if (!t.isERC20()) addRanges(t);
         items.endBatchedUpdates();
     }
 
@@ -189,13 +223,6 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         //determine what kind of holder we need:
         int holderType = AssetInstanceSortedItem.VIEW_TYPE;
         containsScripted = true;
-
-        //        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress()))
-        //        {
-        //            containsScripted = true;
-        //            holderType = AssetInstanceSortedItem.VIEW_TYPE;
-        //        }
-
         addSortedItems(sortedList, t, holderType);
     }
 

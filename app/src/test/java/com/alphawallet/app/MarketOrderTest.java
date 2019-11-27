@@ -5,8 +5,8 @@ import android.support.annotation.NonNull;
 import com.alphawallet.app.entity.BaseViewCallback;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenInfo;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.TradeInstance;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionData;
@@ -20,6 +20,7 @@ import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Sign;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -62,11 +63,6 @@ public class MarketOrderTest
                 // this prevents StackOverflowErrors when scheduling with a delay
                 return super.scheduleDirect(run, 0, unit);
             }
-
-//            @Override
-//            public Worker createWorker() {
-//                return new ExecutorScheduler.ExecutorWorker(Runnable::run);
-//            }
         };
 
         RxJavaPlugins.setInitIoSchedulerHandler(scheduler -> immediate);
@@ -76,7 +72,7 @@ public class MarketOrderTest
         RxAndroidPlugins.setInitMainThreadSchedulerHandler(scheduler -> immediate);
     }
 
-    private final MarketQueueService marketService;// = new MarketQueueService(null, null, );
+    private final MarketQueueService marketService;
 
     public MarketOrderTest()
     {
@@ -86,8 +82,7 @@ public class MarketOrderTest
         transactionRepository = new TransactionRepositoryType() {
 
             @Override
-            public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet, int maxTransactions)
-            {
+            public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet, int maxTransactions, List<Integer> networkFilters) {
                 return null;
             }
 
@@ -218,48 +213,6 @@ public class MarketOrderTest
             System.out.println("Market Queue Error - string resource id: " + String.valueOf(resId));
         }
     };
-
-//    private void onAllTransactions()
-//    {
-//        //now run through all the transactions, check the expiries are all correct and check the signature.
-//        try {
-//            MessageData firstEntryData = SalesOrder.readByteMessage(generatedTrade.getTradeBytes(), generatedTrade.getSignatureBytes(0), 3);
-//
-//            long expiry = generatedTrade.expiry.longValue();
-//            String decimalVal = "" + firstEntryData.priceWei;
-//            BigInteger milliWei = Convert.fromWei(decimalVal, Convert.Unit.FINNEY).toBigInteger();
-//            double price = milliWei.doubleValue() / 1000.0;
-//            String testAddress = "0x" + Keys.getAddress(testKey.getPublicKey());
-//            String contractAddress = Numeric.toHexString(generatedTrade.contractAddress.toByteArray());
-//
-//            for (byte[] sig : generatedTrade.getSignatures()) {
-//                byte[] sigStr64 = Base64.encode(sig);
-//                byte[] tradeBytes64 = Base64.encode(generatedTrade.getTradeBytes());
-//                //generate the sales order from the individual entry
-//                SalesOrder so = new SalesOrder(price, expiry, 1024, 3, contractAddress, new String(sigStr64),
-//                        new String(tradeBytes64));
-//
-//                so.getOwnerKey();
-//
-//                //check all the ec-recovered addresses
-//                assertEquals(testAddress, so.ownerAddress);
-//
-//                //see if we can recover
-//                expiry += 10*60; //10 minutes
-//            }
-//
-//        }
-//        catch (SalesOrderMalformed e)
-//        {
-//            e.printStackTrace();
-//            assertEquals("SalesOrderMalformed", "Bad data");
-//        }
-//        catch (Exception e)
-//        {
-//            e.printStackTrace();
-//            assertEquals("Bad data", "fail");
-//        }
-//    }
 
     private void processMarketTrades(TradeInstance tradeInstance)
     {

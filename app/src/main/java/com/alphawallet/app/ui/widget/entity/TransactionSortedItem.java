@@ -63,11 +63,6 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
                 TransactionMeta oldTx = value;
                 TransactionMeta newTx = (TransactionMeta) newItem.value;
 
-                if (oldTx.hash.equals(newTx.hash))
-                {
-                    System.out.println("yoless");
-                }
-
                 boolean hashMatch = oldTx.hash.equals(newTx.hash);
                 boolean pendingMatch = oldTx.isPending == newTx.isPending;
 
@@ -93,11 +88,6 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
             {
                 TransactionMeta oldTx = value;
                 TransactionMeta newTx = (TransactionMeta) other.value;
-
-                if (oldTx.hash.equals(newTx.hash))
-                {
-                    System.out.println("yoless");
-                }
 
                 return oldTx.hash.equals(newTx.hash);
             }

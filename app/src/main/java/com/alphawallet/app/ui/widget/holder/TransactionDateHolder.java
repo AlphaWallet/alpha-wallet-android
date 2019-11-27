@@ -34,9 +34,6 @@ public class TransactionDateHolder extends BinderViewHolder<Date> {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
             calendar.setTime(data);
-//            java.text.DateFormat dateFormat = DateFormat.getMediumDateFormat(getContext());
-//            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-//            title.setText(dateFormat.format(calendar.getTime()));
             title.setText(DateFormat.format(DATE_TEMPLATE, calendar));
         }
     }

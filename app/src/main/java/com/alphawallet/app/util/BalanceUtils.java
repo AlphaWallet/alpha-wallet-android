@@ -15,7 +15,7 @@ public class BalanceUtils {
 
     public static String ethToUsd(String priceUsd, String ethBalance) {
         BigDecimal usd = new BigDecimal(ethBalance).multiply(new BigDecimal(priceUsd));
-        usd = usd.setScale(2, RoundingMode.HALF_DOWN);
+        usd = usd.setScale(2, RoundingMode.DOWN);
         return usd.toString();
     }
 

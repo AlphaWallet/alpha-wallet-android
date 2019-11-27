@@ -2,10 +2,12 @@ package com.alphawallet.app.interact;
 
 import android.util.Log;
 
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.entity.MessagePair;
 import com.alphawallet.app.entity.SignaturePair;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import io.reactivex.Single;
@@ -23,13 +25,22 @@ public class SignatureGenerateInteract {
     }
 
     //TODO: Sign message here not in the additional field
-    public Single<MessagePair> getMessage(List<Integer> indexList, String contract) {
+    public Single<MessagePair> getMessage(List<BigInteger> tickets, String contract, ContractType contractType) {
         return Single.fromCallable(() -> {
-            String selectionStr = SignaturePair.generateSelection(indexList);
+            String selectionStr = "";
+            if (contractType.equals(ContractType.ERC721_TICKET))
+            {
+                selectionStr = SignaturePair.generateSelection721Tickets(tickets);
+            }
+            else
+            {
+                selectionStr = SignaturePair.generateSelection(tickets);
+            }
             long currentTime = System.currentTimeMillis();
             long minsT = currentTime / (30 * 1000);
             int minsTime = (int) minsT;
-            String plainMessage = selectionStr + "," + String.valueOf(minsTime) + "," + contract.toLowerCase();  //This is the plain text message that gets signed
+            //This is the plain text message that gets signed
+            String plainMessage = selectionStr + "," + minsTime + "," + contract.toLowerCase();
             Log.d("SIG", plainMessage);
             return new MessagePair(selectionStr, plainMessage);
         });

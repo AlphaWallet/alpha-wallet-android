@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 
-import com.alphawallet.app.entity.TokenTicker;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.util.BalanceUtils;
 
 import io.reactivex.Observable;
@@ -17,9 +17,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AmountUpdateCallback;
-import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.repository.TokenRepositoryType;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 
 import java.util.concurrent.TimeUnit;
 
@@ -286,7 +285,6 @@ public class AmountEntryItem
             if (ticker != null && isValidAmount(amountStr))
             {
                 String usdEquivStr = ticker.priceSymbol + " " + getUsdString(Double.parseDouble(amountStr) * currentEthPrice);
-                //String usdEquivStr = "US$ " + getUsdString(Double.parseDouble(amountStr) * currentEthPrice);
                 if (!hasRealValue) usdEquivStr = "(TEST) " + usdEquivStr;
                 usdValue.setText(usdEquivStr);
             }

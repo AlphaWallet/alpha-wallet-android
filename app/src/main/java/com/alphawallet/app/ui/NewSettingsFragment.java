@@ -194,7 +194,6 @@ public class NewSettingsFragment extends Fragment
             try {
                 getActivity().getPackageManager().getPackageInfo(C.TWITTER_PACKAGE_NAME, 0);
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_TWITTER_URL));
-                //intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_TWITTER_ID));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             } catch (Exception e) {
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_TWITTER_URL));
@@ -445,7 +444,6 @@ public class NewSettingsFragment extends Fragment
         int height = LinearLayout.LayoutParams.WRAP_CONTENT;
         final PopupWindow popupWindow = new PopupWindow(popupView, width, height, true);
         popupView.setOnClickListener(v -> {
-            //if (getActivity() != null) ((HomeActivity)getActivity()).postponeWalletBackupWarning(walletAddress);
             viewModel.setIsDismissed(walletAddress, true).subscribe(this::backedUp);
             popupWindow.dismiss();
         });

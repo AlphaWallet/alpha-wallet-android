@@ -2,8 +2,8 @@ package com.alphawallet.app.interact;
 
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenInfo;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.TokenRepositoryType;
@@ -13,6 +13,8 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import com.alphawallet.app.service.TokensService;
+
+import java.util.List;
 
 public class FetchTransactionsInteract {
 
@@ -25,9 +27,9 @@ public class FetchTransactionsInteract {
         this.tokenRepository = tokenRepositoryType;
     }
 
-    public Observable<Transaction[]> fetchCached(Wallet wallet, int maxTransactions) {
+    public Observable<Transaction[]> fetchCached(Wallet wallet, int maxTransactions, List<Integer> networkFilters) {
         return transactionRepository
-                .fetchCachedTransactions(wallet, maxTransactions)
+                .fetchCachedTransactions(wallet, maxTransactions, networkFilters)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -62,6 +64,8 @@ public class FetchTransactionsInteract {
         {
             case ERC20:
             case ERC721:
+            case ERC721_LEGACY:
+            case ERC721_TICKET:
                 return Single.fromCallable(() -> type);
             case ERC875:
                 //requires additional handling to determine if it's Legacy type, but safe to return ERC875 for now:

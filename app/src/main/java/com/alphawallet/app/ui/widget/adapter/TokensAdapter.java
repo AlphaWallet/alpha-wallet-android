@@ -7,7 +7,7 @@ import android.util.Log;
 import android.view.ViewGroup;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -35,7 +35,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public static final int FILTER_CURRENCY = 1;
     public static final int FILTER_ASSETS = 2;
     public static final int FILTER_COLLECTIBLES = 3;
-    private static final BigDecimal CUTOFF_VALUE = BigDecimal.valueOf(9999999999L);
+    private static final BigDecimal CUTOFF_VALUE = BigDecimal.valueOf(99999999999L);
 
     private int filterType;
     private boolean needsRefresh;

@@ -29,8 +29,8 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.Utils;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenTicker;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 
@@ -46,6 +46,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
     public final TextView balanceEth;
     public final TextView balanceCurrency;
+    public final ImageView icon;
     public final TextView text24Hours;
     public final TextView textAppreciation;
     public final TextView issuer;
@@ -58,11 +59,12 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final TextView textIncomplete;
     public final View contractSeparator;
     public final LinearLayout layoutValueDetails;
+    public final LinearLayout extendedInfo;
+    public final TextView blockchain;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
-    private final TextView blockchain;
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
-    private final LinearLayout extendedInfo;
+
     private Handler handler;
 
     public Token token;
@@ -72,6 +74,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     {
         super(resId, parent);
 
+        icon = findViewById(R.id.icon);
         balanceEth = findViewById(R.id.eth_data);
         balanceCurrency = findViewById(R.id.balance_currency);
         currencyLabel = findViewById(R.id.currency_label);
@@ -100,7 +103,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
         try
         {
-            //tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
+            icon.setVisibility(View.GONE);
+            tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             blockchain.setText(getString(R.string.blockchain, token.getNetworkName()));
             chainName.setText(token.getNetworkName());
             Utils.setChainColour(chainName, token.tokenInfo.chainId);
@@ -132,7 +136,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
     public void fillCurrency(BigDecimal ethBalance, TokenTicker ticker) {
         stopTextAnimation();
-        BigDecimal usdBalance = ethBalance.multiply(new BigDecimal(ticker.price)).setScale(2, RoundingMode.HALF_DOWN);
+        BigDecimal usdBalance = ethBalance.multiply(new BigDecimal(ticker.price)).setScale(2, RoundingMode.DOWN);
         String converted = getUsdString(usdBalance.doubleValue());
         String formattedPercents = "";
         int color = Color.RED;
@@ -220,7 +224,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public void onClick(View v) {
         if (onTokenClickListener != null) {
             tokenLayout.setElevation(-10.0f);
-            //tokenLayout.setBackgroundResource(R.drawable.background_light_grey);
             onTokenClickListener.onTokenClick(v, token, null, true);
             handler = new Handler();
             handler.postDelayed(clearElevation, 800);

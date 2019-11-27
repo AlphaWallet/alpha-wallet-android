@@ -1,15 +1,5 @@
 package com.alphawallet.app.service;
 
-//import android.util.Log;
-//
-//import com.amazonaws.auth.CognitoCachingCredentialsProvider;
-//import com.amazonaws.regions.Region;
-//import com.amazonaws.regions.Regions;
-//import com.amazonaws.services.sns.AmazonSNSClient;
-//import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
-//import com.amazonaws.services.sns.model.CreatePlatformEndpointResult;
-//import com.google.firebase.messaging.FirebaseMessagingService;
-
 public class AlphaWalletFirebaseMessagingService
 {
 

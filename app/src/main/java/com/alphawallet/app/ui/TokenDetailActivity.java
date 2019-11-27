@@ -18,7 +18,7 @@ import com.alphawallet.app.util.KittyUtils;
 
 import com.alphawallet.app.R;
 
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.opensea.Trait;
@@ -84,12 +84,6 @@ public class TokenDetailActivity extends BaseActivity {
         setNameAndDesc(asset);
         setExternalLink(asset);
         setTraits(asset);
-
-//        if (token instanceof ERC721Token)
-//        {
-//            findViewById(R.id.button_transfer).setVisibility(View.GONE);
-//        }
-
         findViewById(R.id.button_transfer).setOnClickListener(v -> {
             openTransferDirectDialog();
         });

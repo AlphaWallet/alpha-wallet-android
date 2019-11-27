@@ -9,7 +9,6 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.service.TickerService;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

@@ -1,12 +1,15 @@
-package com.alphawallet.app.entity;
+package com.alphawallet.app.entity.tokens;
 
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextPaint;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.interact.SetupTokensInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -14,9 +17,7 @@ import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
-
 import com.alphawallet.token.entity.TicketRange;
-import com.alphawallet.app.R;
 
 import org.web3j.abi.datatypes.Function;
 import org.web3j.utils.Numeric;
@@ -446,10 +447,6 @@ public class Token implements Parcelable
     {
         contractType = ContractType.ETHEREUM;
     }
-    public boolean isEthereum()
-    {
-        return contractType == ContractType.ETHEREUM;
-    }
 
     public boolean isBad()
     {
@@ -543,6 +540,7 @@ public class Token implements Parcelable
     }
     public void checkIsMatchedInXML(AssetDefinitionService assetService) { }
     public int[] getTicketIndices(String ticketIds) { return new int[0]; }
+    public List<BigInteger> getTicketsAsBigIntList(String ticketIds) { return new ArrayList<>(); }
     public boolean unspecifiedSpec() { return contractType == ContractType.NOT_SET; }
 
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx, boolean iconified) { }
@@ -716,11 +714,6 @@ public class Token implements Parcelable
         return (contractType == ContractType.ETHEREUM || contractType == ContractType.ERC20 || contractType == ContractType.OTHER);
     }
 
-    public boolean isERC20()
-    {
-        return contractType == ContractType.ERC20;
-    }
-
     public boolean hasArrayBalance()
     {
         return false;
@@ -783,9 +776,6 @@ public class Token implements Parcelable
                 }
             }
         }
-
-        //Log.d("TOKEN", tokenInfo.name + " Update weight " + updateWeight);
-
         return updateWeight;
     }
 
@@ -887,6 +877,15 @@ public class Token implements Parcelable
     public boolean isERC875() { return false; }
     public boolean isERC721() { return false; }
     public boolean isNonFungible() { return false; }
+    public boolean isERC20()
+    {
+        return contractType == ContractType.ERC20;
+    }
+    public boolean isEthereum()
+    {
+        return contractType == ContractType.ETHEREUM;
+    }
+    public boolean isERC721Ticket() { return false; }
 
     public BigDecimal getCorrectedAmount(String newAmount)
     {

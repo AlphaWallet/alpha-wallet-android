@@ -1,7 +1,7 @@
 package com.alphawallet.app.service;
 
 import com.google.gson.Gson;
-import com.alphawallet.app.entity.TokenInfo;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;

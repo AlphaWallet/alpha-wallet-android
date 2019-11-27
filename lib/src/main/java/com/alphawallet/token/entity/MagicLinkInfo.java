@@ -6,19 +6,6 @@ package com.alphawallet.token.entity;
  */
 public class MagicLinkInfo
 {
-    //node urls
-    private static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    private static final String CLASSIC_RPC_URL = "https://web3.gastracker.io";
-    private static final String XDAI_RPC_URL = "https://dai.poa.network";
-    private static final String POA_RPC_URL = "https://core.poa.network/";
-    private static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    private static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    private static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    private static final String SOKOL_RPC_URL = "https://sokol.poa.network";
-    private static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    private static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
-    private static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
-
     //domains for DMZ
     public static final String mainnetMagicLinkDomain = "aw.app";
     private static final String legacyMagicLinkDomain = "app.awallet.io";
@@ -50,18 +37,18 @@ public class MagicLinkInfo
     private static final String artisTau1Etherscan = "https://explorer.tau1.artis.network/";
 
     //network ids
-    private static final int LEGACY_VALUE = 0;
-    private static final int MAINNET_NETWORK_ID = 1;
-    private static final int CLASSIC_NETWORK_ID = 61;
-    private static final int KOVAN_NETWORK_ID = 42;
-    private static final int ROPSTEN_NETWORK_ID = 3;
-    private static final int RINKEBY_NETWORK_ID = 4;
-    private static final int POA_NETWORK_ID = 99;
-    private static final int SOKOL_NETWORK_ID = 77;
-    private static final int XDAI_NETWORK_ID = 100;
-    private static final int GOERLI_NETWORK_ID = 5;
-    private static final int ARTIS_SIGMA1_NETWORK_ID = 246529;
-    private static final int ARTIS_TAU1_NETWORK_ID = 246785;
+    public static final int LEGACY_VALUE = 0;
+    public static final int MAINNET_NETWORK_ID = 1;
+    public static final int CLASSIC_NETWORK_ID = 61;
+    public static final int KOVAN_NETWORK_ID = 42;
+    public static final int ROPSTEN_NETWORK_ID = 3;
+    public static final int RINKEBY_NETWORK_ID = 4;
+    public static final int POA_NETWORK_ID = 99;
+    public static final int SOKOL_NETWORK_ID = 77;
+    public static final int XDAI_NETWORK_ID = 100;
+    public static final int GOERLI_NETWORK_ID = 5;
+    public static final int ARTIS_SIGMA1_NETWORK_ID = 246529;
+    public static final int ARTIS_TAU1_NETWORK_ID = 246785;
 
     //network names
     private static final String ETHEREUM_NETWORK = "Ethereum";
@@ -75,8 +62,6 @@ public class MagicLinkInfo
     private static final String GOERLI_NETWORK = "Görli";
     private static final String ARTIS_SIGMA1_NETWORK = "ARTIS sigma1";
     private static final String ARTIS_TAU1_NETWORK = "ARTIS tau1";
-
-
 
     public static String getNetworkNameById(int networkId) {
         switch (networkId) {
@@ -104,35 +89,6 @@ public class MagicLinkInfo
                 return ARTIS_TAU1_NETWORK;
             default:
                 return ETHEREUM_NETWORK;
-        }
-    }
-
-    public static String getNodeURLByNetworkId(int networkId) {
-        switch (networkId) {
-            case MAINNET_NETWORK_ID:
-                return MAINNET_RPC_URL;
-            case KOVAN_NETWORK_ID:
-                return KOVAN_RPC_URL;
-            case ROPSTEN_NETWORK_ID:
-                return ROPSTEN_RPC_URL;
-            case RINKEBY_NETWORK_ID:
-                return RINKEBY_RPC_URL;
-            case POA_NETWORK_ID:
-                return POA_RPC_URL;
-            case SOKOL_NETWORK_ID:
-                return SOKOL_RPC_URL;
-            case CLASSIC_NETWORK_ID:
-                return CLASSIC_RPC_URL;
-            case XDAI_NETWORK_ID:
-                return XDAI_RPC_URL;
-            case GOERLI_NETWORK_ID:
-                return GOERLI_RPC_URL;
-            case ARTIS_SIGMA1_NETWORK_ID:
-                return ARTIS_SIGMA1_RPC_URL;
-            case ARTIS_TAU1_NETWORK_ID:
-                return ARTIS_TAU1_RPC_URL;
-            default:
-                return MAINNET_RPC_URL;
         }
     }
 
@@ -250,10 +206,5 @@ public class MagicLinkInfo
     public static String generatePrefix(int chainId)
     {
         return "https://" + getMagicLinkDomainFromNetworkId(chainId) + "/";
-    }
-
-    public static String formPaymasterURLPrefixFromDomain(String domain)
-    {
-        return "https://" + domain + ":80/api/";
     }
 }

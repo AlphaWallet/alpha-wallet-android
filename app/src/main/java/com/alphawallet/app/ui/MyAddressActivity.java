@@ -14,23 +14,29 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.AmountUpdateCallback;
+import com.alphawallet.app.entity.EIP681Request;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TokenTicker;
-import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.QRScanning.DisplayUtils;
 import com.alphawallet.app.ui.widget.entity.AmountEntryItem;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRUtils;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.viewmodel.MyAddressViewModel;
+import com.alphawallet.app.viewmodel.MyAddressViewModelFactory;
+import com.alphawallet.app.widget.FunctionButtonBar;
 
 import org.web3j.utils.Convert;
 
@@ -42,16 +48,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-import com.alphawallet.app.entity.AmountUpdateCallback;
-import com.alphawallet.app.entity.EIP681Request;
-import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.viewmodel.MyAddressViewModel;
-import com.alphawallet.app.viewmodel.MyAddressViewModelFactory;
-import com.alphawallet.app.widget.FunctionButtonBar;
 
 import static com.alphawallet.app.C.Key.WALLET;
 

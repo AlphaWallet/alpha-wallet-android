@@ -11,7 +11,7 @@ import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.FetchTokensInteract;
@@ -216,7 +216,6 @@ public class WalletsViewModel extends BaseViewModel
     {
         if (wallet.ENSname != null && wallet.ENSname.length() > 0)
         {
-            //updateENSName.postValue(wallet);
             disposable = fetchWalletsInteract.updateWalletData(wallet)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -336,7 +335,6 @@ public class WalletsViewModel extends BaseViewModel
 
     private void onCreateWalletError(Throwable throwable)
     {
-        //Crashlytics.logException(throwable);
         progress.postValue(false);
         createWalletError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
     }

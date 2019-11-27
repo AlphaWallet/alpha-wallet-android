@@ -5,12 +5,12 @@ import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.ERC721Token;
+import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenFactory;
-import com.alphawallet.app.entity.TokenInfo;
-import com.alphawallet.app.entity.TokenTicker;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenFactory;
+import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.entity.RealmERC721Asset;
 import com.alphawallet.app.repository.entity.RealmERC721Token;
@@ -150,17 +150,34 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Single<Token> saveToken(Wallet wallet, Token token) {
+    public Single<Token> saveToken(Wallet wallet, Token token)
+    {
         return Single.fromCallable(() -> {
             Date now = new Date();
-            if (token instanceof ERC721Token)
+            switch (token.getInterfaceSpec())
             {
-                saveERC721Token(wallet, token, now);
+                case ETHEREUM:
+                case ERC20:
+                case ERC875_LEGACY:
+                case ERC875:
+                case CURRENCY:
+                case ERC721_TICKET:
+                    saveToken(wallet, token, now);
+                    break;
+                case ERC721:
+                case ERC721_LEGACY:
+                    saveERC721Token(wallet, token, now);
+                    break;
+                //No save
+                case NOT_SET:
+                case OTHER:
+                case CREATION:
+                    break;
+                default:
+                    System.out.println("Unknown Token Contract");
+                    break;
             }
-            else
-            {
-                saveToken(wallet, token, now);
-            }
+
             return token;
         });
     }

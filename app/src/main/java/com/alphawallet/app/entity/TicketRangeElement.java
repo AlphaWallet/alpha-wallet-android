@@ -1,5 +1,6 @@
 package com.alphawallet.app.entity;
 
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
 
 import java.math.BigInteger;
@@ -31,8 +32,8 @@ public class TicketRangeElement
     public static void sortElements(List<TicketRangeElement> elementList)
     {
         Collections.sort(elementList, (e1, e2) -> {
-            long w1 = e1.time;//((long)e1.venue<<32) + ((long)e1.match<<24) + ((long)e1.category<<16) + e1.ticketNumber;
-            long w2 = e2.time;//((long)e2.venue<<32) + ((long)e2.match<<24) + ((long)e2.category<<16) + e2.ticketNumber;
+            long w1 = e1.time;
+            long w2 = e2.time;
             if (e1.time == 0 && e2.time == 0)
             {
                 w1 = e1.id.longValue();

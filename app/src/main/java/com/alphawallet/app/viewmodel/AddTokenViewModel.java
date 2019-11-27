@@ -10,8 +10,8 @@ import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QrUrlResult;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenInfo;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
@@ -280,6 +280,7 @@ public class AddTokenViewModel extends BaseViewModel {
             //test all the other networks
             List<Integer> networkIds = getNetworkIds();
             networkIds.remove((Integer)result.chainId);
+            networkCount--;
 
             scanNetworksDisposable = Observable.fromCallable(() -> networkIds)
                     .flatMapIterable(networkId -> networkId)

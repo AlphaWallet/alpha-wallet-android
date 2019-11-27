@@ -2,7 +2,6 @@ package com.alphawallet.app.ui.widget.holder;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Base64;
@@ -22,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DAppFunction;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.widget.SignMessageDialog;
 

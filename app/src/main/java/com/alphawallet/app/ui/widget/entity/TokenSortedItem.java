@@ -1,8 +1,8 @@
 package com.alphawallet.app.ui.widget.entity;
 
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
-import com.alphawallet.app.entity.Ticket;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Ticket;
+import com.alphawallet.app.entity.tokens.Token;
 
 public class TokenSortedItem extends SortedItem<Token> {
 
@@ -62,8 +62,5 @@ public class TokenSortedItem extends SortedItem<Token> {
         {
             return false;
         }
-
-//        return other.viewType == TokenHolder.VIEW_TYPE
-//                && ((TokenSortedItem) other).value.tokenInfo.address.equalsIgnoreCase(value.tokenInfo.address);
     }
 }

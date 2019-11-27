@@ -97,7 +97,6 @@ public class SignMessageDialog extends Dialog {
 
     public void setOnApproveListener(View.OnClickListener listener) {
         layoutBtnApprove.setOnClickListener(listener);
-        //btnApprove.setOnClickListener(listener);
     }
 
     public void setOnRejectListener(View.OnClickListener listener) {

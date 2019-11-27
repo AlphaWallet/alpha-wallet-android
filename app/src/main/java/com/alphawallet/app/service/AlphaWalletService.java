@@ -2,37 +2,33 @@ package com.alphawallet.app.service;
 
 import android.util.Log;
 
+import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.tokens.Ticket;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.TransactionRepositoryType;
+import com.alphawallet.token.entity.MagicLinkData;
+import com.alphawallet.token.entity.XMLDsigDescriptor;
+import com.alphawallet.token.tools.ParseMagicLink;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.alphawallet.app.repository.TransactionRepositoryType;
-
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Numeric;
-
 import java.io.File;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.alphawallet.token.entity.XMLDsigDescriptor;
-import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.Ticket;
-import com.alphawallet.app.entity.Wallet;
-
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import com.alphawallet.token.entity.MagicLinkData;
-import com.alphawallet.token.tools.ParseMagicLink;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-
+import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
 import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
-import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 
 public class AlphaWalletService
 {
@@ -68,12 +64,14 @@ public class AlphaWalletService
         switch (order.contractType)
         {
             case spawnable:
-                return sendFeemasterTransaction(url, chainId, wallet.address, order.expiry, "", order.signature).toObservable(); //empty string for spawn
+                return sendFeemasterTransaction(url, chainId, wallet.address, order.expiry,
+                        "", order.signature, order.contractAddress, order.tokenIds).toObservable(); //empty string for spawn
             case currencyLink:
                 return sendFeemasterCurrencyTransaction(url, chainId, wallet.address, order);
             default:
                 return generateTicketString(order.indices)
-                        .flatMap(ticketStr -> sendFeemasterTransaction(url, chainId, wallet.address, order.expiry, ticketStr, order.signature))
+                        .flatMap(ticketStr -> sendFeemasterTransaction(url, chainId, wallet.address, order.expiry,
+                                ticketStr, order.signature, order.contractAddress, order.tokenIds))
                         .toObservable();
         }
     }
@@ -193,20 +191,35 @@ public class AlphaWalletService
         }
     }
 
-    private Single<Integer> sendFeemasterTransaction(String url, int networkId, String toAddress, long expiry, String indices, byte[] tradeSig) {
+    private Single<Integer> sendFeemasterTransaction(
+            String url,
+            int networkId,
+            String toAddress,
+            long expiry,
+            String indices,
+            byte[] tradeSig,
+            String contractAddress,
+            List<BigInteger> tokenIds
+    ) {
         return Single.fromCallable(() -> {
             Integer result = 500; //fail by default
             try
             {
                 StringBuilder sb = new StringBuilder();
                 sb.append(url);
-                if ((url.length() - url.indexOf("/api")) < 6)
+                Map<String, String> args = new HashMap<>();
+                if (indices.equals(""))
+                {
+                    sb.append("/claimSpawnableToken/");
+                    args.put("tokenIds", parseTokenIds(tokenIds));
+                }
+                else
                 {
                     sb.append("/claimToken/");
+                    args.put("indices", indices);
                 }
-                Map<String, String> args = new HashMap<>();
+                args.put("contractAddress", contractAddress);
                 args.put("address", toAddress);
-                args.put("indices", indices);
                 args.put("expiry", String.valueOf(expiry));
                 args.put("networkId", String.valueOf(networkId));
                 addSignature(args, tradeSig);
@@ -220,6 +233,20 @@ public class AlphaWalletService
             return result;
         });
     }
+
+    private String parseTokenIds(List<BigInteger> tokens)
+    {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (BigInteger index : tokens)
+        {
+            if (!first) sb.append(",");
+            sb.append(Numeric.toHexStringNoPrefix(index));
+            first = false;
+        }
+        return sb.toString();
+    }
+
 
     private Integer postRequest(StringBuilder sb, Map<String, String> args) throws Exception
     {

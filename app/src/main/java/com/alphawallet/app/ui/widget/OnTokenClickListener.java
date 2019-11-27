@@ -1,7 +1,7 @@
 package com.alphawallet.app.ui.widget;
 
 import android.view.View;
-import com.alphawallet.app.entity.Token;
+import com.alphawallet.app.entity.tokens.Token;
 
 import java.math.BigInteger;
 import java.util.List;

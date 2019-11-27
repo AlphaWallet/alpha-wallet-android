@@ -7,15 +7,14 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.crashlytics.android.Crashlytics;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractResult;
-import com.alphawallet.app.entity.ERC721Token;
+import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Token;
-import com.alphawallet.app.entity.TokenInfo;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.AddTokenInteract;
@@ -376,11 +375,6 @@ public class WalletViewModel extends BaseViewModel
 
     private void tokensUpdateSingle(Token token)
     {
-        if (token.getAddress().equals("0x16baf0de678e52367adc69fd067e5edd1d33e3bf"))
-        {
-            System.out.println("YOLESS");
-        }
-
         tokenUpdate.postValue(token);
     }
 

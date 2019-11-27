@@ -14,8 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.TokenInterface;
-import com.alphawallet.app.entity.TokensReceiver;
+import com.alphawallet.app.entity.tokens.TokenInterface;
+import com.alphawallet.app.entity.tokens.TokensReceiver;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.ui.widget.adapter.RecycleViewDivider;

@@ -66,7 +66,6 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
     private final OnTransactionClickListener onTransactionClickListener;
 
     private Wallet wallet;
-    //private NetworkInfo network;
     private Map<String, TransactionSortedItem> checkMap = new HashMap<>();
     private final TokensService tokensService;
     private final FetchTransactionsInteract fetchTransactionsInteract;

@@ -1,6 +1,11 @@
-package com.alphawallet.app.entity;
+package com.alphawallet.app.entity.tokens;
 
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.entity.tokens.ERC721Token;
+import com.alphawallet.app.entity.tokens.Ticket;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.entity.RealmERC721Token;
 import com.alphawallet.app.repository.entity.RealmToken;
 
@@ -21,21 +26,29 @@ public class TokenFactory
         switch (type)
         {
             case ERC875:
-            case ERC875LEGACY:
+            case ERC875_LEGACY:
                 if (balances == null) balances = new ArrayList<>();
                 thisToken = new Ticket(tokenInfo, balances, updateBlancaTime, networkName, type);
+                break;
+            case ERC721_TICKET:
+                if (balances == null) balances = new ArrayList<>();
+                thisToken = new ERC721Ticket(tokenInfo, balances, updateBlancaTime, networkName, type);
                 break;
             case ERC721:
             case ERC721_LEGACY:
                 thisToken = new ERC721Token(tokenInfo, new ArrayList<Asset>(), updateBlancaTime, networkName, type);
                 break;
+            case NOT_SET:
             case ERC20:
+            case OTHER:
+            case CURRENCY:
+            case DELETED_ACCOUNT:
+            case CREATION:
             case ETHEREUM:
                 thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
                 break;
             default:
-                thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
-                break;
+                throw new IllegalStateException("Unexpected value: " + type);
         }
 
         thisToken.lastBlockCheck = lastBlockCheck;
@@ -61,9 +74,12 @@ public class TokenFactory
                 thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);
                 thisToken.pendingBalance = balance;
                 break;
-
+            case ERC721_TICKET:
+                if (realmBalance == null) realmBalance = "";
+                thisToken = new ERC721Ticket(tokenInfo, realmBalance, updateBlancaTime, networkName, type);
+                break;
             case ERC875:
-            case ERC875LEGACY:
+            case ERC875_LEGACY:
                 if (realmBalance == null) realmBalance = "";
                 thisToken = new Ticket(tokenInfo, realmBalance, updateBlancaTime, networkName, type);
                 break;
@@ -100,8 +116,11 @@ public class TokenFactory
         switch (type)
         {
             case ERC875:
-            case ERC875LEGACY:
+            case ERC875_LEGACY:
                 thisToken = new Ticket(tokenInfo, new ArrayList<BigInteger>(), currentTime, networkName, type);
+                break;
+            case ERC721_TICKET:
+                thisToken = new ERC721Ticket(tokenInfo, new ArrayList<BigInteger>(), currentTime, networkName, type);
                 break;
             case ERC721:
             case ERC721_LEGACY:

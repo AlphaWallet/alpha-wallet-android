@@ -439,10 +439,6 @@ public class Token implements Parcelable
     {
         contractType = ContractType.ETHEREUM;
     }
-    public boolean isEthereum()
-    {
-        return contractType == ContractType.ETHEREUM;
-    }
 
     public boolean isBad()
     {
@@ -710,11 +706,6 @@ public class Token implements Parcelable
         return (contractType == ContractType.ETHEREUM || contractType == ContractType.ERC20 || contractType == ContractType.OTHER);
     }
 
-    public boolean isERC20()
-    {
-        return contractType == ContractType.ERC20;
-    }
-
     public boolean hasArrayBalance()
     {
         return false;
@@ -878,9 +869,16 @@ public class Token implements Parcelable
         return tokenInfo.name;
     }
 
-    public boolean isERC875() {
-        return false;
+    public boolean isERC875() { return false; }
+    public boolean isERC20()
+    {
+        return contractType == ContractType.ERC20;
     }
+    public boolean isEthereum()
+    {
+        return contractType == ContractType.ETHEREUM;
+    }
+    public boolean isERC721Ticket() { return false; }
 
     public BigDecimal getCorrectedAmount(String newAmount)
     {

@@ -370,12 +370,7 @@ public class WalletViewModel extends BaseViewModel
                 .filter(Token::walletUIUpdateRequired)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::tokensUpdateSingle, this::onError);
-    }
-
-    private void tokensUpdateSingle(Token token)
-    {
-        tokenUpdate.postValue(token);
+                .subscribe(tokenUpdate::postValue, this::onError);
     }
 
     private void onTokenUpdate(Token token)

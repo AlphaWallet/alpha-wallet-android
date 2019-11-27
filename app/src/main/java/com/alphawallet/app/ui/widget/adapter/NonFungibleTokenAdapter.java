@@ -6,6 +6,7 @@ import android.support.v7.widget.AppCompatRadioButton;
 import android.view.ViewGroup;
 
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
+import com.alphawallet.token.tools.Numeric;
 import com.bumptech.glide.Glide;
 import com.alphawallet.app.ui.widget.entity.AssetInstanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.AssetSortedItem;
@@ -171,7 +172,12 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         }
         else
         {
-            tokensToDisplay = new ArrayList<>(Collections.singletonList(new BigInteger(ticketId)));
+            List<BigInteger> ids = new ArrayList<>();
+            String[] tokens = ticketId.split(",");
+            for(String t : tokens) {
+                ids.add(Numeric.toBigInt(t));
+            }
+            tokensToDisplay = ids;
         }
 
         List<TicketRangeElement> sortedList = generateSortedList(assetService, token, tokensToDisplay); //generate sorted list

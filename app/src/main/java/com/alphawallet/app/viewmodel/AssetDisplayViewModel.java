@@ -225,11 +225,6 @@ public class AssetDisplayViewModel extends BaseViewModel
         ctx.startActivity(intent);
     }
 
-    private void openTransferDirectDialog(Intent intent, Token token, String tokenId)
-    {
-
-    }
-
     public void checkTokenScriptValidity(Token token)
     {
         disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)

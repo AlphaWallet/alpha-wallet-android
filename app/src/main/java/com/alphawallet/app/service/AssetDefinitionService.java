@@ -1058,18 +1058,21 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             case "erc875":
                 cType = ContractType.ERC875;
+                if (token.isERC875()) return;
                 break;
             case "erc20":
                 cType = ContractType.ERC20;
                 break;
             case "erc721":
                 cType = ContractType.ERC721;
+                if (token.isERC721() || token.isERC721Ticket()) return;
                 break;
             case "erc721Ticket":
                 cType = ContractType.ERC721_TICKET;
+                if (token.isERC721() || token.isERC721Ticket()) return;
                 break;
             case "ethereum":
-                cType = ContractType.CURRENCY;
+                cType = ContractType.ETHEREUM;
                 break;
             default:
                 cType = ContractType.OTHER;

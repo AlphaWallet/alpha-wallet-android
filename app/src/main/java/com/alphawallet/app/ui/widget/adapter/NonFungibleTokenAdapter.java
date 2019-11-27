@@ -31,7 +31,6 @@ import io.reactivex.schedulers.Schedulers;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.ERC721Token;
-import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.opensea.Asset;

@@ -18,8 +18,6 @@ import com.alphawallet.app.repository.TokenRepository;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import com.alphawallet.token.entity.SalesOrderMalformed;
-import com.alphawallet.token.tools.Convert;
-import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.interact.CreateTransactionInteract;
@@ -34,10 +32,7 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**

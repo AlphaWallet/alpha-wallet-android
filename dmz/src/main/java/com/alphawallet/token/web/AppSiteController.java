@@ -1,13 +1,12 @@
 package com.alphawallet.token.web;
 
 import com.github.cliftonlabs.json_simple.JsonObject;
-import org.apache.commons.io.IOUtils;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

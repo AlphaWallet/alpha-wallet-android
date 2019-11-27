@@ -461,6 +461,8 @@ public class ERC721Ticket extends Token implements Parcelable {
     public boolean isToken() {
         return false;
     }
+    @Override
+    public boolean isERC721Ticket() { return true; }
 
     @Override
     public List<BigInteger> getTicketsAsBigIntList(String ticketIds) {

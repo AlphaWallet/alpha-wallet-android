@@ -64,9 +64,8 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         token = t;
         clickThrough = true;
         openseaService = opensea;
-        if (token.isERC875()) setToken(t);
+        if (token.isERC875() || token.isERC721Ticket()) setToken(t);
         else if (token instanceof ERC721Token) setERC721Tokens(token, null);
-        else if (token instanceof ERC721Ticket) setERC721Tickets(token, null);
     }
 
     public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, String ticketIds, AssetDefinitionService service, OpenseaService opensea)
@@ -214,7 +213,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         items.clear();
         items.add(new TokenBalanceSortedItem(t));
         assetCount = t.getTicketCount();
-        if (t instanceof Ticket) addRanges(t);
+        if (!t.isERC20()) addRanges(t);
         items.endBatchedUpdates();
     }
 
@@ -225,13 +224,6 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         //determine what kind of holder we need:
         int holderType = AssetInstanceSortedItem.VIEW_TYPE;
         containsScripted = true;
-
-        //        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress()))
-        //        {
-        //            containsScripted = true;
-        //            holderType = AssetInstanceSortedItem.VIEW_TYPE;
-        //        }
-
         addSortedItems(sortedList, t, holderType);
     }
 

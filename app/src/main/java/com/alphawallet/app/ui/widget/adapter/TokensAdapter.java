@@ -35,6 +35,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public static final int FILTER_CURRENCY = 1;
     public static final int FILTER_ASSETS = 2;
     public static final int FILTER_COLLECTIBLES = 3;
+    private static final BigDecimal CUTOFF_VALUE = BigDecimal.valueOf(9999999999L);
 
     private int filterType;
     private boolean needsRefresh;
@@ -212,6 +213,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         if (token == null) return false;
         //Add token to display list if it's the base currency, or if it has balance
         boolean allowThroughFilter = VisibilityFilter.filterToken(token, true);
+        allowThroughFilter = checkTokenValue(token, allowThroughFilter);
 
         switch (filterType)
         {
@@ -238,6 +240,24 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
 
         return allowThroughFilter;
+    }
+
+    // This checks to see if the token is likely malformed
+    private boolean checkTokenValue(Token token, boolean allowThroughFilter)
+    {
+        if (!allowThroughFilter) return false; //quick return
+
+        //first check for bad value
+        BigDecimal tokenValue = new BigDecimal(token.getScaledBalance());
+        if (tokenValue.compareTo(CUTOFF_VALUE) >= 0)
+        {
+            String name = token.getFullName();
+            return name.length() <= 18;
+        }
+        else
+        {
+            return true;
+        }
     }
 
     private void populateTokens(Token[] tokens)

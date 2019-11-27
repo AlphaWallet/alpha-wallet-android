@@ -24,11 +24,19 @@ public class QRScanningActivity extends BaseActivity
         if (rc == PackageManager.PERMISSION_GRANTED)
         {
             setContentView(R.layout.activity_full_screen_scanner_fragment);
+            initBackClick();
         }
         else
         {
             requestCameraPermission();
         }
+    }
+
+    private void initBackClick()
+    {
+        findViewById(R.id.click_layout).setOnClickListener(view -> {
+            finish();
+        });
     }
 
     // Handles the requesting of the camera permission.
@@ -56,6 +64,7 @@ public class QRScanningActivity extends BaseActivity
                     if (grantResult == PackageManager.PERMISSION_GRANTED)
                     {
                         setContentView(R.layout.activity_full_screen_scanner_fragment);
+                        initBackClick();
                         handled = true;
                     }
                 }

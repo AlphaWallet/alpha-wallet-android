@@ -897,7 +897,7 @@ public class Token implements Parcelable
             BigDecimal bd = new BigDecimal(newAmount);
             BigDecimal factor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
             //.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros();
-            return bd.multiply(factor).setScale(0, RoundingMode.HALF_UP).stripTrailingZeros();
+            return bd.multiply(factor).setScale(0, RoundingMode.DOWN).stripTrailingZeros();
         }
         catch (Exception e)
         {

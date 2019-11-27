@@ -3,7 +3,6 @@ package com.alphawallet.app.entity.tokenscript;
 import io.reactivex.Observable;
 
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.token.entity.*;
 import com.alphawallet.token.tools.TokenDefinition;
 import okhttp3.OkHttpClient;

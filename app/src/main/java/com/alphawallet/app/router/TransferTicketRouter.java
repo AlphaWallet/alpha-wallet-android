@@ -17,7 +17,6 @@ public class TransferTicketRouter
         Intent intent = new Intent(context, TransferTicketActivity.class);
         intent.putExtra(C.Key.TICKET, ticket);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        //intent.putExtra(TICKET_RANGE, range);
         context.startActivity(intent);
     }
 }

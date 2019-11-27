@@ -76,7 +76,6 @@ import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import static android.os.FileObserver.ALL_EVENTS;
-import static com.alphawallet.app.entity.ContractType.ERC721_TICKET;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
 

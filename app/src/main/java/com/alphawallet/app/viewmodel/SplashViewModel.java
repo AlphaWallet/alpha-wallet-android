@@ -215,7 +215,6 @@ public class SplashViewModel extends ViewModel
             fetchWalletsInteract.storeWallet(wallet)
                     .subscribe(account -> {
                         fetchWallets();
-                        //createWallet.postValue(account);
                     }, this::onError).isDisposed();
         }
         else

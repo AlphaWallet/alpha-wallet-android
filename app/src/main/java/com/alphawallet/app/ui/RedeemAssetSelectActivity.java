@@ -80,8 +80,6 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
 
         toolbar();
 
-//        setTitle(getString(R.string.title_redeem_token));
-
         setTitle(getString(R.string.empty));
 
         systemView = findViewById(R.id.system_view);

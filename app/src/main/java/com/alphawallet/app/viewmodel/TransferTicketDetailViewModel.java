@@ -18,8 +18,6 @@ import com.alphawallet.app.repository.TokenRepository;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import com.alphawallet.token.entity.SalesOrderMalformed;
-import com.alphawallet.token.tools.Convert;
-import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.interact.CreateTransactionInteract;
@@ -34,10 +32,7 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -135,10 +130,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         initParser();
         if (ticketSendIndexList == null || ticketSendIndexList.length == 0)
             return; //TODO: Display error message
-
-        //For testing:
-        //GenerateSpawnLink(new ArrayList<BigInteger>(), contractAddress, expiry);
-        //GenerateDispensoryLink(expiry);
 
         //NB tradeBytes is the exact bytes the ERC875 contract builds to check the valid order.
         //This is what we must sign.

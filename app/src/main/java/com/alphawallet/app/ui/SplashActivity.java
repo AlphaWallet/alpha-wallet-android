@@ -75,7 +75,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
             importData = data.toString();
             if (importData.startsWith("content://"))
             {
-                importPath = data.getPath();// data.getPath();
+                importPath = data.getPath();
             }
         }
         else

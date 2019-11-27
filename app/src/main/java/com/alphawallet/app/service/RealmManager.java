@@ -15,11 +15,6 @@ public class RealmManager {
 
     private final Map<String, RealmConfiguration> realmConfigurations = new HashMap<>();
 
-//    public Realm getRealmInstance(NetworkInfo networkInfo, Wallet wallet) {
-//        String name = getName(networkInfo, wallet);
-//        return getRealmInstance(name);
-//    }
-
     public Realm getRealmInstance(Wallet wallet) {
         return getRealmInstance(wallet.address + "-db.realm");
     }

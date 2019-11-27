@@ -1,6 +1,5 @@
 package com.alphawallet.token.web.Ethereum;
 
-import com.alphawallet.token.entity.MagicLinkInfo;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;

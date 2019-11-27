@@ -204,8 +204,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
             }
             break;
             case android.R.id.home: {
-                //adapter.clear();
-                //viewModel.showTransactions(getContext());
+                break;
             }
         }
         return super.onOptionsItemSelected(item);
@@ -253,7 +252,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         switch (backupLevel)
         {
             case BACKUP_NOT_REQUIRED:
-                //if (getActivity() != null) ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
                 break;
             case WALLET_HAS_LOW_VALUE:
                 wData = new WarningData(this);
@@ -305,19 +303,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     }
 
     private void onBalanceChanged(Map<String, String> balance) {
-//        ActionBar actionBar = getSupportActionBar();
-//        NetworkInfo networkInfo = viewModel.defaultNetwork().getValue();
-//        Wallet wallet = viewModel.defaultWallet().getValue();
-//        if (actionBar == null || networkInfo == null || wallet == null) {
-//            return;
-//        }
-//        if (TextUtils.isEmpty(balance.get(C.USD_SYMBOL))) {
-//            actionBar.setTitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
-//            actionBar.setSubtitle("");
-//        } else {
-//            actionBar.setTitle("$" + balance.get(C.USD_SYMBOL));
-//            actionBar.setSubtitle(balance.get(networkInfo.symbol) + " " + networkInfo.symbol);
-//        }
+
     }
 
     /**
@@ -426,12 +412,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
             remindMeLater(viewModel.getWallet());
         }
-
-//        @Override
-//        public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y)
-//        {
-//            super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
-//        }
 
         @Override
         public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {

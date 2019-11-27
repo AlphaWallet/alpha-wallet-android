@@ -9,8 +9,6 @@ import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import org.bouncycastle.util.encoders.Base64;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 public class TrustAddressGeneratorTest {
     String digest;

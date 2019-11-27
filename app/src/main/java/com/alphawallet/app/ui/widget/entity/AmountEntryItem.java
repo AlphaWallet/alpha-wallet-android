@@ -286,7 +286,6 @@ public class AmountEntryItem
             if (isValidAmount(amountStr))
             {
                 String usdEquivStr = ticker.priceSymbol + " " + getUsdString(Double.parseDouble(amountStr) * currentEthPrice);
-                //String usdEquivStr = "US$ " + getUsdString(Double.parseDouble(amountStr) * currentEthPrice);
                 if (!hasRealValue) usdEquivStr = "(TEST) " + usdEquivStr;
                 usdValue.setText(usdEquivStr);
             }

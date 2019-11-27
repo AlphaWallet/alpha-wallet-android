@@ -190,8 +190,6 @@ public class ImportTokenViewModel extends BaseViewModel
             importOrder.ownerAddress = parser.getOwnerKey(importOrder);
             //see if we picked up a network from the link
             checkContractNetwork.postValue(importOrder.contractAddress);
-            //simultaneously check certificate
-            //assetDefinitionService.getSignatureData(importOrder.chainId, importOrder.contractAddress);
         }
         catch (SalesOrderMalformed e)
         {

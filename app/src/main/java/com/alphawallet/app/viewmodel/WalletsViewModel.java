@@ -216,7 +216,6 @@ public class WalletsViewModel extends BaseViewModel
     {
         if (wallet.ENSname != null && wallet.ENSname.length() > 0)
         {
-            //updateENSName.postValue(wallet);
             disposable = fetchWalletsInteract.updateWalletData(wallet)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -336,7 +335,6 @@ public class WalletsViewModel extends BaseViewModel
 
     private void onCreateWalletError(Throwable throwable)
     {
-        //Crashlytics.logException(throwable);
         progress.postValue(false);
         createWalletError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
     }

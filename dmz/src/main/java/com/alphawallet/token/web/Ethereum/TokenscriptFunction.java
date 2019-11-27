@@ -712,7 +712,6 @@ public abstract class TokenscriptFunction
 
     private Observable<TokenScriptResult.Attribute> resultFromDatabase(TransactionResult transactionResult, AttributeType attr)
     {
-        //return Observable.fromCallable(() -> attr.function.parseFunctionResult(transactionResult, attr));
         return Observable.fromCallable(() -> parseFunctionResult(transactionResult, attr));
     }
 

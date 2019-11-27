@@ -7,7 +7,6 @@ import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.entity.MessagePair;
 import com.alphawallet.app.entity.SignaturePair;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 

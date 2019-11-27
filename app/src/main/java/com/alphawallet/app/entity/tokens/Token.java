@@ -768,9 +768,6 @@ public class Token implements Parcelable
                 }
             }
         }
-
-        //Log.d("TOKEN", tokenInfo.name + " Update weight " + updateWeight);
-
         return updateWeight;
     }
 

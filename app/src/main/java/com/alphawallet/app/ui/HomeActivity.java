@@ -234,7 +234,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     .onClickContentView(R.id.btn_close, view -> {
                         backupWalletDialog.dismiss();
                     })
-                    .on(R.id.layout_nav_settings)
+                    .on(R.id.settings_tab)
                     .addCircle()
                     .onClick(v -> {
                         backupWalletDialog.dismiss();
@@ -865,6 +865,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         }
                         break;
                 }
+                break;
+            case C.UPDATE_LOCALE:
+                settingsFragment.updateLocale(data);
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);

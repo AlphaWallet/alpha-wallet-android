@@ -18,43 +18,42 @@
 
         <include layout="@layout/layout_function_buttons" />
 
-            <LinearLayout
-                android:id="@+id/allz"
+        <LinearLayout
+            android:id="@+id/allz"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_above="@id/layoutButtons">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/token_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:layout_above="@id/layoutButtons">
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"/>
 
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/token_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="5dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_marginStart="22dp"
+                android:gravity="center_vertical"
+                android:fontFamily="@font/font_semibold"
+                android:text="@string/recent_transactions"
+                android:textColor="@color/grey76"
+                android:textSize="15sp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="50dp"
-                    android:layout_marginStart="22dp"
-                    android:gravity="center_vertical"
-                    android:fontFamily="@font/font_semibold"
-                    android:text="@string/recent_transactions"
-                    android:textColor="@color/grey76"
-                    android:textSize="15sp" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/super_light_grey" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/super_light_grey" />
-
-                <ScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
                 <LinearLayout
                     android:id="@+id/layout_transactions"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="100dp"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical">
 
                     <ProgressBar
@@ -101,9 +100,9 @@
 
                 </LinearLayout>
 
-                </ScrollView>
+            </ScrollView>
 
-            </LinearLayout>
+        </LinearLayout>
 
     </RelativeLayout>
 </LinearLayout>

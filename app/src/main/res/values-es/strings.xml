@@ -75,7 +75,7 @@
     <string name="dapp_address">Address</string>
     <string name="search_or_type_web_address">Search or type web address</string>
     <string name="select_network_filters">Select Active Networks:</string>
-    <string name="network">Enabled Networks</string>
+    <string name="network">Networks</string>
     <string name="collectibles">Collectibles</string>
     <string name="token_function">Token Function</string>
     <string name="channel_description">Alphawallet notification channel</string>
@@ -84,7 +84,7 @@
     <string name="tokenscript_send_native">Send %1$s %2$s to %3$s (%4$s)</string>
     <string name="current_funds">Current funds: %1$s %2$s</string>
     <string name="invalid_address_explain">%1$s is not a valid ethereum address</string>
-    <string name="select_single_network">Select Network</string>
+    <string name="select_single_network">Active Network</string>
     <string name="searching_for_token">Scanning for Token</string>
     <string name="token_selection">Token Selection</string>
     <string name="token_requirement">This function requires %1$s tokens</string>

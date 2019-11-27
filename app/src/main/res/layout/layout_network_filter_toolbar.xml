@@ -22,12 +22,35 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
+        <View
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/spacer_view"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:layout_centerVertical="true"
+            android:fontFamily="@font/font_semibold"
+            android:layout_toEndOf="@id/spacer_view"
+            android:layout_toStartOf="@id/filter_button"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:singleLine="true"
+            android:textColor="@color/semi_dark_grey"
+            android:textSize="20sp"
+            android:text=""
+            android:visibility="visible" />
+
         <LinearLayout
             android:id="@+id/filter_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
             android:background="@drawable/background_address_bar"
             android:padding="7dp"
             android:paddingEnd="9dp"
@@ -43,13 +66,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
                 android:fontFamily="@font/font_light"
                 android:text="@string/network"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
 
         </LinearLayout>
+
     </RelativeLayout>
 
 </android.support.v7.widget.Toolbar>

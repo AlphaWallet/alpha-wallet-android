@@ -18,6 +18,7 @@
         android:background="@color/white">
 
     <LinearLayout
+        android:id="@+id/wallet_tab"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:paddingTop="5dp"
@@ -45,6 +46,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/transactions_tab"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
@@ -96,7 +98,7 @@
     </LinearLayout>
 
     <RelativeLayout
-        android:id="@+id/layout_nav_settings"
+        android:id="@+id/settings_tab"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"

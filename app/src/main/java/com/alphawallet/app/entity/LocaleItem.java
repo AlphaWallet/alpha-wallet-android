@@ -1,6 +1,12 @@
 package com.alphawallet.app.entity;
 
-public class LocaleItem {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.alphawallet.app.web3.entity.Message;
+
+public class LocaleItem implements Parcelable
+{
     public String name;
     public String code;
     public boolean isSelected;
@@ -20,6 +26,39 @@ public class LocaleItem {
         this.code = code;
         this.isSelected = isSelected;
     }
+
+    public LocaleItem(Parcel in)
+    {
+        name = in.readString();
+        code = in.readString();
+        isSelected = in.readInt() == 1;
+    }
+
+    @Override
+    public int describeContents()
+    {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags)
+    {
+        dest.writeString(name);
+        dest.writeString(code);
+        dest.writeInt(isSelected?1:0);
+    }
+
+    public static final Parcelable.Creator<LocaleItem> CREATOR = new Parcelable.Creator<LocaleItem>() {
+        @Override
+        public LocaleItem createFromParcel(Parcel in) {
+            return new LocaleItem(in);
+        }
+
+        @Override
+        public LocaleItem[] newArray(int size) {
+            return new LocaleItem[size];
+        }
+    };
 
     public String getName() {
         return name;

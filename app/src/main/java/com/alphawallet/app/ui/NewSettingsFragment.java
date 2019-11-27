@@ -33,7 +33,6 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
-import com.alphawallet.app.widget.SelectLocaleDialog;
 import com.crashlytics.android.Crashlytics;
 
 import static com.alphawallet.app.C.*;
@@ -125,17 +124,11 @@ public class NewSettingsFragment extends Fragment
 
         final LinearLayout layoutSwitchLocale = view.findViewById(R.id.layout_locale_lang);
         layoutSwitchLocale.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), SelectLocaleActivity.class);
             String currentLocale = viewModel.getDefaultLocale();
-            SelectLocaleDialog dialog = new SelectLocaleDialog(getActivity(), viewModel.getLocaleList(getContext()), currentLocale);
-            dialog.setOnClickListener(v1 -> {
-                if (!currentLocale.equals(dialog.getSelectedItemId())) {
-                    viewModel.setDefaultLocale(getContext(), dialog.getSelectedItemId());
-                    localeSubtext.setText(LocaleUtils.getDisplayLanguage(dialog.getSelectedItemId(), currentLocale));
-                    getActivity().sendBroadcast(new Intent(CHANGED_LOCALE));
-                }
-                dialog.dismiss();
-            });
-            dialog.show();
+            intent.putExtra(EXTRA_LOCALE, currentLocale);
+            intent.putParcelableArrayListExtra(EXTRA_STATE, viewModel.getLocaleList(getContext()));
+            getActivity().startActivityForResult(intent, C.UPDATE_LOCALE);
         });
 
         final LinearLayout layoutHelp = view.findViewById(R.id.layout_help_faq);
@@ -463,5 +456,15 @@ public class NewSettingsFragment extends Fragment
     {
         layoutBackup.setVisibility(View.GONE);
         if (getActivity() != null) ((HomeActivity)getActivity()).postponeWalletBackupWarning(walletAddress);
+    }
+
+    public void updateLocale(Intent data)
+    {
+        String currentLocale = viewModel.getDefaultLocale();
+        if (data == null) return;
+        String newLocale = data.getStringExtra(C.EXTRA_LOCALE);
+        viewModel.setDefaultLocale(getContext(), newLocale);
+        localeSubtext.setText(LocaleUtils.getDisplayLanguage(newLocale, currentLocale));
+        getActivity().sendBroadcast(new Intent(CHANGED_LOCALE));
     }
 }

@@ -50,8 +50,12 @@ public class AWalletBottomNavigationView extends LinearLayout {
         dappBrowserLabel = findViewById(R.id.nav_browser_text);
         walletLabel = findViewById(R.id.nav_wallet_text);
         settingsLabel = findViewById(R.id.nav_settings_text);
-
         settingsBadge = findViewById(R.id.settings_badge);
+
+        findViewById(R.id.wallet_tab).setOnClickListener(v -> selectItem(WALLET));
+        findViewById(R.id.transactions_tab).setOnClickListener(v -> selectItem(TRANSACTIONS));
+        findViewById(R.id.browser_tab).setOnClickListener(v -> selectItem(DAPP_BROWSER));
+        findViewById(R.id.settings_tab).setOnClickListener(v -> selectItem(SETTINGS));
 
         transactions.setOnClickListener(v -> selectItem(TRANSACTIONS));
         dappBrowser.setOnClickListener(v -> selectItem(DAPP_BROWSER));

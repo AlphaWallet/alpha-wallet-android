@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.ERC875ContractTransaction;
+import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.repository.entity.RealmToken;
@@ -411,7 +412,7 @@ public class ERC721Ticket extends Token implements Parcelable {
     }
 
     @Override
-    public List<BigInteger> getArrayBalance() { return balanceArray; }
+    public List<BigInteger> getArrayBalance() { return getNonZeroArrayBalance(); }
 
     @Override
     public List<BigInteger> getNonZeroArrayBalance()
@@ -473,4 +474,10 @@ public class ERC721Ticket extends Token implements Parcelable {
         return tokenIds;
     }
 
+    @Override
+    public boolean groupWithToken(TicketRange currentGroupingRange, TicketRangeElement newElement, long currentGroupTime)
+    {
+        //don't group any ERC721 tickets in the asset view
+        return false;
+    }
 }

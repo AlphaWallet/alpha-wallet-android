@@ -11,10 +11,9 @@ import android.widget.TextView;
 
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.ERC875ContractTransaction;
+import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
-import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.BaseActivity;
@@ -611,4 +610,13 @@ public class Ticket extends Token implements Parcelable
     @Override
     public boolean isERC875() { return true; }
     public boolean isNonFungible() { return true; }
+
+    @Override
+    public boolean groupWithToken(TicketRange currentGroupingRange, TicketRangeElement newElement, long currentGroupTime)
+    {
+        if (currentGroupingRange.tokenIds.size() == 0) return false;
+
+        return currentGroupingRange.tokenIds.get(0)
+                .equals(newElement.id) || (newElement.time != 0 && newElement.time == currentGroupTime);
+    }
 }

@@ -8,6 +8,7 @@ import android.view.View;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.opensea.Asset;
@@ -905,9 +906,14 @@ public class Token implements Parcelable
         return BigDecimal.ZERO;
     }
 
-    public String getShortName()
-    {
+    public String getShortName() {
         if (isTerminated() || isBad()) return "";
         return tokenInfo.name != null ? tokenInfo.name : tokenInfo.symbol != null ? tokenInfo.symbol : "";
+    }
+
+    public boolean groupWithToken(TicketRange currentRange, TicketRangeElement e, long currentTime)
+    {
+        //default is no grouping
+        return false;
     }
 }

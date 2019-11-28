@@ -270,25 +270,19 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     protected <T> SortedList<T> addSortedItems(List<TicketRangeElement> sortedList, Token t, int id)
     {
         long currentTime = 0;
-
         for (int i = 0; i < sortedList.size(); i++)
         {
             TicketRangeElement e = sortedList.get(i);
-            if (currentRange != null && e.id.equals(currentRange.tokenIds.get(0)))
+            if (currentRange != null && t.groupWithToken(currentRange, e, currentTime))
             {
                 currentRange.tokenIds.add(e.id);
             }
-            else if (currentRange == null || e.time != currentTime) //check consecutive seats and zone is still the same, and push final ticket
+            else
             {
                 currentRange = new TicketRange(e.id, t.getAddress());
                 final T item = generateType(currentRange, 10 + i, id);
                 items.add((SortedItem)item);
                 currentTime = e.time;
-            }
-            else
-            {
-                //update
-                currentRange.tokenIds.add(e.id);
             }
         }
 

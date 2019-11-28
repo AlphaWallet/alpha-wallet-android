@@ -289,7 +289,14 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
             if ((quantity - 1) >= 0) {
                 quantity--;
                 textQuantity.setText(String.valueOf(quantity));
-                prunedIds = ((Ticket)token).pruneIDList(ticketIds, quantity);
+                if(token instanceof Ticket)
+                {
+                    prunedIds = ((Ticket) token).pruneIDList(ticketIds, 1);
+                }
+                else
+                {
+                    prunedIds = ((ERC721Ticket) token).pruneIDList(ticketIds, 1);
+                }
             }
         });
 

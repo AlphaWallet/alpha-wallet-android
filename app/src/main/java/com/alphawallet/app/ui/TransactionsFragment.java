@@ -18,6 +18,7 @@ import com.alphawallet.app.entity.tokens.TokenInterface;
 import com.alphawallet.app.entity.tokens.TokensReceiver;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.ui.widget.adapter.RecycleViewDivider;
 import com.alphawallet.app.ui.widget.adapter.TransactionsAdapter;
 
 import dagger.android.support.AndroidSupportInjection;
@@ -65,6 +66,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         list = view.findViewById(R.id.list);
         list.setLayoutManager(new LinearLayoutManager(getContext()));
         list.setAdapter(adapter);
+        list.addItemDecoration(new RecycleViewDivider(getContext()));
 
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);

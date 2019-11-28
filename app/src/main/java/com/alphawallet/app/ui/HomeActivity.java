@@ -180,6 +180,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
         systemView = findViewById(R.id.system_view);
+        findViewById(R.id.toolbar).setBackgroundResource(R.color.colorPrimary);
 
         RecyclerView list = findViewById(R.id.list);
 
@@ -233,7 +234,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                     .onClickContentView(R.id.btn_close, view -> {
                         backupWalletDialog.dismiss();
                     })
-                    .on(R.id.layout_nav_settings)
+                    .on(R.id.settings_tab)
                     .addCircle()
                     .onClick(v -> {
                         backupWalletDialog.dismiss();
@@ -845,6 +846,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         }
                         break;
                 }
+                break;
+            case C.UPDATE_LOCALE:
+                settingsFragment.updateLocale(data);
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);

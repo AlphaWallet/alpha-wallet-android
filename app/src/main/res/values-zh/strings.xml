@@ -344,7 +344,7 @@
     <string name="dapp_address">Address</string>
     <string name="search_or_type_web_address">Search or type web address</string>
     <string name="select_network_filters">Select Active Networks:</string>
-    <string name="network">Enabled Networks</string>
+    <string name="network">Networks</string>
     <string name="collectibles">Collectibles</string>
     <string name="token_function">Token Function</string>
     <string name="channel_description">Alphawallet notification channel</string>
@@ -353,7 +353,7 @@
     <string name="tokenscript_send_native">Send %1$s %2$s to %3$s (%4$s)</string>
     <string name="current_funds">Current funds: %1$s %2$s</string>
     <string name="invalid_address_explain">%1$s is not a valid ethereum address</string>
-    <string name="select_single_network">Select Network</string>
+    <string name="select_single_network">Active Network</string>
     <string name="searching_for_token">Scanning for Token</string>
     <string name="token_selection">Token Selection</string>
     <string name="token_requirement">This function requires %1$s tokens</string>
@@ -467,5 +467,9 @@
     <string name="what_is_seed_phrase">A seed phrase, seed recovery phrase or backup seed phrase is a list of words which store all the information needed to recover a Bitcoin wallet. Wallet software will typically generate a seed phrase and instruct the user to write it down on paper.</string>
     <string name="transaction_too_large">Transaction Too Large</string>
     <string name="unable_to_handle_tx">Transaction payload is too large</string>
+    <string name="show_token_contract">Show Token Contract</string>
+    <string name="certificate_details">Certificate Details</string>
+    <string name="signature_details">Signature details</string>
+    <string name="copy_contract_address">Copy Contract Address</string>
     <string name="self">Self</string>
 </resources>

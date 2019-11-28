@@ -3,6 +3,7 @@ package com.alphawallet.app.entity.tokens;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.view.View;
 
 import com.alphawallet.app.entity.ContractType;
@@ -126,6 +127,8 @@ public class ERC721Token extends Token implements Parcelable
         holder.contractType.setText(R.string.erc721);
 
         holder.balanceEth.setVisibility(View.VISIBLE);
+
+        addTokenName(holder);
     }
 
     @Override
@@ -237,6 +240,9 @@ public class ERC721Token extends Token implements Parcelable
     {
         tokenBalanceAssets.clear();
     }
+
+    public boolean isERC721() { return true; }
+    public boolean isNonFungible() { return true; }
 
     @Override
     public boolean requiresTransactionRefresh()

@@ -13,5 +13,6 @@ public interface StandardFunctionInterface
     default void showSend() { };
     default void showReceive() { };
     default void displayTokenSelectionError(TSAction action) { };
-    void handleTokenScriptFunction(String function, List<BigInteger> selection);
+    default void handleClick(int view) { };
+    default void handleTokenScriptFunction(String function, List<BigInteger> selection) { };
 }

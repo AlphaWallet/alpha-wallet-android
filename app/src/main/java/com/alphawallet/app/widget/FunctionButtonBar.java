@@ -57,6 +57,22 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
         activeClick = false;
     }
 
+    public void setupFunctions(StandardFunctionInterface functionInterface, List<Integer> functionResources)
+    {
+        callStandardFunctions = functionInterface;
+        adapter = null;
+        functions = null;
+        removeAllViews();
+
+        addNewButtonLine();
+        for (int resourceId : functionResources)
+        {
+            addButton(resourceId);
+        }
+
+        findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
+    }
+
     public void setupFunctions(StandardFunctionInterface functionInterface, AssetDefinitionService assetSvs, Token token, NonFungibleTokenAdapter adp)
     {
         callStandardFunctions = functionInterface;
@@ -174,6 +190,7 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
                         callStandardFunctions.selectRedeemTokens(selection);
                         break;
                     default:
+                        callStandardFunctions.handleClick(v.getId());
                         break;
                 }
             }

@@ -26,6 +26,6 @@
         android:layout_toRightOf="@id/search_icon"
         android:fontFamily="@font/font_regular"
         android:text="@string/search"
-        android:textColor="@color/semitransparentWhite"
+        android:textColor="@color/colorPrimaryDark"
         android:textSize="15sp" />
 </RelativeLayout>

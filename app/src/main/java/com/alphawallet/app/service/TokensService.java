@@ -481,7 +481,8 @@ public class TokensService
 
     private void handleTokenList(int chainId, List<Token> tokenList, String string)
     {
-        //parse JSON
+        if (string.contains("NOTOK")) return;
+
         try
         {
             JSONObject json = new JSONObject(string);

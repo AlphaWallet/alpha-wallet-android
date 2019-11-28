@@ -769,6 +769,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             case FETCH_MNEMONIC:
             case CHECK_AUTHENTICATION:
             case SIGN_DATA:
+                requireUnlock = true;
             default:
                 dialogTitle = context.getString(R.string.unlock_private_key);
                 break;

@@ -23,6 +23,7 @@ import android.widget.*;
 
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.ENSCallback;
+import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FinishReceiver;
@@ -293,7 +294,14 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         });
 
         textQuantity.setText("1");
-        prunedIds = ((Ticket)token).pruneIDList(ticketIds, 1);
+        if(token instanceof Ticket)
+        {
+            prunedIds = ((Ticket) token).pruneIDList(ticketIds, 1);
+        }
+        else
+        {
+            prunedIds = ((ERC721Ticket) token).pruneIDList(ticketIds, 1);
+        }
     }
 
     private void setupRadioButtons()
@@ -667,7 +675,11 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
     private void linkReady(String universalLink)
     {
-        int quantity = token.ticketIdStringToIndexList(prunedIds).size();
+        int quantity = 1;
+        if(token.ticketIdStringToIndexList(prunedIds) != null)
+        {
+            quantity = token.ticketIdStringToIndexList(prunedIds).size();
+        }
         int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
         String qty = String.valueOf(quantity) + " " +
                 getResources().getString(ticketName) + "\n" +

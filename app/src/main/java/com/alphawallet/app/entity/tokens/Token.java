@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
@@ -16,9 +17,7 @@ import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
-
 import com.alphawallet.token.entity.TicketRange;
-import com.alphawallet.app.R;
 
 import org.web3j.abi.datatypes.Function;
 import org.web3j.utils.Numeric;
@@ -232,7 +231,7 @@ public class Token implements Parcelable
     public void setupContent(TokenHolder holder, AssetDefinitionService definition)
     {
         BigDecimal ethBalance = getCorrectedBalance(4);
-        String value = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
+        String     value      = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
         if (ethBalance.compareTo(BigDecimal.ZERO) == 0 && balance.compareTo(BigDecimal.ZERO) > 0)
         {
             ethBalance = balance.divide(new BigDecimal(Math.pow(10, tokenInfo.decimals)));
@@ -249,7 +248,6 @@ public class Token implements Parcelable
         if (isEthereum())
         {
             holder.textAppreciationSub.setText(R.string.appreciation);
-            holder.icon.setVisibility(View.GONE);
             holder.text24HoursSub.setText(R.string.twenty_four_hours);
             holder.contractType.setVisibility(View.GONE);
             holder.contractSeparator.setVisibility(View.GONE);
@@ -261,21 +259,9 @@ public class Token implements Parcelable
             holder.contractSeparator.setVisibility(View.VISIBLE);
             holder.contractType.setText(R.string.erc20);
             holder.layoutValueDetails.setVisibility(View.GONE);
-
-            //For tokens with a long balance, wrap the name onto a new line so as not to appear cluttered
-            if (value.length() > 8)
-            {
-                holder.symbol.setText("");
-                String symbolStr = tokenInfo.symbol != null ? tokenInfo.symbol.toUpperCase() : "";
-                holder.symbolAux.setVisibility(View.VISIBLE);
-                holder.symbolAux.setText(TextUtils.isEmpty(tokenInfo.name)
-                        ? symbolStr
-                        : getFullName());
-            }
-
-            //currently we don't collect the value of ERC20 tokens
-            //TODO: get ticker for ERC20 tokens
         }
+
+        addTokenName(holder);
 
         //populate ticker if we have it
         if (ticker != null)
@@ -286,8 +272,30 @@ public class Token implements Parcelable
             holder.text24HoursSub.setText(R.string.twenty_four_hours);
             holder.currencyLabel.setText(ticker.priceSymbol);
         }
+        else if (isEthereum())
+        {
+            holder.layoutValueDetails.setVisibility(View.VISIBLE);
+            holder.animateTextWhileWaiting();
+            holder.emptyTicker();
+        }
+        else
+        {
+            holder.layoutValueDetails.setVisibility(View.GONE);
+        }
 
         holder.balanceEth.setVisibility(View.VISIBLE);
+    }
+
+    void addTokenName(TokenHolder holder)
+    {
+        String balance = holder.balanceEth.getText().toString();
+        String symbolStr = tokenInfo.symbol != null ? tokenInfo.symbol.toUpperCase() : "";
+        String nameTxt = TextUtils.isEmpty(tokenInfo.name)
+                         ? symbolStr
+                         : getFullName();
+
+        String composite = balance + " " + nameTxt;
+        holder.balanceEth.setText(composite);
     }
 
     public List<Asset> getTokenAssets() {
@@ -867,6 +875,8 @@ public class Token implements Parcelable
     }
 
     public boolean isERC875() { return false; }
+    public boolean isERC721() { return false; }
+    public boolean isNonFungible() { return false; }
     public boolean isERC20()
     {
         return contractType == ContractType.ERC20;
@@ -886,12 +896,18 @@ public class Token implements Parcelable
             BigDecimal bd = new BigDecimal(newAmount);
             BigDecimal factor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
             //.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros();
-            return bd.multiply(factor).setScale(0, RoundingMode.HALF_UP).stripTrailingZeros();
+            return bd.multiply(factor).setScale(0, RoundingMode.DOWN).stripTrailingZeros();
         }
         catch (Exception e)
         {
             //
         }
         return BigDecimal.ZERO;
+    }
+
+    public String getShortName()
+    {
+        if (isTerminated() || isBad()) return "";
+        return tokenInfo.name != null ? tokenInfo.name : tokenInfo.symbol != null ? tokenInfo.symbol : "";
     }
 }

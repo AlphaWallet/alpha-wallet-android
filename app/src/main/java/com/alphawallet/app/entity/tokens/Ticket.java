@@ -176,6 +176,7 @@ public class Ticket extends Token implements Parcelable
 
         tokenHolder.contractType.setVisibility(View.VISIBLE);
         tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
+        tokenHolder.layoutValueDetails.setVisibility(View.GONE);
         if (contractType == ContractType.ERC875_LEGACY)
         {
             tokenHolder.contractType.setText(R.string.erc875legacy);
@@ -185,9 +186,9 @@ public class Ticket extends Token implements Parcelable
             tokenHolder.contractType.setText(R.string.erc875);
         }
 
-        tokenHolder.balanceEth.setText(String.valueOf(getTicketCount()));
-        tokenHolder.layoutValueDetails.setVisibility(View.GONE);
-        tokenHolder.symbol.setText(getFullName(asset, getTicketCount())); //override name text
+        String composite = getTicketCount() + " " + getFullName(asset, getTicketCount());
+
+        tokenHolder.balanceEth.setText(composite);
     }
 
     @Override
@@ -609,4 +610,5 @@ public class Ticket extends Token implements Parcelable
 
     @Override
     public boolean isERC875() { return true; }
+    public boolean isNonFungible() { return true; }
 }

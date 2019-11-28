@@ -120,7 +120,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         if (date != null) setDate();
 
         if (transaction.blockNumber != null && transaction.blockNumber.equals("0")) { fillPending(); return; }
-        if (transactionBackground != null) transactionBackground.setBackgroundResource(R.drawable.background_marketplace_event);
+        if (transactionBackground != null) transactionBackground.setBackgroundResource(R.color.white);
 
         boolean txSuccess = (transaction.error != null && transaction.error.equals("0"));
         // If operations include token transfer, display token transfer instead
@@ -218,11 +218,11 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             case 1:
             case 2:
                 supplimental.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
-                typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
+                typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
                 colourResource = R.color.green;
                 break;
             case -1:
-                typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+                typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
                 colourResource = R.color.red;
                 break;
             case -2:
@@ -278,13 +278,13 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
                 typeIcon.setImageResource(R.drawable.ic_transactions);
                 value.setTextColor(ContextCompat.getColor(getContext(), R.color.warning_dark_red));
             }
-            else if (!isSent)
+            if (!isSent)
             {
-                typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
+                typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
             }
             else
             {
-                typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+                typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
             }
         }
 
@@ -344,11 +344,11 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             }
             else if (!isSent)
             {
-                typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
+                typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
             }
             else
             {
-                typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+                typeIcon.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
             }
         }
 

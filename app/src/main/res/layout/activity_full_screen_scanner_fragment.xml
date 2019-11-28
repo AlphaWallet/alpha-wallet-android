@@ -6,17 +6,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <fragment android:name="com.alphawallet.app.ui.zxing.FullScannerFragment"
+    <fragment
         android:id="@+id/scanner_fragment"
+        android:name="com.alphawallet.app.ui.zxing.FullScannerFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <ImageView
-        android:src="@mipmap/ic_alpha"
-        android:layout_gravity="top"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:alpha="0.3"/>
+    <LinearLayout
+        android:id="@+id/click_layout"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:src="@drawable/ic_light_back" />
+
+    </LinearLayout>
 
     <TextView
         android:layout_gravity="center|bottom"

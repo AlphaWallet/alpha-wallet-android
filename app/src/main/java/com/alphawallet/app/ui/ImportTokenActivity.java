@@ -128,7 +128,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         viewModel.checkContractNetwork().observe(this, this::checkContractNetwork);
         viewModel.ticketNotValid().observe(this, this::onInvalidTicket);
         viewModel.feemasterAvailable().observe(this, this::onFeemasterAvailable);
-        viewModel.sig().observe(this, toolbarView::onSigData);
+        viewModel.sig().observe(this, sigData -> toolbarView.onSigData(sigData, this));
 
         ticketRange = null;
 

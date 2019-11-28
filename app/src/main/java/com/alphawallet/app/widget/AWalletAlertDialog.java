@@ -7,6 +7,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -23,6 +24,12 @@ public class AWalletAlertDialog extends Dialog {
     public static final int ERROR = R.drawable.ic_error;
     public static final int NO_SCREENSHOT = R.drawable.ic_no_screenshot;
     public static final int WARNING = R.drawable.ic_warning;
+
+    public enum TEXT_STYLE
+    {
+        CENTERED,
+        LEFT
+    }
 
     private static AWalletAlertDialog dialog = null;
     private ImageView icon;
@@ -116,5 +123,18 @@ public class AWalletAlertDialog extends Dialog {
 
     public void setView(View view) {
         viewContainer.addView(view);
+    }
+
+    public void setTextStyle(TEXT_STYLE style)
+    {
+        switch (style)
+        {
+            case CENTERED:
+                messageText.setGravity(Gravity.CENTER_HORIZONTAL);
+                break;
+            case LEFT:
+                messageText.setGravity(Gravity.START);
+                break;
+        }
     }
 }

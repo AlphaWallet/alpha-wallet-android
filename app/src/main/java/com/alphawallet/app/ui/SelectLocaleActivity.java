@@ -1,83 +1,79 @@
-package com.alphawallet.app.widget;
+package com.alphawallet.app.ui;
 
-
-import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.LocaleItem;
+import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.widget.FunctionButtonBar;
 
-public class SelectLocaleDialog extends Dialog {
-    private static SelectLocaleDialog dialog = null;
-    private TextView titleText;
-    private Button button;
-    private Context context;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class SelectLocaleActivity extends BaseActivity implements StandardFunctionInterface
+{
     private ListView listView;
     private CustomAdapter adapter;
+    private FunctionButtonBar functionBar;
 
-    public SelectLocaleDialog(@NonNull Activity activity, ArrayList<LocaleItem> list, String selectedItem) {
-        super(activity);
-        this.context = activity;
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        String currentLocale = getIntent().getStringExtra(C.EXTRA_LOCALE);
+        ArrayList<LocaleItem> localeItems = getIntent().getParcelableArrayListExtra(C.EXTRA_STATE);
 
         setContentView(R.layout.dialog_awallet_list);
-        getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        setCanceledOnTouchOutside(true);
-        getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-
         listView = findViewById(R.id.dialog_list);
-        button = findViewById(R.id.dialog_button);
-        titleText = findViewById(R.id.dialog_main_text);
+        functionBar = findViewById(R.id.layoutButtons);
+        toolbar();
+        setTitle(getString(R.string.dialog_title_select_locale));
 
-        adapter = new CustomAdapter(list, selectedItem);
+        adapter = new CustomAdapter(this, localeItems, currentLocale);
         listView.setAdapter(adapter);
 
-        setTitle(R.string.dialog_title_select_locale);
+        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.action_confirm));
+        functionBar.setupFunctions(this, functions);
     }
 
     @Override
-    public void show() {
-        super.show();
-    }
-
-    public String getSelectedItem() {
-        return adapter.getSelectedItem();
-    }
-
-    public String getSelectedItemId() {
-        return adapter.getSelectedItemId();
-    }
-
-    public void setOnClickListener(View.OnClickListener listener) {
-        button.setOnClickListener(listener);
-    }
-
-    public void setTitle(int resId) {
-        titleText.setVisibility(View.VISIBLE);
-        titleText.setText(context.getResources().getString(resId));
+    public void handleClick(int view)
+    {
+        Intent intent = new Intent();
+        String item = adapter.getSelectedItemId();
+        intent.putExtra(C.EXTRA_LOCALE, item);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     @Override
-    public void setTitle(CharSequence message) {
-        titleText.setVisibility(View.VISIBLE);
-        titleText.setText(message);
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home: {
+                handleClick(0);
+                break;
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
-    public class CustomAdapter extends ArrayAdapter<LocaleItem> {
+    public class CustomAdapter extends ArrayAdapter<LocaleItem>
+    {
         private ArrayList<LocaleItem> dataSet;
         private String selectedItem;
         private String selectedItemId;
@@ -104,8 +100,8 @@ public class SelectLocaleDialog extends Dialog {
             LinearLayout itemLayout;
         }
 
-        private CustomAdapter(ArrayList<LocaleItem> data, String selectedItemId) {
-            super(context, R.layout.item_dialog_list, data);
+        private CustomAdapter(Context ctx, ArrayList<LocaleItem> data, String selectedItemId) {
+            super(ctx, R.layout.item_dialog_list, data);
             this.dataSet = data;
             this.selectedItemId = selectedItemId;
 
@@ -118,7 +114,8 @@ public class SelectLocaleDialog extends Dialog {
 
         @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(int position, View convertView, ViewGroup parent)
+        {
             LocaleItem item = getItem(position);
             final ViewHolder viewHolder;
             View view = convertView;

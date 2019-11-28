@@ -2,11 +2,23 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="?android:attr/actionBarSize"
-    android:background="@color/white"
-    android:orientation="horizontal"
-    android:paddingTop="3dp">
+    android:orientation="vertical">
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:paddingBottom="2dp"
+        android:background="@color/greydd"
+        android:orientation="vertical"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/white">
+
+    <LinearLayout
+        android:id="@+id/wallet_tab"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:paddingTop="5dp"
@@ -34,6 +46,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/transactions_tab"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
@@ -59,6 +72,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/browser_tab"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
@@ -84,7 +98,7 @@
     </LinearLayout>
 
     <RelativeLayout
-        android:id="@+id/layout_nav_settings"
+        android:id="@+id/settings_tab"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
@@ -132,5 +146,7 @@
             android:textSize="12sp"
             android:visibility="gone" />
     </RelativeLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

@@ -92,7 +92,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         viewModel.token().observe(this, this::onTokenData);
         viewModel.tokenTicker().observe(this, this::onTokenTicker);
         viewModel.transactionUpdate().observe(this, this::newTransactions);
-        viewModel.sig().observe(this, toolbarView::onSigData);
+        viewModel.sig().observe(this, sigData -> toolbarView.onSigData(sigData, this));
     }
 
     private void onTokenTicker(Ticker ticker)

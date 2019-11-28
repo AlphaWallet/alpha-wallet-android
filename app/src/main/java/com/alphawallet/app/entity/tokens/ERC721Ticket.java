@@ -167,9 +167,10 @@ public class ERC721Ticket extends Token implements Parcelable {
         tokenHolder.extendedInfo.setVisibility(View.VISIBLE);
         tokenHolder.blockchain.setVisibility(View.GONE);
 
-        tokenHolder.balanceEth.setText(String.valueOf(getTicketCount()));
+        String composite = getTicketCount() + " " + getFullName(asset, getTicketCount());
+        tokenHolder.balanceEth.setText(composite);
+
         tokenHolder.layoutValueDetails.setVisibility(View.GONE);
-        tokenHolder.symbol.setText(getFullName(asset, getTicketCount())); //override name text
     }
 
     @Override

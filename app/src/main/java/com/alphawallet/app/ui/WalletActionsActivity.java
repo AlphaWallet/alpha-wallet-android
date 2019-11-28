@@ -175,7 +175,6 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
 
         walletName = findViewById(R.id.wallet_name);
         if (wallet.name.isEmpty()) {
-            enableDisplayHomeAsHome(false);
             walletName.setText(getString(R.string.wallet_name_template, walletCount));
             save.setEnabled(true);
         } else {

@@ -13,14 +13,14 @@ import java.util.List;
 class SpawnableLinkGenerator {
 
     private static List<BigInteger> tokens = new ArrayList<>();
-    private static final String contractAddress = "0xE4Eb58eB8D83043a875d7Cfd557a269c413702Ed";
+    private static final String contractAddress = "0xC1c14278Cc455d9dFA0b0257aF40862bD8677EFC";
     private static ParseMagicLink parseMagicLink = new ParseMagicLink(new CryptoFunctions(), null);
     //TODO set private key & chain id
     private static final BigInteger privateKey = BigInteger.TEN;
-    private static final int chainId = 3;
+    private static final int chainId = 4;
 
     // Time todo put in right format & set each time
-    private static final String date = "20200706210000+0300";
+    private static final String date = "20240706210000+0300";
     // Cities
     private static final long COPENHAGEN = 1;
     private static final long SAINT_PETERSBERG = 2;
@@ -71,7 +71,7 @@ class SpawnableLinkGenerator {
 
     public static void main(String[] args) throws SalesOrderMalformed {
         //TODO set token ids here
-        new SpawnableLinkGenerator(date, LONDON, PARKEN_STADIUM, TEAM_A, TEAM_B, 10);
+        new SpawnableLinkGenerator(date, LONDON, PARKEN_STADIUM, TEAM_A, TEAM_B, 5);
     }
 
     private SpawnableLinkGenerator(
@@ -84,18 +84,15 @@ class SpawnableLinkGenerator {
     ) throws SalesOrderMalformed {
         // Set values here
         setTokenIds(date, city, venue, teamA, teamB, THE_CLUB, quantity);
-        createSpawnableLink(5);
+        createSpawnableLink();
     }
 
-    private void createSpawnableLink(int quantity) throws SalesOrderMalformed {
+    private void createSpawnableLink() throws SalesOrderMalformed {
         byte[] message = parseMagicLink.getSpawnableBytes(tokens, contractAddress, BigInteger.ZERO, expiry);
         byte[] signature = signMagicLink(message);
         byte[] linkData = ParseMagicLink.generateSpawnableLeadingLinkBytes(tokens, contractAddress, BigInteger.ZERO, expiry);
         String link = parseMagicLink.completeUniversalLink(chainId, linkData, signature);
-        while(quantity > 0) {
-            System.out.println(link);
-            quantity--;
-        }
+        System.out.println(link);
     }
 
     private void setTokenIds(String date, long city, long venue, String teamA, String teamB, long category, int quantity)

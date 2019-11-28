@@ -412,7 +412,7 @@ public class ERC721Ticket extends Token implements Parcelable {
     }
 
     @Override
-    public List<BigInteger> getArrayBalance() { return balanceArray; }
+    public List<BigInteger> getArrayBalance() { return getNonZeroArrayBalance(); }
 
     @Override
     public List<BigInteger> getNonZeroArrayBalance()

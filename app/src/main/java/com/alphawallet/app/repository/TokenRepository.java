@@ -257,38 +257,40 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType contractType)
     {
-        TokenFactory tf = new TokenFactory();
-        NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
+        return Single.fromCallable(() -> {
+            TokenFactory tf      = new TokenFactory();
+            NetworkInfo  network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
 
-        //check balance before we store it
-        List<BigInteger> balanceArray = null;
-        BigDecimal balance = BigDecimal.ZERO;
-        switch (contractType)
-        {
-            case ERC875:
-            case ERC875_LEGACY:
-                balanceArray = checkERC875BalanceArray(wallet, tokenInfo, null);
-                break;
-            case ERC721_LEGACY:
-            case ERC721:
-                break;
-            case ERC721_TICKET:
-                balanceArray = checkERC721TicketBalanceArray(wallet, tokenInfo, null);
-                break;
-            case ETHEREUM:
-            case ERC20:
-                balance = wrappedCheckFungibleBalance(wallet, tokenInfo, null);
-                break;
-            default:
-                break;
-        }
-        Token newToken = tf.createToken(tokenInfo, balance, balanceArray, System.currentTimeMillis(), contractType, network.getShortName(), 0);
-        newToken.setTokenWallet(wallet.address);
+            //check balance before we store it
+            List<BigInteger> balanceArray = null;
+            BigDecimal       balance      = BigDecimal.ZERO;
+            switch (contractType)
+            {
+                case ERC875:
+                case ERC875_LEGACY:
+                    balanceArray = checkERC875BalanceArray(wallet, tokenInfo, null);
+                    break;
+                case ERC721_LEGACY:
+                case ERC721:
+                    break;
+                case ERC721_TICKET:
+                    balanceArray = checkERC721TicketBalanceArray(wallet, tokenInfo, null);
+                    break;
+                case ETHEREUM:
+                case ERC20:
+                    balance = wrappedCheckFungibleBalance(wallet, tokenInfo, null);
+                    break;
+                default:
+                    break;
+            }
+            Token newToken = tf.createToken(tokenInfo, balance, balanceArray, System.currentTimeMillis(), contractType, network.getShortName(), 0);
+            newToken.setTokenWallet(wallet.address);
 
-        if (newToken.hasPositiveBalance()) newToken.walletUIUpdateRequired = true;
-        newToken.ticker = ethereumNetworkRepository.getTokenTicker(newToken);
-
-        return localSource.saveToken(wallet, newToken);
+            if (newToken.hasPositiveBalance())
+                newToken.walletUIUpdateRequired = true;
+            newToken.ticker = ethereumNetworkRepository.getTokenTicker(newToken);
+            return newToken;
+        }).flatMap(nToken -> localSource.saveToken(wallet, nToken));
     }
 
     private Token addTokenTicker(Token newToken, Ticker ticker)
@@ -1152,16 +1154,14 @@ public class TokenRepository implements TokenRepositoryType {
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
 
-    public static byte[] createTicketTransferData(String to, String indexListStr, Token token) {
-        List ticketIndices = Observable.fromArray(indexListStr.split(","))
-                .map(s -> new BigInteger(s.trim())).toList().blockingGet();
-        Function function = ((Ticket)token).getTransferFunction(to, ticketIndices);
+    public static byte[] createTicketTransferData(String to, List<BigInteger> tokenIndices, Token token) {
+        Function function = token.getTransferFunction(to, tokenIndices);
 
         String encodedFunction = FunctionEncoder.encode(function);
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
 
-    public static byte[] createERC721TransferFunction(String to, Token token, String tokenId)
+    public static byte[] createERC721TransferFunction(String to, Token token, List<BigInteger> tokenId)
     {
         Function function = token.getTransferFunction(to, tokenId);
         String encodedFunction = FunctionEncoder.encode(function);
@@ -1170,14 +1170,14 @@ public class TokenRepository implements TokenRepositoryType {
 
     public static byte[] createTrade(Token token, BigInteger expiry, List<BigInteger> ticketIndices, int v, byte[] r, byte[] s)
     {
-        Function function = ((Ticket)token).getTradeFunction(expiry, ticketIndices, v, r, s);
+        Function function = token.getTradeFunction(expiry, ticketIndices, v, r, s);
         String encodedFunction = FunctionEncoder.encode(function);
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
 
     public static byte[] createSpawnPassTo(Token token, BigInteger expiry, List<BigInteger> tokenIds, int v, byte[] r, byte[] s, String recipient)
     {
-        Function function = ((Ticket)token).getSpawnPassToFunction(expiry, tokenIds, v, r, s, recipient);
+        Function function = token.getSpawnPassToFunction(expiry, tokenIds, v, r, s, recipient);
         String encodedFunction = FunctionEncoder.encode(function);
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
@@ -1294,11 +1294,20 @@ public class TokenRepository implements TokenRepositoryType {
             if (returnType != ContractType.OTHER) return returnType;
             try
             {
-                Function function = balanceOf(ZERO_ADDRESS);
+                //could be either ERC721 or ERC20
+                //try some interface values
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
-                String responseValue = callSmartContractFunction(function, tokenInfo.address, network, new Wallet(ZERO_ADDRESS));
-                List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
-                returnType = findContractTypeFromResponse(responseValue, response, tokenInfo);
+                if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_BALANCES_721_TICKET), Boolean.TRUE)) returnType = ContractType.ERC721_TICKET;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OFFICIAL_ERC721), Boolean.TRUE)) returnType = ContractType.ERC721;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_CRYPTOKITTIES), Boolean.TRUE)) returnType = ContractType.ERC721_LEGACY;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OLD_ERC721), Boolean.TRUE)) returnType = ContractType.ERC721_LEGACY;
+                else
+                {
+                    Function    function      = balanceOf(ZERO_ADDRESS);
+                    String      responseValue = callSmartContractFunction(function, tokenInfo.address, network, new Wallet(ZERO_ADDRESS));
+                    List<Type>  response      = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
+                    returnType = findContractTypeFromResponse(responseValue, response, tokenInfo);
+                }
             }
             catch (Exception e)
             {
@@ -1322,14 +1331,7 @@ public class TokenRepository implements TokenRepositoryType {
             }
             else
             {
-                //could be either ERC721 or ERC20
-                //try some interface values
-                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
-                if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_BALANCES_721_TICKET), Boolean.TRUE)) returnType = ContractType.ERC721_TICKET;
-                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OFFICIAL_ERC721), Boolean.TRUE)) returnType = ContractType.ERC721;
-                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_CRYPTOKITTIES), Boolean.TRUE)) returnType = ContractType.ERC721_LEGACY;
-                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OLD_ERC721), Boolean.TRUE)) returnType = ContractType.ERC721_LEGACY;
-                else returnType = ContractType.ERC20;
+                returnType = ContractType.ERC20;
             }
         }
 

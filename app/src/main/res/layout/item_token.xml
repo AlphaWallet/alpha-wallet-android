@@ -146,6 +146,7 @@
                         android:orientation="horizontal">
 
                         <View
+                            android:id="@+id/blockchain_separator"
                             android:layout_width="1dp"
                             android:layout_height="match_parent"
                             android:layout_marginBottom="2dp"

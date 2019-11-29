@@ -142,7 +142,7 @@ public class SellTicketActivity extends BaseActivity implements OnTokenClickList
             idList.addAll(tr.tokenIds);
         }
         Ticket ticket = (Ticket) viewModel.ticket().getValue();
-        return ticket.intArrayToString(idList, false);
+        return ticket.bigIntListToString(idList, false);
     }
 
     private void onMarketPlace() {

@@ -121,13 +121,13 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     @Override
     public void sellTicketRouter(List<BigInteger> selection)
     {
-        viewModel.openUniversalLink(this, token, token.intArrayToString(idList, false));
+        viewModel.openUniversalLink(this, token, token.bigIntListToString(idList, false));
     }
 
     @Override
     public void showTransferToken(List<BigInteger> selection)
     {
-        viewModel.showTransferToken(this, token, token.intArrayToString(idList, false));
+        viewModel.showTransferToken(this, token, token.bigIntListToString(idList, false));
     }
 
     @Override

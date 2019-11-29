@@ -77,7 +77,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     private Wallet wallet;
     private NonFungibleTokenAdapter adapter;
     private String ticketIds;
-    private String prunedIds;
+    private List<BigInteger> selection;
     private double ethToUsd;
     private int saleStatus;
     private double sellPriceValue;
@@ -120,7 +120,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
         saleStatus = getIntent().getIntExtra(EXTRA_STATE, 0);
         sellPriceValue = getIntent().getDoubleExtra(EXTRA_PRICE, 0.0);
-        prunedIds = ticketIds;
+        selection = token.stringHexToBigIntegerList(ticketIds);
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(SellDetailViewModel.class);
@@ -212,7 +212,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
 
         String currencySymbol = viewModel.getNetwork().symbol;
 
-        int quantity = token.ticketIdStringToIndexList(prunedIds).size();
+        int quantity = selection.size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         String totalCostStr = getString(R.string.total_cost, getEthString(quantity * sellPriceValue), currencySymbol);
         confirmQuantityText.setText(getString(R.string.tickets_selected, String.valueOf(quantity), unit));
@@ -271,7 +271,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
             case SET_A_PRICE:
                 if (isPriceAndQuantityValid())
                 {
-                    viewModel.openUniversalLinkSetExpiry(this, prunedIds, sellPriceValue);
+                    viewModel.openUniversalLinkSetExpiry(this, selection, sellPriceValue);
                 }
                 break;
             case SET_EXPIRY:
@@ -341,7 +341,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
                 quantity++;
                 textQuantity.setText(String.valueOf(quantity));
                 updateSellPrice(quantity);
-                prunedIds = token.pruneIDList(ticketIds, quantity);
+                selection = token.pruneIDList(ticketIds, quantity);
             }
         });
 
@@ -352,12 +352,12 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
                 quantity--;
                 textQuantity.setText(String.valueOf(quantity));
                 updateSellPrice(quantity);
-                prunedIds = token.pruneIDList(ticketIds, quantity);
+                selection = token.pruneIDList(ticketIds, quantity);
             }
         });
 
         textQuantity.setText("1");
-        prunedIds = token.pruneIDList(ticketIds, 1);
+        selection = token.pruneIDList(ticketIds, 1);
     }
 
     private void initDatePicker() {
@@ -442,13 +442,12 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         //1. validate price
         BigInteger price = getPriceInWei();
         //2. get quantity
-        int quantity = token.getTicketIndices(prunedIds).length;
+        int quantity = selection.size();
 
-        if (price.doubleValue() > 0.0 && prunedIds != null && quantity > 0) {
+        if (price.doubleValue() > 0.0 && selection != null && quantity > 0) {
             //get the specific ID's, pick from the start of the run
-            int[] prunedIndices = token.getTicketIndices(prunedIds);
             BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity)); //in wei
-            viewModel.generateUniversalLink(prunedIndices, token.getAddress(), totalValue, UTCTimeStamp);
+            viewModel.generateUniversalLink(token.getTransferListFormat(selection), token.getAddress(), totalValue, UTCTimeStamp);
         }
 
         KeyboardUtils.hideKeyboard(getCurrentFocus());
@@ -459,14 +458,14 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         //1. validate price
         BigInteger price = getPriceInWei();
         //2. get indicies
-        int[] prunedIndices = token.getTicketIndices(prunedIds);
+        //int[] prunedIndices = token.getTicketIndices(prunedIds);
         int quantity = Integer.parseInt(textQuantity.getText().toString());
 
-        if (price.doubleValue() > 0.0 && prunedIndices != null && quantity > 0) {
+        if (price.doubleValue() > 0.0 && quantity > 0) {
             //get the specific ID's, pick from the start of the run
             List<BigInteger> ticketIdList = token.stringHexToBigIntegerList(ticketIds);
             BigInteger totalValue = price.multiply(BigInteger.valueOf(quantity)); //in wei
-            viewModel.generateSalesOrders(token.getAddress(), totalValue, prunedIndices, ticketIdList.get(0));
+            viewModel.generateSalesOrders(token.getAddress(), totalValue, selection, ticketIdList.get(0));
             finish();
         }
 
@@ -495,7 +494,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     private void linkReady(String universalLink) {
         //how many indices are we selling?
         String currencySymbol = viewModel.getNetwork().symbol;
-        int quantity = token.ticketIdStringToIndexList(prunedIds).size();
+        int quantity = selection.size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         String totalCostStr = getString(R.string.total_cost, getEthString(quantity * sellPriceValue), currencySymbol);
 
@@ -519,7 +518,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     private void confirmPlaceMarketOrderDialog()
     {
         //how many indices are we selling?
-        int quantity = token.ticketIdStringToIndexList(prunedIds).size();
+        int quantity = selection.size();
         String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
         String qty = String.valueOf(quantity) + " " + unit + " @" + getEthString(sellPriceValue) + getString(R.string.eth_per_ticket);
 

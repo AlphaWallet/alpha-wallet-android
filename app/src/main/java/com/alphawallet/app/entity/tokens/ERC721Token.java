@@ -132,31 +132,28 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public Function getTransferFunction(String to, String tokenId)
+    public Function getTransferFunction(String to, List<BigInteger> tokenIds) throws NumberFormatException
     {
-        Function function = null;
-        try
+        if (tokenIds.size() > 1)
         {
-            BigInteger tokenIdBI = new BigInteger(tokenId);
-            List<Type> params;
-            List<TypeReference<?>> returnTypes = Collections.emptyList();
-            if (tokenUsesLegacyTransfer())
-            {
-                params = Arrays.asList(new Address(to), new Uint256(tokenIdBI));
-                function = new Function("transfer", params, returnTypes);
-            }
-            else
-            {
-                //function safeTransferFrom(address _from, address _to, uint256 _tokenId) external payable;
-                params = Arrays.asList(new Address(getWallet()), new Address(to), new Uint256(tokenIdBI));
-                function = new Function("safeTransferFrom", params, returnTypes);
-            }
-        }
-        catch (NumberFormatException e)
-        {
-            e.printStackTrace();
+            throw new NumberFormatException("ERC721Ticket can't handle batched transfers");
         }
 
+        Function               function    = null;
+        List<Type>             params;
+        BigInteger             tokenIdBI   = tokenIds.get(0);
+        List<TypeReference<?>> returnTypes = Collections.emptyList();
+        if (tokenUsesLegacyTransfer())
+        {
+            params = Arrays.asList(new Address(to), new Uint256(tokenIdBI));
+            function = new Function("transfer", params, returnTypes);
+        }
+        else
+        {
+            //function safeTransferFrom(address _from, address _to, uint256 _tokenId) external payable;
+            params = Arrays.asList(new Address(getWallet()), new Address(to), new Uint256(tokenIdBI));
+            function = new Function("safeTransferFrom", params, returnTypes);
+        }
         return function;
     }
 
@@ -232,7 +229,7 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     protected float calculateBalanceUpdateWeight()
     {
-        return 0.0f;
+        return 0.75f;
     }
 
     @Override
@@ -269,5 +266,25 @@ public class ERC721Token extends Token implements Parcelable
             default:
                 return false;
         }
+    }
+
+    @Override
+    public List<BigInteger> getBalanceAsArray()
+    {
+        List<BigInteger> balanceAsArray = new ArrayList<>();
+        for (Asset a : tokenBalanceAssets)
+        {
+            try
+            {
+                BigInteger tokenIdBI = new BigInteger(a.getTokenId());
+                balanceAsArray.add(tokenIdBI);
+            }
+            catch (NumberFormatException e)
+            {
+                //
+            }
+        }
+
+        return balanceAsArray;
     }
 }

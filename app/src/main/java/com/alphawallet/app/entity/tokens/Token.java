@@ -20,6 +20,7 @@ import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 
+import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.utils.Numeric;
 
@@ -28,6 +29,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -303,7 +305,7 @@ public class Token implements Parcelable
         return null;
     }
 
-    public List<Integer> ticketIdStringToIndexList(String userList)
+    public List<BigInteger> ticketIdStringToIndexList(String userList)
     {
         return null;
     }
@@ -334,7 +336,7 @@ public class Token implements Parcelable
      * @param keepZeros
      * @return
      */
-    public String intArrayToString(List<BigInteger> idList, boolean keepZeros)
+    public String bigIntListToString(List<BigInteger> idList, boolean keepZeros)
     {
         if (idList == null) return "";
         String displayIDs = "";
@@ -535,14 +537,37 @@ public class Token implements Parcelable
     {
         return BigInteger.valueOf(-1);
     }
-    public Function getTransferFunction(String to, String tokenId)
+    public Function getTransferFunction(String to, List<BigInteger> transferData) throws NumberFormatException
     {
         return null;
     }
+    public Function getSpawnPassToFunction(BigInteger expiry, List<BigInteger> tokenIds, int v, byte[] r, byte[] s, String recipient)
+    {
+        return new Function(
+                "spawnPassTo",
+                Arrays.asList(new org.web3j.abi.datatypes.generated.Uint256(expiry),
+                              getDynArray(tokenIds),
+                              new org.web3j.abi.datatypes.generated.Uint8(v),
+                              new org.web3j.abi.datatypes.generated.Bytes32(r),
+                              new org.web3j.abi.datatypes.generated.Bytes32(s),
+                              new org.web3j.abi.datatypes.Address(recipient)),
+                Collections.emptyList());
+    }
+    public Function getTradeFunction(BigInteger expiry, List<BigInteger> tokenIds, int v, byte[] r, byte[] s)
+    {
+        return new Function(
+                "trade",
+                Arrays.asList(new org.web3j.abi.datatypes.generated.Uint256(expiry),
+                              getDynArray(tokenIds),
+                              new org.web3j.abi.datatypes.generated.Uint8(v),
+                              new org.web3j.abi.datatypes.generated.Bytes32(r),
+                              new org.web3j.abi.datatypes.generated.Bytes32(s)),
+                Collections.emptyList());
+    }
+
     public void checkIsMatchedInXML(AssetDefinitionService assetService) { }
     public int[] getTicketIndices(String ticketIds) { return new int[0]; }
-    public List<BigInteger> getTicketsAsBigIntList(String ticketIds) { return new ArrayList<>(); }
-    public boolean unspecifiedSpec() { return contractType == ContractType.NOT_SET; }
+    public boolean contractTypeValid() { return !(contractType == ContractType.NOT_SET || contractType == ContractType.OTHER); }
 
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx, boolean iconified) { }
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx) { }
@@ -837,9 +862,9 @@ public class Token implements Parcelable
         return tokenWallet;
     }
 
-    public String pruneIDList(String ticketIds, int quantity)
+    public List<BigInteger> pruneIDList(String ticketIds, int quantity)
     {
-        return "";
+        return new ArrayList<>();
     }
 
     public void setFocus(boolean focus)
@@ -916,4 +941,23 @@ public class Token implements Parcelable
         //default is no grouping
         return false;
     }
+
+    /**
+     * This function takes a list of tokenIds, and returns a BigInteger list suitable for this token's transfer function
+     * For most token contracts this is the list of tokenIds but for ERC875 this is the list converted to indices
+     * @param tokenIds
+     * @return
+     */
+    public List<BigInteger> getTransferListFormat(List<BigInteger> tokenIds)
+    {
+        return tokenIds;
+    }
+    protected org.web3j.abi.datatypes.DynamicArray getDynArray(List<BigInteger> indices)
+    {
+        return new org.web3j.abi.datatypes.DynamicArray<>(
+                        org.web3j.abi.datatypes.generated.Uint256.class,
+                        org.web3j.abi.Utils.typeMap(indices, org.web3j.abi.datatypes.generated.Uint256.class));
+    }
+
+    public List<BigInteger> getBalanceAsArray() { return null; }
 }

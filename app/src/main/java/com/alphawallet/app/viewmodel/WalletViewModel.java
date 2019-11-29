@@ -224,7 +224,7 @@ public class WalletViewModel extends BaseViewModel
         if (checkNetwork == null) return;
         Log.d("OPENSEA", "Fetch from opensea : " + checkNetwork.getShortName());
         updateTokens = openseaService.getTokens(currentWallet.address, checkNetwork.chainId, checkNetwork.getShortName())
-                //openseaService.getTokens("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63")
+                .flatMap(fetchTokensInteract::checkInterface)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(tokens -> gotOpenseaTokens(checkNetwork.chainId, tokens), this::onOpenseaError);

@@ -33,21 +33,6 @@
                 android:textSize="16sp"
                 android:visibility="visible" />
 
-            <TextView
-                android:id="@+id/import_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="30dp"
-                android:layout_marginTop="10dp"
-                android:fontFamily="@font/font_light"
-                android:gravity="center"
-                android:paddingLeft="40dp"
-                android:paddingRight="40dp"
-                android:text="@string/toolbar_header_importing_tickets"
-                android:textColor="@color/text_black"
-                android:textSize="25sp" />
-
             <include layout="@layout/item_ticket" />
 
             <include layout="@layout/item_ticket_overlay" />

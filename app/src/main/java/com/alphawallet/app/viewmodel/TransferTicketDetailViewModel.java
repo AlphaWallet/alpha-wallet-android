@@ -17,6 +17,8 @@ import com.alphawallet.app.repository.TokenRepository;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.alphawallet.app.entity.opensea.Asset;
@@ -125,18 +127,20 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         userTransaction.postValue(transaction);
     }
 
-    public void generateUniversalLink(int[] ticketSendIndexList, String contractAddress, long expiry)
+    public void generateUniversalLink(List<BigInteger> ticketSendIndexList, String contractAddress, long expiry)
     {
         initParser();
-        if (ticketSendIndexList == null || ticketSendIndexList.length == 0)
+        if (ticketSendIndexList == null || ticketSendIndexList.size() == 0)
             return; //TODO: Display error message
+
+        int[] indexList = Utils.bigIntegerListToIntList(ticketSendIndexList);
 
         //NB tradeBytes is the exact bytes the ERC875 contract builds to check the valid order.
         //This is what we must sign.
-        byte[] tradeBytes = parser.getTradeBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, expiry);
+        byte[] tradeBytes = parser.getTradeBytes(indexList, contractAddress, BigInteger.ZERO, expiry);
         try
         {
-            linkMessage = ParseMagicLink.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, BigInteger.ZERO, expiry);
+            linkMessage = ParseMagicLink.generateLeadingLinkBytes(indexList, contractAddress, BigInteger.ZERO, expiry);
         }
         catch (SalesOrderMalformed e)
         {
@@ -180,19 +184,19 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         transferTicketDetailRouter.openTransfer(context, token, ticketIds, defaultWallet.getValue(), transferStatus);
     }
 
-    public void createTicketTransfer(String to, Token token, String indexList)
+    public void createTicketTransfer(String to, Token token, List<BigInteger> transferList)
     {
-        if (token.unspecifiedSpec())
+        if (!token.contractTypeValid())
         {
             //need to determine the spec
             disposable = fetchTransactionsInteract.queryInterfaceSpec(token.tokenInfo)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(spec -> onInterfaceSpec(spec, to, token, indexList), this::onError);
+                    .subscribe(spec -> onInterfaceSpec(spec, to, token, transferList), this::onError);
         }
         else
         {
-            final byte[] data = TokenRepository.createTicketTransferData(to, indexList, token);
+            final byte[] data = TokenRepository.createTicketTransferData(to, transferList, token);
             GasSettings settings = gasService.getGasSettings(data, true, token.tokenInfo.chainId);
             disposable = createTransactionInteract
                     .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), settings.gasPrice, settings.gasLimit, data, token.tokenInfo.chainId)
@@ -200,11 +204,11 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         }
     }
 
-    private void onInterfaceSpec(ContractType spec, String to, Token token, String indexList)
+    private void onInterfaceSpec(ContractType spec, String to, Token token, List<BigInteger> transferList)
     {
         token.setInterfaceSpec(spec);
         TokensService.setInterfaceSpec(token.tokenInfo.chainId, token.getAddress(), spec);
-        createTicketTransfer(to, token, indexList);
+        createTicketTransfer(to, token, transferList);
     }
 
     public AssetDefinitionService getAssetDefinitionService()

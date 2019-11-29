@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
@@ -239,12 +240,10 @@ public class Utils {
         return idList;
     }
 
-    public static String[] stringListToArray(String list)
+    public static int[] bigIntegerListToIntList(List<BigInteger> ticketSendIndexList)
     {
-        //convert to array
-        String[] split = list.split(",");
-        List<String> strList = new ArrayList<>();
-        Collections.addAll(strList, split);
-        return strList.toArray(new String[0]);
+        int[] indexList = new int[ticketSendIndexList.size()];
+        for (int i = 0; i < ticketSendIndexList.size(); i++) indexList[i] = ticketSendIndexList.get(i).intValue();
+        return indexList;
     }
 }

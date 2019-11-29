@@ -1063,14 +1063,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             case "erc20":
                 cType = ContractType.ERC20;
                 break;
-            case "erc721":
+                //ERC721 and ERC721Ticket are contracts with different interfaces which are handled in different ways but we have chosen to describe them
+                // as the same within the tokenscript. Therefore checking the interface here has no value.
+            /*case "erc721":
                 cType = ContractType.ERC721;
                 if (token.isERC721() || token.isERC721Ticket()) return;
                 break;
             case "erc721Ticket":
                 cType = ContractType.ERC721_TICKET;
                 if (token.isERC721() || token.isERC721Ticket()) return;
-                break;
+                break;*/
             case "ethereum":
                 cType = ContractType.ETHEREUM;
                 break;

@@ -20,10 +20,12 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.MarketQueueService;
 import com.alphawallet.app.ui.SellDetailActivity;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.math.BigInteger;
+import java.util.List;
 
 /**
  * Created by James on 21/02/2018.
@@ -101,19 +103,23 @@ public class SellDetailViewModel extends BaseViewModel {
         ethereumPrice.postValue(Double.parseDouble(ticker.price_usd));
     }
 
-    public void generateSalesOrders(String contractAddr, BigInteger price, int[] ticketIndicies, BigInteger firstTicketId)
+    public void generateSalesOrders(String contractAddr, BigInteger price, List<BigInteger> tokenSendIndexList, BigInteger firstTicketId)
     {
-        marketQueueService.createSalesOrders(defaultWallet.getValue(), price, ticketIndicies, contractAddr, firstTicketId, processMessages, token.tokenInfo.chainId);
+        int[] tokenIndices = Utils.bigIntegerListToIntList(tokenSendIndexList);
+        marketQueueService.createSalesOrders(defaultWallet.getValue(), price, tokenIndices, contractAddr, firstTicketId, processMessages, token.tokenInfo.chainId);
     }
 
-    public void generateUniversalLink(int[] ticketSendIndexList, String contractAddress, BigInteger price, long expiry)
+    public void generateUniversalLink(List<BigInteger> ticketSendIndexList, String contractAddress, BigInteger price, long expiry)
     {
         initParser();
-        if (ticketSendIndexList == null || ticketSendIndexList.length == 0) return; //TODO: Display error message
+        if (ticketSendIndexList == null || ticketSendIndexList.size() == 0) return; //TODO: Display error message
 
-        byte[] tradeBytes = parser.getTradeBytes(ticketSendIndexList, contractAddress, price, expiry);
+        int[] indexList = new int[ticketSendIndexList.size()];
+        for (int i = 0; i < ticketSendIndexList.size(); i++) indexList[i] = ticketSendIndexList.get(i).intValue();
+
+        byte[] tradeBytes = parser.getTradeBytes(indexList, contractAddress, price, expiry);
         try {
-            linkMessage = ParseMagicLink.generateLeadingLinkBytes(ticketSendIndexList, contractAddress, price, expiry);
+            linkMessage = ParseMagicLink.generateLeadingLinkBytes(indexList, contractAddress, price, expiry);
         } catch (SalesOrderMalformed e) {
             //TODO: Display appropriate error to user
         }
@@ -124,9 +130,9 @@ public class SellDetailViewModel extends BaseViewModel {
                 .subscribe(this::gotSignature, this::onError);
     }
 
-    public void openUniversalLinkSetExpiry(Context context, String selection, double price)
+    public void openUniversalLinkSetExpiry(Context context, List<BigInteger> selection, double price)
     {
-        sellDetailRouter.openUniversalLink(context, token, selection, defaultWallet.getValue(), SellDetailActivity.SET_EXPIRY, price);
+        sellDetailRouter.openUniversalLink(context, token, token.bigIntListToString(selection, false), defaultWallet.getValue(), SellDetailActivity.SET_EXPIRY, price);
     }
 
     private void gotSignature(byte[] signature)

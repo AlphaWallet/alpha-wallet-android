@@ -29,6 +29,7 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public class ConfirmationViewModel extends BaseViewModel {
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
@@ -221,13 +222,15 @@ public class ConfirmationViewModel extends BaseViewModel {
     public byte[] getERC721TransferBytes(String to, String contractAddress, String tokenId, int chainId)
     {
         Token token = tokensService.getToken(chainId, contractAddress);
-        return TokenRepository.createERC721TransferFunction(to, token, tokenId);
+        List<BigInteger> tokenIds = token.stringHexToBigIntegerList(tokenId);
+        return TokenRepository.createERC721TransferFunction(to, token, tokenIds);
     }
 
     public byte[] getERC875TransferBytes(String to, String contractAddress, String tokenIds, int chainId)
     {
         Token token = tokensService.getToken(chainId, contractAddress);
-        return TokenRepository.createTicketTransferData(to, tokenIds, token);
+        List<BigInteger> tokenIndices = token.stringHexToBigIntegerList(tokenIds);
+        return TokenRepository.createTicketTransferData(to, tokenIndices, token);
     }
 
     public String getNetworkName(int chainId)

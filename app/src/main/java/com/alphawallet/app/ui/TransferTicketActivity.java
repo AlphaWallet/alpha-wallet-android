@@ -154,7 +154,7 @@ public class TransferTicketActivity extends BaseActivity implements OnTokenClick
                 idList.addAll(tr.tokenIds);
             }
 
-            String idListStr = token.intArrayToString(idList, false); //list of B32 ID's
+            String idListStr = token.bigIntListToString(idList, false); 
             viewModel.openSellDialog(this, idListStr);
         }
     }

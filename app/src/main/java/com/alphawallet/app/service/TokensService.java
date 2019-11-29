@@ -53,7 +53,7 @@ public class TokensService
 
     /**
      * Add the token to the service map and return token in case we use this call in a reactive element
-     * @param t
+     * @param
      * @return
      */
     public Token addToken(Token t)
@@ -293,7 +293,7 @@ public class TokensService
     public static ContractType checkInterfaceSpec(int chainId, String address)
     {
         SparseArray<ContractType> types = interfaceSpecMap.get(address);
-        ContractType type = types != null ? type = types.get(chainId) : null;
+        ContractType type = types != null ? types.get(chainId) : null;
         if (type != null)
         {
             return type;
@@ -398,8 +398,31 @@ public class TokensService
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastUpdateDiff;
-            long cutoffCheck = check.isEthereum() ? 20*1000 : check.isERC875() ? 30*1000 : 40*1000; //ERC20's get updated from blockscout
-            if (updateFactor > highestWeighting && (updateFactor > (float)cutoffCheck || check.refreshCheck)) // don't add to list if updated in the last 20 seconds
+            long cutoffCheck = 40*1000;
+            switch (check.getInterfaceSpec())
+            {
+                case ETHEREUM:
+                case CURRENCY:
+                    cutoffCheck = 20*1000;
+                    break;
+                case ERC875:
+                    cutoffCheck = 30*1000;
+                    break;
+                case ERC875_LEGACY:
+                    cutoffCheck = 60*1000;
+                    break;
+                case ERC721:
+                case ERC721_LEGACY:
+                    cutoffCheck = Long.MAX_VALUE;
+                    break;
+                case ERC721_TICKET:
+                    cutoffCheck = 20*1000;
+                    break;
+                default:
+                    break;
+            }
+
+            if (updateFactor > highestWeighting && (updateFactor > (float)cutoffCheck || check.refreshCheck))
             {
                 highestWeighting = updateFactor;
                 highestToken = check;

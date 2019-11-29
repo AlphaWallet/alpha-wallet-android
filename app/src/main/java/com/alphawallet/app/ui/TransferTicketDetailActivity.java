@@ -104,7 +104,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private TextView textQuantity;
 
     private String ticketIds;
-    private String prunedIds;
+    private List<BigInteger> selection;
     private int transferStatus;
 
     private ENSHandler ensHandler;
@@ -143,7 +143,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         Wallet wallet = getIntent().getParcelableExtra(WALLET);
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
         transferStatus = getIntent().getIntExtra(EXTRA_STATE, 0);
-        prunedIds = ticketIds;
+        selection = token.stringHexToBigIntegerList(ticketIds);
 
         toolbar();
         setTitle(getString(R.string.empty));
@@ -232,7 +232,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
             int nextState = getNextState();
             if (nextState >= 0)
             {
-                viewModel.openTransferState(this, token, prunedIds, nextState);
+                viewModel.openTransferState(this, token, token.bigIntListToString(selection, false), nextState);
             }
         });
 
@@ -279,7 +279,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
             if ((quantity + 1) <= adapter.getTicketRangeCount()) {
                 quantity++;
                 textQuantity.setText(String.valueOf(quantity));
-                prunedIds = ((Ticket)token).pruneIDList(ticketIds, quantity);
+                selection = token.pruneIDList(ticketIds, quantity);
             }
         });
 
@@ -289,26 +289,12 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
             if ((quantity - 1) >= 0) {
                 quantity--;
                 textQuantity.setText(String.valueOf(quantity));
-                if(token instanceof Ticket)
-                {
-                    prunedIds = ((Ticket) token).pruneIDList(ticketIds, 1);
-                }
-                else
-                {
-                    prunedIds = ((ERC721Ticket) token).pruneIDList(ticketIds, 1);
-                }
+                selection = token.pruneIDList(ticketIds, 1);
             }
         });
 
         textQuantity.setText("1");
-        if(token instanceof Ticket)
-        {
-            prunedIds = ((Ticket) token).pruneIDList(ticketIds, 1);
-        }
-        else
-        {
-            prunedIds = ((ERC721Ticket) token).pruneIDList(ticketIds, 1);
-        }
+        selection = token.pruneIDList(ticketIds, 1);
     }
 
     private void setupRadioButtons()
@@ -387,14 +373,19 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
                 if (gotAuth)
                 {
-                    if(token.getInterfaceSpec().equals(ContractType.ERC721_TICKET))
+                    if(token.isERC721Ticket())
                     {
-                        viewModel.generateSpawnLink(token.getTicketsAsBigIntList(ticketIds), token.getAddress(), calculateExpiryTime());
+                        viewModel.generateSpawnLink(selection, token.getAddress(), calculateExpiryTime());
                     }
                     else
                     {
-                        viewModel.generateUniversalLink(token.getTicketIndices(ticketIds), token.getAddress(), calculateExpiryTime());
+                        viewModel.generateUniversalLink(token.getTransferListFormat(selection), token.getAddress(), calculateExpiryTime());
                     }
+                }
+                else
+                {
+                    //display fail auth
+                    onError(new ErrorEnvelope(getString(R.string.authentication_failed)));
                 }
             }
 
@@ -571,7 +562,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         viewModel.createTicketTransfer(
                 to,
                 token,
-                token.integerListToString(token.ticketIdStringToIndexList(prunedIds), true));
+                token.getTransferListFormat(selection));
     }
 
     @Override
@@ -683,9 +674,9 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private void linkReady(String universalLink)
     {
         int quantity = 1;
-        if(token.ticketIdStringToIndexList(prunedIds) != null)
+        if(selection != null)
         {
-            quantity = token.ticketIdStringToIndexList(prunedIds).size();
+            quantity = selection.size();
         }
         int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
         String qty = String.valueOf(quantity) + " " +
@@ -724,7 +715,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private void handleERC875Transfer(final String to)
     {
         //how many indices are we selling?
-        int quantity = token.stringHexToBigIntegerList(prunedIds).size();
+        int quantity = selection.size();
         int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
 
         String toAddress = (ensHandler.getEnsName() == null) ? to : ensHandler.getEnsName();

@@ -553,7 +553,7 @@ public class AppSiteController implements AttributeInterface
             prop.load(input);
 
             //get the property value and print it out
-            infuraKey = prop.getProperty("infuraAPI");
+            infuraKey = prop.getProperty("infuraAPI").replaceAll("\"", "");
 
         } catch (IOException ex) {
             System.out.println("Locate gradle.properties");

@@ -2,19 +2,22 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
 <head>
     <style type="text/css">
         %2$s
     </style>
     <title>%1$s</title>
-    <link rel="stylesheet" href="css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="css/main.css"/>
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/main.css" />
 </head>
+<body>
 <header class="main">
     <div class="container h-100">
         <div class="row h-100">
             <div class="col-lg-7">
                 <div class="header-content">
+
                     <body>
                     <h1><strong class="purchase mb-5" style="font-weight: 300;" >%3$s</strong>
                         <em class="purchase mb-5" style="font-weight: 300;" >%4$s</em>
@@ -43,31 +46,25 @@
                     <p class="mb-3" style="font-weight: 300;">Download the AlphaWallet app to purchase tickets!</p>
                     <p id="download_app">
                         <a href="https://play.google.com/store/apps/details?id=io.stormbird.wallet">
-                            <img width="117" height="40" alt="Google Playstore"
-                                 src="/images/googleplay.png"/>
+                            <img width="117" height="40" alt="Google Playstore" src="/images/googleplay.png" />
                         </a>
                         <a href="https://itunes.apple.com/app/alphawallet/id1358230430?mt=8">
-                            <img class="ml-2" width="117" height="40" alt="App Store"
-                                 src="/images/appstore.png"/>
+                            <img class="ml-2" width="117" height="40" alt="App Store" src="/images/appstore.png" />
                         </a>
                     </p>
                     <br>
                     <h3 class="mt-3 mb-2" style="font-weight: 600; font-size: 20px;">Step 2</h3>
-                    <form id="view_listing"
-                          action=%12$s
-                          onsubmit="
+                    <form id="view_listing" action=%12$s onsubmit="
               this.elements['uri'].select();
               clipboard.writeText(this.elements['uri'].value);
               this.elements['message'].hidden = false;
               this.elements['uri'].hidden     = true;
               //this.elements['submit'].hidden  = true;
-              return false;"
-                    >
-                        <p class="mb-3" style="font-weight: 300;">Once you've downloaded the app on your phone,
-                            copy this link and switch to the app.</p>
+              return false;">
+                        <p class="mb-3" style="font-weight: 300;">Once you've downloaded the app on your phone, copy this link and switch to the app.</p>
                         <input name="uri" readonly="readonly" id="uri" value=%13$s class="form-control-tx form-control-lg" />
-                        <input name="message" readonly="readonly" id="message" hidden="hidden" value="Link copied to clipboard." class="form-control-tx form-control-lg"/>
-                        <input name="submit" type="submit" id="clipboard-button" value="Copy to Clipboard" class="btn-y btn-xl"/>
+                        <input name="message" readonly="readonly" id="message" hidden="hidden" value="Link copied to clipboard." class="form-control-tx form-control-lg" />
+                        <input name="submit" type="submit" id="clipboard-button" value="Copy to Clipboard" class="btn-y btn-xl" />
                     </form>
                     <br>
                     <hr>
@@ -86,8 +83,7 @@
             <div id="root"></div>
         </div>
     </div>
-    </div>
-    </div>
 </header>
 </body>
+
 </html>

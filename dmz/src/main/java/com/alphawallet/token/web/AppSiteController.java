@@ -269,7 +269,7 @@ public class AppSiteController implements AttributeInterface
         String originalLink = "\"https://" + MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId) + "/" + universalLink + "\"";
 
         String etherscanAccountLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "address/" + data.ownerAddress;
-        String etherscanTokenLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "token/" + data.contractAddress;
+        String etherscanTokenLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "address/" + data.contractAddress;
 
         return String.format(initHTML,
                              title, "", String.valueOf(data.ticketCount), nameWithSymbol, "Tokens",

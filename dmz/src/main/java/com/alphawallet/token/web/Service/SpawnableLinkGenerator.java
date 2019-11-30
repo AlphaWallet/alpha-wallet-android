@@ -13,11 +13,11 @@ import java.util.List;
 class SpawnableLinkGenerator {
 
     private static List<BigInteger> tokens = new ArrayList<>();
-    private static final String contractAddress = "0xC1c14278Cc455d9dFA0b0257aF40862bD8677EFC";
+    private static final String contractAddress = "0xc2f901070AdcfA07Bc5c46cc2390063248eb9E81";
     private static ParseMagicLink parseMagicLink = new ParseMagicLink(new CryptoFunctions(), null);
     //TODO set private key & chain id
     private static final BigInteger privateKey = BigInteger.TEN;
-    private static final int chainId = 4;
+    private static final int chainId = 3;
 
     // Time todo put in right format & set each time
     private static final String date = "20240706210000+0300";
@@ -71,7 +71,7 @@ class SpawnableLinkGenerator {
 
     public static void main(String[] args) throws SalesOrderMalformed {
         //TODO set token ids here
-        new SpawnableLinkGenerator(date, LONDON, PARKEN_STADIUM, TEAM_A, TEAM_B, 5);
+        new SpawnableLinkGenerator(date, LONDON, PARKEN_STADIUM, TEAM_A, TEAM_B, 1);
     }
 
     private SpawnableLinkGenerator(

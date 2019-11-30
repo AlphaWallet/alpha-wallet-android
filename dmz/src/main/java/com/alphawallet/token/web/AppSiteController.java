@@ -168,7 +168,6 @@ public class AppSiteController implements AttributeInterface
 
         String tokenName = txHandler.getNameOnly(data.contractAddress);
         String symbol = txHandler.getSymbolOnly(data.contractAddress);
-        String nameWithSymbol = tokenName + "(" + symbol + ")";
 
         try
         {
@@ -186,93 +185,65 @@ public class AppSiteController implements AttributeInterface
                 .isDisposed();
 
         String available = "available";
-        if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000))) available = "expired";
-
-        String price = getEthString(data.price) + " " + MagicLinkInfo.getNetworkNameById(data.chainId);
-
-        String title = data.ticketCount + " " + definition.getTokenName(data.ticketCount) + " " + available;
-
-        String view = definition.getCardData("view");
-        String style = definition.getCardData("style");
-        String initHTML = loadFile("templates/tokenscriptTemplate.html");
-
-        String scriptData = loadFile("templates/token_inject.js.tokenscript");
-        String tokenView = String.format(scriptData,
-                                         tokenData.toString(), view);
-
-        String expiry = new java.util.Date(data.expiry*1000).toString();
-
-        String availableUntil = "<span title=\"Unix Time is " + data.expiry + "\">" + expiry + "</span>";
-        String action = "\"" + universalLink + "\"";
-        String originalLink = "\"https://" + MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId) + "/" + universalLink + "\"";
-
-        String etherscanAccountLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "address/" + data.ownerAddress;
-        String etherscanTokenLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "token/" + data.contractAddress;
-
-        return String.format(
-                initHTML,
-                title, style, String.valueOf(data.ticketCount), nameWithSymbol, definition.getTokenName(data.ticketCount),
-                price, available,
-                data.ticketCount, definition.getTokenName(data.ticketCount),
-                tokenView, availableUntil,
-                action, originalLink,
-                etherscanAccountLink, data.ownerAddress,
-                etherscanTokenLink, data.contractAddress
-        );
-    }
-
-
-
-    private String renderTokenWithoutTokenScript(MagicLinkData data, String universalLink)
-    {
-        TransactionHandler txHandler = new TransactionHandler(data.chainId);
-
-        List<BigInteger> balanceArray;
-        BigInteger firstTokenId = BigInteger.ZERO;
-        String available = "available";
 
         if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000)))
         {
             available = "expired";
         }
 
-        if (data.contractType == spawnable)
+        String view = definition.getCardData("view");
+        String style = definition.getCardData("style");
+
+        String scriptData = loadFile("templates/token_inject.js.tokenscript");
+        String tokenView = String.format(scriptData, tokenData.toString(), view);
+
+        return formWebPage(txHandler, data, universalLink, available, style, tokenView);
+    }
+
+
+
+    //TODO check spawnable link is actual valid by checking balance or checking link has not been used (if coming from issuer)
+    private String renderTokenWithoutTokenScript(MagicLinkData data, String universalLink)
+    {
+        TransactionHandler txHandler = new TransactionHandler(data.chainId);
+
+        List<BigInteger> balanceArray;
+        String available = "available";
+
+        if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000)))
         {
-            firstTokenId = data.tokenIds.get(0);
+            available = "expired";
         }
-        else
+        try
         {
-            try
+            balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
+            //check indices
+            for (int index : data.indices)
             {
-                balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
-                //check indices
-                for (int index : data.indices)
+                if (index >= balanceArray.size() || balanceArray.get(index).equals(BigInteger.ZERO))
                 {
-                    if (index >= balanceArray.size() || balanceArray.get(index).equals(BigInteger.ZERO))
-                    {
-                        available = "unavailable";
-                    }
+                    available = "unavailable";
                 }
-                firstTokenId = balanceArray.get(0);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
             }
         }
-        return formWebPage(firstTokenId, txHandler, data, universalLink, available);
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return formWebPage(txHandler, data, universalLink, available, "", "");
     }
 
     private String formWebPage(
-            BigInteger firstTokenId,
             TransactionHandler txHandler,
             MagicLinkData data,
             String universalLink,
-            String available
+            String available,
+            String style,
+            String tokenView
     )
     {
-        System.out.println(firstTokenId.toString(16));
-        String tokenName = txHandler.getNameOnly(data.contractAddress);
+        String tokenName = txHandler.getName(data.contractAddress);
         String symbol = txHandler.getSymbolOnly(data.contractAddress);
         String nameWithSymbol = tokenName + "(" + symbol + ")";
 
@@ -282,7 +253,7 @@ public class AppSiteController implements AttributeInterface
 
         String initHTML = loadFile("templates/tokenscriptTemplate.html");
 
-        String expiry = new java.util.Date(data.expiry*1000).toString();
+        String expiry = new java.util.Date(data.expiry * 1000).toString();
 
         String availableUntil = "<span title=\"Unix Time is " + data.expiry + "\">" + expiry + "</span>";
         String action = "\"" + universalLink + "\"";
@@ -294,14 +265,22 @@ public class AppSiteController implements AttributeInterface
         return String.format(
                 initHTML,
                 title,
+                style,
+                String.valueOf(data.ticketCount),
+                nameWithSymbol,
                 "",
-                String.valueOf(data.ticketCount), nameWithSymbol, "Tokens",
-                price, available,
-                data.ticketCount, "Tokens",
-                "", availableUntil,
-                action, originalLink,
-                etherscanAccountLink, data.ownerAddress,
-                etherscanTokenLink, data.contractAddress
+                price,
+                available,
+                data.ticketCount,
+                tokenName,
+                tokenView,
+                availableUntil,
+                action,
+                originalLink,
+                etherscanAccountLink,
+                data.ownerAddress,
+                etherscanTokenLink,
+                data.contractAddress
         );
     }
 
@@ -309,9 +288,9 @@ public class AppSiteController implements AttributeInterface
     {
         File xml = null;
         TokenDefinition definition = null;
-        if (addresses.containsKey(100) && addresses.get(100).containsKey(contractAddress))
+        if (addresses.containsKey(chainId) && addresses.get(chainId).containsKey(contractAddress))
         {
-            xml = addresses.get(100).get(contractAddress);
+            xml = addresses.get(chainId).get(contractAddress);
             if (xml == null) {
                 /* this is impossible to happen, because at least 1 xml should present or main() bails out */
                 throw new NoHandlerFoundException("GET", "/" + contractAddress, new HttpHeaders());
@@ -322,7 +301,6 @@ public class AppSiteController implements AttributeInterface
                 definition = new TokenDefinition(in, new Locale("en"), null);
             }
         }
-
         return definition;
     }
 

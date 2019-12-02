@@ -167,7 +167,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
         //we should import a token and a list of chosen ids
         RecyclerView list = findViewById(R.id.listTickets);
-        adapter = new NonFungibleTokenAdapter(this, token, ticketIds, viewModel.getAssetDefinitionService(), null);
+        adapter = new NonFungibleTokenAdapter(this, token, selection, viewModel.getAssetDefinitionService(), null);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
 
@@ -704,7 +704,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
         if (token instanceof ERC721Token)
         {
-            viewModel.openConfirm(this, to, token, ticketIds, ensHandler.getEnsName());
+            viewModel.openConfirm(this, to, token, token.bigIntListToString(selection, true), ensHandler.getEnsName());
         }
         else
         {

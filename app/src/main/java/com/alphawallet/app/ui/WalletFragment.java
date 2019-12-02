@@ -343,7 +343,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
     public void walletOutOfFocus()
     {
-        if (viewModel != null) viewModel.clearProcess();
+        if (viewModel != null) viewModel.terminateBalanceUpdate();
     }
 
     public void walletInFocus()

@@ -141,6 +141,12 @@ public class ERC721Ticket extends Token implements Parcelable {
     }
 
     @Override
+    public void zeroiseBalance()
+    {
+        balanceArray.clear();
+    }
+
+    @Override
     public void setRealmBalance(RealmToken realmToken)
     {
         realmToken.setBalance(bigIntListToString(balanceArray, true));
@@ -459,5 +465,19 @@ public class ERC721Ticket extends Token implements Parcelable {
     {
         //don't group any ERC721 tickets in the asset view
         return false;
+    }
+
+    @Override
+    public void addAssetToTokenBalanceAssets(Asset asset)
+    {
+        try
+        {
+            BigInteger tokenIdBI = new BigInteger(asset.getTokenId());
+            balanceArray.add(tokenIdBI);
+        }
+        catch (NumberFormatException e)
+        {
+            //
+        }
     }
 }

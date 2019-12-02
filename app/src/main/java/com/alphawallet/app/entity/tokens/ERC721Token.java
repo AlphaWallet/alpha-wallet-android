@@ -10,6 +10,7 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
@@ -214,6 +215,23 @@ public class ERC721Token extends Token implements Parcelable
         return (contractType == ContractType.ERC721);
     }
 
+    /**
+     * Detect a change of balance for ERC721 balance
+     * @param balanceArray
+     * @return
+     */
+    @Override
+    public boolean checkBalanceChange(List<BigInteger> balanceArray)
+    {
+        if (balanceArray.size() != tokenBalanceAssets.size()) return true; //quick check for new tokens
+        List<BigInteger> oldBalance = getBalanceAsArray();
+        for (int index = 0; index < balanceArray.size(); index++) //see if spawnable token ID has changed
+        {
+            if (!balanceArray.get(index).equals(oldBalance.get(index))) return true;
+        }
+        return false;
+    }
+
     @Override
     public boolean hasArrayBalance()
     {
@@ -230,6 +248,12 @@ public class ERC721Token extends Token implements Parcelable
     protected float calculateBalanceUpdateWeight()
     {
         return 0.75f;
+    }
+
+    @Override
+    public void setRealmBalance(RealmToken realmToken)
+    {
+        realmToken.setBalance(getFullBalance());
     }
 
     @Override
@@ -286,5 +310,15 @@ public class ERC721Token extends Token implements Parcelable
         }
 
         return balanceAsArray;
+    }
+
+    @Override
+    public boolean checkRealmBalanceChange(RealmToken realmToken)
+    {
+        if (contractType == null || contractType.ordinal() != realmToken.getInterfaceSpec()) return true;
+        String currentState = realmToken.getBalance();
+        if (currentState == null) return true;
+        if (!currentState.equalsIgnoreCase(getFullBalance())) return true;
+        return false;
     }
 }

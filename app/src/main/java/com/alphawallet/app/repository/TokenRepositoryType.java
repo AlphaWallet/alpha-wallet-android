@@ -40,11 +40,13 @@ public interface TokenRepositoryType {
 
     Disposable terminateToken(Token token, Wallet wallet, NetworkInfo network);
 
-    Single<Token[]> addERC721(Wallet wallet, Token[] tokens);
+    Single<Token[]> storeTokens(Wallet wallet, Token[] tokens);
     Single<String> resolveENS(int chainId, String address);
 
     Disposable updateBlockRead(Token token, Wallet wallet);
     Single<String> resolveProxyAddress(TokenInfo tokenInfo);
     Single<ContractType> determineCommonType(TokenInfo tokenInfo);
     Single<Token[]> addERC20(Wallet wallet, Token[] tokens);
+
+    void updateTokenType(Token token, Wallet wallet, ContractType type);
 }

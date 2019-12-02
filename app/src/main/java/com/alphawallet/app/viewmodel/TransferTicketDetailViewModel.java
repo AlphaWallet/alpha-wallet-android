@@ -221,13 +221,16 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         assetDisplayRouter.open(ctx, ticket, isClearStack);
     }
 
-    public void openConfirm(Context ctx, String to, Token token, String tokenId, String ensDetails)
+    public void openConfirm(Context ctx, String to, Token token, String hexTokenId, String ensDetails)
     {
         //first find the asset within the token
         Asset asset = null;
+        int tokenId = Integer.parseInt(hexTokenId, 16);
+        String tokenIdStr = String.valueOf(tokenId);
+
         for (Asset a : token.getTokenAssets())
         {
-            if (a.getTokenId().equals(tokenId))
+            if (a.getTokenId().equals(tokenIdStr))
             {
                 asset = a;
                 break;
@@ -236,7 +239,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
         if (asset != null)
         {
-            confirmationRouter.openERC721Transfer(ctx, to, tokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails, token.tokenInfo.chainId);
+            confirmationRouter.openERC721Transfer(ctx, to, hexTokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails, token.tokenInfo.chainId);
         }
     }
 

@@ -1,5 +1,9 @@
 package com.alphawallet.app.repository.entity;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -69,6 +73,14 @@ public class RealmToken extends RealmObject {
 
     public String getBalance() {
         return balance;
+    }
+
+    public List<String> getTokenIdList()
+    {
+        String[] list = balance.split(",");
+        List<String> tokens = new ArrayList<>();
+        Collections.addAll(tokens, list);
+        return tokens;
     }
 
     public void setBalance(String balance) {

@@ -8,7 +8,6 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SubscribeWrapper;
 import com.alphawallet.app.entity.Ticker;
-import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
@@ -128,7 +127,6 @@ public class TokenRepository implements TokenRepositoryType {
         Wallet wallet = new Wallet(walletAddress);
         return fetchStoredEnabledTokens(wallet) // fetch tokens from cache
                 .compose(attachEthereumStored(wallet)) //add cached eth balance
-                .compose(attachERC721Tokens(wallet))
                 .toObservable();
     }
 
@@ -149,29 +147,11 @@ public class TokenRepository implements TokenRepositoryType {
         });
     }
 
-    private Single<Token[]> fetchERC721Tokens(Wallet wallet)
-    {
-        return localSource.fetchERC721Tokens(wallet);
-    }
-
     @Override
     public Observable<Token[]> fetchActiveStored(String walletAddress) {
         Wallet wallet = new Wallet(walletAddress);
         return fetchStoredEnabledTokens(wallet) // fetch tokens from cache
                 .toObservable();
-    }
-
-    private SingleTransformer<Token[], Token[]> attachERC721Tokens(Wallet wallet)
-    {
-        return upstream -> Single.zip(
-                upstream, fetchERC721Tokens(wallet),
-                (tokens, ERC721Tokens) ->
-                {
-                    List<Token> result = new ArrayList<>();
-                    result.addAll(Arrays.asList(ERC721Tokens));
-                    result.addAll(Arrays.asList(tokens));
-                    return result.toArray(new Token[0]);
-                });
     }
 
     private SingleTransformer<Token[], Token[]> attachEthereumStored(Wallet wallet)
@@ -182,7 +162,7 @@ public class TokenRepository implements TokenRepositoryType {
                 {
                     List<Token> result = new ArrayList<>();
                     result.addAll(ethTokens);
-                    result.addAll(Arrays.asList(tokens));
+                    for (Token t : tokens) if (!t.isEthereum()) result.add(t);
                     return result.toArray(new Token[0]);
                 });
     }
@@ -331,9 +311,9 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<Token[]> addERC721(Wallet wallet, Token[] tokens)
+    public Single<Token[]> storeTokens(Wallet wallet, Token[] tokens)
     {
-        return localSource.saveERC721Tokens(
+        return localSource.saveTokens(
                 wallet,
                 tokens);
     }
@@ -344,6 +324,12 @@ public class TokenRepository implements TokenRepositoryType {
         return localSource.saveERC20Tokens(
                 wallet,
                 tokens);
+    }
+
+    @Override
+    public void updateTokenType(Token token, Wallet wallet, ContractType type)
+    {
+        localSource.updateTokenType(token, wallet, type);
     }
 
     @Override
@@ -408,65 +394,6 @@ public class TokenRepository implements TokenRepositoryType {
     {
         return setupTokensFromLocal(address, network);
     }
-
-//    private Single<Token[]> fetchFromNetworkSource(@NonNull NetworkInfo network, @NonNull Wallet wallet) {
-//        return Single.fromCallable(() -> {
-//            try {
-//                return network.isMainNetwork
-//                        ? tokenNetworkService.fetch(wallet.address).blockingFirst()
-//                        : new TokenInfo[0];
-//            } catch (Throwable th) {
-//                // Ignore all errors, it's not important source.
-//                return new TokenInfo[0];
-//            }
-//        })
-//        .map(this::mapToTokens);
-//    }
-
-//    private Single<Token[]> extractFromTransactions(NetworkInfo network, Wallet wallet) {
-//        return transactionsLocalCache.fetchTransaction(network, wallet)
-//                .flatMap(transactions -> {
-//                    List<Token> result = new ArrayList<>();
-//                    for (Transaction transaction : transactions) {
-//                        if (transaction.operations == null || transaction.operations.length == 0) {
-//                            continue;
-//                        }
-//                        TransactionOperation operation = transaction.operations[0];
-//                        result.add(new Token(new TokenInfo(
-//                                operation.contract.address,
-//                                operation.contract.name,
-//                                operation.contract.symbol,
-//                                operation.contract.decimals,
-//                                true, network.chainId), null, 0
-//                        ,network.getShortName()));
-//                    }
-//                    return Single.just(result.toArray(new Token[result.size()]));
-//                });
-//    }
-//
-//    private Completable updateTokens(NetworkInfo network, Wallet wallet) {
-//        return Single.zip(
-//                fetchFromNetworkSource(network, wallet),
-//                extractFromTransactions(network, wallet),
-//                localSource.fetchAllTokens(network, wallet),
-//                (fromNetTokens, fromTrxTokens, cachedTokens) -> {
-//                    final Set<String> oldTokensIndex = new HashSet<>();
-//                    final List<Token> zip = new ArrayList<>();
-//                    zip.addAll(Arrays.asList(fromNetTokens));
-//                    zip.addAll(Arrays.asList(fromTrxTokens));
-//                    final List<Token> newTokens = new ArrayList<>();
-//                    for (Token cachedToken : cachedTokens) {
-//                        oldTokensIndex.add(cachedToken.tokenInfo.address);
-//                    }
-//                    for (int i = zip.size() - 1; i > -1; i--) {
-//                        if (!oldTokensIndex.contains(zip.get(i).tokenInfo.address)) {
-//                            newTokens.add(zip.get(i));
-//                        }
-//                    }
-//                    return newTokens.toArray(new Token[newTokens.size()]);
-//                })
-//                .flatMapCompletable(tokens -> localSource.saveTokens(network, wallet, tokens));
-//    }
 
     /**
      * Obtain live balance of token from Ethereum blockchain and cache into Realm

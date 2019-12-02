@@ -154,30 +154,35 @@ public class FetchTokensInteract {
         }
     }
 
-    public Single<Token[]> checkInterface(Token[] tokens)
+    // Only for sensing ERC721 Ticket
+    public Single<Token[]> checkInterface(Token[] tokens, Wallet wallet)
     {
         return Single.fromCallable(() -> {
             //check if the token interface has been checked
             for (int i = 0; i < tokens.length; i++)
             {
                 Token t = tokens[i];
+                if (t.isERC721Ticket()) continue;
                 ContractType type = TokensService.checkInterfaceSpec(t.tokenInfo.chainId, t.tokenInfo.address);
 
-                if (type == ContractType.NOT_SET)
+                if (type != ContractType.ERC721 && type != ContractType.ERC721_LEGACY)
                 {
                     type = tokenRepository.determineCommonType(t.tokenInfo).blockingGet();
-                    if (type == ContractType.OTHER) type = t.getInterfaceSpec();
-                    TokensService.setInterfaceSpec(t.tokenInfo.chainId, t.tokenInfo.address, type);
-                    if (type == ContractType.ERC721_TICKET && t.getInterfaceSpec() == ContractType.ERC721)
+                    if (type != ContractType.ERC721_TICKET) type = t.getInterfaceSpec();
+                    if (type == ContractType.ERC721_TICKET && t.isERC721())
                     {
                         //upgrade type:
                         List<BigInteger> balanceFromOpenSea = t.getBalanceAsArray();
                         tokens[i] = new ERC721Ticket(t.tokenInfo, balanceFromOpenSea, System.currentTimeMillis(), t.getNetworkName(), ContractType.ERC721_TICKET);
+                        //update in database
+                        tokenRepository.updateTokenType(t, wallet, type);
                     }
                     else
                     {
                         t.setInterfaceSpec(type);
                     }
+
+                    TokensService.setInterfaceSpec(t.tokenInfo.chainId, t.tokenInfo.address, type);
                 }
             }
 

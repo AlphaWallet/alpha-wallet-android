@@ -63,6 +63,7 @@ import com.alphawallet.token.web.Ethereum.TokenscriptFunction;
 import com.alphawallet.token.web.Ethereum.TransactionHandler;
 import com.alphawallet.token.web.Service.CryptoFunctions;
 import static com.alphawallet.token.tools.Convert.getEthString;
+import static com.alphawallet.token.tools.ParseMagicLink.normal;
 import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
 import static com.alphawallet.token.web.Ethereum.TokenscriptFunction.ZERO_ADDRESS;
 
@@ -118,11 +119,6 @@ public class AppSiteController implements AttributeInterface
         {
             data = parser.parseUniversalLink(universalLink);
             data.chainId = MagicLinkInfo.getNetworkIdFromDomain(domain);
-
-            if (domain.contains("duckdns.org") || domain.contains("192.168"))
-            {
-                data.chainId = 4;
-            }
         }
         catch (SalesOrderMalformed e)
         {
@@ -142,23 +138,29 @@ public class AppSiteController implements AttributeInterface
 
         if (definition == null)
         {
-            return passThroughToken(data, universalLink);
+            return renderTokenWithoutTokenScript(data, universalLink);
         }
 
         try
         {
-            updateTokenInfo(model, data, definition);
+            //TODO check that spawnable link is actually valid i.e. claimable or owned by someone doing a free transfer
+            if(data.contractType == normal)
+            {
+                checkTokensOwnedByMagicLinkCreator(model, data, definition);
+            }
         }
         catch (Exception e)
         {
-            return passThroughToken(data, universalLink);
+            return renderTokenWithoutTokenScript(data, universalLink);
         }
 
         //get attributes
         BigInteger firstTokenId = BigInteger.ZERO;
 
         if (data.tokenIds != null && data.tokenIds.size() > 0)
+        {
             firstTokenId = data.tokenIds.get(0);
+        }
         System.out.println(firstTokenId.toString(16));
         ContractAddress cAddr = new ContractAddress(data.chainId, data.contractAddress);
         StringBuilder tokenData = new StringBuilder();
@@ -166,7 +168,6 @@ public class AppSiteController implements AttributeInterface
 
         String tokenName = txHandler.getNameOnly(data.contractAddress);
         String symbol = txHandler.getSymbolOnly(data.contractAddress);
-        String nameWithSymbol = tokenName + "(" + symbol + ")";
 
         try
         {
@@ -184,75 +185,65 @@ public class AppSiteController implements AttributeInterface
                 .isDisposed();
 
         String available = "available";
-        if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000))) available = "expired";
 
-        String price = getEthString(data.price) + " " + MagicLinkInfo.getNetworkNameById(data.chainId);
-
-        String title = data.ticketCount + " " + definition.getTokenName(data.ticketCount) + " " + available;
+        if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000)))
+        {
+            available = "expired";
+        }
 
         String view = definition.getCardData("view");
         String style = definition.getCardData("style");
-        String initHTML = loadFile("templates/tokenscriptTemplate.html");
 
         String scriptData = loadFile("templates/token_inject.js.tokenscript");
-        String tokenView = String.format(scriptData,
-                                         tokenData.toString(), view);
+        String tokenView = String.format(scriptData, tokenData.toString(), view);
 
-        String expiry = new java.util.Date(data.expiry*1000).toString();
-
-        String availableUntil = "<span title=\"Unix Time is " + data.expiry + "\">" + expiry + "</span>";
-        String action = "\"" + universalLink + "\"";
-        String originalLink = "\"https://" + MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId) + "/" + universalLink + "\"";
-
-        String etherscanAccountLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "address/" + data.ownerAddress;
-        String etherscanTokenLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "token/" + data.contractAddress;
-
-        return String.format(
-                initHTML,
-                title, style, String.valueOf(data.ticketCount), nameWithSymbol, definition.getTokenName(data.ticketCount),
-                price, available,
-                data.ticketCount, definition.getTokenName(data.ticketCount),
-                tokenView, availableUntil,
-                action, originalLink,
-                etherscanAccountLink, data.ownerAddress,
-                etherscanTokenLink, data.contractAddress
-        );
+        return formWebPage(txHandler, data, universalLink, available, style, tokenView);
     }
 
 
 
-    private String passThroughToken(MagicLinkData data, String universalLink)
+    //TODO check spawnable link is actual valid by checking balance or checking link has not been used (if coming from issuer)
+    private String renderTokenWithoutTokenScript(MagicLinkData data, String universalLink)
     {
         TransactionHandler txHandler = new TransactionHandler(data.chainId);
 
         List<BigInteger> balanceArray;
-        BigInteger firstTokenId = BigInteger.ZERO;
         String available = "available";
-        if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000))) available = "expired";
 
-        switch (data.contractType)
+        if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000)))
         {
-            case spawnable:
-                firstTokenId = data.tokenIds.get(0);
-                break;
-            default:
-                try
+            available = "expired";
+        }
+        try
+        {
+            balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
+            //check indices
+            for (int index : data.indices)
+            {
+                if (index >= balanceArray.size() || balanceArray.get(index).equals(BigInteger.ZERO))
                 {
-                    balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
-                    //check indices
-                    for (int index : data.indices)
-                        if (index >= balanceArray.size() || balanceArray.get(index).equals(BigInteger.ZERO)) available = "unavailable";
-                    firstTokenId = balanceArray.get(0);
+                    available = "unavailable";
                 }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-                break;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
 
-        System.out.println(firstTokenId.toString(16));
-        String tokenName = txHandler.getNameOnly(data.contractAddress);
+        return formWebPage(txHandler, data, universalLink, available, "", "");
+    }
+
+    private String formWebPage(
+            TransactionHandler txHandler,
+            MagicLinkData data,
+            String universalLink,
+            String available,
+            String style,
+            String tokenView
+    )
+    {
+        String tokenName = txHandler.getName(data.contractAddress);
         String symbol = txHandler.getSymbolOnly(data.contractAddress);
         String nameWithSymbol = tokenName + "(" + symbol + ")";
 
@@ -262,7 +253,7 @@ public class AppSiteController implements AttributeInterface
 
         String initHTML = loadFile("templates/tokenscriptTemplate.html");
 
-        String expiry = new java.util.Date(data.expiry*1000).toString();
+        String expiry = new java.util.Date(data.expiry * 1000).toString();
 
         String availableUntil = "<span title=\"Unix Time is " + data.expiry + "\">" + expiry + "</span>";
         String action = "\"" + universalLink + "\"";
@@ -271,14 +262,25 @@ public class AppSiteController implements AttributeInterface
         String etherscanAccountLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "address/" + data.ownerAddress;
         String etherscanTokenLink = MagicLinkInfo.getEtherscanURLbyNetwork(data.chainId) + "address/" + data.contractAddress;
 
-        return String.format(initHTML,
-                             title, "", String.valueOf(data.ticketCount), nameWithSymbol, "Tokens",
-                             price, available,
-                             data.ticketCount, "Tokens",
-                             "", availableUntil,
-                             action, originalLink,
-                             etherscanAccountLink, data.ownerAddress,
-                             etherscanTokenLink, data.contractAddress
+        return String.format(
+                initHTML,
+                title,
+                style,
+                String.valueOf(data.ticketCount),
+                nameWithSymbol,
+                "",
+                price,
+                available,
+                data.ticketCount,
+                tokenName,
+                tokenView,
+                availableUntil,
+                action,
+                originalLink,
+                etherscanAccountLink,
+                data.ownerAddress,
+                etherscanTokenLink,
+                data.contractAddress
         );
     }
 
@@ -299,7 +301,6 @@ public class AppSiteController implements AttributeInterface
                 definition = new TokenDefinition(in, new Locale("en"), null);
             }
         }
-
         return definition;
     }
 
@@ -310,11 +311,12 @@ public class AppSiteController implements AttributeInterface
      * @param definition
      * @throws Exception
      */
-    private void updateTokenInfo(
+    private void checkTokensOwnedByMagicLinkCreator(
             Model model,
             MagicLinkData data,
             TokenDefinition definition
-    ) throws Exception {
+    ) throws Exception
+    {
         model.addAttribute("domain", MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId));
         TransactionHandler txHandler = new TransactionHandler(data.chainId);
         List<BigInteger> balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
@@ -330,7 +332,9 @@ public class AppSiteController implements AttributeInterface
                 .collect(Collectors.toList());
 
         if (selection.size() != data.indices.length)
+        {
             throw new Exception("Some or all non-fungible tokens are not owned by the claimed owner");
+        }
     }
 
     @Value("${repository.dir}")

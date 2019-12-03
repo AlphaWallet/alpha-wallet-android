@@ -96,18 +96,16 @@ public class TransactionHandler
     public String getName(String address)
     {
         String name = "";
-        String symbol = "";
         try
         {
             name = getContractData(address, stringParam("name"));
-            symbol = getContractData(address, stringParam("symbol"));
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
 
-        return name + " (" + symbol + ")";
+        return name;
     }
 
     private <T> T getContractData(String address, org.web3j.abi.datatypes.Function function) throws Exception

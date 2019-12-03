@@ -177,8 +177,8 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-    OpenseaService provideOpenseaService(Context ctx) {
-		return new OpenseaService(ctx);
+    OpenseaService provideOpenseaService(Context ctx, TokensService tokensService) {
+		return new OpenseaService(ctx, tokensService);
 	}
 
 	@Singleton

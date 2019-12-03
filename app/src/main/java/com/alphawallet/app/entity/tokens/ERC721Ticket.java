@@ -14,6 +14,7 @@ import com.alphawallet.app.entity.ERC875ContractTransaction;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
+import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
@@ -83,7 +84,7 @@ public class ERC721Ticket extends Token implements Parcelable {
 
     @Override
     public String getStringBalance() {
-        return intArrayToString(balanceArray, false);
+        return bigIntListToString(balanceArray, false);
     }
 
     @Override
@@ -94,7 +95,7 @@ public class ERC721Ticket extends Token implements Parcelable {
     @Override
     public String getFullBalance() {
         if (balanceArray == null) return "no tokens";
-        else return intArrayToString(balanceArray, true);
+        else return bigIntListToString(balanceArray, true);
     }
 
     @Override
@@ -110,7 +111,7 @@ public class ERC721Ticket extends Token implements Parcelable {
      *
      * @return
      */
-    public String pruneIDList(String idListStr, int quantity)
+    public List<BigInteger> pruneIDList(String idListStr, int quantity)
     {
         //convert to list
         List<BigInteger> idList = stringHexToBigIntegerList(idListStr);
@@ -118,12 +119,11 @@ public class ERC721Ticket extends Token implements Parcelable {
          * order is important*/
         //List<BigInteger> idList = Observable.fromArray(idListStr.split(","))
         //       .map(s -> Numeric.toBigInt(s)).toList().blockingGet();
-        for (int i = (idList.size() - 1); i >= quantity; i--)
-        {
-            idList.remove(i);
-        }
+        if (quantity >= idList.size()) return idList;
+        List<BigInteger> pruneList = new ArrayList<>();
+        for (int i = 0; i < quantity; i++) pruneList.add(idList.get(i));
 
-        return intArrayToString(idList, true);
+        return pruneList;
     }
 
     @Override
@@ -141,9 +141,15 @@ public class ERC721Ticket extends Token implements Parcelable {
     }
 
     @Override
+    public void zeroiseBalance()
+    {
+        balanceArray.clear();
+    }
+
+    @Override
     public void setRealmBalance(RealmToken realmToken)
     {
-        realmToken.setBalance(intArrayToString(balanceArray, true));
+        realmToken.setBalance(bigIntListToString(balanceArray, true));
     }
 
     @Override
@@ -159,14 +165,16 @@ public class ERC721Ticket extends Token implements Parcelable {
         tokenHolder.textAppreciation.setText("--");
 
         tokenHolder.issuer.setText(R.string.ethereum);
-        tokenHolder.contractType.setVisibility(View.GONE);
-        tokenHolder.contractSeparator.setVisibility(View.GONE);
+        tokenHolder.contractType.setVisibility(View.VISIBLE);
+        tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
         tokenHolder.layoutValueDetails.setVisibility(View.GONE);
         tokenHolder.icon.setVisibility(View.GONE);
         tokenHolder.icon.setImageResource(R.drawable.ic_ethereum);
-        tokenHolder.chainName.setVisibility(View.GONE);
+        tokenHolder.blockchainSeparator.setVisibility(View.GONE);
+        tokenHolder.chainName.setVisibility(View.VISIBLE);
         tokenHolder.extendedInfo.setVisibility(View.VISIBLE);
         tokenHolder.blockchain.setVisibility(View.GONE);
+        tokenHolder.contractType.setText(R.string.ERC721T);
 
         String composite = getTicketCount() + " " + getFullName(asset, getTicketCount());
         tokenHolder.balanceEth.setText(composite);
@@ -192,7 +200,7 @@ public class ERC721Ticket extends Token implements Parcelable {
      * @return
      */
     @Override
-    public List<Integer> ticketIdStringToIndexList(String userList)
+    public List<BigInteger> ticketIdStringToIndexList(String userList)
     {
         return null;
     }
@@ -305,18 +313,6 @@ public class ERC721Ticket extends Token implements Parcelable {
         return isMatchedInXML;
     }
 
-    public Function getTradeFunction(BigInteger expiry, List<BigInteger> tokenIds, int v, byte[] r, byte[] s)
-    {
-        return new Function(
-                "trade",
-                Arrays.asList(new org.web3j.abi.datatypes.generated.Uint256(expiry),
-                        getDynArray(tokenIds),
-                        new org.web3j.abi.datatypes.generated.Uint8(v),
-                        new org.web3j.abi.datatypes.generated.Bytes32(r),
-                        new org.web3j.abi.datatypes.generated.Bytes32(s)),
-                Collections.emptyList());
-    }
-
     public Function getPassToFunction(BigInteger expiry, List<BigInteger> tokenIds, int v, byte[] r, byte[] s, String recipient)
     {
         return new Function(
@@ -330,28 +326,28 @@ public class ERC721Ticket extends Token implements Parcelable {
                 Collections.emptyList());
     }
 
-    public Function getTransferFunction(String to, BigInteger tokenId)
+    @Override
+    public Function getTransferFunction(String to, List<BigInteger> tokenIds) throws NumberFormatException
     {
+        if (tokenIds.size() > 1)
+        {
+            throw new NumberFormatException("ERC721Ticket currently doesn't handle batch transfers.");
+        }
+
         return new Function(
                 "safeTransferFrom",
                 Arrays.asList(
                         new org.web3j.abi.datatypes.Address(this.getWallet()),
                         new org.web3j.abi.datatypes.Address(to),
-                        new Uint256(tokenId)
+                        new Uint256(tokenIds.get(0))
                 ), Collections.emptyList());
     }
 
+    //Can only be ERC721 ticket if created as ERC721Ticket type
     @Override
-    public boolean unspecifiedSpec()
+    public boolean contractTypeValid()
     {
-        return contractType.equals(ContractType.ERC721_TICKET);
-    }
-
-    private org.web3j.abi.datatypes.DynamicArray getDynArray(List<BigInteger> tokenIds)
-    {
-        return new org.web3j.abi.datatypes.DynamicArray<>(
-                org.web3j.abi.datatypes.generated.Uint256.class,
-                org.web3j.abi.Utils.typeMap(tokenIds, org.web3j.abi.datatypes.generated.Uint256.class));
+        return true;
     }
 
     /**
@@ -465,19 +461,23 @@ public class ERC721Ticket extends Token implements Parcelable {
     public boolean isERC721Ticket() { return true; }
 
     @Override
-    public List<BigInteger> getTicketsAsBigIntList(String ticketIds) {
-        List<BigInteger> tokenIds = new ArrayList<>();
-        String[] tickets = ticketIds.split(",");
-        for(String ticket: tickets) {
-            tokenIds.add(new BigInteger(ticket, 16));
-        }
-        return tokenIds;
-    }
-
-    @Override
     public boolean groupWithToken(TicketRange currentGroupingRange, TicketRangeElement newElement, long currentGroupTime)
     {
         //don't group any ERC721 tickets in the asset view
         return false;
+    }
+
+    @Override
+    public void addAssetToTokenBalanceAssets(Asset asset)
+    {
+        try
+        {
+            BigInteger tokenIdBI = new BigInteger(asset.getTokenId());
+            balanceArray.add(tokenIdBI);
+        }
+        catch (NumberFormatException e)
+        {
+            //
+        }
     }
 }

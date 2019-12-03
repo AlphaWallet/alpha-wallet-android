@@ -2,6 +2,9 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 import android.util.Log;
+
+import com.alphawallet.app.entity.tokens.ERC721Ticket;
+import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.google.gson.Gson;
 import io.reactivex.Single;
 import com.alphawallet.app.entity.ContractType;
@@ -15,7 +18,10 @@ import okhttp3.Request;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -28,13 +34,15 @@ import java.util.concurrent.TimeUnit;
 public class OpenseaService {
     private static OkHttpClient httpClient;
     private static Map<String, Long> balanceAccess = new ConcurrentHashMap<>();
-    private Context context;
+    private final Context context;
+    private final TokensService tokensService;
 
     //TODO: remove old files not accessed for some time
     //      On service creation, check files for old files and delete
 
-    public OpenseaService(Context ctx) {
+    public OpenseaService(Context ctx, TokensService tService) {
         context = ctx;
+        tokensService = tService;
         balanceAccess.clear();
         httpClient = new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
@@ -59,6 +67,8 @@ public class OpenseaService {
         }
         JSONArray assets = object.getJSONArray("assets");
 
+        TokenFactory tf = new TokenFactory();
+
         for (int i = 0; i < assets.length(); i++)
         {
             Asset asset = new Gson().fromJson(assets.getJSONObject(i).toString(), Asset.class);
@@ -69,15 +79,24 @@ public class OpenseaService {
                 Token token = foundTokens.get(asset.getAssetContract().getAddress());
                 if (token == null)
                 {
-                    String tokenName = asset.getAssetContract().getName();
-                    String tokenSymbol = asset.getAssetContract().getSymbol();
+                    TokenInfo tInfo;
+                    ContractType type;
+                    Token checkToken = tokensService.getToken(networkId, asset.getAssetContract().getAddress());
+                    if (checkToken != null && checkToken.getInterfaceSpec() == ContractType.ERC721_TICKET)
+                    {
+                        tInfo = checkToken.tokenInfo;
+                        type = checkToken.getInterfaceSpec();
+                    }
+                    else
+                    {
+                        tInfo = new TokenInfo(asset.getAssetContract().getAddress(), asset.getAssetContract().getName(), asset.getAssetContract().getSymbol(), 0, true, networkId);
+                        type = ContractType.ERC721;
+                    }
 
-                    TokenInfo tInfo = new TokenInfo(asset.getAssetContract().getAddress(), tokenName, tokenSymbol, 0, true, networkId);
-                    token = new ERC721Token(tInfo, null, System.currentTimeMillis(), networkName, ContractType.ERC721);
+                    token = tf.createToken(tInfo, type, networkName);
                     token.setTokenWallet(address);
                     foundTokens.put(asset.getAssetContract().getAddress(), token);
                 }
-                //This will actually go to the ERC721 Token method definition
                 token.addAssetToTokenBalanceAssets(asset);
             }
         }

@@ -138,8 +138,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
         String amountString;
 
-        amount = new BigDecimal(getIntent().getStringExtra(C.EXTRA_AMOUNT));
-
         viewModel = ViewModelProviders.of(this, confirmationViewModelFactory)
                 .get(ConfirmationViewModel.class);
 
@@ -148,11 +146,13 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
         switch (confirmationType) {
             case ETH:
+                amount = new BigDecimal(amountStr);
                 amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString();
                 symbolText.setText(symbol);
                 transactionBytes = null;
                 break;
             case ERC20:
+                amount = new BigDecimal(amountStr);
                 contractAddrText.setVisibility(View.VISIBLE);
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 contractAddrText.setText(contractAddress);

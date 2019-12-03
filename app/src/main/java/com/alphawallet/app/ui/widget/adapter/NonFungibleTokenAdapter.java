@@ -68,37 +68,17 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         else if (token instanceof ERC721Token) setERC721Tokens(token, null);
     }
 
-    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, String ticketIds, AssetDefinitionService service, OpenseaService opensea)
+    public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, List<BigInteger> tokenSelection, AssetDefinitionService service, OpenseaService opensea)
     {
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;
         openseaService = opensea;
-        if (token.isERC875()) setTokenRange(token, ticketIds);
-        else if (token instanceof ERC721Token) setERC721Tokens(token, ticketIds);
-        else if (token instanceof ERC721Ticket) setERC721Tickets(token, ticketIds);
+        if (token.isERC875()) setTokenRange(token, tokenSelection);
+        else if (token instanceof ERC721Token) setERC721Tokens(token, tokenSelection);
+        else if (token instanceof ERC721Ticket) setERC721Tickets(token, tokenSelection);
     }
-
-    public NonFungibleTokenAdapter(Token token, String displayIds, AssetDefinitionService service)
-    {
-        super(null, service);
-        this.token = token;
-        clickThrough = false;
-        setTokenRange(token, displayIds);
-    }
-
-    public NonFungibleTokenAdapter(Token token, String viewCode, FunctionCallback callback, AssetDefinitionService service)
-    {
-        super(null, service);
-        functionCallback = callback;
-        this.token = token;
-        TokenFunctionSortedItem item = new TokenFunctionSortedItem(viewCode, 200);
-        items.clear();
-        items.add(item);
-        notifyDataSetChanged();
-        containsScripted = true;
-    }
-
+    
     @Override
     public BinderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         BinderViewHolder holder = null;
@@ -130,18 +110,20 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         return holder;
     }
 
-    protected void setERC721Tokens(Token token, String ticketId)
+    protected void setERC721Tokens(Token token, List<BigInteger> tokenIds)
     {
         if (!(token instanceof ERC721Token)) return;
         items.beginBatchedUpdates();
         items.clear();
         items.add(new TokenBalanceSortedItem(token));
         int weight = 1; //use the same order we receive from OpenSea
+        String tokenId = null;
+        if (tokenIds != null) tokenId = tokenIds.get(0).toString(10);
 
         // populate the ERC721 items
         for (Asset asset : token.getTokenAssets())
         {
-            if (ticketId == null || ticketId.equals(asset.getTokenId()))
+            if (tokenId == null || tokenId.equals(asset.getTokenId()))
             {
                 items.add(new AssetSortedItem(asset, weight++));
                 assetCount++;
@@ -150,7 +132,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         items.endBatchedUpdates();
     }
 
-    protected void setERC721Tickets(Token token, String ticketId) //ticketId is used when transfering single tickets
+    protected void setERC721Tickets(Token token, List<BigInteger> tokenIds) //ticketId is used when transfering single tickets
     {
         if (!(token instanceof ERC721Ticket)) return;
         items.beginBatchedUpdates();
@@ -166,18 +148,13 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         }
 
         List<BigInteger> tokensToDisplay;
-        if (ticketId == null)
+        if (tokenIds == null)
         {
             tokensToDisplay = token.getArrayBalance();
         }
         else
         {
-            List<BigInteger> ids = new ArrayList<>();
-            String[] tokens = ticketId.split(",");
-            for(String t : tokens) {
-                ids.add(Numeric.toBigInt(t));
-            }
-            tokensToDisplay = ids;
+            tokensToDisplay = tokenIds;
         }
 
         List<TicketRangeElement> sortedList = generateSortedList(assetService, token, tokensToDisplay); //generate sorted list
@@ -194,7 +171,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         return count;
     }
 
-    private void setTokenRange(Token t, String ticketIds)
+    private void setTokenRange(Token t, List<BigInteger> tokenIds)
     {
         items.beginBatchedUpdates();
         items.clear();
@@ -206,8 +183,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
             holderType = AssetInstanceSortedItem.VIEW_TYPE;
         }
 
-        List<BigInteger> idList = t.stringHexToBigIntegerList(ticketIds);
-        List<TicketRangeElement> sortedList = generateSortedList(assetService, token, idList); //generate sorted list
+        List<TicketRangeElement> sortedList = generateSortedList(assetService, token, tokenIds); //generate sorted list
         addSortedItems(sortedList, t, holderType); //insert sorted items into view
 
         items.endBatchedUpdates();

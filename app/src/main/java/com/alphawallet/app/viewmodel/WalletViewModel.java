@@ -7,6 +7,7 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.crashlytics.android.Crashlytics;
 import com.alphawallet.app.BuildConfig;
@@ -39,6 +40,7 @@ import com.alphawallet.app.service.TokensService;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -147,7 +149,7 @@ public class WalletViewModel extends BaseViewModel
         tokensService.clearTokens();
     }
 
-    private void terminateBalanceUpdate()
+    public void terminateBalanceUpdate()
     {
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed())
         {
@@ -224,7 +226,7 @@ public class WalletViewModel extends BaseViewModel
         if (checkNetwork == null) return;
         Log.d("OPENSEA", "Fetch from opensea : " + checkNetwork.getShortName());
         updateTokens = openseaService.getTokens(currentWallet.address, checkNetwork.chainId, checkNetwork.getShortName())
-                //openseaService.getTokens("0xbc8dAfeacA658Ae0857C80D8Aa6dE4D487577c63")
+                .flatMap(tokens -> fetchTokensInteract.checkInterface(tokens, currentWallet))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(tokens -> gotOpenseaTokens(checkNetwork.chainId, tokens), this::onOpenseaError);
@@ -233,16 +235,16 @@ public class WalletViewModel extends BaseViewModel
     private void gotOpenseaTokens(int chainId, Token[] openSeaTokens)
     {
         //zero out balance of tokens
-        Token[] erc721Tokens = tokensService.zeroiseBalanceOfSpentTokens(chainId, openSeaTokens, ERC721Token.class);
+        //tokens.postValue(openSeaTokens);
+        ContractType[] filterTypes = { ContractType.ERC721, ContractType.ERC721_LEGACY, ContractType.ERC721_TICKET };
+        List<Token> erc721Tokens = tokensService.getChangedTokenBalance(chainId, openSeaTokens, filterTypes); //zeroiseBalanceOfSpentTokens(chainId, openSeaTokens, ERC721Token.class);
 
-        if (erc721Tokens.length > 0)
+        if (erc721Tokens.size() > 0)
         {
-            tokensService.addTokens(erc721Tokens);
-
-            tokens.postValue(erc721Tokens);
+            tokens.postValue(erc721Tokens.toArray(new Token[0]));
 
             //store these tokens
-            updateTokens = addTokenInteract.addERC721(currentWallet, erc721Tokens)
+            updateTokens = addTokenInteract.storeTokens(currentWallet, erc721Tokens.toArray(new Token[0]))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::storedTokens, this::onError);

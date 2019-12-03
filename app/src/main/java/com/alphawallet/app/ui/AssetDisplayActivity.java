@@ -179,7 +179,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     @Override
     public void sellTicketRouter(List<BigInteger> selection)
     {
-        viewModel.sellTicketRouter(this, token, token.intArrayToString(selection, false));
+        viewModel.sellTicketRouter(this, token, token.bigIntListToString(selection, false));
     }
 
     @Override
@@ -208,7 +208,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         intent.putExtra(TICKET, token);
         intent.putExtra(WALLET, viewModel.defaultWallet().getValue());
         intent.putExtra(C.EXTRA_STATE, function);
-        intent.putExtra(C.EXTRA_TOKEN_ID, token.intArrayToString(adapter.getSelectedTokenIds(selection), true));
+        intent.putExtra(C.EXTRA_TOKEN_ID, token.bigIntListToString(adapter.getSelectedTokenIds(selection), true));
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         startActivity(intent);
     }

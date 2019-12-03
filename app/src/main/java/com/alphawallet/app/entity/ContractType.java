@@ -4,18 +4,20 @@ package com.alphawallet.app.entity;
  * Created by James on 6/12/2018.
  * Stormbird in Singapore
  */
+//NB: if you add to this list, place your new entry at the end of the list before 'CREATION' because the ordinal is used in storage
+
 public enum ContractType
 {
     NOT_SET,
     ETHEREUM,
     ERC20,
     ERC721,
-    ERC721_TICKET,
     ERC875_LEGACY,
     ERC875,
     OTHER,
     CURRENCY,
     DELETED_ACCOUNT,
     ERC721_LEGACY,
+    ERC721_TICKET,
     CREATION //Placeholder for generic, should be at end of list
 }

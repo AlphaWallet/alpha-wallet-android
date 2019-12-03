@@ -211,14 +211,11 @@ public class AssetDisplayViewModel extends BaseViewModel
         intent.putExtra(C.Key.WALLET, defaultWallet.getValue());
         intent.putExtra(C.Key.TICKET, token);
 
-        if (token instanceof ERC721Token)
+        intent.putExtra(C.EXTRA_TOKENID_LIST, token.bigIntListToString(selection, false));
+
+        if (token.isERC721()) //skip numerical selection - ERC721 has no multiple token transfer
         {
-            intent.putExtra(C.EXTRA_TOKENID_LIST, selection.iterator().next().toString(10));
             intent.putExtra(C.EXTRA_STATE, TransferTicketDetailActivity.TRANSFER_TO_ADDRESS);
-        }
-        else
-        {
-            intent.putExtra(C.EXTRA_TOKENID_LIST, token.intArrayToString(selection, false));
         }
 
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);

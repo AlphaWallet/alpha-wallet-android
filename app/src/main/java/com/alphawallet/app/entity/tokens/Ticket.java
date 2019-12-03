@@ -86,7 +86,7 @@ public class Ticket extends Token implements Parcelable
 
     @Override
     public String getStringBalance() {
-        return intArrayToString(balanceArray, false);
+        return bigIntListToString(balanceArray, false);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class Ticket extends Token implements Parcelable
     @Override
     public String getFullBalance() {
         if (balanceArray == null) return "no tokens";
-        else return intArrayToString(balanceArray, true);
+        else return bigIntListToString(balanceArray, true);
     }
 
     public static final Creator<Ticket> CREATOR = new Creator<Ticket>() {
@@ -125,7 +125,7 @@ public class Ticket extends Token implements Parcelable
      *
      * @return
      */
-    public String pruneIDList(String idListStr, int quantity)
+    public List<BigInteger> pruneIDList(String idListStr, int quantity)
     {
         //convert to list
         List<BigInteger> idList = stringHexToBigIntegerList(idListStr);
@@ -133,12 +133,11 @@ public class Ticket extends Token implements Parcelable
          * order is important*/
         //List<BigInteger> idList = Observable.fromArray(idListStr.split(","))
         //       .map(s -> Numeric.toBigInt(s)).toList().blockingGet();
-        for (int i = (idList.size() - 1); i >= quantity; i--)
-        {
-            idList.remove(i);
-        }
+        if (quantity >= idList.size()) return idList;
+        List<BigInteger> pruneList = new ArrayList<>();
+        for (int i = 0; i < quantity; i++) pruneList.add(idList.get(i));
 
-        return intArrayToString(idList, true);
+        return pruneList;
     }
 
     @Override
@@ -158,7 +157,7 @@ public class Ticket extends Token implements Parcelable
     @Override
     public void setRealmBalance(RealmToken realmToken)
     {
-        realmToken.setBalance(intArrayToString(balanceArray, true));
+        realmToken.setBalance(bigIntListToString(balanceArray, true));
     }
 
     @Override
@@ -193,11 +192,11 @@ public class Ticket extends Token implements Parcelable
     @Override
     public int[] getTicketIndices(String ticketIds)
     {
-        List<Integer> indexList = ticketIdStringToIndexList(ticketIds);
+        List<BigInteger> indexList = ticketIdStringToIndexList(ticketIds);
         int[] indicies = new int[indexList.size()];
         int i = 0;
-        for (Iterator<Integer> iterator = indexList.iterator(); iterator.hasNext(); i++) {
-            indicies[i] = iterator.next();
+        for (Iterator<BigInteger> iterator = indexList.iterator(); iterator.hasNext(); i++) {
+            indicies[i] = iterator.next().intValue();
         }
         return indicies;
     }
@@ -255,45 +254,56 @@ public class Ticket extends Token implements Parcelable
      * @return
      */
     @Override
-    public List<Integer> ticketIdStringToIndexList(String userList)
+    public List<BigInteger> ticketIdStringToIndexList(String userList)
     {
-        //read given indicies and convert into internal format, error checking to ensure
-        List<Integer> idList = new ArrayList<>();
-        List<BigInteger> inventoryCopy = new ArrayList<BigInteger>(balanceArray);
+        List<BigInteger> idList = new ArrayList<>();
 
+        String[] ids = userList.split(",");
+
+        for (String id : ids)
+        {
+            //remove whitespace
+            String     trim   = id.trim();
+            BigInteger thisId = Numeric.toBigInt(trim);
+            idList.add(thisId);
+        }
+
+        return tokenIdsToTokenIndices(idList);
+    }
+
+    private List<BigInteger> tokenIdsToTokenIndices(List<BigInteger> tokenIds)
+    {
+        List<BigInteger> inventoryCopy = new ArrayList<BigInteger>(balanceArray);
+        List<BigInteger> indexList = new ArrayList<>();
         try
         {
-            String[] ids = userList.split(",");
-
-            for (String id : ids) {
-                //remove whitespace
-                String trim = id.trim();
-                BigInteger thisId = Numeric.toBigInt(trim);
-
-                if (thisId.compareTo(BigInteger.ZERO) != 0)
+            for (BigInteger id : tokenIds)
+            {
+                if (id.compareTo(BigInteger.ZERO) != 0)
                 {
-                    int index = inventoryCopy.indexOf(thisId);
+                    int index = inventoryCopy.indexOf(id);
                     if (index > -1)
                     {
                         inventoryCopy.set(index, BigInteger.ZERO);
-                        if (!idList.contains(index))
+                        BigInteger indexBi = BigInteger.valueOf(index);
+                        if (!indexList.contains(indexBi))
                         {   //just make sure they didn't already add this one
-                            idList.add(index);
+                            indexList.add(indexBi);
                         }
                     }
                     else
                     {
-                        idList = null;
+                        indexList = null;
                         break;
                     }
                 }
             }
         }
         catch (Exception e) {
-            idList = null;
+            indexList = null;
         }
 
-        return idList;
+        return indexList;
     }
 
     /**
@@ -428,55 +438,32 @@ public class Ticket extends Token implements Parcelable
         return isMatchedInXML;
     }
 
-    public Function getTradeFunction(BigInteger expiry, List<BigInteger> indices, int v, byte[] r, byte[] s)
-    {
-        return new Function(
-                "trade",
-                Arrays.asList(new org.web3j.abi.datatypes.generated.Uint256(expiry),
-                        getDynArray(indices),
-                        new org.web3j.abi.datatypes.generated.Uint8(v),
-                        new org.web3j.abi.datatypes.generated.Bytes32(r),
-                        new org.web3j.abi.datatypes.generated.Bytes32(s)),
-                Collections.emptyList());
-    }
-
-    public Function getSpawnPassToFunction(BigInteger expiry, List<BigInteger> tokenIds, int v, byte[] r, byte[] s, String recipient)
-    {
-        return new Function(
-                "spawnPassTo",
-                Arrays.asList(new org.web3j.abi.datatypes.generated.Uint256(expiry),
-                        getDynArray(tokenIds),
-                        new org.web3j.abi.datatypes.generated.Uint8(v),
-                        new org.web3j.abi.datatypes.generated.Bytes32(r),
-                        new org.web3j.abi.datatypes.generated.Bytes32(s),
-                        new org.web3j.abi.datatypes.Address(recipient)),
-                Collections.emptyList());
-    }
-
-    public Function getTransferFunction(String to, List<BigInteger> indices)
+    @Override
+    public Function getTransferFunction(String to, List<BigInteger> tokenIndices) throws NumberFormatException
     {
         return new Function(
                 "transfer",
                 Arrays.asList(new org.web3j.abi.datatypes.Address(to),
-                        getDynArray(indices)
+                        getDynArray(tokenIndices)
                 ),
                 Collections.emptyList());
     }
 
     @Override
-    public boolean unspecifiedSpec()
+    public boolean contractTypeValid()
     {
         switch (contractType)
         {
             case ERC875:
             case ERC875_LEGACY:
-                return false;
-            default:
                 return true;
+            default:
+                return false;
         }
     }
 
-    private org.web3j.abi.datatypes.DynamicArray getDynArray(List<BigInteger> indices)
+    @Override
+    protected org.web3j.abi.datatypes.DynamicArray getDynArray(List<BigInteger> indices)
     {
         DynamicArray dynArray;
 
@@ -548,11 +535,6 @@ public class Ticket extends Token implements Parcelable
         return result;
     }
 
-    private enum InterfaceType
-    {
-        NotSpecified, UsingUint16, UsingUint256
-    }
-
     @Override
     public boolean checkIntrinsicType()
     {
@@ -618,5 +600,30 @@ public class Ticket extends Token implements Parcelable
 
         return currentGroupingRange.tokenIds.get(0)
                 .equals(newElement.id) || (newElement.time != 0 && newElement.time == currentGroupTime);
+    }
+
+    /**
+     * This function should return a String list of IDs suitable for submission to the token's transfer function
+     * For ERC875 it is a list of indices, so convert this list of TokenIDs to indices
+     * @param CSVstringIdList
+     * @return
+     */
+
+    public String getTransferListFormat(String CSVstringIdList)
+    {
+        List<BigInteger> indexList = ticketIdStringToIndexList(CSVstringIdList); //convert the list of tokenID to indices.
+        return bigIntListToString(indexList, true);
+    }
+
+    /**
+     * This function takes a list of tokenIds, and returns a BigInteger list suitable for this token's transfer function
+     * For ERC875 it is a list of indices, so convert this list of TokenIDs to indices
+     * @param tokenIds
+     * @return
+     */
+    @Override
+    public List<BigInteger> getTransferListFormat(List<BigInteger> tokenIds)
+    {
+        return tokenIdsToTokenIndices(tokenIds);
     }
 }

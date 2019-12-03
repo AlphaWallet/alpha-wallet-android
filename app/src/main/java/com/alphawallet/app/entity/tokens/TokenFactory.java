@@ -96,6 +96,13 @@ public class TokenFactory
                 thisToken.pendingBalance = balance;
                 break;
 
+            case ERC721:
+            case ERC721_LEGACY:
+                if (realmBalance == null) realmBalance = "";
+                thisToken = new ERC721Token(tokenInfo, null, updateBlancaTime, networkName, type);
+
+                break;
+
             default:
                 balance = new BigDecimal(0);
                 thisToken = new Token(tokenInfo, balance, updateBlancaTime, networkName, type);

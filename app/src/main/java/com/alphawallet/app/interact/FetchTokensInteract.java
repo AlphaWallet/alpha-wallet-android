@@ -1,10 +1,12 @@
 package com.alphawallet.app.interact;
 
+import com.alphawallet.app.entity.Contract;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.OrderContractAddressPair;
 import com.alphawallet.app.entity.Ticker;
+import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
@@ -12,6 +14,7 @@ import com.alphawallet.app.repository.TokenRepositoryType;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -20,6 +23,8 @@ import com.alphawallet.token.entity.MagicLinkData;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FetchTokensInteract {
 
@@ -147,5 +152,41 @@ public class FetchTokensInteract {
         {
             return Observable.fromCallable(() -> new Token(null, BigDecimal.ZERO, System.currentTimeMillis(), "eth", ContractType.ETHEREUM));
         }
+    }
+
+    // Only for sensing ERC721 Ticket
+    public Single<Token[]> checkInterface(Token[] tokens, Wallet wallet)
+    {
+        return Single.fromCallable(() -> {
+            //check if the token interface has been checked
+            for (int i = 0; i < tokens.length; i++)
+            {
+                Token t = tokens[i];
+                if (t.isERC721Ticket()) continue;
+                ContractType type = TokensService.checkInterfaceSpec(t.tokenInfo.chainId, t.tokenInfo.address);
+
+                if (type != ContractType.ERC721 && type != ContractType.ERC721_LEGACY)
+                {
+                    type = tokenRepository.determineCommonType(t.tokenInfo).blockingGet();
+                    if (type != ContractType.ERC721_TICKET) type = t.getInterfaceSpec();
+                    if (type == ContractType.ERC721_TICKET && t.isERC721())
+                    {
+                        //upgrade type:
+                        List<BigInteger> balanceFromOpenSea = t.getBalanceAsArray();
+                        tokens[i] = new ERC721Ticket(t.tokenInfo, balanceFromOpenSea, System.currentTimeMillis(), t.getNetworkName(), ContractType.ERC721_TICKET);
+                        //update in database
+                        tokenRepository.updateTokenType(t, wallet, type);
+                    }
+                    else
+                    {
+                        t.setInterfaceSpec(type);
+                    }
+
+                    TokensService.setInterfaceSpec(t.tokenInfo.chainId, t.tokenInfo.address, type);
+                }
+            }
+
+            return tokens;
+        });
     }
 }

@@ -299,7 +299,6 @@ public class ImportTokenViewModel extends BaseViewModel
         else
         {
             ticketNotValid.postValue(true);
-            //invalidLink.postValue(true);
         }
     }
 
@@ -392,7 +391,7 @@ public class ImportTokenViewModel extends BaseViewModel
 
     private void determineInterface()
     {
-        if (importToken.unspecifiedSpec())
+        if (!importToken.contractTypeValid())
         {
             //establish the interface spec
             disposable = fetchTransactionsInteract.queryInterfaceSpec(importToken.tokenInfo)

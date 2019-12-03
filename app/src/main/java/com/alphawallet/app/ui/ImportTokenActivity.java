@@ -56,7 +56,6 @@ import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 public class ImportTokenActivity extends BaseActivity implements View.OnClickListener, SignAuthenticationCallback
 {
-
     @Inject
     protected ImportTokenViewModelFactory importTokenViewModelFactory;
     private ImportTokenViewModel viewModel;
@@ -72,7 +71,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private TextView priceUSD;
     private TextView priceUSDLabel;
     private TextView importTxt;
-    private TextView importHeader;
 
     private LinearLayout costLayout;
     private int chainId = 0;
@@ -90,14 +88,13 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         setContentView(R.layout.activity_import_token);
         toolbar();
 
-        setTitle(getString(R.string.empty));
+        setTitle(getString(R.string.toolbar_header_importing_tickets));
 
         importString = getIntent().getStringExtra(IMPORT_STRING);
         systemView = findViewById(R.id.system_view);
         priceETH = findViewById(R.id.textImportPrice);
         priceUSD = findViewById(R.id.textImportPriceUSD);
         priceUSDLabel = findViewById(R.id.fiat_price_txt);
-        importHeader = findViewById(R.id.import_header);
         toolbarView = findViewById(R.id.toolbar);
         priceETH.setVisibility(View.GONE);
         priceUSD.setVisibility(View.GONE);
@@ -217,7 +214,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        //16908332
         switch (item.getItemId()) {
             case android.R.id.home: {
                 new HomeRouter().open(this, true);
@@ -321,11 +317,11 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         {
             case spawnable:
                 importTxt.setText(R.string.token_spawn_valid);
-                importHeader.setText(R.string.import_spawnable);
+                setTitle(getString(R.string.import_spawnable));
                 break;
             case currencyLink:
                 importTxt.setText(R.string.currency_drop);
-                importHeader.setText(R.string.currency_import);
+                setTitle(getString(R.string.currency_import));
                 setTicket(false, false, false); //switch off all ticket info
                 //show currency to import
                 LinearLayout currencyCard = findViewById(R.id.layout_currency_import);

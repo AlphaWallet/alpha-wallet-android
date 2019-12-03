@@ -53,7 +53,7 @@ public class TokensService
 
     /**
      * Add the token to the service map and return token in case we use this call in a reactive element
-     * @param t
+     * @param
      * @return
      */
     public Token addToken(Token t)
@@ -226,7 +226,7 @@ public class TokensService
             List<Token> chainTokens = getAllAtAddress(addr);
             for (Token t : chainTokens)
             {
-                if (!t.isTerminated() && t.tokenInfo.name != null && !tokens.contains(t))
+                if (!t.isTerminated() && t.tokenInfo.name != null)
                     tokens.add(t);
             }
         }
@@ -293,7 +293,7 @@ public class TokensService
     public static ContractType checkInterfaceSpec(int chainId, String address)
     {
         SparseArray<ContractType> types = interfaceSpecMap.get(address);
-        ContractType type = types != null ? type = types.get(chainId) : null;
+        ContractType type = types != null ? types.get(chainId) : null;
         if (type != null)
         {
             return type;
@@ -331,12 +331,13 @@ public class TokensService
         return result;
     }
 
-    private List<Token> getAllClass(int chainId, Class<?> tokenClass)
+    private List<Token> getAllClass(int chainId, ContractType[] filter)
     {
+        List<ContractType> filterList = Arrays.asList(filter);
         List<Token> classTokens = new ArrayList<>();
         for (Token t : getAllTokens())
         {
-            if (tokenClass.isInstance(t) && t.tokenInfo.chainId == chainId)
+            if (t.tokenInfo.chainId == chainId && filterList.contains(t.getInterfaceSpec()))
             {
                 classTokens.add(t);
             }
@@ -344,43 +345,6 @@ public class TokensService
         return classTokens;
     }
 
-    /**
-     * Fetch the inverse of the intersection between displayed tokens and the balance received from Opensea
-     * If a token was transferred out then it should no longer be displayed
-     * This is needed because if a token has been transferred out and the balance is now zero, it will not be
-     * in the list of tokens from opensea. The only way to determine zero balance is by comparing to previous token balance
-     *
-     * TODO: use balanceOf function to double check zeroised balance
-     *
-     * @param tokens array of tokens with active balance
-     * @param tokenClass type of token to filter (eg erc721)
-     */
-    public Token[] zeroiseBalanceOfSpentTokens(int chainId, Token[] tokens, Class<?> tokenClass)
-    {
-        List<Token> existingTokens = getAllClass(chainId, tokenClass);
-        List<Token> openSeaRefreshTokens = new ArrayList<>(Arrays.asList(tokens));
-
-        for (Token newToken : openSeaRefreshTokens)
-        {
-            for (Token existingToken : existingTokens)
-            {
-                if (newToken.getAddress().equals(existingToken.getAddress()))
-                {
-                    existingTokens.remove(existingToken);
-                    break;
-                }
-            }
-        }
-
-        //should only be left with a list of tokens with now zero balance
-        for (Token existingToken : existingTokens)
-        {
-            existingToken.zeroiseBalance();
-            openSeaRefreshTokens.add(existingToken);
-        }
-
-        return openSeaRefreshTokens.toArray(new Token[0]);
-    }
 
     public Token getNextInBalanceUpdateQueue()
     {
@@ -398,8 +362,30 @@ public class TokensService
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastUpdateDiff;
-            long cutoffCheck = check.isEthereum() ? 20*1000 : check.isERC875() ? 30*1000 : 40*1000; //ERC20's get updated from blockscout
-            if (updateFactor > highestWeighting && (updateFactor > (float)cutoffCheck || check.refreshCheck)) // don't add to list if updated in the last 20 seconds
+            long cutoffCheck = 40*1000;
+            switch (check.getInterfaceSpec())
+            {
+                case ETHEREUM:
+                case CURRENCY:
+                    cutoffCheck = 20*1000;
+                    break;
+                case ERC875:
+                    cutoffCheck = 30*1000;
+                    break;
+                case ERC875_LEGACY:
+                    cutoffCheck = 60*1000;
+                    break;
+                case ERC721:
+                case ERC721_LEGACY:
+                    continue; //no need to check these token types here
+                case ERC721_TICKET:
+                    cutoffCheck = 20*1000;
+                    break;
+                default:
+                    break;
+            }
+
+            if (updateFactor > highestWeighting && (updateFactor > (float)cutoffCheck || check.refreshCheck))
             {
                 highestWeighting = updateFactor;
                 highestToken = check;
@@ -523,5 +509,45 @@ public class TokensService
     public void requireTokensRefresh()
     {
         for (Token t : getAllLiveTokens()) t.refreshCheck = true;
+    }
+
+    /**
+     * Fetch the inverse of the intersection between displayed tokens and the balance received from Opensea
+     * If a token was transferred out then it should no longer be displayed
+     * This is needed because if a token has been transferred out and the balance is now zero, it will not be
+     * in the list of tokens from opensea. The only way to determine zero balance is by comparing to previous token balance
+     *
+     * TODO: use balanceOf function to double check zeroised balance
+     *
+     */
+    public List<Token> getChangedTokenBalance(int chainId, Token[] tokens, ContractType[] filterTypes)
+    {
+        List<Token> existingTokens = getAllClass(chainId, filterTypes);
+        List<Token> openSeaRefreshedTokens = new ArrayList<>(Arrays.asList(tokens));
+        List<Token> balanceChangedTokens = new ArrayList<>();
+        List<String> refreshedTokenAddrs = new ArrayList<>();
+
+        for (Token newToken : openSeaRefreshedTokens)
+        {
+            refreshedTokenAddrs.add(newToken.getAddress().toLowerCase());
+            Token existingToken = getToken(newToken.tokenInfo.chainId, newToken.tokenInfo.address);
+            if (existingToken == null || existingToken.checkBalanceChange(newToken))
+            {
+                balanceChangedTokens.add(newToken);
+                addToken(newToken);
+            }
+        }
+
+        for (Token existingToken : existingTokens)
+        {
+            if (!refreshedTokenAddrs.contains(existingToken.tokenInfo.address.toLowerCase()))
+            {
+                existingToken.zeroiseBalance();
+                balanceChangedTokens.add(existingToken);
+                addToken(existingToken);
+            }
+        }
+
+        return balanceChangedTokens;
     }
 }

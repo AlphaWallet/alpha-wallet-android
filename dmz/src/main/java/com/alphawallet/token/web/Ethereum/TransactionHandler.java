@@ -69,7 +69,7 @@ public class TransactionHandler
         String name = "";
         try
         {
-            name = getContractData(address, stringParam("name"));
+            name = callSmartContractAndGetResult(address, stringParam("name"));
         }
         catch (Exception e)
         {
@@ -84,7 +84,7 @@ public class TransactionHandler
         String symbol = "";
         try
         {
-            symbol = getContractData(address, stringParam("symbol"));
+            symbol = callSmartContractAndGetResult(address, stringParam("symbol"));
         }
         catch (Exception e)
         {
@@ -99,7 +99,7 @@ public class TransactionHandler
         String name = "";
         try
         {
-            name = getContractData(address, stringParam("name"));
+            name = callSmartContractAndGetResult(address, stringParam("name"));
         }
         catch (Exception e)
         {
@@ -113,7 +113,7 @@ public class TransactionHandler
         String owner = "";
         try
         {
-            owner = Numeric.toHexStringWithPrefix(getContractData(address, ownerOf721(tokenId)));
+            owner = Numeric.toHexStringWithPrefix(callSmartContractAndGetResult(address, ownerOf721(tokenId)));
         }
         catch (Exception e)
         {
@@ -126,7 +126,7 @@ public class TransactionHandler
         List<BigInteger> castBalances = new ArrayList<>();
         try
         {
-            List<Uint256> balances = getContractData(contractAddress, getBalances721TicketToken(owner));
+            List<Uint256> balances = callSmartContractAndGetResult(contractAddress, getBalances721TicketToken(owner));
             for(Uint256 token: balances) {
                 castBalances.add(token.getValue());
             }
@@ -138,7 +138,7 @@ public class TransactionHandler
         return castBalances;
     }
 
-    private <T> T getContractData(String address, org.web3j.abi.datatypes.Function function) throws Exception
+    private <T> T callSmartContractAndGetResult(String address, org.web3j.abi.datatypes.Function function) throws Exception
     {
         String responseValue = callSmartContractFunction(function, address);
 
@@ -211,7 +211,7 @@ public class TransactionHandler
         return new org.web3j.abi.datatypes.Function(
                 "ownerOf",
                 Collections.singletonList(new Uint256(token)),
-                Collections.singletonList(new TypeReference<Uint256>() {}));
+                Collections.singletonList(new TypeReference<Address>() {}));
     }
 
 }

@@ -119,19 +119,17 @@ public class AppSiteController implements AttributeInterface
         {
             data = parser.parseUniversalLink(universalLink);
             data.chainId = MagicLinkInfo.getNetworkIdFromDomain(domain);
+            model.addAttribute("domain", MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId));
         }
         catch (SalesOrderMalformed e)
         {
             return "error: " + e;
         }
         parser.getOwnerKey(data);
-        return handleTokenLink(data, model, universalLink);
+        return handleTokenLink(data, universalLink);
     }
 
-    private String handleTokenLink(
-            MagicLinkData data,
-            Model model,
-            String universalLink
+    private String handleTokenLink(MagicLinkData data, String universalLink
     ) throws IOException, SAXException, NoHandlerFoundException
     {
         TokenDefinition definition = getTokenDefinition(data.chainId, data.contractAddress);
@@ -145,7 +143,7 @@ public class AppSiteController implements AttributeInterface
         {
             if(data.contractType == normal)
             {
-                checkTokensOwnedByMagicLinkCreator(model, data, definition);
+                checkTokensOwnedByMagicLinkCreator(data, definition);
             }
             else
             {
@@ -202,13 +200,9 @@ public class AppSiteController implements AttributeInterface
         return formWebPage(txHandler, data, universalLink, available, style, tokenView);
     }
 
-
-    //TODO this cannot handle 721 tickets without TokenScripts, this is not a problem for our projects for now
     private String renderTokenWithoutTokenScript(MagicLinkData data, String universalLink)
     {
         TransactionHandler txHandler = new TransactionHandler(data.chainId);
-
-        List<BigInteger> balanceArray;
         String available = "available";
 
         if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000)))
@@ -217,19 +211,19 @@ public class AppSiteController implements AttributeInterface
         }
         try
         {
-            balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
-            //check indices
-            for (int index : data.indices)
+            if(data.contractType == normal)
             {
-                if (index >= balanceArray.size() || balanceArray.get(index).equals(BigInteger.ZERO))
-                {
-                    available = "unavailable";
-                }
+                checkTokensOwnedByMagicLinkCreator(data);
+            }
+            else
+            {
+                checkTokensClaimableSpawnable(data);
             }
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            //if exception is thrown, we assume it is not available due to balance call failing to match
+            available = "unavailable";
         }
 
         return formWebPage(txHandler, data, universalLink, available, "", "");
@@ -331,18 +325,11 @@ public class AppSiteController implements AttributeInterface
 
     /**
      * Check ownership of tokens: Ensure that all tokens are still owned by the party selling the tokens
-     * @param model
      * @param data
-     * @param definition
      * @throws Exception
      */
-    private void checkTokensOwnedByMagicLinkCreator(
-            Model model,
-            MagicLinkData data,
-            TokenDefinition definition
-    ) throws Exception
+    private void checkTokensOwnedByMagicLinkCreator(MagicLinkData data, TokenDefinition definition) throws Exception
     {
-        model.addAttribute("domain", MagicLinkInfo.getMagicLinkDomainFromNetworkId(data.chainId));
         TransactionHandler txHandler = new TransactionHandler(data.chainId);
         List<BigInteger> balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
         data.tokenIds = new ArrayList<>();
@@ -354,6 +341,24 @@ public class AppSiteController implements AttributeInterface
                     data.tokenIds.add(tokenId);
                     return new NonFungibleToken(tokenId, definition);
                 })
+                .collect(Collectors.toList());
+
+        if (selection.size() != data.indices.length)
+        {
+            throw new Exception("Some or all non-fungible tokens are not owned by the claimed owner");
+        }
+    }
+
+    //For if there is no TokenScript
+    private void checkTokensOwnedByMagicLinkCreator(MagicLinkData data) throws Exception
+    {
+        TransactionHandler txHandler = new TransactionHandler(data.chainId);
+        List<BigInteger> balanceArray = txHandler.getBalanceArray(data.ownerAddress, data.contractAddress);
+        data.tokenIds = new ArrayList<>();
+
+        List<BigInteger> selection = Arrays.stream(data.indices)
+                .mapToObj(i -> balanceArray.get(i))
+                .filter(tokenId -> !tokenId.equals(BigInteger.ZERO))
                 .collect(Collectors.toList());
 
         if (selection.size() != data.indices.length)

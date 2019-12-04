@@ -140,18 +140,22 @@ public class AppSiteController implements AttributeInterface
         {
             return renderTokenWithoutTokenScript(data, universalLink);
         }
-
+        String available = "available";
         try
         {
-            //TODO check that spawnable link is actually valid i.e. claimable or owned by someone doing a free transfer
             if(data.contractType == normal)
             {
                 checkTokensOwnedByMagicLinkCreator(model, data, definition);
             }
+            else
+            {
+                checkTokensClaimableSpawnable(data);
+            }
         }
         catch (Exception e)
         {
-            return renderTokenWithoutTokenScript(data, universalLink);
+            //if the tokens are not available, an exception will be thrown and therefore the tokens are not available
+            available = "unavailable";
         }
 
         //get attributes
@@ -184,8 +188,6 @@ public class AppSiteController implements AttributeInterface
                 .forEach(attr -> TokenScriptResult.addPair(tokenData, attr.id, attr.text))
                 .isDisposed();
 
-        String available = "available";
-
         if (Calendar.getInstance().getTime().after(new Date(data.expiry*1000)))
         {
             available = "expired";
@@ -201,8 +203,7 @@ public class AppSiteController implements AttributeInterface
     }
 
 
-
-    //TODO check spawnable link is actual valid by checking balance or checking link has not been used (if coming from issuer)
+    //TODO this cannot handle 721 tickets without TokenScripts, this is not a problem for our projects for now
     private String renderTokenWithoutTokenScript(MagicLinkData data, String universalLink)
     {
         TransactionHandler txHandler = new TransactionHandler(data.chainId);
@@ -302,6 +303,30 @@ public class AppSiteController implements AttributeInterface
             }
         }
         return definition;
+    }
+
+    private void checkTokensClaimableSpawnable(MagicLinkData data) throws Exception {
+        TransactionHandler txHandler = new TransactionHandler(data.chainId);
+        //TODO replace with real admin(s) addresses in production
+        if(data.ownerAddress.equalsIgnoreCase("0xEdd6D7ba0FF9f4bC501a12529cb736CA76A4fe7e"))
+        {
+            //check that token ids are not owned by someone
+            for(BigInteger token: data.tokenIds)
+            {
+                if(!txHandler.getOwnerOf721(data.contractAddress, token).equals(""))
+                {
+                    throw new Exception("Token(s) already owned");
+                }
+            }
+        }
+        else
+        {
+            List<BigInteger> balance = txHandler.getBalanceArray721Tickets(data.ownerAddress, data.contractAddress);
+            if(!balance.containsAll(data.tokenIds))
+            {
+                throw new Exception("Token(s) not owned by magic link creator");
+            }
+        }
     }
 
     /**

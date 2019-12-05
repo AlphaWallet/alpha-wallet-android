@@ -48,4 +48,9 @@ public class VisibilityFilter
     {
         return primaryChainName;
     }
+
+    public static long startupDelay()
+    {
+        return 0;
+    }
 }

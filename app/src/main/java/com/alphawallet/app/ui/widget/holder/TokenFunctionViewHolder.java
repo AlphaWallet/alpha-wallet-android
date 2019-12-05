@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 
 import com.alphawallet.app.web3.OnSignPersonalMessageListener;
 import com.alphawallet.app.web3.Web3TokenView;
@@ -40,6 +41,7 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
     private SignMessageDialog dialog;
     private final FunctionCallback functionCallback;
     private final AssetDefinitionService assetDefinitionService;
+    private boolean reloaded;
 
     public TokenFunctionViewHolder(int resId, ViewGroup parent, Token t, FunctionCallback callback, AssetDefinitionService service)
     {
@@ -63,6 +65,7 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
     {
         try
         {
+            reloaded = false;
             String injectedView = tokenView.injectWeb3TokenInit(getContext(), view, "");
             String style = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
             injectedView = tokenView.injectStyleData(injectedView, style);
@@ -87,9 +90,16 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
     }
 
     @Override
-    public void onPageLoaded()
+    public void onPageLoaded(WebView view)
     {
+        tokenView.callToJS("refresh()");
+    }
 
+    @Override
+    public void onPageRendered(WebView view)
+    {
+        if (!reloaded) tokenView.reload();
+        reloaded = true;
     }
 
     @Override

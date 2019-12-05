@@ -9,6 +9,7 @@ import android.support.v7.widget.AppCompatRadioButton;
 import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
@@ -47,6 +48,7 @@ public class TokenscriptViewHolder extends BinderViewHolder<TicketRange> impleme
     private final LinearLayout frameLayout;
 
     private BigInteger tokenId;
+    private boolean reloaded;
 
     private StringBuilder attrs;
 
@@ -77,6 +79,7 @@ public class TokenscriptViewHolder extends BinderViewHolder<TicketRange> impleme
     {
         try
         {
+            reloaded = false;
             if (data.tokenIds.size() == 0) { fillEmpty(); return; }
             waitSpinner.setVisibility(View.VISIBLE);
             tokenView.setVisibility(View.GONE);
@@ -153,9 +156,16 @@ public class TokenscriptViewHolder extends BinderViewHolder<TicketRange> impleme
     }
 
     @Override
-    public void onPageLoaded()
+    public void onPageLoaded(WebView view)
     {
         tokenView.callToJS("refresh()");
+    }
+
+    @Override
+    public void onPageRendered(WebView view)
+    {
+        if (!reloaded) tokenView.reload();
+        reloaded = true;
     }
 }
 

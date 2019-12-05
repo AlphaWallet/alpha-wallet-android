@@ -31,15 +31,14 @@
             android:layout_height="wrap_content"
 
             android:layout_above="@id/layoutButtons"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp"
-            android:animateLayoutChanges="true">
+            android:animateLayoutChanges="false">
 
             <android.support.v4.widget.SwipeRefreshLayout
                 android:layout_alignParentStart="true"
                 android:id="@+id/refresh_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@color/greyffive"
                 android:layout_marginTop="10dp"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
@@ -47,9 +46,10 @@
                 android:id="@+id/listTickets"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:divider="@android:color/transparent"
+                android:divider="@android:color/white"
                 android:dividerHeight="10.0sp" />
             </android.support.v4.widget.SwipeRefreshLayout>
+
         </RelativeLayout>
 
     </RelativeLayout>

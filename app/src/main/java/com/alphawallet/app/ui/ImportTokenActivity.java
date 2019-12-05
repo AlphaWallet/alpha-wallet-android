@@ -128,8 +128,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         viewModel.sig().observe(this, sigData -> toolbarView.onSigData(sigData, this));
 
         ticketRange = null;
-
-        Ticket.blankTicketHolder(R.string.loading,this);
     }
 
     private void onError(ErrorEnvelope errorEnvelope)

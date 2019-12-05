@@ -5,13 +5,22 @@
     android:id="@+id/layout_select_ticket"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:animateLayoutChanges="true"
-    android:orientation="vertical">
+    android:minHeight="100dp"
+    android:animateLayoutChanges="false">
+
+    <ProgressBar
+        android:id="@+id/progress_element"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:indeterminateTint="@color/tealish"
+        android:visibility="gone"/>
 
     <LinearLayout
         android:id="@+id/total_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
         android:orientation="horizontal">
 
         <android.support.v7.widget.AppCompatRadioButton
@@ -19,130 +28,68 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginRight="15dp"
+            android:layout_marginStart="1dp"
+            android:layout_marginEnd="10dp"
             android:background="@drawable/selector_radio_check"
             android:checked="false"
-            android:text=""
             android:visibility="gone"
             app:buttonTint="@color/transparent" />
-
-        <LinearLayout
-            android:id="@+id/layout_legacy"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/background_card_shadow"
-            android:elevation="2dp"
-            android:layout_marginBottom="6dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_weight="1.2"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingBottom="20dp"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
-                    android:paddingTop="15dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/amount"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="5dp"
-                            android:fontFamily="@font/font_bold"
-                            android:text="x2"
-                            android:textColor="@color/green"
-                            android:textSize="21sp" />
-
-                        <TextView
-                            android:id="@+id/name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/font_light"
-                            android:text="@string/NA"
-                            android:textColor="@color/text_black"
-                            android:textSize="21sp" />
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/venue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
-                        android:fontFamily="@font/font_regular"
-                        android:text="@string/NA"
-                        android:textColor="@color/text_black"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/symbol"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/normal_margin"
-                        android:layout_marginStart="@dimen/big_margin"
-                        android:textAllCaps="true"
-                        android:textAppearance="?attr/textAppearanceListItem"
-                        android:textSize="12sp"
-                        android:visibility="gone"
-                        tools:text="" />
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <ImageView
-                android:id="@+id/image_view"
-                android:background="@drawable/ic_ethereum"
-                android:visibility="gone"
-                android:layout_gravity="center_vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/layout_webwrapper"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/background_card_shadow"
+            android:background="@color/white"
             android:gravity="center"
             android:visibility="gone"
             android:orientation="vertical"
-            android:elevation="2dp"
-            android:paddingStart="5dp"
-            android:paddingEnd="5dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:layout_marginBottom="6dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp">
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="6dp">
 
             <com.alphawallet.app.web3.Web3TokenView
                 android:id="@+id/web3_tokenview"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
             </com.alphawallet.app.web3.Web3TokenView>
 
-            <ProgressBar
-                android:id="@+id/progress_element"
+        </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_legacy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_card_shadow"
+        android:elevation="1dp"
+        android:layout_marginBottom="6dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:minHeight="100dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:paddingBottom="20dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="15dp">
+
+            <TextView
+                android:id="@+id/amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:indeterminateTint="@color/colorPrimaryDark"
-                android:visibility="gone"/>
+                android:layout_marginEnd="5dp"
+                android:fontFamily="@font/font_bold"
+                android:text=""
+                android:textColor="@color/green"
+                android:textSize="21sp" />
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_light"
+                android:text="@string/NA"
+                android:textColor="@color/text_black"
+                android:textSize="21sp" />
 
         </LinearLayout>
 

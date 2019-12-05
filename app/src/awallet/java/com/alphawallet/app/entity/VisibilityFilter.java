@@ -1,6 +1,7 @@
 package com.alphawallet.app.entity;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -47,5 +48,15 @@ public class VisibilityFilter
     public static String primaryNetworkName()
     {
         return primaryChainName;
+    }
+
+    public static int getImageOverride()
+    {
+        return 0;
+    }
+
+    public static int getIssuerName()
+    {
+        return R.string.eth;
     }
 }

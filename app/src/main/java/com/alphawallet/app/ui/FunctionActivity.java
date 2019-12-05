@@ -9,6 +9,7 @@ import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import com.alphawallet.app.entity.DAppFunction;
@@ -85,6 +86,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private PinAuthenticationCallbackInterface authInterface;
     private FunctionButtonBar functionBar;
     private Handler handler;
+    private boolean reloaded;
     private boolean isClosing;
 
     private void initViews() {
@@ -108,6 +110,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         waitSpinner.setVisibility(View.VISIBLE);
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
         viewModel.getCurrentWallet();
+        reloaded = false;
 
         getAttrs();
     }
@@ -222,7 +225,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         //expose the webview and remove the token 'card' background
         findViewById(R.id.layout_webwrapper).setBackgroundResource(R.drawable.background_card);
         findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
-        findViewById(R.id.layout_legacy).setVisibility(View.GONE);
 
         initViews();
         toolbar();
@@ -598,9 +600,16 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void onPageLoaded()
+    public void onPageLoaded(WebView view)
     {
+        tokenView.callToJS("refresh()");
+    }
 
+    @Override
+    public void onPageRendered(WebView view)
+    {
+        if (!reloaded) tokenView.reload();
+        reloaded = true;
     }
 
     @Override

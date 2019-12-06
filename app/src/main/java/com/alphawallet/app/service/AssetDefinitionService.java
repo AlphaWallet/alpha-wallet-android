@@ -807,10 +807,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         assetChecked.clear();
     }
 
-    public boolean hasTokenView(int chainId, String contractAddr)
+    public boolean hasTokenView(int chainId, String contractAddr, String type)
     {
         TokenDefinition td = getAssetDefinition(chainId, contractAddr);
-        return (td != null && td.attributeSets.containsKey("cards"));
+        return td != null && td.attributeSets.containsKey("cards") && td.attributeSets.get("cards").containsValue(type);
     }
 
     public String getTokenView(int chainId, String contractAddr, String type)

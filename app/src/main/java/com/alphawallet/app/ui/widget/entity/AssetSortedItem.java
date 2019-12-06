@@ -1,7 +1,7 @@
 package com.alphawallet.app.ui.widget.entity;
 
 import com.alphawallet.app.ui.widget.holder.OpenseaHolder;
-import com.alphawallet.app.entity.opensea.Asset;
+import com.alphawallet.token.entity.TicketRange;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -11,9 +11,9 @@ import java.util.List;
  * Created by James on 3/10/2018.
  * Stormbird in Singapore
  */
-public class AssetSortedItem extends SortedItem<Asset>
+public class AssetSortedItem extends SortedItem<TicketRange>
 {
-    public AssetSortedItem(Asset value, int weight) {
+    public AssetSortedItem(TicketRange value, int weight) {
         super(OpenseaHolder.VIEW_TYPE, value, weight);
     }
 
@@ -23,16 +23,29 @@ public class AssetSortedItem extends SortedItem<Asset>
     }
 
     @Override
-    public boolean areContentsTheSame(SortedItem newItem) {
-        return (newItem.viewType == viewType
-                && ((AssetSortedItem) newItem).value.getTokenId().equals(value.getTokenId()));
+    public boolean areContentsTheSame(SortedItem newItem)
+    {
+        return false;
     }
 
     @Override
-    public boolean areItemsTheSame(SortedItem other) {
-        return (other.viewType == viewType
-                && ((AssetSortedItem) other).value.getTokenId().equals(value.getTokenId()));
+    public boolean areItemsTheSame(SortedItem other)
+    {
+        return other.viewType == OpenseaHolder.VIEW_TYPE && this.viewType == OpenseaHolder.VIEW_TYPE
+                && ( value.equals(other.value));
     }
+
+//    @Override
+//    public boolean areContentsTheSame(SortedItem newItem) {
+//        return (newItem.viewType == viewType
+//                && ((AssetSortedItem) newItem).value.getTokenId().equals(value.getTokenId()));
+//    }
+//
+//    @Override
+//    public boolean areItemsTheSame(SortedItem other) {
+//        return (other.viewType == viewType
+//                && ((AssetSortedItem) other).value.getTokenId().equals(value.getTokenId()));
+//    }
 
     @Override
     public boolean isRadioExposed()
@@ -55,8 +68,14 @@ public class AssetSortedItem extends SortedItem<Asset>
     @Override
     public List<BigInteger> getTokenIds()
     {
-        List<BigInteger> test = new ArrayList<>();
-        test.add(new BigInteger(value.getTokenId()));
-        return test;
+        return value.tokenIds;
     }
+
+//    @Override
+//    public List<BigInteger> getTokenIds()
+//    {
+//        List<BigInteger> test = new ArrayList<>();
+//        test.add(new BigInteger(value.getTokenId()));
+//        return test;
+//    }
 }

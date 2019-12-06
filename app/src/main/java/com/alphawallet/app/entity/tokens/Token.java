@@ -958,6 +958,4 @@ public class Token implements Parcelable
                         org.web3j.abi.datatypes.generated.Uint256.class,
                         org.web3j.abi.Utils.typeMap(indices, org.web3j.abi.datatypes.generated.Uint256.class));
     }
-
-    public List<BigInteger> getBalanceAsArray() { return null; }
 }

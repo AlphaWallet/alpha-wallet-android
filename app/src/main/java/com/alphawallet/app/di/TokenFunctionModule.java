@@ -9,7 +9,6 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
-import com.alphawallet.app.router.SellTicketRouter;
 import com.alphawallet.app.router.TransferTicketDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
@@ -27,7 +26,6 @@ public class TokenFunctionModule
     @Provides
     TokenFunctionViewModelFactory provideTokenFunctionViewModelFactory(
             AssetDefinitionService assetDefinitionService,
-            SellTicketRouter sellTicketRouter,
             TransferTicketDetailRouter transferTicketRouter,
             CreateTransactionInteract createTransactionInteract,
             GasService gasService,
@@ -37,12 +35,7 @@ public class TokenFunctionModule
             GenericWalletInteract genericWalletInteract) {
 
         return new TokenFunctionViewModelFactory(
-                assetDefinitionService, sellTicketRouter, transferTicketRouter, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract);
-    }
-
-    @Provides
-    SellTicketRouter provideSellTicketRouter() {
-        return new SellTicketRouter();
+                assetDefinitionService, transferTicketRouter, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract);
     }
 
     @Provides

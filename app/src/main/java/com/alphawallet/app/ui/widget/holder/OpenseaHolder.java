@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.alphawallet.token.entity.TicketRange;
 import com.bumptech.glide.Glide;
 import com.alphawallet.app.util.KittyUtils;
 
@@ -30,9 +31,9 @@ import java.util.Arrays;
  * Created by James on 3/10/2018.
  * Stormbird in Singapore
  */
-public class OpenseaHolder extends BinderViewHolder<Asset> implements Runnable {
+public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runnable {
     public static final int VIEW_TYPE = 1302;
-    private final Token token;
+    protected final Token token;
     private final TextView titleText;
     private final ImageView image;
     private final TextView generation;
@@ -57,10 +58,14 @@ public class OpenseaHolder extends BinderViewHolder<Asset> implements Runnable {
     }
 
     @Override
-    public void bind(@Nullable Asset asset, @NonNull Bundle addition) {
+    public void bind(@Nullable TicketRange data, @NonNull Bundle addition)
+    {
         String assetName;
         activeClick = false;
         handler = new Handler();
+        //retrieve asset from token
+        Asset asset = getAsset(data);
+
         if (asset.getName() != null && !asset.getName().equals("null")) {
             assetName = asset.getName();
         } else {
@@ -68,13 +73,15 @@ public class OpenseaHolder extends BinderViewHolder<Asset> implements Runnable {
         }
         titleText.setText(assetName);
 
-        if (asset.exposeRadio)
+        if (data.exposeRadio)
         {
+            asset.exposeRadio = true;
             itemSelect.setVisibility(View.VISIBLE);
-            itemSelect.setChecked(asset.isChecked);
+            itemSelect.setChecked(data.isChecked);
         }
         else
         {
+            asset.exposeRadio = false;
             itemSelect.setVisibility(View.GONE);
         }
 
@@ -103,38 +110,30 @@ public class OpenseaHolder extends BinderViewHolder<Asset> implements Runnable {
                 .load(asset.getImagePreviewUrl())
                 .into(image);
 
-        layoutToken.setOnClickListener(v -> handleClick(v, asset));
-        layoutToken.setOnLongClickListener(v -> handleLongClick(v, asset));
+        layoutToken.setOnClickListener(v -> handleClick(v, data));
+        layoutToken.setOnLongClickListener(v -> handleLongClick(v, data));
     }
 
-    private void setStatus(C.TokenStatus status) {
-        if (status == C.TokenStatus.PENDING) {
-            statusText.setVisibility(View.VISIBLE);
-            statusText.setBackgroundResource(R.drawable.background_status_pending);
-            statusText.setText(R.string.status_pending);
-        } else if (status == C.TokenStatus.INCOMPLETE) {
-            statusText.setVisibility(View.VISIBLE);
-            statusText.setBackgroundResource(R.drawable.background_status_incomplete);
-            statusText.setText(R.string.status_incomplete_data);
-        } else {
-            statusText.setVisibility(View.GONE);
-        }
-    }
-
-    public void handleClick(View v, Asset asset)
+    private Asset getAsset(TicketRange data)
     {
-        if (asset.exposeRadio)
+        BigInteger tokenId = data.tokenIds.get(0); //range is never grouped for ERC721 tickets
+        return token.getAssetForToken(tokenId.toString());
+    }
+
+    public void handleClick(View v, TicketRange data)
+    {
+        if (data.exposeRadio)
         {
-            if (!asset.isChecked)
+            if (!data.isChecked)
             {
-                tokenClickListener.onTokenClick(v, token, new ArrayList<>(Arrays.asList(new BigInteger(asset.getTokenId()))), true);
-                asset.isChecked = true;
+                tokenClickListener.onTokenClick(v, token, data.tokenIds, true);
+                data.isChecked = true;
                 itemSelect.setChecked(true);
             }
             else
             {
-                tokenClickListener.onTokenClick(v, token, new ArrayList<>(Arrays.asList(new BigInteger(asset.getTokenId()))), false);
-                asset.isChecked = false;
+                tokenClickListener.onTokenClick(v, token, data.tokenIds, false);
+                data.isChecked = false;
                 itemSelect.setChecked(false);
             }
         }
@@ -144,17 +143,17 @@ public class OpenseaHolder extends BinderViewHolder<Asset> implements Runnable {
             activeClick = true;
             handler.postDelayed(this, 500);
             Intent intent = new Intent(getContext(), TokenDetailActivity.class);
-            intent.putExtra("asset", asset);
+            intent.putExtra("asset", getAsset(data));
             intent.putExtra("token", token);
             getContext().startActivity(intent);
         }
     }
 
-    private boolean handleLongClick(View v, Asset asset)
+    private boolean handleLongClick(View v, TicketRange data)
     {
         //open up the radio view and signal to holding app
-        tokenClickListener.onLongTokenClick(v, token, new ArrayList<>(Arrays.asList(new BigInteger(asset.getTokenId()))));
-        asset.isChecked = true;
+        tokenClickListener.onLongTokenClick(v, token, data.tokenIds);
+        data.isChecked = true;
         itemSelect.setChecked(true);
         return true;
     }

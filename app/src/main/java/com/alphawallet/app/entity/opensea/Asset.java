@@ -7,6 +7,7 @@ import android.os.Parcelable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.math.BigInteger;
 import java.util.List;
 
 public class Asset implements Parcelable {
@@ -77,6 +78,11 @@ public class Asset implements Parcelable {
 
     public String getTokenId() {
         return tokenId;
+    }
+
+    public String getTokenId(int radix) {
+        BigInteger bi = new BigInteger(tokenId);
+        return bi.toString(radix);
     }
 
     public void setTokenId(String tokenId) {

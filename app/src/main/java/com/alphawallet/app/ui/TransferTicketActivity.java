@@ -11,28 +11,25 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
-import com.alphawallet.app.ui.widget.adapter.TicketSaleAdapter;
-import com.alphawallet.app.util.BalanceUtils;
-
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.FinishReceiver;
+import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.viewmodel.TransferTicketViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketViewModelFactory;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
+import com.alphawallet.token.entity.TicketRange;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-import com.alphawallet.token.entity.TicketRange;
 
 import static com.alphawallet.app.C.Key.TICKET;
 
@@ -53,7 +50,7 @@ public class TransferTicketActivity extends BaseActivity implements OnTokenClick
     public TextView selected;
 
     private Token token;
-    private TicketSaleAdapter adapter;
+    private NonFungibleTokenAdapter adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -92,8 +89,8 @@ public class TransferTicketActivity extends BaseActivity implements OnTokenClick
     {
         RecyclerView list = findViewById(R.id.listTickets);
 
-        adapter = new TicketSaleAdapter(this, token, viewModel.getAssetDefinitionService());
-        adapter.setTransferTicket(token);
+        adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), null);
+        adapter.addQuantitySelector();
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
     }
@@ -117,8 +114,6 @@ public class TransferTicketActivity extends BaseActivity implements OnTokenClick
     }
 
     private void onNext() {
-        // Validate input fields
-        boolean inputValid = true;
         //look up all checked fields
         //TODO: Abstract into Token class
         if (token instanceof ERC721Token)
@@ -133,44 +128,15 @@ public class TransferTicketActivity extends BaseActivity implements OnTokenClick
 
     private void handleTransferERC721(Token token)
     {
-        List<String> transferToken = adapter.getERC721Checked();
-        if (!transferToken.isEmpty())
-        {
-            //take user to ERC721 transfer page
-            viewModel.openTransferDirectDialog(this, transferToken.get(0));
-        }
+        TicketRange txRange = adapter.getSelectedRange(token.getArrayBalance());
+        viewModel.openTransferDirectDialog(this, txRange.tokenIds.get(0).toString());
     }
 
     private void handleTransferERC875(Token token)
     {
-        List<TicketRange> sellRange = adapter.getCheckedItems();
-
-        if (!sellRange.isEmpty()) {
-            //add this range to the sell order confirmation
-            //Generate list of indices and actual ids
-            List<BigInteger> idList = new ArrayList<>();
-            for (TicketRange tr : sellRange)
-            {
-                idList.addAll(tr.tokenIds);
-            }
-
-            String idListStr = token.bigIntListToString(idList, false); 
-            viewModel.openSellDialog(this, idListStr);
-        }
-    }
-
-    boolean isValidAmount(String eth) {
-        try {
-            String wei = BalanceUtils.EthToWei(eth);
-            return wei != null;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private void onSelected(String selectionStr)
-    {
-        selected.setText(selectionStr);
+        TicketRange txRange = adapter.getSelectedRange(token.getArrayBalance());
+        String idListStr = token.bigIntListToString(txRange.tokenIds, false);
+        viewModel.openSellDialog(this, idListStr);
     }
 
     @Override

@@ -11,23 +11,25 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.alphawallet.app.ui.widget.OnTokenClickListener;
-import com.alphawallet.app.ui.widget.adapter.TicketSaleAdapter;
-import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
-
-import dagger.android.AndroidInjection;
-import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
+import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModel;
 import com.alphawallet.app.viewmodel.RedeemAssetSelectViewModelFactory;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
+import com.alphawallet.token.entity.TicketRange;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
-import java.math.BigInteger;
-import java.util.List;
+
+import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.TICKET_RANGE;
@@ -56,7 +58,7 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
     private Button redeemButton;
 
     private Token token;
-    private TicketSaleAdapter adapter;
+    private NonFungibleTokenAdapter adapter;
     private TicketRangeParcel ticketRange;
 
     @Override
@@ -104,22 +106,14 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
         invalidateOptionsMenu();
 
         RecyclerView list = findViewById(R.id.listTickets);
+        adapter = new NonFungibleTokenAdapter(this, token, ticketRange.range.tokenIds, viewModel.getAssetDefinitionService(), null);
+        adapter.addQuantitySelector();
 
-        adapter = new TicketSaleAdapter(this, token, viewModel.getAssetDefinitionService());
-        if (ticketRange != null)
-        {
-            adapter.setRedeemTicketQuantity(ticketRange.range, token);
-            nextButton.setVisibility(View.GONE);
-            redeemButton.setVisibility(View.VISIBLE);
-            currentMenu = R.menu.redeem_menu;
-            invalidateOptionsMenu();
-        }
-        else
-        {
-            adapter.setRedeemTicket(token);
-            nextButton.setVisibility(View.VISIBLE);
-            redeemButton.setVisibility(View.GONE);
-        }
+        nextButton.setVisibility(View.GONE);
+        redeemButton.setVisibility(View.VISIBLE);
+        currentMenu = R.menu.redeem_menu;
+        invalidateOptionsMenu();
+
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(adapter);
     }
@@ -160,14 +154,31 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
         viewModel.prepare();
     }
 
+//    private void onNext() {
+//        //first get range selection
+//        TicketRange range = adapter.getCheckedItem();
+//        if (range != null)
+//        {
+//            onTokenClick(null, token, range.tokenIds, true);
+//
+//            adapter.setRedeemTicketQuantity(range, token);
+//            RecyclerView list = findViewById(R.id.listTickets);
+//            list.setAdapter(null);
+//            list.setAdapter(adapter);
+//
+//            nextButton.setVisibility(View.GONE);
+//            redeemButton.setVisibility(View.VISIBLE);
+//        }
+//    }
+
     private void onNext() {
         //first get range selection
-        TicketRange range = adapter.getCheckedItem();
-        if (range != null)
+        List<BigInteger> selection = adapter.getSelectedTokenIds(new ArrayList<>());// adapter.getCheckedItem();
+        if (selection != null)
         {
-            onTokenClick(null, token, range.tokenIds, true);
+            onTokenClick(null, token, selection, true);
 
-            adapter.setRedeemTicketQuantity(range, token);
+            //adapter.setRedeemTicketQuantity(range, token);
             RecyclerView list = findViewById(R.id.listTickets);
             list.setAdapter(null);
             list.setAdapter(adapter);
@@ -179,16 +190,8 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
 
     private void onRedeem()
     {
-        int quantity =  adapter.getSelectedQuantity();
-        TicketRange range = adapter.getCheckedItem();
-
-        //check params
-        if (range != null && quantity > 0 && quantity <= range.tokenIds.size())
-        {
-            //form a new Ticket Range with the required indices to burn
-            range.selectSubRange(quantity);
-            viewModel.showRedeemSignature(this, range, token);
-        }
+        TicketRange range = adapter.getSelectedRange(ticketRange.range.tokenIds);
+        viewModel.showRedeemSignature(this, range, token);
     }
 
     @Override

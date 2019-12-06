@@ -8,25 +8,24 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.interact.FetchTokensInteract;
+import com.alphawallet.app.interact.FindDefaultNetworkInteract;
+import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.router.RedeemAssetSelectRouter;
+import com.alphawallet.app.router.TransferTicketRouter;
+import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.OpenseaService;
 import com.alphawallet.app.ui.RedeemAssetSelectActivity;
 import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
-
 import com.alphawallet.token.entity.SigReturnType;
+import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
-import com.alphawallet.app.interact.FetchTokensInteract;
-import com.alphawallet.app.interact.FindDefaultNetworkInteract;
-import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.interact.SignatureGenerateInteract;
-import com.alphawallet.app.router.MyAddressRouter;
-import com.alphawallet.app.router.RedeemAssetSelectRouter;
-import com.alphawallet.app.router.SellTicketRouter;
-import com.alphawallet.app.router.TransferTicketRouter;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -36,9 +35,6 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import com.alphawallet.token.entity.TicketRange;
-import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.OpenseaService;
 
 /**
  * Created by James on 22/01/2018.
@@ -53,7 +49,6 @@ public class AssetDisplayViewModel extends BaseViewModel
     private final GenericWalletInteract genericWalletInteract;
     private final TransferTicketRouter transferTicketRouter;
     private final RedeemAssetSelectRouter redeemAssetSelectRouter;
-    private final SellTicketRouter sellTicketRouter;
     private final MyAddressRouter myAddressRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final OpenseaService openseaService;
@@ -71,11 +66,9 @@ public class AssetDisplayViewModel extends BaseViewModel
     AssetDisplayViewModel(
             FetchTokensInteract fetchTokensInteract,
             GenericWalletInteract genericWalletInteract,
-            SignatureGenerateInteract signatureGenerateInteract,
             TransferTicketRouter transferTicketRouter,
             RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            SellTicketRouter sellTicketRouter,
             MyAddressRouter myAddressRouter,
             AssetDefinitionService assetDefinitionService,
             OpenseaService openseaService) {
@@ -84,7 +77,6 @@ public class AssetDisplayViewModel extends BaseViewModel
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.redeemAssetSelectRouter = redeemAssetSelectRouter;
         this.transferTicketRouter = transferTicketRouter;
-        this.sellTicketRouter = sellTicketRouter;
         this.myAddressRouter = myAddressRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.openseaService = openseaService;
@@ -171,10 +163,6 @@ public class AssetDisplayViewModel extends BaseViewModel
     public void showContractInfo(Context ctx, Token token)
     {
         myAddressRouter.open(ctx, defaultWallet.getValue(), token);
-    }
-
-    public void sellTicketRouter(Context ctx, Token token) {
-        sellTicketRouter.open(ctx, token);
     }
 
     public void sellTicketRouter(Context context, Token token, String tokenIds) {

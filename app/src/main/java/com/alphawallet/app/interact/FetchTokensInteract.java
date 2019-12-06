@@ -172,7 +172,7 @@ public class FetchTokensInteract {
                     if (type == ContractType.ERC721_TICKET && t.isERC721())
                     {
                         //upgrade type:
-                        List<BigInteger> balanceFromOpenSea = t.getBalanceAsArray();
+                        List<BigInteger> balanceFromOpenSea = t.getArrayBalance();
                         tokens[i] = new ERC721Ticket(t.tokenInfo, balanceFromOpenSea, System.currentTimeMillis(), t.getNetworkName(), ContractType.ERC721_TICKET);
                         //update in database
                         tokenRepository.updateTokenType(t, wallet, type);

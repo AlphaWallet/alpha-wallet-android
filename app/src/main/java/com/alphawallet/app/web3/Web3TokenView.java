@@ -13,6 +13,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.web3.entity.Address;
@@ -60,14 +61,21 @@ public class Web3TokenView extends WebView
         jsInjectorClient = new JsInjectorClient(getContext());
         WebSettings webSettings = super.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setDisplayZoomControls(false);
         webSettings.setDomStorageEnabled(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            WebView.setWebContentsDebuggingEnabled(true);
-        }
+        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webSettings.setUseWideViewPort(false);
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setUserAgentString(webSettings.getUserAgentString()
+                                               + "AlphaWallet(Platform=Android&AppVersion=" + BuildConfig.VERSION_NAME + ")");
+        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
+
+        setScrollBarSize(0);
+        setVerticalScrollBarEnabled(false);
+        setScrollContainer(false);
+        setScrollbarFadingEnabled(true);
 
         setInitialScale(0);
         clearCache(true);
@@ -80,6 +88,11 @@ public class Web3TokenView extends WebView
                 innerOnSignTypedMessageListener), "alpha");
 
         super.setWebViewClient(tokenScriptClient);
+    }
+
+    @Override
+    public void setWebChromeClient(WebChromeClient client) {
+        super.setWebChromeClient(client);
     }
 
     @JavascriptInterface
@@ -225,7 +238,7 @@ public class Web3TokenView extends WebView
         {
             super.onPageFinished(view, url);
             if (assetHolder != null)
-                assetHolder.onPageLoaded();
+                assetHolder.onPageRendered(view);
         }
 
         @Override
@@ -233,7 +246,7 @@ public class Web3TokenView extends WebView
         {
             super.onPageFinished(view, url);
             if (assetHolder != null)
-                assetHolder.onPageLoaded();
+                assetHolder.onPageLoaded(view);
         }
     }
 }

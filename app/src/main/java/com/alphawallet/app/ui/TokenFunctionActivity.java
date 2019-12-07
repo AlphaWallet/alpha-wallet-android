@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.WebView;
 import android.widget.RelativeLayout;
 
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -43,8 +44,8 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private Web3TokenView tokenView;
     private Token token;
     private List<BigInteger> idList = null;
-    private StringBuilder attrs;
     private FunctionButtonBar functionBar;
+    private boolean reloaded;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
@@ -52,10 +53,12 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         RelativeLayout frameLayout = findViewById(R.id.layout_select_ticket);
         tokenView = findViewById(R.id.web3_tokenview);
         idList = token.stringHexToBigIntegerList(displayIds);
+        reloaded = false;
 
         TicketRange data = new TicketRange(idList, token.tokenInfo.address, false);
 
         token.displayTicketHolder(data, frameLayout, viewModel.getAssetDefinitionService(), this, false);
+        tokenView.setOnReadyCallback(this);
         functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null);
         functionBar.revealButtons();
     }
@@ -107,9 +110,16 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
 
     @Override
-    public void onPageLoaded()
+    public void onPageLoaded(WebView view)
     {
         tokenView.callToJS("refresh()");
+    }
+
+    @Override
+    public void onPageRendered(WebView view)
+    {
+        if (!reloaded) tokenView.reload(); //issue a single reload
+        reloaded = true;
     }
 
     @Override

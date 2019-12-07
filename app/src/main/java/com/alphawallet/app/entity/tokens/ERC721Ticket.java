@@ -48,11 +48,13 @@ public class ERC721Ticket extends Token implements Parcelable {
     public ERC721Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = balances;
+        balanceUpdateWeight = calculateBalanceUpdateWeight();
     }
 
     public ERC721Ticket(TokenInfo tokenInfo, String balances, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = stringHexToBigIntegerList(balances);
+        balanceUpdateWeight = calculateBalanceUpdateWeight();
     }
 
     private ERC721Ticket(Parcel in) {

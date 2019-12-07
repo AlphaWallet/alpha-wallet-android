@@ -366,7 +366,7 @@ public class TokensRealmSource implements TokenLocalSource {
             {
                 TokenFactory tf = new TokenFactory();
                 TokenInfo info = tf.createTokenInfo(realmToken);
-                result = tf.createToken(info, realmToken, realmToken.getAddedTime(), network.getShortName());
+                result = tf.createToken(info, realmToken, realmToken.getUpdateTime(), network.getShortName());
                 result.setTokenWallet(wallet.address);
                 result.setupRealmToken(realmToken);
             }
@@ -395,9 +395,8 @@ public class TokensRealmSource implements TokenLocalSource {
                     TokenFactory tf = new TokenFactory();
                     TokenInfo info = tf.createTokenInfo(rt);
                     NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(info.chainId);
-                    Token newToken = tf.createToken(info, rt, rt.getAddedTime(), network.getShortName());//; new Token(info, balance, realmItem.getUpdatedTime());
+                    Token newToken = tf.createToken(info, rt, rt.getUpdateTime(), network.getShortName());//; new Token(info, balance, realmItem.getUpdatedTime());
                     newToken.setTokenWallet(wallet.address);
-                    newToken.setupRealmToken(rt);
                     if (address.equals(wallet.address)) newToken.setIsEthereum();
                     result.put(info.chainId, newToken);
                 }
@@ -521,7 +520,9 @@ public class TokensRealmSource implements TokenLocalSource {
             realmToken.setName(token.tokenInfo.name);
             realmToken.setSymbol(token.tokenInfo.symbol);
             realmToken.setDecimals(token.tokenInfo.decimals);
-            realmToken.setAddedTime(token.updateBlancaTime);
+            realmToken.setUpdateTime(token.updateBlancaTime);
+            realmToken.setTXUpdateTime(token.lastTxUpdate);
+            realmToken.setLastTxTime(token.lastTxTime);
             token.setRealmBalance(realmToken);
             token.setRealmInterfaceSpec(realmToken);
             token.setRealmLastBlock(realmToken);
@@ -538,9 +539,10 @@ public class TokensRealmSource implements TokenLocalSource {
             if (token.checkRealmBalanceChange(realmToken))
             {
                 //has token changed?
-                realmToken.setAddedTime(token.updateBlancaTime);
+                realmToken.setUpdateTime(token.updateBlancaTime);
                 token.setRealmInterfaceSpec(realmToken);
                 token.setRealmBalance(realmToken);
+                token.setRealmLastBlock(realmToken);
                 if (token.isERC721())
                 {
                     saveERC721Assets(realm, token);
@@ -701,9 +703,7 @@ public class TokensRealmSource implements TokenLocalSource {
         TokenInfo    info    = tf.createTokenInfo(realmItem);
 
         NetworkInfo  network = ethereumNetworkRepository.getNetworkByChain(info.chainId);
-        result = tf.createToken(info, realmItem, realmItem.getAddedTime(), network.getShortName());
-        result.lastBlockCheck = realmItem.getLastBlock();
-        result.lastTxCheck = realmItem.getUpdatedTime();
+        result = tf.createToken(info, realmItem, realmItem.getUpdateTime(), network.getShortName());
         result.setTokenWallet(wallet.address);
 
         if (result.isERC721()) //add erc721 assets
@@ -722,8 +722,7 @@ public class TokensRealmSource implements TokenLocalSource {
         realmToken.setName(token.tokenInfo.name);
         realmToken.setSymbol(token.tokenInfo.symbol);
         realmToken.setDecimals(0);
-        realmToken.setAddedTime(-1);
-        realmToken.setAddedTime(-1);
+        realmToken.setUpdateTime(-1);
         realmToken.setEnabled(false);
         realmToken.setInterfaceSpec(0);
         realmToken.setChainId(token.tokenInfo.chainId);

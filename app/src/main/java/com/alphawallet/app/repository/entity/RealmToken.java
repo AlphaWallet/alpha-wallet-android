@@ -15,6 +15,7 @@ public class RealmToken extends RealmObject {
     private int decimals;
     private long addedTime;
     private long updatedTime;
+    private long lastTxTime;
     private String balance;
     private boolean isEnabled;
     private int tokenId;
@@ -55,19 +56,18 @@ public class RealmToken extends RealmObject {
         this.address = address;
     }
 
-    public long getAddedTime() {
+    public long getUpdateTime() {
         return addedTime;
     }
 
-    public void setAddedTime(long addedTime) {
+    public void setUpdateTime(long addedTime) {
         this.addedTime = addedTime;
     }
 
-    public long getUpdatedTime() {
+    public long getTXUpdateTime() {
         return updatedTime;
     }
-
-    public void setUpdatedTime(long updatedTime) {
+    public void setTXUpdateTime(long updatedTime) {
         this.updatedTime = updatedTime;
     }
 
@@ -135,4 +135,14 @@ public class RealmToken extends RealmObject {
 
     public int getChainId() { return chainId; }
     public void setChainId(int chainId) { this.chainId = chainId; }
+
+    public long getLastTxTime()
+    {
+        return lastTxTime;
+    }
+
+    public void setLastTxTime(long lastTxTime)
+    {
+        this.lastTxTime = lastTxTime;
+    }
 }

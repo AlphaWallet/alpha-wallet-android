@@ -35,18 +35,6 @@ public class AssetSortedItem extends SortedItem<TicketRange>
                 && ( value.equals(other.value));
     }
 
-//    @Override
-//    public boolean areContentsTheSame(SortedItem newItem) {
-//        return (newItem.viewType == viewType
-//                && ((AssetSortedItem) newItem).value.getTokenId().equals(value.getTokenId()));
-//    }
-//
-//    @Override
-//    public boolean areItemsTheSame(SortedItem other) {
-//        return (other.viewType == viewType
-//                && ((AssetSortedItem) other).value.getTokenId().equals(value.getTokenId()));
-//    }
-
     @Override
     public boolean isRadioExposed()
     {
@@ -70,12 +58,4 @@ public class AssetSortedItem extends SortedItem<TicketRange>
     {
         return value.tokenIds;
     }
-
-//    @Override
-//    public List<BigInteger> getTokenIds()
-//    {
-//        List<BigInteger> test = new ArrayList<>();
-//        test.add(new BigInteger(value.getTokenId()));
-//        return test;
-//    }
 }

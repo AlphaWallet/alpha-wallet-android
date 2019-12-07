@@ -154,23 +154,6 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
         viewModel.prepare();
     }
 
-//    private void onNext() {
-//        //first get range selection
-//        TicketRange range = adapter.getCheckedItem();
-//        if (range != null)
-//        {
-//            onTokenClick(null, token, range.tokenIds, true);
-//
-//            adapter.setRedeemTicketQuantity(range, token);
-//            RecyclerView list = findViewById(R.id.listTickets);
-//            list.setAdapter(null);
-//            list.setAdapter(adapter);
-//
-//            nextButton.setVisibility(View.GONE);
-//            redeemButton.setVisibility(View.VISIBLE);
-//        }
-//    }
-
     private void onNext() {
         //first get range selection
         List<BigInteger> selection = adapter.getSelectedTokenIds(new ArrayList<>());// adapter.getCheckedItem();

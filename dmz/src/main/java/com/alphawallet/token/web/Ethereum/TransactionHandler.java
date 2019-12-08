@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.alphawallet.token.entity.BadContract;
+import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.web.Service.EthRPCNodes;
 
 import okhttp3.OkHttpClient;
@@ -68,7 +69,7 @@ public class TransactionHandler
         String name = "";
         try
         {
-            name = getContractData(address, stringParam("name"));
+            name = callSmartContractAndGetResult(address, stringParam("name"));
         }
         catch (Exception e)
         {
@@ -83,7 +84,7 @@ public class TransactionHandler
         String symbol = "";
         try
         {
-            symbol = getContractData(address, stringParam("symbol"));
+            symbol = callSmartContractAndGetResult(address, stringParam("symbol"));
         }
         catch (Exception e)
         {
@@ -98,7 +99,7 @@ public class TransactionHandler
         String name = "";
         try
         {
-            name = getContractData(address, stringParam("name"));
+            name = callSmartContractAndGetResult(address, stringParam("name"));
         }
         catch (Exception e)
         {
@@ -108,7 +109,36 @@ public class TransactionHandler
         return name;
     }
 
-    private <T> T getContractData(String address, org.web3j.abi.datatypes.Function function) throws Exception
+    public String getOwnerOf721(String address, BigInteger tokenId) {
+        String owner = "";
+        try
+        {
+            owner = Numeric.toHexStringWithPrefix(callSmartContractAndGetResult(address, ownerOf721(tokenId)));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return owner;
+    }
+
+    public List<BigInteger> getBalanceArray721Tickets(String owner, String contractAddress) {
+        List<BigInteger> castBalances = new ArrayList<>();
+        try
+        {
+            List<Uint256> balances = callSmartContractAndGetResult(contractAddress, getBalances721TicketToken(owner));
+            for(Uint256 token: balances) {
+                castBalances.add(token.getValue());
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return castBalances;
+    }
+
+    private <T> T callSmartContractAndGetResult(String address, org.web3j.abi.datatypes.Function function) throws Exception
     {
         String responseValue = callSmartContractFunction(function, address);
 
@@ -169,4 +199,19 @@ public class TransactionHandler
                 Collections.singletonList(new Address(owner)),
                 Collections.singletonList(new TypeReference<DynamicArray<Uint256>>() {}));
     }
+
+    private static org.web3j.abi.datatypes.Function getBalances721TicketToken(String owner) {
+        return new org.web3j.abi.datatypes.Function(
+                "getBalances",
+                Collections.singletonList(new Address(owner)),
+                Collections.singletonList(new TypeReference<DynamicArray<Uint256>>() {}));
+    }
+
+    private static org.web3j.abi.datatypes.Function ownerOf721(BigInteger token) {
+        return new org.web3j.abi.datatypes.Function(
+                "ownerOf",
+                Collections.singletonList(new Uint256(token)),
+                Collections.singletonList(new TypeReference<Address>() {}));
+    }
+
 }

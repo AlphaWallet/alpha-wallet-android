@@ -760,15 +760,14 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public void handleTransactionCallback(int resultCode, Intent data)
     {
         if (data == null) return;
-        if (resultCode == RESULT_OK)
+        Web3Transaction web3Tx = data.getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
+        if (resultCode == RESULT_OK && web3Tx != null)
         {
-            Web3Transaction web3Tx = data.getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
             String hashData = data.getStringExtra(C.EXTRA_TRANSACTION_DATA);
             web3.onSignTransactionSuccessful(web3Tx, hashData);
         }
-        else
+        else if (web3Tx != null)
         {
-            Web3Transaction web3Tx = data.getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
             web3.onSignCancel(web3Tx);
         }
     }

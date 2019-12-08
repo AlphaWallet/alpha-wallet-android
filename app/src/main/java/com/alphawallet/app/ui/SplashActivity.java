@@ -8,6 +8,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.view.View;
 
@@ -17,6 +18,7 @@ import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.HomeRouter;
@@ -39,7 +41,7 @@ import io.fabric.sdk.android.Fabric;
 
 import static com.alphawallet.app.C.IMPORT_REQUEST_CODE;
 
-public class SplashActivity extends BaseActivity implements CreateWalletCallbackInterface
+public class SplashActivity extends BaseActivity implements CreateWalletCallbackInterface, Runnable
 {
     @Inject
     SplashViewModelFactory splashViewModelFactory;
@@ -48,6 +50,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     private String importData;
     private PinAuthenticationCallbackInterface authInterface;
     private String importPath = null;
+    private Handler handler = new Handler();
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -182,8 +185,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
                 }
             }
 
-            new HomeRouter().open(this, true);
-            finish();
+            handler.postDelayed(this, VisibilityFilter.startupDelay());
         }
     }
 
@@ -250,5 +252,12 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
     {
         authInterface = authCallback;
+    }
+
+    @Override
+    public void run()
+    {
+        new HomeRouter().open(this, true);
+        finish();
     }
 }

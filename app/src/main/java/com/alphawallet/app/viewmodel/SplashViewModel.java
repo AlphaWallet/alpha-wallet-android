@@ -239,7 +239,14 @@ public class SplashViewModel extends ViewModel
                     //valid tokenscript file, import to debug area
                     String newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next();
                     newFileName = newFileName + "-" + testFile.calcMD5() + ".tsml";
-                    newFileName = Environment.getExternalStorageDirectory() + File.separator + ALPHAWALLET_DIR + File.separator + newFileName;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q)
+                    {
+                        newFileName = ctx.getExternalFilesDir("") + File.separator + newFileName;
+                    }
+                    else
+                    {
+                        newFileName = Environment.getExternalStorageDirectory() + File.separator + ALPHAWALLET_DIR + File.separator + newFileName;
+                    }
                     Utils.copyFile(importData, newFileName);
                     //listener system picks up the new file automatically
                 }

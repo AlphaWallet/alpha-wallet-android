@@ -256,6 +256,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
             amountInput = null;
         }
 
+        displayAddress = wallet.address;
         setTitle(getString(R.string.my_wallet_address));
         address.setText(displayAddress);
         currentMode = MODE_ADDRESS;
@@ -339,8 +340,6 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     {
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-
-        if (currentMode != MODE_CONTRACT) displayAddress = wallet.address;
     }
 
     @Override

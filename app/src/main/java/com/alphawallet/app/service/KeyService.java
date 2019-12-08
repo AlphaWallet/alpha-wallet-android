@@ -751,49 +751,55 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     private void checkAuthentication(Operation operation)
     {
-        //first check if the phone is unlocked
-        String dialogTitle;
-        boolean requireUnlock = false;
-        switch (operation)
+        try
         {
-            case UPGRADE_HD_KEY:
-            case UPGRADE_KEYSTORE_KEY:
-                requireUnlock = true;
-                //drop through
-            case IMPORT_HD_KEY:
-            case CREATE_HD_KEY:
-            case CREATE_KEYSTORE_KEY:
-            case CREATE_PRIVATE_KEY:
-                dialogTitle = context.getString(R.string.provide_authentication);
-                break;
-            case FETCH_MNEMONIC:
-            case CHECK_AUTHENTICATION:
-            case SIGN_DATA:
-                requireUnlock = true;
-            default:
-                dialogTitle = context.getString(R.string.unlock_private_key);
-                break;
-        }
+            //first check if the phone is unlocked
+            String  dialogTitle;
+            boolean requireUnlock = false;
+            switch (operation)
+            {
+                case UPGRADE_HD_KEY:
+                case UPGRADE_KEYSTORE_KEY:
+                    requireUnlock = true;
+                    //drop through
+                case IMPORT_HD_KEY:
+                case CREATE_HD_KEY:
+                case CREATE_KEYSTORE_KEY:
+                case CREATE_PRIVATE_KEY:
+                    dialogTitle = context.getString(R.string.provide_authentication);
+                    break;
+                case FETCH_MNEMONIC:
+                case CHECK_AUTHENTICATION:
+                case SIGN_DATA:
+                    requireUnlock = true;
+                default:
+                    dialogTitle = context.getString(R.string.unlock_private_key);
+                    break;
+            }
 
-        //see if unlock is required
-        if (!requireUnlock && !requiresUnlock() && signCallback != null)
+            //see if unlock is required
+            if (!requireUnlock && !requiresUnlock() && signCallback != null)
+            {
+                signCallback.GotAuthorisation(true);
+                return;
+            }
+
+            signDialog = new SignTransactionDialog(activity, operation, dialogTitle, null);
+            signDialog.setCanceledOnTouchOutside(false);
+            signDialog.setCancelListener(v -> {
+                authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation);
+            });
+            signDialog.setOnDismissListener(v -> {
+                signDialog = null;
+            });
+            signDialog.show();
+            signDialog.getFingerprintAuthorisation(this);
+        }
+        catch (Exception e)
         {
-            signCallback.GotAuthorisation(true);
-            return;
+            keyFailure(e.getMessage());
         }
-
-        signDialog = new SignTransactionDialog(activity, operation, dialogTitle, null);
-        signDialog.setCanceledOnTouchOutside(false);
-        signDialog.setCancelListener(v -> {
-            authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation);
-        });
-        signDialog.setOnDismissListener(v -> {
-            signDialog = null;
-        });
-        signDialog.show();
-        signDialog.getFingerprintAuthorisation(this);
     }
-
 
     @Override
     public void CompleteAuthentication(Operation callbackId)
@@ -827,7 +833,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 {
                     checkAuthentication(FETCH_MNEMONIC);
                 }
-                catch (KeyServiceException e)
+                catch (Exception e)
                 {
                     keyFailure(e.getMessage());
                 }
@@ -896,6 +902,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 callbackInterface.keyFailure(message);
             else if (signCallback != null)
                 signCallback.GotAuthorisation(false);
+            else
+                AuthorisationFailMessage(message);
         }
     }
 
@@ -1232,7 +1240,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         return securityStatus == SecurityStatus.HAS_STRONGBOX;
     }
 
-    private boolean requiresUnlock()
+    private boolean requiresUnlock() throws KeyServiceException
     {
         try
         {
@@ -1241,10 +1249,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         catch (UserNotAuthenticatedException e)
         {
             return true;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
         }
 
         return false;

@@ -335,13 +335,13 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     public void keyFailure(String message)
     {
-
+        onCreateWalletError(new ErrorEnvelope(message));
     }
 
     @Override
     public void cancelAuthentication()
     {
-
+        onCreateWalletError(new ErrorEnvelope(getString(R.string.authentication_cancelled)));
     }
 
     @Override

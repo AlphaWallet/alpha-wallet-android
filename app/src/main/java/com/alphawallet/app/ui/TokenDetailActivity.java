@@ -189,7 +189,7 @@ public class TokenDetailActivity extends BaseActivity {
         Intent intent = new Intent(this, TransferTicketDetailActivity.class);
         intent.putExtra(WALLET, new Wallet(token.getWallet()));
         intent.putExtra(TICKET, token);
-        intent.putExtra(EXTRA_TOKENID_LIST, asset.getTokenId());
+        intent.putExtra(EXTRA_TOKENID_LIST, asset.getTokenId(16));
         intent.putExtra(EXTRA_STATE, TRANSFER_TO_ADDRESS);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         startActivity(intent);

@@ -111,7 +111,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     public boolean hasIFrame(Token token)
     {
-        return assetDefinitionService.hasTokenView(token.tokenInfo.chainId, token.getAddress());
+        return assetDefinitionService.hasTokenView(token.tokenInfo.chainId, token.getAddress(), "view");
     }
 
     public String getTokenData(Token token) {

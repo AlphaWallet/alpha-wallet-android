@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.router.SellTicketRouter;
 import com.alphawallet.app.router.TransferTicketDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
@@ -21,7 +20,6 @@ import com.alphawallet.app.service.TokensService;
 public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
 {
     private final AssetDefinitionService assetDefinitionService;
-    private final SellTicketRouter sellTicketRouter;
     private final TransferTicketDetailRouter transferTicketRouter;
     private final CreateTransactionInteract createTransactionInteract;
     private final GasService gasService;
@@ -32,8 +30,7 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
 
     public TokenFunctionViewModelFactory(
             AssetDefinitionService assetDefinitionService,
-            SellTicketRouter sellTicketRouter,
-            TransferTicketDetailRouter transferTicketRouter,
+             TransferTicketDetailRouter transferTicketRouter,
             CreateTransactionInteract createTransactionInteract,
             GasService gasService,
             TokensService tokensService,
@@ -41,7 +38,6 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
             KeyService keyService,
             GenericWalletInteract genericWalletInteract) {
         this.assetDefinitionService = assetDefinitionService;
-        this.sellTicketRouter = sellTicketRouter;
         this.transferTicketRouter = transferTicketRouter;
         this.createTransactionInteract = createTransactionInteract;
         this.gasService = gasService;
@@ -54,6 +50,6 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new TokenFunctionViewModel(assetDefinitionService, sellTicketRouter, transferTicketRouter, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract);
+        return (T) new TokenFunctionViewModel(assetDefinitionService, transferTicketRouter, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract);
     }
 }

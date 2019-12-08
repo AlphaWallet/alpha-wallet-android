@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
@@ -13,6 +14,9 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.ui.widget.OnOpenseaAssetCheckListener;
+import com.alphawallet.token.entity.TicketRange;
+
+import java.math.BigInteger;
 
 /**
  * Created by James on 12/11/2018.
@@ -31,10 +35,16 @@ public class OpenseaSelectHolder extends OpenseaHolder
         select = findViewById(R.id.radioBox);
     }
 
+//    @Override
+//    public void bind(@Nullable Asset asset, @NonNull Bundle addition)
+//    {
+//        super.bind(asset, addition);
     @Override
-    public void bind(@Nullable Asset asset, @NonNull Bundle addition)
+    public void bind(@Nullable TicketRange data, @NonNull Bundle addition)
     {
-        super.bind(asset, addition);
+        BigInteger tokenId = data.tokenIds.get(0); //range is never grouped for ERC721 tickets
+        super.bind(data, addition);
+        Asset      asset   = token.getAssetForToken(tokenId.toString());
         select.setVisibility(View.VISIBLE);
 
         select.setOnCheckedChangeListener(null); //have to invalidate listener first otherwise we trigger cached listener and create infinite loop

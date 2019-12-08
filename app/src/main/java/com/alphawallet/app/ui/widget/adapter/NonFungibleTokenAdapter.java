@@ -6,6 +6,8 @@ import android.support.v7.widget.AppCompatRadioButton;
 import android.view.ViewGroup;
 
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
+import com.alphawallet.app.ui.widget.entity.QuantitySelectorSortedItem;
+import com.alphawallet.app.ui.widget.holder.QuantitySelectorHolder;
 import com.alphawallet.token.tools.Numeric;
 import com.bumptech.glide.Glide;
 import com.alphawallet.app.ui.widget.entity.AssetInstanceSortedItem;
@@ -52,11 +54,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     TicketRange currentRange = null;
     final Token token;
     protected OpenseaService openseaService;
-    private ScriptFunction tokenScriptHolderCallback;
     private boolean clickThrough = false;
-    private FunctionCallback functionCallback;
-    private boolean containsScripted = false;
     protected int assetCount;
+    private FunctionCallback functionCallback;
 
     public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, AssetDefinitionService service, OpenseaService opensea) {
         super(tokenClickListener, service);
@@ -64,8 +64,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         token = t;
         clickThrough = true;
         openseaService = opensea;
-        if (token.isERC875() || token.isERC721Ticket()) setToken(t);
-        else if (token instanceof ERC721Token) setERC721Tokens(token, null);
+        setToken(t);
     }
 
     public NonFungibleTokenAdapter(OnTokenClickListener tokenClickListener, Token t, List<BigInteger> tokenSelection, AssetDefinitionService service, OpenseaService opensea)
@@ -74,9 +73,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         assetCount = 0;
         token = t;
         openseaService = opensea;
-        if (token.isERC875()) setTokenRange(token, tokenSelection);
-        else if (token instanceof ERC721Token) setERC721Tokens(token, tokenSelection);
-        else if (token instanceof ERC721Ticket) setERC721Tickets(token, tokenSelection);
+        setTokenRange(token, tokenSelection);
     }
     
     @Override
@@ -103,64 +100,13 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
                 break;
             case TokenFunctionViewHolder.VIEW_TYPE:
                 holder = new TokenFunctionViewHolder(R.layout.item_function_layout, parent, token, functionCallback, assetService);
-                tokenScriptHolderCallback = (ScriptFunction)holder;
+                break;
+            case QuantitySelectorHolder.VIEW_TYPE:
+                holder = new QuantitySelectorHolder(R.layout.item_quantity_selector, parent, assetCount, assetService);
                 break;
         }
 
         return holder;
-    }
-
-    protected void setERC721Tokens(Token token, List<BigInteger> tokenIds)
-    {
-        if (!(token instanceof ERC721Token)) return;
-        items.beginBatchedUpdates();
-        items.clear();
-        items.add(new TokenBalanceSortedItem(token));
-        int weight = 1; //use the same order we receive from OpenSea
-        String tokenId = null;
-        if (tokenIds != null) tokenId = tokenIds.get(0).toString(10);
-
-        // populate the ERC721 items
-        for (Asset asset : token.getTokenAssets())
-        {
-            if (tokenId == null || tokenId.equals(asset.getTokenId()))
-            {
-                items.add(new AssetSortedItem(asset, weight++));
-                assetCount++;
-            }
-        }
-        items.endBatchedUpdates();
-    }
-
-    protected void setERC721Tickets(Token token, List<BigInteger> tokenIds) //ticketId is used when transfering single tickets
-    {
-        if (!(token instanceof ERC721Ticket)) return;
-        items.beginBatchedUpdates();
-        items.clear();
-        items.add(new TokenBalanceSortedItem(token));
-        assetCount = token.getArrayBalance().size();
-        int holderType = TokenIdSortedItem.VIEW_TYPE;
-
-        if (assetService.hasTokenView(token.tokenInfo.chainId, token.getAddress()))
-        {
-            containsScripted = true;
-            holderType = AssetInstanceSortedItem.VIEW_TYPE;
-        }
-
-        List<BigInteger> tokensToDisplay;
-        if (tokenIds == null)
-        {
-            tokensToDisplay = token.getArrayBalance();
-        }
-        else
-        {
-            tokensToDisplay = tokenIds;
-        }
-
-        List<TicketRangeElement> sortedList = generateSortedList(assetService, token, tokensToDisplay); //generate sorted list
-        addSortedItems(sortedList, token, holderType); //insert sorted items into view
-
-        items.endBatchedUpdates();
     }
 
     public int getTicketRangeCount() {
@@ -171,16 +117,25 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         return count;
     }
 
+    public void addQuantitySelector()
+    {
+        items.add(new QuantitySelectorSortedItem(token));
+    }
+
     private void setTokenRange(Token t, List<BigInteger> tokenIds)
     {
         items.beginBatchedUpdates();
         items.clear();
         int holderType = TokenIdSortedItem.VIEW_TYPE;
+        assetCount = tokenIds.size();
 
-        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress()))
+        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), "view"))
         {
-            containsScripted = true;
             holderType = AssetInstanceSortedItem.VIEW_TYPE;
+        }
+        else if (t.isERC721())
+        {
+            holderType = OpenseaHolder.VIEW_TYPE;
         }
 
         List<TicketRangeElement> sortedList = generateSortedList(assetService, token, tokenIds); //generate sorted list
@@ -189,22 +144,21 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         items.endBatchedUpdates();
     }
 
-    public void setToken(Token t) {
+    public void setToken(Token t)
+    {
         items.beginBatchedUpdates();
         items.clear();
         items.add(new TokenBalanceSortedItem(t));
         assetCount = t.getTicketCount();
-        if (!t.isERC20()) addRanges(t);
+        int holderType = t.isERC721() ? OpenseaHolder.VIEW_TYPE : AssetInstanceScriptHolder.VIEW_TYPE;
+        addRanges(t, holderType);
         items.endBatchedUpdates();
     }
 
-    private void addRanges(Token t)
+    private void addRanges(Token t, int holderType)
     {
         currentRange = null;
         List<TicketRangeElement> sortedList = generateSortedList(assetService, t, t.getArrayBalance());
-        //determine what kind of holder we need:
-        int holderType = AssetInstanceSortedItem.VIEW_TYPE;
-        containsScripted = true;
         addSortedItems(sortedList, t, holderType);
     }
 
@@ -228,11 +182,13 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         switch (id)
         {
             case AssetInstanceScriptHolder.VIEW_TYPE:
-                containsScripted = true;
                 item = (T) new AssetInstanceSortedItem(range, weight);
                 break;
             case TicketSaleHolder.VIEW_TYPE:
                 item = (T) new TicketSaleSortedItem(range, weight);
+                break;
+            case OpenseaHolder.VIEW_TYPE:
+                item = (T) new AssetSortedItem(range, weight);
                 break;
             case TicketHolder.VIEW_TYPE:
             default:
@@ -274,6 +230,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     }
 
     //TODO: Find out how to calculate the storage hash for each image and reproduce that, deleting only the right image.
+    //TODO: Possibly the best way is not to use glide, revert back to caching images as in the original implementation.
     public void reloadAssets(Context ctx)
     {
         if (token instanceof ERC721Token)
@@ -289,24 +246,6 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     private void cleared(Boolean aBoolean)
     {
         this.notifyDataSetChanged();
-    }
-
-    public void addFunctionView(Token token, String view)
-    {
-        TokenFunctionSortedItem item = new TokenFunctionSortedItem(view, 200);
-        items.add(item);
-        notifyDataSetChanged();
-    }
-
-    public boolean containsScripted()
-    {
-        return containsScripted;
-    }
-
-    public void passFunction(String function, String arg)
-    {
-        //pass into the view
-        tokenScriptHolderCallback.callFunction(function, arg);
     }
 
     public void setRadioButtons(boolean expose)
@@ -357,5 +296,32 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         }
 
         return selected;
+    }
+
+    public int getSelectedQuantity()
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
+            SortedItem si = items.get(i);
+            if (si.view.getItemViewType() == QuantitySelectorHolder.VIEW_TYPE)
+            {
+                return ((QuantitySelectorHolder) si.view).getCurrentQuantity();
+            }
+        }
+        return 0;
+    }
+
+    public TicketRange getSelectedRange(List<BigInteger> selection)
+    {
+        int quantity = getSelectedQuantity();
+        if (quantity > selection.size()) quantity = selection.size();
+        List<BigInteger> subSelection = new ArrayList<>();
+
+        for (int i = 0; i < quantity; i++)
+        {
+            subSelection.add(selection.get(i));
+        }
+
+        return new TicketRange(subSelection, token.getAddress(), false);
     }
 }

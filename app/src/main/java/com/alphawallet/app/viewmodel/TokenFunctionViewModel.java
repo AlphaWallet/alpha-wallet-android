@@ -27,7 +27,6 @@ import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.router.SellTicketRouter;
 import com.alphawallet.app.router.TransferTicketDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
@@ -45,7 +44,6 @@ import java.util.List;
 public class TokenFunctionViewModel extends BaseViewModel
 {
     private final AssetDefinitionService assetDefinitionService;
-    private final SellTicketRouter sellTicketRouter;
     private final TransferTicketDetailRouter transferTicketRouter;
     private final CreateTransactionInteract createTransactionInteract;
     private final GasService gasService;
@@ -57,7 +55,6 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     TokenFunctionViewModel(
             AssetDefinitionService assetDefinitionService,
-            SellTicketRouter sellTicketRouter,
             TransferTicketDetailRouter transferTicketRouter,
             CreateTransactionInteract createTransactionInteract,
             GasService gasService,
@@ -66,7 +63,6 @@ public class TokenFunctionViewModel extends BaseViewModel
             KeyService keyService,
             GenericWalletInteract genericWalletInteract) {
         this.assetDefinitionService = assetDefinitionService;
-        this.sellTicketRouter = sellTicketRouter;
         this.transferTicketRouter = transferTicketRouter;
         this.createTransactionInteract = createTransactionInteract;
         this.gasService = gasService;
@@ -97,9 +93,6 @@ public class TokenFunctionViewModel extends BaseViewModel
         gasService.startGasListener(chainId);
     }
 
-    public void sellTicketRouter(Context ctx, Token token) {
-        sellTicketRouter.open(ctx, token);
-    }
     public void showTransferToken(Context context, Token token, String tokenIds)
     {
         transferTicketRouter.open(context, token, tokenIds, wallet);

@@ -224,7 +224,7 @@ public class ERC721Token extends Token implements Parcelable
     public boolean checkBalanceChange(List<BigInteger> balanceArray)
     {
         if (balanceArray.size() != tokenBalanceAssets.size()) return true; //quick check for new tokens
-        List<BigInteger> oldBalance = getBalanceAsArray();
+        List<BigInteger> oldBalance = getArrayBalance();
         for (int index = 0; index < balanceArray.size(); index++) //see if spawnable token ID has changed
         {
             if (!balanceArray.get(index).equals(oldBalance.get(index))) return true;
@@ -293,7 +293,7 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public List<BigInteger> getBalanceAsArray()
+    public List<BigInteger> getArrayBalance()
     {
         List<BigInteger> balanceAsArray = new ArrayList<>();
         for (Asset a : tokenBalanceAssets)

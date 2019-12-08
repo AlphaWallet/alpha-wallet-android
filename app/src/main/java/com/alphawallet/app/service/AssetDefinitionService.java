@@ -807,7 +807,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public boolean hasTokenView(int chainId, String contractAddr, String type)
     {
         TokenDefinition td = getAssetDefinition(chainId, contractAddr);
-        return td != null && td.attributeSets.containsKey("cards") && td.attributeSets.get("cards").containsKey(type);
+        if (td != null && td.attributeSets.containsKey("cards"))
+        {
+            String view = td.attributeSets.get("cards").get(type);
+            // 8 characters is about minimum for a view
+            return view != null && view.length() > 8;
+        }
+        return false;
     }
 
     public String getTokenView(int chainId, String contractAddr, String type)

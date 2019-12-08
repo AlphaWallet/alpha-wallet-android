@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -306,45 +307,6 @@ public class Ticket extends Token implements Parcelable
         return indexList;
     }
 
-    /**
-     * Routine to blank a ticket on a page. It can be static because it doesn't use any class members
-     * It will throw an exception if given an activity page with no ticket on it
-     * @param activity
-     * @param blankingString
-     */
-    public static void blankTicketHolder(int blankingString, BaseActivity activity)
-    {
-        try
-        {
-            TextView textAmount = activity.findViewById(R.id.amount);
-            TextView textTicketName = activity.findViewById(R.id.name);
-            TextView textVenue = activity.findViewById(R.id.venue);
-
-            textAmount.setText("");
-            textTicketName.setText(blankingString);
-            textVenue.setText("");
-        }
-        catch (Exception e)
-        {
-            Log.d("TICKET", e.getMessage());
-        }
-    }
-
-    private void blankTicketExtra(View activity)
-    {
-        try
-        {
-            TextView textVenue = activity.findViewById(R.id.venue);
-
-            //textVenue.setVisibility(View.GONE);
-            textVenue.setText("");
-        }
-        catch (Exception e)
-        {
-            Log.d("TICKET", e.getMessage());
-        }
-    }
-
     private void displayTokenscriptView(TicketRange range, AssetDefinitionService assetService, View activity, Context ctx, boolean iconified)
     {
         //get webview
@@ -404,6 +366,7 @@ public class Ticket extends Token implements Parcelable
      * @param assetService
      * @param ctx needed to create date/time format objects
      */
+    @Override
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx, boolean iconified)
     {
         TokenDefinition td = assetService.getAssetDefinition(tokenInfo.chainId, tokenInfo.address);
@@ -414,6 +377,9 @@ public class Ticket extends Token implements Parcelable
         }
         else
         {
+            activity.findViewById(R.id.layout_legacy).setVisibility(View.VISIBLE);
+            activity.findViewById(R.id.layout_webwrapper).setVisibility(View.GONE);
+
             TextView amount = activity.findViewById(R.id.amount);
             TextView name = activity.findViewById(R.id.name);
 
@@ -422,8 +388,6 @@ public class Ticket extends Token implements Parcelable
 
             name.setText(nameStr);
             amount.setText(seatCount);
-
-            blankTicketExtra(activity);
         }
     }
 

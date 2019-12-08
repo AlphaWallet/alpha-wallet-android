@@ -9,19 +9,19 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import com.alphawallet.app.web3.Web3TokenView;
-import com.alphawallet.app.web3.entity.PageReadyCallback;
-
-import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.TokenFunctionActivity;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.web3.Web3TokenView;
+import com.alphawallet.app.web3.entity.PageReadyCallback;
+import com.alphawallet.token.entity.TicketRange;
 
 import static com.alphawallet.app.C.Key.TICKET;
 
@@ -43,6 +43,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     private final AssetDefinitionService assetDefinitionService; //need to cache this locally, unless we cache every string we need in the constructor
     private boolean activeClick;
     private final Handler handler;
+    private boolean reloaded;
 
     public AssetInstanceScriptHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService assetService, boolean iconified)
     {
@@ -62,6 +63,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     @Override
     public void bind(@Nullable TicketRange data, @NonNull Bundle addition)
     {
+        reloaded = false;
         activeClick = false;
         try
         {
@@ -97,9 +99,16 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     }
 
     @Override
-    public void onPageLoaded()
+    public void onPageLoaded(WebView view)
     {
         tokenView.callToJS("refresh()");
+    }
+
+    @Override
+    public void onPageRendered(WebView view)
+    {
+        if (!reloaded) tokenView.reload();
+        reloaded = true;
     }
 
     public void handleClick(View v, TicketRange data)

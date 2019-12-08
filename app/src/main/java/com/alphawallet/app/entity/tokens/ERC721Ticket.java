@@ -4,16 +4,17 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.ERC875ContractTransaction;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -35,6 +36,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -168,8 +170,13 @@ public class ERC721Ticket extends Token implements Parcelable {
         tokenHolder.contractType.setVisibility(View.VISIBLE);
         tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
         tokenHolder.layoutValueDetails.setVisibility(View.GONE);
-        tokenHolder.icon.setVisibility(View.GONE);
-        tokenHolder.icon.setImageResource(R.drawable.ic_ethereum);
+        if (VisibilityFilter.getImageOverride() != 0)
+        {
+            tokenHolder.icon.setVisibility(View.VISIBLE);
+            tokenHolder.icon.setImageResource(VisibilityFilter.getImageOverride());
+            //TODO: Get issuer name from certificate
+            tokenHolder.issuer.setText(VisibilityFilter.getIssuerName());
+        }
         tokenHolder.blockchainSeparator.setVisibility(View.GONE);
         tokenHolder.chainName.setVisibility(View.VISIBLE);
         tokenHolder.extendedInfo.setVisibility(View.VISIBLE);
@@ -205,20 +212,6 @@ public class ERC721Ticket extends Token implements Parcelable {
         return null;
     }
 
-    private void blankTicketExtra(View activity)
-    {
-        try
-        {
-            TextView textVenue = activity.findViewById(R.id.venue);
-
-            //textVenue.setVisibility(View.GONE);
-            textVenue.setText("");
-        }
-        catch (Exception e)
-        {
-            Log.d("TICKET", e.getMessage());
-        }
-    }
 
     private void displayTokenscriptView(TicketRange range, AssetDefinitionService assetService, View activity, Context ctx, boolean iconified)
     {
@@ -279,6 +272,7 @@ public class ERC721Ticket extends Token implements Parcelable {
      * @param assetService
      * @param ctx needed to create date/time format objects
      */
+    @Override
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx, boolean iconified)
     {
         TokenDefinition td = assetService.getAssetDefinition(tokenInfo.chainId, tokenInfo.address);
@@ -297,8 +291,6 @@ public class ERC721Ticket extends Token implements Parcelable {
 
             name.setText(nameStr);
             amount.setText(seatCount);
-
-            blankTicketExtra(activity);
         }
     }
 

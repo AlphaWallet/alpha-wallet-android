@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.view.View;
 
 import com.alphawallet.app.BuildConfig;
@@ -231,7 +232,13 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     @Override
     public void keyFailure(String message)
     {
-
+        AWalletAlertDialog aDialog = new AWalletAlertDialog(this);
+        aDialog.setTitle(R.string.key_error);
+        aDialog.setIcon(AWalletAlertDialog.ERROR);
+        aDialog.setMessage(message);
+        aDialog.setButtonText(R.string.dialog_ok);
+        aDialog.setButtonListener(v -> aDialog.dismiss());
+        aDialog.show();
     }
 
     @Override

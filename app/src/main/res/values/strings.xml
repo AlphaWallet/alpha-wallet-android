@@ -609,4 +609,5 @@
     <string name="copy_contract_address">Copy Contract Address</string>
     <string name="self">Self</string>
     <string name="ERC721T">ERC721T</string>
+    <string name="fail_sign">Failed to sign redeem message</string>
 </resources>

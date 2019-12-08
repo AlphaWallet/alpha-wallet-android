@@ -215,7 +215,14 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
     private void dialogKeyNotAvailableError()
     {
-
+        AWalletAlertDialog dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(R.string.key_error);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setMessage(getString(R.string.fail_sign));
+        dialog.setOnDismissListener(v -> {
+            sendBroadcast(new Intent(PRUNE_ACTIVITY));
+        });
+        dialog.show();
     }
 
     @Override

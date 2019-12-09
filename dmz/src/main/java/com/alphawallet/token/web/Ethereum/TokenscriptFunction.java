@@ -670,7 +670,7 @@ public abstract class TokenscriptFunction
             if (cAddr == null) useAddress = new ContractAddress(attr.function);
             else useAddress = new ContractAddress(attr.function, cAddr.chainId, cAddr.address);
             TransactionResult transactionResult = attrIf.getFunctionResult(useAddress, attr, tokenId);
-            if (attrIf.resolveOptimisedAttr(useAddress, attr, transactionResult) || !transactionResult.needsUpdating(0)) //can we use wallet's known data or cached value?
+            if (attrIf.resolveOptimisedAttr(useAddress, attr, transactionResult) || !transactionResult.needsUpdating(-1)) //can we use wallet's known data or cached value?
             {
                 return resultFromDatabase(transactionResult, attr);
             }

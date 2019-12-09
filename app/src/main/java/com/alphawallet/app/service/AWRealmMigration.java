@@ -17,5 +17,12 @@ public class AWRealmMigration implements RealmMigration
             if (!realmTicker.hasField("currencySymbol")) realmTicker.addField("currencySymbol", String.class);
             oldVersion++;
         }
+        //Note: these version updates drop through; eg if oldVersion was 4, then the above code AND this code will execute
+        if (oldVersion == 5)
+        {
+            RealmObjectSchema realmToken = schema.get("RealmToken");
+            if (!realmToken.hasField("lastTxTime")) realmToken.addField("lastTxTime", long.class); //add the last transaction update time, used to check tokenscript cached result validity
+            oldVersion++;
+        }
     }
 }

@@ -11,6 +11,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.TransactionContract;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.UnknownToken;
@@ -268,6 +269,7 @@ public class TransactionsViewModel extends BaseViewModel
         Log.d("TRANSACTION", "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
 
         token.lastTxCheck = System.currentTimeMillis();
+        token.lastTxUpdate = System.currentTimeMillis();
         List<Transaction> newTxs = new ArrayList<>();
 
         //NB: final transaction is block marker transaction, it's not used. If it is relevant, then it's a duplicate.
@@ -298,7 +300,9 @@ public class TransactionsViewModel extends BaseViewModel
         //The final transaction is the last transaction read, and will have the highest block number we read
         if (transactions.length > 0)
         {
-            token.lastBlockCheck = Long.parseLong(transactions[transactions.length - 1].blockNumber);
+            Transaction lastTx = transactions[transactions.length - 1];
+            token.lastBlockCheck = Long.parseLong(lastTx.blockNumber);
+            token.lastTxTime = lastTx.timeStamp*1000; //update last transaction received time
 
             if (token.hasTokenScript) assetDefinitionService.updateEthereumResults(token)
                     .subscribeOn(Schedulers.io())

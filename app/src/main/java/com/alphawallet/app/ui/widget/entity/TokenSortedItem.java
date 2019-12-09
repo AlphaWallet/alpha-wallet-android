@@ -21,7 +21,6 @@ public class TokenSortedItem extends SortedItem<Token> {
         {
             Token oldToken = value;
             Token newToken = (Token) newItem.value;
-
             if (!oldToken.getAddress().equals(newToken.getAddress())) return false;
             else if (weight != newItem.weight) return false;
             else if (!oldToken.getFullBalance().equals(newToken.getFullBalance())) return false;

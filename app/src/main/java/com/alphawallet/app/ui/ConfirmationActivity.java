@@ -104,7 +104,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         transaction = null;
         toolbar();
 
-        setTitle(getString(R.string.title_transaction_details));
+        setTitle("");
         fromAddressText = findViewById(R.id.text_from);
         toAddressText = findViewById(R.id.text_to);
         valueText = findViewById(R.id.text_value);
@@ -143,8 +143,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
         Utils.setChainColour(chainName, chainId);
         chainName.setText(viewModel.getNetworkName(chainId));
-
-        if (token == null) token = viewModel.getToken(chainId, contractAddress);
 
         switch (confirmationType) {
             case ETH:
@@ -233,7 +231,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 String contractTxt = contractAddress + " " + contractName;
                 contractAddrText.setText(contractTxt);
-                symbolText.setText(token.tokenInfo.symbol);
                 amountString = symbol;
                 transactionBytes = viewModel.getERC721TransferBytes(toAddress, contractAddress, amountStr, chainId);
                 break;

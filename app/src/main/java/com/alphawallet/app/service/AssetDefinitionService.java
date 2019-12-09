@@ -252,13 +252,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      */
     public void checkExternalDirectoryAndLoad()
     {
-        //Check the external files directory for Android Q+
-        loadExternalContracts(context.getExternalFilesDir(""));
-
-        //Now check the legacy /AlphaWallet directory
+        //create XML repository directory
         File directory = new File(
                 Environment.getExternalStorageDirectory()
                         + File.separator + HomeViewModel.ALPHAWALLET_DIR);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q)
+        {
+            directory = context.getExternalFilesDir("");
+        }
 
         if (!directory.exists())
         {
@@ -584,15 +586,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             Observable.fromIterable(getCanonicalizedAssets())
                     .forEach(this::addContractAssets).isDisposed();
 
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q)
-            {
-                String externalDir = context.getExternalFilesDir("").getAbsolutePath();
-                if (directory.getAbsolutePath().contains(externalDir)) startFileListener(directory);
-            }
-            else if (directory.getAbsolutePath().contains(HomeViewModel.ALPHAWALLET_DIR))
-            {
-                startFileListener(directory);
-            }
+            startFileListener(directory);
         }
         catch (IOException|SAXException e)
         {
@@ -807,13 +801,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public boolean hasTokenView(int chainId, String contractAddr, String type)
     {
         TokenDefinition td = getAssetDefinition(chainId, contractAddr);
-        if (td != null && td.attributeSets.containsKey("cards"))
-        {
-            String view = td.attributeSets.get("cards").get(type);
-            // 8 characters is about minimum for a view
-            return view != null && view.length() > 8;
-        }
-        return false;
+        return td != null && td.attributeSets.containsKey("cards") && td.attributeSets.get("cards").containsKey(type);
     }
 
     public String getTokenView(int chainId, String contractAddr, String type)
@@ -880,7 +868,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    private void startFileListener(File path)
+    public void startFileListener(File path)
     {
         fileObserver = new FileObserver(path.getPath(), ALL_EVENTS)
         {

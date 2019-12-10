@@ -511,9 +511,12 @@ public class TokenRepository implements TokenRepositoryType {
                 {
                     //suspicious balance - check for ERC721 ticket
                     List<BigInteger> testBalance = getBalanceArray721Ticket(wallet, tokenInfo);
-                    if (testBalance != null && testBalance.size() > 0) addToken(wallet, tokenInfo, ContractType.ERC721_TICKET)
-                            .subscribe(this::updateInService).isDisposed();
-                    balance = token.balance;
+                    if (testBalance != null && testBalance.size() > 0)
+                    {
+                        addToken(wallet, tokenInfo, ContractType.ERC721_TICKET)
+                                .subscribe(this::updateInService).isDisposed();
+                        balance = token.balance;
+                    }
                 }
                 else if (token != null && balance.equals(BigDecimal.valueOf(32)) && responseValue.length() > 66)
                 {

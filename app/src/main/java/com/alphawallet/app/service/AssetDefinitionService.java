@@ -1054,16 +1054,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             case "erc20":
                 cType = ContractType.ERC20;
                 break;
-                //ERC721 and ERC721Ticket are contracts with different interfaces which are handled in different ways but we have chosen to describe them
-                // as the same within the tokenscript. Therefore checking the interface here has no value.
-            /*case "erc721":
+                // note: ERC721 and ERC721Ticket are contracts with different interfaces which are handled in different ways but we describe them
+                // as the same within the tokenscript.
+            case "erc721":
+                if (token.isERC721() || token.isERC721Ticket()) return;
                 cType = ContractType.ERC721;
-                if (token.isERC721() || token.isERC721Ticket()) return;
                 break;
-            case "erc721Ticket":
-                cType = ContractType.ERC721_TICKET;
+            case "erc721ticket":
                 if (token.isERC721() || token.isERC721Ticket()) return;
-                break;*/
+                cType = ContractType.ERC721_TICKET;
+                break;
             case "ethereum":
                 cType = ContractType.ETHEREUM;
                 break;
@@ -1106,7 +1106,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public TransactionResult getFunctionResult(ContractAddress contract, AttributeType attr, BigInteger tokenId)
     {
         TransactionResult tr = new TransactionResult(contract.chainId, contract.address, tokenId, attr);
-        try (Realm realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress())) {
+        try (Realm realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress()))
+        {
             RealmAuxData realmToken = realm.where(RealmAuxData.class)
                     .equalTo("instanceKey", functionKey(contract, tokenId, attr.id))
                     .equalTo("chainId", contract.chainId)
@@ -1117,8 +1118,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 tr.resultTime = realmToken.getResultTime();
                 tr.result = realmToken.getResult();
             }
-
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
 

@@ -128,7 +128,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                 return false;
             }
         });
-        tokenViewAdapter = new TokensAdapter(this, null, viewModel.getAssetDefinitionService());
+        tokenViewAdapter = new TokensAdapter(null, viewModel.getAssetDefinitionService(), viewModel.getTokensService());
         Token[] tokens = {token};
         tokenViewAdapter.setTokens(tokens);
         tokenView.setAdapter(tokenViewAdapter);

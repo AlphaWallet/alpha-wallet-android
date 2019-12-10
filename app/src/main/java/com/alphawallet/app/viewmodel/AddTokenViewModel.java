@@ -41,6 +41,9 @@ public class AddTokenViewModel extends BaseViewModel {
     private final MutableLiveData<TokenInfo> tokenInfo = new MutableLiveData<>();
     private final MutableLiveData<Integer> switchNetwork = new MutableLiveData<>();
     private final MutableLiveData<Token> finalisedToken = new MutableLiveData<>();
+    private final MutableLiveData<ContractType> tokentype = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> result = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> noContract = new MutableLiveData<>();
 
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final SetupTokensInteract setupTokensInteract;
@@ -56,8 +59,17 @@ public class AddTokenViewModel extends BaseViewModel {
     private int primaryChainId = 1;
     private String testAddress;
 
-    private final MutableLiveData<Boolean> result = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> update = new MutableLiveData<>();
+    public MutableLiveData<Wallet> wallet() {
+        return wallet;
+    }
+    public MutableLiveData<Token> tokenFinalised() { return finalisedToken; }
+    public MutableLiveData<ContractType> tokenType() { return tokentype; }
+    public MutableLiveData<Boolean> noContract() { return noContract; }
+    public LiveData<Boolean> result() { return result; }
+    public LiveData<Integer> switchNetwork() { return switchNetwork; }
+    public LiveData<TokenInfo> tokenInfo() {
+        return tokenInfo;
+    }
 
     @Nullable
     Disposable scanNetworksDisposable;
@@ -81,10 +93,7 @@ public class AddTokenViewModel extends BaseViewModel {
         this.tokensService = tokensService;
     }
 
-    public MutableLiveData<Wallet> wallet() {
-        return wallet;
-    }
-    public MutableLiveData<Token> tokenFinalised() { return finalisedToken; }
+
 
     public void save(String address, String symbol, int decimals, String name, int chainId) {
         TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, chainId);
@@ -139,7 +148,7 @@ public class AddTokenViewModel extends BaseViewModel {
     private void setupToken(int chainId, String addr) {
         disposable = setupTokensInteract
                 .update(addr, chainId)
-                .subscribe(this::onTokensSetup, this::onError, this::onFetchTokensCompletable);
+                .subscribe(this::onTokensSetup, this::onError);
     }
 
     public void fetchToken(int chainId, String addr)
@@ -166,16 +175,6 @@ public class AddTokenViewModel extends BaseViewModel {
         finalisedToken.postValue(token);
     }
 
-    public LiveData<Boolean> result() {
-        return result;
-    }
-
-    public LiveData<Boolean> update() {
-        return update;
-    }
-
-    public LiveData<Integer> switchNetwork() { return switchNetwork; }
-
     public NetworkInfo getNetworkInfo(int chainId) { return ethereumNetworkRepository.getNetworkByChain(chainId); }
 
     private void findWallet()
@@ -185,15 +184,16 @@ public class AddTokenViewModel extends BaseViewModel {
     }
 
     private void onTokensSetup(TokenInfo tokenData) {
-        tokenInfo.setValue(tokenData);
+        tokenInfo.postValue(tokenData);
+        disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenData)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(tokentype::postValue, this::tokenTypeError);
     }
 
-    private void onFetchTokensCompletable() {
-        update.postValue(true);
-    }
-
-    public LiveData<TokenInfo> tokenInfo() {
-        return tokenInfo;
+    private void tokenTypeError(Throwable throwable)
+    {
+        tokentype.postValue(ContractType.OTHER);
     }
 
     public void prepare()
@@ -319,7 +319,7 @@ public class AddTokenViewModel extends BaseViewModel {
         if (networkCount == 0 && !foundNetwork)
         {
             testAddress = null;
-            update.postValue(false);
+            noContract.postValue(true);
         }
     }
 

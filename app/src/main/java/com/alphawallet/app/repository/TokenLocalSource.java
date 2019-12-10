@@ -21,7 +21,6 @@ public interface TokenLocalSource {
     Map<Integer, Token> getTokenBalances(Wallet wallet, String address);
     void setEnable(NetworkInfo network, Wallet wallet, Token token, boolean isEnabled);
 
-    Single<Token[]> fetchAllTokens(NetworkInfo networkInfo, Wallet wallet);
     Single<Token> fetchEnabledToken(NetworkInfo networkInfo, Wallet wallet, String address);
     Single<Token[]> fetchEnabledTokensWithBalance(Wallet wallet);
     Single<Token> saveTicker(NetworkInfo network, Wallet wallet, Token token);

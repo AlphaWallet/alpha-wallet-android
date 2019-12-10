@@ -14,6 +14,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -76,6 +77,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     private RelativeLayout selectNetworkLayout;
     public TextView chainName;
     private QrUrlResult currentResult;
+    private InputView tokenType;
 
     private AWalletAlertDialog aDialog;
 
@@ -97,10 +99,11 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
         currentNetwork = findViewById(R.id.current_network);
         networkIcon = findViewById(R.id.network_icon);
+        tokenType = findViewById(R.id.input_token_type);
         selectNetworkLayout = findViewById(R.id.select_network_layout);
         selectNetworkLayout.setOnClickListener(v -> selectNetwork());
-
         selectNetworkLayout.setVisibility(View.VISIBLE);
+        tokenType.setVisibility(View.GONE);
 
         progressLayout = findViewById(R.id.layout_progress);
 
@@ -116,9 +119,11 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                 .get(AddTokenViewModel.class);
         viewModel.error().observe(this, this::onError);
         viewModel.result().observe(this, this::onSaved);
-        viewModel.update().observe(this, this::onChecked);
+        viewModel.noContract().observe(this, this::onNoContractFound);
         viewModel.tokenFinalised().observe(this, this::onFetchedToken);
         viewModel.switchNetwork().observe(this, this::setupNetwork);
+        viewModel.tokenType().observe(this, this::onTokenType);
+        viewModel.tokenInfo().observe(this, this::onTokenInfo);
         lastCheck = "";
 
         inputAddressView = findViewById(R.id.input_address_view);
@@ -150,6 +155,17 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         viewModel.prepare();
     }
 
+    private void onTokenType(ContractType contractType)
+    {
+        tokenType = findViewById(R.id.input_token_type);
+        showProgress(false);
+        if (contractType != ContractType.OTHER)
+        {
+            tokenType.setVisibility(View.VISIBLE);
+            tokenType.setText(contractType.toString());
+        }
+    }
+
     private void onFetchedToken(Token token)
     {
         showProgress(false);
@@ -161,7 +177,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
         else
         {
-            onNoContractFound();
+            onNoContractFound(true);
         }
     }
 
@@ -234,19 +250,9 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onChecked(boolean found)
+    private void onTokenInfo(TokenInfo tokenInfo)
     {
-        showProgress(false);
-        if (found)
-        {
-            TokenInfo token = viewModel.tokenInfo().getValue();
-            token.addTokenSetupPage(this, viewModel.getNetworkInfo(token.chainId).getShortName());
-        }
-        else
-        {
-            chainName.setVisibility(View.GONE);
-            onNoContractFound();
-        }
+        tokenInfo.addTokenSetupPage(this, viewModel.getNetworkInfo(tokenInfo.chainId).getShortName());
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {
@@ -333,7 +339,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onNoContractFound()
+    private void onNoContractFound(Boolean noContract)
     {
         aDialog = new AWalletAlertDialog(this);
         aDialog.setTitle(R.string.no_token_found_title);

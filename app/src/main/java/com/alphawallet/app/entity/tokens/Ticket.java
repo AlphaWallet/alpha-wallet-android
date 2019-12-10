@@ -61,11 +61,13 @@ public class Ticket extends Token implements Parcelable
     public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = balances;
+        balanceUpdateWeight = calculateBalanceUpdateWeight();
     }
 
     public Ticket(TokenInfo tokenInfo, String balances, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = stringHexToBigIntegerList(balances);
+        balanceUpdateWeight = calculateBalanceUpdateWeight();
     }
 
     private Ticket(Parcel in) {

@@ -27,8 +27,9 @@ public class TransactionResult
         resultTime = 0;
     }
 
-    public boolean needsUpdating(long lastTxCheck)
+    public boolean needsUpdating(long lastTxTime)
     {
-        return (lastTxCheck == 0 || (resultTime - lastTxCheck) <= 0);
+        //if contract had new transactions then update, or if last tx was -1 (always check)
+        return (resultTime == 0 || lastTxTime == -1 || lastTxTime > resultTime);
     }
 }

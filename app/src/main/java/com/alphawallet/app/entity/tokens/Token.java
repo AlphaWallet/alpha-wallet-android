@@ -43,7 +43,6 @@ public class Token implements Parcelable
     private String tokenWallet;
     protected ContractType contractType;
     public long lastBlockCheck = 0;
-    public long lastTxCheck = 0;
     private final String shortNetworkName;
     public float balanceUpdateWeight;
     public boolean balanceChanged;
@@ -51,7 +50,9 @@ public class Token implements Parcelable
     public boolean hasTokenScript;
     public boolean hasDebugTokenscript;
     public boolean refreshCheck;
-    public long    lastTxUpdate = 0;
+    public long lastTxCheck;
+    public long lastTxUpdate;
+    public long lastTxTime;
 
     public String getNetworkName() { return shortNetworkName; }
 
@@ -68,10 +69,10 @@ public class Token implements Parcelable
         this.shortNetworkName = networkName;
         this.contractType = type;
         this.pendingBalance = balance;
-        this.lastBlockCheck = 0;
-        this.lastTxCheck = System.currentTimeMillis() - (long)((Math.random()*60*1000));
         this.lastTxUpdate = 0;
-
+        this.lastTxCheck = 0;
+        this.lastBlockCheck = 0;
+        this.lastTxTime = 0;
         balanceUpdateWeight = calculateBalanceUpdateWeight();
         balanceChanged = false;
         walletUIUpdateRequired = false;
@@ -90,6 +91,7 @@ public class Token implements Parcelable
             balanceChanged = oldToken.balanceChanged;
             hasTokenScript = oldToken.hasTokenScript;
             hasDebugTokenscript = oldToken.hasDebugTokenscript;
+            lastTxTime = oldToken.lastTxTime;
         }
         refreshCheck = false;
     }
@@ -105,6 +107,7 @@ public class Token implements Parcelable
         lastBlockCheck = in.readLong();
         lastTxCheck = in.readLong();
         lastTxUpdate = in.readLong();
+        lastTxTime = in.readLong();
         int readTS = in.readByte();
         int readDTS = in.readByte();
         hasTokenScript = readTS == 1;
@@ -173,6 +176,7 @@ public class Token implements Parcelable
         dest.writeLong(lastBlockCheck);
         dest.writeLong(lastTxCheck);
         dest.writeLong(lastTxUpdate);
+        dest.writeLong(lastTxTime);
         dest.writeByte(hasTokenScript?(byte)1:(byte)0);
         dest.writeByte(hasDebugTokenscript?(byte)1:(byte)0);
     }
@@ -191,7 +195,7 @@ public class Token implements Parcelable
 
     public void setIsTerminated(RealmToken realmToken)
     {
-        realmToken.setAddedTime(-1);
+        realmToken.setUpdateTime(-1);
         updateBlancaTime = -1;
     }
     public boolean isTerminated() { return (updateBlancaTime == -1); }
@@ -469,7 +473,9 @@ public class Token implements Parcelable
     public void setupRealmToken(RealmToken realmToken)
     {
         lastBlockCheck = realmToken.getLastBlock();
-        lastTxUpdate = realmToken.getUpdatedTime();
+        lastTxUpdate = realmToken.getTXUpdateTime();
+        lastTxCheck = realmToken.getTXUpdateTime();
+        lastTxTime = realmToken.getLastTxTime();
     }
 
     public boolean checkBalanceChange(Token token)
@@ -518,7 +524,8 @@ public class Token implements Parcelable
     public void setRealmLastBlock(RealmToken realmToken)
     {
         realmToken.setLastBlock(lastBlockCheck);
-        realmToken.setUpdatedTime(lastTxUpdate);
+        realmToken.setTXUpdateTime(lastTxUpdate);
+        realmToken.setLastTxTime(lastTxTime);
     }
 
     /**
@@ -786,11 +793,11 @@ public class Token implements Parcelable
                 //testnet: TODO: check time since last transaction - if greater than 1 month slow update further
                 if (isEthereum())
                 {
-                    updateWeight = 0.25f;
+                    updateWeight = 0.4f;
                 }
                 else if (hasPositiveBalance())
                 {
-                    updateWeight = 0.1f;
+                    updateWeight = 0.25f;
                 }
                 else if (tokenInfo.name != null)
                 {

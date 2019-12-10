@@ -110,8 +110,7 @@ public class TokenFactory
 
         }
 
-        thisToken.lastBlockCheck = realmItem.getLastBlock();
-        thisToken.lastTxCheck = realmItem.getUpdatedTime();
+        thisToken.setupRealmToken(realmItem);
 
         return thisToken;
     }
@@ -165,12 +164,5 @@ public class TokenFactory
     {
         return new TokenInfo(realmItem.getAddress(), realmItem.getName(), realmItem.getSymbol(),
                 realmItem.getDecimals(), true, realmItem.getChainId());
-    }
-
-    public Token createERC721Token(RealmERC721Token realmItem, List<Asset> assets, long updateTime, String networkName)
-    {
-        TokenInfo tf = new TokenInfo(realmItem.getAddress(), realmItem.getName(), realmItem.getSymbol(), 0, true, realmItem.getChainId());
-        ContractType type = ContractType.values()[realmItem.getContractType()];
-        return new ERC721Token(tf, assets, updateTime, networkName, type);
     }
 }

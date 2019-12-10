@@ -141,27 +141,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    /**
-     * Fetches non fungible token definition given contract address and token ID
-     * @param token
-     * @param contractAddress
-     * @param tokenId
-     * @return
-     */
-    public NonFungibleToken getNonFungibleToken(Token token, String contractAddress, BigInteger tokenId)
-    {
-        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, contractAddress);
-        if (definition != null)
-        {
-            TokenScriptResult tsr = getTokenScriptResult(token, tokenId);
-            return new NonFungibleToken(tokenId, tsr);
-        }
-        else
-        {
-            return null;
-        }
-    }
-
     @Override
     public boolean resolveOptimisedAttr(ContractAddress contract, AttributeType attr, TransactionResult transactionResult)
     {
@@ -277,6 +256,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         File directory = new File(
                 Environment.getExternalStorageDirectory()
                         + File.separator + HomeViewModel.ALPHAWALLET_DIR);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q)
+        {
+            directory = context.getExternalFilesDir("");
+        }
 
         if (!directory.exists())
         {
@@ -612,9 +596,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void addContractsToNetwork(Integer network, Map<String, File> newTokenDescriptionAddresses)
     {
+        String externalDir = context.getExternalFilesDir("").getAbsolutePath();
         if (assetDefinitions.get(network) == null) assetDefinitions.put(network, new HashMap<>());
         for (String address : newTokenDescriptionAddresses.keySet())
         {
+            if (assetDefinitions.get(network).containsKey(address))
+            {
+                String filename = assetDefinitions.get(network).get(address).getAbsolutePath();
+                if (filename.contains(HomeViewModel.ALPHAWALLET_DIR)
+                    || filename.contains(externalDir)) continue; //don't override if this is a developer added script
+            }
             assetDefinitions.get(network).put(address, new TokenScriptFile(context, newTokenDescriptionAddresses.get(address).getAbsolutePath()));
         }
     }
@@ -1025,8 +1016,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             checkCorrectInterface(token, cInfo.contractInterface);
                                 Observable.fromIterable(token.getNonZeroArrayBalance())
                                         .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
-                                        .filter(txResult -> txResult.needsUpdating(token.lastTxUpdate))
-                                        .concatMap(result -> tokenscriptUtility.fetchAttrResult(token.getWallet(), attr.id, result.tokenId, cAddr, td, this, token.lastTxUpdate))
+                                        .filter(txResult -> txResult.needsUpdating(token.lastTxTime))
+                                        .concatMap(result -> tokenscriptUtility.fetchAttrResult(token.getWallet(), attr.id, result.tokenId, cAddr, td, this, token.lastTxTime))
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe();
@@ -1035,9 +1026,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         {
                             //doesn't have a contract interface, so just fetch the function
                             TransactionResult tr = getFunctionResult(cAddr, attr, BigInteger.ZERO);
-                            if (tr.needsUpdating(token.lastTxUpdate))
+                            if (tr.needsUpdating(token.lastTxTime))
                             {
-                                tokenscriptUtility.fetchAttrResult(token.getWallet(), attr.id, tr.tokenId, cAddr, td, this, token.lastTxUpdate)
+                                tokenscriptUtility.fetchAttrResult(token.getWallet(), attr.id, tr.tokenId, cAddr, td, this, token.lastTxTime)
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe();
@@ -1290,7 +1281,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
         //return definition.resolveAttributes(tokenId, this, cAddr);
         //resolveAttributes(BigInteger tokenId, AttributeInterface attrIf, ContractAddress cAddr, TokenDefinition td)
-        return tokenscriptUtility.resolveAttributes(token.getWallet(), tokenId, this, cAddr, definition, token.lastTxUpdate);
+        return tokenscriptUtility.resolveAttributes(token.getWallet(), tokenId, this, cAddr, definition, token.lastTxTime);
     }
 
     public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, List<BigInteger> tokenIds)

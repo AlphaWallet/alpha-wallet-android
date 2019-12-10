@@ -3,6 +3,7 @@ package com.alphawallet.app.entity.tokenscript;
 import io.reactivex.Observable;
 
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.token.entity.*;
 import com.alphawallet.token.tools.TokenDefinition;
 import okhttp3.OkHttpClient;
@@ -401,16 +402,15 @@ public abstract class TokenscriptFunction
                             params, returnTypes);
     }
 
-    private void handleTransactionResult(TransactionResult result, Function function, String responseValue, FunctionDefinition fd)
+    private void handleTransactionResult(TransactionResult result, Function function, String responseValue, FunctionDefinition fd, long lastTransactionTime)
     {
         try
         {
-            long currentTime = System.currentTimeMillis();
             //try to interpret the value
             List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
-            result.resultTime = currentTime;
             if (response.size() > 0)
             {
+                result.resultTime = lastTransactionTime;
                 Type val = response.get(0);
                 switch (fd.syntax)
                 {
@@ -431,6 +431,10 @@ public abstract class TokenscriptFunction
                         }
                         break;
                 }
+            }
+            else
+            {
+                result.resultTime = 0;
             }
         }
         catch (Exception e)
@@ -501,7 +505,8 @@ public abstract class TokenscriptFunction
      * @param definition
      * @return
      */
-    public Observable<TransactionResult> fetchResultFromEthereum(String walletAddress, ContractAddress override, AttributeType attr, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
+    public Observable<TransactionResult> fetchResultFromEthereum(String walletAddress, ContractAddress override, AttributeType attr,
+                                                                 BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf, long lastTransactionTime)
     {
         return Observable.fromCallable(() -> {
             ContractAddress useAddress;
@@ -515,30 +520,19 @@ public abstract class TokenscriptFunction
                 useAddress = override;
             }
             TransactionResult transactionResult = new TransactionResult(useAddress.chainId, useAddress.address, tokenId, attr);
-            // 1: create transaction call
             org.web3j.abi.datatypes.Function transaction = generateTransactionFunction(walletAddress, tokenId, definition, attr.function, attrIf);
-            // 2: create web3 connection
-            OkHttpClient okClient = new OkHttpClient.Builder()
-                    .connectTimeout(5, TimeUnit.SECONDS)
-                    .readTimeout(5, TimeUnit.SECONDS)
-                    .writeTimeout(5, TimeUnit.SECONDS)
-                    .retryOnConnectionFailure(false)
-                    .build();
-
-            HttpService nodeService = new HttpService(EthereumNetworkRepository.getNodeURLByNetworkId(useAddress.chainId), okClient, false);
-
-            Web3j web3j = Web3j.build(nodeService);
 
             //now push the transaction
-            String result = callSmartContractFunction(web3j, transaction, useAddress.address, ZERO_ADDRESS);
+            String result = callSmartContractFunction(TokenRepository.getWeb3jService(useAddress.chainId), transaction, useAddress.address, ZERO_ADDRESS);
 
-            handleTransactionResult(transactionResult, transaction, result, attr.function);
+            handleTransactionResult(transactionResult, transaction, result, attr.function, lastTransactionTime);
             return transactionResult;
         });
     }
 
     private String callSmartContractFunction(Web3j web3j,
-                                             Function function, String contractAddress, String walletAddr) throws Exception {
+                                             Function function, String contractAddress, String walletAddr)
+    {
         String encodedFunction = FunctionEncoder.encode(function);
 
         try
@@ -590,7 +584,7 @@ public abstract class TokenscriptFunction
             else  //if value is old or there wasn't any previous value
             {
                 //for function query, never need wallet address
-                return fetchResultFromEthereum(walletAddress, useAddress, attr, tokenId, td, attrIf)       // Fetch function result from blockchain
+                return fetchResultFromEthereum(walletAddress, useAddress, attr, tokenId, td, attrIf, transactionUpdate)       // Fetch function result from blockchain
                         .map(result -> restoreFromDBIfRequired(result, transactionResult))  // If network unavailable restore value from cache
                         .map(attrIf::storeAuxData)                                          // store new data
                         .map(result -> parseFunctionResult(result, attr));    // write returned data into attribute
@@ -641,7 +635,6 @@ public abstract class TokenscriptFunction
 
     private Observable<TokenScriptResult.Attribute> resultFromDatabase(TransactionResult transactionResult, AttributeType attr)
     {
-        //return Observable.fromCallable(() -> attr.function.parseFunctionResult(transactionResult, attr));
         return Observable.fromCallable(() -> parseFunctionResult(transactionResult, attr));
     }
 

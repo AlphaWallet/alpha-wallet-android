@@ -49,4 +49,5 @@ public interface TokenRepositoryType {
     Single<Token[]> addERC20(Wallet wallet, Token[] tokens);
 
     void updateTokenType(Token token, Wallet wallet, ContractType type);
+    Single<Token[]> storeTickers(Wallet wallet, Token[] tokens);
 }

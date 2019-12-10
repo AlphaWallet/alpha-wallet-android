@@ -208,7 +208,7 @@ public class Token implements Parcelable
         if (isTerminated()) return SetupTokensInteract.EXPIRED_CONTRACT;
         if (isBad()) return SetupTokensInteract.UNKNOWN_CONTRACT;
         String name = tokenInfo.name == null ? "" : tokenInfo.name;
-        String symbol = tokenInfo.symbol == null ? "" : "(" + tokenInfo.symbol.toUpperCase() + ")";
+        String symbol = (tokenInfo.symbol == null || tokenInfo.symbol.length() == 0) ? "" : " (" + tokenInfo.symbol.toUpperCase() + ")";
         return name + symbol;
     }
 
@@ -480,7 +480,7 @@ public class Token implements Parcelable
 
     public boolean checkBalanceChange(Token token)
     {
-        return token != null && !getFullBalance().equals(token.getFullBalance());
+        return token != null && (!getFullBalance().equals(token.getFullBalance()) || !tokenInfo.name.equals(token.tokenInfo.name));
     }
 
     public String getPendingDiff()

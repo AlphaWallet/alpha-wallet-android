@@ -585,6 +585,7 @@ public class WalletViewModel extends BaseViewModel
         if (ethereumNetworkRepository.checkTickers())
         {
             ethereumNetworkRepository.attachTokenTickers(tokensService.getAllLiveTokens().toArray(new Token[0]))
+                    .flatMap(tokens -> fetchTokensInteract.storeTickers(currentWallet, tokens)) //store tickers so they can be recreated at startup. This stops the token display from 'janking' around at startup
                     .observeOn(Schedulers.newThread())
                     .subscribeOn(AndroidSchedulers.mainThread())
                     .subscribe(tokens::postValue).isDisposed();

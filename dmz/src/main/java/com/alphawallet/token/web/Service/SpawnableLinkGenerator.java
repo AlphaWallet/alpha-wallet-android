@@ -13,11 +13,11 @@ import java.util.List;
 class SpawnableLinkGenerator {
 
     private static List<BigInteger> tokens = new ArrayList<>();
-    private static final String contractAddress = "0xc2f901070AdcfA07Bc5c46cc2390063248eb9E81";
+    private static final String contractAddress = "0x0f43923667843bccafd12a5c001a7838fa5fc8ab";
     private static ParseMagicLink parseMagicLink = new ParseMagicLink(new CryptoFunctions(), null);
     //TODO set private key & chain id
     private static final BigInteger privateKey = BigInteger.TEN;
-    private static final int chainId = 3;
+    private static final int chainId = 100;
 
     // Time todo put in right format & set each time
     private static final String date = "20240706210000+0300";
@@ -123,7 +123,7 @@ class SpawnableLinkGenerator {
     }
 
     //TODO this function should be in the libs module not here or in the app
-    private static byte[] bytesFromSignature(Sign.SignatureData signature)
+    static byte[] bytesFromSignature(Sign.SignatureData signature)
     {
         byte[] sigBytes = new byte[65];
         Arrays.fill(sigBytes, (byte) 0);

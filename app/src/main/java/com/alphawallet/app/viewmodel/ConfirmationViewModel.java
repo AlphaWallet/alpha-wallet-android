@@ -268,4 +268,9 @@ public class ConfirmationViewModel extends BaseViewModel {
     {
         keyService.resetSigningDialog();
     }
+
+    public Token getToken(int chainId, String contractAddress)
+    {
+        return tokensService.getToken(chainId, contractAddress);
+    }
 }

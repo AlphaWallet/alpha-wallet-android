@@ -273,12 +273,6 @@ public class TokenRepository implements TokenRepositoryType {
         }).flatMap(nToken -> localSource.saveToken(wallet, nToken));
     }
 
-    private Token addTokenTicker(Token newToken, Ticker ticker)
-    {
-        newToken.ticker = new TokenTicker(ticker, newToken.getAddress(), null);
-        return newToken;
-    }
-
     private String callStringFunction(String method, String address, NetworkInfo network, BigInteger tokenId)
     {
         String result;
@@ -330,6 +324,12 @@ public class TokenRepository implements TokenRepositoryType {
     public void updateTokenType(Token token, Wallet wallet, ContractType type)
     {
         localSource.updateTokenType(token, wallet, type);
+    }
+
+    @Override
+    public Single<Token[]> storeTickers(Wallet wallet, Token[] tokens)
+    {
+        return localSource.saveTickers(wallet, tokens);
     }
 
     @Override
@@ -475,7 +475,9 @@ public class TokenRepository implements TokenRepositoryType {
                 e.printStackTrace();
                 return token;
             }
-        }).flatMap(ethereumNetworkRepository::attachTokenTicker);
+        })
+        .flatMap(ethereumNetworkRepository::attachTokenTicker)
+        .flatMap(ttoken -> localSource.saveTicker(wallet, ttoken));
     }
 
     /**
@@ -631,13 +633,13 @@ public class TokenRepository implements TokenRepositoryType {
                         return oldToken;
                     }
                 })
-                .flatMap(token -> localSource.fetchTicker(network, wallet, token)
+                .flatMap(token -> localSource.fetchTicker(wallet, token)
                         .flatMap(ticker -> ethereumNetworkRepository.getTicker(network.chainId, ticker))
                         .map(ticker -> {
                             token.ticker = new TokenTicker(String.valueOf(network.chainId), wallet.address, ticker.price_usd, ticker.percentChange24h, "USD", null);
                             return token;
                         })
-                        .flatMap(ttoken -> localSource.saveTicker(network, wallet, ttoken))
+                        .flatMap(ttoken -> localSource.saveTicker(wallet, ttoken))
                         .doOnError(throwable -> { System.out.println(throwable.getMessage()); })
                         .onErrorResumeNext(throwable -> Single.just(token)));
     }

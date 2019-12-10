@@ -24,8 +24,9 @@ public interface TokenLocalSource {
     Single<Token[]> fetchAllTokens(NetworkInfo networkInfo, Wallet wallet);
     Single<Token> fetchEnabledToken(NetworkInfo networkInfo, Wallet wallet, String address);
     Single<Token[]> fetchEnabledTokensWithBalance(Wallet wallet);
-    Single<Token> saveTicker(NetworkInfo network, Wallet wallet, Token token);
-    Single<TokenTicker> fetchTicker(NetworkInfo network, Wallet wallet, Token tokens);
+    Single<Token> saveTicker(Wallet wallet, Token token);
+    Single<Token[]> saveTickers(Wallet wallet, Token[] tokens);
+    Single<TokenTicker> fetchTicker(Wallet wallet, Token tokens);
 
     Disposable setTokenTerminated(Token token, NetworkInfo network, Wallet wallet);
     Disposable storeBlockRead(Token token, Wallet wallet);

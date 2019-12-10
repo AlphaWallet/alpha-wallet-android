@@ -15,6 +15,8 @@ public class TokenTicker implements Parcelable {
     public final String percentChange24h;
     public final String image;
 
+    public boolean isCurrent;
+
     public TokenTicker(String id, String contract, String price, String percentChange24h, String symbol, String image) {
         this.id = id;
         this.contract = contract;
@@ -22,6 +24,7 @@ public class TokenTicker implements Parcelable {
         this.percentChange24h = percentChange24h;
         this.image = image;
         this.priceSymbol = symbol;
+        isCurrent = true;
     }
 
     public TokenTicker(Ticker ticker, String contract, String image) {
@@ -45,6 +48,7 @@ public class TokenTicker implements Parcelable {
         {
             this.priceSymbol = ticker.symbol;
         }
+        isCurrent = true;
     }
 
     private TokenTicker(Parcel in) {
@@ -54,6 +58,7 @@ public class TokenTicker implements Parcelable {
         percentChange24h = in.readString();
         image = in.readString();
         priceSymbol = in.readString();
+        isCurrent = in.readInt() == 1;
     }
 
     public static final Creator<TokenTicker> CREATOR = new Creator<TokenTicker>() {
@@ -81,5 +86,6 @@ public class TokenTicker implements Parcelable {
         dest.writeString(percentChange24h);
         dest.writeString(image);
         dest.writeString(priceSymbol);
+        dest.writeInt(isCurrent ? 1 : 0);
     }
 }

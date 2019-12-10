@@ -30,6 +30,7 @@ import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
+import io.reactivex.SingleSource;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.realm.Realm;
@@ -219,13 +220,13 @@ public class TokensRealmSource implements TokenLocalSource {
                         .equalTo("isEnabled", true)
                         .findAll();
 
-                return convertMulti(realmItems, System.currentTimeMillis(), wallet, realm);  //convertBalance(realmItems, System.currentTimeMillis(), wallet);
+                return convertMulti(realmItems, System.currentTimeMillis(), wallet, realm);
             }
             catch (Exception e)
             {
                 return new Token[0]; //ensure fetch completes
             }
-        });
+        }).flatMap(tokens -> attachTickers(tokens, wallet));
     }
 
     @Override
@@ -249,30 +250,16 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Single<Token> saveTicker(NetworkInfo network, Wallet wallet, final Token token) {
+    public Single<Token> saveTicker(Wallet wallet, final Token token) {
         return Single.fromCallable(() -> {
+            if (!WalletUtils.isValidAddress(wallet.address)
+                    || token.ticker == null) return token;
+
             try (Realm realm = realmManager.getRealmInstance(wallet))
             {
-                if (!WalletUtils.isValidAddress(wallet.address)) return token;
                 TransactionsRealmCache.addRealm();
                 realm.beginTransaction();
-                long now = System.currentTimeMillis();
-                String tickerName = token.getAddress() + "-" + token.tokenInfo.chainId;
-                RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
-                        .equalTo("contract", tickerName)
-                        .findFirst();
-                if (realmItem == null) {
-                    realmItem = realm.createObject(RealmTokenTicker.class, tickerName);
-                    realmItem.setCreatedTime(now);
-                }
-                realmItem.setId(token.ticker.id);
-                realmItem.setPercentChange24h(token.ticker.percentChange24h);
-                realmItem.setPrice(token.ticker.price);
-                realmItem.setImage(TextUtils.isEmpty(token.ticker.image)
-                        ? String.format(COINMARKETCAP_IMAGE_URL, token.ticker.id)
-                        : token.ticker.image);
-                realmItem.setUpdatedTime(now);
-                realmItem.setCurrencySymbol(token.ticker.priceSymbol);
+                writeTickerToRealm(realm, token);
                 realm.commitTransaction();
             }
             catch (Exception e)
@@ -284,36 +271,104 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Single<TokenTicker> fetchTicker(NetworkInfo network, Wallet wallet, Token token) {
+    public Single<Token[]> saveTickers(Wallet wallet, Token[] tokens)
+    {
         return Single.fromCallable(() -> {
-            ArrayList<TokenTicker> tokenTickers = new ArrayList<>();
             try (Realm realm = realmManager.getRealmInstance(wallet))
             {
-                long minCreatedTime = System.currentTimeMillis() - ACTUAL_TOKEN_TICKER_INTERVAL;
-                RealmResults<RealmTokenTicker> rawItems = realm.where(RealmTokenTicker.class)
-                        .equalTo("contract", token.getAddress() + "-" + token.tokenInfo.chainId)
-                        .greaterThan("updatedTime", minCreatedTime)
-                        .findAll();
-                int len = rawItems.size();
-                for (int i = 0; i < len; i++)
+                TransactionsRealmCache.addRealm();
+                realm.beginTransaction();
+                for (Token token : tokens)
                 {
-                    RealmTokenTicker rawItem = rawItems.get(i);
-                    if (rawItem != null)
-                    {
-                        String currencySymbol = rawItem.getCurrencySymbol();
-                        if (currencySymbol == null || currencySymbol.length() == 0) currencySymbol = "USD";
-                        tokenTickers.add(new TokenTicker(rawItem.getId(), rawItem.getContract(), rawItem.getPrice(), rawItem.getPercentChange24h(), rawItem.getCurrencySymbol(), rawItem.getImage()));
-                    }
+                    if (!WalletUtils.isValidAddress(wallet.address)
+                            || token.ticker == null) continue;
+                    writeTickerToRealm(realm, token);
                 }
+                realm.commitTransaction();
+                TransactionsRealmCache.subRealm();
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
+            }
+            return tokens;
+        });
+    }
+
+    private void writeTickerToRealm(Realm realm, final Token token)
+    {
+        long now = System.currentTimeMillis();
+        String tickerName = databaseKey(token);
+        RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
+                .equalTo("contract", tickerName)
+                .findFirst();
+        if (realmItem == null) {
+            realmItem = realm.createObject(RealmTokenTicker.class, tickerName);
+            realmItem.setCreatedTime(now);
+        }
+        realmItem.setId(token.ticker.id);
+        realmItem.setPercentChange24h(token.ticker.percentChange24h);
+        realmItem.setPrice(token.ticker.price);
+        realmItem.setImage(TextUtils.isEmpty(token.ticker.image)
+                           ? String.format(COINMARKETCAP_IMAGE_URL, token.ticker.id)
+                           : token.ticker.image);
+        realmItem.setUpdatedTime(now);
+        realmItem.setCurrencySymbol(token.ticker.priceSymbol);
+    }
+
+    private Single<Token[]> attachTickers(Token[] tokens, Wallet wallet)
+    {
+        return Single.fromCallable(() -> {
+            try (Realm realm = realmManager.getRealmInstance(wallet))
+            {
+                for (Token t : tokens)
+                {
+                    RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
+                            .equalTo("contract", databaseKey(t))
+                            .findFirst();
+                    t.ticker = convertRealmTicker(realmItem);
+                }
+            }
+            return tokens;
+        });
+    }
+
+    @Override
+    public Single<TokenTicker> fetchTicker(Wallet wallet, Token token) {
+        return Single.fromCallable(() -> {
+            TokenTicker tokenTicker = null;
+            try (Realm realm = realmManager.getRealmInstance(wallet))
+            {
+                RealmTokenTicker rawItem = realm.where(RealmTokenTicker.class)
+                        .equalTo("contract", token.getAddress() + "-" + token.tokenInfo.chainId)
+                        .findFirst();
+
+                tokenTicker = convertRealmTicker(rawItem);
             }
             catch (Exception e)
             {
                 e.printStackTrace();
             }
-            return tokenTickers.size() == 0
-                    ? new TokenTicker("0", "0", "0", "0", "USD", null)
-                    : tokenTickers.get(0);
+            return tokenTicker == null
+                    ? new TokenTicker("0", "", "0", "0", "USD", null)
+                    : tokenTicker;
         });
+    }
+
+    private TokenTicker convertRealmTicker(RealmTokenTicker rawItem)
+    {
+        TokenTicker tokenTicker = null;
+        if (rawItem != null)
+        {
+            long minCreatedTime = System.currentTimeMillis() - ACTUAL_TOKEN_TICKER_INTERVAL;
+            String currencySymbol = rawItem.getCurrencySymbol();
+            if (currencySymbol == null || currencySymbol.length() == 0)
+                currencySymbol = "USD";
+            tokenTicker = new TokenTicker(rawItem.getId(), rawItem.getContract(), rawItem.getPrice(), rawItem.getPercentChange24h(), currencySymbol, rawItem.getImage());
+            if (rawItem.getUpdatedTime() < minCreatedTime) tokenTicker.isCurrent = false;
+        }
+
+        return tokenTicker;
     }
 
     @Override
@@ -323,7 +378,8 @@ public class TokensRealmSource implements TokenLocalSource {
             token.tokenInfo.isEnabled = isEnabled;
             realm = realmManager.getRealmInstance(wallet);
             RealmToken realmToken = realm.where(RealmToken.class)
-                    .equalTo("address", token.tokenInfo.address)
+                    .equalTo("address", databaseKey(token))
+                    .equalTo("chainId", network.chainId)
                     .findFirst();
 
             TransactionsRealmCache.addRealm();
@@ -521,8 +577,6 @@ public class TokensRealmSource implements TokenLocalSource {
             realmToken.setSymbol(token.tokenInfo.symbol);
             realmToken.setDecimals(token.tokenInfo.decimals);
             realmToken.setUpdateTime(token.updateBlancaTime);
-            realmToken.setTXUpdateTime(token.lastTxUpdate);
-            realmToken.setLastTxTime(token.lastTxTime);
             token.setRealmBalance(realmToken);
             token.setRealmInterfaceSpec(realmToken);
             token.setRealmLastBlock(realmToken);
@@ -539,6 +593,8 @@ public class TokensRealmSource implements TokenLocalSource {
             if (token.checkRealmBalanceChange(realmToken))
             {
                 //has token changed?
+                realmToken.setName(token.tokenInfo.name);
+                realmToken.setSymbol(token.tokenInfo.symbol);
                 realmToken.setUpdateTime(token.updateBlancaTime);
                 token.setRealmInterfaceSpec(realmToken);
                 token.setRealmBalance(realmToken);

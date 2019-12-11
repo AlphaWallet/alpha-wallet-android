@@ -84,16 +84,4 @@ public class FetchTransactionsInteract {
     {
         return transactionRepository.fetchCachedTransaction(walletAddress, hash);
     }
-
-    public Observable<TokenInfo> queryInterfaceSpecForService(TokenInfo tokenInfo)
-    {
-        return queryInterfaceSpec(tokenInfo).toObservable()
-                .map(spec -> addSpecToService(tokenInfo, spec));
-    }
-
-    private TokenInfo addSpecToService(TokenInfo info, ContractType contractType)
-    {
-        TokensService.setInterfaceSpec(info.chainId, info.address, contractType);
-        return info;
-    }
 }

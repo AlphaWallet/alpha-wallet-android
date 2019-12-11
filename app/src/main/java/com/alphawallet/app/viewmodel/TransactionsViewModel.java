@@ -153,9 +153,9 @@ public class TransactionsViewModel extends BaseViewModel
             if (tokensService.getToken(t.chainId, t.address) == null)
             {
                 queryUnknownTokensDisposable = setupTokensInteract.addToken(t.address, t.chainId) //fetch tokenInfo
-                        .flatMap(fetchTransactionsInteract::queryInterfaceSpecForService)
                         .filter(tokenInfo -> tokenInfo.name != null)
-                        .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.chainId, tokenInfo.address), defaultWallet().getValue())) //add to database
+                        .flatMap(tokenInfo -> fetchTransactionsInteract.queryInterfaceSpec(tokenInfo).toObservable()
+                                .flatMap(contractType -> addTokenInteract.add(tokenInfo, contractType, defaultWallet().getValue())))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
                         .subscribe(this::updateTokenService, this::onError, this::reCheckUnknowns);

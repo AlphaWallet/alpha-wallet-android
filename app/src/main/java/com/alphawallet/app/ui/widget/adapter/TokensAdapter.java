@@ -39,7 +39,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private static final BigDecimal CUTOFF_VALUE = BigDecimal.valueOf(99999999999L);
 
     private int filterType;
-    private boolean needsRefresh;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
 
@@ -85,14 +84,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService, TokensService tService) {
         this.onTokenClickListener = onTokenClickListener;
-        needsRefresh = true;
         this.assetService = aService;
         this.tokensService = tService;
     }
 
     protected TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService) {
         this.onTokenClickListener = onTokenClickListener;
-        needsRefresh = true;
         this.assetService = aService;
         this.tokensService = null;
     }
@@ -143,13 +140,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         return items.size();
     }
 
-    public boolean checkTokens()
-    {
-        boolean refresh = needsRefresh;
-        needsRefresh = false;
-        return refresh;
-    }
-
     public void addWarning(WarningData data)
     {
         items.add(new WarningSortedItem(data, 0));
@@ -185,9 +175,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         if (tokensService != null) tokensService.markTokenUpdated(token);
         if (canDisplayToken(token))
         {
-            int added = items.add(new TokenSortedItem(token, calculateWeight(token)));
-            if (!internal || added > 0)
-                notifyItemChanged(added);
+            items.add(new TokenSortedItem(token, calculateWeight(token)));
         }
         else
         {
@@ -204,8 +192,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                         Log.d(TAG, "REMOVE: " + token.getFullName());
                         items.removeItemAt(i);
                         notifyItemRemoved(i);
-                        if (!internal)
-                            notifyDataSetChanged();
                         break;
                     }
                 }
@@ -401,17 +387,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         items.clear();
         items.endBatchedUpdates();
         notifyDataSetChanged();
-        needsRefresh = true;
     }
 
     private void checkLiveToken(Token t)
     {
         if (t != null) t.checkIsMatchedInXML(assetService);
-    }
-
-    public void setClear()
-    {
-        needsRefresh = true;
     }
 
     public boolean hasBackupWarning()

@@ -751,54 +751,36 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     private void checkAuthentication(Operation operation)
     {
-        try
+        //first check if the phone is unlocked
+        String dialogTitle;
+        switch (operation)
         {
-            //first check if the phone is unlocked
-            String  dialogTitle;
-            boolean requireUnlock = false;
-            switch (operation)
-            {
-                case UPGRADE_HD_KEY:
-                case UPGRADE_KEYSTORE_KEY:
-                    requireUnlock = true;
-                    //drop through
-                case IMPORT_HD_KEY:
-                case CREATE_HD_KEY:
-                case CREATE_KEYSTORE_KEY:
-                case CREATE_PRIVATE_KEY:
-                    dialogTitle = context.getString(R.string.provide_authentication);
-                    break;
-                case FETCH_MNEMONIC:
-                case CHECK_AUTHENTICATION:
-                case SIGN_DATA:
-                    requireUnlock = true;
-                default:
-                    dialogTitle = context.getString(R.string.unlock_private_key);
-                    break;
-            }
-
-            //see if unlock is required
-            if (!requireUnlock && !requiresUnlock() && signCallback != null)
-            {
-                signCallback.GotAuthorisation(true);
-                return;
-            }
-
-            signDialog = new SignTransactionDialog(activity, operation, dialogTitle, null);
-            signDialog.setCanceledOnTouchOutside(false);
-            signDialog.setCancelListener(v -> {
-                authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation);
-            });
-            signDialog.setOnDismissListener(v -> {
-                signDialog = null;
-            });
-            signDialog.show();
-            signDialog.getFingerprintAuthorisation(this);
+            case UPGRADE_HD_KEY:
+            case UPGRADE_KEYSTORE_KEY:
+            case CREATE_PRIVATE_KEY:
+            case CREATE_KEYSTORE_KEY:
+            case IMPORT_HD_KEY:
+            case CREATE_HD_KEY:
+                dialogTitle = context.getString(R.string.provide_authentication);
+                break;
+            case FETCH_MNEMONIC:
+            case CHECK_AUTHENTICATION:
+            case SIGN_DATA:
+            default:
+                dialogTitle = context.getString(R.string.unlock_private_key);
+                break;
         }
-        catch (Exception e)
-        {
-            keyFailure(e.getMessage());
-        }
+
+        signDialog = new SignTransactionDialog(activity, operation, dialogTitle, null);
+        signDialog.setCanceledOnTouchOutside(false);
+        signDialog.setCancelListener(v -> {
+            authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation);
+        });
+        signDialog.setOnDismissListener(v -> {
+            signDialog = null;
+        });
+        signDialog.show();
+        signDialog.getFingerprintAuthorisation(this);
     }
 
     @Override
@@ -1240,13 +1222,13 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         return securityStatus == SecurityStatus.HAS_STRONGBOX;
     }
 
-    private boolean requiresUnlock() throws KeyServiceException
+    private boolean requiresUnlock()
     {
         try
         {
             unpackMnemonic();
         }
-        catch (UserNotAuthenticatedException e)
+        catch (UserNotAuthenticatedException | KeyServiceException e)
         {
             return true;
         }

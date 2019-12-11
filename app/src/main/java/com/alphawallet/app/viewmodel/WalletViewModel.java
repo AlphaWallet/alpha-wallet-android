@@ -286,9 +286,6 @@ public class WalletViewModel extends BaseViewModel
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::storedTokens, this::onError).isDisposed();
-
-            //TODO: Once we start receiving ERC20 tickers check backup requirement if ERC20 received
-            //checkBackup();
         }
     }
 
@@ -315,13 +312,19 @@ public class WalletViewModel extends BaseViewModel
      */
     private void updateTokenBalances()
     {
-        unknownAddresses.addAll(ethereumNetworkRepository.getAllKnownContracts(tokensService.getNetworkFilters()));
-        checkUnknownAddresses();
+        AddUnresolvedContracts();
         if (balanceTimerDisposable == null || balanceTimerDisposable.isDisposed())
         {
             balanceTimerDisposable = Observable.interval(0, BALANCE_CHECK_INTERVAL_MILLIS, TimeUnit.MILLISECONDS)
                     .doOnNext(l -> checkBalances()).subscribe();
         }
+    }
+
+    private void AddUnresolvedContracts()
+    {
+        Observable.fromArray(ethereumNetworkRepository.getAllKnownContracts(tokensService.getNetworkFilters()).toArray(new ContractResult[0]))
+                .filter(result -> tokensService.getToken(result.chainId, result.name) == null)
+                .forEach(r -> unknownAddresses.add(r)).isDisposed();
     }
 
     private void checkBalances()
@@ -467,44 +470,20 @@ public class WalletViewModel extends BaseViewModel
         isVisible = visibility;
     }
 
-    public void checkKnownContracts(List<ContractResult> knownContracts)
-    {
-        List<Token> tokens = tokensService.getAllTokens();
-        //Add all unterminated contracts that have null names
-        for (Token t : tokens) if (t.tokenInfo.name == null && !t.isTerminated()) ContractResult.addIfNotInList(knownContracts, new ContractResult(t.getAddress(), t.tokenInfo.chainId));
-
-        for (NetworkInfo network : ethereumNetworkRepository.getAvailableNetworkList())
-        {
-            List<String> contracts = assetDefinitionService.getAllContracts(network.chainId);
-            for (String contract : contracts)
-            {
-                ContractResult test = new ContractResult(contract, network.chainId);
-                ContractResult.addIfNotInList(knownContracts, test);
-            }
-        }
-
-        unknownAddresses.addAll(tokensService.reduceToUnknown(knownContracts));
-    }
-
     private void checkUnknownAddresses()
     {
         ContractResult contract = unknownAddresses.poll();
+
         if (contract != null)
         {
-            disposable = setupTokensInteract.addToken(contract.name, contract.chainId)
+            disposable = setupTokensInteract.addToken(contract.name, contract.chainId) //fetch tokenInfo
+                    .filter(tokenInfo -> tokenInfo.name != null)
+                    .flatMap(tokenInfo -> fetchTransactionsInteract.queryInterfaceSpec(tokenInfo).toObservable()
+                            .flatMap(contractType -> addTokenInteract.add(tokenInfo, contractType, currentWallet)))
                     .subscribeOn(Schedulers.io())
-                    .observeOn(Schedulers.computation())
-                    .subscribe(this::resolvedToken, this::onTokenAddError);
+                    .observeOn(Schedulers.io())
+                    .subscribe(this::finishedImport, this::onError);
         }
-    }
-
-    private void resolvedToken(TokenInfo info)
-    {
-        disposable = fetchTransactionsInteract.queryInterfaceSpecForService(info)
-                .flatMap(tokenInfo -> addTokenInteract.add(tokenInfo, tokensService.getInterfaceSpec(tokenInfo.chainId, tokenInfo.address), currentWallet))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::finishedImport, this::onTokenAddError);
     }
 
     private void finishedImport(Token token)

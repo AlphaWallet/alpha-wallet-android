@@ -550,10 +550,11 @@ public class TokenRepository implements TokenRepositoryType {
         if (balance.size() > 0)
         {
             BigInteger firstVal = balance.get(0);
-            if (token != null && firstVal.compareTo(BigInteger.valueOf(NODE_COMMS_ERROR)) == 0)
+            if (firstVal.compareTo(BigInteger.valueOf(NODE_COMMS_ERROR)) == 0)
             {
                 //comms error, use previous token balance
-                balance = token.getArrayBalance();
+                if (token != null) balance = token.getArrayBalance();
+                else balance.clear();
             }
             else if (firstVal.compareTo(BigInteger.valueOf(CONTRACT_BALANCE_NULL)) == 0)
             {
@@ -1127,17 +1128,6 @@ public class TokenRepository implements TokenRepositoryType {
         String encodedFunction = FunctionEncoder.encode(function);
         return Numeric.hexStringToByteArray(Numeric.cleanHexPrefix(encodedFunction));
     }
-
-//    private Token[] mapToTokens(TokenInfo[] items) {
-//        int len = items.length;
-//        Token[] tokens = new Token[len];
-//        for (int i = 0; i < len; i++)
-//        {
-//            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(items[i].chainId);
-//            tokens[i] = new Token(items[i], null, 0, network.getShortName(), 0);
-//        }
-//        return tokens;
-//    }
 
     @Override
     public Single<ContractResult> getTokenResponse(String address, int chainId, String method)

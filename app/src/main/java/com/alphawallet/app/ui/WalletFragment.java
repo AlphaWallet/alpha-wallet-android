@@ -123,7 +123,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
     private void refreshList()
     {
-        adapter.setClear();
+        adapter.clear();
         viewModel.reloadTokens();
     }
 

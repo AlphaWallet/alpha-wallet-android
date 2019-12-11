@@ -569,10 +569,11 @@ public class TokenRepository implements TokenRepositoryType {
         if (balance.size() > 0)
         {
             BigInteger firstVal = balance.get(0);
-            if (token != null && firstVal.compareTo(BigInteger.valueOf(NODE_COMMS_ERROR)) == 0)
+            if (firstVal.compareTo(BigInteger.valueOf(NODE_COMMS_ERROR)) == 0)
             {
                 //comms error, use previous token balance
-                balance = token.getArrayBalance();
+                if (token != null) balance = token.getArrayBalance();
+                else balance.clear();
             }
             else if (firstVal.compareTo(BigInteger.valueOf(CONTRACT_BALANCE_NULL)) == 0)
             {
@@ -1258,13 +1259,13 @@ public class TokenRepository implements TokenRepositoryType {
     {
         ContractType returnType = ContractType.OTHER;
 
-        int length = balanceResponse.length();
+        int responseLength = balanceResponse.length();
 
         if (balance721Ticket != null && balance721Ticket.size() > 0)
         {
             returnType = ContractType.ERC721_TICKET;
         }
-        else if (balance875 != null && balance875.size() > 0)
+        else if (balance875 != null && balance875.size() > 0 && responseLength > 66)
         {
             returnType = ContractType.ERC875;
         }

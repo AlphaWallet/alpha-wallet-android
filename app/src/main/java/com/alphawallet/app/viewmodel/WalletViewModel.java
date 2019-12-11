@@ -312,7 +312,7 @@ public class WalletViewModel extends BaseViewModel
      */
     private void updateTokenBalances()
     {
-        AddUnresolvedContracts();
+        addUnresolvedContracts();
         if (balanceTimerDisposable == null || balanceTimerDisposable.isDisposed())
         {
             balanceTimerDisposable = Observable.interval(0, BALANCE_CHECK_INTERVAL_MILLIS, TimeUnit.MILLISECONDS)
@@ -320,7 +320,7 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
-    private void AddUnresolvedContracts()
+    private void addUnresolvedContracts()
     {
         Observable.fromArray(ethereumNetworkRepository.getAllKnownContracts(tokensService.getNetworkFilters()).toArray(new ContractResult[0]))
                 .filter(result -> tokensService.getToken(result.chainId, result.name) == null)

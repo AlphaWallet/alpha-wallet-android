@@ -27,6 +27,7 @@ public class TokenSortedItem extends SortedItem<Token> {
             else if (!oldToken.pendingBalance.equals(newToken.pendingBalance)) return false;
             else if (!oldToken.getFullName().equals(newToken.getFullName())) return false;
             else if (oldToken.ticker == null && newToken.ticker != null) return false;
+            else if (oldToken.getInterfaceSpec() != newToken.getInterfaceSpec()) return false;
 
             //Had a redeem
             if (oldToken instanceof Ticket && newToken instanceof Ticket)
@@ -55,7 +56,8 @@ public class TokenSortedItem extends SortedItem<Token> {
             Token oldToken = value;
             Token newToken = (Token) other.value;
 
-            return oldToken.getAddress().equals(newToken.getAddress()) && other.weight == weight;
+            if (oldToken == null || newToken == null) return false;
+            else return oldToken.getAddress().equals(newToken.getAddress()) && oldToken.tokenInfo.chainId == newToken.tokenInfo.chainId;
         }
         else
         {

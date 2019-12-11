@@ -831,9 +831,7 @@ public class Token implements Parcelable
 
     public boolean walletUIUpdateRequired()
     {
-        boolean requiresUpdate = walletUIUpdateRequired;
-        walletUIUpdateRequired = false;
-        return requiresUpdate;
+        return walletUIUpdateRequired;
     }
 
     public boolean requiresTransactionRefresh()

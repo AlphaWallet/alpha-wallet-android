@@ -610,4 +610,5 @@
     <string name="self">Self</string>
     <string name="ERC721T">ERC721T</string>
     <string name="fail_sign">Failed to sign redeem message</string>
+    <string name="hint_contract_type">Token Type</string>
 </resources>

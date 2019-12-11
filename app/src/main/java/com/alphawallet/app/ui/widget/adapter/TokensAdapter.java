@@ -11,6 +11,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenSortedItem;
@@ -39,6 +40,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private int filterType;
     protected final AssetDefinitionService assetService;
+    protected final TokensService tokensService;
 
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -80,14 +82,16 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
-    public TokensAdapter(Context context, OnTokenClickListener onTokenClickListener, AssetDefinitionService aService) {
+    public TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService, TokensService tService) {
         this.onTokenClickListener = onTokenClickListener;
         this.assetService = aService;
+        this.tokensService = tService;
     }
 
-    public TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService) {
+    protected TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService) {
         this.onTokenClickListener = onTokenClickListener;
         this.assetService = aService;
+        this.tokensService = null;
     }
 
     @Override
@@ -168,6 +172,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public void updateToken(Token token, boolean internal)
     {
         checkLiveToken(token);
+        if (tokensService != null) tokensService.markTokenUpdated(token);
         if (canDisplayToken(token))
         {
             items.add(new TokenSortedItem(token, calculateWeight(token)));

@@ -64,6 +64,14 @@
                 android:layout_marginBottom="15dp"
                 custom:label="@string/hint_contract_name" />
 
+            <com.alphawallet.app.widget.InputView
+                android:id="@+id/input_token_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                android:visibility="gone"
+                custom:label="@string/hint_contract_type" />
+
             <LinearLayout
                 android:id="@+id/layoutTicket"
                 android:layout_width="match_parent"

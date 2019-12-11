@@ -58,6 +58,8 @@ public class TokensService
      */
     public Token addToken(Token t)
     {
+        Token e = getToken(t.tokenInfo.chainId, t.tokenInfo.address);
+        if (e != null && e.walletUIUpdateRequired) return t; //ensure tokens marked as requiring UI update complete operation
         if (t.checkTokenWallet(currentAddress))
         {
             if (t.equals(focusToken))
@@ -549,5 +551,14 @@ public class TokensService
         }
 
         return balanceChangedTokens;
+    }
+
+    public void markTokenUpdated(Token toUpdate)
+    {
+        Token t = getToken(toUpdate.tokenInfo.chainId, toUpdate.tokenInfo.address);
+        if (t != null && t.walletUIUpdateRequired && t.getInterfaceSpec() == toUpdate.getInterfaceSpec() && t.getStringBalance().equals(toUpdate.getStringBalance()))
+        {
+            t.walletUIUpdateRequired = false;
+        }
     }
 }

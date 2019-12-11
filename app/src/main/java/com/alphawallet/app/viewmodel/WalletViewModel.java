@@ -631,4 +631,9 @@ public class WalletViewModel extends BaseViewModel
     {
         return currentWallet;
     }
+
+    public TokensService getTokensService()
+    {
+        return tokensService;
+    }
 }

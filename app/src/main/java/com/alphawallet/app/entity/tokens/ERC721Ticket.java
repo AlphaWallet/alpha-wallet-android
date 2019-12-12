@@ -214,58 +214,6 @@ public class ERC721Ticket extends Token implements Parcelable {
         return null;
     }
 
-
-    private void displayTokenscriptView(TicketRange range, AssetDefinitionService assetService, View activity, Context ctx, boolean iconified)
-    {
-        //get webview
-        Web3TokenView tokenView = activity.findViewById(R.id.web3_tokenview);
-        ProgressBar waitSpinner = activity.findViewById(R.id.progress_element);
-        activity.findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
-        activity.findViewById(R.id.layout_legacy).setVisibility(View.GONE);
-
-        waitSpinner.setVisibility(View.VISIBLE);
-        BigInteger tokenId = range.tokenIds.get(0);
-
-        final StringBuilder attrs = assetService.getTokenAttrs(this, tokenId, range.tokenIds.size());
-
-        assetService.resolveAttrs(this, tokenId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(throwable, ctx, assetService, attrs, waitSpinner, tokenView, iconified),
-                        () -> displayTicket(ctx, assetService, attrs, waitSpinner, tokenView, iconified))
-                .isDisposed();
-    }
-
-    private void displayTicket(Context ctx, AssetDefinitionService assetService, StringBuilder attrs, ProgressBar waitSpinner, Web3TokenView tokenView, boolean iconified)
-    {
-        waitSpinner.setVisibility(View.GONE);
-        tokenView.setVisibility(View.VISIBLE);
-
-        String view = assetService.getTokenView(tokenInfo.chainId, getAddress(), iconified ? "view-iconified" : "view");
-        String style = assetService.getTokenView(tokenInfo.chainId, getAddress(), "style");
-        String viewData = tokenView.injectWeb3TokenInit(ctx, view, attrs.toString());
-        viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
-
-        String base64 = android.util.Base64.encodeToString(viewData.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
-        tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
-    }
-
-    private void onError(Throwable throwable, Context ctx, AssetDefinitionService assetService, StringBuilder attrs, ProgressBar waitSpinner, Web3TokenView tokenView, boolean iconified)
-    {
-        throwable.printStackTrace();
-        displayTicket(ctx, assetService, attrs, waitSpinner, tokenView, iconified);
-    }
-
-    private void onAttr(TokenScriptResult.Attribute attribute, StringBuilder attrs)
-    {
-        TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
-    }
-
-    public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx)
-    {
-        displayTicketHolder(range, activity, assetService, ctx, false);
-    }
-
     /**
      * This is a single method that populates any instance of graphic ticket anywhere
      *

@@ -203,8 +203,9 @@ public class JsInjectorClient {
 
     String injectStyle(String view, String style)
     {
-        style = "<style type=\"text/css\">\n" + style + "</style>\n";
-        return style + view;
+        String injectHeader = "<head><meta name=\"viewport\" content=\"width=device-width, user-scalable=yes\" /></head>";
+        style = "<style type=\"text/css\">\n" + style + "</style><body>\n";
+        return injectHeader + style + view + "</body>";
     }
 
     private static String loadFile(Context context, @RawRes int rawRes) {

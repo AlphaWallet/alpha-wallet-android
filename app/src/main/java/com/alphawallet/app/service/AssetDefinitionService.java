@@ -1365,4 +1365,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         cachedDefinition = null;
     }
+
+    public boolean viewsEqual(Token token)
+    {
+        String view = getTokenView(token.tokenInfo.chainId, token.tokenInfo.address, "view");
+        String iconifiedView = getTokenView(token.tokenInfo.chainId, token.tokenInfo.address, "view-iconified");
+        return view.equals(iconifiedView);
+    }
 }

@@ -57,6 +57,17 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         tokenView.setOnReadyCallback(this);
         this.iconified = iconified;
         handler = new Handler();
+
+        if (iconified && token.iconifiedWebviewHeight > 0)
+        {
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, token.iconifiedWebviewHeight);
+            tokenView.setLayoutParams(params);
+        }
+        else if (token.nonIconifiedWebviewHeight > 0)
+        {
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, token.nonIconifiedWebviewHeight);
+            tokenView.setLayoutParams(params);
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -107,8 +118,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     @Override
     public void onPageRendered(WebView view)
     {
-        if (!reloaded) tokenView.reload();
-        reloaded = true;
+
     }
 
     public void handleClick(View v, TicketRange data)

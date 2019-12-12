@@ -4,7 +4,9 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.view.View;
+import android.widget.ProgressBar;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
@@ -18,21 +20,26 @@ import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
+import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.token.entity.TicketRange;
+import com.alphawallet.token.entity.TokenScriptResult;
 
-import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class Token implements Parcelable
 {
@@ -53,6 +60,9 @@ public class Token implements Parcelable
     public long lastTxCheck;
     public long lastTxUpdate;
     public long lastTxTime;
+
+    public int iconifiedWebviewHeight;
+    public int nonIconifiedWebviewHeight;
 
     public String getNetworkName() { return shortNetworkName; }
 
@@ -108,10 +118,11 @@ public class Token implements Parcelable
         lastTxCheck = in.readLong();
         lastTxUpdate = in.readLong();
         lastTxTime = in.readLong();
-        int readTS = in.readByte();
-        int readDTS = in.readByte();
-        hasTokenScript = readTS == 1;
-        hasDebugTokenscript = readDTS == 1;
+        hasTokenScript = in.readByte() == 1;
+        hasDebugTokenscript = in.readByte() == 1;
+        nonIconifiedWebviewHeight = in.readInt();
+        iconifiedWebviewHeight = in.readInt();
+
         balanceChanged = false;
         if (readType <= ContractType.CREATION.ordinal())
         {
@@ -179,6 +190,8 @@ public class Token implements Parcelable
         dest.writeLong(lastTxTime);
         dest.writeByte(hasTokenScript?(byte)1:(byte)0);
         dest.writeByte(hasDebugTokenscript?(byte)1:(byte)0);
+        dest.writeInt(nonIconifiedWebviewHeight);
+        dest.writeInt(iconifiedWebviewHeight);
     }
 
     public void setRealmBalance(RealmToken realmToken)
@@ -962,5 +975,61 @@ public class Token implements Parcelable
         return new org.web3j.abi.datatypes.DynamicArray<>(
                         org.web3j.abi.datatypes.generated.Uint256.class,
                         org.web3j.abi.Utils.typeMap(indices, org.web3j.abi.datatypes.generated.Uint256.class));
+    }
+
+
+    /**
+     * Common TokenScript methods
+     */
+
+    protected void displayTokenscriptView(TicketRange range, AssetDefinitionService assetService, View activity, Context ctx, boolean iconified)
+    {
+        //get webview
+        Web3TokenView tokenView = activity.findViewById(R.id.web3_tokenview);
+        ProgressBar waitSpinner = activity.findViewById(R.id.progress_element);
+        activity.findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
+        activity.findViewById(R.id.layout_legacy).setVisibility(View.GONE);
+
+        waitSpinner.setVisibility(View.VISIBLE);
+        renderTokenscriptView(range, assetService, waitSpinner, ctx, tokenView, iconified);
+    }
+
+    public void renderTokenscriptView(TicketRange range, AssetDefinitionService assetService, ProgressBar waitSpinner, Context ctx, Web3TokenView tokenView, boolean iconified)
+    {
+        BigInteger tokenId = range.tokenIds.get(0);
+
+        final StringBuilder attrs = assetService.getTokenAttrs(this, tokenId, range.tokenIds.size());
+
+        assetService.resolveAttrs(this, tokenId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(throwable, ctx, assetService, attrs, waitSpinner, tokenView, iconified),
+                           () -> displayTicket(ctx, assetService, attrs, waitSpinner, tokenView, iconified))
+                .isDisposed();
+    }
+
+    private void displayTicket(Context ctx, AssetDefinitionService assetService, StringBuilder attrs, ProgressBar waitSpinner, Web3TokenView tokenView, boolean iconified)
+    {
+        if (waitSpinner != null) waitSpinner.setVisibility(View.GONE);
+        tokenView.setVisibility(View.VISIBLE);
+
+        String view = assetService.getTokenView(tokenInfo.chainId, getAddress(), iconified ? "view-iconified" : "view");
+        String style = assetService.getTokenView(tokenInfo.chainId, getAddress(), "style");
+        String viewData = tokenView.injectWeb3TokenInit(ctx, view, attrs.toString());
+        viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
+
+        String base64 = android.util.Base64.encodeToString(viewData.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+        tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
+    }
+
+    private void onError(Throwable throwable, Context ctx, AssetDefinitionService assetService, StringBuilder attrs, ProgressBar waitSpinner, Web3TokenView tokenView, boolean iconified)
+    {
+        throwable.printStackTrace();
+        displayTicket(ctx, assetService, attrs, waitSpinner, tokenView, iconified);
+    }
+
+    private void onAttr(TokenScriptResult.Attribute attribute, StringBuilder attrs)
+    {
+        TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
     }
 }

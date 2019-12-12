@@ -50,8 +50,8 @@
                     android:id="@+id/listTickets"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="15dp"
-                    android:paddingRight="15dp"
+                    android:paddingLeft="2dp"
+                    android:paddingRight="2dp"
                     android:divider="@android:color/transparent"
                     android:dividerHeight="10.0sp" />
 

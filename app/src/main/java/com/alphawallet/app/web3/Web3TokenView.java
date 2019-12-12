@@ -244,7 +244,7 @@ public class Web3TokenView extends WebView
         @Override
         public void onPageCommitVisible(WebView view, String url)
         {
-            super.onPageFinished(view, url);
+            super.onPageCommitVisible(view, url);
             if (assetHolder != null)
                 assetHolder.onPageLoaded(view);
         }

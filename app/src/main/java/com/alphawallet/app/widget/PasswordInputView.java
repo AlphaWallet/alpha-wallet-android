@@ -30,12 +30,11 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
 {
     private final Context context;
 
-    private TextView label;
-    private TextView error;
-    private EditText editText;
-    private CheckBox togglePassword;
-    private TextView instruction;
-    private RelativeLayout container;
+    private final TextView label;
+    private final TextView error;
+    private final EditText editText;
+    private final CheckBox togglePassword;
+    private final TextView instruction;
 
     private int labelResId;
     private int lines;
@@ -50,15 +49,19 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
     public PasswordInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
-
         getAttrs(context, attrs);
 
-        bindViews();
+        inflate(context, R.layout.layout_password_input, this);
 
+        label = findViewById(R.id.label);
+        error = findViewById(R.id.error);
+        editText = findViewById(R.id.edit_text);
+        instruction = findViewById(R.id.instruction);
+        togglePassword = findViewById(R.id.toggle_password);
+
+        setViews();
         setLines();
-
         setImeOptions();
-
         setInputType();
         setMinHeight();
     }
@@ -78,17 +81,10 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
         return editText;
     }
 
-    private void bindViews() {
-        inflate(context, R.layout.layout_password_input, this);
-
-        label = findViewById(R.id.label);
+    private void setViews()
+    {
         label.setText(labelResId);
-        error = findViewById(R.id.error);
-        editText = findViewById(R.id.edit_text);
-        container = findViewById(R.id.box_layout);
-        instruction = findViewById(R.id.instruction);
         if (labelResId != R.string.empty) label.setVisibility(View.VISIBLE);
-        togglePassword = findViewById(R.id.toggle_password);
         togglePassword.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 editText.setTransformationMethod(HideReturnsTransformationMethod.getInstance());

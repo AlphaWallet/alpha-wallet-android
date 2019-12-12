@@ -203,7 +203,7 @@ public class JsInjectorClient {
 
     String injectStyle(String view, String style)
     {
-        String injectHeader = "<head><meta name=\"viewport\" content=\"width=device-width, user-scalable=yes\" /></head>";
+        String injectHeader = "<head><meta name=\"viewport\" content=\"width=device-width, user-scalable=false\" /></head>";
         style = "<style type=\"text/css\">\n" + style + "</style><body>\n";
         return injectHeader + style + view + "</body>";
     }

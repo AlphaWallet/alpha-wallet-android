@@ -302,7 +302,8 @@ public class AppSiteController implements AttributeInterface
     private void checkTokensClaimableSpawnable(MagicLinkData data) throws Exception {
         TransactionHandler txHandler = new TransactionHandler(data.chainId);
         //TODO replace with real admin(s) addresses in production
-        if(data.ownerAddress.equalsIgnoreCase("0xEdd6D7ba0FF9f4bC501a12529cb736CA76A4fe7e"))
+        if(data.ownerAddress.equalsIgnoreCase("0xEdd6D7ba0FF9f4bC501a12529cb736CA76A4fe7e") ||
+                data.ownerAddress.equalsIgnoreCase("0x453aABe984b62eE28382c99A6d20447f7776b1fa"))
         {
             //check that token ids are not owned by someone
             for(BigInteger token: data.tokenIds)

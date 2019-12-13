@@ -4,7 +4,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
+import android.widget.ProgressBar;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -27,7 +27,6 @@ import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
-import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
@@ -72,7 +71,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     protected AssetDisplayViewModelFactory assetDisplayViewModelFactory;
     private AssetDisplayViewModel viewModel;
     private SystemView systemView;
-    private ProgressView progressView;
+    private ProgressBar progressView;
     private RecyclerView list;
     private FinishReceiver finishReceiver;
     private CertifiedToolbarView toolbarView;
@@ -82,7 +81,6 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     private AWalletAlertDialog dialog;
     private Web3TokenView testView;
     private Handler handler;
-    private final Runnable activityRunnable = this;
     private boolean iconifiedCheck;
     private int checkVal;
 
@@ -102,7 +100,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         systemView = findViewById(R.id.system_view);
         systemView.hide();
         progressView = findViewById(R.id.progress_view);
-        progressView.hide();
+        progressView.setVisibility(View.VISIBLE);
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
         systemView.attachSwipeRefreshLayout(refreshLayout);
         refreshLayout.setOnRefreshListener(this::refreshAssets);
@@ -116,14 +114,11 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         viewModel = ViewModelProviders.of(this, assetDisplayViewModelFactory)
                 .get(AssetDisplayViewModel.class);
 
-        viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.ticket().observe(this, this::onTokenUpdate);
         viewModel.sig().observe(this, this::onSigData);
 
         functionBar = findViewById(R.id.layoutButtons);
-
-        functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter);
 
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setHapticFeedbackEnabled(true);
@@ -138,7 +133,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         if (token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
         {
             initWebViewCheck(iconifiedCheck);
-            handler.postDelayed(activityRunnable, 1500);
+            handler.postDelayed(this, 1500);
         }
         else
         {
@@ -278,15 +273,20 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         testView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
             if (token != null)
             {
-                if (iconifiedCheck) token.iconifiedWebviewHeight = bottom - top;
+                if (iconifiedCheck)token.iconifiedWebviewHeight = bottom - top;
                 else token.nonIconifiedWebviewHeight = bottom - top;
                 checkVal++;
             }
 
-            handler.removeCallbacksAndMessages(activityRunnable);
-            if (checkVal == 2) handler.post(activityRunnable); //received the second webview render update - this is the final size we want.
-            else handler.postDelayed(activityRunnable, 800); //wait another 800ms for the second view update
+            if (checkVal == 3) addRunCall(0); //received the third webview render update - this is always the final size we want, but sometimes there's only 1 or 2 updates
+            else addRunCall(400);//wait another 400ms for the second view update
         });
+    }
+
+    private void addRunCall(int delay)
+    {
+        handler.removeCallbacks(this);
+        handler.postDelayed(this, delay);
     }
 
     @Override
@@ -310,7 +310,9 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
 
     private void displayTokens()
     {
+        progressView.setVisibility(View.GONE);
         adapter = new NonFungibleTokenAdapter(functionBar, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
+        functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter);
         list.setAdapter(adapter);
     }
 }

@@ -10,9 +10,13 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.alphawallet.app.web3.Web3TokenView;
+import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
@@ -43,7 +47,7 @@ import static com.alphawallet.app.entity.Operation.SIGN_DATA;
  * Created by James on 24/01/2018.
  */
 
-public class RedeemSignatureDisplayActivity extends BaseActivity implements View.OnClickListener, SignAuthenticationCallback
+public class RedeemSignatureDisplayActivity extends BaseActivity implements View.OnClickListener, SignAuthenticationCallback, PageReadyCallback
 {
     private static final float QR_IMAGE_WIDTH_RATIO = 0.9f;
     public static final String KEY_ADDRESS = "key_address";
@@ -58,6 +62,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     private Token token;
     private TicketRangeParcel ticketRange;
     private PinAuthenticationCallbackInterface authInterface;
+    private Web3TokenView tokenView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,11 +73,12 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         setContentView(R.layout.activity_rotating_signature);
         toolbar();
 
-        setTitle(getString(R.string.empty));
+        setTitle(getString(R.string.action_redeem));
 
         token = getIntent().getParcelableExtra(TICKET);
         wallet = getIntent().getParcelableExtra(WALLET);
         ticketRange = getIntent().getParcelableExtra(TICKET_RANGE);
+        tokenView = findViewById(R.id.web3_tokenview);
         findViewById(R.id.advanced_options).setVisibility(View.GONE); //setOnClickListener(this);
 
         viewModel = ViewModelProviders.of(this, redeemSignatureDisplayModelFactory)
@@ -91,6 +97,8 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
         //given a webview populate with rendered token
         token.displayTicketHolder(ticketRange.range, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
+        tokenView.setOnReadyCallback(this);
+        tokenView.setLayout(token, false);
         finishReceiver = new FinishReceiver(this);
     }
 
@@ -229,5 +237,18 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
     {
         authInterface = authCallback;
+    }
+
+    @Override
+    public void onPageLoaded(WebView view)
+    {
+        tokenView.callToJS("refresh()");
+    }
+
+
+    @Override
+    public void onPageRendered(WebView view)
+    {
+
     }
 }

@@ -126,7 +126,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         }
     }
 
-    public void fetchTokenBalance() {
+    private void fetchTokenBalance() {
         progress.postValue(true);
         getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
@@ -134,6 +134,24 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onToken, this::onError)).subscribe();
+    }
+
+    private void checkRedeemTicket() {
+        progress.postValue(true);
+        getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
+                .doOnNext(l -> fetchTokensInteract
+                        .checkRedeemed(token, this.tickets)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onRedeemCheck, this::onError)).subscribe();
+    }
+
+    private void onRedeemCheck(Boolean redeemed)
+    {
+        if (redeemed)
+        {
+            ticketsBurned();
+        }
     }
 
     /**
@@ -267,7 +285,14 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
         startCycleSignature();
-        fetchTokenBalance();
+        if (token.isERC721Ticket())
+        {
+            checkRedeemTicket();
+        }
+        else
+        {
+            fetchTokenBalance();
+        }
         startMemoryPoolListener();
 
         onSaved();

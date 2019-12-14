@@ -221,7 +221,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 }
                 break;
             case FILTER_COLLECTIBLES:
-                if (token.getInterfaceSpec() != ContractType.ERC721 && token.getInterfaceSpec() != ContractType.ERC721_LEGACY)
+                if (!(token.isERC721() || token.isERC721Ticket()))
                 {
                     allowThroughFilter = false;
                 }

@@ -43,7 +43,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 
 public class RedeemSignatureDisplayModel extends BaseViewModel
 {
-    private static final long CYCLE_SIGNATURE_INTERVAL = 30;
+    private static final long CYCLE_SIGNATURE_INTERVAL = 10 * 60; //cycle every 10 minutes
     private static final long CHECK_BALANCE_INTERVAL = 10;
 
     private final KeyService keyService;
@@ -153,7 +153,12 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
             {
                 for (BigInteger index : this.tickets)
                 {
-                    if (!balance.get(index.intValue()).equals(BigInteger.ZERO))
+                    if (token.isERC721Ticket() && !index.equals(BigInteger.ZERO)) //handle ERC721
+                    {
+                        allBurned = false;
+                        break;
+                    }
+                    else if (!balance.get(index.intValue()).equals(BigInteger.ZERO))
                     {
                         allBurned = false;
                         break;

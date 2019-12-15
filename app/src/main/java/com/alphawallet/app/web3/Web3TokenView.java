@@ -12,8 +12,11 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.web3.entity.Address;
@@ -219,6 +222,20 @@ public class Web3TokenView extends WebView
     public String injectStyleData(String viewData, String style)
     {
         return jsInjectorClient.injectStyle(viewData, style);
+    }
+
+    public void setLayout(Token token, boolean iconified)
+    {
+        if (iconified && token.iconifiedWebviewHeight > 0)
+        {
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, token.iconifiedWebviewHeight);
+            setLayoutParams(params);
+        }
+        else if (token.nonIconifiedWebviewHeight > 0)
+        {
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, token.nonIconifiedWebviewHeight);
+            setLayoutParams(params);
+        }
     }
 
     private class TokenScriptClient extends WebViewClient

@@ -50,4 +50,6 @@ public interface TokenRepositoryType {
 
     void updateTokenType(Token token, Wallet wallet, ContractType type);
     Single<Token[]> storeTickers(Wallet wallet, Token[] tokens);
+
+    Single<Boolean> fetchIsRedeemed(Token token, BigInteger tokenId);
 }

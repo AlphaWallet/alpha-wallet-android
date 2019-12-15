@@ -5,6 +5,9 @@ import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -243,6 +246,34 @@ public class QRSelectionTest
         String[] split = qr.sigPair.message.split(",");
         String timeStr = split[1];
         return Long.parseLong(timeStr);
+    }
+
+    /*
+     * This is a reference decoder for the new ERC721 token QR encoding
+     */
+    public static void decodeTest(String s)
+    {
+        try (InputStream bas  = new ByteArrayInputStream(s.getBytes()))
+        {
+            byte[] protocolBuf = new byte[1];
+            byte[] lengthBuf = new byte[2];
+            bas.read(protocolBuf);
+            bas.read(lengthBuf);
+            int tokenIdlength = Integer.valueOf(new String(lengthBuf));
+            byte[] tokenIdBuf = new byte[tokenIdlength];
+            bas.read(tokenIdBuf);
+            BigInteger tokenId = new BigInteger(new String(tokenIdBuf));
+            byte[] signatureBuf = new byte[bas.available()];
+            bas.read(signatureBuf); //signature as string bytes
+            BigInteger signatureBi = new BigInteger(new String(signatureBuf));
+
+            System.out.println("ctest[TokenID2: 0x" + tokenId.toString(16));
+            System.out.println("ctest[Sig2    : 0x" + signatureBi.toString(16));
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private String ecRecoverAddress(byte[] data, Sign.SignatureData signature) //get the hex string address from the sig and data

@@ -590,7 +590,9 @@ public class Token implements Parcelable
     public boolean contractTypeValid() { return !(contractType == ContractType.NOT_SET || contractType == ContractType.OTHER); }
 
     public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx, boolean iconified) { }
-    public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx) { }
+    public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx) {
+        displayTicketHolder(range, activity, assetService, ctx, false);
+    }
     public List<BigInteger> getArrayBalance() { return new ArrayList<>(); }
     public List<BigInteger> getNonZeroArrayBalance() { return new ArrayList<>(Arrays.asList(BigInteger.ZERO)); }
     public boolean isMatchedInXML() { return false; }

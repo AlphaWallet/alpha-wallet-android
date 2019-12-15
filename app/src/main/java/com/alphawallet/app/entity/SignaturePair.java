@@ -2,6 +2,10 @@ package com.alphawallet.app.entity;
 
 import org.web3j.utils.Numeric;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,13 +61,25 @@ public class SignaturePair
     }
 
     //should only be one by one for now
+    /**
+     * Note: all values must be in decimal (base 10) to allow the QR encoding optimiser to work most efficiently
+     *
+     * Format is:
+     * one decimal digit for future proofing in case we add to this format
+     * two decimal digits giving length of the decimal encoded token ID
+     * remaining digits are the signature in decimal
+     *
+     */
     public static String generateSelection721Tickets(List<BigInteger> tokenIds) {
+        String prefix = "0"; //future proof the format - this is one digit to refer to token count or protocol format
         StringBuilder stringBuilder = new StringBuilder();
         for(BigInteger token: tokenIds) {
-            stringBuilder.append(Numeric.toHexStringNoPrefix(token));
+            stringBuilder.append(token.toString(10));
             stringBuilder.append(",");
         }
-        return stringBuilder.substring(0, stringBuilder.length() - 1);
+        String tokenIdsString = stringBuilder.substring(0, stringBuilder.length() - 1);
+        prefix = prefix + (tokenIdsString.length() < 10 ? "0" : "") + tokenIdsString.length(); //it's unlikely we ever have a tokenId length less than 10 but accommodate it if it happens
+        return prefix + tokenIdsString;
     }
 
     /**

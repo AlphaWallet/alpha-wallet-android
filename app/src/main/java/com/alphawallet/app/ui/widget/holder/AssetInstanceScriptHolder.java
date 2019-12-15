@@ -58,16 +58,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         this.iconified = iconified;
         handler = new Handler();
 
-        if (iconified && token.iconifiedWebviewHeight > 0)
-        {
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, token.iconifiedWebviewHeight);
-            tokenView.setLayoutParams(params);
-        }
-        else if (token.nonIconifiedWebviewHeight > 0)
-        {
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, token.nonIconifiedWebviewHeight);
-            tokenView.setLayoutParams(params);
-        }
+        tokenView.setLayout(token, iconified);
     }
 
     @SuppressLint("ClickableViewAccessibility")

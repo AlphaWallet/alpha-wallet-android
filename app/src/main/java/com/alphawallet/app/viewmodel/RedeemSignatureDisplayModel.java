@@ -43,7 +43,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 
 public class RedeemSignatureDisplayModel extends BaseViewModel
 {
-    private static final long CYCLE_SIGNATURE_INTERVAL = 30;
+    private static final long CYCLE_SIGNATURE_INTERVAL = 10 * 60; //cycle every 10 minutes
     private static final long CHECK_BALANCE_INTERVAL = 10;
 
     private final KeyService keyService;
@@ -126,7 +126,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         }
     }
 
-    public void fetchTokenBalance() {
+    private void fetchTokenBalance() {
         progress.postValue(true);
         getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
                 .doOnNext(l -> fetchTokensInteract
@@ -134,6 +134,24 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onToken, this::onError)).subscribe();
+    }
+
+    private void checkRedeemTicket() {
+        progress.postValue(true);
+        getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
+                .doOnNext(l -> fetchTokensInteract
+                        .checkRedeemed(token, this.tickets)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onRedeemCheck, this::onError)).subscribe();
+    }
+
+    private void onRedeemCheck(Boolean redeemed)
+    {
+        if (redeemed)
+        {
+            ticketsBurned();
+        }
     }
 
     /**
@@ -153,7 +171,12 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
             {
                 for (BigInteger index : this.tickets)
                 {
-                    if (!balance.get(index.intValue()).equals(BigInteger.ZERO))
+                    if (token.isERC721Ticket() && !index.equals(BigInteger.ZERO)) //handle ERC721
+                    {
+                        allBurned = false;
+                        break;
+                    }
+                    else if (!balance.get(index.intValue()).equals(BigInteger.ZERO))
                     {
                         allBurned = false;
                         break;
@@ -267,7 +290,14 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
         startCycleSignature();
-        fetchTokenBalance();
+        if (token.isERC721Ticket())
+        {
+            checkRedeemTicket();
+        }
+        else
+        {
+            fetchTokenBalance();
+        }
         startMemoryPoolListener();
 
         onSaved();

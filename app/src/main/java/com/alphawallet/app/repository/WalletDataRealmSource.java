@@ -48,6 +48,12 @@ public class WalletDataRealmSource {
                 }
             }
 
+            if (keyService.detectWalletIssues(walletList))
+            {
+                //save changes
+                for (Wallet w : walletList) storeKeyData(w);
+            }
+
             return walletList.toArray(new Wallet[0]);
         });
     }

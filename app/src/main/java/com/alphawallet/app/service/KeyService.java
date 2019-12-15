@@ -1260,12 +1260,19 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                         case KEY_STORE_SECRET:
                             break;
                         case USER_NOT_AUTHENTICATED:
-                        case INVALID_KEY:
                             //key is authenticated, must be new style
                             w.type = WalletType.KEYSTORE;
                             w.lastBackupTime = System.currentTimeMillis();
                             if (hasStrongbox()) w.authLevel = AuthenticationLevel.STRONGBOX_AUTHENTICATION;
                             else w.authLevel = AuthenticationLevel.TEE_AUTHENTICATION;
+                            hasChanges = true;
+                            break;
+                        case INVALID_KEY:
+                            //key cypher is incorrect
+                            w.type = WalletType.KEYSTORE;
+                            w.lastBackupTime = System.currentTimeMillis();
+                            if (hasStrongbox()) w.authLevel = AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
+                            else w.authLevel = AuthenticationLevel.TEE_NO_AUTHENTICATION;
                             hasChanges = true;
                             break;
                         case KEY_IS_GONE:

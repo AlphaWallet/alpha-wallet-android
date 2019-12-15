@@ -59,7 +59,6 @@ public class NewSettingsFragment extends Fragment
     private ImageView backupStatusImage;
     private View backupPopupAnchor;
     private LinearLayout layoutBackupKey;
-    private View layoutBackupDivider;
     private TextView backupText;
 
     @Nullable
@@ -105,7 +104,6 @@ public class NewSettingsFragment extends Fragment
             viewModel.showManageWallets(getContext(), false);
         });
 
-        layoutBackupDivider = view.findViewById(R.id.backup_divider);
         layoutBackupKey = view.findViewById(R.id.layout_backup_wallet);
         layoutBackupKey.setOnClickListener(v -> {
             Wallet wallet = viewModel.defaultWallet().getValue();
@@ -116,11 +114,18 @@ public class NewSettingsFragment extends Fragment
         });
 
         final LinearLayout layoutSwitchnetworks = view.findViewById(R.id.layout_switch_network);
-        layoutSwitchnetworks.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), SelectNetworkActivity.class);
-            intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
-            getActivity().startActivity(intent);
-        });
+        if (EthereumNetworkRepository.showNetworkFilters())
+        {
+            layoutSwitchnetworks.setOnClickListener(v -> {
+                Intent intent = new Intent(getActivity(), SelectNetworkActivity.class);
+                intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
+                getActivity().startActivity(intent);
+            });
+        }
+        else
+        {
+            layoutSwitchnetworks.setVisibility(View.GONE);
+        }
 
         final LinearLayout layoutSwitchLocale = view.findViewById(R.id.layout_locale_lang);
         layoutSwitchLocale.setOnClickListener(v -> {
@@ -189,25 +194,35 @@ public class NewSettingsFragment extends Fragment
         }
 
         final LinearLayout layoutTwitter = view.findViewById(R.id.layout_twitter);
-        layoutTwitter.setOnClickListener(v -> {
-            Intent intent;
-            try {
-                getActivity().getPackageManager().getPackageInfo(C.TWITTER_PACKAGE_NAME, 0);
-                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_TWITTER_URL));
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            } catch (Exception e) {
-                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_TWITTER_URL));
-            }
-            try
-            {
-                getActivity().startActivity(intent);
-            }
-            catch (Exception e)
-            {
-                Crashlytics.logException(e);
-                e.printStackTrace();
-            }
-        });
+        if (MediaLinks.AWALLET_TWITTER_URL != null)
+        {
+            layoutTwitter.setOnClickListener(v -> {
+                Intent intent;
+                try
+                {
+                    getActivity().getPackageManager().getPackageInfo(C.TWITTER_PACKAGE_NAME, 0);
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_TWITTER_URL));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                }
+                catch (Exception e)
+                {
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_TWITTER_URL));
+                }
+                try
+                {
+                    getActivity().startActivity(intent);
+                }
+                catch (Exception e)
+                {
+                    Crashlytics.logException(e);
+                    e.printStackTrace();
+                }
+            });
+        }
+        else
+        {
+            layoutTwitter.setVisibility(View.GONE);
+        }
 
         final LinearLayout layoutNotifications = view.findViewById(R.id.layout_notification_settings);
         layoutNotifications.setOnClickListener(v -> {
@@ -226,26 +241,36 @@ public class NewSettingsFragment extends Fragment
         backupPopupAnchor = view.findViewById(R.id.popup_anchor);
         layoutBackup.setVisibility(View.GONE);
 
-        LinearLayout layoutFacebook = view.findViewById(R.id.layout_facebook);
-        layoutFacebook.setOnClickListener(v -> {
-            Intent intent;
-            try {
-                getActivity().getPackageManager().getPackageInfo(C.FACEBOOK_PACKAGE_NAME, 0);
-                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_FACEBOOK_URL));
-                //intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_FACEBOOK_ID));
-            } catch (Exception e) {
-                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_FACEBOOK_URL));
-            }
-            try
-            {
-                getActivity().startActivity(intent);
-            }
-            catch (Exception e)
-            {
-                Crashlytics.logException(e);
-                e.printStackTrace();
-            }
-        });
+        final LinearLayout layoutFacebook = view.findViewById(R.id.layout_facebook);
+        if (MediaLinks.AWALLET_FACEBOOK_URL != null)
+        {
+            layoutFacebook.setOnClickListener(v -> {
+                Intent intent;
+                try
+                {
+                    getActivity().getPackageManager().getPackageInfo(C.FACEBOOK_PACKAGE_NAME, 0);
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_FACEBOOK_URL));
+                    //intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_FACEBOOK_ID));
+                }
+                catch (Exception e)
+                {
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_FACEBOOK_URL));
+                }
+                try
+                {
+                    getActivity().startActivity(intent);
+                }
+                catch (Exception e)
+                {
+                    Crashlytics.logException(e);
+                    e.printStackTrace();
+                }
+            });
+        }
+        else
+        {
+            layoutFacebook.setVisibility(View.GONE);
+        }
 
         layoutEnableXML = view.findViewById(R.id.layout_xml_override);
         if (checkWritePermission() == false && EthereumNetworkRepository.extraChains() == null) {
@@ -340,7 +365,6 @@ public class NewSettingsFragment extends Fragment
         if (wallet.type == WalletType.WATCH)
         {
             layoutBackupKey.setVisibility(View.GONE);
-            layoutBackupDivider.setVisibility(View.GONE);
         }
     }
 

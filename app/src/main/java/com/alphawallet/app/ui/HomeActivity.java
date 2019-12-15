@@ -33,6 +33,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.github.florent37.tutoshowcase.TutoShowcase;
 import com.alphawallet.app.entity.CryptoFunctions;
@@ -86,10 +87,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private HomeReceiver homeReceiver;
     private AWalletConfirmationDialog cDialog;
     private String buildVersion;
-    private final NewSettingsFragment settingsFragment;
-    private final DappBrowserFragment dappBrowserFragment;
-    private final TransactionsFragment transactionsFragment;
-    private final WalletFragment walletFragment;
+    private final Fragment settingsFragment;
+    private final Fragment dappBrowserFragment;
+    private final Fragment transactionsFragment;
+    private final Fragment walletFragment;
     private String walletTitle;
     private final LifecycleObserver lifeCycle;
     private static boolean updatePrompt = false;
@@ -106,7 +107,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     public HomeActivity()
     {
-        dappBrowserFragment = new DappBrowserFragment();
+        if (VisibilityFilter.hideDappBrowser()) dappBrowserFragment = new Fragment();
+        else dappBrowserFragment = new DappBrowserFragment();
         transactionsFragment = new TransactionsFragment();
         settingsFragment = new NewSettingsFragment();
         walletFragment = new WalletFragment();
@@ -116,14 +118,14 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             private void onMoveToForeground()
             {
                 Log.d("LIFE", "AlphaWallet into foreground");
-                walletFragment.walletInFocus();
+                ((WalletFragment)walletFragment).walletInFocus();
             }
 
             @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
             private void onMoveToBackground()
             {
                 Log.d("LIFE", "AlphaWallet into background");
-                walletFragment.walletOutOfFocus();
+                ((WalletFragment)walletFragment).walletOutOfFocus();
             }
 
             @Override
@@ -204,7 +206,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         viewModel.loadExternalXMLContracts();
 
-        if (getIntent() != null && getIntent().getStringExtra("url") != null) {
+        if (VisibilityFilter.hideDappBrowser())
+        {
+            removeDappBrowser();
+        }
+        else if (getIntent() != null && getIntent().getStringExtra("url") != null) {
             String url = getIntent().getStringExtra("url");
 
             Bundle bundle = new Bundle();
@@ -362,7 +368,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             case DAPP_BROWSER: {
                 if (getSelectedItem() == DAPP_BROWSER) {
-                    dappBrowserFragment.homePressed();
+                    ((DappBrowserFragment)dappBrowserFragment).homePressed();
                 } else {
                     showPage(DAPP_BROWSER);
                 }
@@ -461,7 +467,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 selectNavigationItem(TRANSACTIONS);
                 enableDisplayHomeAsHome(false);
                 invalidateOptionsMenu();
-                transactionsFragment.transactionsShowing();
+                ((TransactionsFragment)transactionsFragment).transactionsShowing();
                 break;
             }
             default:
@@ -508,7 +514,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void TokensReady()
     {
-        if (transactionsFragment != null) transactionsFragment.resetTokens();
+        if (transactionsFragment != null) ((TransactionsFragment)transactionsFragment).resetTokens();
     }
 
     @Override
@@ -520,18 +526,18 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private void backupWalletFail(String keyBackup)
     {
         //postpone backup until later
-        settingsFragment.backupSeedSuccess();
+        ((NewSettingsFragment)settingsFragment).backupSeedSuccess();
         if (keyBackup != null)
         {
-            walletFragment.remindMeLater(new Wallet(keyBackup));
+            ((WalletFragment)walletFragment).remindMeLater(new Wallet(keyBackup));
             viewModel.checkIsBackedUp(keyBackup);
         }
     }
 
     private void backupWalletSuccess(String keyBackup)
     {
-        settingsFragment.backupSeedSuccess();
-        walletFragment.storeWalletBackupTime(keyBackup);
+        ((NewSettingsFragment)settingsFragment).backupSeedSuccess();
+        ((WalletFragment)walletFragment).storeWalletBackupTime(keyBackup);
         removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
         successImage.setImageResource(R.drawable.big_green_tick);
         successOverlay.setVisibility(View.VISIBLE);
@@ -578,10 +584,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void ResetDappBrowser()
     {
         getSupportFragmentManager()
-                .beginTransaction()
-                .detach(dappBrowserFragment)
-                .attach(dappBrowserFragment)
-                .commit();
+                    .beginTransaction()
+                    .detach(dappBrowserFragment)
+                    .attach(dappBrowserFragment)
+                    .commit();
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
@@ -740,7 +746,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         {
                             case RC_ASSET_EXTERNAL_WRITE_PERM:
                                 viewModel.loadExternalXMLContracts();
-                                settingsFragment.refresh();
+                                ((NewSettingsFragment)settingsFragment).refresh();
                                 break;
                             case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
                                 viewModel.downloadAndInstall(buildVersion, this);
@@ -816,10 +822,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         switch (requestCode)
         {
             case DAPP_BARCODE_READER_REQUEST_CODE:
-                dappBrowserFragment.handleQRCode(resultCode, data, this);
+                ((DappBrowserFragment)dappBrowserFragment).handleQRCode(resultCode, data, this);
                 break;
             case C.REQUEST_SELECT_NETWORK:
-                dappBrowserFragment.handleSelectNetwork(resultCode, data);
+                ((DappBrowserFragment)dappBrowserFragment).handleSelectNetwork(resultCode, data);
                 break;
             case C.REQUEST_BACKUP_WALLET:
                 String keyBackup = null;
@@ -828,13 +834,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 else backupWalletFail(keyBackup);
                 break;
             case C.REQUEST_TRANSACTION_CALLBACK:
-                dappBrowserFragment.handleTransactionCallback(resultCode, data);
+                ((DappBrowserFragment)dappBrowserFragment).handleTransactionCallback(resultCode, data);
                 break;
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
                 switch (getSelectedItem())
                 {
                     case DAPP_BROWSER:
-                        dappBrowserFragment.GotAuthorisation(resultCode == RESULT_OK);
+                        ((DappBrowserFragment)dappBrowserFragment).GotAuthorisation(resultCode == RESULT_OK);
                         break;
                     default:
                         //continue with generating the authenticated key
@@ -848,7 +854,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 }
                 break;
             case C.UPDATE_LOCALE:
-                settingsFragment.updateLocale(data);
+                ((NewSettingsFragment)settingsFragment).updateLocale(data);
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);

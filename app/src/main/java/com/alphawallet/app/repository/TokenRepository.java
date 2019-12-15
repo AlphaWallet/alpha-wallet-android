@@ -1004,6 +1004,14 @@ public class TokenRepository implements TokenRepositoryType {
                 Collections.singletonList(new TypeReference<Address>() {}));
     }
 
+    private static Function redeemed(BigInteger tokenId) throws NumberFormatException
+    {
+        return new Function(
+                "redeemed",
+                Collections.singletonList(new Uint256(tokenId)),
+                Collections.singletonList(new TypeReference<Bool>() {}));
+    }
+
     private List callSmartContractFunctionArray(
             org.web3j.abi.datatypes.Function function, String contractAddress, NetworkInfo network, Wallet wallet)
     {
@@ -1275,6 +1283,25 @@ public class TokenRepository implements TokenRepositoryType {
         }
 
         return returnType;
+    }
+
+    @Override
+    public Single<Boolean> fetchIsRedeemed(Token token, BigInteger tokenId)
+    {
+        return Single.fromCallable(() -> {
+            boolean result = false;
+            try
+            {
+                NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
+                result = getContractData(networkInfo, token.tokenInfo.address, redeemed(tokenId), Boolean.TRUE);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return result;
+        });
     }
 
     @Override

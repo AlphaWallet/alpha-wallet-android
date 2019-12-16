@@ -31,6 +31,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class QRSelectionTest
@@ -231,7 +232,8 @@ public class QRSelectionTest
 
                 //check the signature corresponds to the test address
                 String addressHex = "0x" + ecRecoverAddress(sPair.message.getBytes(), sigData);
-                assertTrue(selectionRecreate.equals(qr.indices));
+                // compare BigInteger and Integer. this is quicker than using stream->collect
+                assertEquals(qr.indices.toString(), selectionRecreate.toString());
                 assertTrue(addressHex.equals(testAddress));
             }
         }

@@ -3,7 +3,6 @@ package com.alphawallet.app.service;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.alphawallet.app.service.TransactionsNetworkClientType;
 import com.google.gson.Gson;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.EtherscanTransaction;

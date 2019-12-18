@@ -20,7 +20,7 @@ public class EdconLinkGenerator {
     private static final int chainId = 100;
 
     // Time todo put in right format & set each time
-    private static final String date = "20240706210000+0300";
+    private static final String date = "20250706210000+0300";
     // Cities
     private static final long VIENNA = 1;
 
@@ -43,7 +43,7 @@ public class EdconLinkGenerator {
 
     public static void main(String[] args) throws SalesOrderMalformed {
         //TODO set token ids here
-        new com.alphawallet.token.web.Service.EdconLinkGenerator(date, VIENNA, BLOCKCHAIN_HALL, 1);
+        new com.alphawallet.token.web.Service.EdconLinkGenerator(date, VIENNA, BLOCKCHAIN_HALL, 25);
     }
 
     private EdconLinkGenerator(
@@ -73,7 +73,7 @@ public class EdconLinkGenerator {
             tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(city), 2);
             tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(venue), 2);
             //Padding
-            tokenId += "000000000000000";
+            tokenId += "00000000000000";
             tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(category), 2);
             // Must increment the numero to change the token id as 721 can only map one token to one address
             tokenId += Numeric.toHexStringNoPrefixZeroPadded(BigInteger.valueOf(numero++), 4);

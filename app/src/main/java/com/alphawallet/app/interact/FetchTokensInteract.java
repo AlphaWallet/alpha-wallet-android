@@ -195,4 +195,11 @@ public class FetchTokensInteract {
             return tokens;
         });
     }
+
+    public Single<Boolean> checkRedeemed(Token token, List<BigInteger> tickets)
+    {
+        if (token == null || tickets == null || tickets.size() == 0) return Single.fromCallable(() -> true ); //early return for invalid input
+        BigInteger tokenId = tickets.get(0);
+        return tokenRepository.fetchIsRedeemed(token, tokenId);
+    }
 }

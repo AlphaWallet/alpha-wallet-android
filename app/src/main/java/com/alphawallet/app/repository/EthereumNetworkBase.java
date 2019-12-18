@@ -27,6 +27,7 @@ import org.web3j.protocol.http.HttpService;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -458,7 +459,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static List<Integer> addDefaultNetworks()
     {
-        return new ArrayList<>(EthereumNetworkRepository.MAINNET_ID);
+        return new ArrayList<>(Collections.singletonList(EthereumNetworkRepository.MAINNET_ID));
     }
 
     public static boolean hasTicker(Token token)
@@ -481,6 +482,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         else return 0;
     }
 
+    public static boolean showNetworkFilters() { return true; }
 
     private Ticker updateTickers(Map<Integer, Ticker> newTickers)
     {

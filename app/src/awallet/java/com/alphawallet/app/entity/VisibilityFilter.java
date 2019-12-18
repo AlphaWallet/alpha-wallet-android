@@ -64,4 +64,17 @@ public class VisibilityFilter
     {
         return R.string.eth;
     }
+
+    //Switch off dapp browser?
+    public static boolean hideDappBrowser()
+    {
+        return false;
+    }
+
+    public static boolean hideNetworkSettings() { return true; }
+
+    public static boolean hideTabBar()
+    {
+        return false;
+    }
 }

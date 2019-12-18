@@ -28,6 +28,11 @@
     <color name="grey">#EEEEEE</color>
     <color name="holo_blue">#FF33b5e5</color>
 	<color name="tealish">#239ec5</color>
+    <color name="title_color">#333333</color>
+	<color name="button_colour">#69c800</color>
+	<color name="button_pressed_colour">#b4cd99</color>
+	<color name="button_disabled_colour">#b4cd99</color>
+
 
 	<color name="semi_dark_grey">#707070</color>
 	<color name="text_black">#2f2f2f</color>

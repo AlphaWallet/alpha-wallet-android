@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 
 import com.alphawallet.app.entity.BackupTokenCallback;
 import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInterface;
 import com.alphawallet.app.entity.tokens.TokensReceiver;
@@ -151,6 +152,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
     private void initTabLayout(View view) {
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
+        if (VisibilityFilter.hideTabBar()) { tabLayout.setVisibility(View.GONE); return; }
         tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.currency));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.collectibles));

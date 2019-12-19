@@ -63,6 +63,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     private TicketRangeParcel ticketRange;
     private PinAuthenticationCallbackInterface authInterface;
     private Web3TokenView tokenView;
+    private boolean signRequest;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,6 +73,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
         setContentView(R.layout.activity_rotating_signature);
         toolbar();
+        signRequest = false;
 
         setTitle(getString(R.string.action_redeem));
 
@@ -130,7 +132,8 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.prepare(token.tokenInfo.address, token, ticketRange.range);
+        if (!signRequest) viewModel.prepare(token.tokenInfo.address, token, ticketRange.range);
+        signRequest = false;
     }
 
     @Override
@@ -204,6 +207,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        signRequest = true;
         super.onActivityResult(requestCode,resultCode,intent);
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)

@@ -224,6 +224,34 @@ public class NewSettingsFragment extends Fragment
             layoutTwitter.setVisibility(View.GONE);
         }
 
+        final LinearLayout layoutReddit = view.findViewById(R.id.layout_reddit);
+        if (MediaLinks.AWALLET_REDDIT_URL != null)
+        {
+            layoutReddit.setOnClickListener(v -> {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                if (isAppAvailable(C.REDDIT_PACKAGE_NAME))
+                {
+                    intent.setPackage(C.REDDIT_PACKAGE_NAME);
+                }
+                
+                intent.setData(Uri.parse(MediaLinks.AWALLET_REDDIT_URL));
+
+                try
+                {
+                    getActivity().startActivity(intent);
+                }
+                catch (Exception e)
+                {
+                    Crashlytics.logException(e);
+                    e.printStackTrace();
+                }
+            });
+        }
+        else
+        {
+            layoutReddit.setVisibility(View.GONE);
+        }
+
         final LinearLayout layoutNotifications = view.findViewById(R.id.layout_notification_settings);
         layoutNotifications.setOnClickListener(v -> {
             boolean currentState = viewModel.getNotificationState();

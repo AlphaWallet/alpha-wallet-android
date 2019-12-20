@@ -37,6 +37,7 @@ import com.crashlytics.android.Crashlytics;
 
 import static com.alphawallet.app.C.*;
 import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 
 public class NewSettingsFragment extends Fragment
 {
@@ -299,6 +300,9 @@ public class NewSettingsFragment extends Fragment
         {
             layoutFacebook.setVisibility(View.GONE);
         }
+
+        final TextView textScriptVersion = view.findViewById(R.id.text_tokenscript_standard);
+        textScriptVersion.setText(TOKENSCRIPT_CURRENT_SCHEMA);
 
         layoutEnableXML = view.findViewById(R.id.layout_xml_override);
         if (checkWritePermission() == false && EthereumNetworkRepository.extraChains() == null) {

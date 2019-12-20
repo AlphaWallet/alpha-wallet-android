@@ -476,4 +476,6 @@
     <string name="fail_sign">Failed to sign redeem message</string>
     <string name="hint_contract_type">Token Type</string>
     <string name="reddit">Reddit</string>
+    <string name="tokenscript_standard">TokenScript Standard</string>
+    <string name="version">Version</string>
 </resources>

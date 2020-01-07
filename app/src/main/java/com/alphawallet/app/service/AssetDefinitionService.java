@@ -90,7 +90,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final Context context;
     private final OkHttpClient okHttpClient;
 
-    private Map<Integer, Map<String, TokenScriptFile>> assetDefinitions;
+    private SparseArray<Map<String, TokenScriptFile>> assetDefinitions;
     private Map<String, Long> assetChecked;                //Mapping of contract address to when they were last fetched from server
     private FileObserver fileObserver;                     //Observer which scans the override directory waiting for file change
     private Map<String, TokenScriptFileData> fileHashes;                //Mapping of files and hashes.
@@ -128,7 +128,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void loadLocalContracts()
     {
-        assetDefinitions = new HashMap<>();
+        assetDefinitions = new SparseArray<>();
 
         try
         {
@@ -231,19 +231,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    private ContractAddress getFromContracts(Map<Integer, List<String>> addresses)
-    {
-        for (int chainId : addresses.keySet())
-        {
-            for (String addr : addresses.get(chainId))
-            {
-                return new ContractAddress(chainId, addr);
-            }
-        }
-
-        return null;
-    }
-
     /**
      * Called at startup once we know we've got folder write permission.
      * Note - Android 6.0 and above needs user to verify folder access permission
@@ -308,7 +295,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private TokenScriptFile getTokenScriptFile(int chainId, String address)
     {
-        if (assetDefinitions.containsKey(chainId) && assetDefinitions.get(chainId).containsKey(address))
+        if (assetDefinitions.get(chainId) != null && assetDefinitions.get(chainId).containsKey(address))
         {
             return assetDefinitions.get(chainId).get(address);
         }
@@ -327,6 +314,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      */
     public TokenDefinition getAssetDefinition(int chainId, String address)
     {
+        reloadAssets(); //if OS scaveneged the lookup map then rebuild.
         TokenDefinition assetDef = null;
         if (address == null) return null;
 
@@ -473,7 +461,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         throwable.printStackTrace();
     }
 
-    @SuppressWarnings("deprecation")
     private TokenDefinition parseFile(InputStream xmlInputStream) throws IOException, SAXException, Exception
     {
         Locale locale;
@@ -722,11 +709,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      */
     private File getXMLFile(String contractAddress)
     {
-        for (int networkId : assetDefinitions.keySet())
+        for (int i = 0; i < assetDefinitions.size(); i++)
         {
-            if (assetDefinitions.get(networkId).containsKey(contractAddress.toLowerCase()))
+            if (assetDefinitions.valueAt(i).containsKey(contractAddress.toLowerCase()))
             {
-                return assetDefinitions.get(networkId).get(contractAddress.toLowerCase());
+                return assetDefinitions.valueAt(i).get(contractAddress.toLowerCase());
             }
         }
 
@@ -736,11 +723,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private List<String> getScriptsInSecureZone()
     {
         List<String> checkScripts = new ArrayList<>();
-        for (int networkId : assetDefinitions.keySet())
+        for (int i = 0; i < assetDefinitions.size(); i++)
         {
-            for (String address : assetDefinitions.get(networkId).keySet())
+            for (String address : assetDefinitions.valueAt(i).keySet())
             {
-                if (isInSecureZone(assetDefinitions.get(networkId).get(address)))
+                if (isInSecureZone(assetDefinitions.valueAt(i).get(address)))
                 {
                     if (!checkScripts.contains(address)) checkScripts.add(address);
                 }
@@ -795,7 +782,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public boolean hasDefinition(int chainId, String address)
     {
-        return assetDefinitions.containsKey(chainId) && assetDefinitions.get(chainId).containsKey(address);
+        return assetDefinitions.get(chainId) != null && assetDefinitions.get(chainId).containsKey(address);
     }
 
     //when user reloads the tokens we should also check XML for any files
@@ -806,6 +793,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public boolean hasTokenView(int chainId, String contractAddr, String type)
     {
+        reloadAssets();
         TokenDefinition td = getAssetDefinition(chainId, contractAddr);
         if (td != null && td.attributeSets.containsKey("cards"))
         {
@@ -818,6 +806,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public String getTokenView(int chainId, String contractAddr, String type)
     {
+        reloadAssets();
         String viewHTML = "";
         TokenDefinition td = getAssetDefinition(chainId, contractAddr);
         if (td != null && td.attributeSets.containsKey("cards"))
@@ -841,28 +830,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    public String getTokenFunctionView(int chainId, String contractAddr)
-    {
-        TokenDefinition td = getAssetDefinition(chainId, contractAddr);
-        if (td != null && td.getActions().size() > 0)
-        {
-            for (TSAction a : td.getActions().values())
-            {
-                return a.view;
-            }
-            return null;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
     public boolean hasAction(int chainId, String contractAddr)
     {
         TokenDefinition td = getAssetDefinition(chainId, contractAddr);
-        if (td != null && td.actions != null && td.actions.size() > 0) return true;
-        else return false;
+        return td != null && td.actions != null && td.actions.size() > 0;
     }
 
     @Override
@@ -941,9 +912,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public void checkTokenscriptEnabledTokens(TokensService tokensService)
     {
-        for (int networkId : assetDefinitions.keySet())
+        for (int i = 0; i < assetDefinitions.size(); i++)
         {
-            Map<String, TokenScriptFile> defMap = assetDefinitions.get(networkId);
+            int networkId = assetDefinitions.keyAt(i);
+            Map<String, TokenScriptFile> defMap = assetDefinitions.valueAt(i);
             for (String address : defMap.keySet())
             {
                 Token token = tokensService.getToken(networkId, address);
@@ -1371,5 +1343,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         String view = getTokenView(token.tokenInfo.chainId, token.tokenInfo.address, "view");
         String iconifiedView = getTokenView(token.tokenInfo.chainId, token.tokenInfo.address, "view-iconified");
         return view.equals(iconifiedView);
+    }
+
+    /**
+     * If the OS has scavenged the TokenScript contract lookup map then re-init
+     */
+    private void reloadAssets()
+    {
+        if (assetDefinitions == null || assetDefinitions.size() == 0)
+        {
+            loadLocalContracts();
+        }
     }
 }

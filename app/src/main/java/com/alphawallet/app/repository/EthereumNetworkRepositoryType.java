@@ -32,6 +32,8 @@ public interface EthereumNetworkRepositoryType {
 	TokenTicker getTokenTicker(Token token);
 	String getNameById(int id);
 
+	Single<Token[]> getTokensOnNetwork(int chainId, String address);
+
     List<Integer> getFilterNetworkList();
     void setFilterNetworkList(int[] networkList);
 

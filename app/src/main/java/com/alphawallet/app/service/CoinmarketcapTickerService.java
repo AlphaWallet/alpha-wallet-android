@@ -3,7 +3,10 @@ package com.alphawallet.app.service;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.AmberDataElement;
 import com.alphawallet.app.entity.BlockscoutValue;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.tokens.TokenFactory;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.TokenRepository;
 import com.google.gson.Gson;
 import com.alphawallet.app.entity.Ticker;
@@ -26,6 +29,7 @@ import org.web3j.protocol.core.methods.response.EthCall;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -179,6 +183,78 @@ public class CoinmarketcapTickerService implements TickerService
     public boolean hasTickers()
     {
         return erc20Tickers != null;
+    }
+
+    @Override
+    public Single<Token[]> getTokensOnNetwork(NetworkInfo info, String address)
+    {
+        //TODO: find tokens on other networks
+        String netName = "ethereum-mainnet";
+        if (info.chainId != MAINNET_ID) return Single.fromCallable(() -> { return new Token[0]; });
+        List<Token> tokenList = new ArrayList<>();
+        final String keyAPI = BuildConfig.AmberdataAPI;
+        return Single.fromCallable(() -> {
+            try
+            {
+                String url = "https://web3api.io/api/v2/addresses/" + address + "/balances";
+                Request request = new Request.Builder()
+                        .url(url)
+                        .get()
+                        .addHeader("x-api-key", keyAPI)
+                        .addHeader("x-amberdata-blockchain-id", netName)
+                        .build();
+                okhttp3.Response response = httpClient.newCall(request)
+                        .execute();
+                if (response.code() / 200 == 1)
+                {
+                    String result = response.body().string();
+                    handleTokenList(info, tokenList, result, address);
+                }
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+
+            return tokenList.toArray(new Token[0]);
+        });
+    }
+
+    private void handleTokenList(NetworkInfo network, List<Token> tokenList, String result, String currentAddress)
+    {
+        if (result.contains("NOTOK")) return;
+
+        try
+        {
+            JSONObject   json    = new JSONObject(result);
+            JSONObject   res     = json.getJSONObject("payload");
+            JSONArray    tokens  = res.getJSONArray("tokens");
+
+            TokenFactory tf      = new TokenFactory();
+
+            for (int i = 0; i < tokens.length(); i++)
+            {
+                JSONObject t = (JSONObject)tokens.get(i);
+                String balanceStr = t.getString("amount");
+                if (balanceStr.length() == 0 || balanceStr.equals("0")) continue;
+                String    decimalsStr = t.getString("decimals");
+                int       decimals    = (decimalsStr.length() > 0) ? Integer.parseInt(decimalsStr) : 0;
+                TokenInfo info        = new TokenInfo(t.getString("address"), t.getString("name"), t.getString("symbol"), decimals, true, network.chainId);
+                //now create token with balance info, only for ERC20 for now
+                if (decimalsStr.length() > 0)
+                {
+                    BigDecimal balance = new BigDecimal(balanceStr);
+                    Token newToken = tf.createToken(info, balance, null, System.currentTimeMillis(), ContractType.ERC20, network.getShortName(), System.currentTimeMillis());
+                    newToken.setTokenWallet(currentAddress);
+                    newToken.refreshCheck = false;
+                    tokenList.add(newToken);
+                }
+            }
+        }
+        catch (JSONException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -36,15 +36,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.Credentials;
 
 public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryType
 {
-    public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/" + BuildConfig.InfuraAPI;
+    public static final String MAINNET_RPC_URL = "https://rpc.web3api.io?x-api-key=" + BuildConfig.AmberdataAPI;
     public static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
     public static final String XDAI_RPC_URL = "https://dai.poa.network";
     public static final String POA_RPC_URL = "https://core.poa.network/";
     public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/" + BuildConfig.InfuraAPI;
-    public static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/" + BuildConfig.InfuraAPI;
+    public static final String RINKEBY_RPC_URL = "https://rpc.web3api.io?x-api-key=" + BuildConfig.AmberdataAPI;
     public static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/" + BuildConfig.InfuraAPI;
     public static final String SOKOL_RPC_URL = "https://sokol.poa.network";
     public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/" + BuildConfig.InfuraAPI;
@@ -284,6 +285,13 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
+    @Override
+    public Single<Token[]> getTokensOnNetwork(int chainId, String address)
+    {
+        NetworkInfo info = getNetworkByChain(chainId);
+        return tickerService.getTokensOnNetwork(info, address);
+    }
+
     private Single<Ticker> updateTicker(NetworkInfo networkInfo)
     {
         Ticker ticker = ethTickers.get(networkInfo.chainId);
@@ -454,7 +462,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static void addRequiredCredentials(int chainId, HttpService publicNodeService)
     {
-
+        if (chainId == MAINNET_ID)
+        {
+            publicNodeService.addHeader("x-amberdata-blockchain-id", "1c9c969065fcd1cf");
+        }
+        else if (chainId == RINKEBY_ID)
+        {
+            publicNodeService.addHeader("x-amberdata-blockchain-id", "1b3f7a72b3e99c13");
+        }
     }
 
     public static List<Integer> addDefaultNetworks()

@@ -1240,6 +1240,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         List<Wallet> removalList = new ArrayList<>();
         for (Wallet w : walletList)
         {
+            //Test legacy key
             if (w.type == WalletType.KEYSTORE_LEGACY)
             {
                 try
@@ -1252,27 +1253,17 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                     switch (ke.code)
                     {
                         case UNKNOWN_ERROR:
-                            break;
                         case KEY_STORE_ERROR:
-                            break;
                         case FAIL_TO_SAVE_IV_FILE:
-                            break;
                         case KEY_STORE_SECRET:
                             break;
                         case USER_NOT_AUTHENTICATED:
+                        case INVALID_KEY:
                             //key is authenticated, must be new style
                             w.type = WalletType.KEYSTORE;
                             w.lastBackupTime = System.currentTimeMillis();
                             if (hasStrongbox()) w.authLevel = AuthenticationLevel.STRONGBOX_AUTHENTICATION;
                             else w.authLevel = AuthenticationLevel.TEE_AUTHENTICATION;
-                            hasChanges = true;
-                            break;
-                        case INVALID_KEY:
-                            //key cypher is incorrect
-                            w.type = WalletType.KEYSTORE;
-                            w.lastBackupTime = System.currentTimeMillis();
-                            if (hasStrongbox()) w.authLevel = AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
-                            else w.authLevel = AuthenticationLevel.TEE_NO_AUTHENTICATION;
                             hasChanges = true;
                             break;
                         case KEY_IS_GONE:

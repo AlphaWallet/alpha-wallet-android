@@ -2,18 +2,10 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'application'
 
-mainClassName = 'com.alphawallet.scripttool.Main'
+mainClassName = 'com.alphawallet.scripttool.ScriptTool'
 
 repositories {
     mavenCentral()
-}
-
-jar {
-    manifest {
-        attributes(
-                'Main-Class': 'com.alphawallet.scripttool.Main'
-        )
-    }
 }
 
 version = '0.1' // current tool for demonstration only

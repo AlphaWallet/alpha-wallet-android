@@ -41,6 +41,9 @@ public class ScriptTool implements AttributeInterface
 
     private final TokenscriptFunction tokenscriptFunction = new TokenscriptFunction() { };
 
+    public static void main(String[] args) {
+        new ScriptTool(args);
+    }
     public ScriptTool(String[] args)
     {
         ParseState p = ARG;

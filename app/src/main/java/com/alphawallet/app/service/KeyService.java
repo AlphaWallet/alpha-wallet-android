@@ -11,6 +11,8 @@ import android.security.keystore.*;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.alphawallet.app.entity.WalletType;
 import com.crashlytics.android.Crashlytics;
 import com.alphawallet.app.BuildConfig;
 
@@ -38,10 +40,15 @@ import javax.crypto.spec.GCMParameterSpec;
 import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 import static com.alphawallet.app.entity.Operation.*;
+import static com.alphawallet.app.entity.ServiceErrorException.ServiceErrorCode.INVALID_KEY;
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+import static com.alphawallet.app.service.KeyService.AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
+import static com.alphawallet.app.service.KeyService.AuthenticationLevel.TEE_NO_AUTHENTICATION;
 import static com.alphawallet.app.service.KeystoreAccountService.KEYSTORE_FOLDER;
 import static com.alphawallet.app.service.LegacyKeystore.getLegacyPassword;
 
@@ -658,24 +665,24 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             {
                 Log.d(TAG, "Using Strongbox");
                 if (useAuthentication) authLevel = AuthenticationLevel.STRONGBOX_AUTHENTICATION;
-                else authLevel = AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
+                else authLevel = STRONGBOX_NO_AUTHENTICATION;
             }
             else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && tryInitStrongBoxKey(keyGenerator, keyAddress, false))
             {
                 Log.d(TAG, "Using Strongbox");
-                authLevel = AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
+                authLevel = STRONGBOX_NO_AUTHENTICATION;
             }
             else if (tryInitTEEKey(keyGenerator, keyAddress, useAuthentication))
             {
                 //fallback to non Strongbox
                 Log.d(TAG, "Using Hardware security TEE");
                 if (useAuthentication) authLevel = AuthenticationLevel.TEE_AUTHENTICATION;
-                else authLevel = AuthenticationLevel.TEE_NO_AUTHENTICATION;
+                else authLevel = TEE_NO_AUTHENTICATION;
             }
             else if (tryInitTEEKey(keyGenerator, keyAddress, false))
             {
                 Log.d(TAG, "Using Hardware security TEE without authentication");
-                authLevel = AuthenticationLevel.TEE_NO_AUTHENTICATION;
+                authLevel = TEE_NO_AUTHENTICATION;
             }
         }
         catch (NoSuchAlgorithmException | NoSuchProviderException ex)
@@ -769,6 +776,14 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             default:
                 dialogTitle = context.getString(R.string.unlock_private_key);
                 break;
+        }
+
+        //see if unlock is required
+        if ((currentWallet.authLevel == TEE_NO_AUTHENTICATION || currentWallet.authLevel == STRONGBOX_NO_AUTHENTICATION)
+               && !requiresUnlock() && signCallback != null)
+        {
+            signCallback.GotAuthorisation(true);
+            return;
         }
 
         signDialog = new SignTransactionDialog(activity, operation, dialogTitle, null);
@@ -1062,6 +1077,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         catch (Exception e)
         {
             e.printStackTrace();
+            AuthorisationFailMessage(e.getMessage());
         }
 
         return sigBytes;
@@ -1217,6 +1233,62 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         }
     }
 
+    public boolean detectWalletIssues(List<Wallet> walletList)
+    {
+        boolean hasChanges = false;
+        //double check for consistency
+        List<Wallet> removalList = new ArrayList<>();
+        for (Wallet w : walletList)
+        {
+            //Test legacy key
+            if (w.type == WalletType.KEYSTORE_LEGACY)
+            {
+                try
+                {
+                    currentWallet = new Wallet(w.address);
+                    getLegacyPassword(context, currentWallet.address);
+                }
+                catch (ServiceErrorException ke)
+                {
+                    switch (ke.code)
+                    {
+                        case UNKNOWN_ERROR:
+                        case KEY_STORE_ERROR:
+                        case FAIL_TO_SAVE_IV_FILE:
+                        case KEY_STORE_SECRET:
+                            break;
+                        case USER_NOT_AUTHENTICATED:
+                        case INVALID_KEY:
+                            //key is authenticated, must be new style
+                            w.type = WalletType.KEYSTORE;
+                            w.lastBackupTime = System.currentTimeMillis();
+                            if (hasStrongbox()) w.authLevel = AuthenticationLevel.STRONGBOX_AUTHENTICATION;
+                            else w.authLevel = AuthenticationLevel.TEE_AUTHENTICATION;
+                            hasChanges = true;
+                            break;
+                        case KEY_IS_GONE:
+                        case INVALID_DATA:
+                        case IV_OR_ALIAS_NO_ON_DISK:
+                            //need to delete this data
+                            deleteKey(w.address);
+                            removalList.add(w);
+                            hasChanges = true;
+                            break;
+                    }
+                    ke.printStackTrace();
+                    System.out.println("KSE: " + ke.code);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        for (Wallet w : removalList) walletList.remove(w);
+        return hasChanges;
+    }
+
     public static boolean hasStrongbox()
     {
         return securityStatus == SecurityStatus.HAS_STRONGBOX;
@@ -1228,7 +1300,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         {
             unpackMnemonic();
         }
-        catch (UserNotAuthenticatedException | KeyServiceException e)
+        catch (Exception e)
         {
             return true;
         }

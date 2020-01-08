@@ -61,7 +61,7 @@ public class ScriptTool implements AttributeInterface
                 case ARG:
                     switch (arg)
                     {
-                        case "-file":
+                        case "-tokenscript":
                             p = TS_FILE;
                             break;
                         case "-address":
@@ -119,7 +119,7 @@ public class ScriptTool implements AttributeInterface
     private void showUsage()
     {
         System.out.println("Usage:");
-        System.out.println("scripttool -file <TokenScript File> -address <Ethereum address>");
+        System.out.println("scripttool -tokenscript <TokenScript File> -address <Ethereum address>");
     }
 
     private void dumpTokenScriptFile()

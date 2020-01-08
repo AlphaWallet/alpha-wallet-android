@@ -23,7 +23,7 @@ dependencies {
 }
 
 run {
-    args = ["-file", "fifa.tsml", "-address", "0x901dbb9771d30124bd25b2f86ef4d8c6c135d948"]
+    args = ["-tokenscript", "fifa.tsml", "-address", "0x901dbb9771d30124bd25b2f86ef4d8c6c135d948"]
     doFirst {
         assert file("fifa.tsml").exists() : "Need a tokenscript to test this functionality. Run this:\n curl -O http://repo.tokenscript.org/aw.app/2019/10/fifa.tsml\nto get it"
     }

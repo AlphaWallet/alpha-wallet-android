@@ -115,8 +115,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             issuer.setText(displayTxt);
 
             if (token.ticker != null) animateTextWhileWaiting();
-            token.setupContent(this, assetDefinition);
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
+            token.setupContent(this, assetDefinition);
             setPending();
         } catch (Exception ex) {
             fillEmpty();

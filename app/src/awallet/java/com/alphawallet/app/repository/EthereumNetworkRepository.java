@@ -1,6 +1,7 @@
 package com.alphawallet.app.repository;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.View;
 
 import com.alphawallet.app.R;
@@ -19,6 +20,10 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
     public EthereumNetworkRepository(PreferenceRepositoryType preferenceRepository, TickerService tickerService, Context ctx)
     {
         super(preferenceRepository, tickerService, new NetworkInfo[0], true);
+        /* defaultNetwork should already have a value by now */
+        if (getByName(preferences.getDefaultNetwork()) != null) {
+            defaultNetwork = getByName(preferences.getDefaultNetwork());
+        }
         context = ctx;
     }
 
@@ -32,11 +37,6 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
         view.setBackgroundResource(R.drawable.item_eth_circle);
     }
 
-    public static List<ContractResult> getAllKnownContracts(Context context, List<Integer> chainFilters)
-    {
-        return EthereumNetworkBase.getAllKnownContracts(context, chainFilters);
-    }
-
     public static List<Integer> addDefaultNetworks()
     {
         return new ArrayList<>(Collections.singletonList(EthereumNetworkRepository.MAINNET_ID));
@@ -44,11 +44,6 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
 
     public static String getNodeURLByNetworkId(int networkId) {
         return EthereumNetworkBase.getNodeURLByNetworkId(networkId);
-    }
-
-    public static String getMagicLinkDomainFromNetworkId(int networkId)
-    {
-        return EthereumNetworkBase.getMagicLinkDomainFromNetworkId(networkId);
     }
 
     public static String getEtherscanURLbyNetwork(int networkId)
@@ -59,6 +54,52 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
     @Override
     public List<ContractResult> getAllKnownContracts(List<Integer> networkFilters)
     {
-        return EthereumNetworkBase.getAllKnownContracts(context, networkFilters);
+        List<ContractResult> knownContracts = new ArrayList<>(getAllKnownContractsOnNetwork(context, EthereumNetworkRepository.MAINNET_ID, networkFilters));
+        knownContracts.addAll(getAllKnownContractsOnNetwork(context, EthereumNetworkRepository.XDAI_ID, networkFilters));
+        return knownContracts;
     }
+
+    private static List<ContractResult> getAllKnownContractsOnNetwork(Context context, int chainId, List<Integer> filters)
+    {
+        int index = 0;
+
+        if (!filters.contains((Integer)chainId)) return new ArrayList<>();
+
+        List<ContractResult> result = new ArrayList<>();
+        switch (chainId)
+        {
+            case EthereumNetworkRepository.XDAI_ID:
+                index = R.array.xDAI;
+                break;
+            case EthereumNetworkRepository.MAINNET_ID:
+                index = R.array.MainNet;
+                break;
+            default:
+                break;
+        }
+
+        if (index > 0)
+        {
+            String[] strArray = context.getResources().getStringArray(index);
+            for (String addr : strArray)
+            {
+                result.add(new ContractResult(addr, chainId));
+            }
+        }
+
+        return result;
+    }
+
+
+    private NetworkInfo getByName(String name) {
+        if (!TextUtils.isEmpty(name)) {
+            for (NetworkInfo NETWORK : NETWORKS) {
+                if (name.equals(NETWORK.name)) {
+                    return NETWORK;
+                }
+            }
+        }
+        return null;
+    }
+
 }

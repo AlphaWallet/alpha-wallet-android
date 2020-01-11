@@ -1,11 +1,7 @@
 package com.alphawallet.app.repository;
 
-import android.content.Context;
-import android.text.TextUtils;
-
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
-import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -39,6 +35,9 @@ import io.reactivex.schedulers.Schedulers;
 
 public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryType
 {
+    /* constructing URLs from BuildConfig. In the below area you will see hardcoded key like da3717...
+       These hardcoded keys are fallbacks used by AlphaWallet forks.
+     */
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/" + BuildConfig.InfuraAPI;
     public static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
     public static final String XDAI_RPC_URL = "https://dai.poa.network";
@@ -63,6 +62,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final int ARTIS_SIGMA1_ID = 246529;
     public static final int ARTIS_TAU1_ID = 246785;
 
+
     public static final String BLOCKSCOUT_API = "https://blockscout.com/";
     public static final String BLOCKSCOUT_TOKEN_ARGS = "/api?module=account&action=tokenlist&address=";
 
@@ -76,10 +76,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String KOVAN_BLOCKSCOUT = "eth/kovan";
     public static final String GOERLI_BLOCKSCOUT = "eth/goerli";
 
-    private final Map<Integer, NetworkInfo> networkMap;
+    final Map<Integer, NetworkInfo> networkMap;
 
-    private final NetworkInfo[] NETWORKS;
-    private NetworkInfo[] DEFAULT_NETWORKS = new NetworkInfo[] {
+    final NetworkInfo[] NETWORKS;
+    static final NetworkInfo[] DEFAULT_NETWORKS = new NetworkInfo[] {
             new NetworkInfo(C.ETHEREUM_NETWORK_NAME, C.ETH_SYMBOL,
                     MAINNET_RPC_URL,
                     "https://etherscan.io/tx/",MAINNET_ID, true,
@@ -131,9 +131,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://explorer.tau1.artis.network/", C.ARTIS_SIGMA_TICKER, ""),
     };
 
-    private final PreferenceRepositoryType preferences;
+    final PreferenceRepositoryType preferences;
     private final TickerService tickerService;
-    private NetworkInfo defaultNetwork;
+    NetworkInfo defaultNetwork;
     private final Set<OnNetworkChangeListener> onNetworkChangedListeners = new HashSet<>();
     private Map<Integer, Ticker> ethTickers = new ConcurrentHashMap<>();
     private Map<Integer, Long> ethTickerTimes = new ConcurrentHashMap<>();
@@ -143,16 +143,17 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     {
         this.preferences = preferenceRepository;
         this.tickerService = tickerService;
-        List<NetworkInfo> networks = new ArrayList<>();
 
+        /* merging static compile time network list with runtime network list */
+        List<NetworkInfo> networks = new ArrayList<>();
         addNetworks(additionalNetworks, networks, true);
         addNetworks(DEFAULT_NETWORKS, networks, true);
         addNetworks(additionalNetworks, networks, false);
         if (useTestNets) addNetworks(DEFAULT_NETWORKS, networks, false);
 
+        /* then store the result list in a network variable */
         NETWORKS = networks.toArray(new NetworkInfo[0]);
 
-        defaultNetwork = getByName(preferences.getDefaultNetwork());
         if (defaultNetwork == null) {
             defaultNetwork = NETWORKS[0];
         }
@@ -177,17 +178,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             if (EthereumNetworkRepository.hasRealValue(network.chainId) == withValue) result.add(network);
         }
-    }
-
-    private NetworkInfo getByName(String name) {
-        if (!TextUtils.isEmpty(name)) {
-            for (NetworkInfo NETWORK : NETWORKS) {
-                if (name.equals(NETWORK.name)) {
-                    return NETWORK;
-                }
-            }
-        }
-        return null;
     }
 
     @Override
@@ -398,45 +388,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     {
         return MagicLinkInfo.getEtherscanURLbyNetwork(networkId);
     }
-
-    protected static List<ContractResult> getAllKnownContracts(Context context, List<Integer> chainFilters)
-    {
-        List<ContractResult> knownContracts = new ArrayList<>(getAllKnownContractsOnNetwork(context, EthereumNetworkRepository.MAINNET_ID, chainFilters));
-        knownContracts.addAll(getAllKnownContractsOnNetwork(context, EthereumNetworkRepository.XDAI_ID, chainFilters));
-        return knownContracts;
-    }
-
-    protected static List<ContractResult> getAllKnownContractsOnNetwork(Context context, int chainId, List<Integer> filters)
-    {
-        int index = 0;
-
-        if (!filters.contains((Integer)chainId)) return new ArrayList<>();
-
-        List<ContractResult> result = new ArrayList<>();
-        switch (chainId)
-        {
-            case EthereumNetworkRepository.XDAI_ID:
-                index = R.array.xDAI;
-                break;
-            case EthereumNetworkRepository.MAINNET_ID:
-                index = R.array.MainNet;
-                break;
-            default:
-                break;
-        }
-
-        if (index > 0)
-        {
-            String[] strArray = context.getResources().getStringArray(index);
-            for (String addr : strArray)
-            {
-                result.add(new ContractResult(addr, chainId));
-            }
-        }
-
-        return result;
-    }
-
+    
     public static boolean hasGasOverride(int chainId)
     {
         return false;

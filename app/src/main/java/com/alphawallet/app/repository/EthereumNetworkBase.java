@@ -1,5 +1,8 @@
 package com.alphawallet.app.repository;
 
+/* Please don't add import android at this point. Later this file will be shared
+ * between projects including non-Android projects */
+
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractResult;

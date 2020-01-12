@@ -9,9 +9,7 @@ import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.service.TickerService;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class EthereumNetworkRepository extends EthereumNetworkBase
 {
@@ -51,45 +49,22 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
         return EthereumNetworkBase.getEtherscanURLbyNetwork(networkId);
     }
 
-    @Override
+    /* can't turn this one into one-liners like every other function
+     * in this file, without making either EthereumNetworkBase or
+     * ContractResult import android (therefore preventing their use
+     * in non-Android projects) or introducing a new trivial
+     * interface/class */
     public List<ContractResult> getAllKnownContracts(List<Integer> networkFilters)
     {
-        List<ContractResult> knownContracts = new ArrayList<>(getAllKnownContractsOnNetwork(context, EthereumNetworkRepository.MAINNET_ID, networkFilters));
-        knownContracts.addAll(getAllKnownContractsOnNetwork(context, EthereumNetworkRepository.XDAI_ID, networkFilters));
+        List<ContractResult> knownContracts = new ArrayList<>();
+        if (networkFilters.contains(EthereumNetworkRepository.MAINNET_ID)) {
+            knownContracts = Arrays.asList(ContractResult.fromAddresses(context.getResources().getStringArray(R.array.MainNet), EthereumNetworkRepository.MAINNET_ID));
+        }
+        if (networkFilters.contains(EthereumNetworkRepository.XDAI_ID)) {
+            knownContracts.addAll(Arrays.asList(ContractResult.fromAddresses(context.getResources().getStringArray(R.array.xDAI), EthereumNetworkRepository.XDAI_ID)));
+        }
         return knownContracts;
     }
-
-    private static List<ContractResult> getAllKnownContractsOnNetwork(Context context, int chainId, List<Integer> filters)
-    {
-        int index = 0;
-
-        if (!filters.contains((Integer)chainId)) return new ArrayList<>();
-
-        List<ContractResult> result = new ArrayList<>();
-        switch (chainId)
-        {
-            case EthereumNetworkRepository.XDAI_ID:
-                index = R.array.xDAI;
-                break;
-            case EthereumNetworkRepository.MAINNET_ID:
-                index = R.array.MainNet;
-                break;
-            default:
-                break;
-        }
-
-        if (index > 0)
-        {
-            String[] strArray = context.getResources().getStringArray(index);
-            for (String addr : strArray)
-            {
-                result.add(new ContractResult(addr, chainId));
-            }
-        }
-
-        return result;
-    }
-
 
     private NetworkInfo getByName(String name) {
         if (!TextUtils.isEmpty(name)) {

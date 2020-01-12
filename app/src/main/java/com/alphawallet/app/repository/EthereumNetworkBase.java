@@ -157,6 +157,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         /* then store the result list in a network variable */
         NETWORKS = networks.toArray(new NetworkInfo[0]);
 
+        defaultNetwork = getByName(preferences.getDefaultNetwork());
         if (defaultNetwork == null) {
             defaultNetwork = NETWORKS[0];
         }
@@ -181,6 +182,17 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         {
             if (EthereumNetworkRepository.hasRealValue(network.chainId) == withValue) result.add(network);
         }
+    }
+
+    private NetworkInfo getByName(String name) {
+        if (name != null && name != "") {
+            for (NetworkInfo NETWORK : NETWORKS) {
+                if (name.equals(NETWORK.name)) {
+                    return NETWORK;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -391,7 +403,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     {
         return MagicLinkInfo.getEtherscanURLbyNetwork(networkId);
     }
-    
+
     public static boolean hasGasOverride(int chainId)
     {
         return false;

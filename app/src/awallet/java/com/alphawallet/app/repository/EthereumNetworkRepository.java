@@ -1,7 +1,6 @@
 package com.alphawallet.app.repository;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.view.View;
 
 import com.alphawallet.app.R;
@@ -18,10 +17,6 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
     public EthereumNetworkRepository(PreferenceRepositoryType preferenceRepository, TickerService tickerService, Context ctx)
     {
         super(preferenceRepository, tickerService, new NetworkInfo[0], true);
-        /* defaultNetwork should already have a value by now */
-        if (getByName(preferences.getDefaultNetwork()) != null) {
-            defaultNetwork = getByName(preferences.getDefaultNetwork());
-        }
         context = ctx;
     }
 
@@ -65,16 +60,4 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
         }
         return knownContracts;
     }
-
-    private NetworkInfo getByName(String name) {
-        if (!TextUtils.isEmpty(name)) {
-            for (NetworkInfo NETWORK : NETWORKS) {
-                if (name.equals(NETWORK.name)) {
-                    return NETWORK;
-                }
-            }
-        }
-        return null;
-    }
-
 }

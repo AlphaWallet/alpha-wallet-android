@@ -36,6 +36,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
+
 /**
  * Created by James on 22/01/2018.
  */
@@ -203,7 +205,7 @@ public class AssetDisplayViewModel extends BaseViewModel
 
         if (token.isERC721()) //skip numerical selection - ERC721 has no multiple token transfer
         {
-            intent.putExtra(C.EXTRA_STATE, TransferTicketDetailActivity.TRANSFER_TO_ADDRESS);
+            intent.putExtra(C.EXTRA_STATE, TRANSFER_TO_ADDRESS.ordinal());
         }
 
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);

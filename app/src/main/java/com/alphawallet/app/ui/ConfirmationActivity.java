@@ -144,9 +144,18 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         Utils.setChainColour(chainName, chainId);
         chainName.setText(viewModel.getNetworkName(chainId));
 
-        if (amountStr != null) amount = new BigDecimal(amountStr);
+        try
+        {
+            if (amountStr != null)
+                amount = new BigDecimal(amountStr);
+        }
+        catch (NumberFormatException e)
+        {
+            //Cannot convert
+        }
 
-        if (token == null) token = viewModel.getToken(chainId, contractAddress);
+        if (token == null)
+            token = viewModel.getToken(chainId, contractAddress);
 
         switch (confirmationType) {
             case ETH:

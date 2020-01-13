@@ -7,6 +7,7 @@ import android.content.Context;
 
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.tokens.Ticket;
@@ -179,9 +180,9 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         universalLinkReady.postValue(universalLink);
     }
 
-    public void openTransferState(Context context, Token token, String ticketIds, int transferStatus)
+    public void openTransferState(Context context, Token token, String ticketIds, DisplayState transferStatus)
     {
-        transferTicketDetailRouter.openTransfer(context, token, ticketIds, defaultWallet.getValue(), transferStatus);
+        if (transferStatus != DisplayState.NO_ACTION) transferTicketDetailRouter.openTransfer(context, token, ticketIds, defaultWallet.getValue(), transferStatus.ordinal());
     }
 
     public void createTicketTransfer(String to, Token token, List<BigInteger> transferList)

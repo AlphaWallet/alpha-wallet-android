@@ -149,6 +149,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
         /* merging static compile time network list with runtime network list */
         List<NetworkInfo> networks = new ArrayList<>();
+
+        /* the order is passed to the uesr interface. So if a user has a token on one
+         * of the additionalNetworks, the same token on DEFAULT_NETWORKS, and on a few
+         * test nets, they are displayed by that order.
+         */
         addNetworks(additionalNetworks, networks, true);
         addNetworks(DEFAULT_NETWORKS, networks, true);
         addNetworks(additionalNetworks, networks, false);

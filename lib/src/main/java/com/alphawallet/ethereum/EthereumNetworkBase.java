@@ -1,27 +1,8 @@
 package com.alphawallet.ethereum;
 
-/* Weiwu 12 Jan 2020: My original intention is to move this class from
- * :app to :lib so all projects can utilize Ethereum node
- * configuration and API keys configured in build.gradle.
-
- * However, when I started this James Brown is in the middle of
- * refactoring token classes in com.alphawallet.app.entity.tokens and
- * EthereumNetworkBase.java uses the Token.java in that package.
-
- * I see the need to make token class into those who handle token
- * generically, and those who handle token in Android context,
- * therefore I hope James Brown's refactoring is about moving certain
- * logic to lib, but this is not confirmed.
-
- * Eitherway, he marked all classes in
- * com.alphawallet.app.entity.tokens untouchable until he finishes
- * refactoring, so I created this
- * com.alphawallet.ethereum.EthereumNetworkBase to partially duplicate
- * the functionalities of
- * com.alphawallet.app.repository.EthereumNetworkBase so that non-app
- * projects can use node configurations
+/* Weiwu 12 Jan 2020: This class eventually will replace the EthereumNetworkBase class in :app
+ * one all inteface methods are implemented.
  */
-
 
 import java.util.LinkedHashMap;
 import java.util.Map;

@@ -8,9 +8,7 @@ import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.service.TickerService;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class EthereumNetworkRepository extends EthereumNetworkBase
 {
@@ -32,11 +30,6 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
         view.setBackgroundResource(R.drawable.item_eth_circle);
     }
 
-    public static List<ContractResult> getAllKnownContracts(Context context, List<Integer> chainFilters)
-    {
-        return EthereumNetworkBase.getAllKnownContracts(context, chainFilters);
-    }
-
     public static List<Integer> addDefaultNetworks()
     {
         return new ArrayList<>(Collections.singletonList(EthereumNetworkRepository.MAINNET_ID));
@@ -46,19 +39,25 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
         return EthereumNetworkBase.getNodeURLByNetworkId(networkId);
     }
 
-    public static String getMagicLinkDomainFromNetworkId(int networkId)
-    {
-        return EthereumNetworkBase.getMagicLinkDomainFromNetworkId(networkId);
-    }
-
     public static String getEtherscanURLbyNetwork(int networkId)
     {
         return EthereumNetworkBase.getEtherscanURLbyNetwork(networkId);
     }
 
-    @Override
+    /* can't turn this one into one-liners like every other function
+     * in this file, without making either EthereumNetworkBase or
+     * ContractResult import android (therefore preventing their use
+     * in non-Android projects) or introducing a new trivial
+     * interface/class */
     public List<ContractResult> getAllKnownContracts(List<Integer> networkFilters)
     {
-        return EthereumNetworkBase.getAllKnownContracts(context, networkFilters);
+        List<ContractResult> knownContracts = new ArrayList<>();
+        if (networkFilters.contains(EthereumNetworkRepository.MAINNET_ID)) {
+            knownContracts = Arrays.asList(ContractResult.fromAddresses(context.getResources().getStringArray(R.array.MainNet), EthereumNetworkRepository.MAINNET_ID));
+        }
+        if (networkFilters.contains(EthereumNetworkRepository.XDAI_ID)) {
+            knownContracts.addAll(Arrays.asList(ContractResult.fromAddresses(context.getResources().getStringArray(R.array.xDAI), EthereumNetworkRepository.XDAI_ID)));
+        }
+        return knownContracts;
     }
 }

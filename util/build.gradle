@@ -14,12 +14,12 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile 'org.web3j:core:4.5.0'
+    implementation 'org.web3j:core:4.5.0'
     testImplementation 'junit:junit:4.12'
-    compile project(path: ':lib')
+    implementation project(path: ':lib')
     // To avoid any kind of class conflicts and logger conflicts, 
     // JDeferred does not include any logger libraries. Providing one here.
-    compile 'org.slf4j:slf4j-nop:1.7.25'
+    implementation 'org.slf4j:slf4j-nop:1.7.25'
 }
 
 run {

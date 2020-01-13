@@ -81,6 +81,6 @@ public class VisibilityFilter
     //Use to switch off direct transfer, only use magiclink transfer
     public static boolean hasDirectTransfer()
     {
-        return false;
+        return true;
     }
 }

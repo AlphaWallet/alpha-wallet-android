@@ -1,11 +1,10 @@
 package com.alphawallet.app.repository;
 
-import android.content.Context;
-import android.text.TextUtils;
+/* Please don't add import android at this point. Later this file will be shared
+ * between projects including non-Android projects */
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
-import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -40,6 +39,10 @@ import okhttp3.Credentials;
 
 public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryType
 {
+    /* constructing URLs from BuildConfig. In the below area you will see hardcoded key like da3717...
+       These hardcoded keys are fallbacks used by AlphaWallet forks.
+     */
+    public static final String BACKUP_INFURA_KEY = "da3717f25f824cc1baa32d812386d93f";
     public static final String MAINNET_RPC_URL = "https://rpc.web3api.io?x-api-key=" + BuildConfig.AmberdataAPI;
     public static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
     public static final String XDAI_RPC_URL = "https://dai.poa.network";
@@ -64,9 +67,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final int ARTIS_SIGMA1_ID = 246529;
     public static final int ARTIS_TAU1_ID = 246785;
 
-    public static final String BLOCKSCOUT_API = "https://blockscout.com/";
-    public static final String BLOCKSCOUT_TOKEN_ARGS = "/api?module=account&action=tokenlist&address=";
-
     public static final String MAINNET_BLOCKSCOUT = "eth/mainnet";
     public static final String CLASSIC_BLOCKSCOUT = "etc/mainnet";
     public static final String XDAI_BLOCKSCOUT = "poa/dai";
@@ -77,14 +77,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String KOVAN_BLOCKSCOUT = "eth/kovan";
     public static final String GOERLI_BLOCKSCOUT = "eth/goerli";
 
-    private final Map<Integer, NetworkInfo> networkMap;
+    final Map<Integer, NetworkInfo> networkMap;
 
-    private final NetworkInfo[] NETWORKS;
-    private NetworkInfo[] DEFAULT_NETWORKS = new NetworkInfo[] {
+    final NetworkInfo[] NETWORKS;
+    static final NetworkInfo[] DEFAULT_NETWORKS = new NetworkInfo[] {
             new NetworkInfo(C.ETHEREUM_NETWORK_NAME, C.ETH_SYMBOL,
                     MAINNET_RPC_URL,
                     "https://etherscan.io/tx/",MAINNET_ID, true,
-                    "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
+                    "https://mainnet.infura.io/v3/" + BACKUP_INFURA_KEY,
                     "https://api.etherscan.io/",
                     C.ETHEREUM_TICKER_NAME,
                     MAINNET_BLOCKSCOUT),
@@ -108,19 +108,19 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://explorer.sigma1.artis.network/", C.ARTIS_SIGMA_TICKER, ""),
             new NetworkInfo(C.KOVAN_NETWORK_NAME, C.ETH_SYMBOL, KOVAN_RPC_URL,
                     "https://kovan.etherscan.io/tx/", KOVAN_ID, false,
-                    "https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
+                    "https://kovan.infura.io/v3/" + BACKUP_INFURA_KEY,
                     "https://api-kovan.etherscan.io/", C.ETHEREUM_TICKER_NAME, KOVAN_BLOCKSCOUT),
             new NetworkInfo(C.ROPSTEN_NETWORK_NAME, C.ETH_SYMBOL,
                     ROPSTEN_RPC_URL,
                     "https://ropsten.etherscan.io/tx/",ROPSTEN_ID, false,
-                    "https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
+                    "https://ropsten.infura.io/v3/" + BACKUP_INFURA_KEY,
                     "https://api-ropsten.etherscan.io/", C.ETHEREUM_TICKER_NAME, ROPSTEN_BLOCKSCOUT),
             new NetworkInfo(C.SOKOL_NETWORK_NAME, C.POA_SYMBOL,
                     SOKOL_RPC_URL,
                     "https://sokol-explorer.poa.network/account/",SOKOL_ID, false, C.ETHEREUM_TICKER_NAME, SOKOL_BLOCKSCOUT),
             new NetworkInfo(C.RINKEBY_NETWORK_NAME, C.ETH_SYMBOL, RINKEBY_RPC_URL,
                     "https://rinkeby.etherscan.io/tx/",RINKEBY_ID, false,
-                    "https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f",
+                    "https://rinkeby.infura.io/v3/" + BACKUP_INFURA_KEY,
                     "https://api-rinkeby.etherscan.io/", C.ETHEREUM_TICKER_NAME, RINKEBY_BLOCKSCOUT),
             new NetworkInfo(C.GOERLI_NETWORK_NAME, C.GOERLI_SYMBOL, GOERLI_RPC_URL,
                     "https://goerli.etherscan.io/tx/",GOERLI_ID, false,
@@ -132,9 +132,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://explorer.tau1.artis.network/", C.ARTIS_SIGMA_TICKER, ""),
     };
 
-    private final PreferenceRepositoryType preferences;
+    final PreferenceRepositoryType preferences;
     private final TickerService tickerService;
-    private NetworkInfo defaultNetwork;
+    NetworkInfo defaultNetwork;
     private final Set<OnNetworkChangeListener> onNetworkChangedListeners = new HashSet<>();
     private Map<Integer, Ticker> ethTickers = new ConcurrentHashMap<>();
     private Map<Integer, Long> ethTickerTimes = new ConcurrentHashMap<>();
@@ -144,13 +144,15 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     {
         this.preferences = preferenceRepository;
         this.tickerService = tickerService;
-        List<NetworkInfo> networks = new ArrayList<>();
 
+        /* merging static compile time network list with runtime network list */
+        List<NetworkInfo> networks = new ArrayList<>();
         addNetworks(additionalNetworks, networks, true);
         addNetworks(DEFAULT_NETWORKS, networks, true);
         addNetworks(additionalNetworks, networks, false);
         if (useTestNets) addNetworks(DEFAULT_NETWORKS, networks, false);
 
+        /* then store the result list in a network variable */
         NETWORKS = networks.toArray(new NetworkInfo[0]);
 
         defaultNetwork = getByName(preferences.getDefaultNetwork());
@@ -181,7 +183,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     private NetworkInfo getByName(String name) {
-        if (!TextUtils.isEmpty(name)) {
+        if (name != null && name != "") {
             for (NetworkInfo NETWORK : NETWORKS) {
                 if (name.equals(NETWORK.name)) {
                     return NETWORK;
@@ -405,44 +407,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static String getEtherscanURLbyNetwork(int networkId)
     {
         return MagicLinkInfo.getEtherscanURLbyNetwork(networkId);
-    }
-
-    protected static List<ContractResult> getAllKnownContracts(Context context, List<Integer> chainFilters)
-    {
-        List<ContractResult> knownContracts = new ArrayList<>(getAllKnownContractsOnNetwork(context, EthereumNetworkRepository.MAINNET_ID, chainFilters));
-        knownContracts.addAll(getAllKnownContractsOnNetwork(context, EthereumNetworkRepository.XDAI_ID, chainFilters));
-        return knownContracts;
-    }
-
-    protected static List<ContractResult> getAllKnownContractsOnNetwork(Context context, int chainId, List<Integer> filters)
-    {
-        int index = 0;
-
-        if (!filters.contains((Integer)chainId)) return new ArrayList<>();
-
-        List<ContractResult> result = new ArrayList<>();
-        switch (chainId)
-        {
-            case EthereumNetworkRepository.XDAI_ID:
-                index = R.array.xDAI;
-                break;
-            case EthereumNetworkRepository.MAINNET_ID:
-                index = R.array.MainNet;
-                break;
-            default:
-                break;
-        }
-
-        if (index > 0)
-        {
-            String[] strArray = context.getResources().getStringArray(index);
-            for (String addr : strArray)
-            {
-                result.add(new ContractResult(addr, chainId));
-            }
-        }
-
-        return result;
     }
 
     public static boolean hasGasOverride(int chainId)

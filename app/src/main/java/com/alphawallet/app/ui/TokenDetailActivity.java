@@ -27,7 +27,7 @@ import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.ui.TransferTicketDetailActivity.TRANSFER_TO_ADDRESS;
+import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
 
 public class TokenDetailActivity extends BaseActivity {
     private ImageView image;
@@ -190,7 +190,7 @@ public class TokenDetailActivity extends BaseActivity {
         intent.putExtra(WALLET, new Wallet(token.getWallet()));
         intent.putExtra(TICKET, token);
         intent.putExtra(EXTRA_TOKENID_LIST, asset.getTokenId(16));
-        intent.putExtra(EXTRA_STATE, TRANSFER_TO_ADDRESS);
+        intent.putExtra(EXTRA_STATE, TRANSFER_TO_ADDRESS.ordinal());
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         startActivity(intent);
     }

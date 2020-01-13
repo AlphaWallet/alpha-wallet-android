@@ -171,7 +171,6 @@ public class ERC721Ticket extends Token implements Parcelable {
         tokenHolder.issuer.setText(R.string.ethereum);
         tokenHolder.contractType.setVisibility(View.VISIBLE);
         tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
-        tokenHolder.layoutValueDetails.setVisibility(View.GONE);
         if (VisibilityFilter.getImageOverride() != 0)
         {
             tokenHolder.icon.setVisibility(View.VISIBLE);

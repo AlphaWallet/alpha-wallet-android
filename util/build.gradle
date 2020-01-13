@@ -1,0 +1,34 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+
+mainClassName = 'com.alphawallet.scripttool.ScriptTool'
+
+repositories {
+    mavenCentral()
+}
+
+version = '0.1' // current tool for demonstration only
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile 'org.web3j:core:4.5.0'
+    testImplementation 'junit:junit:4.12'
+    compile project(path: ':lib')
+    // To avoid any kind of class conflicts and logger conflicts, 
+    // JDeferred does not include any logger libraries. Providing one here.
+    compile 'org.slf4j:slf4j-nop:1.7.25'
+}
+
+run {
+    args = ["-tokenscript", "fifa.tsml", "-address", "0x901dbb9771d30124bd25b2f86ef4d8c6c135d948"]
+    doFirst {
+        assert file("fifa.tsml").exists() : "Need a tokenscript to test this functionality. Run this:\n curl -O http://repo.tokenscript.org/aw.app/2019/10/fifa.tsml\nto get it"
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.5'
+}

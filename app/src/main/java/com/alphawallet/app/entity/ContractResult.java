@@ -2,8 +2,6 @@ package com.alphawallet.app.entity;
 
 import com.alphawallet.app.entity.tokens.Token;
 
-import java.util.List;
-
 /**
  * Created by James on 2/02/2019.
  * Stormbird in Singapore
@@ -33,21 +31,13 @@ public class ContractResult
         return (token != null && name != null && name.equalsIgnoreCase(token.getAddress()) && chainId == token.tokenInfo.chainId);
     }
 
-    public static void addIfNotInList(List<ContractResult> contractList, ContractResult candidate)
-    {
-        boolean inList = false;
-        for (ContractResult r : contractList)
-        {
-            if (r.name.equals(candidate.name) && r.chainId == candidate.chainId)
-            {
-                inList = true;
-                break;
-            }
+    /* replace this with a one-liner use of stream when we up our minSdkVersion to 24 */
+    public static ContractResult[] fromAddresses(String[] addresses, int chainID) {
+        ContractResult[] retval = new ContractResult[addresses.length];
+        for (int i=0; i<addresses.length; i++) {
+            retval[i] = new ContractResult(addresses[i], chainID);
         }
-
-        if (!inList)
-        {
-            contractList.add(candidate);
-        }
+        return retval;
     }
+
 }

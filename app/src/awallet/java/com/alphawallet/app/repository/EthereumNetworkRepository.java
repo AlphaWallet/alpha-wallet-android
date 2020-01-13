@@ -53,7 +53,7 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
     {
         List<ContractResult> knownContracts = new ArrayList<>();
         if (networkFilters.contains(EthereumNetworkRepository.MAINNET_ID)) {
-            knownContracts = Arrays.asList(ContractResult.fromAddresses(context.getResources().getStringArray(R.array.MainNet), EthereumNetworkRepository.MAINNET_ID));
+            knownContracts.addAll(Arrays.asList(ContractResult.fromAddresses(context.getResources().getStringArray(R.array.MainNet), EthereumNetworkRepository.MAINNET_ID)));
         }
         if (networkFilters.contains(EthereumNetworkRepository.XDAI_ID)) {
             knownContracts.addAll(Arrays.asList(ContractResult.fromAddresses(context.getResources().getStringArray(R.array.xDAI), EthereumNetworkRepository.XDAI_ID)));

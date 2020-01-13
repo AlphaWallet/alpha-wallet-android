@@ -20,6 +20,8 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import com.alphawallet.app.service.AssetDefinitionService;
 
+import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
+
 public class TransferTicketViewModel extends BaseViewModel {
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
@@ -104,7 +106,7 @@ public class TransferTicketViewModel extends BaseViewModel {
 
     public void openTransferDirectDialog(Context context, String tokenId)
     {
-        transferTicketDetailRouter.openTransfer(context, token.getValue(), tokenId, defaultWallet.getValue(), TransferTicketDetailActivity.TRANSFER_TO_ADDRESS);
+        transferTicketDetailRouter.openTransfer(context, token.getValue(), tokenId, defaultWallet.getValue(), TRANSFER_TO_ADDRESS.ordinal());
     }
 
     public AssetDefinitionService getAssetDefinitionService()

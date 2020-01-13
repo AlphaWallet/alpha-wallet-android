@@ -65,7 +65,7 @@ public class VisibilityFilter
         return R.string.eth;
     }
 
-    //Switch off dapp browser?
+    //Switch off dapp browser
     public static boolean hideDappBrowser()
     {
         return false;
@@ -76,5 +76,11 @@ public class VisibilityFilter
     public static boolean hideTabBar()
     {
         return false;
+    }
+
+    //Use to switch off direct transfer, only use magiclink transfer
+    public static boolean hasDirectTransfer()
+    {
+        return true;
     }
 }

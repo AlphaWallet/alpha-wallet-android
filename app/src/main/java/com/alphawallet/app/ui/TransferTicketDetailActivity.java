@@ -19,19 +19,28 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.*;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.ENSCallback;
-import com.alphawallet.app.entity.tokens.ERC721Ticket;
-import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.tokens.Ticket;
-import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.ERC721Token;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteUrlAdapter;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
@@ -41,11 +50,6 @@ import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRURLParser;
-
-import dagger.android.AndroidInjection;
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -56,7 +60,6 @@ import com.alphawallet.app.widget.SystemView;
 
 import org.web3j.abi.datatypes.Address;
 
-import javax.inject.Inject;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,9 +68,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import static com.alphawallet.app.C.*;
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+
+import static com.alphawallet.app.C.EXTRA_STATE;
+import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
@@ -79,10 +88,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
     private static final int SEND_INTENT_REQUEST_CODE = 2;
-    private static final int CHOOSE_QUANTITY = 0;
-    private static final int PICK_TRANSFER_METHOD = 1;
-    private static final int TRANSFER_USING_LINK = 2;
-    public  static final int TRANSFER_TO_ADDRESS = 3;
 
     @Inject
     protected TransferTicketDetailViewModelFactory viewModelFactory;
@@ -105,7 +110,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
     private String ticketIds;
     private List<BigInteger> selection;
-    private int transferStatus;
+    private DisplayState transferStatus;
 
     private ENSHandler ensHandler;
     private Handler handler;
@@ -142,7 +147,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
         Wallet wallet = getIntent().getParcelableExtra(WALLET);
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
-        transferStatus = getIntent().getIntExtra(EXTRA_STATE, 0);
+        transferStatus = DisplayState.values()[getIntent().getIntExtra(EXTRA_STATE, 0)];
         selection = token.stringHexToBigIntegerList(ticketIds);
 
         toolbar();
@@ -229,11 +234,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
         Button nextAction = findViewById(R.id.button_next);
         nextAction.setOnClickListener((View v) -> {
-            int nextState = getNextState();
-            if (nextState >= 0)
-            {
-                viewModel.openTransferState(this, token, token.bigIntListToString(selection, false), nextState);
-            }
+            viewModel.openTransferState(this, token, token.bigIntListToString(selection, false), getNextState());
         });
 
         qrImageView = findViewById(R.id.img_scan_qr);
@@ -329,23 +330,30 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         });
     }
 
-    private int getNextState()
+    private DisplayState getNextState()
     {
-        int newState = -1;
+        DisplayState newState = DisplayState.NO_ACTION;
 
         switch (transferStatus)
         {
             case CHOOSE_QUANTITY:
-                newState = PICK_TRANSFER_METHOD;
+                if (VisibilityFilter.hasDirectTransfer())
+                {
+                    newState = DisplayState.PICK_TRANSFER_METHOD;
+                }
+                else
+                {
+                    newState = DisplayState.TRANSFER_USING_LINK;
+                }
                 break;
             case PICK_TRANSFER_METHOD:
                 if (pickTransfer.isChecked())
                 {
-                    newState = TRANSFER_TO_ADDRESS;
+                    newState = DisplayState.TRANSFER_TO_ADDRESS;
                 }
                 else
                 {
-                    newState = TRANSFER_USING_LINK;
+                    newState = DisplayState.TRANSFER_USING_LINK;
                 }
                 break;
             case TRANSFER_USING_LINK:

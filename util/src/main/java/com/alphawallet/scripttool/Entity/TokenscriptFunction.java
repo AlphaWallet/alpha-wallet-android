@@ -116,6 +116,7 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -609,7 +610,8 @@ public abstract class TokenscriptFunction
                     .retryOnConnectionFailure(false)
                     .build();
 
-            HttpService nodeService = new HttpService(MagicLinkInfo.getNodeURLByNetworkId(useAddress.chainId), okClient, false);
+            String nodeURL = EthereumNetworkBase.getNetworkByChain(useAddress.chainId).rpcServerUrl;
+            HttpService nodeService = new HttpService(nodeURL, okClient, false);
 
             Web3j web3j = Web3j.build(nodeService);
 

@@ -31,12 +31,12 @@ dependencies {
 
 
     // https://mvnrepository.com/artifact/com.github.cliftonlabs/json-simple
-    compile group: 'com.github.cliftonlabs', name: 'json-simple', version: '3.1.0'
-    compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.12'
-    compile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
+    implementation group: 'com.github.cliftonlabs', name: 'json-simple', version: '3.1.0'
+    implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.12'
+    implementation group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
 
     testCompile("junit:junit")
-    compile project(path: ':lib')
+    implementation project(path: ':lib')
 }
 
 bootRun {

@@ -175,7 +175,11 @@ public class AttributeType {
                 return data;
             case Integer:
                 //convert to integer
-                if (Character.isDigit(data.charAt(0)))
+                if (data.length() == 0)
+                {
+                    return "0";
+                }
+                else if (Character.isDigit(data.charAt(0)))
                 {
                     return data;
                 }

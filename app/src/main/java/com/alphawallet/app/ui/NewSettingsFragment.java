@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.*;
 
 import com.alphawallet.app.entity.MediaLinks;
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.LocaleUtils;
 
@@ -101,9 +102,16 @@ public class NewSettingsFragment extends Fragment
         });
 
         final LinearLayout layoutManageWallets = view.findViewById(R.id.layout_manage_wallets);
-        layoutManageWallets.setOnClickListener(v -> {
-            viewModel.showManageWallets(getContext(), false);
-        });
+        if (VisibilityFilter.canChangeWallets())
+        {
+            layoutManageWallets.setOnClickListener(v -> {
+                viewModel.showManageWallets(getContext(), false);
+            });
+        }
+        else
+        {
+            layoutManageWallets.setVisibility(View.GONE);
+        }
 
         layoutBackupKey = view.findViewById(R.id.layout_backup_wallet);
         layoutBackupKey.setOnClickListener(v -> {

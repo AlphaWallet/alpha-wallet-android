@@ -768,6 +768,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             case CREATE_KEYSTORE_KEY:
             case IMPORT_HD_KEY:
             case CREATE_HD_KEY:
+                //always unlock for these conditions
                 dialogTitle = context.getString(R.string.provide_authentication);
                 break;
             case FETCH_MNEMONIC:
@@ -775,15 +776,14 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             case SIGN_DATA:
             default:
                 dialogTitle = context.getString(R.string.unlock_private_key);
+                //unlock may be optional here
+                if ((currentWallet.authLevel == TEE_NO_AUTHENTICATION || currentWallet.authLevel == STRONGBOX_NO_AUTHENTICATION)
+                        && !requiresUnlock() && signCallback != null)
+                {
+                    signCallback.GotAuthorisation(true);
+                    return;
+                }
                 break;
-        }
-
-        //see if unlock is required
-        if ((currentWallet.authLevel == TEE_NO_AUTHENTICATION || currentWallet.authLevel == STRONGBOX_NO_AUTHENTICATION)
-               && !requiresUnlock() && signCallback != null)
-        {
-            signCallback.GotAuthorisation(true);
-            return;
         }
 
         signDialog = new SignTransactionDialog(activity, operation, dialogTitle, null);

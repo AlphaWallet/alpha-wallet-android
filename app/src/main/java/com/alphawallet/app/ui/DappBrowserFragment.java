@@ -1,14 +1,19 @@
 package com.alphawallet.app.ui;
 
+import android.Manifest;
 import android.animation.LayoutTransition;
 import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -17,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.webkit.ValueCallback;
 import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
 import android.webkit.WebHistoryItem;
@@ -111,8 +117,14 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public static final String PERSONAL_MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
     public static final String CURRENT_FRAGMENT = "currentFragment";
     private static final String CURRENT_URL = "urlInBar";
+    private ValueCallback<Uri[]> uploadMessage;
+    private WebChromeClient.FileChooserParams fileChooserParams;
+    private Intent picker;
 
     private static final String MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
+
+    private static final int UPLOAD_FILE = 1;
+    public static final int REQUEST_FILE_ACCESS = 31;
 
     static byte[] getEthereumMessagePrefix(int messageLength) {
         return MESSAGE_PREFIX.concat(String.valueOf(messageLength)).getBytes();
@@ -227,15 +239,16 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 if (lastUrl.length() > 0)
                     loadOnInit = lastUrl;
             }
+            else if (prevFragment != null)
+            {
+                attachFragment(prevFragment);
+                if (prevUrl != null && prevFragment.equals(DAPP_BROWSER) && prevUrl.length() > 0)
+                    loadOnInit = prevUrl;
+            }
             else if (EthereumNetworkRepository.defaultDapp() != null)
             {
                 currentFragment = DAPP_BROWSER;
                 loadOnInit = EthereumNetworkRepository.defaultDapp();
-            }
-            else if (prevFragment != null)
-            {
-                attachFragment(prevFragment);
-                if (prevUrl != null && prevFragment.equals(DAPP_BROWSER) && prevUrl.length() > 0) loadOnInit = prevUrl;
             } else {
                 attachFragment(DAPP_HOME);
             }
@@ -325,9 +338,17 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public void homePressed()
     {
         detachFragments(false);
-        attachFragment(dappHomeFragment, DAPP_HOME);
-        web3.stopLoading();
-        urlTv.getText().clear();
+        if (EthereumNetworkRepository.defaultDapp() != null)
+        {
+            loadUrl(EthereumNetworkRepository.defaultDapp());
+        }
+        else
+        {
+            attachFragment(dappHomeFragment, DAPP_HOME);
+            urlTv.getText().clear();
+            if (web3 != null)
+                web3.stopLoading();
+        }
     }
 
     @Override
@@ -589,6 +610,19 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 super.onReceivedTitle(view, title);
                 currentWebpageTitle = title;
             }
+
+            @Override
+            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
+                                             FileChooserParams fCParams)
+            {
+                if (filePathCallback == null) return true;
+                uploadMessage = filePathCallback;
+                fileChooserParams = fCParams;
+                picker = fileChooserParams.createIntent();
+
+                if (!checkReadPermission()) return super.onShowFileChooser(webView, filePathCallback, fCParams);
+                else return requestUpload();
+            }
         });
 
         web3.setWebViewClient(new WebViewClient() {
@@ -609,6 +643,22 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             loadUrl(loadOnInit);
             loadOnInit = null;
         }
+    }
+
+    protected boolean requestUpload()
+    {
+        try
+        {
+            startActivityForResult(picker, UPLOAD_FILE);
+        }
+        catch (ActivityNotFoundException e)
+        {
+            uploadMessage = null;
+            Toast.makeText(getActivity().getApplicationContext(), "Cannot Open File Chooser", Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        return true;
     }
 
     @Override
@@ -1125,6 +1175,22 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         resultDialog.show();
     }
 
+    private boolean checkReadPermission()
+    {
+        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED)
+        {
+            return true;
+        }
+        else
+        {
+            String[] permissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
+            getActivity().requestPermissions(permissions, REQUEST_FILE_ACCESS);
+            return false;
+        }
+
+    }
+
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -1153,12 +1219,32 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         return web3.getScrollY();
     }
 
-    public void onActivityResult(int requestCode, int resultCode)
+    public void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
             GotAuthorisation(resultCode == RESULT_OK);
         }
+        else if (requestCode == UPLOAD_FILE && uploadMessage != null)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                uploadMessage.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, intent));
+            }
+            uploadMessage = null;
+        }
+        else if (requestCode == REQUEST_FILE_ACCESS)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                requestUpload();
+            }
+        }
+    }
+
+    public void gotFileAccess(int requestCode)
+    {
+
     }
 
     @Override

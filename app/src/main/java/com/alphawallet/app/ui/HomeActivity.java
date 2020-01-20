@@ -732,7 +732,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
     {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == RC_DOWNLOAD_EXTERNAL_WRITE_PERM || requestCode == RC_ASSET_EXTERNAL_WRITE_PERM)
+        if (requestCode == DappBrowserFragment.REQUEST_FILE_ACCESS)
+        {
+            ((DappBrowserFragment)dappBrowserFragment).gotFileAccess(requestCode);
+        }
+        else if (requestCode == RC_DOWNLOAD_EXTERNAL_WRITE_PERM || requestCode == RC_ASSET_EXTERNAL_WRITE_PERM)
         {
             //check permission is granted
             for (int i = 0; i < permissions.length; i++)

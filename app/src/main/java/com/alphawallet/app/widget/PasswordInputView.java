@@ -143,8 +143,10 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
                     break;
                 }
                 case "textNoSuggestions":{
-//                    editText.setRawInputType(InputType.TYPE_CLASS_TEXT);
-//                    editText.setInputType(EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+                    editText.setInputType(
+                            EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS |
+                            EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE |
+                            EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
                     break;
                 }
             }

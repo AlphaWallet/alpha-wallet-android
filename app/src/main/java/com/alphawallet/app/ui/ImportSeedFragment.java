@@ -184,17 +184,20 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         wordCount.setText(String.valueOf(words));
 
         //get last word from the text
-        if(value.length() > 1) {
+        if(value.length() > 0) {
             int lastDelimiterPosition = value.lastIndexOf(" ");
             String lastWord = lastDelimiterPosition == -1 ? value :
                     value.substring(lastDelimiterPosition + " ".length());
             if(lastWord.trim().length() > 0) {
                 filterList(lastWord);
+                if(listSuggestions.getVisibility() == View.GONE){
+                    listSuggestions.setVisibility(View.VISIBLE);
+                }
             }else{
-                suggestionsAdapter.setData(suggestions);
+                listSuggestions.setVisibility(View.GONE);
             }
         }else{
-            suggestionsAdapter.setData(suggestions);
+            listSuggestions.setVisibility(View.GONE);
         }
     }
 
@@ -207,7 +210,6 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
     public void onLayoutShrunk()
     {
         if (importButton != null) importButton.setVisibility(View.GONE);
-        listSuggestions.setVisibility(View.VISIBLE);
         setHintState(false);
     }
 

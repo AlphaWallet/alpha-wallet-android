@@ -583,7 +583,6 @@ public abstract class TokenscriptFunction
             }
             else  //if value is old or there wasn't any previous value
             {
-                //for function query, never need wallet address
                 return fetchResultFromEthereum(walletAddress, useAddress, attr, tokenId, td, attrIf, transactionUpdate)       // Fetch function result from blockchain
                         .map(result -> restoreFromDBIfRequired(result, transactionResult))  // If network unavailable restore value from cache
                         .map(attrIf::storeAuxData)                                          // store new data
@@ -646,7 +645,7 @@ public abstract class TokenscriptFunction
      */
     private TransactionResult restoreFromDBIfRequired(TransactionResult result, TransactionResult transactionResult)
     {
-        if (result.resultTime == 0 && transactionResult != null)
+        if (result.resultTime == 0 && transactionResult != null && result.result == null)
         {
             result.result = transactionResult.result;
             result.resultTime = transactionResult.resultTime;

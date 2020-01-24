@@ -45,7 +45,6 @@ import java.util.List;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 import static com.alphawallet.app.entity.Operation.*;
-import static com.alphawallet.app.entity.ServiceErrorException.ServiceErrorCode.INVALID_KEY;
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.service.KeyService.AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
 import static com.alphawallet.app.service.KeyService.AuthenticationLevel.TEE_NO_AUTHENTICATION;
@@ -254,7 +253,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
         switch (wallet.type)
         {
-            case KEYSTORE_LEGACY:
+            case PRIVATE_KEY:
                 signCallback.GotAuthorisation(true); //Legacy keys don't require authentication
                 break;
             case KEYSTORE:
@@ -296,7 +295,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         switch (wallet.type)
         {
             case KEYSTORE:
-            case KEYSTORE_LEGACY:
+            case PRIVATE_KEY:
                 checkAuthentication(UPGRADE_KEYSTORE_KEY);
                 return UpgradeKeyResult.REQUESTING_SECURITY;
             case HDKEY:
@@ -327,7 +326,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         currentWallet = wallet;
         switch (wallet.type)
         {
-            case KEYSTORE_LEGACY:
+            case PRIVATE_KEY:
                 return signWithKeystore(transactionBytes);
             case KEYSTORE:
                 return signWithKeystore(transactionBytes);
@@ -382,7 +381,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                     password = unpackMnemonic();
                     callback.FetchMnemonic(password);
                     break;
-                case KEYSTORE_LEGACY:
+                case PRIVATE_KEY:
                     password = new String(getLegacyPassword(context, wallet.address));
                     callback.FetchMnemonic(password);
                     break;
@@ -562,7 +561,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 case KEYSTORE:
                     secretData = unpackMnemonic();
                     break;
-                case KEYSTORE_LEGACY:
+                case PRIVATE_KEY:
                     secretData = new String(getLegacyPassword(context, currentWallet.address));
                     break;
                 default:
@@ -1055,7 +1054,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 case KEYSTORE:
                     password = unpackMnemonic();
                     break;
-                case KEYSTORE_LEGACY:
+                case PRIVATE_KEY:
                     password = new String(getLegacyPassword(context, currentWallet.address));
                     break;
                 default:
@@ -1241,7 +1240,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         for (Wallet w : walletList)
         {
             //Test legacy key
-            if (w.type == WalletType.KEYSTORE_LEGACY)
+            if (w.type == WalletType.PRIVATE_KEY)
             {
                 try
                 {

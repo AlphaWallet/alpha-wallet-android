@@ -334,7 +334,7 @@ public class NewSettingsFragment extends Fragment
             case HDKEY:
                 intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_HD_KEY);
                 break;
-            case KEYSTORE_LEGACY:
+            case PRIVATE_KEY:
             case KEYSTORE:
                 intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_KEYSTORE_KEY);
                 break;

@@ -83,7 +83,7 @@ public class WalletDataRealmSource {
                 {
                     RealmKeyType realmKey = realm.createObject(RealmKeyType.class, wallet.address);
                     wallet.authLevel = KeyService.AuthenticationLevel.TEE_NO_AUTHENTICATION;
-                    wallet.type = WalletType.KEYSTORE_LEGACY;
+                    wallet.type = WalletType.PRIVATE_KEY;
                     realmKey.setType(wallet.type); //all keys are legacy
                     realmKey.setLastBackup(System.currentTimeMillis());
                     realmKey.setDateAdded(wallet.walletCreationTime);

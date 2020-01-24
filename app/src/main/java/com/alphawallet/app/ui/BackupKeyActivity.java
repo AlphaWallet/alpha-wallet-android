@@ -178,7 +178,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         switch (wallet.type)
         {
             case KEYSTORE:
-            case KEYSTORE_LEGACY:
+            case PRIVATE_KEY:
             case HDKEY:
                 switch (viewModel.upgradeKeySecurity(wallet, this, this))
                 {
@@ -210,7 +210,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         {
             switch (wallet.type)
             {
-                case KEYSTORE_LEGACY:
+                case PRIVATE_KEY:
                 case KEYSTORE:
                 case HDKEY:
                     viewModel.upgradeWallet(address);
@@ -528,7 +528,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         Intent intent = new Intent();
         switch (wallet.type)
         {
-            case KEYSTORE_LEGACY:
+            case PRIVATE_KEY:
             case KEYSTORE:
                 intent.putExtra("TYPE", BackupOperationType.BACKUP_KEYSTORE_KEY);
                 break;

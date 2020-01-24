@@ -88,7 +88,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
             default:
             case WATCH:
             case KEYSTORE:
-            case KEYSTORE_LEGACY:
+            case PRIVATE_KEY:
             case HDKEY:
                 return WalletHolder.VIEW_TYPE;
             case TEXT_MARKER:
@@ -117,7 +117,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
             {
                 switch (w.type)
                 {
-                    case KEYSTORE_LEGACY:
+                    case PRIVATE_KEY:
                     case KEYSTORE:
                         hasLegacyWallet = true;
                         break;
@@ -140,7 +140,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
 
                 for (Wallet w : wallets)
                 {
-                    if (w.type == WalletType.KEYSTORE || w.type == WalletType.KEYSTORE_LEGACY)
+                    if (w.type == WalletType.KEYSTORE || w.type == WalletType.PRIVATE_KEY)
                     {
                         this.wallets.add(w);
                     }

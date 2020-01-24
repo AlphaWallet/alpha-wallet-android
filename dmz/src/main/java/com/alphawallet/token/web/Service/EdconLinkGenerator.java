@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import static com.alphawallet.token.web.Service.SpawnableLinkGenerator.bytesFromSignature;
 
-public class EdconLinkGenerator {
+class EdconLinkGenerator {
 
     private static final String contractAddress = "0xF6b8DD8Ba9996bEaE6Ad0eE3481F1E9cF080A9eB";
-    private static ParseMagicLink parseMagicLink = new ParseMagicLink(new CryptoFunctions(), null);
+    private static final ParseMagicLink parseMagicLink = new ParseMagicLink(new CryptoFunctions(), null);
     //TODO set private key & chain id
     private static final BigInteger privateKey = new BigInteger("0", 16);
     private static final int chainId = 100;

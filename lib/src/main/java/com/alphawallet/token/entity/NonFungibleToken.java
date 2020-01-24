@@ -14,12 +14,12 @@ import java.util.Map;
 
 public class NonFungibleToken
 {
-    public BigInteger id;
+    private BigInteger id;
 
     public static final class Attribute {
-        public final String id;
-        public String name;
-        public String text;
+        final String id;
+        String name;
+        public final String text;
         public final BigInteger value;
         public Attribute(String attributeId, String name, BigInteger value, String text) {
             this.id = attributeId;
@@ -29,14 +29,14 @@ public class NonFungibleToken
         }
     }
 
-    protected HashMap<String, Attribute> attributes;
+    private HashMap<String, Attribute> attributes;
 
     public HashMap<String, Attribute> getAttributes()
     {
         return attributes;
     }
 
-    public Attribute getAttribute(String attributeId) {
+    private Attribute getAttribute(String attributeId) {
         if (attributes != null)
         {
             return attributes.get(attributeId);
@@ -69,7 +69,7 @@ public class NonFungibleToken
         ad.parseField(tokenId, this);
     }
 
-    public NonFungibleToken(BigInteger tokenId) {
+    private NonFungibleToken(BigInteger tokenId) {
         id = tokenId;
         attributes = new HashMap<>();
     }

@@ -389,7 +389,7 @@ public class XMLDSigVerifier {
 
     private class SimpleKeySelectorResult implements KeySelectorResult
     {
-        private PublicKey pk;
+        private final PublicKey pk;
         SimpleKeySelectorResult(PublicKey pk) {
             this.pk = pk;
         }

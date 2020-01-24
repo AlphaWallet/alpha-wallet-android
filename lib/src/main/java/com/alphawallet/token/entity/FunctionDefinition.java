@@ -17,7 +17,7 @@ public class FunctionDefinition
     public String method;
     public TokenDefinition.Syntax syntax;
     public As as;
-    public List<MethodArg> parameters = new ArrayList<>();
+    public final List<MethodArg> parameters = new ArrayList<>();
 
     public String result;
     public long resultTime = 0;

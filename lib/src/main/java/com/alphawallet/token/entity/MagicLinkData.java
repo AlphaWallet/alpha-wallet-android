@@ -17,14 +17,14 @@ public class MagicLinkData
     public int ticketStart;
     public int ticketCount;
     public String contractAddress;
-    public byte[] signature = new byte[65];
+    public final byte[] signature = new byte[65];
     public byte[] message;
     public String ownerAddress;
     public String contractName;
     public byte contractType;
     public int chainId;
 
-    public List<BigInteger> balanceInfo = null;
+    private List<BigInteger> balanceInfo = null;
 
     public boolean isValidOrder()
     {

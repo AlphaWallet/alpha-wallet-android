@@ -15,8 +15,8 @@ public class TokenScriptResult
 {
     public static final class Attribute {
         public final String id;
-        public String name;
-        public String text;
+        public final String name;
+        public final String text;
         public final BigInteger value;
         public Map<BigInteger, String> tokenIdText;
         public Map<BigInteger, BigInteger> tokenIdValue;
@@ -28,7 +28,7 @@ public class TokenScriptResult
         }
     }
 
-    private Map<String, Attribute> attrs = new HashMap<>();
+    private final Map<String, Attribute> attrs = new HashMap<>();
 
     public void setAttribute(String key, Attribute attr)
     {

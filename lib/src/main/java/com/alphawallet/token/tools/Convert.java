@@ -39,15 +39,15 @@ public final class Convert {
         METHER("mether", 24),
         GETHER("gether", 27);
 
-        private String name;
-        private BigDecimal weiFactor;
+        private final String name;
+        private final BigDecimal weiFactor;
 
         Unit(String name, int factor) {
             this.name = name;
             this.weiFactor = BigDecimal.TEN.pow(factor);
         }
 
-        public BigDecimal getWeiFactor() {
+        BigDecimal getWeiFactor() {
             return weiFactor;
         }
 

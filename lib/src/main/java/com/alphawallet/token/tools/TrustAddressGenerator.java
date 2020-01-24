@@ -32,7 +32,7 @@ public class TrustAddressGenerator {
     private static final ECDomainParameters CURVE = new ECDomainParameters(CURVE_PARAMS.getCurve(), CURVE_PARAMS.getG(),
             CURVE_PARAMS.getN(), CURVE_PARAMS.getH());
 
-    public static final byte[] masterPubKey = Hex.decode("04f0985bd9dbb6f461adc994a0c12595716a7f4fb2879bfc5155dffec3770096201c13f8314b46db8d8177887f8d95af1f2dd217291ce6ffe9183681186696bbe5");
+    private static final byte[] masterPubKey = Hex.decode("04f0985bd9dbb6f461adc994a0c12595716a7f4fb2879bfc5155dffec3770096201c13f8314b46db8d8177887f8d95af1f2dd217291ce6ffe9183681186696bbe5");
 
     public static String getTrustAddress(String contractAddress, String digest) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         return preimageToAddress((contractAddress + "TRUST" + digest).getBytes());
@@ -44,7 +44,7 @@ public class TrustAddressGenerator {
 
     // this won't make sense at all if you didn't read security.md
     // https://github.com/AlphaWallet/TokenScript/blob/master/doc/security.md
-    public static String preimageToAddress(byte[] preimage) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
+    private static String preimageToAddress(byte[] preimage) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         Security.addProvider(new BouncyCastleProvider());
 
         // get the hash of the preimage text
@@ -147,7 +147,7 @@ public class TrustAddressGenerator {
             this.contract = contractAddress;
         }
 
-        public String getDigest() {
+        String getDigest() {
             return digest;
         }
 
@@ -176,7 +176,7 @@ public class TrustAddressGenerator {
 
         public void setRevokeAddress(String revokeAddress) { this.revokeAddress = revokeAddress; }
 
-        public Response(String trustAddress, String revokeAddress) {
+        Response(String trustAddress, String revokeAddress) {
             this.trustAddress = trustAddress;
             this.revokeAddress = revokeAddress;
         }

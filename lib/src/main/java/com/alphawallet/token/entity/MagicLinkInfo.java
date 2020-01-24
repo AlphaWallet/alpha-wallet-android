@@ -37,7 +37,7 @@ public class MagicLinkInfo
     private static final String artisTau1Etherscan = "https://explorer.tau1.artis.network/";
 
     //network ids
-    public static final int LEGACY_VALUE = 0;
+    private static final int LEGACY_VALUE = 0;
     public static final int MAINNET_NETWORK_ID = 1;
     public static final int CLASSIC_NETWORK_ID = 61;
     public static final int KOVAN_NETWORK_ID = 42;

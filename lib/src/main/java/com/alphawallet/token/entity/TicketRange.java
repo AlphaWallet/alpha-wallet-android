@@ -18,7 +18,7 @@ public class TicketRange
     //public int seatCount;
     public boolean isChecked;
     public boolean exposeRadio;
-    public String contractAddress; // Should this be address or actual token?
+    public final String contractAddress; // Should this be address or actual token?
 
     public List<BigInteger> tokenIds;
 

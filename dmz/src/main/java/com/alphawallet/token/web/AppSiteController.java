@@ -70,9 +70,9 @@ import static com.alphawallet.token.web.Ethereum.TokenscriptFunction.ZERO_ADDRES
 @RequestMapping("/")
 public class AppSiteController implements AttributeInterface
 {
-    private static CryptoFunctions cryptoFunctions = new CryptoFunctions();
+    private static final CryptoFunctions cryptoFunctions = new CryptoFunctions();
     private static Map<Integer, Map<String, File>> addresses;
-    private static Map<Integer, Map<String, Map<BigInteger, CachedResult>>> transactionResults = new ConcurrentHashMap<>();  //optimisation results
+    private static final Map<Integer, Map<String, Map<BigInteger, CachedResult>>> transactionResults = new ConcurrentHashMap<>();  //optimisation results
     private static final String appleAssociationConfig = "{\n" +
             "  \"applinks\": {\n" +
             "    \"apps\": [],\n" +
@@ -513,8 +513,8 @@ public class AppSiteController implements AttributeInterface
      */
     private class CachedResult
     {
-        long resultTime;
-        String result;
+        final long resultTime;
+        final String result;
 
         CachedResult(long time, String r)
         {

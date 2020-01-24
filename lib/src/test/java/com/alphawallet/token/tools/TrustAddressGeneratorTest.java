@@ -11,7 +11,7 @@ import java.io.*;
 import org.bouncycastle.util.encoders.Base64;
 
 public class TrustAddressGeneratorTest {
-    String digest;
+    private String digest;
 
     public TrustAddressGeneratorTest() throws IOException, MarshalException, ParserConfigurationException, SAXException, XMLSignatureException {
         InputStream input = new FileInputStream("src/test/ts/EntryToken.tsml");
@@ -42,7 +42,7 @@ public class TrustAddressGeneratorTest {
      * parsing XML and calculating the digest.
      */
 
-    byte[] getBytesFromInputStream(InputStream is) throws IOException {
+    private byte[] getBytesFromInputStream(InputStream is) throws IOException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         byte[] buffer = new byte[0xFFFF];
         for (int len = is.read(buffer); len != -1; len = is.read(buffer)) {
@@ -51,7 +51,7 @@ public class TrustAddressGeneratorTest {
         return os.toByteArray();
     }
 
-    String convertHexToBase64String(String input) throws IOException {
+    private String convertHexToBase64String(String input) throws IOException {
         byte[] barr = new byte[16];
         int bcnt = 0;
         for (int i = 0; i < 32; i += 2) {
@@ -69,7 +69,7 @@ public class TrustAddressGeneratorTest {
         return outputStream.toString();
     }
 
-    int convertCharToInt(char c) {
+    private int convertCharToInt(char c) {
         char[] carr = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
         char clower = Character.toLowerCase(c);
         for (int i = 0; i < carr.length; i++) {

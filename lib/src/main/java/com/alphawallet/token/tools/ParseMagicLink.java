@@ -31,7 +31,7 @@ public class ParseMagicLink
     public static final byte currencyLink = 0x04;
 
     private static final String CURRENCY_LINK_PREFIX = "XDAIDROP";
-    private CryptoFunctionsInterface cryptoInterface;
+    private final CryptoFunctionsInterface cryptoInterface;
 
     private Map<Integer, ChainSpec> extraChains;
 

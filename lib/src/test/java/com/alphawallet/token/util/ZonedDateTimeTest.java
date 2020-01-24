@@ -11,9 +11,9 @@ import java.util.TimeZone;
 import static org.junit.Assert.assertEquals;
 
 public class ZonedDateTimeTest {
-    final long unixTime = 0;
-    final String ISO8601 = "1970-01-01T03:00+03:00";
-    final String GeneralizedTime = "19700101030000+0300";
+    private final long unixTime = 0;
+    private final String ISO8601 = "1970-01-01T03:00+03:00";
+    private final String GeneralizedTime = "19700101030000+0300";
     @Test
     public void DemonstrateBehaviourOfJave8ZonedDateTime() {
         java.time.LocalDateTime time = java.time.LocalDateTime.ofEpochSecond(unixTime, 0, java.time.ZoneOffset.of("+3"));

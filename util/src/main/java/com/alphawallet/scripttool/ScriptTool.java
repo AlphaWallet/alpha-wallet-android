@@ -36,7 +36,7 @@ public class ScriptTool implements AttributeInterface
     private File tokenScriptFile;
     private Address userAddress = Address.DEFAULT;
 
-    private Map<Integer, Map<String, Map<BigInteger, CachedResult>>> transactionResults = new ConcurrentHashMap<>();  //optimisation results
+    private final Map<Integer, Map<String, Map<BigInteger, CachedResult>>> transactionResults = new ConcurrentHashMap<>();  //optimisation results
 
 
     private final TokenscriptFunction tokenscriptFunction = new TokenscriptFunction() { };
@@ -44,7 +44,7 @@ public class ScriptTool implements AttributeInterface
     public static void main(String[] args) {
         new ScriptTool(args);
     }
-    public ScriptTool(String[] args)
+    private ScriptTool(String[] args)
     {
         ParseState p = ARG;
 

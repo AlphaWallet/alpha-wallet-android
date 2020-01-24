@@ -306,12 +306,12 @@ public class AttributeType {
         }
     }
 
-    public As getAs()
+    private As getAs()
     {
         return as;
     }
 
-    public void setAs(As as)
+    private void setAs(As as)
     {
         this.as = as;
     }

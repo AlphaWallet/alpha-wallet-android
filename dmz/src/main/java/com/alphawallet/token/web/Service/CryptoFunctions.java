@@ -38,7 +38,7 @@ public class CryptoFunctions implements CryptoFunctionsInterface
         return Keys.getAddress(recoveredKey);
     }
 
-    public static Sign.SignatureData sigFromByteArray(byte[] sig)
+    private static Sign.SignatureData sigFromByteArray(byte[] sig)
     {
         if (sig.length < 64 || sig.length > 65) return null;
 

@@ -10,5 +10,5 @@ public class MessageData
 {
     public BigInteger priceWei;
     public int[] tickets;
-    public byte[] signature = new byte[65];
+    public final byte[] signature = new byte[65];
 }

@@ -132,11 +132,11 @@ public class EthereumReadBuffer extends DataInputStream
         int state = 0;
 
         List<Integer> indexList = new ArrayList<>();
-        Integer rValue = 0;
+        int rValue = 0;
 
         while (index < indiciesLength)
         {
-            Integer p = toUnsignedInt(readBuffer[index]); // equivalent of Byte.toUnsignedInt()
+            int p = toUnsignedInt(readBuffer[index]); // equivalent of Byte.toUnsignedInt()
             switch (state)
             {
                 case 0:

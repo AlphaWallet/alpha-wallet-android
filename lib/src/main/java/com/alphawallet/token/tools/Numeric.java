@@ -44,7 +44,7 @@ public final class Numeric {
         }
     }
 
-    public static boolean containsHexPrefix(String input) {
+    private static boolean containsHexPrefix(String input) {
         return input.length() > 1 && input.charAt(0) == '0' && input.charAt(1) == 'x';
     }
 
@@ -61,7 +61,7 @@ public final class Numeric {
         return toBigIntNoPrefix(cleanValue);
     }
 
-    public static BigInteger toBigIntNoPrefix(String hexValue) {
+    private static BigInteger toBigIntNoPrefix(String hexValue) {
         return new BigInteger(hexValue, 16);
     }
 
@@ -69,7 +69,7 @@ public final class Numeric {
         return HEX_PREFIX + value.toString(16);
     }
 
-    public static String toHexStringNoPrefix(BigInteger value) {
+    private static String toHexStringNoPrefix(BigInteger value) {
         return value.toString(16);
     }
 
@@ -160,7 +160,7 @@ public final class Numeric {
         return data;
     }
 
-    public static String toHexString(byte[] input, int offset, int length, boolean withPrefix) {
+    private static String toHexString(byte[] input, int offset, int length, boolean withPrefix) {
         StringBuilder stringBuilder = new StringBuilder();
         if (withPrefix) {
             stringBuilder.append("0x");

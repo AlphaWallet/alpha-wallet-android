@@ -134,7 +134,7 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
  */
 public abstract class TokenscriptFunction
 {
-    public Function generateTransactionFunction(String walletAddr, BigInteger tokenId, TokenDefinition definition, FunctionDefinition function, AttributeInterface attrIf)
+    private Function generateTransactionFunction(String walletAddr, BigInteger tokenId, TokenDefinition definition, FunctionDefinition function, AttributeInterface attrIf)
     {
         //pre-parse tokenId.
         if (tokenId.bitCount() > 256) tokenId = tokenId.or(BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE)); //truncate tokenId too large
@@ -555,7 +555,7 @@ public abstract class TokenscriptFunction
         return name;
     }
 
-    public TokenScriptResult.Attribute parseFunctionResult(TransactionResult transactionResult, AttributeType attr)
+    private TokenScriptResult.Attribute parseFunctionResult(TransactionResult transactionResult, AttributeType attr)
     {
         String res = attr.getSyntaxVal(transactionResult.result);
         BigInteger val = transactionResult.tokenId; //?
@@ -575,7 +575,7 @@ public abstract class TokenscriptFunction
         return new TokenScriptResult.Attribute(attr.id, attr.name, val, res);
     }
 
-    public static final String ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+    private static final String ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
     /**
      * Haven't pre-cached this value yet, so need to fetch it before we can proceed
@@ -585,7 +585,7 @@ public abstract class TokenscriptFunction
      * @param definition
      * @return
      */
-    public Observable<TransactionResult> fetchResultFromEthereum(String walletAddress, ContractAddress override, AttributeType attr, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
+    private Observable<TransactionResult> fetchResultFromEthereum(String walletAddress, ContractAddress override, AttributeType attr, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
     {
         return Observable.fromCallable(() -> {
             ContractAddress useAddress;
@@ -656,7 +656,7 @@ public abstract class TokenscriptFunction
     }
 
 
-    public Observable<TokenScriptResult.Attribute> fetchAttrResult(String walletAddress, String attribute, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf)
+    private Observable<TokenScriptResult.Attribute> fetchAttrResult(String walletAddress, String attribute, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf)
     {
         AttributeType attr = td.attributeTypes.get(attribute);
         if (attr == null) return Observable.fromCallable(() -> null);

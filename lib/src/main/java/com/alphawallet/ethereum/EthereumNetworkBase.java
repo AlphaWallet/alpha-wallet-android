@@ -8,41 +8,41 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public abstract class EthereumNetworkBase { // implements EthereumNetworkRepositoryType
-    public static final int MAINNET_ID = 1;
-    public static final int CLASSIC_ID = 61;
-    public static final int POA_ID = 99;
-    public static final int KOVAN_ID = 42;
-    public static final int ROPSTEN_ID = 3;
-    public static final int SOKOL_ID = 77;
-    public static final int RINKEBY_ID = 4;
-    public static final int XDAI_ID = 100;
-    public static final int GOERLI_ID = 5;
-    public static final int ARTIS_SIGMA1_ID = 246529;
-    public static final int ARTIS_TAU1_ID = 246785;
+    private static final int MAINNET_ID = 1;
+    private static final int CLASSIC_ID = 61;
+    private static final int POA_ID = 99;
+    private static final int KOVAN_ID = 42;
+    private static final int ROPSTEN_ID = 3;
+    private static final int SOKOL_ID = 77;
+    private static final int RINKEBY_ID = 4;
+    private static final int XDAI_ID = 100;
+    private static final int GOERLI_ID = 5;
+    private static final int ARTIS_SIGMA1_ID = 246529;
+    private static final int ARTIS_TAU1_ID = 246785;
 
-    public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    public static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
-    public static final String XDAI_RPC_URL = "https://dai.poa.network";
-    public static final String POA_RPC_URL = "https://core.poa.network/";
-    public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    public static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    public static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    public static final String SOKOL_RPC_URL = "https://sokol.poa.network";
-    public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
-    public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
+    private static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    private static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
+    private static final String XDAI_RPC_URL = "https://dai.poa.network";
+    private static final String POA_RPC_URL = "https://core.poa.network/";
+    private static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    private static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    private static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    private static final String SOKOL_RPC_URL = "https://sokol.poa.network";
+    private static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
+    private static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
+    private static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
 
-    public static final String MAINNET_BLOCKSCOUT = "eth/mainnet";
-    public static final String CLASSIC_BLOCKSCOUT = "etc/mainnet";
-    public static final String XDAI_BLOCKSCOUT = "poa/dai";
-    public static final String POA_BLOCKSCOUT = "poa/core";
-    public static final String ROPSTEN_BLOCKSCOUT = "eth/ropsten";
-    public static final String RINKEBY_BLOCKSCOUT = "eth/rinkeby";
-    public static final String SOKOL_BLOCKSCOUT = "poa/sokol";
-    public static final String KOVAN_BLOCKSCOUT = "eth/kovan";
-    public static final String GOERLI_BLOCKSCOUT = "eth/goerli";
+    private static final String MAINNET_BLOCKSCOUT = "eth/mainnet";
+    private static final String CLASSIC_BLOCKSCOUT = "etc/mainnet";
+    private static final String XDAI_BLOCKSCOUT = "poa/dai";
+    private static final String POA_BLOCKSCOUT = "poa/core";
+    private static final String ROPSTEN_BLOCKSCOUT = "eth/ropsten";
+    private static final String RINKEBY_BLOCKSCOUT = "eth/rinkeby";
+    private static final String SOKOL_BLOCKSCOUT = "poa/sokol";
+    private static final String KOVAN_BLOCKSCOUT = "eth/kovan";
+    private static final String GOERLI_BLOCKSCOUT = "eth/goerli";
 
-    static Map<Integer, NetworkInfo> networkMap = new LinkedHashMap<Integer, NetworkInfo>() {
+    private static final Map<Integer, NetworkInfo> networkMap = new LinkedHashMap<Integer, NetworkInfo>() {
         {
             put(MAINNET_ID, new NetworkInfo("Ethereum", "ETH", MAINNET_RPC_URL, "https://etherscan.io/tx/",
                     MAINNET_ID, true, "ethereum", MAINNET_BLOCKSCOUT));

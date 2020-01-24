@@ -8,7 +8,7 @@ import java.math.BigInteger;
 
 public class UnsignedLong extends BigInteger
 {
-    public UnsignedLong(byte[] byteValue)
+    private UnsignedLong(byte[] byteValue)
     {
         super(1, byteValue);
     }

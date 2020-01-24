@@ -19,13 +19,13 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
 
 public class TokenDefinition {
     protected Document xml;
-    public Map<String, AttributeType> attributeTypes = new HashMap<>();
-    protected Locale locale;
+    public final Map<String, AttributeType> attributeTypes = new HashMap<>();
+    private Locale locale;
 
-    public Map<String, ContractInfo> contracts = new HashMap<>();
-    public Map<String, Map<String, String>> attributeSets = new HashMap<>(); //TODO: add language, in case user changes language during operation - see Weiwu's comment further down
-    public Map<String, TSAction> actions = new HashMap<>();
-    private Map<String, String> names = new HashMap<>(); // store plural etc for token name
+    public final Map<String, ContractInfo> contracts = new HashMap<>();
+    public final Map<String, Map<String, String>> attributeSets = new HashMap<>(); //TODO: add language, in case user changes language during operation - see Weiwu's comment further down
+    public final Map<String, TSAction> actions = new HashMap<>();
+    private final Map<String, String> names = new HashMap<>(); // store plural etc for token name
 
     public String nameSpace;
     public TokenscriptContext context;
@@ -57,7 +57,7 @@ public class TokenDefinition {
      - each XML file can be signed mulitple times, with multiple
        <KeyName>.
     */
-    protected String keyName = null;
+    private String keyName = null;
 
     public List<FunctionDefinition> getFunctionData()
     {
@@ -142,7 +142,7 @@ public class TokenDefinition {
         }
     }
 
-    Node getLocalisedNode(Element nameContainer, String tagName) {
+    private Node getLocalisedNode(Element nameContainer, String tagName) {
         NodeList nList = nameContainer.getElementsByTagNameNS(nameSpace, tagName);
         if (nList.getLength() == 0) nList = nameContainer.getElementsByTagName(tagName);
         Element name;
@@ -162,7 +162,7 @@ public class TokenDefinition {
         return nonLocalised;
     }
 
-    String getLocalisedString(Element container) {
+    private String getLocalisedString(Element container) {
         NodeList nList = container.getChildNodes();
 
         String nonLocalised = null;

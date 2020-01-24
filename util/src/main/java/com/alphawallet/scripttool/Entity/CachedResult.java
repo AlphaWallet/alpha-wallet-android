@@ -2,8 +2,8 @@ package com.alphawallet.scripttool.Entity;
 
 public class CachedResult
 {
-    public long resultTime;
-    public String result;
+    public final long resultTime;
+    public final String result;
 
     public CachedResult(long time, String r)
     {

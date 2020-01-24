@@ -9,5 +9,5 @@ import java.util.Map;
  */
 public class EthereumTransaction
 {
-    public Map<String, TokenscriptElement> args = new HashMap<>();
+    public final Map<String, TokenscriptElement> args = new HashMap<>();
 }

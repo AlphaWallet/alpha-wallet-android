@@ -12,9 +12,9 @@ import java.util.List;
 
 class SpawnableLinkGenerator {
 
-    private static List<BigInteger> tokens = new ArrayList<>();
+    private static final List<BigInteger> tokens = new ArrayList<>();
     private static final String contractAddress = "0x0f43923667843bccafd12a5c001a7838fa5fc8ab";
-    private static ParseMagicLink parseMagicLink = new ParseMagicLink(new CryptoFunctions(), null);
+    private static final ParseMagicLink parseMagicLink = new ParseMagicLink(new CryptoFunctions(), null);
     //TODO set private key & chain id
     private static final BigInteger privateKey = BigInteger.TEN;
     private static final int chainId = 100;
@@ -66,7 +66,7 @@ class SpawnableLinkGenerator {
     private static final long THE_SUITE_GOLD = 4;
 
     // Ticket expiry
-    private static long expiry = (System.currentTimeMillis() + 1000000000) / 1000L;
+    private static final long expiry = (System.currentTimeMillis() + 1000000000) / 1000L;
 
 
     public static void main(String[] args) throws SalesOrderMalformed {

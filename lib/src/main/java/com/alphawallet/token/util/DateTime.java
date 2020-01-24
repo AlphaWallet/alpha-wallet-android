@@ -11,9 +11,9 @@ import java.util.TimeZone;
  */
 public abstract class DateTime
 {
-    protected long time;
-    protected TimeZone timezone;
-    protected boolean isZoned = false;
+    long time;
+    TimeZone timezone;
+    boolean isZoned = false;
 
     public int getHour() {
         /* you can't just do this:

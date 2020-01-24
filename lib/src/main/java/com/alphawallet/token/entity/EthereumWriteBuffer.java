@@ -27,7 +27,7 @@ public class EthereumWriteBuffer extends DataOutputStream
         write(Numeric.toBytesPadded(bi, 32));
     }
 
-    public void writeAddress(BigInteger addr) throws IOException {
+    private void writeAddress(BigInteger addr) throws IOException {
         write(Numeric.toBytesPadded(addr, 20));
     }
 

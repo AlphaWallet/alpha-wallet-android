@@ -50,6 +50,7 @@ import org.web3j.utils.Numeric;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -854,7 +855,7 @@ public class TokenRepository implements TokenRepositoryType {
                 {
                     data = Arrays.copyOfRange(data, 0, index + 1);
                 }
-                name = new String(data, "UTF-8");
+                name = new String(data, StandardCharsets.UTF_8);
                 //now filter out any 'bad' chars
                 name = filterAscii(name);
             }
@@ -937,63 +938,63 @@ public class TokenRepository implements TokenRepositoryType {
 
     private static org.web3j.abi.datatypes.Function nameOf() {
         return new Function("name",
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Arrays.asList(),
+                Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function supportsInterface(BigInteger value) {
         return new org.web3j.abi.datatypes.Function(
                 "supportsInterface",
-                Arrays.<Type>asList(new Bytes4(Numeric.toBytesPadded(value, 4))),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
+                Arrays.asList(new Bytes4(Numeric.toBytesPadded(value, 4))),
+                Arrays.asList(new TypeReference<Bool>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function stringParam(String param) {
         return new Function(param,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Arrays.asList(),
+                Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function boolParam(String param) {
         return new Function(param,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
+                Arrays.asList(),
+                Arrays.asList(new TypeReference<Bool>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function stringParam(String param, BigInteger value) {
         return new Function(param,
                             Arrays.asList(new Uint256(value)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                            Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function intParam(String param, BigInteger value) {
         return new Function(param,
                             Arrays.asList(new Uint256(value)),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+                            Arrays.asList(new TypeReference<Uint256>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function intParam(String param) {
         return new Function(param,
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint>() {}));
+                Arrays.asList(),
+                Arrays.asList(new TypeReference<Uint>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function symbolOf() {
         return new Function("symbol",
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                Arrays.asList(),
+                Arrays.asList(new TypeReference<Utf8String>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function decimalsOf() {
         return new Function("decimals",
-                Arrays.<Type>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {}));
+                Arrays.asList(),
+                Arrays.asList(new TypeReference<Uint8>() {}));
     }
 
     private static org.web3j.abi.datatypes.Function addrParam(String param) {
         return new Function(param,
-                            Arrays.<Type>asList(),
-                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
+                            Arrays.asList(),
+                            Arrays.asList(new TypeReference<Address>() {}));
     }
 
     private org.web3j.abi.datatypes.Function addressFunction(String method, byte[] resultHash)
@@ -1029,8 +1030,8 @@ public class TokenRepository implements TokenRepositoryType {
             if (values.isEmpty())
             {
                 values = new ArrayList<Type>();
-                values.add((Type)new Int256(CONTRACT_BALANCE_NULL));
-                o = (List)values;
+                values.add(new Int256(CONTRACT_BALANCE_NULL));
+                o = values;
             }
             else
             {
@@ -1162,8 +1163,8 @@ public class TokenRepository implements TokenRepositoryType {
         return Single.fromCallable(() -> {
             ContractResult contractResult = new ContractResult(INVALID_CONTRACT, chainId);
             org.web3j.abi.datatypes.Function function = new Function(method,
-                                                                     Arrays.<Type>asList(),
-                                                                     Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
+                                                                     Arrays.asList(),
+                                                                     Arrays.asList(new TypeReference<Utf8String>() {}));
 
             Wallet temp = new Wallet(null);
             String responseValue = callCustomNetSmartContractFunction(function, address, temp, chainId);

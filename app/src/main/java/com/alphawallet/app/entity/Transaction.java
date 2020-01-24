@@ -161,11 +161,10 @@ public class Transaction implements Parcelable {
 		else
 		{
 			if (to.equals(contractAddress)) return true;
-			if (operation != null && (operations[0].contract.address.equals(contractAddress))) return true;
+            return operation != null && (operations[0].contract.address.equals(contractAddress));
 		}
 
-		return false;
-	}
+    }
 
     public TransactionContract getOperation()
     {

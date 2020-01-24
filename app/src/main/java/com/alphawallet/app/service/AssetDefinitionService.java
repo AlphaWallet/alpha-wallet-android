@@ -461,7 +461,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         throwable.printStackTrace();
     }
 
-    private TokenDefinition parseFile(InputStream xmlInputStream) throws IOException, SAXException, Exception
+    private TokenDefinition parseFile(InputStream xmlInputStream) throws Exception
     {
         Locale locale;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

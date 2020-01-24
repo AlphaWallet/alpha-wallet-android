@@ -9,6 +9,7 @@ import org.w3c.dom.NodeList;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -275,7 +276,7 @@ public class AttributeType {
         switch (getAs())
         {
             case UTF8:
-                return new String(data.toByteArray(), "UTF8");
+                return new String(data.toByteArray(), StandardCharsets.UTF_8);
 
             case Unsigned:
                 return data.toString();

@@ -647,7 +647,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
                         break;
                     default:
                         Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                                                    "Code: " + String.valueOf(resultCode)
+                                                    "Code: " + resultCode
                         ));
                         break;
                 }
@@ -687,7 +687,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
             quantity = selection.size();
         }
         int ticketName = (quantity > 1) ? R.string.tickets : R.string.ticket;
-        String qty = String.valueOf(quantity) + " " +
+        String qty = quantity + " " +
                 getResources().getString(ticketName) + "\n" +
                 getString(R.string.universal_link_expiry_on) + expiryDateEditText.getText().toString() + " " + expiryTimeEditText.getText().toString();
 
@@ -728,7 +728,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
         String toAddress = (ensHandler.getEnsName() == null) ? to : ensHandler.getEnsName();
 
-        String qty = String.valueOf(quantity) + " " +
+        String qty = quantity + " " +
                 getResources().getString(ticketName) + "\n" +
                 getResources().getString(R.string.to) + " " +
                 toAddress;

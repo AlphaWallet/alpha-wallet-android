@@ -113,7 +113,7 @@ public class Asset implements Parcelable {
         if (name != null && !name.equals("null")) {
             assetName = name;
         } else {
-            assetName = "ID# " + String.valueOf(tokenId);
+            assetName = "ID# " + tokenId;
         }
         return assetName;
     }

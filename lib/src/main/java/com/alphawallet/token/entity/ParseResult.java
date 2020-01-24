@@ -12,7 +12,7 @@ public interface ParseResult
         XML_OUT_OF_DATE,
         PARSER_OUT_OF_DATE,
         PARSE_FAILED
-    };
+    }
 
     void parseMessage(ParseResultId parseResult);
 }

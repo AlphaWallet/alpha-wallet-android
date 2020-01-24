@@ -455,7 +455,7 @@ public class CoinmarketcapTickerService implements TickerService
     private static org.web3j.abi.datatypes.Function read() {
         return new org.web3j.abi.datatypes.Function(
                 "read",
-                Arrays.<Type>asList(),
+                Arrays.asList(),
                 Collections.singletonList(new TypeReference<Uint256>() {}));
     }
 

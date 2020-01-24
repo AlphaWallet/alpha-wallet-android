@@ -195,7 +195,7 @@ public class MarketOrderTest
 
         @Override
         public void queueUpdate(int complete) {
-            System.out.println(String.valueOf(complete));
+            System.out.println(complete);
         }
 
         @Override
@@ -205,12 +205,12 @@ public class MarketOrderTest
 
         @Override
         public void showMarketQueueSuccessDialog(Integer resId) {
-            System.out.println("Market Queue Success - string resource id: " + String.valueOf(resId));
+            System.out.println("Market Queue Success - string resource id: " + resId);
         }
 
         @Override
         public void showMarketQueueErrorDialog(Integer resId) {
-            System.out.println("Market Queue Error - string resource id: " + String.valueOf(resId));
+            System.out.println("Market Queue Error - string resource id: " + resId);
         }
     };
 

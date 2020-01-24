@@ -98,28 +98,28 @@ public class TrustAddressGenerator {
      For use in Command Console
      **********************************************************************************/
 
-    public static void main(String args[]) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
         if (args.length == 2) {
             System.out.println("Express of Trust Address derived using the following:");
-            System.out.println("");
+            System.out.println();
             System.out.println("\tContract Address: " + args[0]);
             System.out.println("\tXML Digest for Signature: " + args[1]);
-            System.out.println("");
+            System.out.println();
             System.out.println("Are:");
-            System.out.println("");
+            System.out.println();
             System.out.println("\tTrust Address:\t" + getTrustAddress(args[0], args[1]));
             System.out.println("\tRevoke Address:\t" + getRevokeAddress(args[0], args[1]));
         } else {
             System.out.println("This utility generates express-of-trust address and its revocation address\n for a given pair of token contract and TokenScript");
-            System.out.println("");
+            System.out.println();
             System.out.println("Expecting two arguments: contract address and XML digest.");
-            System.out.println("");
+            System.out.println();
             System.out.println("\tExample:");
             System.out.println("\tAssuming classpath is set properly,:");
             System.out.println("\te.g. if you built the lib project with `gradle shadowJar` and you've set");
             System.out.println("\tCLASSPATH=build/libs/lib-all.jar");
             System.out.println("\tRun the following:");
-            System.out.println("");
+            System.out.println();
             System.out.println("$ java " + TrustAddressGenerator.class.getCanonicalName() +
                     "0x63cCEF733a093E5Bd773b41C96D3eCE361464942 z+I6NxdALVtlc3TuUo2QEeV9rwyAmKB4UtQWkTLQhpE=");
         }

@@ -376,7 +376,6 @@ public class XMLDSigVerifier {
             {
                 throw new KeySelectorException(e.getMessage());
             }
-            ;
             if (signingCert != null)
             {
                 return new SimpleKeySelectorResult(signingCert.getPublicKey());

@@ -403,7 +403,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         setTicket(false, false, true);
         Token t = viewModel.getImportToken();
         TextView tv = findViewById(R.id.text_ticket_range);
-        String importText = String.valueOf(order.ticketCount) + "x ";
+        String importText = order.ticketCount + "x ";
         importText += t.getTokenName(viewModel.getAssetDefinitionService(), order.ticketCount);
 
         tv.setText(importText);
@@ -424,7 +424,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         setTicket(false, false, true);
         Token t = viewModel.getImportToken();
         TextView tv = findViewById(R.id.text_ticket_range);
-        String importText = String.valueOf(order.ticketCount) + "x ";
+        String importText = order.ticketCount + "x ";
         importText += t.getTokenName(viewModel.getAssetDefinitionService(), order.ticketCount);
         tv.setText(importText);
         //Note: it's actually not possible to pull the event or anything like that since we can't get the tokenID if it's been imported.

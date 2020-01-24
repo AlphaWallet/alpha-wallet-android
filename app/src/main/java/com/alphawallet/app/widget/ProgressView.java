@@ -57,7 +57,7 @@ public class ProgressView extends RelativeLayout {
 
     public void updateProgress(Integer prog) {
         if (prog < 100) {
-            counter.setText(String.valueOf(prog) + "%");
+            counter.setText(prog + "%");
             progress.setVisibility(VISIBLE);
             counter.setVisibility(VISIBLE);
             setVisibility(VISIBLE);

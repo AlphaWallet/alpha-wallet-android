@@ -436,7 +436,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                     break;
                 default:
                     Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                                                "Code: " + String.valueOf(resultCode)
+                                                "Code: " + resultCode
                     ));
                     break;
             }

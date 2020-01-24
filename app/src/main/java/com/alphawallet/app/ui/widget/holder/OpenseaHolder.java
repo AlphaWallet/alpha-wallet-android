@@ -69,7 +69,7 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
         if (asset.getName() != null && !asset.getName().equals("null")) {
             assetName = asset.getName();
         } else {
-            assetName = "ID# " + String.valueOf(asset.getTokenId());
+            assetName = "ID# " + asset.getTokenId();
         }
         titleText.setText(assetName);
 

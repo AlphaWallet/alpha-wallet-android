@@ -89,7 +89,8 @@ public class SendViewModel extends BaseViewModel {
         return networkRepository.getNetworkByChain(chainId);
     }
 
-    public Token getToken(int chainId, String tokenAddress) { return tokensService.getToken(chainId, tokenAddress); };
+    public Token getToken(int chainId, String tokenAddress) { return tokensService.getToken(chainId, tokenAddress); }
+
     public void checkENSAddress(int chainId, String name)
     {
         disposable = ensInteract.checkENSAddress(chainId, name)

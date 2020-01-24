@@ -307,7 +307,7 @@ public class EtherscanTransaction
             }
             else
             {
-                op.contract.name = "*" + String.valueOf(name.ordinal());
+                op.contract.name = "*" + name.ordinal();
             }
         }
     }

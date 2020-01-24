@@ -37,7 +37,7 @@ public class EdconLinkGenerator {
     private static final long E = 5;
 
     // Ticket expiry
-    private static long expiry = (System.currentTimeMillis() + 5000000000L) / 1000L;;
+    private static long expiry = (System.currentTimeMillis() + 5000000000L) / 1000L;
 
 
     public static void main(String[] args) throws SalesOrderMalformed {

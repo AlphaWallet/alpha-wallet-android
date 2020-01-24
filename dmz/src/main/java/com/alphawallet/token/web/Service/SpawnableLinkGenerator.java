@@ -66,7 +66,7 @@ class SpawnableLinkGenerator {
     private static final long THE_SUITE_GOLD = 4;
 
     // Ticket expiry
-    private static long expiry = (System.currentTimeMillis() + 1000000000) / 1000L;;
+    private static long expiry = (System.currentTimeMillis() + 1000000000) / 1000L;
 
 
     public static void main(String[] args) throws SalesOrderMalformed {

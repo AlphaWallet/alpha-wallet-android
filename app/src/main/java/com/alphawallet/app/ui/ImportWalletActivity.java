@@ -63,7 +63,7 @@ import static com.alphawallet.app.widget.InputAddressView.BARCODE_READER_REQUEST
 
 public class ImportWalletActivity extends BaseActivity implements OnImportSeedListener, ImportWalletCallback, OnImportKeystoreListener, OnImportPrivateKeyListener
 {
-    private static enum ImportType
+    private enum ImportType
     {
         SEED_FORM_INDEX, KEYSTORE_FORM_INDEX, PRIVATE_KEY_FORM_INDEX, WATCH_FORM_INDEX
     }
@@ -435,7 +435,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
                 break;
             default:
                 Log.e("SEND", String.format(getString(R.string.barcode_error_format),
-                                            "Code: " + String.valueOf(resultCode)
+                                            "Code: " + resultCode
                 ));
                 break;
         }

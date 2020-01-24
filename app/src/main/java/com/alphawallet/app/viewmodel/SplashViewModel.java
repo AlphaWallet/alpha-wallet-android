@@ -167,7 +167,7 @@ public class SplashViewModel extends ViewModel
             {
                 fileData = new FileData();
                 fileData.fileDate = connection.getLastModified();
-                fileData.fileName = stepLocation.substring(stepLocation.lastIndexOf('/') + 1, stepLocation.length());
+                fileData.fileName = stepLocation.substring(stepLocation.lastIndexOf('/') + 1);
             }
         }
         catch (Exception e)

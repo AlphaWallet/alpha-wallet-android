@@ -248,7 +248,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public void setFilterNetworkList(int[] networkList)
     {
         String store = Utils.intArrayToString(networkList);
-        preferences.setNetworkFilterList(store.toString());
+        preferences.setNetworkFilterList(store);
     }
 
     @Override

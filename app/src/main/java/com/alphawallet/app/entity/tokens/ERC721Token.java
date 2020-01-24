@@ -318,7 +318,6 @@ public class ERC721Token extends Token implements Parcelable
         if (contractType == null || contractType.ordinal() != realmToken.getInterfaceSpec()) return true;
         String currentState = realmToken.getBalance();
         if (currentState == null) return true;
-        if (!currentState.equalsIgnoreCase(getFullBalance())) return true;
-        return false;
+        return !currentState.equalsIgnoreCase(getFullBalance());
     }
 }

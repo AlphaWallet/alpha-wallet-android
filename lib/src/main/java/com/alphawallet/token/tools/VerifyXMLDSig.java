@@ -3,6 +3,8 @@ package com.alphawallet.token.tools;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+
 import com.alphawallet.token.entity.XMLDsigVerificationResult;
 import com.github.cliftonlabs.json_simple.JsonObject;
 
@@ -16,7 +18,7 @@ public class VerifyXMLDSig {
 
     public JsonObject validateSSLCertificate(String file) throws UnsupportedEncodingException {
         JsonObject result = new JsonObject();
-        InputStream stream = new ByteArrayInputStream(file.getBytes("UTF-8"));
+        InputStream stream = new ByteArrayInputStream(file.getBytes(StandardCharsets.UTF_8));
         XMLDsigVerificationResult XMLDsigVerificationResult = new XMLDSigVerifier().VerifyXMLDSig(stream);
         if (XMLDsigVerificationResult.isValid)
         {

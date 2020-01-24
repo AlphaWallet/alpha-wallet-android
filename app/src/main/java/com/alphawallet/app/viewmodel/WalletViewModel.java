@@ -12,10 +12,8 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.crashlytics.android.Crashlytics;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractResult;
-import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.AddTokenInteract;
@@ -40,7 +38,6 @@ import com.alphawallet.app.service.TokensService;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -229,7 +226,7 @@ public class WalletViewModel extends BaseViewModel
                 .flatMap(tokens -> fetchTokensInteract.checkInterface(tokens, currentWallet))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(tokens -> gotOpenseaTokens(checkNetwork.chainId, tokens), this::onOpenseaError);
+                .subscribe(tokens -> gotOpenseaTokens(checkNetwork.chainId, tokens), throwable -> onOpenseaError());
     }
 
     private void gotOpenseaTokens(int chainId, Token[] openSeaTokens)
@@ -247,20 +244,20 @@ public class WalletViewModel extends BaseViewModel
             updateTokens = addTokenInteract.storeTokens(currentWallet, erc721Tokens.toArray(new Token[0]))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::storedTokens, this::onError);
+                    .subscribe(tokens1 -> storedTokens(), this::onError);
         }
 
         progress.postValue(false);
     }
 
-    private void onOpenseaError(Throwable throwable)
+    private void onOpenseaError()
     {
         //This is expected to happen - opensea gets a lot of activity
         //proceed using the stored data until we no longer get an error
         onFetchTokensCompletable();
     }
 
-    private void storedTokens(Token[] tokens)
+    private void storedTokens()
     {
         onFetchTokensCompletable();
     }
@@ -270,7 +267,7 @@ public class WalletViewModel extends BaseViewModel
         updateTokens = tokensService.getTokensAtAddress()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::receiveNetworkTokens, this::onBlockscoutError);
+                .subscribe(this::receiveNetworkTokens, throwable -> onBlockscoutError());
     }
 
     private void receiveNetworkTokens(Token[] receivedTokens)
@@ -285,11 +282,11 @@ public class WalletViewModel extends BaseViewModel
             addTokenInteract.addERC20(currentWallet, updatedTokens)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::storedTokens, this::onError).isDisposed();
+                    .subscribe(tokens1 -> storedTokens(), this::onError).isDisposed();
         }
     }
 
-    private void onBlockscoutError(Throwable throwable)
+    private void onBlockscoutError()
     {
         //unable to resolve blockscout - phone may be offline
     }
@@ -353,7 +350,7 @@ public class WalletViewModel extends BaseViewModel
             balanceCheckDisposable = fetchTokensInteract.updateDefaultBalance(t, currentWallet)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onTokenUpdate, this::balanceUpdateError, this::checkComplete);
+                    .subscribe(this::onTokenUpdate, throwable -> balanceUpdateError(), this::checkComplete);
         }
     }
 
@@ -363,7 +360,7 @@ public class WalletViewModel extends BaseViewModel
         checkUIUpdates();
     }
 
-    private void balanceUpdateError(Throwable throwable)
+    private void balanceUpdateError()
     {
         balanceCheckDisposable = null;
     }
@@ -489,10 +486,10 @@ public class WalletViewModel extends BaseViewModel
     private void finishedImport(Token token)
     {
         tokensService.addToken(token);
-        if (EthereumNetworkRepository.isPriorityToken(token)) tokenUpdate.postValue(token);
+        if (EthereumNetworkRepository.isPriorityToken()) tokenUpdate.postValue(token);
     }
 
-    private void onTokenAddError(Throwable throwable)
+    private void onTokenAddError()
     {
         //cannot add the token until we get internet connection
         Log.d("WVM", "Wait for internet");
@@ -539,7 +536,7 @@ public class WalletViewModel extends BaseViewModel
                     .map(needsBackup -> calculateBackupWarning(needsBackup, calcValue))
                     .subscribeOn(Schedulers.computation())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(backupEvent::postValue, this::onBlockscoutError).isDisposed();
+                    .subscribe(backupEvent::postValue, throwable -> onBlockscoutError()).isDisposed();
         }
     }
 

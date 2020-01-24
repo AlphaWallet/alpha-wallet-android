@@ -11,7 +11,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.WebView;
 import android.widget.ProgressBar;
 
 import com.alphawallet.app.C;
@@ -262,13 +261,13 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     }
 
     @Override
-    public void onPageLoaded(WebView view)
+    public void onPageLoaded()
     {
         testView.callToJS("refresh()");
     }
 
     @Override
-    public void onPageRendered(WebView view)
+    public void onPageRendered()
     {
         testView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
             if (token != null)

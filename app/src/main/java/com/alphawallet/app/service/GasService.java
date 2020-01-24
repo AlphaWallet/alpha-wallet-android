@@ -211,7 +211,7 @@ public class GasService implements ContractGasProvider
         }
     }
 
-    public GasSettings getGasSettings(byte[] transactionBytes, boolean isNonFungible, int chainId)
+    public GasSettings getGasSettings(byte[] transactionBytes, boolean isNonFungible)
     {
         BigInteger gasLimit = getGasLimit();
         BigInteger gasPrice = getGasPrice();
@@ -244,9 +244,9 @@ public class GasService implements ContractGasProvider
 
     private void setCurrentPrice(int chainId)
     {
-        if (EthereumNetworkRepository.hasGasOverride(chainId))
+        if (EthereumNetworkRepository.hasGasOverride())
         {
-            currentGasPrice = EthereumNetworkRepository.gasOverrideValue(chainId);
+            currentGasPrice = EthereumNetworkRepository.gasOverrideValue();
         }
         else
         {

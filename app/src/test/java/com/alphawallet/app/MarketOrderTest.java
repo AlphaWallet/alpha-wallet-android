@@ -167,7 +167,7 @@ public class MarketOrderTest
             }
         };
 
-        marketService = new MarketQueueService(null, null, transactionRepository);
+        marketService = new MarketQueueService(null, transactionRepository);
     }
 
     @Test

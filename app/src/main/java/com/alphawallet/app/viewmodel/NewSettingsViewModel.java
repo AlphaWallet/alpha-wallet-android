@@ -203,7 +203,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final Runnable startGetBalanceTask = this::getBalance;
 
     public ArrayList<LocaleItem> getLocaleList(Context context) {
-        return localeRepository.getLocaleList(context);
+        return localeRepository.getLocaleList();
     }
 
     public void setLocale(Context activity)

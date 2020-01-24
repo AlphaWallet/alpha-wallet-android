@@ -13,8 +13,8 @@ public interface TickerService {
 
     Single<Map<Integer, Ticker>> fetchCMCTickers();
     Single<Double> convertPair(String currency1, String currency2);
-    Single<TokenTicker[]> fetchTokenTickers(Token[] tokens, String currency);
-    Single<Ticker> fetchEthPrice(NetworkInfo networkInfo, Ticker ticker);
+    Single<TokenTicker[]> fetchTokenTickers();
+    Single<Ticker> fetchEthPrice(Ticker ticker);
     Single<Ticker> fetchBlockScoutPrice(NetworkInfo networkInfo, Ticker ticker);
     Single<Map<Integer, Ticker>> fetchAmberData();
     Single<Token> attachTokenTicker(Token token);

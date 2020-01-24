@@ -99,7 +99,7 @@ public class KeystoreAccountService implements AccountKeystoreService
                 wallet.setWalletType(WalletType.KEYSTORE);
             } catch (Exception ex) {
                 // We need to make sure that we do not have a broken account
-                deleteAccount(address, newPassword).subscribe(() -> {}, t -> {}).isDisposed();
+                deleteAccount(address).subscribe(() -> {}, t -> {}).isDisposed();
                 throw ex;
             }
 
@@ -146,11 +146,10 @@ public class KeystoreAccountService implements AccountKeystoreService
      * Delete 'geth' keystore file then ensure password encrypted bytes and keys in Android keystore
      * are deleted
      * @param address account address
-     * @param password account password
      * @return
      */
     @Override
-    public Completable deleteAccount(String address, String password) {
+    public Completable deleteAccount(String address) {
         return Completable.fromAction(() -> {
             String cleanedAddr = Numeric.cleanHexPrefix(address);
             deleteAccountFiles(cleanedAddr);
@@ -317,7 +316,7 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     @Override
-    public Single<byte[]> signTransactionFast(Wallet signer, String signerPassword, byte[] message, long chainId) {
+    public Single<byte[]> signTransactionFast(Wallet signer, String signerPassword, byte[] message) {
         return Single.fromCallable(() -> {
             Credentials credentials = getCredentials(keyFolder, signer.address, signerPassword);
             Sign.SignatureData signatureData = Sign.signMessage(
@@ -331,7 +330,7 @@ public class KeystoreAccountService implements AccountKeystoreService
     //In all cases where we need to sign data the signature needs to be in Ethereum format
     //Geth gives us the pure EC function, but for hash signing
     @Override
-    public Single<byte[]> signTransaction(Wallet signer, byte[] message, long chainId)
+    public Single<byte[]> signTransaction(Wallet signer, byte[] message)
     {
         return Single.fromCallable(() -> {
             //byte[] messageHash = Hash.sha3(message);

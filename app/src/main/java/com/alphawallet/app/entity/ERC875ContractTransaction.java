@@ -62,7 +62,7 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
                 indices.add(Integer.parseInt(trim));
             }
         }
-        catch (Exception e)
+        catch (Exception ignored)
         {
 
         }

@@ -11,7 +11,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.TransactionContract;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.UnknownToken;
@@ -183,12 +182,12 @@ public class TransactionsViewModel extends BaseViewModel
                         fetchTransactionsInteract.fetchNetworkTransactions(network, t.getAddress(), t.lastBlockCheck, userAddress)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
+                                .subscribe(transactions -> onUpdateTransactions(transactions, t), throwable -> onTxError());
             }
         }
     }
 
-    private void onTxError(Throwable throwable)
+    private void onTxError()
     {
         fetchTransactionDisposable = null;
     }

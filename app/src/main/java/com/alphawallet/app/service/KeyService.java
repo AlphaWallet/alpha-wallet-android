@@ -45,7 +45,6 @@ import java.util.List;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 import static com.alphawallet.app.entity.Operation.*;
-import static com.alphawallet.app.entity.ServiceErrorException.ServiceErrorCode.INVALID_KEY;
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.service.KeyService.AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
 import static com.alphawallet.app.service.KeyService.AuthenticationLevel.TEE_NO_AUTHENTICATION;
@@ -517,7 +516,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         HDWallet newWallet = new HDWallet(DEFAULT_KEY_STRENGTH, "");
         boolean success = storeHDKey(newWallet, false); //create non-authenticated key initially
         if (callbackInterface != null)
-            callbackInterface.HDKeyCreated(success ? currentWallet.address : null, context, authLevel);
+            callbackInterface.HDKeyCreated(success ? currentWallet.address : null, authLevel);
     }
 
     /**
@@ -700,8 +699,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     }
 
     @RequiresApi(api = Build.VERSION_CODES.P)
-    private boolean tryInitStrongBoxKey(KeyGenerator keyGenerator, String keyAddress, boolean useAuthentication) throws InvalidAlgorithmParameterException
-    {
+    private boolean tryInitStrongBoxKey(KeyGenerator keyGenerator, String keyAddress, boolean useAuthentication) {
         try
         {
             keyGenerator.init(new KeyGenParameterSpec.Builder(
@@ -789,7 +787,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         signDialog = new SignTransactionDialog(activity, operation, dialogTitle, null);
         signDialog.setCanceledOnTouchOutside(false);
         signDialog.setCancelListener(v -> {
-            authenticateFail("Cancelled", AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation);
+            authenticateFail(AuthenticationFailType.AUTHENTICATION_DIALOG_CANCELLED, operation);
         });
         signDialog.setOnDismissListener(v -> {
             signDialog = null;
@@ -807,7 +805,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     @Override
     public void FailedAuthentication(Operation taskCode)
     {
-        authenticateFail("Authentication fail", AuthenticationFailType.PIN_FAILED, taskCode);
+        authenticateFail(AuthenticationFailType.PIN_FAILED, taskCode);
     }
 
     @Override
@@ -855,7 +853,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     }
 
     @Override
-    public void authenticateFail(String fail, AuthenticationFailType failType, Operation callbackId)
+    public void authenticateFail(AuthenticationFailType failType, Operation callbackId)
     {
         System.out.println("AUTH FAIL: " + failType.ordinal());
 

@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 import android.view.View;
 
 import com.alphawallet.app.BuildConfig;
@@ -226,7 +225,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     }
 
     @Override
-    public void HDKeyCreated(String address, Context ctx, KeyService.AuthenticationLevel level)
+    public void HDKeyCreated(String address, KeyService.AuthenticationLevel level)
     {
         splashViewModel.StoreHDKey(address, level);
     }

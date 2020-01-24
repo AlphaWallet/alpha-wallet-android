@@ -16,7 +16,6 @@ import com.alphawallet.token.entity.TicketRange;
 import com.bumptech.glide.Glide;
 import com.alphawallet.app.util.KittyUtils;
 
-import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.TokenDetailActivity;
@@ -24,8 +23,6 @@ import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by James on 3/10/2018.
@@ -152,7 +149,7 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
     private boolean handleLongClick(View v, TicketRange data)
     {
         //open up the radio view and signal to holding app
-        tokenClickListener.onLongTokenClick(v, token, data.tokenIds);
+        tokenClickListener.onLongTokenClick(data.tokenIds);
         data.isChecked = true;
         itemSelect.setChecked(true);
         return true;

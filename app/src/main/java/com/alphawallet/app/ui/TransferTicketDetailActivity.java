@@ -268,7 +268,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         };
         ensHandler = new ENSHandler(this, handler, adapterUrl, this, ensCallback);
         viewModel.ensResolve().observe(this, ensHandler::onENSSuccess);
-        viewModel.ensFail().observe(this, ensHandler::hideENS);
+        viewModel.ensFail().observe(this, name -> ensHandler.hideENS());
     }
 
     //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
@@ -602,7 +602,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     }
 
     @Override
-    public void onLongTokenClick(View view, Token token, List<BigInteger> tokenId)
+    public void onLongTokenClick(List<BigInteger> tokenId)
     {
 
     }

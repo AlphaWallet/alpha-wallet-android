@@ -151,7 +151,7 @@ public class Web3TokenView extends WebView
     @JavascriptInterface
     public void TScallToJS(String fName, String script, TokenScriptRenderCallback cb)
     {
-        post(() -> evaluateJavascript(script, value -> cb.callToJSComplete(fName, value)));
+        post(() -> evaluateJavascript(script, value -> cb.callToJSComplete(fName)));
     }
 
     @JavascriptInterface
@@ -255,7 +255,7 @@ public class Web3TokenView extends WebView
         {
             super.onPageFinished(view, url);
             if (assetHolder != null)
-                assetHolder.onPageRendered(view);
+                assetHolder.onPageRendered();
         }
 
         @Override
@@ -263,7 +263,7 @@ public class Web3TokenView extends WebView
         {
             super.onPageCommitVisible(view, url);
             if (assetHolder != null)
-                assetHolder.onPageLoaded(view);
+                assetHolder.onPageLoaded();
         }
     }
 }

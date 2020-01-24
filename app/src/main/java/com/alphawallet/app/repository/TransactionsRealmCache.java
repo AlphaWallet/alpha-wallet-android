@@ -55,7 +55,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
 	}
 
     @Override
-    public Single<Transaction[]> fetchTransactions(Wallet wallet, Token token, int count)
+    public Single<Transaction[]> fetchTransactions(Wallet wallet, Token token)
     {
         return Single.fromCallable(() -> {
             try (Realm instance = realmManager.getRealmInstance(wallet))

@@ -1,6 +1,5 @@
 package com.alphawallet.app.repository;
 
-import android.service.notification.ZenPolicy;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -16,7 +15,6 @@ import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.entity.TransferFromEventResponse;
-import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.Utils;
@@ -109,7 +107,7 @@ public class TokenRepository implements TokenRepositoryType {
     private void buildWeb3jClient(NetworkInfo networkInfo)
     {
         HttpService publicNodeService = new HttpService(networkInfo.rpcServerUrl, okClient, false);
-        EthereumNetworkRepository.addRequiredCredentials(networkInfo.chainId, publicNodeService);
+        EthereumNetworkRepository.addRequiredCredentials();
         web3jNodeServers.put(networkInfo.chainId, Web3j.build(publicNodeService));
     }
 
@@ -119,7 +117,7 @@ public class TokenRepository implements TokenRepositoryType {
         if (!web3jNodeServers.containsKey(chainId) && networkInfo != null)
         {
             HttpService publicNodeService = new HttpService(networkInfo.rpcServerUrl, okClient, false);
-            EthereumNetworkRepository.addRequiredCredentials(chainId, publicNodeService);
+            EthereumNetworkRepository.addRequiredCredentials();
             web3jNodeServers.put(chainId, Web3j.build(publicNodeService));
         }
 
@@ -780,7 +778,7 @@ public class TokenRepository implements TokenRepositoryType {
         return result;
     }
 
-    public Observable<TransferFromEventResponse> burnListenerObservable(String contractAddr)
+    public Observable<TransferFromEventResponse> burnListenerObservable()
     {
         return Observable.fromCallable(() -> {
             TransferFromEventResponse event = new TransferFromEventResponse();
@@ -837,8 +835,7 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private String checkBytesString(String responseValue) throws Exception
-    {
+    private String checkBytesString(String responseValue) {
         String name = "";
         if (responseValue.length() > 0)
         {
@@ -900,7 +897,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private int getDecimals(String address, NetworkInfo network) throws Exception {
-        if (EthereumNetworkRepository.decimalOverride(address, network.chainId) > 0) return EthereumNetworkRepository.decimalOverride(address, network.chainId);
+        if (EthereumNetworkRepository.decimalOverride() > 0) return EthereumNetworkRepository.decimalOverride();
         org.web3j.abi.datatypes.Function function = decimalsOf();
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, network, temp);
@@ -1052,7 +1049,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private String callSmartContractFunction(
-            Function function, String contractAddress, NetworkInfo network, Wallet wallet) throws Exception {
+            Function function, String contractAddress, NetworkInfo network, Wallet wallet) {
         String encodedFunction = FunctionEncoder.encode(function);
 
         try
@@ -1264,8 +1261,7 @@ public class TokenRepository implements TokenRepositoryType {
         });
     }
 
-    private ContractType findContractTypeFromResponse(List<BigInteger> balance875, List<BigInteger> balance721Ticket, String balanceResponse) throws Exception
-    {
+    private ContractType findContractTypeFromResponse(List<BigInteger> balance875, List<BigInteger> balance721Ticket, String balanceResponse) {
         ContractType returnType = ContractType.OTHER;
 
         int responseLength = balanceResponse.length();
@@ -1366,7 +1362,7 @@ public class TokenRepository implements TokenRepositoryType {
                 .build();
         String rpcServerUrl = EthereumNetworkRepository.getNodeURLByNetworkId(chainId);
         HttpService publicNodeService = new HttpService(rpcServerUrl, okClient, false);
-        EthereumNetworkRepository.addRequiredCredentials(chainId, publicNodeService);
+        EthereumNetworkRepository.addRequiredCredentials();
         return Web3j.build(publicNodeService);
     }
 }

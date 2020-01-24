@@ -279,7 +279,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!EthereumNetworkRepository.hasGasOverride(chainId))
+        if (!EthereumNetworkRepository.hasGasOverride())
         {
             getMenuInflater().inflate(R.menu.menu_settings, menu);
         }
@@ -336,7 +336,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
     private void onSend()
     {
-        viewModel.getGasForSending(confirmationType, this, chainId);
+        viewModel.getGasForSending(confirmationType);
     }
 
     private void onSendGasSettings(GasSettings gasSettings)

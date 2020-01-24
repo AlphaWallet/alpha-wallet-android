@@ -272,7 +272,7 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
     }
 
     @Override
-    public void onLongTokenClick(View view, Token token, List<BigInteger> tokenIds)
+    public void onLongTokenClick(List<BigInteger> tokenIds)
     {
         //show radio buttons of all token groups
         if (adapter != null) adapter.setRadioButtons(true);

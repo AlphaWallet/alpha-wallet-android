@@ -78,8 +78,8 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.transactions().observe(this, this::onTransactions);
         viewModel.showEmpty().observe(this, this::showEmptyTx);
-        viewModel.clearAdapter().observe(this, this::clearAdapter);
-        viewModel.refreshAdapter().observe(this, this::refreshAdapter);
+        viewModel.clearAdapter().observe(this, aBoolean1 -> clearAdapter());
+        viewModel.refreshAdapter().observe(this, aBoolean -> refreshAdapter());
         viewModel.newTransactions().observe(this, this::onNewTransactions);
         refreshLayout.setOnRefreshListener(() -> viewModel.prepare());
 
@@ -196,14 +196,14 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         viewModel.clearProcesses();
     }
 
-    private void clearAdapter(Boolean aBoolean)
+    private void clearAdapter()
     {
         adapter.clear();
         list.setAdapter(adapter);
         viewModel.clearProcesses();
     }
 
-    private void refreshAdapter(Boolean aBoolean)
+    private void refreshAdapter()
     {
         adapter.notifyDataSetChanged();
     }

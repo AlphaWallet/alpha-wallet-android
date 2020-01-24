@@ -3,9 +3,7 @@ package com.alphawallet.app.entity.tokens;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Base64;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
@@ -20,9 +18,7 @@ import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
-import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.token.entity.TicketRange;
-import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.tools.TokenDefinition;
 
 import org.web3j.abi.datatypes.Function;
@@ -30,15 +26,11 @@ import org.web3j.abi.datatypes.generated.Uint256;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 
 public class ERC721Ticket extends Token implements Parcelable {
 

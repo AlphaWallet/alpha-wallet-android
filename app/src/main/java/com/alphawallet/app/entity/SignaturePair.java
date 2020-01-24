@@ -1,11 +1,5 @@
 package com.alphawallet.app.entity;
 
-import org.web3j.utils.Numeric;
-
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;

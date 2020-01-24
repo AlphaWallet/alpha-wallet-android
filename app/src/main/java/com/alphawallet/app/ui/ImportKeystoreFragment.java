@@ -95,7 +95,7 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
         if (getContext() != null) importButton.setBackgroundColor(getContext().getColor(colorId));
     }
 
-    private void handleKeypress(View view)
+    private void handleKeypress()
     {
         if (password.getVisibility() == View.GONE)
         {
@@ -115,7 +115,7 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
 
     @Override
     public void onClick(View view) {
-        handleKeypress(view);
+        handleKeypress();
     }
 
     public String getKeystore()
@@ -225,6 +225,6 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
     @Override
     public void onInputDoneClick(View view)
     {
-        handleKeypress(view);
+        handleKeypress();
     }
 }

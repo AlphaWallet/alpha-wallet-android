@@ -254,7 +254,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     private void startMemoryPoolListener() {
         memPoolSubscription = memoryPoolInteract.burnListener(token.getAddress())
                 .subscribeOn(Schedulers.newThread())
-                .subscribe(this::receiveBurnNotification, this::onBurnError);
+                .subscribe(this::receiveBurnNotification, throwable -> onBurnError());
     }
 
     private void receiveBurnNotification(TransferFromEventResponse burnTx)
@@ -269,7 +269,7 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     }
 
     //restart the listener - sometimes blockchain throws a wobbly
-    private void onBurnError(Throwable throwable)
+    private void onBurnError()
     {
         if (!memPoolSubscription.isDisposed()) memPoolSubscription.dispose();
         startMemoryPoolListener();

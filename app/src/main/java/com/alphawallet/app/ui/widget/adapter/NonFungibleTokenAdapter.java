@@ -5,17 +5,14 @@ import android.support.v7.util.SortedList;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.view.ViewGroup;
 
-import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.alphawallet.app.ui.widget.entity.QuantitySelectorSortedItem;
 import com.alphawallet.app.ui.widget.holder.QuantitySelectorHolder;
-import com.alphawallet.token.tools.Numeric;
 import com.bumptech.glide.Glide;
 import com.alphawallet.app.ui.widget.entity.AssetInstanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.AssetSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
 import com.alphawallet.app.ui.widget.entity.TicketSaleSortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenBalanceSortedItem;
-import com.alphawallet.app.ui.widget.entity.TokenFunctionSortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenIdSortedItem;
 import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
@@ -26,7 +23,6 @@ import com.alphawallet.app.ui.widget.holder.TokenDescriptionHolder;
 import com.alphawallet.app.ui.widget.holder.TokenFunctionViewHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
 import com.alphawallet.app.web3.entity.FunctionCallback;
-import com.alphawallet.app.web3.entity.ScriptFunction;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -36,14 +32,12 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.OpenseaService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -238,12 +232,12 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
             clearCache(ctx)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::cleared, error -> System.out.println("Cache clean: " + error.getMessage()))
+                    .subscribe(aBoolean -> cleared(), error -> System.out.println("Cache clean: " + error.getMessage()))
                     .isDisposed();
         }
     }
 
-    private void cleared(Boolean aBoolean)
+    private void cleared()
     {
         this.notifyDataSetChanged();
     }

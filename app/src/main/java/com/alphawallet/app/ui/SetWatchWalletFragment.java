@@ -81,10 +81,10 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
     @Override
     public void onClick(View view)
     {
-        handleWatchAddress(view);
+        handleWatchAddress();
     }
 
-    private void handleWatchAddress(View view)
+    private void handleWatchAddress()
     {
         watchAddress.setError(null);
         String value = watchAddress.getText().toString();
@@ -176,6 +176,6 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
     @Override
     public void onInputDoneClick(View view)
     {
-        handleWatchAddress(view);
+        handleWatchAddress();
     }
 }

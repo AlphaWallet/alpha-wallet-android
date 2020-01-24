@@ -3,8 +3,6 @@ package com.alphawallet.app.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.alphawallet.app.web3.entity.Message;
-
 public class LocaleItem implements Parcelable
 {
     public String name;

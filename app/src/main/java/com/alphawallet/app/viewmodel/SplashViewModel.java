@@ -71,11 +71,11 @@ public class SplashViewModel extends ViewModel
         System.out.println("KEYS: Fetchwallets");
         fetchWalletsInteract
                 .fetch()
-                .subscribe(wallets::postValue, this::onError);
+                .subscribe(wallets::postValue, throwable -> onError());
     }
 
     //on wallet error ensure execution still continues and splash screen terminates
-    private void onError(Throwable throwable) {
+    private void onError() {
         wallets.postValue(new Wallet[0]);
     }
 
@@ -143,7 +143,7 @@ public class SplashViewModel extends ViewModel
         getFileDataFromURL(ALPHAWALLET_FILE_URL)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result -> onUpdate(result, currentInstallDate, baseContext), this::onError).isDisposed();
+                .subscribe(result -> onUpdate(result, currentInstallDate, baseContext), throwable -> onError()).isDisposed();
     }
 
     private Single<FileData> getFileDataFromURL(final String location)
@@ -215,7 +215,7 @@ public class SplashViewModel extends ViewModel
             fetchWalletsInteract.storeWallet(wallet)
                     .subscribe(account -> {
                         fetchWallets();
-                    }, this::onError).isDisposed();
+                    }, throwable -> onError()).isDisposed();
         }
         else
         {

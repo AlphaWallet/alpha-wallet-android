@@ -29,7 +29,6 @@ import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
-import com.alphawallet.app.util.TabUtils;
 
 import dagger.android.support.AndroidSupportInjection;
 import com.alphawallet.app.C;
@@ -96,10 +95,10 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         viewModel.tokens().observe(this, this::onTokens);
         viewModel.total().observe(this, this::onTotal);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
-        viewModel.currentWalletBalance().observe(this, this::onBalanceChanged);
-        viewModel.refreshTokens().observe(this, this::refreshTokens);
+        viewModel.currentWalletBalance().observe(this, balance -> onBalanceChanged());
+        viewModel.refreshTokens().observe(this, aBoolean -> refreshTokens());
         viewModel.tokenUpdate().observe(this, this::onToken);
-        viewModel.tokensReady().observe(this, this::tokensReady);
+        viewModel.tokensReady().observe(this, dummy -> tokensReady());
         viewModel.backupEvent().observe(this, this::backupEvent);
 
         adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService());
@@ -147,7 +146,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
     private void onToken(Token token)
     {
-        adapter.updateToken(token, false);
+        adapter.updateToken(token);
     }
 
     private void initTabLayout(View view) {
@@ -223,7 +222,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     }
 
     @Override
-    public void onLongTokenClick(View view, Token token, List<BigInteger> tokenId)
+    public void onLongTokenClick(List<BigInteger> tokenId)
     {
 
     }
@@ -303,21 +302,20 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         viewModel.clearProcess();
     }
 
-    private void onBalanceChanged(Map<String, String> balance) {
+    private void onBalanceChanged() {
 
     }
 
     /**
      * This is triggered by transaction view after we have found new tokens by scanning the transaction history
-     * @param aBoolean - dummy param
      */
-    private void refreshTokens(Boolean aBoolean)
+    private void refreshTokens()
     {
         adapter.clear();
         viewModel.resetAndFetchTokens();
     }
 
-    private void tokensReady(Boolean dummy)
+    private void tokensReady()
     {
         //if (getActivity() != null) ((HomeActivity)getActivity()).TokensReady();
     }

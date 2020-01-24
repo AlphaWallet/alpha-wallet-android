@@ -30,7 +30,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
@@ -466,7 +465,7 @@ public class NewSettingsFragment extends Fragment
     {
         if (s.equals(viewModel.defaultWallet().getValue().address))
         {
-            addBackupNotice(GenericWalletInteract.BackupLevel.WALLET_HAS_HIGH_VALUE);
+            addBackupNotice();
         }
         else
         {
@@ -480,7 +479,7 @@ public class NewSettingsFragment extends Fragment
         }
     }
 
-    void addBackupNotice(GenericWalletInteract.BackupLevel walletValue)
+    void addBackupNotice()
     {
         layoutBackup.setVisibility(View.VISIBLE);
         //current Wallet only
@@ -517,7 +516,7 @@ public class NewSettingsFragment extends Fragment
     private void backedUp(String walletAddress)
     {
         layoutBackup.setVisibility(View.GONE);
-        if (getActivity() != null) ((HomeActivity)getActivity()).postponeWalletBackupWarning(walletAddress);
+        if (getActivity() != null) ((HomeActivity)getActivity()).postponeWalletBackupWarning();
     }
 
     public void updateLocale(Intent data)

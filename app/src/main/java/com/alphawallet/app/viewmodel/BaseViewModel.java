@@ -132,7 +132,7 @@ public class BaseViewModel extends ViewModel
 		successDialogMutable.postValue(resId);
 	}
 
-	public void showSendToken(Context context, String address, String symbol, int decimals, Token token) {
+	public void showSendToken() {
 		//do nothing
 	}
 

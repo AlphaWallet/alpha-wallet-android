@@ -6,7 +6,6 @@ import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.repository.entity.RealmERC721Token;
 import com.alphawallet.app.repository.entity.RealmToken;
 
 import java.math.BigDecimal;

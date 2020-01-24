@@ -114,7 +114,7 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void prepare(ConfirmationActivity ctx)
     {
-        gasService.gasPriceUpdateListener().observe(ctx, this::onGasPrice);
+        gasService.gasPriceUpdateListener().observe(ctx, currentGasPrice -> onGasPrice());
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -135,12 +135,12 @@ public class ConfirmationViewModel extends BaseViewModel {
         gasService.startGasListener(chainId);
         if (gasSettings.getValue() == null)
         {
-            GasSettings gasSettings = gasService.getGasSettings(transaction, isNonFungible, chainId);
+            GasSettings gasSettings = gasService.getGasSettings(transaction, isNonFungible);
             onGasSettings(gasSettings);
         }
     }
 
-    public void getGasForSending(ConfirmationType confirmationType, Activity context, int chainId)
+    public void getGasForSending(ConfirmationType confirmationType)
     {
         if (gasSettings.getValue() == null)
         {
@@ -165,9 +165,8 @@ public class ConfirmationViewModel extends BaseViewModel {
      * Only update from the network price if:
      * - user hasn't overriden the default/network settings
      * - network is not xDai (which is priced at 1 GWei).
-     * @param currentGasPrice
      */
-    private void onGasPrice(BigInteger currentGasPrice)
+    private void onGasPrice()
     {
         GasSettings updateSettings = new GasSettings(gasService.getGasPrice(), gasService.getGasLimit());
         this.gasSettings.postValue(updateSettings);

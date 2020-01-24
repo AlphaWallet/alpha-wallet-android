@@ -1,7 +1,6 @@
 package com.alphawallet.app.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -490,7 +489,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         verifyTextBox.setVisibility(View.GONE);
 
         //terminate and display tick
-        backupKeySuccess(BackupOperationType.BACKUP_HD_KEY);
+        backupKeySuccess();
     }
 
     private void seedIncorrect()
@@ -504,7 +503,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         state = BackupState.SEED_PHRASE_INVALID;
     }
 
-    private void backupKeySuccess(BackupOperationType type)
+    private void backupKeySuccess()
     {
         //first record backup time success, in case user aborts operation during key locking
         viewModel.backupSuccess(wallet);
@@ -686,7 +685,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     }
 
     @Override
-    public void HDKeyCreated(String address, Context ctx, KeyService.AuthenticationLevel level)
+    public void HDKeyCreated(String address, KeyService.AuthenticationLevel level)
     {
         //empty, doesn't get called
     }
@@ -831,7 +830,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             case SHARE_REQUEST_CODE:
                 if (resultCode == RESULT_OK)
                 {
-                    backupKeySuccess(BackupOperationType.BACKUP_KEYSTORE_KEY);
+                    backupKeySuccess();
                 }
                 else
                 {
@@ -861,7 +860,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         alertDialog.setButtonText(R.string.yes_continue);
         alertDialog.setButtonListener(v -> {
             hideDialog();
-            backupKeySuccess(BackupOperationType.BACKUP_KEYSTORE_KEY);
+            backupKeySuccess();
         });
         alertDialog.setSecondaryButtonText(R.string.no_repeat);
         alertDialog.setSecondaryButtonListener(v -> {

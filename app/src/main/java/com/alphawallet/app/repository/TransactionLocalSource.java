@@ -10,7 +10,7 @@ import io.reactivex.Single;
 
 public interface TransactionLocalSource {
 	Single<Transaction[]> fetchTransaction(Wallet wallet, int maxTransactions, List<Integer> networkFilters);
-	Single<Transaction[]> fetchTransactions(Wallet wallet, Token token, int count);
+	Single<Transaction[]> fetchTransactions(Wallet wallet, Token token);
 	Transaction fetchTransaction(Wallet wallet, String hash);
 	Single<Transaction[]> putAndReturnTransactions(Wallet wallet, Transaction[] txList);
 	void putTransaction(Wallet wallet, Transaction tx);

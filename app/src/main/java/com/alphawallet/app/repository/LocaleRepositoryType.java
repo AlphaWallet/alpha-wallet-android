@@ -11,5 +11,5 @@ public interface LocaleRepositoryType {
 
     void setDefaultLocale(Context context, String locale);
 
-    ArrayList<LocaleItem> getLocaleList(Context context);
+    ArrayList<LocaleItem> getLocaleList();
 }

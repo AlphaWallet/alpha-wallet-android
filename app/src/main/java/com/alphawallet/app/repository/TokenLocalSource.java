@@ -10,7 +10,6 @@ import com.alphawallet.app.entity.Wallet;
 
 import java.util.Map;
 
-import io.reactivex.Completable;
 import io.reactivex.Single;
 
 public interface TokenLocalSource {

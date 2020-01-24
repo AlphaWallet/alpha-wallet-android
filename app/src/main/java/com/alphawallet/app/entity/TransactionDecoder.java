@@ -61,7 +61,7 @@ public class TransactionDecoder
             while (parseIndex < input.length() && !(parseState == ParseStage.FINISH)) {
                 switch (parseState) {
                     case PARSE_FUNCTION: //get function
-                        parseState = setFunction(readBytes(input, 10), input.length());
+                        parseState = setFunction(readBytes(input, 10));
                         break;
                     case PARSE_ARGS: //now get params
                         parseState = getParams(input);
@@ -85,7 +85,7 @@ public class TransactionDecoder
         return thisData;
     }
 
-    private ParseStage setFunction(String input, int length) {
+    private ParseStage setFunction(String input) {
         //first get expected arg list:
         FunctionData data = functionList.get(input);
 

@@ -130,7 +130,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         if (operation == null || operation.contract == null) {
             // default to ether transaction
             fill(txSuccess, transaction.from, transaction.to, tokenSymbol, transaction.value,
-                    ETHER_DECIMALS, transaction.timeStamp);
+                    ETHER_DECIMALS);
         }
         else if (operation.contract instanceof ERC875ContractTransaction)
         {
@@ -139,7 +139,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         else if (operation.from == null)
         {
             fill(txSuccess, transaction.from, transaction.to, tokenSymbol, transaction.value,
-                 ETHER_DECIMALS, transaction.timeStamp);
+                 ETHER_DECIMALS);
         }
         else
         {
@@ -192,7 +192,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
 
         if (token != null)
         {
-            ticketMove = token.getTransactionValue(trans, getContext());
+            ticketMove = token.getTransactionValue(trans);
         }
         else if (ct.indices != null && ct.indices.size() > 0)
         {
@@ -260,8 +260,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             String to,
             String symbol,
             String valueStr,
-            long decimals,
-            long timestamp)
+            long decimals)
     {
         boolean isSent = from.toLowerCase().equals(defaultAddress);
         type.setText(isSent ? getString(R.string.sent) : getString(R.string.received));
@@ -358,7 +357,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         String valueStr;
         if (token != null)
         {
-            valueStr = token.getTransactionValue(transaction, getContext());
+            valueStr = token.getTransactionValue(transaction);
         }
         else
         {

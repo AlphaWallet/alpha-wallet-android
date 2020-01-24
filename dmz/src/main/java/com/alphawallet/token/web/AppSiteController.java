@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import org.xml.sax.SAXException;
 
@@ -64,7 +63,6 @@ import com.alphawallet.token.web.Ethereum.TransactionHandler;
 import com.alphawallet.token.web.Service.CryptoFunctions;
 import static com.alphawallet.token.tools.Convert.getEthString;
 import static com.alphawallet.token.tools.ParseMagicLink.normal;
-import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
 import static com.alphawallet.token.web.Ethereum.TokenscriptFunction.ZERO_ADDRESS;
 
 @Controller
@@ -98,7 +96,7 @@ public class AppSiteController implements AttributeInterface
     }
 
     @GetMapping("/")
-    public RedirectView home(RedirectAttributes attributes){
+    public RedirectView home(){
         return new RedirectView("http://alphawallet.com");
     }
 

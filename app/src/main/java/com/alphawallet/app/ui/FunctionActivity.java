@@ -9,7 +9,6 @@ import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import com.alphawallet.app.entity.DAppFunction;
@@ -600,13 +599,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void onPageLoaded(WebView view)
+    public void onPageLoaded()
     {
         tokenView.callToJS("refresh()");
     }
 
     @Override
-    public void onPageRendered(WebView view)
+    public void onPageRendered()
     {
         if (!reloaded) tokenView.reload();
         reloaded = true;
@@ -705,7 +704,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             DAppFunction dAppFunction = new DAppFunction()
             {
                 @Override
-                public void DAppError(Throwable error, Message<String> message)
+                public void DAppError(Message<String> message)
                 {
                     tokenView.onSignCancel(message);
                     dialog.dismiss();
@@ -747,7 +746,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void callToJSComplete(String function, String result)
+    public void callToJSComplete(String function)
     {
         completeTokenscriptFunction(function);
     }

@@ -7,7 +7,7 @@ class JsInjectorResponse {
     final String charset;
     final boolean isRedirect;
 
-    JsInjectorResponse(String data, int code, String url, String mime, String charset, boolean isRedirect) {
+    JsInjectorResponse(String data, String url, String mime, String charset, boolean isRedirect) {
         this.data = data;
         this.url = url;
         this.mime = mime;

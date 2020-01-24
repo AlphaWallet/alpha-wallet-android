@@ -118,7 +118,7 @@ public class HomeViewModel extends BaseViewModel {
                 .filter(wallet -> checkWalletNotEqual(wallet, importData))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(wallet -> importLink(wallet, context, importData), this::onError);
+                .subscribe(wallet -> importLink(context, importData), this::onError);
     }
 
     private boolean checkWalletNotEqual(Wallet wallet, String importData) {
@@ -145,7 +145,7 @@ public class HomeViewModel extends BaseViewModel {
         return filterPass;
     }
 
-    private void importLink(Wallet wallet, Context context, String importData) {
+    private void importLink(Context context, String importData) {
         //valid link, remove from clipboard
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboard != null) {

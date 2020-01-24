@@ -35,7 +35,7 @@ public class TradeInstance
         this.contractAddress = Numeric.toBigInt(contractAddress);
     }
 
-    public TradeInstance(TradeInstance t, byte[] sig) {
+    public TradeInstance(TradeInstance t) {
         this.price = t.price;
         this.expiry = t.expiry;
         this.tickets = t.tickets;

@@ -170,7 +170,7 @@ public class ENSHandler
     {
         if (address.equals("0"))
         {
-            hideENS(address);
+            hideENS();
         }
         else
         {
@@ -185,7 +185,7 @@ public class ENSHandler
         }
     }
 
-    public void hideENS(String name)
+    public void hideENS()
     {
         waitingForENS = false;
         layoutENSResolve.setVisibility(View.GONE);

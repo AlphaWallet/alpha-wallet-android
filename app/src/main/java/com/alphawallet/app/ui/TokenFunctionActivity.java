@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.webkit.WebView;
 import android.widget.RelativeLayout;
 
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -110,13 +109,13 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
 
     @Override
-    public void onPageLoaded(WebView view)
+    public void onPageLoaded()
     {
         tokenView.callToJS("refresh()");
     }
 
     @Override
-    public void onPageRendered(WebView view)
+    public void onPageRendered()
     {
         if (!reloaded) tokenView.reload(); //issue a single reload
         reloaded = true;

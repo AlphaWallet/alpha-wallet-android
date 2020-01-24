@@ -268,10 +268,8 @@ public class AttributeType {
      *
      * @param data
      * @return
-     * @throws UnsupportedEncodingException
      */
-    public String toString(BigInteger data) throws UnsupportedEncodingException
-    {
+    public String toString(BigInteger data) {
         // TODO: in all cases other than UTF8, syntax should be checked
         switch (getAs())
         {

@@ -81,7 +81,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
         viewModel = ViewModelProviders.of(this, walletActionsViewModelFactory)
                 .get(WalletActionsViewModel.class);
 
-        viewModel.saved().observe(this, this::onSaved);
+        viewModel.saved().observe(this, integer -> onSaved());
         viewModel.deleteWalletError().observe(this, this::onDeleteError);
         viewModel.exportWalletError().observe(this, this::onExportError);
         viewModel.deleted().observe(this, this::onDeleteWallet);
@@ -98,7 +98,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
         this.isTaskRunning = isTaskRunning;
     }
 
-    private void onSaved(Integer integer) {
+    private void onSaved() {
         if (!isNewWallet) {
             showWalletsActivity();
         }

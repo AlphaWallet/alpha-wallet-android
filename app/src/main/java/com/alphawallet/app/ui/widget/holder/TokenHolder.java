@@ -1,20 +1,13 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.StaticLayout;
-import android.text.TextPaint;
-import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
@@ -115,7 +108,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             issuer.setText(displayTxt);
 
             if (token.ticker != null) animateTextWhileWaiting();
-            if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
+            if (EthereumNetworkRepository.isPriorityToken()) extendedInfo.setVisibility(View.GONE);
             token.setupContent(this, assetDefinition);
             setPending();
         } catch (Exception ex) {
@@ -237,7 +230,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public boolean onLongClick(View v)
     {
         if (onTokenClickListener != null) {
-            onTokenClickListener.onLongTokenClick(v, token, null);
+            onTokenClickListener.onLongTokenClick(null);
         }
 
         return true;

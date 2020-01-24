@@ -35,10 +35,10 @@ public interface AccountKeystoreService {
 
 	/**
 	 * Delete account from keystore
-	 * @param address account address
-	 * @param password account password
-	 */
-	Completable deleteAccount(String address, String password);
+     * @param address account address
+     *
+     */
+	Completable deleteAccount(String address);
 
 	/**
 	 * Sign transaction
@@ -58,15 +58,13 @@ public interface AccountKeystoreService {
 			long chainId);
 
 	Single<byte[]> signTransaction(
-			Wallet signer,
-			byte[] message,
-			long chainId);
+            Wallet signer,
+            byte[] message);
 
 	Single<byte[]> signTransactionFast(
-			Wallet signer,
-			String password,
-			byte[] message,
-			long chainId);
+            Wallet signer,
+            String password,
+            byte[] message);
 
 	/**
 	 * Check if there is an address in the keystore

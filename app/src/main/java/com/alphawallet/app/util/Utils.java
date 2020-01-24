@@ -17,7 +17,6 @@ import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -115,7 +114,7 @@ public class Utils {
                 view.setBackgroundResource(R.drawable.background_artis_tau1);
                 break;
             default:
-                EthereumNetworkRepository.setChainColour(view, chainId);
+                EthereumNetworkRepository.setChainColour(view);
                 break;
         }
     }
@@ -152,7 +151,7 @@ public class Utils {
                 view.setBackgroundResource(R.drawable.item_eth_circle);
                 break;
             default:
-                EthereumNetworkRepository.setChainCircle(view, chainId);
+                EthereumNetworkRepository.setChainCircle(view);
                 break;
 
         }

@@ -72,7 +72,7 @@ public class WalletActionsViewModel extends BaseViewModel {
         isTaskRunning.postValue(true);
         disposable = deleteWalletInteract
                 .delete(wallet)
-                .subscribe(this::onDelete, this::onDeleteWalletError);
+                .subscribe(wallets -> onDelete(), this::onDeleteWalletError);
     }
 
     private void onDeleteWalletError(Throwable throwable) {
@@ -82,7 +82,7 @@ public class WalletActionsViewModel extends BaseViewModel {
                         ? throwable.getMessage() : throwable.getLocalizedMessage()));
     }
 
-    private void onDelete(Wallet[] wallets) {
+    private void onDelete() {
         isTaskRunning.postValue(false);
         deleted.postValue(true);
     }

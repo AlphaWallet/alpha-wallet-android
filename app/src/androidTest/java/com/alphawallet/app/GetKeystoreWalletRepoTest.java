@@ -84,7 +84,7 @@ public class GetKeystoreWalletRepoTest {
 	public void testDeleteStore() {
 		importAccountStore(STORE_1, PASS_1);
 		TestObserver<Void> subscriber = accountKeystoreService
-				.deleteAccount(ADDRESS_1, PASS_1)
+				.deleteAccount(ADDRESS_1)
 				.test();
 		subscriber.awaitTerminalEvent();
 		subscriber.assertComplete();
@@ -156,7 +156,7 @@ public class GetKeystoreWalletRepoTest {
 
 	private void deleteAccountStore(String address, String password) {
 		accountKeystoreService
-				.deleteAccount(address, password)
+				.deleteAccount(address)
 				.toObservable()
 				.test()
 				.awaitTerminalEvent();

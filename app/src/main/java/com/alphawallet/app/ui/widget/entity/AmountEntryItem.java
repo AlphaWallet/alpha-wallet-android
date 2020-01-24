@@ -224,7 +224,7 @@ public class AmountEntryItem
         return result;
     }
 
-    public void setAmount(String value)
+    public void setAmount()
     {
         updateValues(lastTicker);
     }
@@ -236,7 +236,7 @@ public class AmountEntryItem
                         .getTokenTicker(token)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onTicker, this::onError)).subscribe();
+                        .subscribe(this::onTicker, throwable -> onError())).subscribe();
     }
 
     private void onTicker(TokenTicker ticker)
@@ -247,7 +247,7 @@ public class AmountEntryItem
             switchBtn.setVisibility(View.VISIBLE);
             currentEthPrice = Double.valueOf(ticker.price);
             //now update UI
-            setAmount(amountEditText.getText().toString());
+            setAmount();
             String currencyLabel = ticker.priceSymbol + getCurrencyLabel(ticker.priceSymbol);
             usdLabel.setText(currencyLabel);
             updateValues(lastTicker);
@@ -301,7 +301,7 @@ public class AmountEntryItem
         }
     }
 
-    private void onError(Throwable throwable)
+    private void onError()
     {
         usdValue.setVisibility(View.GONE);
         quantityUpBtn.setVisibility(View.VISIBLE);

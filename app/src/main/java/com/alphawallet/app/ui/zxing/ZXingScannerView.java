@@ -103,7 +103,7 @@ public class ZXingScannerView extends BarcodeScannerView
                     // continue
                 } catch (NullPointerException npe) {
                     // This is terrible
-                } catch (ArrayIndexOutOfBoundsException aoe) {
+                } catch (ArrayIndexOutOfBoundsException ignored) {
 
                 } finally {
                     mMultiFormatReader.reset();
@@ -166,7 +166,7 @@ public class ZXingScannerView extends BarcodeScannerView
         try {
             source = new PlanarYUVLuminanceSource(data, width, height, rect.left, rect.top,
                     rect.width(), rect.height(), false);
-        } catch(Exception e) {
+        } catch(Exception ignored) {
         }
 
         return source;

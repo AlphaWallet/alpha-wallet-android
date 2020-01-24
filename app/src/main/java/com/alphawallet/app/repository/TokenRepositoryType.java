@@ -31,7 +31,7 @@ public interface TokenRepositoryType {
     Observable<TokenInfo> update(String address, int chainId);
     Single<TokenInfo[]> update(String[] address, NetworkInfo network);
     Disposable memPoolListener(int chainId, SubscribeWrapper wrapper); //only listen to transactions relating to this address
-    Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
+    Observable<TransferFromEventResponse> burnListenerObservable();
     Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType interfaceSpec);
     Single<Ticker> getEthTicker(int chainId);
     Single<TokenTicker> getTokenTicker(Token token);

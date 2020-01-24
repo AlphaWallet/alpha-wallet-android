@@ -146,7 +146,7 @@ public class TransferTicketActivity extends BaseActivity implements OnTokenClick
     }
 
     @Override
-    public void onLongTokenClick(View view, Token token, List<BigInteger> tokenId)
+    public void onLongTokenClick(List<BigInteger> tokenId)
     {
 
     }

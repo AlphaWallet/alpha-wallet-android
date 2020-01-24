@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 
 public class ImportSeedFragment extends Fragment implements View.OnClickListener, TextWatcher, LayoutCallbackListener
 {
-    private static final OnImportSeedListener dummyOnImportSeedListener = (s, c) -> {};
+    private static final OnImportSeedListener dummyOnImportSeedListener = (s) -> {};
     private static final String validator = "[^a-z^A-Z^ ]";
 
     private PasswordInputView seedPhrase;
@@ -80,17 +80,17 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
 
     @Override
     public void onClick(View view) {
-        processSeed(view);
+        processSeed();
     }
 
-    private void processSeed(View view)
+    private void processSeed()
     {
         this.seedPhrase.setError(null);
         String newMnemonic = seedPhrase.getText().toString();
         if (TextUtils.isEmpty(newMnemonic)) {
             this.seedPhrase.setError(getString(R.string.error_field_required));
         } else {
-            onImportSeedListener.onSeed(newMnemonic, getActivity());
+            onImportSeedListener.onSeed(newMnemonic);
         }
     }
 
@@ -161,6 +161,6 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
     @Override
     public void onInputDoneClick(View view)
     {
-        processSeed(view);
+        processSeed();
     }
 }

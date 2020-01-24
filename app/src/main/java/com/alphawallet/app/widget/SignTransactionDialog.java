@@ -73,7 +73,7 @@ public class SignTransactionDialog extends BottomSheetDialog
 
         if (fpManager != null)
         {
-            authenticate(fpManager, context, authCallback);
+            authenticate(fpManager, authCallback);
         }
         else
         {
@@ -82,7 +82,7 @@ public class SignTransactionDialog extends BottomSheetDialog
 
         if (!hasPINLockSetup())
         {
-            authCallback.authenticateFail("Device unlocked", AuthenticationFailType.DEVICE_NOT_SECURE, callBackId);
+            authCallback.authenticateFail(AuthenticationFailType.DEVICE_NOT_SECURE, callBackId);
         }
     }
 
@@ -103,7 +103,7 @@ public class SignTransactionDialog extends BottomSheetDialog
         }
     }
 
-    private void authenticate(FingerprintManager fpManager, Context context, AuthenticationCallback authCallback) {
+    private void authenticate(FingerprintManager fpManager, AuthenticationCallback authCallback) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
             return;
         CancellationSignal cancellationSignal;
@@ -159,7 +159,7 @@ public class SignTransactionDialog extends BottomSheetDialog
             @Override
             public void onAuthenticationFailed() {
                 super.onAuthenticationFailed();
-                authCallback.authenticateFail("Authentication Failure", AuthenticationFailType.FINGERPRINT_NOT_VALIDATED, callBackId);
+                authCallback.authenticateFail(AuthenticationFailType.FINGERPRINT_NOT_VALIDATED, callBackId);
             }
         }, null);
     }

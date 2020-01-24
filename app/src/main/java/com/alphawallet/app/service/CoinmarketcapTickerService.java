@@ -281,13 +281,13 @@ public class CoinmarketcapTickerService implements TickerService
     }
 
     @Override
-    public Single<TokenTicker[]> fetchTokenTickers(Token[] tokens, String currency)
+    public Single<TokenTicker[]> fetchTokenTickers()
     {
         return Single.just(new TokenTicker[0]);
     }
 
     @Override
-    public Single<Ticker> fetchEthPrice(NetworkInfo networkInfo, Ticker ticker)
+    public Single<Ticker> fetchEthPrice(Ticker ticker)
     {
         return Single.fromCallable(() -> {
             //create a function
@@ -336,7 +336,7 @@ public class CoinmarketcapTickerService implements TickerService
     }
 
     private static @NonNull
-    <T> ApiErrorOperator<T> apiError(Gson gson)
+    <T> ApiErrorOperator<T> apiError()
     {
         return new ApiErrorOperator<>();
     }
@@ -408,7 +408,7 @@ public class CoinmarketcapTickerService implements TickerService
     }
 
     private String callSmartContractFunction(Web3j web3j,
-                                             Function function, String contractAddress) throws Exception {
+                                             Function function, String contractAddress) {
         String encodedFunction = FunctionEncoder.encode(function);
 
         try

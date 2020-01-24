@@ -126,7 +126,7 @@ public class TokenFunctionViewModel extends BaseViewModel
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig, message),
-                           error -> dAppFunction.DAppError(error, message));
+                           error -> dAppFunction.DAppError(message));
     }
 
     public String getTransactionBytes(Token token, BigInteger tokenId, FunctionDefinition def)

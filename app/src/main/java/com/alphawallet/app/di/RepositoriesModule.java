@@ -172,7 +172,7 @@ public class RepositoriesModule {
 	@Provides
     MarketQueueService provideMarketQueueService(Context ctx, OkHttpClient okHttpClient,
                                                  TransactionRepositoryType transactionRepository) {
-		return new MarketQueueService(ctx, okHttpClient, transactionRepository);
+		return new MarketQueueService(okHttpClient, transactionRepository);
 	}
 
 	@Singleton

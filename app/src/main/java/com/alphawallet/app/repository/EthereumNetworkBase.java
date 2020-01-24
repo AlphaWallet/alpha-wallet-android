@@ -21,7 +21,6 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.http.HttpService;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -315,7 +314,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     return tickerService.fetchBlockScoutPrice(networkInfo, ticker)
                             .map(newTicker -> updateTicker(networkInfo.chainId, newTicker));
                 case MAINNET_ID:
-                    return tickerService.fetchEthPrice(networkInfo, ticker)
+                    return tickerService.fetchEthPrice(ticker)
                             .map(newTicker -> updateTicker(networkInfo.chainId, newTicker));
                 default:
                     return Single.fromCallable(() -> ethTickers.get(networkInfo.chainId));
@@ -409,12 +408,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return MagicLinkInfo.getEtherscanURLbyNetwork(networkId);
     }
 
-    public static boolean hasGasOverride(int chainId)
+    public static boolean hasGasOverride()
     {
         return false;
     }
 
-    public static BigInteger gasOverrideValue(int chainId)
+    public static BigInteger gasOverrideValue()
     {
         return BigInteger.valueOf(1);
     }
@@ -424,7 +423,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return null;
     }
 
-    public static void addRequiredCredentials(int chainId, HttpService publicNodeService)
+    public static void addRequiredCredentials()
     {
 
     }
@@ -443,7 +442,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return new ContractResult("", EthereumNetworkRepository.MAINNET_ID, ContractType.ETHEREUM);
     }
 
-    public static boolean isPriorityToken(Token token)
+    public static boolean isPriorityToken()
     {
         return false;
     }
@@ -542,7 +541,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return tickerService.attachTokenTickers(tokens);
     }
 
-    public static int decimalOverride(String address, int chainId)
+    public static int decimalOverride()
     {
         return 0;
     }

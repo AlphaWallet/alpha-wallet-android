@@ -68,7 +68,7 @@ public class BackupKeyViewModel extends BaseViewModel {
                         ? throwable.getMessage() : throwable.getLocalizedMessage()));
     }
 
-    private void onDelete(Wallet[] wallets) {
+    private void onDelete() {
         deleted.postValue(true);
     }
 

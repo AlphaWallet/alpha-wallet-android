@@ -8,5 +8,5 @@ package com.alphawallet.app.entity;
 public interface AuthenticationCallback
 {
     void authenticatePass(Operation callbackId);
-    void authenticateFail(String fail, AuthenticationFailType failType, Operation callbackId);
+    void authenticateFail(AuthenticationFailType failType, Operation callbackId);
 }

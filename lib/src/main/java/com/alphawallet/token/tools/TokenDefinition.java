@@ -491,8 +491,7 @@ public class TokenDefinition {
         return null;
     }
 
-    private void handleInput(Element element) throws Exception
-    {
+    private void handleInput(Element element) {
         ContractInfo ci = new ContractInfo();
 
         for(Node n=element.getFirstChild(); n!=null; n=n.getNextSibling())
@@ -870,25 +869,17 @@ public class TokenDefinition {
         for (String key : attributeTypes.keySet()) {
             AttributeType attrtype = attributeTypes.get(key);
             BigInteger val = BigInteger.ZERO;
-            try
+            if (attrtype.function != null)
             {
-                if (attrtype.function != null)
-                {
-                    //obtain this from the function return, can't get it here
-                    token.setAttribute(attrtype.id,
-                                       new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, "unsupported encoding"));
-                }
-                else
-                {
-                    val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
-                    token.setAttribute(attrtype.id,
-                                       new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, attrtype.toString(val)));
-                }
-            }
-            catch (UnsupportedEncodingException e)
-            {
+                //obtain this from the function return, can't get it here
                 token.setAttribute(attrtype.id,
                                    new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, "unsupported encoding"));
+            }
+            else
+            {
+                val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
+                token.setAttribute(attrtype.id,
+                                   new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, attrtype.toString(val)));
             }
         }
     }

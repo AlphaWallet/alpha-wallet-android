@@ -20,12 +20,12 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
         context = ctx;
     }
 
-    public static void setChainColour(View view, int chainId)
+    public static void setChainColour(View view)
     {
         view.setBackgroundResource(R.drawable.background_mainnet);
     }
 
-    public static void setChainCircle(View view, int chainId)
+    public static void setChainCircle(View view)
     {
         view.setBackgroundResource(R.drawable.item_eth_circle);
     }

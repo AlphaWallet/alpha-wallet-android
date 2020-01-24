@@ -67,7 +67,7 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
 
     @Override
     public void onClick(View view) {
-        handleKey(view);
+        handleKey();
     }
 
     @Override
@@ -77,7 +77,7 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
         if (privateKey == null && getActivity() != null) setupView();
     }
 
-    private void handleKey(View view)
+    private void handleKey()
     {
         privateKey.setError(null);
         String value = privateKey.getText().toString();
@@ -168,6 +168,6 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
     @Override
     public void onInputDoneClick(View view)
     {
-        handleKey(view);
+        handleKey();
     }
 }

@@ -37,7 +37,6 @@ import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.github.florent37.tutoshowcase.TutoShowcase;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.HomeCommsInterface;
 import com.alphawallet.app.entity.HomeReceiver;
@@ -192,7 +191,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel = ViewModelProviders.of(this, homeViewModelFactory)
                 .get(HomeViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
-        viewModel.error().observe(this, this::onError);
+        viewModel.error().observe(this, errorEnvelope -> onError());
         viewModel.setLocale(this);
         viewModel.installIntent().observe(this, this::onInstallIntent);
         viewModel.walletName().observe(this, this::onWalletName);
@@ -263,7 +262,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private void onError(ErrorEnvelope errorEnvelope)
+    private void onError()
     {
 
     }
@@ -734,7 +733,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == DappBrowserFragment.REQUEST_FILE_ACCESS)
         {
-            ((DappBrowserFragment)dappBrowserFragment).gotFileAccess(requestCode);
+            ((DappBrowserFragment)dappBrowserFragment).gotFileAccess();
         }
         else if (requestCode == RC_DOWNLOAD_EXTERNAL_WRITE_PERM || requestCode == RC_ASSET_EXTERNAL_WRITE_PERM)
         {
@@ -916,7 +915,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         updatePrompt = true;
     }
 
-    void postponeWalletBackupWarning(String walletAddress)
+    void postponeWalletBackupWarning()
     {
         removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
     }

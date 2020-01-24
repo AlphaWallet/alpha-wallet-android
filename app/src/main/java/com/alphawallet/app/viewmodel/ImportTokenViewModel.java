@@ -240,10 +240,10 @@ public class ImportTokenViewModel extends BaseViewModel
         importToken = null;
         disposable = fetchTokensInteract
                 .fetchStoredToken(network.getValue(), wallet.getValue(), importOrder.contractAddress)
-                .subscribe(this::onToken, this::onFetchError, this::fetchTokensComplete);
+                .subscribe(this::onToken, throwable -> onFetchError(), this::fetchTokensComplete);
     }
 
-    private void onFetchError(Throwable throwable)
+    private void onFetchError()
     {
         //there was no token found, retrieve from blockchain
         setupTokenAddr(importOrder.contractAddress);
@@ -453,7 +453,7 @@ public class ImportTokenViewModel extends BaseViewModel
             MagicLinkData order = parser.parseUniversalLink(universalImportLink);
             //calculate gas settings
             final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
-            GasSettings settings = gasService.getGasSettings(tradeData, true, importOrder.chainId);
+            GasSettings settings = gasService.getGasSettings(tradeData, true);
             performImportFinal(settings);
         }
         catch (Exception e)
@@ -573,13 +573,13 @@ public class ImportTokenViewModel extends BaseViewModel
 
     public void checkFeemaster(String feemasterServer)
     {
-        disposable = alphaWalletService.checkFeemasterService(feemasterServer, network.getValue().chainId, importOrder.contractAddress)
+        disposable = alphaWalletService.checkFeemasterService(feemasterServer, importOrder.contractAddress)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::handleFeemasterAvailability, this::onFeeMasterError);
+                .subscribe(this::handleFeemasterAvailability, throwable -> onFeeMasterError());
     }
 
-    private void onFeeMasterError(Throwable throwable)
+    private void onFeeMasterError()
     {
         feemasterAvailable.postValue(false);
     }

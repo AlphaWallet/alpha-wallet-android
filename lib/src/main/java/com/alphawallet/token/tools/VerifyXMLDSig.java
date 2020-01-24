@@ -16,7 +16,7 @@ public class VerifyXMLDSig {
         return new Response(result);
     }
 
-    public JsonObject validateSSLCertificate(String file) throws UnsupportedEncodingException {
+    public JsonObject validateSSLCertificate(String file) {
         JsonObject result = new JsonObject();
         InputStream stream = new ByteArrayInputStream(file.getBytes(StandardCharsets.UTF_8));
         XMLDsigVerificationResult XMLDsigVerificationResult = new XMLDSigVerifier().VerifyXMLDSig(stream);

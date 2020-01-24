@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 
 import com.alphawallet.app.web3.OnSignPersonalMessageListener;
 import com.alphawallet.app.web3.Web3TokenView;
@@ -90,13 +89,13 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
     }
 
     @Override
-    public void onPageLoaded(WebView view)
+    public void onPageLoaded()
     {
         tokenView.callToJS("refresh()");
     }
 
     @Override
-    public void onPageRendered(WebView view)
+    public void onPageRendered()
     {
         if (!reloaded) tokenView.reload();
         reloaded = true;
@@ -113,7 +112,7 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
     {
         DAppFunction dAppFunction = new DAppFunction() {
             @Override
-            public void DAppError(Throwable error, Message<String> message) {
+            public void DAppError(Message<String> message) {
                 tokenView.onSignCancel(message);
                 dialog.dismiss();
                 functionCallback.functionFailed();

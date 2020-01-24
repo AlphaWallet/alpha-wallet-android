@@ -34,7 +34,7 @@ public class WalletDataRealmSource {
 
     public Single<Wallet[]> populateWalletData(Wallet[] wallets, KeyService keyService) {
         return Single.fromCallable(() -> {
-            List<Wallet> walletList = loadOrCreateKeyRealmDB(wallets, keyService); //call has action on upgrade to new UX
+            List<Wallet> walletList = loadOrCreateKeyRealmDB(wallets); //call has action on upgrade to new UX
 
             try (Realm realm = realmManager.getWalletDataRealmInstance())
             {
@@ -58,7 +58,7 @@ public class WalletDataRealmSource {
         });
     }
 
-    private List<Wallet> loadOrCreateKeyRealmDB(Wallet[] wallets,KeyService keyService)
+    private List<Wallet> loadOrCreateKeyRealmDB(Wallet[] wallets)
     {
         List<Wallet> walletList = new ArrayList<>();
         try (Realm realm = realmManager.getWalletTypeRealmInstance())

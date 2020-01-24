@@ -1,6 +1,5 @@
 package com.alphawallet.app.ui;
 
-import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -131,7 +130,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         importWalletViewModel.progress().observe(this, this::onProgress);
         importWalletViewModel.error().observe(this, this::onError);
         importWalletViewModel.wallet().observe(this, this::onWallet);
-        importWalletViewModel.badSeed().observe(this, this::onBadSeed);
+        importWalletViewModel.badSeed().observe(this, aBoolean -> onBadSeed());
 
         TabUtils.changeTabsFont(this, tabLayout);
     }
@@ -150,7 +149,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void onBadSeed(Boolean aBoolean)
+    private void onBadSeed()
     {
         ((ImportSeedFragment) pages.get(ImportType.SEED_FORM_INDEX.ordinal()).second).onBadSeed();
     }
@@ -263,7 +262,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     }
 
     @Override
-    public void onSeed(String seedPhrase, Activity ctx)
+    public void onSeed(String seedPhrase)
     {
         importWalletViewModel.importHDWallet(seedPhrase, this, this);
     }

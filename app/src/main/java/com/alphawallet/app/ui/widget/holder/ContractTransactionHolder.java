@@ -72,10 +72,10 @@ public class ContractTransactionHolder extends BinderViewHolder<Transaction> imp
         if (operation == null || operation.contract == null) {
             // default to ether transaction
             fill(transaction.error, transaction.from, transaction.to, networkSymbol, transaction.value,
-                    ETHER_DECIMALS, transaction.timeStamp);
+                    ETHER_DECIMALS);
         } else {
             fill(transaction.error, operation.from, operation.to, operation.contract.symbol, operation.value,
-                    operation.contract.decimals, transaction.timeStamp);
+                    operation.contract.decimals);
         }
     }
 
@@ -85,8 +85,7 @@ public class ContractTransactionHolder extends BinderViewHolder<Transaction> imp
             String to,
             String symbol,
             String valueStr,
-            long decimals,
-            long timestamp) {
+            long decimals) {
         boolean isSent = from.toLowerCase().equals(defaultAddress);
         type.setText(isSent ? getString(R.string.sent) : getString(R.string.received));
         if (!TextUtils.isEmpty(error)) {

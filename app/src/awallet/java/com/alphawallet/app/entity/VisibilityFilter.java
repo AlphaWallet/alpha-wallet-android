@@ -3,12 +3,8 @@ package com.alphawallet.app.entity;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
-
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class VisibilityFilter
 {
@@ -25,17 +21,17 @@ public class VisibilityFilter
         return !badToken && filterResult;
     }
 
-    public static void addPriorityTokens(ConcurrentLinkedQueue<ContractResult> unknownAddresses, TokensService tokensService)
+    public static void addPriorityTokens()
     {
 
     }
 
-    public static ContractType checkKnownTokens(TokenInfo tokenInfo)
+    public static ContractType checkKnownTokens()
     {
         return ContractType.OTHER;
     }
 
-    public static boolean showContractAddress(Token token)
+    public static boolean showContractAddress()
     {
         return true;
     }

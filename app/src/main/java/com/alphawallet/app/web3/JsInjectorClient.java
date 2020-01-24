@@ -109,7 +109,7 @@ public class JsInjectorClient {
         String charset = getCharset(contentType);
         String mime = getMimeType(contentType);
         String finalUrl = request.url().toString();
-        return new JsInjectorResponse(result, code, finalUrl, mime, charset, isRedirect);
+        return new JsInjectorResponse(result, finalUrl, mime, charset, isRedirect);
     }
 
     String injectJS(String html) {

@@ -9,7 +9,6 @@ import android.support.v7.widget.AppCompatRadioButton;
 import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
@@ -117,8 +116,7 @@ public class TokenscriptViewHolder extends BinderViewHolder<TicketRange> impleme
         }
     }
 
-    private void getAttrs(TicketRange data) throws Exception
-    {
+    private void getAttrs(TicketRange data) {
         tokenId = data.tokenIds.get(0);
         attrs = assetDefinitionService.getTokenAttrs(token, tokenId, data.tokenIds.size());
         assetDefinitionService.resolveAttrs(token, tokenId)
@@ -156,13 +154,13 @@ public class TokenscriptViewHolder extends BinderViewHolder<TicketRange> impleme
     }
 
     @Override
-    public void onPageLoaded(WebView view)
+    public void onPageLoaded()
     {
         tokenView.callToJS("refresh()");
     }
 
     @Override
-    public void onPageRendered(WebView view)
+    public void onPageRendered()
     {
         if (!reloaded) tokenView.reload();
         reloaded = true;

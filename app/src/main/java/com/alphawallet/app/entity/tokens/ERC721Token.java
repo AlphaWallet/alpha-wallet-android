@@ -3,7 +3,6 @@ package com.alphawallet.app.entity.tokens;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 import android.view.View;
 
 import com.alphawallet.app.entity.ContractType;
@@ -190,7 +189,7 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public String getTransactionValue(Transaction transaction, Context ctx)
+    public String getTransactionValue(Transaction transaction)
     {
         if (transaction.operations != null && transaction.operations.length > 0)
         {

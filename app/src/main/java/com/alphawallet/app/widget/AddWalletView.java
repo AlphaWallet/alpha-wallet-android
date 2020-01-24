@@ -36,17 +36,17 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
 		switch (view.getId()) {
 			case R.id.new_account_action: {
 				if (onNewWalletClickListener != null) {
-					onNewWalletClickListener.onNewWallet(view);
+					onNewWalletClickListener.onNewWallet();
 				}
 			} break;
 			case R.id.import_account_action: {
 				if (onImportWalletClickListener != null) {
-					onImportWalletClickListener.onImportWallet(view);
+					onImportWalletClickListener.onImportWallet();
 				}
 			} break;
             case R.id.watch_account_action: {
                 if (onWatchWalletClickListener != null) {
-                    onWatchWalletClickListener.onWatchWallet(view);
+                    onWatchWalletClickListener.onWatchWallet();
                 }
             }
             break;
@@ -66,14 +66,14 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
     }
 
 	public interface OnNewWalletClickListener {
-		void onNewWallet(View view);
+		void onNewWallet();
 	}
 
 	public interface OnImportWalletClickListener {
-		void onImportWallet(View view);
+		void onImportWallet();
 	}
 
 	public interface OnWatchWalletClickListener {
-	    void onWatchWallet(View view);
+	    void onWatchWallet();
     }
 }

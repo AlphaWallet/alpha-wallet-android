@@ -30,7 +30,6 @@ import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
-import io.reactivex.SingleSource;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.realm.Realm;
@@ -121,7 +120,7 @@ public class TokensRealmSource implements TokenLocalSource {
 
             if (realmToken == null)
             {
-                saveToken(wallet, token, new Date());
+                saveToken(wallet, token);
             }
             else
             {
@@ -154,7 +153,7 @@ public class TokensRealmSource implements TokenLocalSource {
             case ERC721_TICKET:
             case ERC721:
             case ERC721_LEGACY:
-                saveToken(wallet, token, now);
+                saveToken(wallet, token);
                 break;
             //No save
             case NOT_SET:
@@ -198,7 +197,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         .equalTo("isEnabled", true)
                         .findAll();
 
-                return convertMulti(realmItems, System.currentTimeMillis(), wallet, realm);
+                return convertMulti(realmItems, wallet, realm);
             }
             catch (Exception e)
             {
@@ -446,7 +445,7 @@ public class TokensRealmSource implements TokenLocalSource {
 
             if (token.hasPositiveBalance() && realmToken == null)
             {
-                saveToken(wallet, token, new Date());
+                saveToken(wallet, token);
             }
             else if (realmToken != null && token.checkRealmBalanceChange(realmToken))
             {
@@ -494,7 +493,7 @@ public class TokensRealmSource implements TokenLocalSource {
                         }
                         else
                         {
-                            saveToken(wallet, token, new Date());
+                            saveToken(wallet, token);
                         }
                     }
 
@@ -517,8 +516,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 });
     }
 
-    private void saveToken(Realm realm, Token token) throws Exception
-    {
+    private void saveToken(Realm realm, Token token) {
         String databaseKey = databaseKey(token);
 
         RealmToken realmToken = realm.where(RealmToken.class)
@@ -562,22 +560,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     saveERC721Assets(realm, token);
                 }
             }
-        }
-    }
-
-    private void saveToken(Wallet wallet, Token token, Date currentTime) {
-        if (!WalletUtils.isValidAddress(wallet.address)) return;
-        try (Realm realm = realmManager.getRealmInstance(wallet))
-        {
-            TransactionsRealmCache.addRealm();
-            realm.beginTransaction();
-            saveToken(realm, token);
-            realm.commitTransaction();
-            TransactionsRealmCache.subRealm();
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
         }
     }
 
@@ -695,7 +677,7 @@ public class TokensRealmSource implements TokenLocalSource {
         return assets;
     }
 
-    private Token[] convertMulti(RealmResults<RealmToken> realmItems, long now, Wallet wallet, Realm realm)
+    private Token[] convertMulti(RealmResults<RealmToken> realmItems, Wallet wallet, Realm realm)
     {
         TokenFactory tf        = new TokenFactory();
         List<Token>  tokenList = new ArrayList<>();

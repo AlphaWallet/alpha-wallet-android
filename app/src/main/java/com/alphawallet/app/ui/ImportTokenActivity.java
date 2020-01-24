@@ -33,7 +33,6 @@ import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.viewmodel.ImportTokenViewModel;
@@ -116,14 +115,14 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         viewModel.importRange().observe(this, this::onImportRange);
         viewModel.invalidRange().observe(this, this::invalidTicket);
-        viewModel.invalidTime().observe(this, this::invalidTime);
+        viewModel.invalidTime().observe(this, integer -> invalidTime());
         viewModel.newTransaction().observe(this, this::onTransaction);
         viewModel.error().observe(this, this::onError);
         viewModel.txError().observe(this, this::onTxError);
-        viewModel.invalidLink().observe(this, this::onBadLink);
+        viewModel.invalidLink().observe(this, aBoolean -> onBadLink());
         viewModel.network().observe(this, this::onNetwork);
         viewModel.checkContractNetwork().observe(this, this::checkContractNetwork);
-        viewModel.ticketNotValid().observe(this, this::onInvalidTicket);
+        viewModel.ticketNotValid().observe(this, aBoolean -> onInvalidTicket());
         viewModel.feemasterAvailable().observe(this, this::onFeemasterAvailable);
         viewModel.sig().observe(this, sigData -> toolbarView.onSigData(sigData, this));
 
@@ -168,7 +167,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         networkText.setText(networkInfo.name);
     }
 
-    private void onInvalidTicket(Boolean aBoolean)
+    private void onInvalidTicket()
     {
         TextView tv = findViewById(R.id.text_ticket_range);
         tv.setVisibility(View.GONE);
@@ -185,7 +184,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         aDialog.show();
     }
 
-    private void onBadLink(Boolean aBoolean)
+    private void onBadLink()
     {
         TextView tv = findViewById(R.id.text_ticket_range);
         tv.setVisibility(View.GONE);
@@ -395,7 +394,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
-    private void invalidTime(Integer integer)
+    private void invalidTime()
     {
         MagicLinkData order = viewModel.getSalesOrder();
         importTxt.setText(R.string.ticket_range_expired);

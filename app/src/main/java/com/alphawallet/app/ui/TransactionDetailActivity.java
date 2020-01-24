@@ -133,7 +133,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
 
         if (token != null)
         {
-            rawValue = token.getTransactionValue(transaction, getApplicationContext());
+            rawValue = token.getTransactionValue(transaction);
             isSent = token.getIsSent(transaction);
         }
         else

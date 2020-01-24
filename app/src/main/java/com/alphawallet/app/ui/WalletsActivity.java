@@ -92,11 +92,11 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.createWalletError().observe(this, this::onCreateWalletError);
         viewModel.updateBalance().observe(this, this::onUpdatedBalance);
         viewModel.updateENSName().observe(this, this::updateWalletName);
-        viewModel.noWalletsError().observe(this, this::noWallets);
+        viewModel.noWalletsError().observe(this, aBoolean -> noWallets());
         viewModel.findNetwork();
     }
 
-    private void noWallets(Boolean aBoolean)
+    private void noWallets()
     {
         Intent intent = new Intent(this, SplashActivity.class);
         startActivity(intent);
@@ -225,20 +225,20 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
-    public void onNewWallet(View view) {
+    public void onNewWallet() {
         hideDialog();
         viewModel.newWallet(this, this);
     }
 
     @Override
-    public void onWatchWallet(View view)
+    public void onWatchWallet()
     {
         hideDialog();
         viewModel.watchWallet(this);
     }
 
     @Override
-    public void onImportWallet(View view) {
+    public void onImportWallet() {
         hideDialog();
         viewModel.importWallet(this);
     }
@@ -326,7 +326,7 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
-    public void HDKeyCreated(String address, Context ctx, KeyService.AuthenticationLevel level)
+    public void HDKeyCreated(String address, KeyService.AuthenticationLevel level)
     {
         if (address == null) onCreateWalletError(new ErrorEnvelope(""));
         else viewModel.StoreHDWallet(address, level);

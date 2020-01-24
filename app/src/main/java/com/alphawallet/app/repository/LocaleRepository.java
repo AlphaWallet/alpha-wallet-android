@@ -33,7 +33,7 @@ public class LocaleRepository implements LocaleRepositoryType {
     }
 
     @Override
-    public ArrayList<LocaleItem> getLocaleList(Context context) {
+    public ArrayList<LocaleItem> getLocaleList() {
         ArrayList<LocaleItem> list = new ArrayList<>();
         for (String locale : LOCALES) {
             Locale l = new Locale(locale);

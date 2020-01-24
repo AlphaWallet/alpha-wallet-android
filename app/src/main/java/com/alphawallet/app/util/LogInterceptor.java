@@ -132,7 +132,7 @@ public class LogInterceptor implements Interceptor {
 			logBuilder.append("\n\n\n");
 			Log.d(TAG, logBuilder.toString());
 		}
-		catch (Exception e)
+		catch (Exception ignored)
 		{
 
 		}

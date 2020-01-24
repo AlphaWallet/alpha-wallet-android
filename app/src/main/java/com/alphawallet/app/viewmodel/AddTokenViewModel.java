@@ -102,12 +102,12 @@ public class AddTokenViewModel extends BaseViewModel {
                 .flatMap(token -> fetchTokensInteract.updateDefaultBalance(token, wallet.getValue()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onSaved, error -> onInterfaceCheckError(error, tokenInfo));
+                .subscribe(this::onSaved, error -> onInterfaceCheckError(tokenInfo));
     }
 
     //fallback in case interface spec check throws an error.
     //If any token data was picked up then default to ERC20 token.
-    private void onInterfaceCheckError(Throwable throwable, TokenInfo tokenInfo)
+    private void onInterfaceCheckError(TokenInfo tokenInfo)
     {
         if ((tokenInfo.name != null && tokenInfo.name.length() > 0)
             || (tokenInfo.symbol != null && tokenInfo.symbol.length() > 0))
@@ -188,10 +188,10 @@ public class AddTokenViewModel extends BaseViewModel {
         disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenData)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(tokentype::postValue, this::tokenTypeError);
+                .subscribe(tokentype::postValue, throwable -> tokenTypeError());
     }
 
-    private void tokenTypeError(Throwable throwable)
+    private void tokenTypeError()
     {
         tokentype.postValue(ContractType.OTHER);
     }

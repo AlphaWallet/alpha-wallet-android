@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QrUrlResult;
 import com.alphawallet.app.entity.tokens.Token;
@@ -117,9 +116,9 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
         viewModel = ViewModelProviders.of(this, addTokenViewModelFactory)
                 .get(AddTokenViewModel.class);
-        viewModel.error().observe(this, this::onError);
+        viewModel.error().observe(this, errorEnvelope -> onError());
         viewModel.result().observe(this, this::onSaved);
-        viewModel.noContract().observe(this, this::onNoContractFound);
+        viewModel.noContract().observe(this, noContract -> onNoContractFound());
         viewModel.tokenFinalised().observe(this, this::onFetchedToken);
         viewModel.switchNetwork().observe(this, this::setupNetwork);
         viewModel.tokenType().observe(this, this::onTokenType);
@@ -177,7 +176,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
         else
         {
-            onNoContractFound(true);
+            onNoContractFound();
         }
     }
 
@@ -255,7 +254,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         tokenInfo.addTokenSetupPage(this, viewModel.getNetworkInfo(tokenInfo.chainId).getShortName());
     }
 
-    private void onError(ErrorEnvelope errorEnvelope) {
+    private void onError() {
         dialog = new AWalletAlertDialog(this);
         dialog.setTitle(R.string.title_dialog_error);
         dialog.setMessage(R.string.error_add_token);
@@ -339,7 +338,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onNoContractFound(Boolean noContract)
+    private void onNoContractFound()
     {
         aDialog = new AWalletAlertDialog(this);
         aDialog.setTitle(R.string.no_token_found_title);

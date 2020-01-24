@@ -81,7 +81,7 @@ public class QuantitySelectorHolder extends BinderViewHolder<Token> {
                     quantityTxt.trim();
                     currentQuantity = Integer.parseInt(quantityTxt);
                 }
-                catch (Exception e)
+                catch (Exception ignored)
                 {
 
                 }

@@ -188,7 +188,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig, message),
-                           error -> dAppFunction.DAppError(error, message));
+                           error -> dAppFunction.DAppError(message));
     }
 
     public void signTransaction(Web3Transaction transaction, DAppFunction dAppFunction, String url)
@@ -202,7 +202,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
             disposable = createTransactionInteract
                     .create(defaultWallet.getValue(), transaction.gasPrice, transaction.gasLimit, transaction.payload, defaultNetwork.getValue().chainId)
                     .subscribe(hash -> onCreateTransaction(hash, dAppFunction, url),
-                               error -> dAppFunction.DAppError(error, errorMsg));
+                               error -> dAppFunction.DAppError(errorMsg));
 
         }
         else
@@ -211,7 +211,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
             disposable = createTransactionInteract
                     .create(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, transaction.gasPrice, transaction.gasLimit, data, defaultNetwork.getValue().chainId)
                     .subscribe(hash -> onCreateTransaction(hash, dAppFunction, url),
-                               error -> dAppFunction.DAppError(error, errorMsg));
+                               error -> dAppFunction.DAppError(errorMsg));
         }
     }
 

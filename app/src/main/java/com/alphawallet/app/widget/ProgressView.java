@@ -86,7 +86,7 @@ public class ProgressView extends RelativeLayout {
         setVisibility(VISIBLE);
     }
 
-    public void showEmpty(View view) {
+    public void showEmpty() {
         hideAllComponents();
     }
 

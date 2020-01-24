@@ -1,6 +1,5 @@
 package com.alphawallet.app.interact;
 
-import com.alphawallet.app.entity.Contract;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -14,7 +13,6 @@ import com.alphawallet.app.repository.TokenRepositoryType;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -23,7 +21,6 @@ import com.alphawallet.token.entity.MagicLinkData;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 
 public class FetchTokensInteract {

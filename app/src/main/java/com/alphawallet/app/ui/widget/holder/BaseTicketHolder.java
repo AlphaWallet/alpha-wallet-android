@@ -63,7 +63,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     {
         if (onTokenClickListener != null)
         {
-            onTokenClickListener.onLongTokenClick(view, token, thisData.tokenIds);
+            onTokenClickListener.onLongTokenClick(thisData.tokenIds);
         }
 
         return true;

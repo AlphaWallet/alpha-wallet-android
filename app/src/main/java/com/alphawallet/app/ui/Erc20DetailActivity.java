@@ -115,7 +115,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private void setUpRecentTransactionsView() {
         recentTransactionsView = findViewById(R.id.list);
         recentTransactionsView.setLayoutManager(new LinearLayoutManager(this));
-        recentTransactionsAdapter = new TransactionsAdapter(this::onTransactionClick, viewModel.getTokensService(),
+        recentTransactionsAdapter = new TransactionsAdapter((view, transaction) -> onTransactionClick(transaction), viewModel.getTokensService(),
                 viewModel.getTransactionsInteract(), R.layout.item_recent_transaction);
         recentTransactionsView.setAdapter(recentTransactionsAdapter);
     }
@@ -191,7 +191,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         }
     }
 
-    private void onTransactionClick(View view, Transaction transaction) {
+    private void onTransactionClick(Transaction transaction) {
         viewModel.showDetails(this, transaction);
     }
 
@@ -211,7 +211,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         }
     }
 
-    private void initViews(Wallet wallet) {
+    private void initViews() {
         noTransactionsLayout = findViewById(R.id.layout_no_recent_transactions);
         noTransactionsSubText = findViewById(R.id.no_recent_transactions_subtext);
 
@@ -253,7 +253,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     }
 
     private void onDefaultWallet(Wallet wallet) {
-        initViews(wallet);
+        initViews();
         setUpTokenView();
         setUpRecentTransactionsView();
         recentTransactionsAdapter.setDefaultWallet(wallet);

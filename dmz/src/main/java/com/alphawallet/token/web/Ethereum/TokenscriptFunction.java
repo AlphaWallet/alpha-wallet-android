@@ -532,8 +532,7 @@ public abstract class TokenscriptFunction
         }
     }
 
-    private String checkBytesString(String responseValue) throws Exception
-    {
+    private String checkBytesString(String responseValue) {
         String name = "";
         if (responseValue.length() > 0)
         {
@@ -625,7 +624,7 @@ public abstract class TokenscriptFunction
     }
 
     private String callSmartContractFunction(Web3j web3j,
-                                             Function function, String contractAddress, String walletAddr) throws Exception {
+                                             Function function, String contractAddress, String walletAddr) {
         String encodedFunction = FunctionEncoder.encode(function);
 
         try

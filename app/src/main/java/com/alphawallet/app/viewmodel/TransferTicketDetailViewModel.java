@@ -198,7 +198,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         else
         {
             final byte[] data = TokenRepository.createTicketTransferData(to, transferList, token);
-            GasSettings settings = gasService.getGasSettings(data, true, token.tokenInfo.chainId);
+            GasSettings settings = gasService.getGasSettings(data, true);
             disposable = createTransactionInteract
                     .create(defaultWallet.getValue(), token.getAddress(), BigInteger.valueOf(0), settings.gasPrice, settings.gasLimit, data, token.tokenInfo.chainId)
                     .subscribe(this::onCreateTransaction, this::onError);

@@ -191,7 +191,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         };
         ensHandler = new ENSHandler(this, handler, adapterUrl, this, ensCallback);
         viewModel.ensResolve().observe(this, ensHandler::onENSSuccess);
-        viewModel.ensFail().observe(this, ensHandler::hideENS);
+        viewModel.ensFail().observe(this, name -> ensHandler.hideENS());
         viewModel.tokenFinalised().observe(this, this::resumeEIP681);
     }
 
@@ -387,7 +387,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                 toAddressEditText.setText(result.getAddress());
                 amountInput = new AmountEntryItem(this, tokenRepository, token);
                 amountInput.setAmountText(ethAmount);
-                amountInput.setAmount(ethAmount);
+                amountInput.setAmount();
                 setupTokenContent();
                 break;
 

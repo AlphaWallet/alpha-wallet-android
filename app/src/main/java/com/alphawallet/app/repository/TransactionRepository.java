@@ -123,7 +123,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	private BigInteger gasPriceForNode(int chainId, BigInteger gasPrice)
 	{
-		if (EthereumNetworkRepository.hasGasOverride(chainId)) return EthereumNetworkRepository.gasOverrideValue(chainId);
+		if (EthereumNetworkRepository.hasGasOverride()) return EthereumNetworkRepository.gasOverrideValue();
 		else return gasPrice;
 	}
 
@@ -211,7 +211,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	private Single<byte[]> signEncodeRawTransaction(RawTransaction rtx, Wallet wallet, int chainId)
 	{
 		return Single.fromCallable(() -> TransactionEncoder.encode(rtx))
-				.flatMap(encoded -> accountKeystoreService.signTransaction(wallet, encoded, chainId))
+				.flatMap(encoded -> accountKeystoreService.signTransaction(wallet, encoded))
 				.flatMap(signatureBytes -> encodeTransaction(signatureBytes, rtx));
 	}
 
@@ -226,12 +226,12 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 	@Override
 	public Single<byte[]> getSignature(Wallet wallet, byte[] message, int chainId) {
-		return accountKeystoreService.signTransaction(wallet, message, chainId);
+		return accountKeystoreService.signTransaction(wallet, message);
 	}
 
 	@Override
 	public Single<byte[]> getSignatureFast(Wallet wallet, String password, byte[] message, int chainId) {
-		return accountKeystoreService.signTransactionFast(wallet, password, message, chainId);
+		return accountKeystoreService.signTransactionFast(wallet, password, message);
 	}
 
 	private Single<Transaction[]> fetchFromCache(Wallet wallet, int maxTransactions, List<Integer> networkFilters) {
@@ -245,7 +245,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	@Override
 	public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token, int count)
 	{
-		return inDiskCache.fetchTransactions(wallet, token, count);
+		return inDiskCache.fetchTransactions(wallet, token);
 	}
 
 	@Override

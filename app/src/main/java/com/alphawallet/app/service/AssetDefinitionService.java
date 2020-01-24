@@ -33,7 +33,6 @@ import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.ContractInfo;
 import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
-import com.alphawallet.token.entity.NonFungibleToken;
 import com.alphawallet.token.entity.ParseResult;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.TSAction;
@@ -129,16 +128,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private void loadLocalContracts()
     {
         assetDefinitions = new SparseArray<>();
-
-        try
-        {
-            loadContracts(context.getFilesDir());
-            checkDownloadedFiles();
-        }
-        catch (IOException| SAXException e)
-        {
-            e.printStackTrace();
-        }
+        loadContracts(context.getFilesDir());
+        checkDownloadedFiles();
     }
 
     @Override
@@ -564,26 +555,19 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void loadExternalContracts(File directory)
     {
-        try
+        loadContracts(directory);
+
+        Observable.fromIterable(getCanonicalizedAssets())
+                .forEach(this::addContractAssets).isDisposed();
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q)
         {
-            loadContracts(directory);
-
-            Observable.fromIterable(getCanonicalizedAssets())
-                    .forEach(this::addContractAssets).isDisposed();
-
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q)
-            {
-                String externalDir = context.getExternalFilesDir("").getAbsolutePath();
-                if (directory.getAbsolutePath().contains(externalDir)) startFileListener(directory);
-            }
-            else if (directory.getAbsolutePath().contains(HomeViewModel.ALPHAWALLET_DIR))
-            {
-                startFileListener(directory);
-            }
+            String externalDir = context.getExternalFilesDir("").getAbsolutePath();
+            if (directory.getAbsolutePath().contains(externalDir)) startFileListener(directory);
         }
-        catch (IOException|SAXException e)
+        else if (directory.getAbsolutePath().contains(HomeViewModel.ALPHAWALLET_DIR))
         {
-            e.printStackTrace();
+            startFileListener(directory);
         }
     }
 
@@ -687,8 +671,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return false;
     }
 
-    private void loadContracts(File directory) throws IOException, SAXException
-    {
+    private void loadContracts(File directory) {
         File[] files = directory.listFiles();
         if (files == null || files.length == 0) return;
 
@@ -1241,8 +1224,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      * Get all the magic values - eg native crypto balances for all chains
      * @return
      */
-    public String getMagicValuesForInjection(int chainId) throws Exception
-    {
+    public String getMagicValuesForInjection(int chainId) {
         String walletBalance = "walletBalance";
         String prefix = "web3.eth";
         StringBuilder sb = new StringBuilder();

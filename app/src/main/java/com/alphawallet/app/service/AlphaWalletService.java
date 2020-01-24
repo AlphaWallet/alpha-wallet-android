@@ -287,7 +287,7 @@ public class AlphaWalletService
         return sb.toString();
     }
 
-    public Single<Boolean> checkFeemasterService(String url, int chainId, String address)
+    public Single<Boolean> checkFeemasterService(String url, String address)
     {
         return Single.fromCallable(() -> {
             Boolean result = false;

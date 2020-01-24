@@ -714,7 +714,7 @@ public class Token implements Parcelable
         return idList;
     }
 
-    public String getTransactionValue(Transaction transaction, Context context)
+    public String getTransactionValue(Transaction transaction)
     {
         String result = "0";
         if (transaction.error.equals("1"))
@@ -860,7 +860,7 @@ public class Token implements Parcelable
 
         long currentTime = System.currentTimeMillis();
 
-        long multiplier = isEthereum() || EthereumNetworkRepository.isPriorityToken(this) ? 1 : 5;
+        long multiplier = isEthereum() || EthereumNetworkRepository.isPriorityToken() ? 1 : 5;
 
         //ensure chain transactions for the wallet are checked on a regular basis.
         if (EthereumNetworkRepository.hasTicker(this) && hasPositiveBalance() && (currentTime - lastTxCheck) > multiplier*60*1000) //need to check main chains once per minute

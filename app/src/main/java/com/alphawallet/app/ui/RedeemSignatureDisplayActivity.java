@@ -10,7 +10,6 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
-import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -86,9 +85,9 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         viewModel = ViewModelProviders.of(this, redeemSignatureDisplayModelFactory)
                 .get(RedeemSignatureDisplayModel.class);
         viewModel.signature().observe(this, this::onSignatureChanged);
-        viewModel.selection().observe(this, this::onSelected);
-        viewModel.burnNotice().observe(this, this::onBurned);
-        viewModel.signRequest().observe(this, this::onSignRequest);
+        viewModel.selection().observe(this, selectionStr -> onSelected());
+        viewModel.burnNotice().observe(this, burn -> onBurned());
+        viewModel.signRequest().observe(this, aBoolean -> onSignRequest());
 
         ticketBurnNotice();
         TextView tv = findViewById(R.id.textAddIDs);
@@ -104,7 +103,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         finishReceiver = new FinishReceiver(this);
     }
 
-    private void onSignRequest(Boolean aBoolean)
+    private void onSignRequest()
     {
         viewModel.getAuthorisation(this, this);
     }
@@ -167,7 +166,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         findViewById(R.id.qr_image).setAlpha(0.1f);
     }
 
-    private void onBurned(Boolean burn)
+    private void onBurned()
     {
         AWalletAlertDialog dialog = new AWalletAlertDialog(this);
         dialog.setTitle(R.string.ticket_redeemed);
@@ -200,7 +199,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         }
     }
 
-    private void onSelected(String selectionStr)
+    private void onSelected()
     {
 
     }
@@ -244,14 +243,14 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     }
 
     @Override
-    public void onPageLoaded(WebView view)
+    public void onPageLoaded()
     {
         tokenView.callToJS("refresh()");
     }
 
 
     @Override
-    public void onPageRendered(WebView view)
+    public void onPageRendered()
     {
 
     }

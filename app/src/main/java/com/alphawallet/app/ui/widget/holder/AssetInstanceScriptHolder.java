@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
@@ -101,13 +100,13 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     }
 
     @Override
-    public void onPageLoaded(WebView view)
+    public void onPageLoaded()
     {
         tokenView.callToJS("refresh()");
     }
 
     @Override
-    public void onPageRendered(WebView view)
+    public void onPageRendered()
     {
 
     }
@@ -139,7 +138,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     private boolean handleLongClick(View v, TicketRange data)
     {
         //open up the radio view and signal to holding app
-        tokenClickListener.onLongTokenClick(v, token, data.tokenIds);
+        tokenClickListener.onLongTokenClick(data.tokenIds);
         data.isChecked = true;
         itemSelect.setChecked(true);
         return true;

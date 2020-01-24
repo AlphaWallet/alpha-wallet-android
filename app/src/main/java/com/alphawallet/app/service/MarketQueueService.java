@@ -1,7 +1,5 @@
 package com.alphawallet.app.service;
 
-import android.content.Context;
-
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 
@@ -61,7 +59,7 @@ public class MarketQueueService {
     private ParseMagicLink parser;
     private CryptoFunctions cryptoFunctions;
 
-    public MarketQueueService(Context ctx, OkHttpClient httpClient,
+    public MarketQueueService(OkHttpClient httpClient,
                               TransactionRepositoryType transactionRepository) {
         this.httpClient = httpClient;
         this.transactionRepository = transactionRepository;
@@ -140,7 +138,7 @@ public class MarketQueueService {
                 paramData.put("count", String.valueOf(trades.tickets.length));
                 String args = formEncodedData(paramData);
                 String url = MARKET_QUEUE_URL + urlProlog + args;
-                response = writeToQueue(url, buffer.toByteArray(), true);
+                response = writeToQueue(url, buffer.toByteArray());
             }
             catch (Exception e)
             {
@@ -152,7 +150,7 @@ public class MarketQueueService {
     }
 
     //TODO: Refactor this using
-    private String writeToQueue(final String writeURL, final byte[] data, final boolean post)
+    private String writeToQueue(final String writeURL, final byte[] data)
     {
         String result = null;
         try
@@ -214,7 +212,7 @@ public class MarketQueueService {
     }
 
     //sign a trade transaction
-    public Single<byte[]> sign(Wallet wallet, TradeInstance t, byte[] data, int chainId) {
+    public Single<byte[]> sign(Wallet wallet, byte[] data, int chainId) {
         return transactionRepository.getSignature(wallet, data, chainId);
     }
 
@@ -266,7 +264,7 @@ public class MarketQueueService {
     public void createSalesOrders(Wallet wallet, BigInteger price, int[] ticketIDs, String contractAddr, BigInteger firstTicketId, BaseViewCallback callback, int chainId) {
         messageCallback = callback;
         marketQueueProcessing = getTradeInstances(wallet, price, ticketIDs, contractAddr, firstTicketId, chainId)
-                .subscribe(this::processMarketTrades, this::onError, this::onAllTransactions);
+                .subscribe(this::processMarketTrades, error -> onError(), this::onAllTransactions);
     }
 
     public Observable<MagicLinkData[]> fetchSalesOrders(String contractAddress) {
@@ -305,7 +303,7 @@ public class MarketQueueService {
         }).toObservable();
     }
 
-    private void onError(Throwable error) {
+    private void onError() {
         //something went wrong
     }
 

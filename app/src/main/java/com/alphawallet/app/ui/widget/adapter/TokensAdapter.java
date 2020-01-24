@@ -1,12 +1,10 @@
 package com.alphawallet.app.ui.widget.adapter;
 
-import android.content.Context;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.ViewGroup;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -169,7 +167,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
      *
      * @param token
      */
-    public void updateToken(Token token, boolean internal)
+    public void updateToken(Token token)
     {
         checkLiveToken(token);
         if (tokensService != null) tokensService.markTokenUpdated(token);
@@ -258,7 +256,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
         for (Token token : tokens)
         {
-            updateToken(token, true);
+            updateToken(token);
         }
         items.endBatchedUpdates();
         notifyDataSetChanged();

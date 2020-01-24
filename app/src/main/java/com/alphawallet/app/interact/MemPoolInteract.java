@@ -20,6 +20,6 @@ public class MemPoolInteract
 
     //create an observable
     public Observable<TransferFromEventResponse> burnListener(String contractAddress) {
-        return tokenRepository.burnListenerObservable(contractAddress);
+        return tokenRepository.burnListenerObservable();
     }
 }

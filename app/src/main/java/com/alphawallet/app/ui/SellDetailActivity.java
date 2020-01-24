@@ -128,7 +128,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.ethereumPrice().observe(this, this::onEthereumPrice);
         viewModel.universalLinkReady().observe(this, this::linkReady);
-        viewModel.defaultWallet().observe(this, this::setupPage);
+        viewModel.defaultWallet().observe(this, wallet1 -> setupPage());
 
         //we should import a token and a list of chosen ids
         list = findViewById(R.id.listTickets);
@@ -166,7 +166,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         unregisterReceiver(finishReceiver);
     }
 
-    private void setupPage(Wallet wallet)
+    private void setupPage()
     {
         switch (saleStatus)
         {
@@ -305,7 +305,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         {
             sellPriceValue = Double.parseDouble(sellPrice.getText().toString());
         }
-        if (!isValidAmount(sellPrice.getText().toString())) {
+        if (!isValidAmount()) {
             priceErrorText.setVisibility(View.VISIBLE);
             result = false;
         }
@@ -404,7 +404,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
                 String usdText = "$" + ImportTokenActivity.getUsdString(ethPrice * ethToUsd * (double) quantity);
                 usdPrice.setText(usdText);
             }
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException ignored) {
 
         }
     }
@@ -483,7 +483,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         return Convert.toWei(Long.toString(microEth), Convert.Unit.SZABO).toBigInteger();
     }
 
-    boolean isValidAmount(String eth) {
+    boolean isValidAmount() {
         try {
             return !getPriceInWei().equals(BigInteger.ZERO);
         } catch (Exception e) {
@@ -565,7 +565,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     }
 
     @Override
-    public void onLongTokenClick(View view, Token token, List<BigInteger> tokenId)
+    public void onLongTokenClick(List<BigInteger> tokenId)
     {
 
     }

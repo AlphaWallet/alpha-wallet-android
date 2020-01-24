@@ -2,11 +2,10 @@ package com.alphawallet.app.entity.tokenscript;
 
 import io.reactivex.Observable;
 
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.token.entity.*;
 import com.alphawallet.token.tools.TokenDefinition;
-import okhttp3.OkHttpClient;
+
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
@@ -21,7 +20,6 @@ import org.web3j.abi.datatypes.generated.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -31,7 +29,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
@@ -444,8 +441,7 @@ public abstract class TokenscriptFunction
         }
     }
 
-    private String checkBytesString(String responseValue) throws Exception
-    {
+    private String checkBytesString(String responseValue) {
         String name = "";
         if (responseValue.length() > 0)
         {

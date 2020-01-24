@@ -9,7 +9,6 @@ import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.BytesType;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Int;
 import org.web3j.abi.datatypes.Type;
@@ -532,8 +531,7 @@ public abstract class TokenscriptFunction
         }
     }
 
-    private String checkBytesString(String responseValue) throws Exception
-    {
+    private String checkBytesString(String responseValue) {
         String name = "";
         if (responseValue.length() > 0)
         {
@@ -626,7 +624,7 @@ public abstract class TokenscriptFunction
     }
 
     private String callSmartContractFunction(Web3j web3j,
-                                             Function function, String contractAddress, String walletAddr) throws Exception {
+                                             Function function, String contractAddress, String walletAddr) {
         String encodedFunction = FunctionEncoder.encode(function);
 
         try

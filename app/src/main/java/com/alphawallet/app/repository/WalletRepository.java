@@ -86,7 +86,7 @@ public class WalletRepository implements WalletRepositoryType
 	@Override
 	public Completable deleteWallet(String address, String password)
 	{
-		return accountKeystoreService.deleteAccount(address, password);
+		return accountKeystoreService.deleteAccount(address);
 	}
 
 	@Override

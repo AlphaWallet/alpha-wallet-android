@@ -666,7 +666,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         messageToSign = message;
         dAppFunction = new DAppFunction() {
             @Override
-            public void DAppError(Throwable error, Message<String> message) {
+            public void DAppError(Message<String> message) {
                 web3.onSignCancel(message);
                 dialog.dismiss();
             }
@@ -717,7 +717,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         messageToSign = message;
         dAppFunction = new DAppFunction() {
             @Override
-            public void DAppError(Throwable error, Message<String> message) {
+            public void DAppError(Message<String> message) {
                 web3.onSignCancel(message);
                 dialog.dismiss();
             }
@@ -1242,7 +1242,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
     }
 
-    public void gotFileAccess(int requestCode)
+    public void gotFileAccess()
     {
 
     }

@@ -36,8 +36,7 @@ public class ConfirmationRouter {
     }
 
     //Sign transaction for dapp browser
-    public void open(Activity context, Web3Transaction transaction, String networkName, boolean isMainNet, String requesterURL, int chainId) throws TransactionTooLargeException
-    {
+    public void open(Activity context, Web3Transaction transaction, String networkName, boolean isMainNet, String requesterURL, int chainId) {
         Intent intent = new Intent(context, ConfirmationActivity.class);
         intent.putExtra(C.EXTRA_WEB3TRANSACTION, transaction);
         intent.putExtra(C.EXTRA_AMOUNT, Convert.fromWei(transaction.value.toString(10), Convert.Unit.WEI).toString());

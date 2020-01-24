@@ -563,6 +563,29 @@ public abstract class TokenscriptFunction
         }
     }
 
+    /**
+     * Fetches a TokenScript attribute
+     *
+     * May either return a static attribute sourced from the Token ID or a dynamic one from a contract function
+     *
+     * If a dynamic function, then test to see if we can source the value from the result cache -
+     * Test to see if the contract has seen any transactions AFTER the result was cached, if so then invalidate the result and re-fetch
+     *
+     * TODO: there is currently an optimisation issue with this. If the contract being called to resolve the attribute is not the token
+     *       contract which the script refers to then the result is not cached. This can be seen eg with 'ENABLE' functions which permit
+     *       the script contract to manipulate the tokens which the 'ENABLE' function is being called on.
+     *       It may not be possible to always safely cache these values; even with an event handler we have to interpret those events and invalidate
+     *       any cached results. However if we're tracking the referenced contract as a token then it should be safe
+     *
+     * @param walletAddress
+     * @param attribute
+     * @param tokenId
+     * @param cAddr
+     * @param td
+     * @param attrIf
+     * @param transactionUpdate
+     * @return
+     */
     public Observable<TokenScriptResult.Attribute> fetchAttrResult(String walletAddress, String attribute, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf, long transactionUpdate)
     {
         AttributeType attr = td.attributeTypes.get(attribute);
@@ -576,16 +599,17 @@ public abstract class TokenscriptFunction
             ContractAddress useAddress;
             if (cAddr == null) useAddress = new ContractAddress(attr.function);
             else useAddress = new ContractAddress(attr.function, cAddr.chainId, cAddr.address);
-            TransactionResult transactionResult = attrIf.getFunctionResult(useAddress, attr, tokenId); //Needs to allow for multiple tokenIds
-            if (attrIf.resolveOptimisedAttr(useAddress, attr, transactionResult) || !transactionResult.needsUpdating(transactionUpdate)) //can we use wallet's known data or cached value?
+            TransactionResult cachedResult = attrIf.getFunctionResult(useAddress, attr, tokenId); //Needs to allow for multiple tokenIds
+            if (cAddr != null && !useAddress.address.equalsIgnoreCase(cAddr.address)) transactionUpdate = 0; //If calling a function which isn't the main tokenscript function retrieve from contract call not cache
+            if (attrIf.resolveOptimisedAttr(useAddress, attr, cachedResult) || !cachedResult.needsUpdating(transactionUpdate)) //can we use wallet's known data or cached value?
             {
-                return resultFromDatabase(transactionResult, attr);
+                return resultFromDatabase(cachedResult, attr);
             }
-            else  //if value is old or there wasn't any previous value
+            else  //if cached value is invalid or if value is dynamic
             {
                 return fetchResultFromEthereum(walletAddress, useAddress, attr, tokenId, td, attrIf, transactionUpdate)       // Fetch function result from blockchain
-                        .map(result -> restoreFromDBIfRequired(result, transactionResult))  // If network unavailable restore value from cache
-                        .map(attrIf::storeAuxData)                                          // store new data
+                        .map(result -> restoreFromDBIfRequired(result, cachedResult))  // If network unavailable restore value from cache
+                        .map(attrIf::storeAuxData)                                     // store new data
                         .map(result -> parseFunctionResult(result, attr));    // write returned data into attribute
             }
         }
@@ -639,16 +663,16 @@ public abstract class TokenscriptFunction
 
     /**
      * Restore result from Database if required (eg connection failure), and if there was a database value to restore
-     * @param result
-     * @param transactionResult
+     * @param result return from calling contract function
+     * @param cachedResult previous return value, restored from database
      * @return
      */
-    private TransactionResult restoreFromDBIfRequired(TransactionResult result, TransactionResult transactionResult)
+    private TransactionResult restoreFromDBIfRequired(TransactionResult result, TransactionResult cachedResult)
     {
-        if (result.resultTime == 0 && transactionResult != null && result.result == null)
+        if (result.resultTime == 0 && cachedResult != null && result.result == null)
         {
-            result.result = transactionResult.result;
-            result.resultTime = transactionResult.resultTime;
+            result.result = cachedResult.result;
+            result.resultTime = cachedResult.resultTime;
         }
 
         return result;

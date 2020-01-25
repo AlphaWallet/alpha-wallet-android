@@ -10,19 +10,12 @@
     <string name="copy">Copy to clipboard</string>
     <string name="sent">Sent</string>
     <string name="received">Received</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="barcode_error_format">Invalid barcode format: %s</string>
     <string name="title_delete_account">Are you sure you want to delete wallet?</string>
 
     <string name="error_import">Error importing keystore</string>
-    <string name="backup_warning_text">
-        Since only you control your money, you\'ll need to save your backup keystore in case this app is deleted. \n\n
-        Your wallet is never saved to cloud storage or standard device backups.
-    </string>
-    <string name="message_no_backup">No backup, no Ethereum.</string>
     <string name="error_deleting_account">Error deleting wallet</string>
-    <string name="unlock_screen_title_android">Unlock screen</string>
-    <string name="unlock_screen_prompt_android">Please unlock your Android device to continue.</string>
     <string name="do_manage_make_backup">Did you manage to make a backup?</string>
     <string name="yes_continue">Yes, continue</string>
     <string name="no_repeat">No, repeat</string>
@@ -33,8 +26,6 @@
     <string name="already_have_account">Already have a wallet?</string>
     <string name="action_create_new_account">Create new wallet</string>
     <string name="unknown_error">An error has occurred.</string>
-    <string name="action_backup_wallet">Backup Wallet</string>
-    <string name="action_backup_later">Do it later</string>
     <string name="no_tokens">No tokens found.</string>
 
     <!-- Titles -->
@@ -42,18 +33,14 @@
     <string name="title_activity_send">Send</string>
     <string name="title_activity_confirmation">Confirm</string>
     <string name="title_transaction_details">Transaction Details</string>
-    <string name="suggestion_empty_password_available">The password can be left blank.</string>
 
     <!-- Dialog titles -->
     <string name="title_dialog_error">Error</string>
     <string name="title_dialog_handling">Handling…</string>
-    <string name="title_dialog_watch_out">Watch out!</string>
     <string name="title_dialog_add_account">Add wallet</string>
     <string name="title_dialog_deposit">How would you like to buy?</string>
 
     <!-- Dialog messages-->
-    <string name="dialog_message">Enter the password to encrypt your wallet</string>
-    <string name="dialog_message_unrecoverable_message">If this device is replaced or this app is deleted, neither you nor Trust Wallet can recover your funds without a backup.</string>
     <string name="toast_message_wallet_imported">The wallet was imported</string>
     <string name="toast_message_wallet_exported">A backup was created</string>
     <string name="toast_qr_code_no_address">QR code doesn\'t contain valid address</string>
@@ -96,7 +83,6 @@
     <string name="unknown_balance_without_symbol">--</string>
     <string name="dummy_transaction_value">&#45;&#45;</string>
     <string name="title_dialog_sending">Sending...</string>
-    <string name="i_understand">I understand</string>
     <string name="scan_qr">Get address from QR Code</string>
     <string name="info_gas_price">The higher the gas price, the more expensive your transaction fee will be, but the quicker your transaction will be processed by the Ethereum network.</string>
     <string name="info_gas_limit">The gas limit prevents smart contracts from consuming all your Ethereum. We will try to calculate the gas limit automatically for you, but some smart contracts may require a custom gas limit.</string>
@@ -111,7 +97,6 @@
     <string name="app_name">AlphaWallet</string>
     <string name="all">All</string>
     <string name="currency">Currencies</string>
-    <string name="assets">Assets</string>
     <string name="advanced">Advanced Options</string>
     <string name="copy_wallet_address">Copy Wallet Address</string>
     <string name="hint_contract_name">Name</string>
@@ -129,25 +114,17 @@
     <string name="token_balance">%1$s%2$s</string>
     <!--<string name="token_balance">%1$s%2$s %3$s</string>-->
     <string name="token_name">%1$s (%2$s)</string>
-    <string name="copy_addr_to_clipboard">copy address to clipboard</string>
     <string name="create_sell_order">Create Sales Order</string>
     <string name="select_tickets">Select %1$s to Sell:</string>
-    <string name="select_tickets_redeem">Select Tickets to Redeem:</string>
-    <string name="marketplace_title">Marketplace</string>
-    <string name="title_marketplace">Marketplace</string>
+    <string name="select_tickets_redeem">Select Tickets to Redeem:</string>show
     <string name="action_purchase">Purchase</string>
-    <string name="view_listings">View Listings</string>
-    <string name="search">Search</string>
     <string name="toolbar_header_wallet">Wallet</string>
     <string name="toolbar_header_settings">Settings</string>
     <string name="toolbar_header_help">Help \u0026 FAQ</string>
-    <string name="toolbar_ethereum_info">Ethereum Info</string>
     <string name="toolbar_header_transactions">Transactions</string>
     <string name="settings_my_wallet_address">My Wallet Address</string>
     <string name="settings_notification">Notifications</string>
-    <string name="settings_logout">Log Out</string>
     <string name="title_redeem">Redeem Ticket</string>
-    <string name="title_show_tickets">Token Inventory</string>
     <string name="waiting_for_blockchain">Waiting for blockchain …</string>
     <string name="btn_text_apply">Apply</string>
     <string name="filter_by">Filter by:</string>
@@ -164,7 +141,6 @@
     <string name="generate_pick_up_link">Generate a MagicLink</string>
     <string name="transfer_now">Transfer Now</string>
     <string name="to">to</string>
-    <string name="stormbird">Stormbird</string>
 
     <string-array name="filter_date">
         <item>Most Recent</item>
@@ -208,16 +184,11 @@
     <string name="equivalent_in_usd">Equivalent in USD</string>
     <string name="total_cost">%1s %2s</string>
     <string name="select_quantity_tickets">Select Quantity of %1$s</string>
-    <string name="redeemed">Redeemed</string>
     <string name="ticket_redeemed">Your ticket has been redeemed</string>
-    <string name="filter">Filter</string>
     <string name="search_for">Search for:</string>
     <string name="filter_search_class">Class</string>
     <string name="filter_search_seats">No. of Seats Together</string>
     <string name="search_label_match">Match</string>
-    <string name="onboarding_1">Hold all your Crypto assets in one place</string>
-    <string name="onboarding_2">Powered by blockchain technology, smart tickets, fraud free</string>
-    <string name="onboarding_3">Buy, sell and transfer your favourite tokens</string>
     <string name="help_question1">What is ETH/Ethereum?</string>
     <string name="help_question2">Why does aWallet use Ethereum?</string>
     <string name="help_question3">How do I get my money?</string>
@@ -225,9 +196,6 @@
     <string name="help_question5">How do I transfer ETH into my wallet?</string>
     <string name="twenty_four_hours">24 hours</string>
     <string name="appreciation">Appreciation</string>
-    <string name="usd_value">USD Value</string>
-    <string name="my_listings">My Listings</string>
-    <string name="fifa_2018">FIFA 2018</string>
     <string name="eth_per_ticket">%1s/Ticket</string>
     <string name="ethereum">Ethereum</string>
     <string name="ethereum_blockchain">Ethereum Blockchain</string>
@@ -240,13 +208,10 @@
     <string name="seekbar_max">Max</string>
     <string name="seekbar_min">Min</string>
     <string name="seekbar_label_default_value">$0.00</string>
-    <string name="confirm_purchase_title">Confirm Purchase?</string>
-    <string name="confirm_purchase_small_text">Total Cost:</string>
     <string name="confirm_purchase_button_text">Confirm Purchase</string>
     <string name="label_transfer_ticket_detail">Transfer Ticket Details</string>
     <string name="label_transfer_ticket">Transfer Ticket</string>
     <string name="select_tickets_transfer">Select Tickets to Transfer:</string>
-    <string name="label_order_details">Order Details</string>
     <string name="dialog_go_to_listings">Go to My Listings</string>
     <string name="dialog_marketplace_success">Your tickets have been put up for sale in the Marketplace</string>
     <string name="dialog_process_error">Trade not processed</string>
@@ -266,7 +231,6 @@
     <string name="bad_import_link">Invalid Import Link</string>
     <string name="bad_import_link_body">Import link contains an error; please re-request the link</string>
     <string name="depreciation">DEPRECIATION</string>
-    <string name="ticket_unavailable">Unavailable</string>
     <string name="generate_free_transfer_link">Create free transfer link?</string>
     <string name="send_universal_link">Share MagicLink</string>
     <string name="generate_sale_transfer_link">Generate MagicLink</string>
@@ -281,18 +245,9 @@
     <string name="confirm_transfer_details">Confirm Transfer Details</string>
     <string name="advanced_settings">Advanced Settings</string>
     <string name="action_confirm">Confirm</string>
-    <string name="eth_detail_q1">What is Ethereum?</string>
-    <string name="eth_detail_a1">ETH is short for Ethereum. Ethereum is a crypto currency (similar to BitCoin) running on blockchain technology.</string>
-    <string name="eth_detail_q2">How do I convert Ethereum into cash?</string>
-    <string name="eth_detail_a2">You can convert Ethereum to USD and transfer it to your bank account with the following exchange platforms:</string>
-    <string name="eth_detail_coinbase"><u>www.coinbase.com</u></string>
-    <string name="eth_detail_gemini"><u>www.gemini.com</u></string>
-    <string name="eth_detail_q3">Why does aWallet use Ethereum?</string>
-    <string name="eth_detail_a3">aWallet uses Ethereum instead of currency (USD) because it is a more secure way to manage transactions. Ethereum is also the second of the world\'s biggest cryptocurrencies next to BitCoin.</string>
     <string name="scan_qr_label">Scan the QR Code or copy the text below:</string>
     <string name="my_wallet_address">My Wallet Address</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
-    <string name="action_marketplace">Marketplace</string>
     <string name="universal_link_expiry_on">MagicLink expiry on:</string>
     <string name="confirm_sale_total">Total: %s</string>
     <string name="set_universal_link_expiry">Set MagicLink Expiry:</string>
@@ -317,7 +272,6 @@
     <string name="ticket_already_imported">Tickets already imported</string>
     <string name="ticket_range_inavlid">Tickets partially imported</string>
     <string name="free_import">Free Import</string>
-    <string name="select_network">Select Network</string>
     <string name="title_select_ticket_quantity">Select %1$s Quantity:</string>
     <string name="title_select_transfer_method">Select Transfer Method:</string>
     <string name="title_set_universal_link_expiry">Set MagicLink Expiry:</string>
@@ -326,7 +280,6 @@
     <string name="action_import">Import</string>
     <string name="prompt_password">Password</string>
     <string name="enter_password">Enter Password</string>
-    <string name="hint_private_key_field">Private key *</string>
     <string name="hint_keystore">Enter Keystore JSON</string>
     <string name="tab_seed">Seed</string>
     <string name="tab_keystore">Keystore</string>
@@ -362,11 +315,8 @@
     <string name="contract_address">Contract Address</string>
     <string name="input_address">Ethereum address or ENS name</string>
     <string name="ticket_range_expired">Magiclink Expired</string>
-    <string name="verified_contract">Verified by Stormbird</string>
-    <string name="unverified_contract">Unverified Contract</string>
     <string name="ticket_not_valid">Invalid Token</string>
     <string name="ticket_not_valid_body">No valid contract at this address on this network. The contract could have been terminated or it may be on a different network. Try changing to \'Ropsten (Test)\'.</string>
-    <string name="loading">Loading …</string>
     <string name="new_version_title">Update available</string>
     <string name="new_version">Version update is available on the AlphaWallet website.</string>
     <string name="confirm_update">Download and Install</string>
@@ -389,15 +339,9 @@
     <string name="transaction_value">Transaction Value</string>
     <string name="dialog_title_sign_transaction">Sign Transaction</string>
     <string name="action_view_bookmarks">View Bookmarks</string>
-    <string name="action_added">Bookmarked</string>
-    <string name="action_add_bookmark">Add Bookmark</string>
-    <string name="bookmarks">Bookmarks</string>
-    <string name="visit">Visit</string>
     <string name="erc721">ERC721</string>
     <string name="status_pending">Pending</string>
     <string name="status_incomplete_data">Incomplete Data</string>
-    <string name="status_pending_with_qty">%1$s Pending</string>
-    <string name="status_incomplete_data_with_qty">%1$s Incomplete Data</string>
     <string name="token_details">Token Details</string>
     <string name="label_cattributes">Cattributes</string>
     <string name="label_attributes">Attributes</string>
@@ -416,8 +360,6 @@
     <string name="available">Available</string>
     <string name="usd_label">US$</string>
     <string name="recent_transactions">Recent Transactions</string>
-    <string name="confirmed_by_stormbird">Confirmed by Stormbird</string>
-    <string name="unconfirmed">Unconfirmed</string>
     <string name="no_recent_transactions">You have no transactions yet</string>
     <string name="paste">Paste</string>
     <string name="no_recent_transactions_subtext">When you send or receive %1$s,\n your transactions will appear here</string>
@@ -442,10 +384,6 @@
     <string name="blockchain">%1$s Blockchain</string>
     <string name="currency_00">0.00 %s</string>
     <string name="telegram">Telegram</string>
-    <string name="wrong_chain">Please switch to %s in settings</string>
-    <string name="wrong_chain_title">Wallet set to wrong chain</string>
-    <string name="wrong_token">Switch to token at address: %s</string>
-    <string name="wrong_token_title">Different token requested</string>
     <string name="transfer_request">Transfer request</string>
     <string name="token_transfer_request">Token transfer request</string>
     <string name="generate_payment_request">Generate Payment Request</string>
@@ -453,8 +391,6 @@
     <string name="feemaster_service_not_available">Feemaster service is currently not available, please try again later.</string>
     <string name="importing_tickets">Importing Tokens</string>
     <string name="wallet_name">Wallet Name</string>
-    <string name="delete_wallet">Delete Wallet</string>
-    <string name="backup_keystore">Backup Keystore</string>
     <string name="wallet_name_template">Wallet %1$d</string>
     <string name="no_token_found_title">Token Not Found</string>
     <string name="no_token_found">No Token contract found at this address on any active Ethereum chain.</string>
@@ -500,8 +436,6 @@
     <string name="back_up_wallet_action">BACK UP WALLET %1$s →</string>
     <string name="authentication_cancelled">Authentication Cancelled</string>
     <string name="authentication_failed">Authentication Failed</string>
-    <string name="authentication_failed_message">User Authentication failed, try again?</string>
-    <string name="action_try_again">Try Again</string>
     <string name="backup_seed_phrase">Back up your wallet with seed phrase</string>
     <string name="backup_seed_phrase_detail">Making a backup is very simple and safe: just write down 12 words and keep them in a safe place, offline.</string>
     <string name="action_back_up_my_wallet">back up my wallet</string>
@@ -518,7 +452,6 @@
     <string name="export_keystore_json">Export Keystore JSON</string>
     <string name="what_is_keystore_json">What is Keystore JSON?</string>
     <string name="export_keystore_detail">A Keystore is a text file. You can copy its content and place when you want to import your wallet.</string>
-    <string name="seed_phrase">Seed Phrase</string>
     <string name="test_seed_phrase">Test my seed phrase</string>
     <string name="make_a_backup">Making backup is very simple and safe just write down %1$s words and keep them in a safe place, offline.</string>
     <string name="keystore_detail_text">A KeyStore is a text file. You can copy its content and place when you want to import your wallet. This is a safe way to back up a wallet.</string>
@@ -536,7 +469,6 @@
     <string name="nothing_to_share_message">Browse to a DApp to share it.</string>
     <string name="time_to_backup_wallet">Time to back up your Wallet</string>
     <string name="recommend_monthly_backup">We highly recommend to back up your wallet every month.</string>
-    <string name="pin_unlock">Pin Unlock</string>
     <string name="use_pin">Use Pin</string>
     <string name="touch_fingerprint_sensor">Touch the fingerprint sensor</string>
     <string name="unlock_private_key">Unlock Private Key</string>
@@ -559,10 +491,6 @@
     <string name="title_back_up_your_wallet">Back up your Wallet</string>
     <string name="message_backup_wallet">Your funds will be at risk if you do not back up before using your wallet.</string>
     <string name="action_close">Close</string>
-    <string name="title_find_your_wallet_address">Find your Wallet Address</string>
-    <string name="message_find_address">Tap here to find your Ethereum Wallet address</string>
-    <string name="restore_from_standby_key">Restore from Standby Key</string>
-    <string name="restore_from_standby_key_detail">Your wallet key was restored from non-authorised standby key. This is caused by a change to phone security invalidating key. Recommend to backup your wallet key safely as soon as possible. Standby key is erased after successful backup.</string>
     <string name="back_up_this_wallet">Back up this Wallet</string>
     <string name="not_locked">Not Locked</string>
     <string name="back_up_now">Back up Now!</string>
@@ -573,7 +501,6 @@
     <string name="backup_wallet_detail">We highly recommend you back up your wallet.</string>
     <string name="skip_upgrade">Skip Upgrade</string>
     <string name="lock_keystore_upgrade">Lock your Keystore to increase security</string>
-    <string name="title_backup_seed">Backup Seed Phrase</string>
     <string name="invalid_keystore">Invalid Keystore JSON</string>
     <string name="invalid_private_key">Invalid Private Key</string>
     <string name="reimport_wallet_detail">Wallet %1$s already exists, do you wish to re-import the wallet?</string>
@@ -581,11 +508,7 @@
     <string name="provide_authentication">Provide authentication to create key</string>
     <string name="import_error">Import Error, Try re-import again.</string>
     <string name="welcome_to_alphawallet">Welcome to AlphaWallet</string>
-    <string name="logo">AlphaWallet Logo</string>
     <string name="lock_seed_phrase">LOCK SEED PHRASE</string>
-    <string name="verified">Verified by %1$s</string>
-    <string name="no_certificate">No Certificate</string>
-    <string name="certificate_fail">Invalid Certificate</string>
     <string name="no_key">No Key found</string>
     <string name="pending_transaction">Pending Transaction ...</string>
     <string name="title_enable_debug">Local Scripts Not Enabled</string>
@@ -604,7 +527,6 @@
     <string name="transaction_too_large">Transaction Too Large</string>
     <string name="unable_to_handle_tx">Transaction payload is too large</string>
     <string name="show_token_contract">Show Token Contract</string>
-    <string name="certificate_details">Certificate Details</string>
     <string name="signature_details">Signature details</string>
     <string name="copy_contract_address">Copy Contract Address</string>
     <string name="self">Self</string>

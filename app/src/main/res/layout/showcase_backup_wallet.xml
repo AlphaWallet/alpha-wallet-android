@@ -34,7 +34,7 @@
             android:gravity="center_horizontal"
             android:layout_marginBottom="23dp"
             android:fontFamily="@font/font_regular"
-            android:text="@string/message_backup_wallet"
+            android:text="@string/nudge_user_to_backup_wallet"
             android:textColor="@color/text_dark_gray"
             android:textSize="17sp" />
 

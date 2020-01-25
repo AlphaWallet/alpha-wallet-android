@@ -545,7 +545,7 @@
     <string name="action_watch_account">查看账户</string>
     <string name="receive_payment">接收付款</string>
     <string name="title_back_up_your_wallet">备份您的钱包</string>
-    <string name="message_backup_wallet">如在未备份的情况下使用钱包，您的资金将面临风险。</string>
+    <string name="nudge_user_to_backup_wallet">如在未备份的情况下使用钱包，您的资金将面临风险。</string>
     <string name="action_close">关闭</string>
     <string name="title_find_your_wallet_address">查找您的钱包地址</string>
     <string name="message_find_address">点击此处查找您的以太坊钱包地址</string>

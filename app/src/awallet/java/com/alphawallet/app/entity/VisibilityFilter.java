@@ -83,4 +83,10 @@ public class VisibilityFilter
     {
         return true;
     }
+
+    //Allow multiple wallets (true) or single wallet mode (false)
+    public static boolean canChangeWallets()
+    {
+        return true;
+    }
 }

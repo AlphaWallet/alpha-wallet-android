@@ -461,6 +461,8 @@ public class TokensService
             Token existingToken = getToken(newToken.tokenInfo.chainId, newToken.tokenInfo.address);
             if (existingToken == null || existingToken.checkBalanceChange(newToken))
             {
+                //opensea is potentially unreliable for ERC721 Ticket class
+                if (existingToken != null && existingToken.isERC721Ticket()) continue; //don't take the opensea balance for ERC721 ticket if the token is already known (use contract's getBalance instead).
                 balanceChangedTokens.add(newToken);
                 addToken(newToken);
             }

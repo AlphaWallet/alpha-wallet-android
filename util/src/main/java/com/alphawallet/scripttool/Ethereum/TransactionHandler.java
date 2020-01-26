@@ -1,7 +1,7 @@
 package com.alphawallet.scripttool.Ethereum;
 
 
-import com.alphawallet.token.entity.MagicLinkInfo;
+import com.alphawallet.ethereum.EthereumNetworkBase;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
@@ -34,7 +34,7 @@ public class TransactionHandler
 
     public TransactionHandler(int networkId)
     {
-        String nodeURL = MagicLinkInfo.getNodeURLByNetworkId(networkId);
+        String nodeURL = EthereumNetworkBase.getNetworkByChain(networkId).rpcServerUrl;
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(20, TimeUnit.SECONDS);
         builder.readTimeout(20, TimeUnit.SECONDS);

@@ -12,15 +12,14 @@ import static com.alphawallet.token.web.Service.SpawnableLinkGenerator.bytesFrom
 
 public class EdconLinkGenerator {
 
-    private static List<BigInteger> tokens = new ArrayList<>();
     private static final String contractAddress = "0xF6b8DD8Ba9996bEaE6Ad0eE3481F1E9cF080A9eB";
     private static ParseMagicLink parseMagicLink = new ParseMagicLink(new CryptoFunctions(), null);
     //TODO set private key & chain id
-    private static final BigInteger privateKey = BigInteger.TEN;
+    private static final BigInteger privateKey = new BigInteger("0", 16);
     private static final int chainId = 100;
 
     // Time todo put in right format & set each time
-    private static final String date = "20250706210000+0300";
+    private static final String date = "20200403090000+0300";
     // Cities
     private static final long VIENNA = 1;
 
@@ -38,12 +37,15 @@ public class EdconLinkGenerator {
     private static final long E = 5;
 
     // Ticket expiry
-    private static long expiry = (System.currentTimeMillis() + 1000000000) / 1000L;;
+    private static long expiry = (System.currentTimeMillis() + 5000000000L) / 1000L;;
 
 
     public static void main(String[] args) throws SalesOrderMalformed {
-        //TODO set token ids here
-        new com.alphawallet.token.web.Service.EdconLinkGenerator(date, VIENNA, BLOCKCHAIN_HALL, 25);
+        int rounds = 50;
+        while(rounds > 0) {
+            new com.alphawallet.token.web.Service.EdconLinkGenerator(date, VIENNA, BLOCKCHAIN_HALL, 1);
+            rounds--;
+        }
     }
 
     private EdconLinkGenerator(
@@ -53,20 +55,22 @@ public class EdconLinkGenerator {
             int quantity
     ) throws SalesOrderMalformed {
         // Set values here
-        setTokenIds(date, city, venue, A, quantity);
-        createSpawnableLink();
+        List<BigInteger> tokens = setTokenIds(date, city, venue, A, quantity);
+        createSpawnableLink(tokens);
     }
 
-    private void createSpawnableLink() throws SalesOrderMalformed {
+    private void createSpawnableLink(List<BigInteger> tokens) throws SalesOrderMalformed {
         byte[] message = parseMagicLink.getSpawnableBytes(tokens, contractAddress, BigInteger.ZERO, expiry);
         byte[] signature = signMagicLink(message);
         byte[] linkData = ParseMagicLink.generateSpawnableLeadingLinkBytes(tokens, contractAddress, BigInteger.ZERO, expiry);
         String link = parseMagicLink.completeUniversalLink(chainId, linkData, signature);
         System.out.println(link);
+        System.out.println();
     }
 
-    private void setTokenIds(String date, long city, long venue, long category, int quantity)
+    private List<BigInteger> setTokenIds(String date, long city, long venue, long category, int quantity)
     {
+        List<BigInteger> tokens = new ArrayList<>();
         while(quantity > 0) {
             String tokenId = "";
             tokenId += Numeric.toHexStringNoPrefixZeroPadded(Numeric.toBigInt(date.getBytes()), 38);
@@ -83,6 +87,7 @@ public class EdconLinkGenerator {
             tokens.add(token);
             quantity--;
         }
+        return tokens;
     }
 
     private byte[] signMagicLink(byte[] signData) {

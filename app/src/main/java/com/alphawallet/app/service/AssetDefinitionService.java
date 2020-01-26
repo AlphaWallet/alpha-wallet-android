@@ -1122,7 +1122,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     @Override
                     public void onStart()
                     {
-                        if (tResult.result == null) tResult.result = "";
                         if (!WalletUtils.isValidAddress(tokensService.getCurrentAddress())) return;
                         realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress());
                         ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
@@ -1137,7 +1136,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             realm.beginTransaction();
                             createAuxData(realm, tResult);
                         }
-                        else if (realmToken.getResultTime() != tResult.resultTime)
+                        else if (tResult.result != null)
                         {
                             TransactionsRealmCache.addRealm();
                             realm.beginTransaction();

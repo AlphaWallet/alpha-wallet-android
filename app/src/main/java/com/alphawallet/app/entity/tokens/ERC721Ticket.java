@@ -232,6 +232,9 @@ public class ERC721Ticket extends Token implements Parcelable {
         }
         else
         {
+            activity.findViewById(R.id.layout_legacy).setVisibility(View.VISIBLE);
+            activity.findViewById(R.id.layout_webwrapper).setVisibility(View.GONE);
+
             TextView amount = activity.findViewById(R.id.amount);
             TextView name = activity.findViewById(R.id.name);
 

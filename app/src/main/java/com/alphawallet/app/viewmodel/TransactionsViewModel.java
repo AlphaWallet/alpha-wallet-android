@@ -146,11 +146,11 @@ public class TransactionsViewModel extends BaseViewModel
 
     private void checkUnknownTokens()
     {
-        if (queryUnknownTokensDisposable == null && !unknownTokens.isEmpty())
+        if (queryUnknownTokensDisposable == null)
         {
             UnknownToken t = unknownTokens.poll();
 
-            if (tokensService.getToken(t.chainId, t.address) == null)
+            if (t != null && tokensService.getToken(t.chainId, t.address) == null)
             {
                 queryUnknownTokensDisposable = setupTokensInteract.addToken(t.address, t.chainId) //fetch tokenInfo
                         .filter(tokenInfo -> tokenInfo.name != null)
@@ -255,11 +255,25 @@ public class TransactionsViewModel extends BaseViewModel
             if (!txMap.containsKey(tx.hash))
             {
                 txMap.put(tx.hash, tx);
+                //does this transaction correspond to a known token?
+                checkTokenTransactions(tx);
             }
         }
 
         this.transactions.postValue(txMap.values().toArray(new Transaction[0]));
         fetchTransactionDisposable = null;
+    }
+
+    private void checkTokenTransactions(Transaction tx)
+    {
+        Token t = tokensService.getToken(tx.chainId, tx.to);
+        Long blockNumber = Long.parseLong(tx.blockNumber);
+        if (t != null && !t.isEthereum() && t.lastBlockCheck < blockNumber)
+        {
+            t.lastBlockCheck = blockNumber;
+            t.lastTxTime = tx.timeStamp*1000; //update last transaction received time
+            addTokenInteract.updateBlockRead(t, defaultWallet().getValue());
+        }
     }
 
     private void onUpdateTransactions(Transaction[] transactions, Token token)

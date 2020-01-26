@@ -14,13 +14,7 @@
     <string name="barcode_error_format">无效条形码格式：%s</string>
     <string name="title_delete_account">是否确定要删除钱包？</string>
     <string name="error_import">导入密钥库时出错</string>
-    <string name="backup_warning_text">        您的资金由您掌控！请务必保存备份密钥库，以防此应用遭到删除。 \n\n
-        我们绝不会将您的钱包保存到云存储或标准备份设备中。
-    </string>
-    <string name="message_no_backup">绝无备份，亦无以太坊。</string>
     <string name="error_deleting_account">删除钱包时出错</string>
-    <string name="unlock_screen_title_android">解锁屏幕</string>
-    <string name="unlock_screen_prompt_android">请解锁您的 Android 设备以继续。</string>
     <string name="do_manage_make_backup">您是否已成功进行备份？</string>
     <string name="yes_continue">是，继续</string>
     <string name="no_repeat">否，重复</string>
@@ -31,24 +25,18 @@
     <string name="already_have_account">已经有钱包了吗？</string>
     <string name="action_create_new_account">创建新钱包</string>
     <string name="unknown_error">发生错误。</string>
-    <string name="action_backup_wallet">备份钱包</string>
-    <string name="action_backup_later">稍后备份</string>
     <string name="no_tokens">未找到通证。</string>
     <!-- Titles -->
     <string name="title_my_address">我的地址</string>
     <string name="title_activity_send">发送</string>
     <string name="title_activity_confirmation">确认</string>
     <string name="title_transaction_details">交易详情</string>
-    <string name="suggestion_empty_password_available">密码可以留空。</string>
     <!-- Dialog titles -->
     <string name="title_dialog_error">错误</string>
     <string name="title_dialog_handling">处理中……</string>
-    <string name="title_dialog_watch_out">小心！</string>
     <string name="title_dialog_add_account">添加钱包</string>
     <string name="title_dialog_deposit">您想如何购买？</string>
     <!-- Dialog messages-->
-    <string name="dialog_message">请输入密码来加密你的钱包</string>
-    <string name="dialog_message_unrecoverable_message">若更换此设备或删除本应用，您或 Trust Wallet 均无法在无备份的情况下恢复资金。</string>
     <string name="toast_message_wallet_imported">钱包已导入</string>
     <string name="toast_message_wallet_exported">备份已创建</string>
     <string name="toast_qr_code_no_address">二维码未包含有效地址</string>
@@ -87,7 +75,6 @@
     <string name="unknown_balance_without_symbol">--</string>
     <string name="dummy_transaction_value">&#45;&#45;</string>
     <string name="title_dialog_sending">发送中……</string>
-    <string name="i_understand">我理解</string>
     <string name="scan_qr">从二维码获取地址</string>
     <string name="info_gas_price">燃料价格越高，您的交易费用就越昂贵，但以太坊网络对交易的处理速度则越快。</string>
     <string name="info_gas_limit">燃料限制可防止智能合约消耗掉您的所有以太币。我们会尝试为您自动计算燃料限制，但部分智能合约可能需要自定义燃料限制。</string>
@@ -101,7 +88,6 @@
     <string name="app_name">AlphaWallet</string>
     <string name="all">全部</string>
     <string name="currency">币类</string>
-    <string name="assets">资产类</string>
     <string name="advanced">高级设置</string>
     <string name="copy_wallet_address">复制钱包地址</string>
     <string name="hint_contract_name">名称</string>
@@ -119,25 +105,17 @@
     <string name="token_balance">%1$s%2$s</string>
     <!--<string name="token_balance">%1$s%2$s %3$s</string>-->
     <string name="token_name">%1$s (%2$s)</string>
-    <string name="copy_addr_to_clipboard">复制地址到剪贴板</string>
     <string name="create_sell_order">创建卖单</string>
     <string name="select_tickets">选择要出售的%1$s:</string>
     <string name="select_tickets_redeem">选择要兑换的门票:</string>
-    <string name="marketplace_title">公共市场</string>
-    <string name="title_marketplace">公共市场</string>
     <string name="action_purchase">购买</string>
-    <string name="view_listings">查看在售列表</string>
-    <string name="search">搜索</string>
     <string name="toolbar_header_wallet">我的钱包</string>
     <string name="toolbar_header_settings">我的设置</string>
     <string name="toolbar_header_help">帮助</string>
-    <string name="toolbar_ethereum_info">以太坊信息</string>
     <string name="toolbar_header_transactions">我的账单</string>
     <string name="settings_my_wallet_address">我的钱包地址</string>
     <string name="settings_notification">通知设置</string>
-    <string name="settings_logout">登出</string>
     <string name="title_redeem">兑换门票</string>
-    <string name="title_show_tickets">门票</string>
     <string name="waiting_for_blockchain">请等待区块链处理数据</string>
     <string name="btn_text_apply">应用</string>
     <string name="filter_by">筛选:</string>
@@ -154,7 +132,6 @@
     <string name="generate_pick_up_link">通过MagicLink导出门票</string>
     <string name="transfer_now">现在直接转让门票</string>
     <string name="to">至</string>
-    <string name="stormbird">Stormbird</string>
     <string-array name="filter_date">
         <item>最新</item>
         <item>最早</item>
@@ -197,16 +174,11 @@
     <string name="equivalent_in_usd">相当于USD</string>
     <string name="total_cost">%1s %2s</string>
     <string name="select_quantity_tickets">选择%1$s数量</string>
-    <string name="redeemed">已兑换</string>
     <string name="ticket_redeemed">你的门票已经被兑换</string>
-    <string name="filter">筛选</string>
     <string name="search_for">搜索:</string>
     <string name="filter_search_class">等级</string>
     <string name="filter_search_seats">连座数量</string>
     <string name="search_label_match">比赛</string>
-    <string name="onboarding_1">支持调用各种数字资产</string>
-    <string name="onboarding_2">基于区块链技术，智能门票，杜绝欺诈</string>
-    <string name="onboarding_3">买，卖，转让各种token</string>
     <string name="help_question1">以太币/以太坊是什么?</string>
     <string name="help_question2">为什么AlphaWallet需要调用以太币?</string>
     <string name="help_question3">怎样才能拿到法币?</string>
@@ -214,9 +186,6 @@
     <string name="help_question5">怎样把以太币转到AlphaWallet内?</string>
     <string name="twenty_four_hours">24小时</string>
     <string name="appreciation">升值</string>
-    <string name="usd_value">USD价值</string>
-    <string name="my_listings">我的出售列表</string>
-    <string name="fifa_2018">FIFA 2018世界杯</string>
     <string name="eth_per_ticket">%1s/门票</string>
     <string name="ethereum">以太坊</string>
     <string name="ethereum_blockchain">基于以太坊智能合约</string>
@@ -229,13 +198,10 @@
     <string name="seekbar_max">最多</string>
     <string name="seekbar_min">最少</string>
     <string name="seekbar_label_default_value">$0.00</string>
-    <string name="confirm_purchase_title">确认购买?</string>
-    <string name="confirm_purchase_small_text">总价:</string>
     <string name="confirm_purchase_button_text">确认购买</string>
     <string name="label_transfer_ticket_detail">转让门票的具体信息</string>
     <string name="label_transfer_ticket">转让门票</string>
     <string name="select_tickets_transfer">选择要转让的门票:</string>
-    <string name="label_order_details">订单信息</string>
     <string name="dialog_go_to_listings">查看我的销售列表</string>
     <string name="dialog_marketplace_success">您的门票已成功发布在市场上出售</string>
     <string name="dialog_process_error">交易还没完成</string>
@@ -255,7 +221,6 @@
     <string name="bad_import_link">链接无效</string>
     <string name="bad_import_link_body">抱歉，此链接无效，请再尝试</string>
     <string name="depreciation">降价</string>
-    <string name="ticket_unavailable">无效</string>
     <string name="generate_free_transfer_link">免费创建转让链接?</string>
     <string name="send_universal_link">创建链接</string>
     <string name="generate_sale_transfer_link">创建销售链接</string>
@@ -270,18 +235,9 @@
     <string name="confirm_transfer_details">确认转发信息</string>
     <string name="advanced_settings">设置</string>
     <string name="action_confirm">确认</string>
-    <string name="eth_detail_q1">什么是以太坊?</string>
-    <string name="eth_detail_a1">ETH 是以太坊的简写. 以太坊是一种加密货币(类似比特币)运行区块链技术.</string>
-    <string name="eth_detail_q2">如何将以太坊转换成现金?</string>
-    <string name="eth_detail_a2">您可以将以太坊转换为美元，并通过以下交易平台将其转入您的银行账户</string>
-    <string name="eth_detail_coinbase"><u>www.coinbase.com</u></string>
-    <string name="eth_detail_gemini"><u>www.gemini.com</u></string>
-    <string name="eth_detail_q3">为什么 aWallet 使用以太坊?</string>
-    <string name="eth_detail_a3">aWallet 使用以太坊取代美元，因为它是一种更安全的管理交易的方式。以太坊也是在Bitcoin 后全世界第二大的加密货</string>
     <string name="scan_qr_label">扫描QR码或者复制下面的文字:</string>
     <string name="my_wallet_address">我的钱包地址</string>
     <string name="copied_to_clipboard">复制到剪切板</string>
-    <string name="action_marketplace">市场</string>
     <string name="universal_link_expiry_on">MagicLink链接过期时间:</string>
     <string name="confirm_sale_total">总共: %s</string>
     <string name="set_universal_link_expiry">设置MagicLink链接过期时间:</string>
@@ -306,7 +262,6 @@
     <string name="ticket_already_imported">门票导入成功</string>
     <string name="ticket_range_inavlid">部分门票之前已被导入过</string>
     <string name="free_import">免费导入</string>
-    <string name="select_network">选择网络:</string>
     <string name="title_select_ticket_quantity">选择门%1$s数量:</string>
     <string name="title_select_transfer_method">选择转让方式:</string>
     <string name="title_set_universal_link_expiry">设置MagicLink链接过期时间:</string>
@@ -315,7 +270,6 @@
     <string name="action_import">导入</string>
     <string name="prompt_password">密码</string>
     <string name="enter_password">输入密码</string>
-    <string name="hint_private_key_field">私人钥匙码 *</string>
     <string name="hint_keystore">密钥库 *</string>
     <string name="tab_seed">种子</string>
     <string name="tab_keystore">密钥库</string>
@@ -350,11 +304,8 @@
     <string name="contract_address">智能合约地址</string>
     <string name="input_address">以太坊地址或ENS名称</string>
     <string name="ticket_range_expired">MagicLink已经过期</string>
-    <string name="verified_contract">已通过Stormbird验证</string>
-    <string name="unverified_contract">没有验证过的合约</string>
     <string name="ticket_not_valid">无效的Token</string>
     <string name="ticket_not_valid_body">在当前网络上此地址没有有效智能合约： 合约可能已经被终止，或者它可能位于不同的网络上。 可以尝试将网络改为“Ropsten（测试网络）”。</string>
-    <string name="loading">正在导入</string>
     <string name="new_version_title">有可用更新</string>
     <string name="new_version">前往 AlphaWallet 网站即可获得版本更新资讯。</string>
     <string name="confirm_update">下载并安装</string>
@@ -377,15 +328,9 @@
     <string name="transaction_value">交易价格</string>
     <string name="dialog_title_sign_transaction">签署交易</string>
     <string name="action_view_bookmarks">查看书签</string>
-    <string name="action_added">已加入书签</string>
-    <string name="action_add_bookmark">添加书签</string>
-    <string name="bookmarks">书签夹</string>
-    <string name="visit">访问</string>
     <string name="erc721">ERC721</string>
     <string name="status_pending">未确定</string>
     <string name="status_incomplete_data">不完整数据</string>
-    <string name="status_pending_with_qty">%1$s未确定</string>
-    <string name="status_incomplete_data_with_qty">%1$s不完整数据</string>
     <string name="token_details">通证详情</string>
     <string name="label_cattributes">喵属性</string>
     <string name="label_attributes">属性</string>
@@ -404,8 +349,6 @@
     <string name="available">可用</string>
     <string name="usd_label">美元</string>
     <string name="recent_transactions">最近交易</string>
-    <string name="confirmed_by_stormbird">由 Stormbird 确认</string>
-    <string name="unconfirmed">未确认</string>
     <string name="no_recent_transactions">您尚无交易</string>
     <string name="paste">粘贴</string>
     <string name="no_recent_transactions_subtext">发送或接收%1$s时，\n 您的交易将在此显示</string>
@@ -430,10 +373,6 @@
     <string name="blockchain">%1$s区块链</string>
     <string name="currency_00">0.00%s</string>
     <string name="telegram">电报</string>
-    <string name="wrong_chain">请在设置中切换为%s</string>
-    <string name="wrong_chain_title">钱包设置为错误的链</string>
-    <string name="wrong_token">切换为通证，地址：%s</string>
-    <string name="wrong_token_title">需要不同的通证</string>
     <string name="transfer_request">转账请求</string>
     <string name="token_transfer_request">通证转账请求</string>
     <string name="generate_payment_request">生成付款请求</string>
@@ -441,8 +380,6 @@
     <string name="feemaster_service_not_available">Feemaster 服务当前不可用，请稍后重试。</string>
     <string name="importing_tickets">导入门票</string>
     <string name="wallet_name">钱包名称</string>
-    <string name="delete_wallet">删除钱包</string>
-    <string name="backup_keystore">备份密钥库</string>
     <string name="wallet_name_template">钱包%1$d</string>
     <string name="no_token_found_title">未找到通证</string>
     <string name="no_token_found">未能在任何活动的以太坊链上找到此地址的通证合约。</string>
@@ -488,8 +425,6 @@
     <string name="back_up_wallet_action">备份钱包%1$s →</string>
     <string name="authentication_cancelled">已取消身份验证</string>
     <string name="authentication_failed">身份验证失败</string>
-    <string name="authentication_failed_message">用户身份验证失败，是否重试？</string>
-    <string name="action_try_again">重试</string>
     <string name="backup_seed_phrase">通过助记词备份您的钱包</string>
     <string name="backup_seed_phrase_detail">Making backup is very simple and safe: just write down 12 words and keep them in a safe place, offline.</string>
     <string name="action_back_up_my_wallet">备份我的钱包</string>
@@ -506,7 +441,6 @@
     <string name="export_keystore_json">导出密钥库 JSON</string>
     <string name="what_is_keystore_json">什么是密钥库 JSON？</string>
     <string name="export_keystore_detail">密钥库是一个文本文件。当您要导入钱包时，可以复制其内容和位置。</string>
-    <string name="seed_phrase">助记词</string>
     <string name="test_seed_phrase">测试我的助记词</string>
     <string name="make_a_backup">备份操作简单安全，只需写下 %1$s 个单词，并将其保存在一个离线的安全地方即可。</string>
     <string name="keystore_detail_text">密钥库是一个文本文件。当您要导入钱包时，可以复制其内容和位置。这是备份钱包的安全方法。</string>
@@ -524,7 +458,6 @@
     <string name="nothing_to_share_message">请浏览以找到 DApp 并将其共享。</string>
     <string name="time_to_backup_wallet">是时候备份您的钱包了</string>
     <string name="recommend_monthly_backup">我们强烈建议您每月备份钱包。</string>
-    <string name="pin_unlock">个人识别码解锁</string>
     <string name="use_pin">使用个人识别码</string>
     <string name="touch_fingerprint_sensor">触摸指纹传感器</string>
     <string name="unlock_private_key">解锁私钥</string>
@@ -547,10 +480,6 @@
     <string name="title_back_up_your_wallet">备份您的钱包</string>
     <string name="nudge_user_to_backup_wallet">如在未备份的情况下使用钱包，您的资金将面临风险。</string>
     <string name="action_close">关闭</string>
-    <string name="title_find_your_wallet_address">查找您的钱包地址</string>
-    <string name="message_find_address">点击此处查找您的以太坊钱包地址</string>
-    <string name="restore_from_standby_key">从备用密钥恢复</string>
-    <string name="restore_from_standby_key_detail">您的钱包密钥已从未经授权的备用密钥恢复。这是由于更改电话安全功能而使密钥无效造成。建议尽快使用安全方式备份钱包密钥。备份成功后，将会删除备用密钥。</string>
     <string name="back_up_this_wallet">备份此钱包</string>
     <string name="not_locked">未锁定</string>
     <string name="back_up_now">马上备份！</string>
@@ -561,7 +490,6 @@
     <string name="backup_wallet_detail">我们强烈建议您备份钱包。</string>
     <string name="skip_upgrade">跳过升级</string>
     <string name="lock_keystore_upgrade">锁定您的密钥库以提高安全性</string>
-    <string name="title_backup_seed">备份助记词</string>
     <string name="invalid_keystore">Invalid Keystore Import</string>
     <string name="invalid_private_key">无效的私钥</string>
     <string name="reimport_wallet_detail">已存在钱包%1$s，是否要重新导入钱包？</string>
@@ -569,11 +497,7 @@
     <string name="provide_authentication">提供身份验证以创建密钥</string>
     <string name="import_error">导入错误，请再次尝试重新导入。</string>
     <string name="welcome_to_alphawallet">欢迎使用 AlphaWallet</string>
-    <string name="logo">AlphaWallet 标志</string>
     <string name="lock_seed_phrase">锁定助记词</string>
-    <string name="verified">通过%1$s验证</string>
-    <string name="no_certificate">无证书</string>
-    <string name="certificate_fail">无效证书</string>
     <string name="no_key">未找到密钥</string>
     <string name="pending_transaction">交易待定……</string>
     <string name="title_enable_debug">未启用本地脚本</string>
@@ -592,7 +516,6 @@
     <string name="transaction_too_large">交易太大</string>
     <string name="unable_to_handle_tx">交易有效负载太大</string>
     <string name="show_token_contract">显示通证合约</string>
-    <string name="certificate_details">证书详细信息</string>
     <string name="signature_details">签名详细信息</string>
     <string name="copy_contract_address">复制合约地址</string>
     <string name="self">自己</string>

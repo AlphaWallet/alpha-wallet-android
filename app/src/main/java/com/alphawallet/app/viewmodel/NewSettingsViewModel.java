@@ -109,11 +109,6 @@ public class NewSettingsViewModel extends BaseViewModel {
         return localeRepository.getDefaultLocale();
     }
 
-    public void setDefaultLocale(Context context, String locale) {
-        localeRepository.setDefaultLocale(context, locale);
-        showHome(context, true); //Refresh activity to reflect changes
-    }
-
     public NetworkInfo[] getNetworkList() {
         return ethereumNetworkRepository.getAvailableNetworkList();
     }

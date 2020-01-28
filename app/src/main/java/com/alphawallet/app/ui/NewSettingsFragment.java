@@ -519,14 +519,4 @@ public class NewSettingsFragment extends Fragment
         layoutBackup.setVisibility(View.GONE);
         if (getActivity() != null) ((HomeActivity)getActivity()).postponeWalletBackupWarning(walletAddress);
     }
-
-    public void updateLocale(Intent data)
-    {
-        String currentLocale = viewModel.getDefaultLocale();
-        if (data == null) return;
-        String newLocale = data.getStringExtra(C.EXTRA_LOCALE);
-        viewModel.setDefaultLocale(getContext(), newLocale);
-        localeSubtext.setText(LocaleUtils.getDisplayLanguage(newLocale, currentLocale));
-        getActivity().sendBroadcast(new Intent(CHANGED_LOCALE));
-    }
 }

@@ -77,7 +77,6 @@ public class TokenRepository implements TokenRepositoryType {
     private static final String TAG = "TRT";
     private final TokenLocalSource localSource;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
-    private final TickerService tickerService;
     private final GasService gasService;
     private final TokensService tokensService;
 
@@ -98,12 +97,10 @@ public class TokenRepository implements TokenRepositoryType {
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenLocalSource localSource,
-            TickerService tickerService,
             GasService gasService,
             TokensService tokensService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.localSource = localSource;
-        this.tickerService = tickerService;
         this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
         this.gasService = gasService;
         this.tokensService = tokensService;

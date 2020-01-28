@@ -5,14 +5,15 @@ import com.alphawallet.app.entity.AmberDataElement;
 import com.alphawallet.app.entity.BlockscoutValue;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.tokens.TokenFactory;
-import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.repository.TokenRepository;
-import com.google.gson.Gson;
 import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenFactory;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.repository.TokenRepository;
+import com.google.gson.Gson;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,6 +45,8 @@ import io.reactivex.observers.DisposableObserver;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Response;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.repository.EthereumNetworkRepository.CLASSIC_ID;
@@ -60,7 +63,6 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 
 public class CoinmarketcapTickerService implements TickerService
 {
-
     private static final String COINMARKET_API_URL = "https://pro-api.coinmarketcap.com";
     private static final String MEDIANIZER = "0x729D19f657BD0614b4985Cf1D82531c67569197B";
 
@@ -186,7 +188,7 @@ public class CoinmarketcapTickerService implements TickerService
     }
 
     @Override
-    public Single<Token[]> getTokensOnNetwork(NetworkInfo info, String address)
+    public Single<Token[]> getTokensOnNetwork(NetworkInfo info, String address, TokensService tokensService)
     {
         //TODO: find tokens on other networks
         String netName = "ethereum-mainnet";
@@ -204,11 +206,11 @@ public class CoinmarketcapTickerService implements TickerService
                         .addHeader("x-amberdata-blockchain-id", netName)
                         .build();
                 okhttp3.Response response = httpClient.newCall(request)
-                        .execute();
+                        .execute(); //https://web3api.io/api/v2/market/tokens/prices/0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359/latest
                 if (response.code() / 200 == 1)
                 {
                     String result = response.body().string();
-                    handleTokenList(info, tokenList, result, address);
+                    handleTokenList(info, tokenList, result, address, tokensService);
                 }
             }
             catch (IOException e)
@@ -220,7 +222,7 @@ public class CoinmarketcapTickerService implements TickerService
         });
     }
 
-    private void handleTokenList(NetworkInfo network, List<Token> tokenList, String result, String currentAddress)
+    private void handleTokenList(NetworkInfo network, List<Token> tokenList, String result, String currentAddress, TokensService tokensService)
     {
         if (result.contains("NOTOK")) return;
 
@@ -239,6 +241,8 @@ public class CoinmarketcapTickerService implements TickerService
                 if (balanceStr.length() == 0 || balanceStr.equals("0")) continue;
                 String    decimalsStr = t.getString("decimals");
                 int       decimals    = (decimalsStr.length() > 0) ? Integer.parseInt(decimalsStr) : 0;
+                Token existingToken = tokensService.getToken(network.chainId, t.getString("address"));
+                if (decimals == 0 || (existingToken != null && !existingToken.isERC20())) continue;
                 TokenInfo info        = new TokenInfo(t.getString("address"), t.getString("name"), t.getString("symbol"), decimals, true, network.chainId);
                 //now create token with balance info, only for ERC20 for now
                 if (decimalsStr.length() > 0)
@@ -246,6 +250,8 @@ public class CoinmarketcapTickerService implements TickerService
                     BigDecimal balance = new BigDecimal(balanceStr);
                     Token newToken = tf.createToken(info, balance, null, System.currentTimeMillis(), ContractType.ERC20, network.getShortName(), System.currentTimeMillis());
                     newToken.setTokenWallet(currentAddress);
+                    if (existingToken != null) newToken.transferPreviousData(existingToken);
+                    attachTokenTicker(newToken, erc20Tickers.get(newToken.tokenInfo.address.toLowerCase()));
                     newToken.refreshCheck = false;
                     tokenList.add(newToken);
                 }
@@ -254,6 +260,91 @@ public class CoinmarketcapTickerService implements TickerService
         catch (JSONException e)
         {
             e.printStackTrace();
+        }
+    }
+
+    private Single<Map<Integer, Ticker>> addERC20Tickers(Map<Integer, Ticker> tickers)
+    {
+        return Single.fromCallable(() -> {
+            try
+            {
+                Request request = new Request.Builder()
+                        .url("https://web3api.io/api/v2/tokens/rankings?type=erc20")
+                        .get()
+                        .addHeader("x-api-key", BuildConfig.AmberdataAPI)
+                        .build();
+
+                okhttp3.Response response = httpClient.newCall(request)
+                        .execute();
+
+                handleTokenTickers(response);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return tickers;
+        });
+    }
+
+    private void handleTokenTickers(@NotNull okhttp3.Response response) throws IOException, JSONException
+    {
+        if (response.code() / 200 == 1)
+        {
+            String result = response.body()
+                    .string();
+            JSONObject         stateData = new JSONObject(result);
+            JSONObject         payload   = stateData.getJSONObject("payload");
+            JSONArray          data      = payload.getJSONArray("data");
+            Ticker             ticker;
+            for (int i = 0; i < data.length(); i++)
+            {
+                JSONObject e = (JSONObject) data.get(i);
+                ticker = tickerFromAmber(e);
+                if (erc20Tickers == null) erc20Tickers = new HashMap<>();
+                erc20Tickers.put(e.getString("address").toLowerCase(), ticker);
+            }
+        }
+    }
+
+    private void handlerTickers(Map<Integer, Ticker> tickers, @NotNull okhttp3.Response response) throws IOException, JSONException
+    {
+        if (response.code() / 200 == 1)
+        {
+            String result = response.body()
+                    .string();
+            JSONObject         stateData = new JSONObject(result);
+            JSONObject         payload   = stateData.getJSONObject("payload");
+            JSONArray          data      = payload.getJSONArray("data");
+            AmberDataElement[] elements  = gson.fromJson(data.toString(), AmberDataElement[].class);
+            Ticker             ticker;
+            for (AmberDataElement e : elements)
+            {
+                ticker = tickerFromAmber(e);
+                switch (e.symbol)
+                {
+                    case "eth":
+                        tickers.put(MAINNET_ID, ticker);
+                        tickers.put(RINKEBY_ID, ticker);
+                        tickers.put(ROPSTEN_ID, ticker);
+                        tickers.put(KOVAN_ID, ticker);
+                        tickers.put(GOERLI_ID, ticker);
+                        break;
+                    case "DAI":
+                        tickers.put(XDAI_ID, ticker);
+                        break;
+                    case "etc":
+                        tickers.put(CLASSIC_ID, ticker);
+                        break;
+                }
+
+                if (e.address != null && e.specifications != null && e.specifications.length > 0 && e.specifications[0].equals("ERC20"))
+                {
+                    if (erc20Tickers == null) erc20Tickers = new HashMap<>();
+                    erc20Tickers.put(e.address, ticker);
+                }
+            }
         }
     }
 
@@ -272,42 +363,8 @@ public class CoinmarketcapTickerService implements TickerService
                         .build();
                 okhttp3.Response response = httpClient.newCall(request)
                         .execute();
-                if (response.code() / 200 == 1)
-                {
-                    String result = response.body()
-                            .string();
-                    JSONObject         stateData = new JSONObject(result);
-                    JSONObject         payload   = stateData.getJSONObject("payload");
-                    JSONArray          data      = payload.getJSONArray("data");
-                    AmberDataElement[] elements  = gson.fromJson(data.toString(), AmberDataElement[].class);
-                    Ticker             ticker;
-                    for (AmberDataElement e : elements)
-                    {
-                        ticker = tickerFromAmber(e);
-                        switch (e.symbol)
-                        {
-                            case "eth":
-                                tickers.put(MAINNET_ID, ticker);
-                                tickers.put(RINKEBY_ID, ticker);
-                                tickers.put(ROPSTEN_ID, ticker);
-                                tickers.put(KOVAN_ID, ticker);
-                                tickers.put(GOERLI_ID, ticker);
-                                break;
-                            case "DAI":
-                                tickers.put(XDAI_ID, ticker);
-                                break;
-                            case "etc":
-                                tickers.put(CLASSIC_ID, ticker);
-                                break;
-                        }
 
-                        if (e.address != null && e.specifications != null && e.specifications.length > 0 && e.specifications[0].equals("ERC20"))
-                        {
-                            if (erc20Tickers == null) erc20Tickers = new HashMap<>();
-                            erc20Tickers.put(e.address, ticker);
-                        }
-                    }
-                }
+                handlerTickers(tickers, response);
             }
             catch (IOException e)
             {
@@ -315,7 +372,7 @@ public class CoinmarketcapTickerService implements TickerService
             }
 
             return tickers;
-        });
+        }).flatMap(this::addERC20Tickers);
     }
 
     private Ticker tickerFromAmber(AmberDataElement e)
@@ -327,6 +384,18 @@ public class CoinmarketcapTickerService implements TickerService
         ticker.percentChange24h = change.setScale(3, RoundingMode.DOWN).toString();
         ticker.symbol = e.symbol;
         ticker.name = e.name;
+        return ticker;
+    }
+
+    private Ticker tickerFromAmber(JSONObject e) throws JSONException
+    {
+        Ticker ticker = new Ticker();
+        ticker.price_usd = e.getString("currentPrice");
+        ticker.id = e.getString("address");
+        BigDecimal change = new BigDecimal(e.getString("changeInPriceDaily"));
+        ticker.percentChange24h = change.setScale(3, RoundingMode.DOWN).toString();
+        ticker.symbol = e.getString("symbol");
+        ticker.name = e.getString("name");
         return ticker;
     }
 
@@ -343,10 +412,6 @@ public class CoinmarketcapTickerService implements TickerService
             BigDecimal change = new BigDecimal(usdData.getString("percent_change_24h"));
             ticker.percentChange24h = change.setScale(3, RoundingMode.DOWN).toString();
             ticker.price_usd = usdData.getString("price");
-        }
-        catch (JSONException j)
-        {
-            j.printStackTrace();
         }
         catch (Exception e)
         {
@@ -534,5 +599,4 @@ public class CoinmarketcapTickerService implements TickerService
                 Arrays.<Type>asList(),
                 Collections.singletonList(new TypeReference<Uint256>() {}));
     }
-
 }

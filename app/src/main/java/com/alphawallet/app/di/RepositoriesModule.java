@@ -127,13 +127,11 @@ public class RepositoriesModule {
     TokenRepositoryType provideTokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenLocalSource tokenLocalSource,
-            TickerService tickerService,
 			GasService gasService,
 			TokensService tokensService) {
 	    return new TokenRepository(
 	            ethereumNetworkRepository,
                 tokenLocalSource,
-                tickerService,
 				gasService,
 				tokensService);
     }

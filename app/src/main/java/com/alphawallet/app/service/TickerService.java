@@ -17,7 +17,7 @@ public interface TickerService {
     Single<Ticker> fetchEthPrice(NetworkInfo networkInfo, Ticker ticker);
     Single<Ticker> fetchBlockScoutPrice(NetworkInfo networkInfo, Ticker ticker);
     Single<Map<Integer, Ticker>> fetchAmberData();
-    Single<Token[]> getTokensOnNetwork(NetworkInfo info, String address);
+    Single<Token[]> getTokensOnNetwork(NetworkInfo info, String address, TokensService tokensService);
     Single<Token> attachTokenTicker(Token token);
     Single<Token[]> attachTokenTickers(Token[] tokens);
     boolean hasTickers();

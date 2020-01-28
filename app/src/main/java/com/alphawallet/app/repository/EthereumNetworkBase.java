@@ -13,6 +13,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ChainSpec;
 import com.alphawallet.token.entity.MagicLinkInfo;
@@ -293,10 +294,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     @Override
-    public Single<Token[]> getTokensOnNetwork(int chainId, String address)
+    public Single<Token[]> getTokensOnNetwork(int chainId, String address, TokensService tokensService)
     {
         NetworkInfo info = getNetworkByChain(chainId);
-        return tickerService.getTokensOnNetwork(info, address);
+        return tickerService.getTokensOnNetwork(info, address, tokensService);
     }
 
     private Single<Ticker> updateTicker(NetworkInfo networkInfo)

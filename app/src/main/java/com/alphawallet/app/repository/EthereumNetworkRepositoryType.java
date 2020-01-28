@@ -10,6 +10,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.service.TokensService;
 
 import io.reactivex.Single;
 
@@ -32,7 +33,7 @@ public interface EthereumNetworkRepositoryType {
 	TokenTicker getTokenTicker(Token token);
 	String getNameById(int id);
 
-	Single<Token[]> getTokensOnNetwork(int chainId, String address);
+	Single<Token[]> getTokensOnNetwork(int chainId, String address, TokensService tokensService);
 
     List<Integer> getFilterNetworkList();
     void setFilterNetworkList(int[] networkList);

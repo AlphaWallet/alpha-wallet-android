@@ -269,7 +269,7 @@ public class WalletViewModel extends BaseViewModel
 
     private void getTokensOnNetwork()
     {
-        ethereumNetworkRepository.getTokensOnNetwork(MAINNET_ID, currentWallet.address)
+        ethereumNetworkRepository.getTokensOnNetwork(MAINNET_ID, currentWallet.address, tokensService)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::receiveNetworkTokens, this::onTokenBalanceError).isDisposed();

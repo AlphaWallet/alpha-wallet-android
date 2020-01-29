@@ -69,6 +69,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.lang.reflect.Method;
 
+import static com.alphawallet.app.C.CHANGED_LOCALE;
 import static com.alphawallet.app.widget.AWalletBottomNavigationView.*;
 
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface, FragmentMessenger, Runnable, SignAuthenticationCallback
@@ -148,6 +149,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
+        viewModel = ViewModelProviders.of(this, homeViewModelFactory)
+                .get(HomeViewModel.class);
+        viewModel.setLocale(this);
+
         setContentView(R.layout.activity_home);
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -189,11 +194,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
 
-        viewModel = ViewModelProviders.of(this, homeViewModelFactory)
-                .get(HomeViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
-        viewModel.setLocale(this);
         viewModel.installIntent().observe(this, this::onInstallIntent);
         viewModel.walletName().observe(this, this::onWalletName);
         viewModel.backUpMessage().observe(this, this::onBackup);
@@ -858,7 +860,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 }
                 break;
             case C.UPDATE_LOCALE:
-                ((NewSettingsFragment)settingsFragment).updateLocale(data);
+                updateLocale(data);
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
@@ -919,5 +921,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     void postponeWalletBackupWarning(String walletAddress)
     {
         removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+    }
+
+    public void updateLocale(Intent data)
+    {
+        if (data == null) return;
+        String newLocale = data.getStringExtra(C.EXTRA_LOCALE);
+        sendBroadcast(new Intent(CHANGED_LOCALE));
+        viewModel.updateLocale(newLocale, this);
     }
 }

@@ -6,7 +6,7 @@ import android.view.View;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.service.TickerServiceInterface;
 
 import java.util.*;
 
@@ -14,7 +14,7 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
 {
     private final Context context;
 
-    public EthereumNetworkRepository(PreferenceRepositoryType preferenceRepository, TickerService tickerService, Context ctx)
+    public EthereumNetworkRepository(PreferenceRepositoryType preferenceRepository, TickerServiceInterface tickerService, Context ctx)
     {
         super(preferenceRepository, tickerService, new NetworkInfo[0], true);
         context = ctx;

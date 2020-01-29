@@ -17,7 +17,6 @@ import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.Utils;
@@ -659,7 +658,7 @@ public class TokenRepository implements TokenRepositoryType {
                     }
                 })
                 .flatMap(token -> localSource.fetchTicker(wallet, token)
-                        .flatMap(ticker -> ethereumNetworkRepository.getTicker(network.chainId, ticker))
+                        .flatMap(ticker -> ethereumNetworkRepository.updateTicker(network.chainId, ticker))
                         .map(ticker -> {
                             token.ticker = new TokenTicker(String.valueOf(network.chainId), wallet.address, ticker.price_usd, ticker.percentChange24h, "USD", null);
                             return token;
@@ -687,7 +686,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<Ticker> getEthTicker(int chainId)
     {
-        return ethereumNetworkRepository.getTicker(chainId, null);
+        return ethereumNetworkRepository.getTicker(chainId);
     }
 
     @Override

@@ -248,7 +248,7 @@ public class TokensService
         {
             if (t.isBad() || t.getInterfaceSpec() == ContractType.OTHER) continue;
             Token check = getToken(t.tokenInfo.chainId, t.tokenInfo.address);
-            if (check == null || t.checkBalanceChange(check))
+            if (check == null || t.checkBalanceChange(check) || t.checkTickerChange(check))
             {
                 changedTokens.add(t);
             }

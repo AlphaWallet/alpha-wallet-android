@@ -3,6 +3,7 @@ package com.alphawallet.app.di;
 import android.content.Context;
 
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.service.TickerServiceInterface;
 import com.google.gson.Gson;
 
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
@@ -22,8 +23,7 @@ import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.service.AccountKeystoreService;
 import com.alphawallet.app.service.AlphaWalletService;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.CoinmarketcapTickerService;
-import com.alphawallet.app.service.EthplorerTokenService;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.ImportTokenService;
 import com.alphawallet.app.service.KeyService;
@@ -32,8 +32,6 @@ import com.alphawallet.app.service.MarketQueueService;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.OpenseaService;
 import com.alphawallet.app.service.RealmManager;
-import com.alphawallet.app.service.TickerService;
-import com.alphawallet.app.service.TokenExplorerClientType;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsNetworkClient;
 import com.alphawallet.app.service.TransactionsNetworkClientType;
@@ -65,15 +63,15 @@ public class RepositoriesModule {
 
 	@Singleton
     @Provides
-    TickerService provideTickerService(OkHttpClient httpClient, Gson gson) {
-		return new CoinmarketcapTickerService(httpClient, gson);
+	TickerServiceInterface provideTickerService(OkHttpClient httpClient, Gson gson) {
+		return new TickerService(httpClient, gson);
     }
 
 	@Singleton
 	@Provides
 	EthereumNetworkRepositoryType provideEthereumNetworkRepository(
             PreferenceRepositoryType preferenceRepository,
-            TickerService tickerService,
+            TickerServiceInterface tickerService,
 			Context context) {
 		return new EthereumNetworkRepository(preferenceRepository, tickerService, context);
 	}
@@ -134,12 +132,6 @@ public class RepositoriesModule {
                 tokenLocalSource,
 				gasService,
 				tokensService);
-    }
-
-	@Singleton
-    @Provides
-    TokenExplorerClientType provideTokenService(OkHttpClient okHttpClient, Gson gson) {
-	    return new EthplorerTokenService(okHttpClient, gson);
     }
 
     @Singleton

@@ -222,7 +222,7 @@ public class GasService implements ContractGasProvider
             }
             else
             {
-                gasLimit = new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_TOKENS);
+                gasLimit = new BigInteger(C.DEFAULT_UNKNOWN_FUNCTION_GAS_LIMIT);
             }
             BigInteger estimate = estimateGasLimit(transactionBytes);
             if (estimate.compareTo(gasLimit) > 0) gasLimit = estimate;

@@ -38,6 +38,7 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.viewmodel.BackupKeyViewModel;
 import com.alphawallet.app.viewmodel.BackupKeyViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.LayoutCallbackListener;
 import com.alphawallet.app.widget.PasswordInputView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 
@@ -45,7 +46,7 @@ import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.SHARE_REQUEST_CODE;
 
 public class BackupKeyActivity extends BaseActivity implements View.OnClickListener,
-        CreateWalletCallbackInterface, TextWatcher, SignAuthenticationCallback, Runnable
+                                                               CreateWalletCallbackInterface, TextWatcher, SignAuthenticationCallback, Runnable, LayoutCallbackListener
 {
     @Inject
     BackupKeyViewModelFactory backupKeyViewModelFactory;
@@ -76,6 +77,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     private int seedTextSize;
     private int seedTextHPadding;
     private int seedTextVPadding;
+    private String keystorePassword;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -432,6 +434,8 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                 JSONBackup();
                 break;
             case SET_JSON_PASSWORD:
+                inputView = findViewById(R.id.input_password);
+                keystorePassword = inputView.getText().toString();
                 viewModel.getPasswordForKeystore(wallet, this, this);
                 break;
             case SHOW_SEED_PHRASE:
@@ -465,6 +469,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         inputView.getEditText().addTextChangedListener(this);
         nextButton.setText(R.string.share_keystore);
         updateButtonState(false);
+        inputView.setLayoutListener(this, this, null);
     }
 
     private void TestSeedPhrase()
@@ -647,16 +652,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     {
         seedWord.setTextSize(TypedValue.COMPLEX_UNIT_SP, seedTextSize);
         seedWord.setPadding(seedTextHPadding, seedTextVPadding, seedTextHPadding, seedTextVPadding);
-//        if (layoutHolderWidth > 600)
-//        {
-//            seedWord.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-//            seedWord.setPadding(40, 25, 40, 25);
-//        }
-//        else
-//        {
-//            seedWord.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-//            seedWord.setPadding(16, 6, 16, 6);
-//        }
     }
 
     private TextView addWordToLayout(String word)
@@ -748,8 +743,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
                 break;
             case ENTER_JSON_BACKUP:
             case SET_JSON_PASSWORD:
-                inputView = findViewById(R.id.input_password);
-                viewModel.exportWallet(wallet, mnemonic, inputView.getText().toString());
+                viewModel.exportWallet(wallet, mnemonic, keystorePassword);
                 break;
             case SHOW_SEED_PHRASE:
                 setupTestSeed();
@@ -929,6 +923,33 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         }
     }
 
+    @Override
+    public void onLayoutShrunk()
+    {
+
+    }
+
+    @Override
+    public void onLayoutExpand()
+    {
+
+    }
+
+    @Override
+    public void onInputDoneClick(View view)
+    {
+        inputView = findViewById(R.id.input_password);
+        keystorePassword = inputView.getText().toString();
+        if (keystorePassword.length() > 5)
+        {
+            viewModel.getPasswordForKeystore(wallet, this, this);
+        }
+        else
+        {
+            inputView.setError(R.string.password_6_characters_or_more);
+        }
+    }
+
     private enum BackupState
     {
         UNDEFINED, ENTER_BACKUP_STATE_HD, WRITE_DOWN_SEED_PHRASE, VERIFY_SEED_PHRASE, SEED_PHRASE_INVALID,
@@ -939,31 +960,4 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     {
         UNDEFINED, BACKUP_HD_KEY, BACKUP_KEYSTORE_KEY, SHOW_SEED_PHRASE, EXPORT_PRIVATE_KEY, UPGRADE_KEY
     }
-
-//                switch (operation)
-//    {
-//        case CREATE_HD_KEY:
-//        case CREATE_NON_AUTHENTICATED_KEY:
-//            if (callbackInterface != null)
-//                callbackInterface.HDKeyCreated(address, context, authLevel);
-//            break;
-//        case IMPORT_HD_KEY:
-//            importCallback.WalletValidated(address, authLevel);
-//            deleteNonAuthKeyEncryptedKeyBytes(address); //in the case the user re-imported a key, destroy the backup key
-//            break;
-//        case UPGRADE_HD_KEY:
-//        case UPGRADE_KEYSTORE_KEY:
-//            signCallback.CreatedKey(address);
-//            deleteNonAuthKeyEncryptedKeyBytes(address);
-//            break;
-//        case CREATE_KEYSTORE_KEY:
-//            importCallback.KeystoreValidated(new String(data), authLevel);
-//            break;
-//        case CREATE_PRIVATE_KEY:
-//            importCallback.KeyValidated(new String(data), authLevel);
-//            break;
-//        default:
-//            break;
-//    }
-
 }

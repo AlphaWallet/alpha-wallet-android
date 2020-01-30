@@ -38,6 +38,7 @@ import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.viewmodel.MyAddressViewModelFactory;
 import com.alphawallet.app.widget.FunctionButtonBar;
 
+import org.web3j.crypto.Keys;
 import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
@@ -256,7 +257,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
             amountInput = null;
         }
 
-        displayAddress = wallet.address;
+        displayAddress = Keys.toChecksumAddress(wallet.address);
         setTitle(getString(R.string.my_wallet_address));
         address.setText(displayAddress);
         currentMode = MODE_ADDRESS;

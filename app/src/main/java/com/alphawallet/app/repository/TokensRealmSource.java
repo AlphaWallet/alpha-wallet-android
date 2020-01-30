@@ -255,6 +255,7 @@ public class TokensRealmSource implements TokenLocalSource {
 
     private void writeTickerToRealm(Realm realm, final Token token)
     {
+        if (token.ticker == null) return;
         long now = System.currentTimeMillis();
         String tickerName = databaseKey(token);
         RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
@@ -412,6 +413,12 @@ public class TokensRealmSource implements TokenLocalSource {
                     Token newToken = tf.createToken(info, rt, rt.getUpdateTime(), network.getShortName());//; new Token(info, balance, realmItem.getUpdatedTime());
                     newToken.setTokenWallet(wallet.address);
                     if (address.equals(wallet.address)) newToken.setIsEthereum();
+
+                    RealmTokenTicker rawItem = realm.where(RealmTokenTicker.class)
+                            .equalTo("contract", newToken.getAddress() + "-" + newToken.tokenInfo.chainId)
+                            .findFirst();
+
+                    newToken.ticker = convertRealmTicker(rawItem);
                     result.put(info.chainId, newToken);
                 }
             }
@@ -540,6 +547,10 @@ public class TokensRealmSource implements TokenLocalSource {
             token.setRealmLastBlock(realmToken);
             realmToken.setEnabled(token.tokenInfo.isEnabled);
             realmToken.setChainId(token.tokenInfo.chainId);
+            if (token.ticker != null)
+            {
+                writeTickerToRealm(realm, token);
+            }
             if (token.isERC721())
             {
                 saveERC721Assets(realm, token);
@@ -557,6 +568,10 @@ public class TokensRealmSource implements TokenLocalSource {
                 token.setRealmInterfaceSpec(realmToken);
                 token.setRealmBalance(realmToken);
                 token.setRealmLastBlock(realmToken);
+                if (token.ticker != null)
+                {
+                    writeTickerToRealm(realm, token);
+                }
                 if (token.isERC721())
                 {
                     saveERC721Assets(realm, token);
@@ -721,6 +736,11 @@ public class TokensRealmSource implements TokenLocalSource {
         NetworkInfo  network = ethereumNetworkRepository.getNetworkByChain(info.chainId);
         result = tf.createToken(info, realmItem, realmItem.getUpdateTime(), network.getShortName());
         result.setTokenWallet(wallet.address);
+        RealmTokenTicker rawItem = realm.where(RealmTokenTicker.class)
+                .equalTo("contract", result.getAddress() + "-" + result.tokenInfo.chainId)
+                .findFirst();
+
+        result.ticker = convertRealmTicker(rawItem);
 
         if (result.isERC721()) //add erc721 assets
         {

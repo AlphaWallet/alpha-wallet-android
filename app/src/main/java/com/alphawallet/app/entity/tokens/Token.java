@@ -1034,4 +1034,10 @@ public class Token implements Parcelable
     {
         TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
     }
+
+    public boolean checkTickerChange(Token check)
+    {
+        if (check.ticker == null && ticker != null) return true; //now has ticker
+        else return check.ticker != null && ticker != null && !check.ticker.price.equals(ticker.price); //return true if ticker changed
+    }
 }

@@ -46,11 +46,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
+import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+
 public class WalletViewModel extends BaseViewModel
 {
     private static final int BALANCE_CHECK_INTERVAL_MILLIS = 500; //Balance check interval in milliseconds - should be integer divisible with 1000 (1 second)
     private static final int CHECK_OPENSEA_INTERVAL_TIME = 40; //Opensea refresh interval in seconds
-    private static final int CHECK_BLOCKSCOUT_INTERVAL_TIME = 30;
+    private static final int CHECK_TOKENS_INTERVAL_TIME = 30;
     private static final int OPENSEA_RINKEBY_CHECK = 3; //check Rinkeby opensea once per XX opensea checks (ie if interval time is 25 and rinkeby check is 1 in 6, rinkeby refresh time is once per 300 seconds).
     public static double VALUE_THRESHOLD = 200.0; //$200 USD value is difference between red and grey backup warnings
 
@@ -213,7 +215,7 @@ public class WalletViewModel extends BaseViewModel
 
     private void startBalanceUpdate()
     {
-        fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.MAINNET_ID));
+        fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(MAINNET_ID));
         updateTokenBalances();
         assetDefinitionService.checkTokenscriptEnabledTokens(tokensService);
     }
@@ -265,12 +267,12 @@ public class WalletViewModel extends BaseViewModel
         onFetchTokensCompletable();
     }
 
-    private void fetchFromBlockscout()
+    private void getTokensOnNetwork()
     {
-        updateTokens = tokensService.getTokensAtAddress()
+        ethereumNetworkRepository.getTokensOnNetwork(MAINNET_ID, currentWallet.address, tokensService)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::receiveNetworkTokens, this::onBlockscoutError);
+                .subscribe(this::receiveNetworkTokens, this::onTokenBalanceError).isDisposed();
     }
 
     private void receiveNetworkTokens(Token[] receivedTokens)
@@ -289,9 +291,9 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
-    private void onBlockscoutError(Throwable throwable)
+    private void onTokenBalanceError(Throwable throwable)
     {
-        //unable to resolve blockscout - phone may be offline
+        //unable to resolve - phone may be offline
     }
 
     private void onFetchTokensCompletable()
@@ -539,7 +541,7 @@ public class WalletViewModel extends BaseViewModel
                     .map(needsBackup -> calculateBackupWarning(needsBackup, calcValue))
                     .subscribeOn(Schedulers.computation())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(backupEvent::postValue, this::onBlockscoutError).isDisposed();
+                    .subscribe(backupEvent::postValue, this::onTokenBalanceError).isDisposed();
         }
     }
 
@@ -578,11 +580,11 @@ public class WalletViewModel extends BaseViewModel
     {
         if (isVisible) //update at half speed if not visible
         {
-            openSeaCheckCounter++;
+            openSeaCheckCounter += 2;
         }
         else
         {
-            openSeaCheckCounter += 2;
+            openSeaCheckCounter ++;
         }
 
         //init events
@@ -602,7 +604,7 @@ public class WalletViewModel extends BaseViewModel
 
         if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * updateCorrection) == 0)
         {
-            NetworkInfo openSeaCheck = ethereumNetworkRepository.getNetworkByChain(EthereumNetworkRepository.MAINNET_ID);
+            NetworkInfo openSeaCheck = ethereumNetworkRepository.getNetworkByChain(MAINNET_ID);
 
             if (openSeaCheckCounter % (CHECK_OPENSEA_INTERVAL_TIME * updateCorrection * OPENSEA_RINKEBY_CHECK) == 0 && ethereumNetworkRepository.getFilterNetworkList().contains(EthereumNetworkRepository.RINKEBY_ID))
             {
@@ -611,9 +613,9 @@ public class WalletViewModel extends BaseViewModel
 
             fetchFromOpensea(openSeaCheck);
         }
-        else if ((openSeaCheckCounter - 8) % (CHECK_BLOCKSCOUT_INTERVAL_TIME * updateCorrection) == 0)
+        else if ((openSeaCheckCounter - 8) % (CHECK_TOKENS_INTERVAL_TIME * updateCorrection) == 0)
         {
-            fetchFromBlockscout();
+            getTokensOnNetwork();
         }
     }
 

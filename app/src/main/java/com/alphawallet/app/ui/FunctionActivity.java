@@ -381,15 +381,15 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                         args.put(e.ref, e.value);
                         break;
                     case e8:
-                        e.value = new BigInteger(valueFromInput).multiply(new BigInteger("8")).toString();
+                        e.value = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("100000000"));
                         args.put(e.ref, e.value);
                         break;
                     case e4:
-                        e.value = new BigInteger(valueFromInput).multiply(new BigInteger("4")).toString();
+                        e.value = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("1000"));
                         args.put(e.ref, e.value);
                         break;
                     case e2:
-                        e.value = new BigInteger(valueFromInput).multiply(new BigInteger("2")).toString();
+                        e.value = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("100"));
                         args.put(e.ref, e.value);
                         break;
                     case Mapping:

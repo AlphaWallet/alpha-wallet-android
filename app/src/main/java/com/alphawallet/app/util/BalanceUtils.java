@@ -24,6 +24,11 @@ public class BalanceUtils {
         return wei.toBigInteger().toString();
     }
 
+    public static String UnitToEMultiplier(String value, BigDecimal decimalPlaces) {
+        BigDecimal val = new BigDecimal(value).multiply(decimalPlaces);
+        return val.toBigInteger().toString();
+    }
+
     public static BigDecimal weiToGweiBI(BigInteger wei) {
         return Convert.fromWei(new BigDecimal(wei), Convert.Unit.GWEI);
     }

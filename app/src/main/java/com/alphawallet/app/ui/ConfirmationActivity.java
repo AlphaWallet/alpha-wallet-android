@@ -83,7 +83,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private int decimals;
     private String contractAddress;
     private String amountStr;
-    private String toAddress;
+    private String to;
     private String transactionHex;
     private Token token;
     private int chainId;
@@ -124,7 +124,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
         transaction = getIntent().getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
 
-        toAddress = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
+        to = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
         confirmationType = ConfirmationType.values()[getIntent().getIntExtra(C.TOKEN_TYPE, 0)];
         String ensName = getIntent().getStringExtra(C.EXTRA_ENS_DETAILS);
@@ -169,28 +169,28 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 contractAddrText.setText(contractAddress);
                 amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString();
                 symbolText.setText(symbol);
-                transactionBytes = TokenRepository.createTokenTransferData(toAddress, amount.toBigInteger());
+                transactionBytes = TokenRepository.createTokenTransferData(to, amount.toBigInteger());
                 break;
             case ERC875:
                 contractAddrText.setVisibility(View.VISIBLE);
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 contractAddrText.setText(contractAddress);
                 amountString = tokenList;
-                transactionBytes = viewModel.getERC875TransferBytes(toAddress, contractAddress, amountStr, chainId);
+                transactionBytes = viewModel.getERC875TransferBytes(to, contractAddress, amountStr, chainId);
                 break;
             case MARKET:
                 amountString = tokenList;
-                toAddress = "Stormbird market";
+                to = "Stormbird market";
                 break;
             case TOKENSCRIPT:
                 title.setVisibility(View.VISIBLE);
                 title.setText(R.string.confirm_tokenscript_transaction);
-                toAddress = "TokenScript: " + getIntent().getStringExtra(C.EXTRA_FUNCTION_NAME);
+                to = getIntent().getStringExtra(C.EXTRA_ACTION_NAME) + " Contract";
 
                 contractAddrText.setVisibility(View.VISIBLE);
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 contractAddrText.setText(contractAddress);
-                amountString = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);
+                amountString = getIntent().getStringExtra(C.EXTRA_ACTION_NAME);
                 symbolText.setVisibility(View.GONE);
 
                 transactionHex = getIntent().getStringExtra(C.EXTRA_TRANSACTION_DATA);
@@ -200,7 +200,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
             case WEB3TRANSACTION:
                 title.setVisibility(View.VISIBLE);
                 title.setText(R.string.confirm_dapp_transaction);
-                toAddress = transaction.recipient.toString();
+                to = transaction.recipient.toString();
                 if (transaction.payload == null) //pure ETH transaction
                 {
                     confirmationType = ETH;
@@ -211,16 +211,16 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                     BigInteger addr = Numeric.toBigInt(transaction.recipient.toString());
                     if (addr.equals(BigInteger.ZERO)) //constructor
                     {
-                        toAddress = getString(R.string.ticket_contract_constructor);
+                        to = getString(R.string.ticket_contract_constructor);
                     }
                     else //function call to contract
                     {
                         moreDetail.setVisibility(View.VISIBLE);
-                        moreDetail.setOnClickListener(v -> { viewModel.showMoreDetails(this, toAddress, chainId); }); // allow user to check out contract
+                        moreDetail.setOnClickListener(v -> { viewModel.showMoreDetails(this, to, chainId); }); // allow user to check out contract
                     }
                     transactionBytes = Numeric.hexStringToByteArray(transaction.payload);
                 }
-                String urlRequester = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);
+                String urlRequester = getIntent().getStringExtra(C.EXTRA_ACTION_NAME);
                 checkTransactionGas();
 
                 if (urlRequester != null)
@@ -235,7 +235,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 symbolText.setText(ETH_SYMBOL);
                 break;
             case ERC721:
-                String contractName = getIntent().getStringExtra(C.EXTRA_CONTRACT_NAME);
+                String contractName = getIntent().getStringExtra(C.EXTRA_ACTION_NAME);
                 title.setVisibility(View.VISIBLE);
                 title.setText(R.string.confirm_erc721_transfer);
                 contractAddrText.setVisibility(View.VISIBLE);
@@ -244,7 +244,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 contractAddrText.setText(contractTxt);
                 symbolText.setText(token.tokenInfo.symbol);
                 amountString = symbol;
-                transactionBytes = viewModel.getERC721TransferBytes(toAddress, contractAddress, amountStr, chainId);
+                transactionBytes = viewModel.getERC721TransferBytes(to, contractAddress, amountStr, chainId);
                 break;
             default:
                 amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString();
@@ -259,7 +259,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         }
         else
         {
-            toAddressText.setText(toAddress);
+            toAddressText.setText(to);
         }
 
         valueText.setText(amountString);
@@ -351,7 +351,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
             case ETH:
                 viewModel.createTransaction(
                         sendingWallet,
-                        toAddress,
+                        to,
                         amount.toBigInteger(),
                         localGasSettings.gasPrice,
                         localGasSettings.gasLimit,
@@ -361,7 +361,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
             case ERC20:
                 viewModel.createTokenTransfer(
                         sendingWallet,
-                        toAddress,
+                        to,
                         contractAddress,
                         amount.toBigInteger(),
                         localGasSettings.gasPrice,
@@ -372,7 +372,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
             case ERC875:
                 viewModel.createTicketTransfer(
                         sendingWallet,
-                        toAddress,
+                        to,
                         contractAddress,
                         amountStr,
                         localGasSettings.gasPrice,
@@ -390,7 +390,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
             case ERC721:
                 viewModel.createERC721Transfer(
-                        toAddress,
+                        to,
                         contractAddress,
                         amountStr,
                         localGasSettings.gasPrice,

@@ -55,7 +55,7 @@ public abstract class C {
     public static final String EXTRA_AMOUNT = "AMOUNT";
     public static final String EXTRA_GAS_PRICE = "GAS_PRICE";
     public static final String EXTRA_GAS_LIMIT = "GAS_LIMIT";
-    public static final String EXTRA_CONTRACT_NAME = "NAME";
+    public static final String EXTRA_ACTION_NAME = "NAME";
     public static final String EXTRA_TOKEN_ID = "TID";
     public static final String EXTRA_TOKEN_BALANCE = "BALANCE";
     public static final String EXTRA_TOKENID_LIST = "TOKENIDLIST";

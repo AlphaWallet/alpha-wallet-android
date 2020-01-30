@@ -44,7 +44,7 @@ public class ConfirmationRouter {
         intent.putExtra(C.TOKEN_TYPE, ConfirmationType.WEB3TRANSACTION.ordinal());
         intent.putExtra(C.EXTRA_NETWORK_NAME, networkName);
         intent.putExtra(C.EXTRA_NETWORK_MAINNET, isMainNet);
-        intent.putExtra(C.EXTRA_CONTRACT_NAME, requesterURL);
+        intent.putExtra(C.EXTRA_ACTION_NAME, requesterURL);
         intent.putExtra(C.EXTRA_NETWORKID, chainId);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         context.startActivityForResult(intent, C.REQUEST_TRANSACTION_CALLBACK);
@@ -61,7 +61,7 @@ public class ConfirmationRouter {
         intent.putExtra(C.EXTRA_SENDING_TOKENS, true);
         intent.putExtra(C.TOKEN_TYPE, ConfirmationType.ERC721.ordinal());
         intent.putExtra(C.EXTRA_TOKENID_LIST, tokenId);
-        intent.putExtra(C.EXTRA_CONTRACT_NAME, name);
+        intent.putExtra(C.EXTRA_ACTION_NAME, name);
         intent.putExtra(C.EXTRA_ENS_DETAILS, ensDetails);
         intent.putExtra(C.EXTRA_NETWORKID, chainId);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

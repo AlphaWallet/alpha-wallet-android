@@ -160,7 +160,7 @@ public class GasService implements ContractGasProvider
                 return new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS).multiply(BigInteger.valueOf(2));
 
             default:
-                return new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_TOKENS);
+                return new BigInteger(C.DEFAULT_UNKNOWN_FUNCTION_GAS_LIMIT);
         }
     }
 

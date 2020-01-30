@@ -1,6 +1,5 @@
 package com.alphawallet.app.repository;
 
-import android.service.notification.ZenPolicy;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -11,30 +10,31 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SubscribeWrapper;
 import com.alphawallet.app.entity.Ticker;
+import com.alphawallet.app.entity.TransferFromEventResponse;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
-import com.alphawallet.app.entity.TransferFromEventResponse;
-import com.alphawallet.app.entity.VisibilityFilter;
-import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.Utils;
-
-import io.reactivex.Completable;
-import io.reactivex.Observable;
-import io.reactivex.Single;
-import io.reactivex.SingleTransformer;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import com.alphawallet.token.entity.MagicLinkData;
-import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.service.TickerService;
-import com.alphawallet.app.service.TokensService;
 
-import okhttp3.OkHttpClient;
-import org.web3j.abi.*;
-import org.web3j.abi.datatypes.*;
+import org.web3j.abi.EventEncoder;
+import org.web3j.abi.EventValues;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Bool;
+import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.Event;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Uint;
+import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Bytes4;
 import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.abi.datatypes.generated.Uint256;
@@ -50,9 +50,21 @@ import org.web3j.utils.Numeric;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Completable;
+import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.SingleTransformer;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import okhttp3.OkHttpClient;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.repository.EthereumNetworkRepository.MAINNET_ID;
@@ -64,7 +76,6 @@ public class TokenRepository implements TokenRepositoryType {
     private static final String TAG = "TRT";
     private final TokenLocalSource localSource;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
-    private final TickerService tickerService;
     private final GasService gasService;
     private final TokensService tokensService;
 
@@ -85,12 +96,10 @@ public class TokenRepository implements TokenRepositoryType {
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenLocalSource localSource,
-            TickerService tickerService,
             GasService gasService,
             TokensService tokensService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.localSource = localSource;
-        this.tickerService = tickerService;
         this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
         this.gasService = gasService;
         this.tokensService = tokensService;
@@ -102,7 +111,6 @@ public class TokenRepository implements TokenRepositoryType {
                 .writeTimeout(5, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(false)
                 .build();
-        buildWeb3jClient(ethereumNetworkRepository.getDefaultNetwork());
     }
 
     private void buildWeb3jClient(NetworkInfo networkInfo)
@@ -114,14 +122,10 @@ public class TokenRepository implements TokenRepositoryType {
 
     private Web3j getService(int chainId)
     {
-        NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(chainId);
-        if (!web3jNodeServers.containsKey(chainId) && networkInfo != null)
+        if (!web3jNodeServers.containsKey(chainId))
         {
-            HttpService publicNodeService = new HttpService(networkInfo.rpcServerUrl, okClient, false);
-            EthereumNetworkRepository.addRequiredCredentials(chainId, publicNodeService);
-            web3jNodeServers.put(chainId, Web3j.build(publicNodeService));
+            buildWeb3jClient(ethereumNetworkRepository.getNetworkByChain(chainId));
         }
-
         return web3jNodeServers.get(chainId);
     }
 
@@ -654,7 +658,7 @@ public class TokenRepository implements TokenRepositoryType {
                     }
                 })
                 .flatMap(token -> localSource.fetchTicker(wallet, token)
-                        .flatMap(ticker -> ethereumNetworkRepository.getTicker(network.chainId, ticker))
+                        .flatMap(ticker -> ethereumNetworkRepository.updateTicker(network.chainId, ticker))
                         .map(ticker -> {
                             token.ticker = new TokenTicker(String.valueOf(network.chainId), wallet.address, ticker.price_usd, ticker.percentChange24h, "USD", null);
                             return token;
@@ -682,7 +686,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<Ticker> getEthTicker(int chainId)
     {
-        return ethereumNetworkRepository.getTicker(chainId, null);
+        return ethereumNetworkRepository.getTicker(chainId);
     }
 
     @Override
@@ -1363,8 +1367,7 @@ public class TokenRepository implements TokenRepositoryType {
                 .writeTimeout(5, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(false)
                 .build();
-        String rpcServerUrl = EthereumNetworkRepository.getNodeURLByNetworkId(chainId);
-        HttpService publicNodeService = new HttpService(rpcServerUrl, okClient, false);
+        HttpService publicNodeService = new HttpService(EthereumNetworkRepository.getNodeURLByNetworkId(chainId), okClient, false);
         EthereumNetworkRepository.addRequiredCredentials(chainId, publicNodeService);
         return Web3j.build(publicNodeService);
     }

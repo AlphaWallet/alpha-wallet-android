@@ -417,20 +417,19 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     private void getAuthenticationForSignature()
     {
-        String lcAddress = currentWallet.address.toLowerCase();
         //check unlock status
         try
         {
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
-            SecretKey secretKey = (SecretKey) keyStore.getKey(lcAddress, null);
-            String encryptedHDKeyPath = getFilePath(context, lcAddress);
+            SecretKey secretKey = (SecretKey) keyStore.getKey(currentWallet.address, null);
+            String encryptedHDKeyPath = getFilePath(context, currentWallet.address);
             if (!new File(encryptedHDKeyPath).exists() || secretKey == null)
             {
                 signCallback.GotAuthorisation(false);
                 return;
             }
-            byte[] iv = readBytesFromFile(getFilePath(context, lcAddress + "iv"));
+            byte[] iv = readBytesFromFile(getFilePath(context, currentWallet.address + "iv"));
             Cipher outCipher = Cipher.getInstance(CIPHER_ALGORITHM);
             final GCMParameterSpec spec = new GCMParameterSpec(128, iv);
             outCipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
@@ -572,7 +571,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
             if (secretData == null) return;
 
-            boolean keyStored = storeEncryptedBytes(secretData.getBytes(), true);
+            boolean keyStored = storeEncryptedBytes(secretData.getBytes(), true, currentWallet.address.toLowerCase());
             if (keyStored)
             {
                 signCallback.CreatedKey(currentWallet.address);
@@ -601,32 +600,31 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
         currentWallet = new Wallet(CoinType.ETHEREUM.deriveAddress(pk));
 
-        return storeEncryptedBytes(newWallet.mnemonic().getBytes(), keyRequiresAuthentication);
+        return storeEncryptedBytes(newWallet.mnemonic().getBytes(), keyRequiresAuthentication, currentWallet.address);
     }
 
-    private synchronized boolean storeEncryptedBytes(byte[] data, boolean createAuthLocked)
+    private synchronized boolean storeEncryptedBytes(byte[] data, boolean createAuthLocked, String fileName)
     {
         KeyStore keyStore = null;
-        String lcAddress = currentWallet.address.toLowerCase();
         try
         {
             keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
 
-            String encryptedHDKeyPath = getFilePath(context, lcAddress);
-            KeyGenerator keyGenerator = getMaxSecurityKeyGenerator(lcAddress, createAuthLocked);
+            String encryptedHDKeyPath = getFilePath(context, fileName);
+            KeyGenerator keyGenerator = getMaxSecurityKeyGenerator(fileName, createAuthLocked);
             final SecretKey secretKey = keyGenerator.generateKey();
             final Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             byte[] iv = cipher.getIV();
-            String ivPath = getFilePath(context, lcAddress + "iv");
+            String ivPath = getFilePath(context, fileName + "iv");
             boolean success = writeBytesToFile(ivPath, iv);
             if (!success)
             {
-                deleteKey(lcAddress);
+                deleteKey(fileName);
                 throw new ServiceErrorException(
                         ServiceErrorException.ServiceErrorCode.FAIL_TO_SAVE_IV_FILE,
-                        "Failed to saveTokens the iv file for: " + lcAddress + "iv");
+                        "Failed to saveTokens the iv file for: " + fileName + "iv");
             }
 
             try (CipherOutputStream cipherOutputStream = new CipherOutputStream(
@@ -637,17 +635,17 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             }
             catch (Exception ex)
             {
-                deleteKey(lcAddress);
+                deleteKey(fileName);
                 throw new ServiceErrorException(
                         ServiceErrorException.ServiceErrorCode.KEY_STORE_ERROR,
-                        "Failed to saveTokens the file for: " + lcAddress);
+                        "Failed to saveTokens the file for: " + fileName);
             }
 
             return true;
         }
         catch (Exception ex)
         {
-            deleteKey(lcAddress);
+            deleteKey(fileName);
             Log.d(TAG, "Key store error", ex);
         }
 
@@ -1023,7 +1021,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
         random.nextBytes(newPassword);
 
-        boolean success = storeEncryptedBytes(newPassword, true);  //because we'll now only ever be importing keystore, always create with Auth if possible
+        boolean success = storeEncryptedBytes(newPassword, true, currentWallet.address);  //because we'll now only ever be importing keystore, always create with Auth if possible
 
         if (!success)
         {

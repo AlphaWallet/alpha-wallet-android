@@ -358,7 +358,6 @@
     <string name="contains_no_data">DApp 交易未包含任何数据</string>
     <string name="error_insufficient_funds">资金不够</string>
     <string name="ssl_cert_invalid">无效的 SSL 证书。此站点可能不安全。是否继续？</string>
-    <string name="spawn">生成</string>
     <string name="import_spawnable">创建可生成通证</string>
     <string name="token_spawn_valid">有效通证可进行生成操作</string>
     <string name="currency_drop">领取加密货币</string>

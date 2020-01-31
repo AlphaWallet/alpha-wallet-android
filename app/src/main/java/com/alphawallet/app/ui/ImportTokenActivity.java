@@ -314,7 +314,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         switch (data.contractType)
         {
             case spawnable:
-                importTxt.setText(R.string.token_spawn_valid);
+                importTxt.setText(R.string.ticket_import_valid);
                 setTitle(getString(R.string.import_spawnable));
                 break;
             case currencyLink:
@@ -353,7 +353,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         switch (data.contractType)
         {
             case spawnable:
-                importTickets.setText(R.string.spawn);
+                importTickets.setText(R.string.action_import);
                 token.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
                 break;
             case currencyLink:

@@ -369,9 +369,7 @@
     <string name="contains_no_data">DApp transaction contains no data</string>
     <string name="error_insufficient_funds">Insufficient Funds</string>
     <string name="ssl_cert_invalid">Invalid SSL Certificate. This site may be unsafe. Proceed?</string>
-    <string name="spawn">Spawn</string>
-    <string name="import_spawnable">Create Spawnable Tokens</string>
-    <string name="token_spawn_valid">Tokens valid to Spawn</string>
+    <string name="import_spawnable">Import Tokens</string>
     <string name="currency_drop">Take Currency Drop</string>
     <string name="currency_import">Currency Import</string>
     <string name="you_will_receive">you will receive</string>

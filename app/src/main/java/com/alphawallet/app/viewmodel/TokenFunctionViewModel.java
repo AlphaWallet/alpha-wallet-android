@@ -149,7 +149,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.EXTRA_AMOUNT, value);
         if (toAddress != null) intent.putExtra(C.EXTRA_TO_ADDRESS, toAddress);
         if (contractAddress != null) intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, contractAddress);
-        intent.putExtra(C.EXTRA_CONTRACT_NAME, additionalDetails);
+        intent.putExtra(C.EXTRA_ACTION_NAME, additionalDetails);
         intent.putExtra(C.EXTRA_FUNCTION_NAME, functionName);
         intent.putExtra(C.TOKEN_TYPE, ConfirmationType.TOKENSCRIPT.ordinal());
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

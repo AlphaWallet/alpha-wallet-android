@@ -17,8 +17,10 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.alphawallet.app.entity.BackupTokenCallback;
+import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.tokens.Token;
@@ -67,6 +69,8 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     private TokensAdapter adapter;
     private View selectedToken;
     private Handler handler;
+    private String importFileName;
+    private RecyclerView listView;
 
     private boolean isVisible;
 
@@ -84,9 +88,9 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
         progressView.setWhiteCircle();
 
-        RecyclerView list = view.findViewById(R.id.list);
+        listView = view.findViewById(R.id.list);
 
-        systemView.attachRecyclerView(list);
+        systemView.attachRecyclerView(listView);
         systemView.attachSwipeRefreshLayout(refreshLayout);
 
         viewModel = ViewModelProviders.of(this, walletViewModelFactory)
@@ -104,11 +108,11 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
         adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService());
         adapter.setHasStableIds(true);
-        list.setLayoutManager(new LinearLayoutManager(getContext()));
-        list.setAdapter(adapter);
+        listView.setLayoutManager(new LinearLayoutManager(getContext()));
+        listView.setAdapter(adapter);
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeCallback(adapter));
-        itemTouchHelper.attachToRecyclerView(list);
+        itemTouchHelper.attachToRecyclerView(listView);
 
         refreshLayout.setOnRefreshListener(this::refreshList);
 
@@ -117,6 +121,8 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         initTabLayout(view);
 
         isVisible = true;
+
+        setImportToken();
 
         viewModel.clearProcess();
         return view;
@@ -235,6 +241,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         selectedToken = null;
         viewModel.setVisibility(isVisible);
         viewModel.prepare();
+        listView = getActivity().findViewById(R.id.list);
     }
 
     private void onTokens(Token[] tokens)
@@ -242,6 +249,34 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         if (tokens != null)
         {
             adapter.setTokens(tokens);
+            checkScrollPosition();
+        }
+    }
+
+    /**
+     * Checks to see if the current session was started from clicking on a TokenScript notification
+     * If it was, identify the contract and pass information to adapter which will identify the corresponding contract token card
+     */
+    private void setImportToken()
+    {
+        if (importFileName != null)
+        {
+            ContractResult importToken = viewModel.getAssetDefinitionService().getHoldingContract(importFileName);
+            if (importToken != null) Toast.makeText(getContext(), importToken.name, Toast.LENGTH_LONG).show();
+            if (importToken != null) adapter.setScrollToken(importToken);
+            importFileName = null;
+        }
+    }
+
+    /**
+     * If the adapter has identified the clicked-on script update from the above call and that card is present, scroll to the card.
+     */
+    private void checkScrollPosition()
+    {
+        int scrollPos = adapter.getScrollPosition();
+        if (scrollPos > 0 && listView != null)
+        {
+            ((LinearLayoutManager)listView.getLayoutManager()).scrollToPositionWithOffset(scrollPos, 0);
         }
     }
 
@@ -394,6 +429,11 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     {
         if (viewModel != null) viewModel.setKeyBackupTime(backedUpKey).isDisposed();
         if (adapter != null) adapter.removeBackupWarning();
+    }
+
+    public void setImportFilename(String fName)
+    {
+        importFileName = fName;
     }
 
     public class SwipeCallback extends ItemTouchHelper.SimpleCallback {

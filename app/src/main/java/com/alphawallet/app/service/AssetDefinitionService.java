@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.SparseArray;
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
@@ -853,6 +854,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void startFileListener(File path)
     {
+        if (fileObserver != null) return;
         fileObserver = new FileObserver(path.getPath(), ALL_EVENTS)
         {
             @Override
@@ -872,27 +874,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                         Environment.getExternalStorageDirectory()
                                                 + File.separator + HomeViewModel.ALPHAWALLET_DIR, s);
 
-                                String hash = newTSFile.calcMD5();
                                 TokenScriptFileData fData = fileHashes.get(newTSFile.getAbsolutePath());
-                                if (fData != null)
-                                {
-                                    if (fData.hash.equals(hash)) break;
-                                    else
-                                    {
-                                        fData.hash = hash;
-                                        fData.sigDescriptor = null;
-                                    }
-                                }
-                                else
-                                {
-                                    fData = new TokenScriptFileData();
-                                    fileHashes.put(newTSFile.getAbsolutePath(), fData);
-                                }
-                                fData.hash = hash;
                                 if (addContractAddresses(newTSFile))
                                 {
+                                    if (fData == null) fData = new TokenScriptFileData();
+                                    fData.hash = newTSFile.calcMD5();
+                                    fData.sigDescriptor = null;
                                     notificationService.DisplayNotification("Definition Updated", s, NotificationCompat.PRIORITY_MAX);
                                     cachedDefinition = null;
+                                    fileHashes.put(newTSFile.getAbsolutePath(), fData);
                                 }
                             }
                         }
@@ -1353,5 +1343,27 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             loadLocalContracts();
         }
+    }
+
+    public ContractResult getHoldingContract(String importFileName)
+    {
+        ContractResult cr = null;
+        for (int i = 0; i < assetDefinitions.size(); i++)
+        {
+            int chainId = assetDefinitions.keyAt(i);
+            for (String address : assetDefinitions.get(chainId).keySet())
+            {
+                TokenScriptFile f = assetDefinitions.get(chainId).get(address);
+                String path = f.getAbsoluteFile().toString();
+                if (path.contains(importFileName))
+                {
+                    cr = new ContractResult(address, chainId);
+                    break;
+                }
+            }
+            if (cr != null) break;
+        }
+
+        return cr;
     }
 }

@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
@@ -61,11 +63,13 @@ public class WalletsActivity extends BaseActivity implements
     private Dialog dialog;
     private AWalletAlertDialog aDialog;
     private WalletsAdapter adapter;
+    private Handler handler;
 
     private boolean walletChange = false;
     private boolean requiresHomeRefresh;
     private NetworkInfo networkInfo;
     private PinAuthenticationCallbackInterface authInterface;
+    private String dialogError;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -94,6 +98,13 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.updateENSName().observe(this, this::updateWalletName);
         viewModel.noWalletsError().observe(this, this::noWallets);
         viewModel.findNetwork();
+
+        if (handler == null) handler = new Handler();
+    }
+
+    protected Activity getThisActivity()
+    {
+        return this;
     }
 
     private void noWallets(Boolean aBoolean)
@@ -132,22 +143,39 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.swipeRefreshWallets(); //check all records
     }
 
-    private void onCreateWalletError(ErrorEnvelope errorEnvelope) {
-        aDialog = new AWalletAlertDialog(this);
-        aDialog.setTitle(R.string.title_dialog_error);
-        aDialog.setIcon(AWalletAlertDialog.ERROR);
-        aDialog.setMessage(TextUtils.isEmpty(errorEnvelope.message)
-                ? getString(R.string.error_create_wallet)
-                : errorEnvelope.message);
-        aDialog.setButtonText(R.string.dialog_ok);
-        aDialog.setButtonListener(v -> aDialog.dismiss());
-        aDialog.show();
+    private void onCreateWalletError(ErrorEnvelope errorEnvelope)
+    {
+        dialogError = errorEnvelope.message;
+        if (handler != null) handler.post(displayWalletError);
     }
+
+    private Runnable displayWalletError = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            aDialog = new AWalletAlertDialog(getThisActivity());
+            aDialog.setTitle(R.string.title_dialog_error);
+            aDialog.setIcon(AWalletAlertDialog.ERROR);
+            aDialog.setMessage(TextUtils.isEmpty(dialogError)
+                               ? getString(R.string.error_create_wallet)
+                               : dialogError);
+            aDialog.setButtonText(R.string.dialog_ok);
+            aDialog.setButtonListener(v -> aDialog.dismiss());
+            aDialog.show();
+        }
+    };
 
     @Override
     protected void onPause() {
         super.onPause();
         hideDialog();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        handler = null;
     }
 
     @Override

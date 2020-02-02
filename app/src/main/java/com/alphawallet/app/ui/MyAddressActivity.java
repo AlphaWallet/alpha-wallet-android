@@ -89,12 +89,11 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         screenWidth = (int) ((float)DisplayUtils.getScreenResolution(this).x * 0.8f);
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
+        initViewModel();
         overrideNetwork = 0;
         getInfo();
-
-        getPreviousMode();
-
         viewModel.prepare();
+        getPreviousMode();
     }
 
     private void getPreviousMode() {
@@ -221,7 +220,6 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     private void showPointOfSaleMode() {
         setContentView(R.layout.activity_eip681);
         initViews();
-        initViewModel();
         getInfo();
         //Generate QR link for receive payment.
         //Initially just generate simple payment.
@@ -248,7 +246,6 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         getInfo();
         setContentView(R.layout.activity_my_address);
         initViews();
-        initViewModel();
         findViewById(R.id.toolbar_title).setVisibility(View.VISIBLE);
 
         if (amountInput != null)
@@ -277,7 +274,6 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         getInfo();
         setContentView(R.layout.activity_contract_address);
         initViews();
-        initViewModel();
         findViewById(R.id.toolbar_title).setVisibility(View.VISIBLE);
 
         currentMode = MODE_CONTRACT;

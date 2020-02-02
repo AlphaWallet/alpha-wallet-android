@@ -7,6 +7,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.inputmethod.BaseInputConnection;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -18,6 +22,7 @@ import android.widget.RelativeLayout;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
+import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.FunctionCallback;
@@ -39,6 +44,8 @@ public class Web3TokenView extends WebView
     private JsInjectorClient jsInjectorClient;
     private TokenScriptClient tokenScriptClient;
     private PageReadyCallback assetHolder;
+
+    protected WebCompletionCallback keyPressCallback;
 
     @Nullable
     private OnSignPersonalMessageListener onSignPersonalMessageListener;
@@ -134,6 +141,11 @@ public class Web3TokenView extends WebView
     public void onSignPersonalMessageSuccessful(Message message, String signHex) {
         long callbackId = message.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
+    }
+
+    public void setKeyboardListenerCallback(WebCompletionCallback cpCallback)
+    {
+        keyPressCallback = cpCallback;
     }
 
     @Override
@@ -264,6 +276,15 @@ public class Web3TokenView extends WebView
             super.onPageCommitVisible(view, url);
             if (assetHolder != null)
                 assetHolder.onPageLoaded(view);
+        }
+
+        @Override
+        public void onUnhandledKeyEvent(WebView view, KeyEvent event) {
+            if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+            {
+                if (keyPressCallback != null) keyPressCallback.enterKeyPressed();
+            }
+            super.onUnhandledKeyEvent(view, event);
         }
     }
 }

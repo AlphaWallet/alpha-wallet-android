@@ -52,6 +52,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     private PinAuthenticationCallbackInterface authInterface;
     private String importPath = null;
     private Handler handler = new Handler();
+    AWalletAlertDialog aDialog;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -98,6 +99,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
 
         splashViewModel.fetchWallets();
         splashViewModel.checkVersionUpdate(getBaseContext(), getAppUpdateTime);
+        aDialog = new AWalletAlertDialog(this);
     }
 
     //wallet created, now check if we need to import
@@ -232,9 +234,16 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     }
 
     @Override
+    public void onResume()
+    {
+        super.onResume();
+        if (aDialog == null) aDialog = new AWalletAlertDialog(this);
+    }
+
+    @Override
     public void keyFailure(String message)
     {
-        AWalletAlertDialog aDialog = new AWalletAlertDialog(this);
+        if (aDialog == null) return;
         aDialog.setTitle(R.string.key_error);
         aDialog.setIcon(AWalletAlertDialog.ERROR);
         aDialog.setMessage(message);

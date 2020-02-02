@@ -354,14 +354,14 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         {
             case spawnable:
                 importTickets.setText(R.string.action_import);
-                token.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
+                if (token != null) token.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
                 break;
             case currencyLink:
                 importTickets.setText(R.string.action_import);
                 break;
             default:
                 importTxt.setText(R.string.ticket_import_valid);
-                token.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
+                if (token != null) token.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
                 break;
         }
     }

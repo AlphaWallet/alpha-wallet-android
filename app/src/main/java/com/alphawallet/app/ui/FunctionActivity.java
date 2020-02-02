@@ -6,46 +6,53 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Base64;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
+import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
+import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.web3.OnSignPersonalMessageListener;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
-import dagger.android.AndroidInjection;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import com.alphawallet.app.widget.FunctionButtonBar;
-import com.alphawallet.token.entity.*;
-import com.alphawallet.token.tools.Numeric;
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
-import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
+import com.alphawallet.token.entity.AttributeType;
+import com.alphawallet.token.entity.ContractAddress;
+import com.alphawallet.token.entity.FunctionDefinition;
+import com.alphawallet.token.entity.MethodArg;
+import com.alphawallet.token.entity.TSAction;
+import com.alphawallet.token.entity.TokenScriptResult;
+import com.alphawallet.token.entity.TokenscriptElement;
+import com.alphawallet.token.tools.Numeric;
+
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
-import javax.inject.Inject;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -55,6 +62,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
@@ -64,7 +78,7 @@ import static com.alphawallet.app.entity.Operation.SIGN_DATA;
  * Stormbird in Singapore
  */
 public class FunctionActivity extends BaseActivity implements FunctionCallback,
-        PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback, StandardFunctionInterface, TokenScriptRenderCallback
+                                                              PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback, StandardFunctionInterface, TokenScriptRenderCallback, WebCompletionCallback
 {
     @Inject
     protected TokenFunctionViewModelFactory viewModelFactory;
@@ -110,6 +124,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         waitSpinner.setVisibility(View.VISIBLE);
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
         viewModel.getCurrentWallet();
+        tokenView.setKeyboardListenerCallback(this);
         reloaded = false;
 
         getAttrs();
@@ -750,5 +765,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     public void callToJSComplete(String function, String result)
     {
         completeTokenscriptFunction(function);
+    }
+
+    @Override
+    public void enterKeyPressed()
+    {
+        KeyboardUtils.hideKeyboard(getCurrentFocus());
     }
 }

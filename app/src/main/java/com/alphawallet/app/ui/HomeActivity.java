@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.service.NotificationService;
 import com.github.florent37.tutoshowcase.TutoShowcase;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
@@ -98,6 +99,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private TutoShowcase backupWalletDialog;
     private TutoShowcase findWalletAddressDialog;
     private PinAuthenticationCallbackInterface authInterface;
+    private String importFileName;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -108,6 +110,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     public HomeActivity()
     {
+        importFileName = null;
         if (VisibilityFilter.hideDappBrowser()) dappBrowserFragment = new Fragment();
         else dappBrowserFragment = new DappBrowserFragment();
         transactionsFragment = new TransactionsFragment();
@@ -148,6 +151,19 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
+
+        Intent intent = getIntent();
+        Uri data = intent.getData();
+        if (data != null)
+        {
+            String flags = data.toString();
+            if (flags.startsWith(NotificationService.AWSTARTUP))
+            {
+                flags = flags.substring(NotificationService.AWSTARTUP.length());
+                //move window to token if found
+                ((WalletFragment)walletFragment).setImportFilename(flags);
+            }
+        }
 
         viewModel = ViewModelProviders.of(this, homeViewModelFactory)
                 .get(HomeViewModel.class);

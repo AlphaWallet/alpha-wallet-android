@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.ViewGroup;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.VisibilityFilter;
@@ -41,6 +42,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private int filterType;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
+    private ContractResult scrollToken; // designates a token that should be scrolled to
 
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -397,5 +399,33 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public boolean hasBackupWarning()
     {
         return items.size() > 0 && items.get(0).viewType == WarningHolder.VIEW_TYPE;
+    }
+
+    public void setScrollToken(ContractResult importToken)
+    {
+        scrollToken = importToken;
+    }
+
+    public int getScrollPosition()
+    {
+        if (scrollToken != null)
+        {
+            for (int i = 0; i < items.size(); i++)
+            {
+                Object si = items.get(i);
+                if (si instanceof TokenSortedItem)
+                {
+                    TokenSortedItem tsi   = (TokenSortedItem) si;
+                    Token           token = tsi.value;
+                    if (scrollToken.equals(token))
+                    {
+                        scrollToken = null;
+                        return i;
+                    }
+                }
+            }
+        }
+
+        return -1;
     }
 }

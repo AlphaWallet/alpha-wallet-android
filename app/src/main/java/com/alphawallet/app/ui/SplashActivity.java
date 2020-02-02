@@ -239,10 +239,17 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     }
 
     @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        handler = null;
+    }
+
+    @Override
     public void keyFailure(String message)
     {
         errorMessage = message;
-        handler.post(displayError);
+        if (handler != null) handler.post(displayError);
     }
 
     Runnable displayError = new Runnable()

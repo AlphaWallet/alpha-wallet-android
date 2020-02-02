@@ -60,6 +60,7 @@ public class WalletViewModel extends BaseViewModel
     private final MutableLiveData<BigDecimal> total = new MutableLiveData<>();
     private final MutableLiveData<Token> tokenUpdate = new MutableLiveData<>();
     private final MutableLiveData<Boolean> tokensReady = new MutableLiveData<>();
+    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GenericWalletInteract.BackupLevel> backupEvent = new MutableLiveData<>();
 
     private final FetchTokensInteract fetchTokensInteract;
@@ -130,6 +131,7 @@ public class WalletViewModel extends BaseViewModel
     }
     public LiveData<Token> tokenUpdate() { return tokenUpdate; }
     public LiveData<Boolean> tokensReady() { return tokensReady; }
+    public LiveData<Wallet> defaultWallet() { return defaultWallet; }
     public LiveData<GenericWalletInteract.BackupLevel> backupEvent() { return backupEvent; }
 
     public String getWalletAddr() { return currentWallet != null ? currentWallet.address : null; }
@@ -465,6 +467,7 @@ public class WalletViewModel extends BaseViewModel
     private void onDefaultWallet(@NotNull Wallet wallet) {
         tokensService.setCurrentAddress(wallet.address);
         currentWallet = wallet;
+        defaultWallet.postValue(wallet);
         fetchTokens();
     }
 

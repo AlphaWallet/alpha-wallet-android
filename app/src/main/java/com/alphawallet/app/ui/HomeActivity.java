@@ -238,7 +238,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         viewModel.cleanDatabases(this);
-        showBackupWalletDialog();
     }
 
     private void onBackup(String address)
@@ -249,23 +248,32 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    public void showBackupWalletDialog() {
-        if (!viewModel.isFindWalletAddressDialogShown()) {
-            int lighterBackground = Color.argb(102, 0, 0, 0); //40% opacity
-            backupWalletDialog = TutoShowcase.from(this);
-            backupWalletDialog.setContentView(R.layout.showcase_backup_wallet)
-                    .setBackgroundColor(lighterBackground)
-                    .onClickContentView(R.id.btn_close, view -> {
-                        backupWalletDialog.dismiss();
-                    })
-                    .on(R.id.settings_tab)
-                    .addCircle()
-                    .onClick(v -> {
-                        backupWalletDialog.dismiss();
-                        showPage(SETTINGS);
-                    })
-                    .show();
-            viewModel.setFindWalletAddressDialogShown(true);
+    public void showBackupWalletDialog(boolean walletImported) {
+        if (!viewModel.isFindWalletAddressDialogShown())
+        {
+            //check if wallet was imported - in which case no need to display
+            if (walletImported)
+            {
+                viewModel.setFindWalletAddressDialogShown(true);
+            }
+            else
+            {
+                int lighterBackground = Color.argb(102, 0, 0, 0); //40% opacity
+                backupWalletDialog = TutoShowcase.from(this);
+                backupWalletDialog.setContentView(R.layout.showcase_backup_wallet)
+                        .setBackgroundColor(lighterBackground)
+                        .onClickContentView(R.id.btn_close, view -> {
+                            backupWalletDialog.dismiss();
+                        })
+                        .on(R.id.settings_tab)
+                        .addCircle()
+                        .onClick(v -> {
+                            backupWalletDialog.dismiss();
+                            showPage(SETTINGS);
+                        })
+                        .show();
+                viewModel.setFindWalletAddressDialogShown(true);
+            }
         }
     }
 

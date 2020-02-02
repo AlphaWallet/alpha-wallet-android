@@ -105,6 +105,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         viewModel.tokenUpdate().observe(this, this::onToken);
         viewModel.tokensReady().observe(this, this::tokensReady);
         viewModel.backupEvent().observe(this, this::backupEvent);
+        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
         adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService());
         adapter.setHasStableIds(true);
@@ -126,6 +127,12 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
         viewModel.clearProcess();
         return view;
+    }
+
+    private void onDefaultWallet(Wallet wallet)
+    {
+        //Do we display new user backup popup?
+        ((HomeActivity)getActivity()).showBackupWalletDialog(wallet.lastBackupTime > 0);
     }
 
     private void refreshList()

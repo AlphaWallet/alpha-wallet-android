@@ -12,29 +12,29 @@
         android:layout_alignParentTop="true"
         android:orientation="vertical">
 
+        <TextView
+            android:id="@+id/text_word_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="11dp"
+            android:layout_marginEnd="16dp"
+            android:gravity="center_horizontal"
+            android:text="0/12"
+            android:textColor="@color/greyfivef"
+            android:textSize="14sp" />
+
         <com.alphawallet.app.widget.PasswordInputView
             android:id="@+id/input_seed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
             android:textSize="18sp"
             android:visibility="visible"
             custom:imeOptions="actionDone"
             custom:inputType="textNoSuggestions"
             custom:label="@string/enter_seed_phrase"
             custom:lines="6"
-            custom:minHeight="100" />
-
-        <TextView
-            android:id="@+id/text_word_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginEnd="16dp"
-            android:gravity="center_horizontal"
-            android:text="0"
-            android:textColor="@color/greyfivef"
-            android:textSize="14sp" />
+            custom:minHeight="170" />
 
     </LinearLayout>
 
@@ -50,6 +50,7 @@
             android:id="@+id/list_suggestions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:visibility="gone" />
 

@@ -1,9 +1,11 @@
 package com.alphawallet.app.ui;
 
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -29,6 +31,7 @@ import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,6 +39,7 @@ import java.util.regex.Pattern;
 public class ImportSeedFragment extends Fragment implements View.OnClickListener, TextWatcher, LayoutCallbackListener, OnSuggestionClickListener {
     private static final OnImportSeedListener dummyOnImportSeedListener = (s, c) -> {};
     private static final String validator = "[^a-z^A-Z^ ]";
+    private final int maxWordCount = 12;
 
     private PasswordInputView seedPhrase;
     private Button importButton;
@@ -44,6 +48,8 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
     private RecyclerView listSuggestions;
     private List<String> suggestions;
     private SuggestionsAdapter suggestionsAdapter;
+    Typeface boldTypeface = Typeface.defaultFromStyle(Typeface.BOLD);
+    Typeface normalTypeface = Typeface.defaultFromStyle(Typeface.NORMAL);
 
     @NonNull
     private OnImportSeedListener onImportSeedListener = dummyOnImportSeedListener;
@@ -181,7 +187,17 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         if(value.trim().length() > 0) {
             words = value.trim().replaceAll("\n", "").split("\\s").length;
         }
-        wordCount.setText(String.valueOf(words));
+        wordCount.setText(words + "/" + maxWordCount);
+
+        if(words == maxWordCount) {
+            wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.nasty_green));
+            wordCount.setTypeface(boldTypeface);
+        }else if(words == (maxWordCount -1)){
+            wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.colorPrimaryDark));
+            wordCount.setTypeface(normalTypeface);
+        }else if(words > maxWordCount){
+            wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.dark_seed_danger));
+        }
 
         //get last word from the text
         if(value.length() > 0) {

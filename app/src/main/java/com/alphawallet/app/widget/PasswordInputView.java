@@ -143,7 +143,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
                     break;
                 }
                 case "textNoSuggestions":{
-                    editText.setInputType(
+                    editText.setInputType(editText.getInputType() |
                             EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS |
                             EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE |
                             EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);

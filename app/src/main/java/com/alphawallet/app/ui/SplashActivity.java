@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
@@ -52,7 +53,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     private PinAuthenticationCallbackInterface authInterface;
     private String importPath = null;
     private Handler handler = new Handler();
-    AWalletAlertDialog aDialog;
+    private String errorMessage;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -99,7 +100,11 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
 
         splashViewModel.fetchWallets();
         splashViewModel.checkVersionUpdate(getBaseContext(), getAppUpdateTime);
-        aDialog = new AWalletAlertDialog(this);
+    }
+
+    protected Activity getThisActivity()
+    {
+        return this;
     }
 
     //wallet created, now check if we need to import
@@ -234,23 +239,26 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     }
 
     @Override
-    public void onResume()
-    {
-        super.onResume();
-        if (aDialog == null) aDialog = new AWalletAlertDialog(this);
-    }
-
-    @Override
     public void keyFailure(String message)
     {
-        if (aDialog == null) return;
-        aDialog.setTitle(R.string.key_error);
-        aDialog.setIcon(AWalletAlertDialog.ERROR);
-        aDialog.setMessage(message);
-        aDialog.setButtonText(R.string.dialog_ok);
-        aDialog.setButtonListener(v -> aDialog.dismiss());
-        aDialog.show();
+        errorMessage = message;
+        handler.post(displayError);
     }
+
+    Runnable displayError = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            AWalletAlertDialog aDialog = new AWalletAlertDialog(getThisActivity());
+            aDialog.setTitle(R.string.key_error);
+            aDialog.setIcon(AWalletAlertDialog.ERROR);
+            aDialog.setMessage(errorMessage);
+            aDialog.setButtonText(R.string.dialog_ok);
+            aDialog.setButtonListener(v -> aDialog.dismiss());
+            aDialog.show();
+        }
+    };
 
     @Override
     public void cancelAuthentication()

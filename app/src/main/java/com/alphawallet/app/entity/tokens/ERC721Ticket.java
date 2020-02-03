@@ -167,21 +167,25 @@ public class ERC721Ticket extends Token implements Parcelable {
     {
         tokenHolder.balanceCurrency.setText("--");
         tokenHolder.textAppreciation.setText("--");
-
-        tokenHolder.issuer.setText(R.string.ethereum);
+        String issuerName = asset.getIssuerName(tokenHolder.token);
+        tokenHolder.issuer.setText(asset.getIssuerName(tokenHolder.token));
+        if(issuerName != null)
+        {
+            tokenHolder.issuer.setText(issuerName);
+        }
+        else
+        {
+            tokenHolder.issuerPlaceholder.setVisibility(View.GONE);
+        }
         tokenHolder.contractType.setVisibility(View.VISIBLE);
         tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
         if (VisibilityFilter.getImageOverride() != 0)
         {
             tokenHolder.icon.setVisibility(View.VISIBLE);
             tokenHolder.icon.setImageResource(VisibilityFilter.getImageOverride());
-            //TODO: Get issuer name from certificate
-            tokenHolder.issuer.setText(VisibilityFilter.getIssuerName());
         }
-        tokenHolder.blockchainSeparator.setVisibility(View.GONE);
         tokenHolder.chainName.setVisibility(View.VISIBLE);
         tokenHolder.extendedInfo.setVisibility(View.VISIBLE);
-        tokenHolder.blockchain.setVisibility(View.GONE);
         tokenHolder.contractType.setText(R.string.ERC721T);
 
         String composite = getTicketCount() + " " + getFullName(asset, getTicketCount());
@@ -193,7 +197,7 @@ public class ERC721Ticket extends Token implements Parcelable {
     @Override
     public int[] getTicketIndices(String ticketIds)
     {
-       return null;
+        return null;
     }
 
     /*************************************
@@ -262,11 +266,11 @@ public class ERC721Ticket extends Token implements Parcelable {
         return new Function(
                 "passTo",
                 Arrays.asList(new org.web3j.abi.datatypes.generated.Uint256(expiry),
-                        getDynArray(tokenIds),
-                        new org.web3j.abi.datatypes.generated.Uint8(v),
-                        new org.web3j.abi.datatypes.generated.Bytes32(r),
-                        new org.web3j.abi.datatypes.generated.Bytes32(s),
-                        new org.web3j.abi.datatypes.Address(recipient)),
+                              getDynArray(tokenIds),
+                              new org.web3j.abi.datatypes.generated.Uint8(v),
+                              new org.web3j.abi.datatypes.generated.Bytes32(r),
+                              new org.web3j.abi.datatypes.generated.Bytes32(s),
+                              new org.web3j.abi.datatypes.Address(recipient)),
                 Collections.emptyList());
     }
 
@@ -284,7 +288,7 @@ public class ERC721Ticket extends Token implements Parcelable {
                         new org.web3j.abi.datatypes.Address(this.getWallet()),
                         new org.web3j.abi.datatypes.Address(to),
                         new Uint256(tokenIds.get(0))
-                ), Collections.emptyList());
+                             ), Collections.emptyList());
     }
 
     //Can only be ERC721 ticket if created as ERC721Ticket type
@@ -383,7 +387,7 @@ public class ERC721Ticket extends Token implements Parcelable {
     {
         boolean isSent = true;
         TransactionOperation operation = transaction.operations == null
-                || transaction.operations.length == 0 ? null : transaction.operations[0];
+                                                 || transaction.operations.length == 0 ? null : transaction.operations[0];
 
         if (operation != null && operation.contract instanceof ERC875ContractTransaction)
         {

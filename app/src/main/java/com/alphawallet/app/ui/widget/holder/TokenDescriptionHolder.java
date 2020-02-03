@@ -3,12 +3,15 @@ package com.alphawallet.app.ui.widget.holder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
+
+import org.w3c.dom.Text;
 
 /**
  * Created by James on 12/02/2018.
@@ -21,6 +24,7 @@ public class TokenDescriptionHolder extends BinderViewHolder<Token>
     private final TextView count;
     private final TextView title;
     private final TextView issuerName;
+    private final TextView issuerPlaceholder;
     private final String issuer;
     private final AssetDefinitionService assetService;
     private final int assetCount;
@@ -30,6 +34,7 @@ public class TokenDescriptionHolder extends BinderViewHolder<Token>
         title = findViewById(R.id.name);
         count = findViewById(R.id.amount);
         issuerName = findViewById(R.id.textViewIssuer);
+        issuerPlaceholder = findViewById(R.id.textViewIssuerPlaceholderTokenDescription);
         assetService = service;
         if (service != null)
         {
@@ -38,6 +43,7 @@ public class TokenDescriptionHolder extends BinderViewHolder<Token>
         else
         {
             issuer = "";
+            issuerPlaceholder.setVisibility(View.GONE);
         }
         assetCount = tokenCount;
     }

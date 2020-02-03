@@ -19,12 +19,10 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.alphawallet.app.util.Utils;
-
 import com.alphawallet.app.R;
+import com.alphawallet.app.util.Utils;
 
 public class PasswordInputView extends LinearLayout implements TextView.OnEditorActionListener
 {
@@ -60,10 +58,10 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
         togglePassword = findViewById(R.id.toggle_password);
 
         setViews();
-        setLines();
         setImeOptions();
         setInputType();
         setMinHeight();
+        setLines();
     }
 
     public void setLayoutListener(Activity a, LayoutCallbackListener callback, View bm)

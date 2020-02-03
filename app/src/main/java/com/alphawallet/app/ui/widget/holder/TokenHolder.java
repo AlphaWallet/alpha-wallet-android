@@ -61,7 +61,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public final View blockchainSeparator;
     public final LinearLayout layoutValueDetails;
     public final LinearLayout extendedInfo;
-    public final TextView blockchain;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
@@ -90,7 +89,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         layoutValueDetails = findViewById(R.id.layout_value_details);
         textPending = findViewById(R.id.status_pending);
         textIncomplete = findViewById(R.id.status_incomplete);
-        blockchain = findViewById(R.id.text_chain);
         chainName = findViewById(R.id.text_chain_name);
         pendingText = findViewById(R.id.balance_eth_pending);
         tokenLayout = findViewById(R.id.token_layout);
@@ -107,7 +105,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         {
             icon.setVisibility(View.GONE);
             tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
-            blockchain.setText(getString(R.string.blockchain, token.getNetworkName()));
             chainName.setVisibility(View.VISIBLE);
             chainName.setText(token.getNetworkName());
             Utils.setChainColour(chainName, token.tokenInfo.chainId);

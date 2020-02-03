@@ -188,7 +188,6 @@
     <string name="appreciation">升值</string>
     <string name="eth_per_ticket">%1s/门票</string>
     <string name="ethereum">以太坊</string>
-    <string name="ethereum_blockchain">基于以太坊智能合约</string>
     <string name="issuer">发行方:</string>
     <string name="root_title">设备安全性受损</string>
     <string name="root_body">任何 \'rooted\' 应用 都可以查看到AlphaWallet\的 密匙数据并盗取你的数字资产! 请立即在此设备上删除你的钱包并在安全的设备上恢复你的钱包.</string>

@@ -198,7 +198,6 @@
     <string name="appreciation">Appreciation</string>
     <string name="eth_per_ticket">%1s/Ticket</string>
     <string name="ethereum">Ethereum</string>
-    <string name="ethereum_blockchain">Ethereum Blockchain</string>
     <string name="issuer">Issuer:</string>
     <string name="root_title">DEVICE SECURITY COMPROMISED</string>
     <string name="root_body">Any \'rooted\' app can access aWallet\'s keychain data and steal your wallet! Wipe this wallet immediately and restore on a secure device.</string>

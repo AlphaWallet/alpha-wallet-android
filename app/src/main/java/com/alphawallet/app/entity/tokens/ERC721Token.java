@@ -129,7 +129,7 @@ public class ERC721Token extends Token implements Parcelable
 
         holder.balanceEth.setVisibility(View.VISIBLE);
 
-        addTokenName(holder);
+        addTokenName(holder, definition);
     }
 
     @Override

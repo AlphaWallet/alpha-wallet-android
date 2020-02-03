@@ -1,9 +1,13 @@
 package com.alphawallet.app.ui;
 
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -11,27 +15,42 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.alphawallet.app.ui.widget.OnImportSeedListener;
 
 import com.alphawallet.app.R;
 
+import com.alphawallet.app.ui.widget.OnSuggestionClickListener;
+import com.alphawallet.app.ui.widget.adapter.SuggestionsAdapter;
 import com.alphawallet.app.widget.LayoutCallbackListener;
 import com.alphawallet.app.widget.PasswordInputView;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class ImportSeedFragment extends Fragment implements View.OnClickListener, TextWatcher, LayoutCallbackListener
-{
+public class ImportSeedFragment extends Fragment implements View.OnClickListener, TextWatcher, LayoutCallbackListener, OnSuggestionClickListener {
     private static final OnImportSeedListener dummyOnImportSeedListener = (s, c) -> {};
     private static final String validator = "[^a-z^A-Z^ ]";
+    private final int maxWordCount = 12;
 
     private PasswordInputView seedPhrase;
     private Button importButton;
     private Pattern pattern;
+    private TextView wordCount;
+    private RecyclerView listSuggestions;
+    private List<String> suggestions;
+    private SuggestionsAdapter suggestionsAdapter;
+    Typeface boldTypeface = Typeface.defaultFromStyle(Typeface.BOLD);
+    Typeface normalTypeface = Typeface.defaultFromStyle(Typeface.NORMAL);
+
     @NonNull
     private OnImportSeedListener onImportSeedListener = dummyOnImportSeedListener;
 
@@ -51,24 +70,40 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         super.onViewCreated(view, savedInstanceState);
 
         setupView();
+        setHintState(true);
     }
 
     private void setupView()
     {
         seedPhrase = getActivity().findViewById(R.id.input_seed);
         importButton = getActivity().findViewById(R.id.import_action);
+        wordCount = getActivity().findViewById(R.id.text_word_count);
+        listSuggestions = getActivity().findViewById(R.id.list_suggestions);
         importButton.setOnClickListener(this);
         seedPhrase.getEditText().addTextChangedListener(this);
         updateButtonState(false);
         pattern = Pattern.compile(validator, Pattern.MULTILINE);
 
+        seedPhrase.setLayoutListener(getActivity(), this, getActivity().findViewById(R.id.bottom_marker));
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
+        listSuggestions.setLayoutManager(linearLayoutManager);
+
+        suggestions = Arrays.asList(getResources().getStringArray(R.array.bip39_english));
+        suggestionsAdapter = new SuggestionsAdapter(suggestions, this);
+        listSuggestions.setAdapter(suggestionsAdapter);
+    }
+
+    private void setHintState(boolean enabled){
         String lang = Locale.getDefault().getDisplayLanguage();
-        if (lang.equalsIgnoreCase("English")) //remove language hint for English locale
+        if (enabled && !lang.equalsIgnoreCase("English")) //remove language hint for English locale
+        {
+            getActivity().findViewById(R.id.text_non_english_hint).setVisibility(View.VISIBLE);
+        }
+        else
         {
             getActivity().findViewById(R.id.text_non_english_hint).setVisibility(View.GONE);
         }
-
-        seedPhrase.setLayoutListener(getActivity(), this, getActivity().findViewById(R.id.bottom_marker));
     }
 
     @Override
@@ -135,32 +170,82 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         {
             updateButtonState(false);
             seedPhrase.setError("Seed phrase can only contain words");
+            wordCount.setVisibility(View.GONE);
         }
         else if (value.length() > 5)
         {
             updateButtonState(true);
+            wordCount.setVisibility(View.VISIBLE);
         }
         else
         {
             updateButtonState(false);
+            wordCount.setVisibility(View.VISIBLE);
         }
+
+        int words = 0;
+        if(value.trim().length() > 0) {
+            words = value.trim().replaceAll("\n", "").split("\\s").length;
+        }
+        wordCount.setText(words + "/" + maxWordCount);
+
+        if(words == maxWordCount) {
+            wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.nasty_green));
+            wordCount.setTypeface(boldTypeface);
+        }else if(words == (maxWordCount -1)){
+            wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.colorPrimaryDark));
+            wordCount.setTypeface(normalTypeface);
+        }else if(words > maxWordCount){
+            wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.dark_seed_danger));
+        }
+
+        //get last word from the text
+        if(value.length() > 0) {
+            int lastDelimiterPosition = value.lastIndexOf(" ");
+            String lastWord = lastDelimiterPosition == -1 ? value :
+                    value.substring(lastDelimiterPosition + " ".length());
+            if(lastWord.trim().length() > 0) {
+                filterList(lastWord);
+                if(listSuggestions.getVisibility() == View.GONE){
+                    listSuggestions.setVisibility(View.VISIBLE);
+                }
+            }else{
+                listSuggestions.setVisibility(View.GONE);
+            }
+        }else{
+            listSuggestions.setVisibility(View.GONE);
+        }
+    }
+
+    private void filterList(String lastWord) {
+        List<String> filteredList = Lists.newArrayList(Collections2.filter(suggestions, input -> input.startsWith(lastWord)));
+        suggestionsAdapter.setData(filteredList, lastWord);
     }
 
     @Override
     public void onLayoutShrunk()
     {
         if (importButton != null) importButton.setVisibility(View.GONE);
+        setHintState(false);
     }
 
     @Override
     public void onLayoutExpand()
     {
         if (importButton != null) importButton.setVisibility(View.VISIBLE);
+        listSuggestions.setVisibility(View.GONE);
+        setHintState(true);
     }
 
     @Override
     public void onInputDoneClick(View view)
     {
         processSeed(view);
+    }
+
+    @Override
+    public void onSuggestionClick(String value)
+    {
+        seedPhrase.getEditText().append(value + " ");
     }
 }

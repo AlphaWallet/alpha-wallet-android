@@ -58,7 +58,7 @@ public class SuggestionsAdapter extends RecyclerView.Adapter<SuggestionsAdapter.
         viewHolder.name.setText(data);
 
         viewHolder.name.setOnClickListener(v -> {
-            String outputWord = data.replace(suggestion, "");
+            String outputWord = data.replaceFirst(suggestion, "");
             onSuggestionClickListener.onSuggestionClick(outputWord);
         });
     }
@@ -66,5 +66,11 @@ public class SuggestionsAdapter extends RecyclerView.Adapter<SuggestionsAdapter.
     @Override
     public int getItemCount() {
         return suggestionList.size();
+    }
+
+    public String getSingleSuggestion()
+    {
+        if (suggestionList.size() == 1) return suggestionList.get(0);
+        else return "";
     }
 }

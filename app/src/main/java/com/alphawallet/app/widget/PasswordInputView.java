@@ -60,10 +60,10 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
         togglePassword = findViewById(R.id.toggle_password);
 
         setViews();
-        setLines();
         setImeOptions();
         setInputType();
         setMinHeight();
+        setLines();
     }
 
     public void setLayoutListener(Activity a, LayoutCallbackListener callback, View bm)

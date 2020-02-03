@@ -22,6 +22,7 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
@@ -416,7 +417,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         dialog.setButtonText(R.string.copy);
         dialog.setButtonListener(v -> {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("transaction hash", hash);
+            ClipData clip = ClipData.newPlainText("transaction hash",
+                    EthereumNetworkBase.getEtherscanURLbyNetwork(token.tokenInfo.chainId) + "tx/" + hash);
             clipboard.setPrimaryClip(clip);
             dialog.dismiss();
             sendBroadcast(new Intent(PRUNE_ACTIVITY));
@@ -437,7 +439,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         dialog.setButtonText(R.string.copy);
         dialog.setButtonListener(v -> {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("transaction hash", txData.txHash);
+            ClipData clip = ClipData.newPlainText("transaction hash",
+                    EthereumNetworkBase.getEtherscanURLbyNetwork(token.tokenInfo.chainId) + "tx/" + txData.txHash);
             clipboard.setPrimaryClip(clip);
             dialog.dismiss();
         });

@@ -40,6 +40,7 @@ import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteUrlAdapter;
@@ -488,7 +489,8 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         dialog.setButtonText(R.string.copy);
         dialog.setButtonListener(v -> {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("transaction hash", hash);
+            ClipData clip = ClipData.newPlainText("transaction hash",
+                    EthereumNetworkBase.getEtherscanURLbyNetwork(token.tokenInfo.chainId) + "tx/" + hash);
             clipboard.setPrimaryClip(clip);
             dialog.dismiss();
             sendBroadcast(new Intent(PRUNE_ACTIVITY));

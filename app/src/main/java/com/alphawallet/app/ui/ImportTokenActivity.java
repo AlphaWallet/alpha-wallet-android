@@ -14,10 +14,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.token.tools.Convert;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -27,7 +25,6 @@ import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.alphawallet.app.R;
-
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -480,7 +477,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         aDialog.setButtonText(R.string.copy);
         aDialog.setButtonListener(v -> {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("transaction hash", hash);
+            ClipData clip = ClipData.newPlainText("transaction hash",
+                    viewModel.getNetwork().etherscanTxUrl + hash);
             clipboard.setPrimaryClip(clip);
             aDialog.dismiss();
             new HomeRouter().open(this, true);

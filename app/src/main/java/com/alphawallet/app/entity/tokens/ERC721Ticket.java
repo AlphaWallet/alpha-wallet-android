@@ -167,16 +167,22 @@ public class ERC721Ticket extends Token implements Parcelable {
     {
         tokenHolder.balanceCurrency.setText("--");
         tokenHolder.textAppreciation.setText("--");
-
-        tokenHolder.issuer.setText(R.string.ethereum);
+        String issuerName = asset.getIssuerName(tokenHolder.token);
+        tokenHolder.issuer.setText(asset.getIssuerName(tokenHolder.token));
+        if(issuerName != null)
+        {
+            tokenHolder.issuer.setText(issuerName);
+        }
+        else
+        {
+            tokenHolder.issuerPlaceholder.setVisibility(View.GONE);
+        }
         tokenHolder.contractType.setVisibility(View.VISIBLE);
         tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
         if (VisibilityFilter.getImageOverride() != 0)
         {
             tokenHolder.icon.setVisibility(View.VISIBLE);
             tokenHolder.icon.setImageResource(VisibilityFilter.getImageOverride());
-            //TODO: Get issuer name from certificate
-            tokenHolder.issuer.setText(VisibilityFilter.getIssuerName());
         }
         tokenHolder.blockchainSeparator.setVisibility(View.GONE);
         tokenHolder.chainName.setVisibility(View.VISIBLE);

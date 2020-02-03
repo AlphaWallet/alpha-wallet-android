@@ -156,6 +156,7 @@
                             android:background="@color/colorPrimaryDark" />
 
                         <TextView
+                            android:id="@+id/issuerPlaceholder"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/font_semibold"
@@ -169,7 +170,6 @@
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="2dp"
                             android:fontFamily="@font/font_semibold"
-                            android:text="@string/ethereum"
                             android:textColor="@color/colorPrimaryDark"
                             android:textSize="11sp" />
 

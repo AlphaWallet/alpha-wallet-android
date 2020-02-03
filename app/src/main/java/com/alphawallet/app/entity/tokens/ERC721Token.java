@@ -120,7 +120,15 @@ public class ERC721Token extends Token implements Parcelable
         int balance = tokenBalanceAssets.size();
 
         holder.balanceEth.setText(String.valueOf(balance));
-        holder.issuer.setText(R.string.ethereum);
+        String issuerName = definition.getIssuerName(holder.token);
+        if(issuerName != null)
+        {
+            holder.issuer.setText(definition.getIssuerName(holder.token));
+        }
+        else
+        {
+            holder.issuerPlaceholder.setVisibility(View.GONE);
+        }
         holder.layoutValueDetails.setVisibility(View.GONE);
 
         holder.contractType.setVisibility(View.VISIBLE);

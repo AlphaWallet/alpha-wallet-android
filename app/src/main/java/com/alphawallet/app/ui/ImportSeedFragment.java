@@ -17,10 +17,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.alphawallet.app.ui.widget.OnImportSeedListener;
-
 import com.alphawallet.app.R;
-
+import com.alphawallet.app.ui.widget.OnImportSeedListener;
 import com.alphawallet.app.ui.widget.OnSuggestionClickListener;
 import com.alphawallet.app.ui.widget.adapter.SuggestionsAdapter;
 import com.alphawallet.app.widget.LayoutCallbackListener;
@@ -50,6 +48,7 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
     private SuggestionsAdapter suggestionsAdapter;
     Typeface boldTypeface = Typeface.defaultFromStyle(Typeface.BOLD);
     Typeface normalTypeface = Typeface.defaultFromStyle(Typeface.NORMAL);
+    private boolean deletePressed;
 
     @NonNull
     private OnImportSeedListener onImportSeedListener = dummyOnImportSeedListener;
@@ -125,7 +124,16 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         if (TextUtils.isEmpty(newMnemonic)) {
             this.seedPhrase.setError(getString(R.string.error_field_required));
         } else {
-            onImportSeedListener.onSeed(newMnemonic, getActivity());
+            String[] words = newMnemonic.split("\\s+");
+            StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            for (String word : words)
+            {
+                if (!first) sb.append(" ");
+                sb.append(word);
+                first = false;
+            }
+            onImportSeedListener.onSeed(sb.toString(), getActivity());
         }
     }
 
@@ -155,9 +163,9 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
     }
 
     @Override
-    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+    public void onTextChanged(CharSequence charSequence, int start, int count, int after)
     {
-
+        deletePressed = count == 1;
     }
 
     @Override
@@ -183,11 +191,9 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
             wordCount.setVisibility(View.VISIBLE);
         }
 
-        int words = 0;
-        if(value.trim().length() > 0) {
-            words = value.trim().replaceAll("\n", "").split("\\s").length;
-        }
-        wordCount.setText(words + "/" + maxWordCount);
+        int words = wordCount(value);
+        String wordCountDisplay = words + "/" + maxWordCount;
+        wordCount.setText(wordCountDisplay);
 
         if(words == maxWordCount) {
             wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.nasty_green));
@@ -201,13 +207,16 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
 
         //get last word from the text
         if(value.length() > 0) {
-            int lastDelimiterPosition = value.lastIndexOf(" ");
-            String lastWord = lastDelimiterPosition == -1 ? value :
-                    value.substring(lastDelimiterPosition + " ".length());
+            String lastWord = getLastWord(value);
             if(lastWord.trim().length() > 0) {
                 filterList(lastWord);
                 if(listSuggestions.getVisibility() == View.GONE){
                     listSuggestions.setVisibility(View.VISIBLE);
+                }
+                if (!deletePressed && suggestionsAdapter.getSingleSuggestion().equals(lastWord))
+                {
+                    seedPhrase.getEditText().append(" ");
+                    listSuggestions.setVisibility(View.GONE);
                 }
             }else{
                 listSuggestions.setVisibility(View.GONE);
@@ -215,6 +224,20 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         }else{
             listSuggestions.setVisibility(View.GONE);
         }
+    }
+
+    private int wordCount(String value)
+    {
+        if (value == null || value.length() == 0) return 0;
+        String[] split = value.split("\\s+");
+        return split.length;
+    }
+
+    private String getLastWord(String value)
+    {
+        int lastDelimiterPosition = value.lastIndexOf(" ");
+        return lastDelimiterPosition == -1 ? value :
+                          value.substring(lastDelimiterPosition + " ".length());
     }
 
     private void filterList(String lastWord) {

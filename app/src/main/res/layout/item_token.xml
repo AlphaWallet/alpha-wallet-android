@@ -130,30 +130,11 @@
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/text_chain"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_semibold"
-                        android:text="@string/ethereum_blockchain"
-                        android:textColor="@color/colorPrimaryDark"
-                        android:textSize="11sp" />
-
                     <LinearLayout
                         android:id="@+id/layout_extended_info"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
-
-                        <View
-                            android:id="@+id/blockchain_separator"
-                            android:layout_width="1dp"
-                            android:layout_height="match_parent"
-                            android:layout_marginBottom="2dp"
-                            android:layout_marginLeft="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginTop="2dp"
-                            android:background="@color/colorPrimaryDark" />
 
                         <TextView
                             android:id="@+id/issuerPlaceholder"

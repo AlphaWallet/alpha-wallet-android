@@ -216,6 +216,7 @@ public class Token implements Parcelable
     public String getAddress() {
         return tokenInfo.address;
     }
+
     public String getFullName()
     {
         if (isTerminated()) return SetupTokensInteract.EXPIRED_CONTRACT;
@@ -227,11 +228,14 @@ public class Token implements Parcelable
 
     public String getFullName(AssetDefinitionService assetDefinition, int count)
     {
-        String name = getFullName();
-        String tokenTypeName = assetDefinition.getTokenName(tokenInfo.chainId, tokenInfo.address, count);
-        if (name != null && tokenTypeName != null && !name.contains(tokenTypeName)) name = name + " " + tokenTypeName;
-
-        return name;
+        //override contract name with TS defined name
+        String name = assetDefinition.getTokenName(tokenInfo.chainId, tokenInfo.address, count);
+        if (name != null) {
+            String symbol = (tokenInfo.symbol == null || tokenInfo.symbol.length() == 0) ? "" : " (" + tokenInfo.symbol.toUpperCase() + ")";
+            return name + symbol;
+        } else {
+            return getFullName();
+        }
     }
 
     public void clickReact(BaseViewModel viewModel, Context context)
@@ -281,7 +285,7 @@ public class Token implements Parcelable
             holder.layoutValueDetails.setVisibility(View.GONE);
         }
 
-        addTokenName(holder);
+        addTokenName(holder, definition);
 
         //populate ticker if we have it
         if (ticker != null)
@@ -306,13 +310,13 @@ public class Token implements Parcelable
         holder.balanceEth.setVisibility(View.VISIBLE);
     }
 
-    void addTokenName(TokenHolder holder)
+    void addTokenName(TokenHolder holder, AssetDefinitionService definitionService)
     {
         String balance = holder.balanceEth.getText().toString();
         String symbolStr = tokenInfo.symbol != null ? tokenInfo.symbol.toUpperCase() : "";
         String nameTxt = TextUtils.isEmpty(tokenInfo.name)
                          ? symbolStr
-                         : getFullName();
+                         : getFullName(definitionService, getTicketCount());
 
         String composite = balance + " " + nameTxt;
         holder.balanceEth.setText(composite);

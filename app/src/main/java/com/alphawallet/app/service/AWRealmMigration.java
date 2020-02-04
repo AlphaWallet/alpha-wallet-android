@@ -33,13 +33,13 @@ public class AWRealmMigration implements RealmMigration
         {
             schema.create("RealmCertificateData")
                     .addField("instanceKey", String.class, FieldAttribute.PRIMARY_KEY)
-                    .addField("result", String.class, FieldAttribute.INDEXED)
-                    .addField("subject", String.class, FieldAttribute.INDEXED)
-                    .addField("keyName", String.class, FieldAttribute.INDEXED)
-                    .addField("keyType", String.class, FieldAttribute.INDEXED)
-                    .addField("issuer", String.class, FieldAttribute.INDEXED)
-                    .addField("certificateName", String.class, FieldAttribute.INDEXED)
-                    .addField("type", int.class, FieldAttribute.INDEXED);
+                    .addField("result", String.class)
+                    .addField("subject", String.class)
+                    .addField("keyName", String.class)
+                    .addField("keyType", String.class)
+                    .addField("issuer", String.class)
+                    .addField("certificateName", String.class)
+                    .addField("type", int.class);
             oldVersion++;
         }
     }

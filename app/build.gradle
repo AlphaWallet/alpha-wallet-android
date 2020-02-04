@@ -55,7 +55,7 @@ android {
             INFURA_API_KEY = infuraAPI
         }
 
-        buildConfigField 'int', 'DB_VERSION', '6'
+        buildConfigField 'int', 'DB_VERSION', '7'
         buildConfigField "String", CoinmarketCapAPI, COINMARKET_CAP_KEY
         buildConfigField "String", AmberdataAPI, AMBERDATA_API_KEY
         buildConfigField "String", InfuraAPI, INFURA_API_KEY
@@ -68,7 +68,7 @@ android {
     productFlavors {
 	awallet {
 		dimension "targetting"
-        versionCode 84
+        versionCode 88
         versionName "2.20.0"
 	}
     }

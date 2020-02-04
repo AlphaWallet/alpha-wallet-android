@@ -12,7 +12,7 @@ import io.realm.annotations.PrimaryKey;
 public class RealmCertificateData extends RealmObject
 {
     @PrimaryKey
-    private String instanceKey; //should be token address and tokenID
+    private String instanceKey; //File hash
     private String result;
     private String subject;
     private String keyName;

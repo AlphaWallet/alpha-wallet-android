@@ -90,7 +90,7 @@ import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVE
 
 public class AssetDefinitionService implements ParseResult, AttributeInterface
 {
-    private static final String CERTIFICATE_DB = "REALM_CERTS";
+    private static final String CERTIFICATE_DB = "CERTIFICATE_CACHE-db.realm";
 
     private final Context context;
     private final OkHttpClient okHttpClient;
@@ -445,11 +445,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void loadScriptFromServer(String correctedAddress)
     {
-        Token t = tokensService.getToken(1, correctedAddress);
-        if (t != null && t.tokenInfo.name.contains("SAI"))
-        {
-            System.out.println("yoless");
-        }
         //first check the last time we tried this session
         if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() - assetChecked.get(correctedAddress)) > 1000*60*60)
         {

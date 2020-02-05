@@ -15,6 +15,7 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.interact.SetupTokensInteract;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -867,13 +868,19 @@ public class Token implements Parcelable
         long multiplier = isEthereum() || EthereumNetworkRepository.isPriorityToken(this) ? 1 : 5;
 
         //ensure chain transactions for the wallet are checked on a regular basis.
-        if (EthereumNetworkRepository.hasTicker(this) && hasPositiveBalance() && (currentTime - lastTxCheck) > multiplier*60*1000) //need to check main chains once per minute
+        if (checkBackgroundUpdate(currentTime) || (EthereumNetworkRepository.hasTicker(this) && hasPositiveBalance() && (currentTime - lastTxCheck) > multiplier*60*1000)) //need to check main chains once per minute
         {
             lastTxCheck = currentTime; //don't check again
             requiresUpdate = true;
         }
 
         return requiresUpdate;
+    }
+
+    private boolean checkBackgroundUpdate(long currentTime)
+    {
+        //check balance of empty mainnet chains once per hour
+        return isEthereum() && !hasPositiveBalance() && (currentTime - lastTxCheck) > 60 * 60 * 1000;
     }
 
     public boolean getIsSent(Transaction transaction)

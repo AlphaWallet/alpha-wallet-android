@@ -629,6 +629,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     AWSig.issuer = "AlphaWallet";
                     AWSig.keyName = "AlphaWallet";
                     AWSig.type = SigReturnType.SIGNATURE_PASS;
+                    tsf.determineSignatureType(AWSig);
                     storeCertificateData(hash, AWSig);
                 }
                 return true;
@@ -770,6 +771,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 //fetch signature and store in realm
                 sig = alphaWalletService.checkTokenScriptSignature(tsf);
+                tsf.determineSignatureType(sig);
                 storeCertificateData(hash, sig);
             }
 
@@ -1014,9 +1016,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 if (sig == null)
                 {
                     sig = alphaWalletService.checkTokenScriptSignature(tsf);
+                    tsf.determineSignatureType(sig);
                     storeCertificateData(hash, sig);
                 }
-                if (sig != null) sigDescriptor = sig;
+                sigDescriptor = sig;
             }
 
             return sigDescriptor;

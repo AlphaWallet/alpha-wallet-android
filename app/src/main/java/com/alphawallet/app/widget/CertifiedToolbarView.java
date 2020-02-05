@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.app.R;
 
@@ -34,14 +35,15 @@ public class CertifiedToolbarView extends android.support.v7.widget.Toolbar
         activity = act;
         findViewById(R.id.certificate_spinner).setVisibility(View.GONE);
         ImageView lockStatus = findViewById(R.id.image_lock);
-        //TextView signatureMessage = findViewById(R.id.text_verified);
         lockStatus.setVisibility(View.VISIBLE);
 
         lockStatus.setOnClickListener(view -> {
             showCertificateDetails(sigData);
         });
 
-        switch (sigData.type)
+        SigReturnType type = sigData.type != null ? sigData.type : SigReturnType.NO_TOKENSCRIPT;
+
+        switch (type)
         {
             case NO_TOKENSCRIPT:
                 lockStatus.setVisibility(View.GONE);
@@ -52,7 +54,6 @@ public class CertifiedToolbarView extends android.support.v7.widget.Toolbar
             case DEBUG_SIGNATURE_INVALID:
                 lockResource = R.mipmap.ic_unlocked_debug;
                 lockStatus.setImageResource(R.mipmap.ic_unlocked_debug);
-                //signatureMessage.setText(R.string.certificate_fail);
                 break;
             case DEBUG_SIGNATURE_PASS:
                 lockResource = R.mipmap.ic_locked_debug;

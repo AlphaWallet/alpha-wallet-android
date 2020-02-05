@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.interact.FetchWalletsInteract;
@@ -22,6 +23,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final AssetDefinitionService assetDefinitionService;
     private final GenericWalletInteract genericWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
+    private final CurrencyRepositoryType currencyRepository;
 
     public HomeViewModelFactory(
             PreferenceRepositoryType preferenceRepository,
@@ -31,7 +33,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
             GenericWalletInteract genericWalletInteract,
-            FetchWalletsInteract fetchWalletsInteract) {
+            FetchWalletsInteract fetchWalletsInteract,
+            CurrencyRepositoryType currencyRepository) {
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.importTokenRouter = importTokenRouter;
@@ -40,6 +43,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.assetDefinitionService = assetDefinitionService;
         this.genericWalletInteract = genericWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
+        this.currencyRepository = currencyRepository;
     }
 
     @NonNull
@@ -53,7 +57,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 addTokenRouter,
                 assetDefinitionService,
                 genericWalletInteract,
-                fetchWalletsInteract
+                fetchWalletsInteract,
+                currencyRepository
                 );
     }
 }

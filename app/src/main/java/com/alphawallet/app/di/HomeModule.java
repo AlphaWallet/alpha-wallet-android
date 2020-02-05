@@ -4,6 +4,8 @@ import dagger.Module;
 import dagger.Provides;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.CurrencyRepository;
+import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.LocaleRepository;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
@@ -25,7 +27,8 @@ class HomeModule {
             AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
             GenericWalletInteract genericWalletInteract,
-            FetchWalletsInteract fetchWalletsInteract) {
+            FetchWalletsInteract fetchWalletsInteract,
+            CurrencyRepositoryType currencyRepository) {
         return new HomeViewModelFactory(
                 preferenceRepository,
                 localeRepository,
@@ -34,7 +37,8 @@ class HomeModule {
                 addTokenRouter,
                 assetDefinitionService,
                 genericWalletInteract,
-                fetchWalletsInteract);
+                fetchWalletsInteract,
+                currencyRepository);
     }
 
     @Provides
@@ -63,5 +67,10 @@ class HomeModule {
     @Provides
     FetchWalletsInteract provideFetchWalletInteract(WalletRepositoryType walletRepository) {
         return new FetchWalletsInteract(walletRepository);
+    }
+
+    @Provides
+    CurrencyRepositoryType provideCurrencyRepository(PreferenceRepositoryType preferenceRepository) {
+        return new CurrencyRepository(preferenceRepository);
     }
 }

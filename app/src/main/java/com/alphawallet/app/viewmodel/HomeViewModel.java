@@ -11,6 +11,7 @@ import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
@@ -52,6 +53,7 @@ public class HomeViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final GenericWalletInteract genericWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
+    private final CurrencyRepositoryType currencyRepository;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -67,7 +69,8 @@ public class HomeViewModel extends BaseViewModel {
             AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
             GenericWalletInteract genericWalletInteract,
-            FetchWalletsInteract fetchWalletsInteract) {
+            FetchWalletsInteract fetchWalletsInteract,
+            CurrencyRepositoryType currencyRepository) {
         this.preferenceRepository = preferenceRepository;
         this.externalBrowserRouter = externalBrowserRouter;
         this.importTokenRouter = importTokenRouter;
@@ -76,6 +79,7 @@ public class HomeViewModel extends BaseViewModel {
         this.assetDefinitionService = assetDefinitionService;
         this.genericWalletInteract = genericWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
+        this.currencyRepository = currencyRepository;
     }
 
     @Override
@@ -303,5 +307,9 @@ public class HomeViewModel extends BaseViewModel {
 
     public void setFindWalletAddressDialogShown(boolean isShown) {
         preferenceRepository.setFindWalletAddressDialogShown(isShown);
+    }
+
+    public void updateCurrency(String currencyCode){
+        currencyRepository.setDefaultCurrency(currencyCode);
     }
 }

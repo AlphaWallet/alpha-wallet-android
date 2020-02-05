@@ -31,4 +31,8 @@ public interface PreferenceRepositoryType {
     boolean isFindWalletAddressDialogShown();
 
     void setFindWalletAddressDialogShown(boolean isShown);
+
+    void setDefaultCurrency(String currency);
+
+    String getDefaultCurrency();
 }

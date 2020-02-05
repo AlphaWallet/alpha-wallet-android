@@ -886,6 +886,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case C.UPDATE_LOCALE:
                 updateLocale(data);
                 break;
+            case C.UPDATE_CURRENCY:
+                updateCurrency(data);
+                break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
                 break;
@@ -953,5 +956,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         String newLocale = data.getStringExtra(C.EXTRA_LOCALE);
         sendBroadcast(new Intent(CHANGED_LOCALE));
         viewModel.updateLocale(newLocale, this);
+    }
+
+    public void updateCurrency(Intent data)
+    {
+        if (data == null) return;
+        String currencyCode = data.getStringExtra(C.EXTRA_CURRENCY);
+        viewModel.updateCurrency(currencyCode);
     }
 }

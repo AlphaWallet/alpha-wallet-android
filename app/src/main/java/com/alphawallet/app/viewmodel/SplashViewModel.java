@@ -15,6 +15,7 @@ import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.FileData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.util.Utils;
@@ -46,6 +47,7 @@ public class SplashViewModel extends ViewModel
     private final LocaleRepositoryType localeRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final KeyService keyService;
+    private final CurrencyRepositoryType currencyRepository;
 
     private MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private MutableLiveData<Wallet> createWallet = new MutableLiveData<>();
@@ -54,12 +56,14 @@ public class SplashViewModel extends ViewModel
                     PreferenceRepositoryType preferenceRepository,
                     LocaleRepositoryType localeRepository,
                     KeyService keyService,
-                    AssetDefinitionService assetDefinitionService) {
+                    AssetDefinitionService assetDefinitionService,
+                    CurrencyRepositoryType currencyRepository) {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.keyService = keyService;
         this.assetDefinitionService = assetDefinitionService;
+        this.currencyRepository = currencyRepository;
     }
 
     public void setLocale(Context context) {
@@ -264,5 +268,9 @@ public class SplashViewModel extends ViewModel
                 + File.separator + ALPHAWALLET_DIR);
 
         return directory.exists();
+    }
+
+    public void setCurrency() {
+        currencyRepository.setDefaultCurrency(preferenceRepository.getDefaultCurrency());
     }
 }

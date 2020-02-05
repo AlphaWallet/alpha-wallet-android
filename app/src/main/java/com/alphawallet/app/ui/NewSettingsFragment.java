@@ -62,6 +62,7 @@ public class NewSettingsFragment extends Fragment
     private View backupPopupAnchor;
     private LinearLayout layoutBackupKey;
     private TextView backupText;
+    private TextView currencySubtext;
 
     @Nullable
     @Override
@@ -80,6 +81,7 @@ public class NewSettingsFragment extends Fragment
         backupStatusText = view.findViewById(R.id.text_backup_status);
         backupStatusImage = view.findViewById(R.id.image_backup_status);
         backupText = view.findViewById(R.id.backup_text);
+        currencySubtext = view.findViewById(R.id.locale_currency_subtext);
 
         TextView helpText = view.findViewById(R.id.text_version);
         try
@@ -93,6 +95,7 @@ public class NewSettingsFragment extends Fragment
         }
 
         localeSubtext.setText(LocaleUtils.getDisplayLanguage(viewModel.getDefaultLocale(), viewModel.getDefaultLocale()));
+        currencySubtext.setText(viewModel.getDefaultCurrency());
 
         updateNotificationState();
 
@@ -143,6 +146,15 @@ public class NewSettingsFragment extends Fragment
             intent.putExtra(EXTRA_LOCALE, currentLocale);
             intent.putParcelableArrayListExtra(EXTRA_STATE, viewModel.getLocaleList(getContext()));
             getActivity().startActivityForResult(intent, C.UPDATE_LOCALE);
+        });
+
+        final LinearLayout layoutSwitchCurrency = view.findViewById(R.id.layout_locale_currency);
+        layoutSwitchCurrency.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), SelectCurrencyActivity.class);
+            String currentCurrency = viewModel.getDefaultCurrency();
+            intent.putExtra(EXTRA_CURRENCY, currentCurrency);
+            intent.putParcelableArrayListExtra(EXTRA_STATE, viewModel.getCurrencyList());
+            getActivity().startActivityForResult(intent, C.UPDATE_CURRENCY);
         });
 
         final LinearLayout layoutHelp = view.findViewById(R.id.layout_help_faq);
@@ -412,6 +424,7 @@ public class NewSettingsFragment extends Fragment
     public void onResume() {
         super.onResume();
         viewModel.prepare();
+        updateData();
     }
 
     private void showXMLOverrideDialog() {
@@ -518,5 +531,9 @@ public class NewSettingsFragment extends Fragment
     {
         layoutBackup.setVisibility(View.GONE);
         if (getActivity() != null) ((HomeActivity)getActivity()).postponeWalletBackupWarning(walletAddress);
+    }
+
+    private void updateData() {
+        currencySubtext.setText(viewModel.getDefaultCurrency());
     }
 }

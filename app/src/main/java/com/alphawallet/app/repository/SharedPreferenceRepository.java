@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.alphawallet.app.C;
+
 import java.util.Locale;
 
 public class SharedPreferenceRepository implements PreferenceRepositoryType {
@@ -18,6 +20,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String LOCALE_KEY = "locale";
     private static final String BACKUP_WALLET_SHOWN = "backup_wallet_shown";
     private static final String FIND_WALLET_ADDRESS_SHOWN = "find_wallet_address_shown";
+    private static final String CURRENCY_KEY = "currency";
 
     private final SharedPreferences pref;
 
@@ -105,5 +108,15 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public void setFindWalletAddressDialogShown(boolean isShown) {
         pref.edit().putBoolean(FIND_WALLET_ADDRESS_SHOWN, isShown).apply();
+    }
+
+    @Override
+    public void setDefaultCurrency(String currency) {
+        pref.edit().putString(CURRENCY_KEY, currency).apply();
+    }
+
+    @Override
+    public String getDefaultCurrency() {
+        return pref.getString(CURRENCY_KEY, C.DEFAULT_CURRENCY_CODE);
     }
 }

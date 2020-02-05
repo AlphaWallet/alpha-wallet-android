@@ -75,6 +75,7 @@
     <string name="error_invalid_address">Invalid address</string>
     <string name="error_invalid_amount">Invalid amount</string>
     <string name="error_transaction_failed">Transaction error</string>
+    <string name="error_import_failed">Error al importar el token</string>
     <string name="error_must_numeric">must be a numeric value.</string>
     <string name="transaction_succeeded">Transaction successful</string>
     <string name="NA">N/A</string>

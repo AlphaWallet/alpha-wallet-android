@@ -513,8 +513,8 @@ public class ImportTokenViewModel extends BaseViewModel
         {
             switch (result)
             {
-                case 501:
-                    txError.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "Duplicate transaction passed."));
+                case 400:
+                    txError.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "Token already claimed."));
                     break;
                 case 401:
                     txError.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "Signature invalid."));

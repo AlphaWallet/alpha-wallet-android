@@ -19,7 +19,7 @@ public class RealmManager {
         return getRealmInstance(wallet.address + "-db.realm");
     }
 
-    private Realm getRealmInstance(String name) {
+    public Realm getRealmInstance(String name) {
         try
         {
             RealmConfiguration config = realmConfigurations.get(name);

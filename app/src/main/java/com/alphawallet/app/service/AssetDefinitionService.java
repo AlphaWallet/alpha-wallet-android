@@ -26,6 +26,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.app.repository.entity.RealmCertificateData;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.token.entity.AttributeInterface;
@@ -67,6 +68,7 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -88,14 +90,14 @@ import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVE
 
 public class AssetDefinitionService implements ParseResult, AttributeInterface
 {
+    private static final String CERTIFICATE_DB = "CERTIFICATE_CACHE-db.realm";
+
     private final Context context;
     private final OkHttpClient okHttpClient;
 
     private SparseArray<Map<String, TokenScriptFile>> assetDefinitions;
     private Map<String, Long> assetChecked;                //Mapping of contract address to when they were last fetched from server
     private FileObserver fileObserver;                     //Observer which scans the override directory waiting for file change
-    private Map<String, TokenScriptFileData> fileHashes;                //Mapping of files and hashes.
-
     private final NotificationService notificationService;
     private final RealmManager realmManager;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -115,7 +117,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         okHttpClient = client;
         assetChecked = new HashMap<>();
         tokenTypeName = new SparseArray<>();
-        fileHashes = new ConcurrentHashMap<>();
         notificationService = svs;
         realmManager = rm;
         ethereumNetworkRepository = eth;
@@ -431,11 +432,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         try
         {
             TokenScriptFile tsf = getTokenScriptFile(chainId, address);
-            TokenScriptFileData fd = fileHashes.get(tsf.getAbsolutePath());
-            if (tsf.fileUnchanged(fd))
-            {
-                issuer = fd.sigDescriptor.keyName;
-            }
+            XMLDsigDescriptor sig = getCertificateFromRealm(tsf.calcMD5());
+            if (sig != null) issuer = sig.keyName;
         }
         catch (Exception e)
         {
@@ -451,6 +449,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() - assetChecked.get(correctedAddress)) > 1000*60*60)
         {
             fetchXMLFromServer(correctedAddress)
+                    .flatMap(this::updateSignature)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::handleFileLoad, this::onError).isDisposed();
@@ -496,6 +495,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             //peek to see if this file exists
             File existingFile = getXMLFile(address);
+            result = existingFile;
             long fileTime = 0;
             if (existingFile != null && existingFile.exists())
             {
@@ -623,11 +623,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 for (int network : holdingContracts.addresses.keySet())
                 {
                     addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), asset));
-                    TokenScriptFileData fd = new TokenScriptFileData();
-                    fd.hash = tsf.calcMD5();
-                    fd.sigDescriptor = new XMLDsigDescriptor();
-                    fd.sigDescriptor.result = "pass";
-                    fileHashes.put(asset, fd);
+                    XMLDsigDescriptor AWSig = new XMLDsigDescriptor();
+                    String hash = tsf.calcMD5();
+                    AWSig.result = "pass";
+                    AWSig.issuer = "AlphaWallet";
+                    AWSig.keyName = "AlphaWallet";
+                    AWSig.type = SigReturnType.SIGNATURE_PASS;
+                    storeCertificateData(hash, AWSig);
                 }
                 return true;
             }
@@ -751,9 +753,81 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         //check all definitions in the download zone
         Disposable d = Observable.fromIterable(getScriptsInSecureZone())
                 .concatMap(addr -> fetchXMLFromServer(addr).toObservable())
+                .flatMap(f -> updateSignature(f).toObservable())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::handleFileLoad, this::onError);
+    }
+
+    private Single<File> updateSignature(File file)
+    {
+        return Single.fromCallable(() -> {
+            TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
+            String hash = tsf.calcMD5();
+            //pull data from realm
+            XMLDsigDescriptor sig = getCertificateFromRealm(hash);
+            if (sig == null)
+            {
+                //fetch signature and store in realm
+                sig = alphaWalletService.checkTokenScriptSignature(tsf);
+                storeCertificateData(hash, sig);
+            }
+
+            return file;
+        });
+    }
+
+    private void storeCertificateData(String hash, XMLDsigDescriptor sig)
+    {
+        try (Realm realm = realmManager.getRealmInstance(CERTIFICATE_DB))
+        {
+            //if signature present, then just update
+            RealmCertificateData realmData = realm.where(RealmCertificateData.class)
+                    .equalTo("instanceKey", hash)
+                    .findFirst();
+
+            TransactionsRealmCache.addRealm();
+            realm.beginTransaction();
+            if (realmData == null) realmData = realm.createObject(RealmCertificateData.class, hash);
+            realmData.setFromSig(sig);
+            realm.commitTransaction();
+            realm.close();
+            TransactionsRealmCache.subRealm();
+        }
+        catch (Exception e)
+        {
+            TransactionsRealmCache.subRealm();
+            e.printStackTrace();
+        }
+    }
+
+    private XMLDsigDescriptor getCertificateFromRealm(String hash)
+    {
+        XMLDsigDescriptor sig = null;
+        try (Realm realm = realmManager.getRealmInstance(CERTIFICATE_DB))
+        {
+            RealmCertificateData realmCert = realm.where(RealmCertificateData.class)
+                    .equalTo("instanceKey", hash)
+                    .findFirst();
+
+            if (realmCert != null)
+            {
+                sig = new XMLDsigDescriptor();
+                sig.issuer = realmCert.getIssuer();
+                sig.certificateName = realmCert.getCertificateName();
+                sig.keyName = realmCert.getKeyName();
+                sig.keyType = realmCert.getKeyType();
+                sig.result = realmCert.getResult();
+                sig.subject = realmCert.getSubject();
+                sig.type = realmCert.getType();
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return sig;
     }
 
     /**
@@ -874,15 +948,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                         Environment.getExternalStorageDirectory()
                                                 + File.separator + HomeViewModel.ALPHAWALLET_DIR, s);
 
-                                TokenScriptFileData fData = fileHashes.get(newTSFile.getAbsolutePath());
+                                //TokenScriptFileData fData = fileHashes.get(newTSFile.getAbsolutePath());
                                 if (addContractAddresses(newTSFile))
                                 {
-                                    if (fData == null) fData = new TokenScriptFileData();
-                                    fData.hash = newTSFile.calcMD5();
-                                    fData.sigDescriptor = null;
                                     notificationService.DisplayNotification("Definition Updated", s, NotificationCompat.PRIORITY_MAX);
                                     cachedDefinition = null;
-                                    fileHashes.put(newTSFile.getAbsolutePath(), fData);
+                                    updateSignature(newTSFile) //update signature data if necessary
+                                            .subscribeOn(Schedulers.io())
+                                            .observeOn(AndroidSchedulers.mainThread())
+                                            .subscribe().isDisposed();
                                 }
                             }
                         }
@@ -933,25 +1007,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             sigDescriptor.type = SigReturnType.NO_TOKENSCRIPT;
 
             TokenScriptFile tsf = getTokenScriptFile(chainId, contractAddress);
-            if (tsf.isValidTokenScript())
+            if (tsf != null)
             {
-                TokenScriptFileData fd = fileHashes.get(tsf.getAbsolutePath());
-                if (tsf.fileUnchanged(fd))
+                String hash = tsf.calcMD5();
+                XMLDsigDescriptor sig = getCertificateFromRealm(hash);
+                if (sig == null)
                 {
-                    return fd.sigDescriptor;
+                    sig = alphaWalletService.checkTokenScriptSignature(tsf);
+                    storeCertificateData(hash, sig);
                 }
-                else
-                {
-                    if (fd == null)
-                    {
-                        fd = new TokenScriptFileData();
-                        fileHashes.put(tsf.getAbsolutePath(), fd);
-                    }
-                    fd.sigDescriptor = alphaWalletService.checkTokenScriptSignature(tsf);
-                    tsf.determineSignatureType(fd);
-                }
-                fd.hash = tsf.calcMD5();
-                sigDescriptor = fd.sigDescriptor;
+                if (sig != null) sigDescriptor = sig;
             }
 
             return sigDescriptor;
@@ -1181,6 +1246,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             e.printStackTrace();
         }
     }
+
+    //private Token
 
     private void addOpenSeaAttributes(StringBuilder attrs, Token erc721Token, BigInteger tokenId)
     {

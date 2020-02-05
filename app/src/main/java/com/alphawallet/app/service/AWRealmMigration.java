@@ -1,6 +1,9 @@
 package com.alphawallet.app.service;
 
+import com.alphawallet.app.repository.entity.RealmCertificateData;
+
 import io.realm.DynamicRealm;
+import io.realm.FieldAttribute;
 import io.realm.RealmMigration;
 import io.realm.RealmObjectSchema;
 import io.realm.RealmSchema;
@@ -22,6 +25,21 @@ public class AWRealmMigration implements RealmMigration
         {
             RealmObjectSchema realmToken = schema.get("RealmToken");
             if (!realmToken.hasField("lastTxTime")) realmToken.addField("lastTxTime", long.class); //add the last transaction update time, used to check tokenscript cached result validity
+            oldVersion++;
+        }
+
+        //Version 6
+        if (oldVersion == 6)
+        {
+            schema.create("RealmCertificateData")
+                    .addField("instanceKey", String.class, FieldAttribute.PRIMARY_KEY)
+                    .addField("result", String.class)
+                    .addField("subject", String.class)
+                    .addField("keyName", String.class)
+                    .addField("keyType", String.class)
+                    .addField("issuer", String.class)
+                    .addField("certificateName", String.class)
+                    .addField("type", int.class);
             oldVersion++;
         }
     }

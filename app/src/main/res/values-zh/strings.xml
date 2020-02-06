@@ -524,4 +524,5 @@
     <string name="reddit">Reddit</string>
     <string name="tokenscript_standard">TokenScript 标准</string>
     <string name="version">版本</string>
+    <string name="show_qr_code_to_redemption_booth">呈递二维码到兑换台</string>
 </resources>

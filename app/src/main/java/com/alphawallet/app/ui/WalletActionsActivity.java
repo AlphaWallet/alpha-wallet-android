@@ -32,7 +32,6 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
     WalletActionsViewModelFactory walletActionsViewModelFactory;
     WalletActionsViewModel viewModel;
 
-    private TextView walletTitle;
     private TextView walletBalance;
     private TextView walletAddress;
     private LinearLayout successOverlay;
@@ -145,8 +144,6 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
     }
 
     private void initViews() {
-        walletTitle = findViewById(R.id.wallet_title);
-
         walletBalance = findViewById(R.id.wallet_balance);
         walletBalance.setText(String.format("%s %s", wallet.balance, currencySymbol));
 

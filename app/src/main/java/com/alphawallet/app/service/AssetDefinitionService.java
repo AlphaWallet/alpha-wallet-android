@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.SparseArray;
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.tokens.ERC721Token;
@@ -433,7 +434,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             TokenScriptFile tsf = getTokenScriptFile(chainId, address);
             XMLDsigDescriptor sig = getCertificateFromRealm(tsf.calcMD5());
-            if (sig != null) issuer = sig.keyName;
+            if (sig != null && sig.keyName != null) issuer = sig.keyName;
         }
         catch (Exception e)
         {
@@ -700,7 +701,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 .filter(File::isFile)
                 .filter(this::allowableExtension)
                 .filter(File::canRead)
-                .forEach(this::addContractAddresses).isDisposed();
+                .flatMap(file -> updateSignature(file).toObservable()) //check we have signature when initialising
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::addContractAddresses)
+                .isDisposed();
     }
 
     /**
@@ -747,17 +752,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     }
 
     /**
-     * check the downloaded XML files for updates when wallet restarts.
+     * check the repo server for updates to downloaded TokenScripts
      */
     private void checkDownloadedFiles()
     {
-        //check all definitions in the download zone
-        Disposable d = Observable.fromIterable(getScriptsInSecureZone())
+        Observable.fromIterable(getScriptsInSecureZone())
                 .concatMap(addr -> fetchXMLFromServer(addr).toObservable())
-                .flatMap(f -> updateSignature(f).toObservable())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::handleFileLoad, this::onError);
+                .subscribe(this::handleFileLoad, this::onError).isDisposed();
     }
 
     private Single<File> updateSignature(File file)
@@ -765,9 +768,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return Single.fromCallable(() -> {
             TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
             String hash = tsf.calcMD5();
+
             //pull data from realm
             XMLDsigDescriptor sig = getCertificateFromRealm(hash);
-            if (sig == null)
+            if (sig == null || sig.keyName == null)
             {
                 //fetch signature and store in realm
                 sig = alphaWalletService.checkTokenScriptSignature(tsf);

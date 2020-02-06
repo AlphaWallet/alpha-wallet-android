@@ -535,4 +535,6 @@
     <string name="reddit">Reddit</string>
     <string name="tokenscript_standard">TokenScript Standard</string>
     <string name="version">Version</string>
+    <string name="debug_script">TokenScript depurar</string>
+    <string name="unsigned_script">no confiable</string>
 </resources>

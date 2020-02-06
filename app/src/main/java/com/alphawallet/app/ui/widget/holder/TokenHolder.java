@@ -108,16 +108,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             chainName.setVisibility(View.VISIBLE);
             chainName.setText(token.getNetworkName());
             Utils.setChainColour(chainName, token.tokenInfo.chainId);
-            String issuerName = assetDefinition.getIssuerName(token);
-            issuerPlaceholder.setVisibility(View.VISIBLE);
-            if(issuerName != null)
-            {
-                issuer.setText(issuerName);
-            }
-            else
-            {
-                issuerPlaceholder.setVisibility(View.GONE);
-            }
+            setIssuerDetails();
 
             if (token.ticker != null) animateTextWhileWaiting();
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
@@ -266,6 +257,24 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         text24Hours.startAnimation(anim);
         textAppreciation.startAnimation(anim);
         balanceCurrency.startAnimation(anim);
+    }
+
+    private void setIssuerDetails()
+    {
+        String issuerName = assetDefinition.getIssuerName(token);
+        if(issuerName != null)
+        {
+            issuer.setVisibility(View.VISIBLE);
+            issuerPlaceholder.setVisibility(View.VISIBLE);
+            contractSeparator.setVisibility(View.VISIBLE);
+            issuer.setText(issuerName);
+        }
+        else
+        {
+            issuer.setVisibility(View.GONE);
+            issuerPlaceholder.setVisibility(View.GONE);
+            contractSeparator.setVisibility(View.GONE);
+        }
     }
 
     private void stopTextAnimation() {

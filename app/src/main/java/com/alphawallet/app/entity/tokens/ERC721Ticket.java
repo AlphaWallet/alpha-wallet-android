@@ -167,18 +167,7 @@ public class ERC721Ticket extends Token implements Parcelable {
     {
         tokenHolder.balanceCurrency.setText("--");
         tokenHolder.textAppreciation.setText("--");
-        String issuerName = asset.getIssuerName(tokenHolder.token);
-        tokenHolder.issuer.setText(asset.getIssuerName(tokenHolder.token));
-        if(issuerName != null)
-        {
-            tokenHolder.issuer.setText(issuerName);
-        }
-        else
-        {
-            tokenHolder.issuerPlaceholder.setVisibility(View.GONE);
-        }
         tokenHolder.contractType.setVisibility(View.VISIBLE);
-        tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
         if (VisibilityFilter.getImageOverride() != 0)
         {
             tokenHolder.icon.setVisibility(View.VISIBLE);
@@ -194,28 +183,11 @@ public class ERC721Ticket extends Token implements Parcelable {
         tokenHolder.layoutValueDetails.setVisibility(View.GONE);
     }
 
-    @Override
-    public int[] getTicketIndices(String ticketIds)
-    {
-        return null;
-    }
-
     /*************************************
      *
      * Conversion functions used for manipulating indices
      *
      */
-
-    /**
-     * Convert a String list of ticket IDs into a list of ticket indices
-     * @param userList
-     * @return
-     */
-    @Override
-    public List<BigInteger> ticketIdStringToIndexList(String userList)
-    {
-        return null;
-    }
 
     /**
      * This is a single method that populates any instance of graphic ticket anywhere
@@ -325,12 +297,6 @@ public class ERC721Ticket extends Token implements Parcelable {
     }
 
     @Override
-    public int interfaceOrdinal()
-    {
-        return contractType.ordinal();
-    }
-
-    @Override
     public BigInteger getTokenID(int index)
     {
         if (balanceArray.size() > index && index >= 0) return balanceArray.get(index);
@@ -397,14 +363,6 @@ public class ERC721Ticket extends Token implements Parcelable {
         return isSent;
     }
 
-    @Override
-    public boolean isERC875() {
-        return false;
-    }
-    @Override
-    public boolean isToken() {
-        return false;
-    }
     @Override
     public boolean isERC721Ticket() { return true; }
 

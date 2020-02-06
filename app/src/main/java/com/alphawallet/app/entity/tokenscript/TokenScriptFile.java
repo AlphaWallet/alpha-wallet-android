@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
+import com.alphawallet.app.R;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 
@@ -139,23 +140,36 @@ public class TokenScriptFile extends File
             if (isDebug) sigDescriptor.type = SigReturnType.DEBUG_SIGNATURE_PASS;
             else sigDescriptor.type = SigReturnType.SIGNATURE_PASS;
         }
-        else if (sigDescriptor.subject != null)
+        else
         {
-            if (sigDescriptor.subject.contains("Invalid"))
-            {
-                if (isDebug) sigDescriptor.type = SigReturnType.DEBUG_SIGNATURE_INVALID;
-                else sigDescriptor.type = SigReturnType.SIGNATURE_INVALID;
-            }
-            else
-            {
-                if (isDebug) sigDescriptor.type = SigReturnType.DEBUG_NO_SIGNATURE;
-                else sigDescriptor.type = SigReturnType.NO_SIGNATURE;
-            }
+            setFailedIssuer(isDebug, sigDescriptor);
+        }
+    }
+
+    private void setFailedIssuer(boolean isDebug, XMLDsigDescriptor sigDescriptor)
+    {
+        if (isDebug)
+        {
+            sigDescriptor.keyName = context.getString(R.string.debug_script);
         }
         else
         {
-            if (isDebug) sigDescriptor.type = SigReturnType.DEBUG_NO_SIGNATURE;
-            else sigDescriptor.type = SigReturnType.NO_SIGNATURE;
+            sigDescriptor.keyName = context.getString(R.string.unsigned_script);
+        }
+
+        if (sigDescriptor.subject != null && sigDescriptor.subject.contains("Invalid"))
+        {
+            if (isDebug)
+                sigDescriptor.type = SigReturnType.DEBUG_SIGNATURE_INVALID;
+            else
+                sigDescriptor.type = SigReturnType.SIGNATURE_INVALID;
+        }
+        else
+        {
+            if (isDebug)
+                sigDescriptor.type = SigReturnType.DEBUG_NO_SIGNATURE;
+            else
+                sigDescriptor.type = SigReturnType.NO_SIGNATURE;
         }
     }
 }

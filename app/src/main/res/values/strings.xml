@@ -538,4 +538,6 @@
     <string name="debug_script">TokenScript debug</string>
     <string name="unsigned_script">untrusted</string>
     <string name="show_qr_code_to_redemption_booth">Show QR Code to Redemption Booth:</string>
+    <string name="manage_tokens">Manage Tokens</string>
+    <string name="apply_filters">Apply Filters</string>
 </resources>

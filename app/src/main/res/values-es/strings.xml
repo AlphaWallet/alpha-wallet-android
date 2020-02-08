@@ -538,4 +538,6 @@
     <string name="debug_script">TokenScript depurar</string>
     <string name="unsigned_script">no confiable</string>
     <string name="show_qr_code_to_redemption_booth">Mostrar código QR al contador de canje</string>
+    <string name="manage_tokens">Manage Tokens</string>
+    <string name="apply_filters">Apply Filters</string>
 </resources>

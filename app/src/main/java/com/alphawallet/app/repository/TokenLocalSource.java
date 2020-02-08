@@ -23,6 +23,7 @@ public interface TokenLocalSource {
 
     Single<Token> fetchEnabledToken(NetworkInfo networkInfo, Wallet wallet, String address);
     Single<Token[]> fetchEnabledTokensWithBalance(Wallet wallet);
+    Single<Token[]> fetchTokensWithBalance(Wallet wallet);
     Single<Token> saveTicker(Wallet wallet, Token token);
     Single<Token[]> saveTickers(Wallet wallet, Token[] tokens);
     Single<TokenTicker> fetchTicker(Wallet wallet, Token tokens);

@@ -30,6 +30,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.WarningData;
+import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.util.TabUtils;
 
@@ -458,16 +459,20 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-            remindMeLater(viewModel.getWallet());
+            if (viewHolder instanceof WarningHolder) {
+                remindMeLater(viewModel.getWallet());
+            } else {
+                if (viewHolder instanceof TokenHolder) {
+                    Token token = ((TokenHolder) viewHolder).token;
+                    viewModel.setTokenEnabled(token, false);
+                    refreshList();
+                }
+            }
         }
 
         @Override
         public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-            if (viewHolder instanceof WarningHolder) {
-                return super.getSwipeDirs(recyclerView, viewHolder);
-            } else {
-                return 0;
-            }
+            return super.getSwipeDirs(recyclerView, viewHolder);
         }
     }
 }

@@ -15,7 +15,6 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.interact.SetupTokensInteract;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -1050,5 +1049,26 @@ public class Token implements Parcelable
     {
         if (check.ticker == null && ticker != null) return true; //now has ticker
         else return check.ticker != null && ticker != null && !check.ticker.price.equals(ticker.price); //return true if ticker changed
+    }
+
+    @Override
+    public boolean equals(Object v)
+    {
+        boolean retVal = false;
+
+        if (v instanceof Token) {
+            Token t = (Token) v;
+            retVal = t != null && tokenInfo.chainId == t.tokenInfo.chainId && getAddress().equals(t.getAddress());
+        }
+
+        return retVal;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 7;
+        hash = 17 * hash + (this.tokenInfo.name != null ? this.tokenInfo.name.hashCode() : 0);
+        return hash;
     }
 }

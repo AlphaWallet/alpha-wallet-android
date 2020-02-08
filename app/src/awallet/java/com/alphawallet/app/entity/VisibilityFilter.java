@@ -20,8 +20,13 @@ public class VisibilityFilter
         boolean badToken = false;
         if (!token.hasDebugTokenscript && !token.hasPositiveBalance()) filterResult = false;
         if (token.isTerminated() || token.isBad()) badToken = true;
-
-        if (token.isEthereum()) filterResult = true;
+        if (token.isEthereum()) {
+            if (token.tokenInfo.isEnabled) {
+                filterResult = true;
+            } else {
+                filterResult = false;
+            }
+        }
         return !badToken && filterResult;
     }
 

@@ -527,4 +527,6 @@
     <string name="debug_script">TokenScript 调试</string>
     <string name="unsigned_script">不信任</string>
     <string name="show_qr_code_to_redemption_booth">呈递二维码到兑换台</string>
+    <string name="manage_tokens">Manage Tokens</string>
+    <string name="apply_filters">Apply Filters</string>
 </resources>

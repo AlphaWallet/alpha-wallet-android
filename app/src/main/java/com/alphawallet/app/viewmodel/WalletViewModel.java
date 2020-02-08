@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.crashlytics.android.Crashlytics;
 import com.alphawallet.app.BuildConfig;
@@ -76,6 +77,7 @@ public class WalletViewModel extends BaseViewModel
     private final TokensService tokensService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final ChangeTokenEnableInteract changeTokenEnableInteract;
 
     private final MutableLiveData<Map<String, String>> currentWalletBalance = new MutableLiveData<>();
 
@@ -106,7 +108,8 @@ public class WalletViewModel extends BaseViewModel
             TokensService tokensService,
             OpenseaService openseaService,
             FetchTransactionsInteract fetchTransactionsInteract,
-            EthereumNetworkRepositoryType ethereumNetworkRepository)
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            ChangeTokenEnableInteract changeTokenEnableInteract)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
@@ -121,6 +124,7 @@ public class WalletViewModel extends BaseViewModel
         this.tokensService = tokensService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.changeTokenEnableInteract = changeTokenEnableInteract;
     }
 
     public LiveData<Token[]> tokens() {
@@ -640,5 +644,9 @@ public class WalletViewModel extends BaseViewModel
     public TokensService getTokensService()
     {
         return tokensService;
+    }
+
+    public void setTokenEnabled(Token token, boolean enabled) {
+        changeTokenEnableInteract.setEnable(currentWallet, token, enabled);
     }
 }

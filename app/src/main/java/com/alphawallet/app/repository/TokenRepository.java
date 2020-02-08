@@ -155,6 +155,13 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Observable<Token[]> fetchStored(String walletAddress) {
+        Wallet wallet = new Wallet(walletAddress);
+        return fetchStoredTokens(wallet) // fetch tokens from cache
+                .toObservable();
+    }
+
+    @Override
     public Observable<Token[]> fetchActiveStored(String walletAddress) {
         Wallet wallet = new Wallet(walletAddress);
         return fetchStoredEnabledTokens(wallet) // fetch tokens from cache
@@ -380,7 +387,8 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Completable setEnable(Wallet wallet, Token token, boolean isEnabled) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
-        return Completable.fromAction(() -> localSource.setEnable(network, wallet, token, isEnabled));
+        localSource.setEnable(network, wallet, token, isEnabled);
+        return Completable.fromAction(() -> {});
     }
 
     @Override
@@ -592,6 +600,11 @@ public class TokenRepository implements TokenRepositoryType {
     public Disposable memPoolListener(int chainId, SubscribeWrapper subscriber)
     {
         return getService(chainId).pendingTransactionFlowable().subscribe(subscriber::scanReturn);
+    }
+
+    private Single<Token[]> fetchStoredTokens(Wallet wallet) {
+        return localSource
+                .fetchTokensWithBalance(wallet);
     }
 
     private Single<Token[]> fetchStoredEnabledTokens(Wallet wallet) {

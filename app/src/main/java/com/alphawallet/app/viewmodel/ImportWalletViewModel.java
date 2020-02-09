@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
+import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.alphawallet.app.C;
@@ -151,5 +152,15 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     public void resetSignDialog()
     {
         keyService.resetSigningDialog();
+    }
+
+    public void completeAuthentication(Operation taskCode)
+    {
+        keyService.completeAuthentication(taskCode);
+    }
+
+    public void failedAuthentication(Operation taskCode)
+    {
+        keyService.failedAuthentication(taskCode);
     }
 }

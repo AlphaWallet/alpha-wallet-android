@@ -1250,8 +1250,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
-        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
+        if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
+        else viewModel.failedAuthentication(SIGN_DATA);
 
         if (gotAuth)
         {
@@ -1262,11 +1262,5 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             web3.onSignCancel(messageToSign);
             dialog.dismiss();
         }
-    }
-
-    @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-    {
-        authInterface = authCallback;
     }
 }

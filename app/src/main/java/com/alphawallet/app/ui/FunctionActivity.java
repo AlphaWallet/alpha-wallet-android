@@ -97,7 +97,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private StringBuilder attrs;
     private AWalletAlertDialog alertDialog;
     private Message<String> messageToSign;
-    private PinAuthenticationCallbackInterface authInterface;
     private FunctionButtonBar functionBar;
     private Handler handler;
     private boolean reloaded;
@@ -712,8 +711,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
-        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
+        if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
+        else viewModel.failedAuthentication(SIGN_DATA);
 
         if (gotAuth)
         {
@@ -744,12 +743,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                     + convertedMessage;
             signMessage(signMessage.getBytes(), dAppFunction, messageToSign);
         }
-    }
-
-    @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-    {
-        authInterface = authCallback;
     }
 
     @Override

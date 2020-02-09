@@ -10,6 +10,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ConfirmationType;
 import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.TransactionData;
@@ -63,14 +64,12 @@ public class ConfirmationViewModel extends BaseViewModel {
     }
 
     public void createTransaction(Wallet from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
-        progress.postValue(true);
         disposable = createTransactionInteract
                 .create(from, to, amount, gasPrice, gasLimit, null, chainId)
                 .subscribe(this::onCreateTransaction, this::onError);
     }
 
     public void createTokenTransfer(Wallet from, String to, String contractAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
-        progress.postValue(true);
         final byte[] data = TokenRepository.createTokenTransferData(to, amount);
         disposable = createTransactionInteract
                 .create(from, contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
@@ -78,7 +77,6 @@ public class ConfirmationViewModel extends BaseViewModel {
     }
 
     public void createTicketTransfer(Wallet from, String to, String contractAddress, String ids, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
-        progress.postValue(true);
         final byte[] data = getERC875TransferBytes(to, contractAddress, ids, chainId);
         disposable = createTransactionInteract
                 .create(from, contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
@@ -175,7 +173,6 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void signWeb3DAppTransaction(Web3Transaction transaction, BigInteger gasPrice, BigInteger gasLimit, int chainId)
     {
-        progress.postValue(true);
         BigInteger addr = Numeric.toBigInt(transaction.recipient.toString());
 
         if (addr.equals(BigInteger.ZERO)) //constructor
@@ -197,7 +194,6 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void signTokenScriptTransaction(String transactionData, String contractAddress, BigInteger gasPrice, BigInteger gasLimit, BigInteger value, int chainId)
     {
-        progress.postValue(true);
         byte[] data = Numeric.hexStringToByteArray(transactionData);
             disposable = createTransactionInteract
                     .create(defaultWallet.getValue(), contractAddress, value, gasPrice, gasLimit, data, chainId)
@@ -212,7 +208,6 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void createERC721Transfer(String to, String contractAddress, String tokenId, BigInteger gasPrice, BigInteger gasLimit, int chainId)
     {
-        progress.postValue(true);
         final byte[] data = getERC721TransferBytes(to, contractAddress, tokenId, chainId);
         disposable = createTransactionInteract
                 .create(defaultWallet.getValue(), contractAddress, BigInteger.valueOf(0), gasPrice, gasLimit, data, chainId)
@@ -272,5 +267,15 @@ public class ConfirmationViewModel extends BaseViewModel {
     public Token getToken(int chainId, String contractAddress)
     {
         return tokensService.getToken(chainId, contractAddress);
+    }
+
+    public void completeAuthentication(Operation signData)
+    {
+        keyService.completeAuthentication(signData);
+    }
+
+    public void failedAuthentication(Operation signData)
+    {
+        keyService.failedAuthentication(signData);
     }
 }

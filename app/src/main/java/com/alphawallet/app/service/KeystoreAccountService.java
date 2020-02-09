@@ -1,5 +1,7 @@
 package com.alphawallet.app.service;
 
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
+import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -205,8 +207,10 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     @Override
-    public Single<byte[]> signTransaction(Wallet signer, String toAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
+    public Single<SignatureFromKey> signTransaction(Wallet signer, String toAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
         return Single.fromCallable(() -> {
+            SignatureFromKey returnSig = new SignatureFromKey();
+            Sign.SignatureData sigData;
             String dataStr = data != null ? Numeric.toHexString(data) : "";
 
             RawTransaction rtx = RawTransaction.createTransaction(
@@ -223,10 +227,8 @@ public class KeystoreAccountService implements AccountKeystoreService
             {
                 //old code to be removed
                 byte[] signData = TransactionEncoder.encode(rtx);
-                byte[] signatureBytes = keyService.signData(signer, signData);
-                Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
-                if (sigData == null) return FAILED_SIGNATURE.getBytes();
-                else return encode(rtx, sigData);
+                returnSig = keyService.signData(signer, signData);
+                sigData = sigFromByteArray(returnSig.signature);
             }
             else
             {
@@ -235,12 +237,17 @@ public class KeystoreAccountService implements AccountKeystoreService
                 byte chainIdByte = (byte) (chainId & 0xFF);
 
                 byte[] signData = TransactionEncoder.encode(rtx, chainIdByte); //TODO: pass in chainId directly
-                byte[] signatureBytes = keyService.signData(signer, signData);
-                Sign.SignatureData sigData = sigFromByteArray(signatureBytes);
-                if (sigData == null) return FAILED_SIGNATURE.getBytes();
-                Sign.SignatureData eip155SignatureData = TransactionEncoder.createEip155SignatureData(sigData, chainIdByte); //TODO: pass in chainId directly
-                return encode(rtx, eip155SignatureData);
+                returnSig = keyService.signData(signer, signData);
+                sigData = sigFromByteArray(returnSig.signature);
+                if (sigData == null) {
+                    returnSig.sigType = SignatureReturnType.KEY_CIPHER_ERROR;
+                    returnSig.failMessage = "Incorrect signature length"; //should never see this message
+                }
+                else sigData = TransactionEncoder.createEip155SignatureData(sigData, chainIdByte); //TODO: pass in chainId directly
             }
+
+            returnSig.signature = encode(rtx, sigData);
+            return returnSig;
         })
         .subscribeOn(Schedulers.io());
     }
@@ -331,14 +338,13 @@ public class KeystoreAccountService implements AccountKeystoreService
     //In all cases where we need to sign data the signature needs to be in Ethereum format
     //Geth gives us the pure EC function, but for hash signing
     @Override
-    public Single<byte[]> signTransaction(Wallet signer, byte[] message, long chainId)
+    public Single<SignatureFromKey> signTransaction(Wallet signer, byte[] message, long chainId)
     {
         return Single.fromCallable(() -> {
             //byte[] messageHash = Hash.sha3(message);
-            byte[] signed = keyService.signData(signer, message);
-
-            signed = patchSignatureVComponent(signed);
-            return signed;
+            SignatureFromKey returnSig = keyService.signData(signer, message);
+            returnSig.signature = patchSignatureVComponent(returnSig.signature);
+            return returnSig;
         }).subscribeOn(Schedulers.io());
     }
 

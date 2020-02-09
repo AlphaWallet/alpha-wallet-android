@@ -7,6 +7,8 @@ import io.reactivex.schedulers.Schedulers;
 
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
+import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Transaction;
@@ -85,14 +87,19 @@ public class TransactionRepository implements TransactionRepositoryType {
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
 			.flatMap(nonce -> accountKeystoreService.signTransaction(from, toAddress, subunitAmount, useGasPrice, gasLimit, nonce.longValue(), data, chainId))
 			.flatMap(signedMessage -> Single.fromCallable( () -> {
+				if (signedMessage.sigType != SignatureReturnType.SIGNATURE_GENERATED)
+				{
+					throw new Exception(signedMessage.failMessage);
+				}
 				EthSendTransaction raw = web3j
-					.ethSendRawTransaction(Numeric.toHexString(signedMessage))
-					.send();
-			if (raw.hasError()) {
-			    throw new Exception(raw.getError().getMessage());
-			}
-			return raw.getTransactionHash();
-		}))
+						.ethSendRawTransaction(Numeric.toHexString(signedMessage.signature))
+						.send();
+				if (raw.hasError())
+				{
+					throw new Exception(raw.getError().getMessage());
+				}
+				return raw.getTransactionHash();
+			}))
 		.flatMap(txHash -> storeUnconfirmedTransaction(from, txHash, toAddress, subunitAmount, useGasPrice, chainId, data != null ? Numeric.toHexString(data) : "0x"))
 		.subscribeOn(Schedulers.io());
 	}
@@ -107,9 +114,13 @@ public class TransactionRepository implements TransactionRepositoryType {
 		return networkRepository.getLastTransactionNonce(web3j, from.address)
 				.flatMap(nonce -> accountKeystoreService.signTransaction(from, toAddress, subunitAmount, useGasPrice, gasLimit, nonce.longValue(), data, chainId))
 				.flatMap(signedMessage -> Single.fromCallable( () -> {
-					txData.signature = Numeric.toHexString(signedMessage);
+					if (signedMessage.sigType != SignatureReturnType.SIGNATURE_GENERATED)
+					{
+						throw new Exception(signedMessage.failMessage);
+					}
+					txData.signature = Numeric.toHexString(signedMessage.signature);
 					EthSendTransaction raw = web3j
-							.ethSendRawTransaction(Numeric.toHexString(signedMessage))
+							.ethSendRawTransaction(Numeric.toHexString(signedMessage.signature))
 							.send();
 					if (raw.hasError()) {
 						throw new Exception(raw.getError().getMessage());
@@ -212,7 +223,13 @@ public class TransactionRepository implements TransactionRepositoryType {
 	{
 		return Single.fromCallable(() -> TransactionEncoder.encode(rtx))
 				.flatMap(encoded -> accountKeystoreService.signTransaction(wallet, encoded, chainId))
-				.flatMap(signatureBytes -> encodeTransaction(signatureBytes, rtx));
+				.flatMap(signatureReturn -> {
+						 	if (signatureReturn.sigType != SignatureReturnType.SIGNATURE_GENERATED)
+							{
+								throw new Exception(signatureReturn.failMessage);
+							}
+						 	return encodeTransaction(signatureReturn.signature, rtx);
+						 });
 	}
 
 	private Single<byte[]> encodeTransaction(byte[] signatureBytes, RawTransaction rtx)
@@ -225,7 +242,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<byte[]> getSignature(Wallet wallet, byte[] message, int chainId) {
+	public Single<SignatureFromKey> getSignature(Wallet wallet, byte[] message, int chainId) {
 		return accountKeystoreService.signTransaction(wallet, message, chainId);
 	}
 

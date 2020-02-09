@@ -14,7 +14,6 @@ import android.widget.TextView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,13 +33,10 @@ public class TokenListAdapter extends RecyclerView.Adapter<TokenListAdapter.View
 
     private List<Token> filterTokens(List<Token> tokens) {
         ArrayList<Token> filteredList = new ArrayList<>();
-
         for (Token t : tokens) {
             if (t.tokenInfo.name != null) {
-                if (t.isEthereum() || t.balance.compareTo(BigDecimal.ZERO) > 0) {
-                    if (!filteredList.contains(t)) {
-                        filteredList.add(t);
-                    }
+                if (!filteredList.contains(t)) {
+                    filteredList.add(t);
                 }
             }
         }

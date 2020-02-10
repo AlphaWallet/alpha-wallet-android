@@ -345,7 +345,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         else
         {
             attachFragment(dappHomeFragment, DAPP_HOME);
-            urlTv.getText().clear();
+            if (urlTv != null)
+                urlTv.getText().clear();
             if (web3 != null)
                 web3.stopLoading();
         }

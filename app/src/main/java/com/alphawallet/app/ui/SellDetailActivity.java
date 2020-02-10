@@ -610,15 +610,11 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
-        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
-        //got authorisation, continue with transaction
-        if (gotAuth) sellTicketLinkFinal();
-    }
-
-    @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-    {
-        authInterface = authCallback;
+        if (gotAuth)
+        {
+            viewModel.completeAuthentication(SIGN_DATA);
+            sellTicketLinkFinal();
+        }
+        else viewModel.failedAuthentication(SIGN_DATA);
     }
 }

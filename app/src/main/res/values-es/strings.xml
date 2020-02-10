@@ -538,4 +538,8 @@
     <string name="debug_script">TokenScript depurar</string>
     <string name="unsigned_script">no confiable</string>
     <string name="show_qr_code_to_redemption_booth">Mostrar código QR al contador de canje</string>
+    <string name="cannot_read_encrypt_file">Wallet can not read encrypted key; re-import required.</string>
+    <string name="authentication_error">Authenitcation to unlock key not provided or timed out. Please try again.</string>
+    <string name="device_security_changed">Since this key was created the mobile device security has changed and the OS has invalidated the key. Please re-import your key.</string>
+    <string name="fingerprint_authentication_failed">Fingerprint authentication failed</string>
 </resources>

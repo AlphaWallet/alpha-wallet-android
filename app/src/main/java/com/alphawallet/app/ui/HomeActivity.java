@@ -595,12 +595,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface callBack)
-    {
-        authInterface = callBack;
-    }
-
-    @Override
     public void CreatedKey(String keyAddress)
     {
         //Key was upgraded
@@ -873,13 +867,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         ((DappBrowserFragment)dappBrowserFragment).GotAuthorisation(resultCode == RESULT_OK);
                         break;
                     default:
-                        //continue with generating the authenticated key
-                        if (resultCode == RESULT_OK) authInterface.CompleteAuthentication(taskCode);
-                        else
-                        {
-                            authInterface.FailedAuthentication(taskCode);
-                            GotAuthorisation(false);
-                        }
                         break;
                 }
                 break;

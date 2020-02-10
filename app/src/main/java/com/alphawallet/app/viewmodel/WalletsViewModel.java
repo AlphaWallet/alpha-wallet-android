@@ -11,6 +11,7 @@ import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
@@ -372,5 +373,15 @@ public class WalletsViewModel extends BaseViewModel
     public void watchWallet(Activity activity)
     {
         importWalletRouter.openWatchCreate(activity, C.IMPORT_REQUEST_CODE);
+    }
+
+    public void completeAuthentication(Operation taskCode)
+    {
+        keyService.completeAuthentication(taskCode);
+    }
+
+    public void failedAuthentication(Operation taskCode)
+    {
+        keyService.failedAuthentication(taskCode);
     }
 }

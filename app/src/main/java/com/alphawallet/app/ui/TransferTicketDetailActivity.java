@@ -133,7 +133,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private DatePickerDialog datePickerDialog;
     private TimePickerDialog timePickerDialog;
 
-    private PinAuthenticationCallbackInterface authInterface;
     private SignAuthenticationCallback signCallback;
 
     @Override
@@ -377,8 +376,8 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
             @Override
             public void GotAuthorisation(boolean gotAuth)
             {
-                if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
-                else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
+                if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
+                else viewModel.failedAuthentication(SIGN_DATA);
 
                 if (gotAuth)
                 {
@@ -396,12 +395,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
                     //display fail auth
                     onError(new ErrorEnvelope(getString(R.string.authentication_failed)));
                 }
-            }
-
-            @Override
-            public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-            {
-                authInterface = authCallback;
             }
         };
 
@@ -740,16 +733,10 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
             @Override
             public void GotAuthorisation(boolean gotAuth)
             {
-                if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
-                else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
+                if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
+                else viewModel.failedAuthentication(SIGN_DATA);
 
                 if (gotAuth) transferTicketFinal();
-            }
-
-            @Override
-            public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-            {
-                authInterface = authCallback;
             }
         };
 

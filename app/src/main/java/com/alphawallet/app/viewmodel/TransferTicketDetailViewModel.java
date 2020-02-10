@@ -9,7 +9,9 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.GasSettings;
+import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
@@ -173,9 +175,9 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                 .subscribe(this::gotSignature, this::onError);
     }
 
-    private void gotSignature(byte[] signature)
+    private void gotSignature(SignatureFromKey signature)
     {
-        String universalLink = parser.completeUniversalLink(token.tokenInfo.chainId, linkMessage, signature);
+        String universalLink = parser.completeUniversalLink(token.tokenInfo.chainId, linkMessage, signature.signature);
         //Now open the share icon
         universalLinkReady.postValue(universalLink);
     }
@@ -268,5 +270,15 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public void resetSignDialog()
     {
         keyService.resetSigningDialog();
+    }
+
+    public void completeAuthentication(Operation signData)
+    {
+        keyService.completeAuthentication(signData);
+    }
+
+    public void failedAuthentication(Operation signData)
+    {
+        keyService.completeAuthentication(signData);
     }
 }

@@ -527,4 +527,8 @@
     <string name="debug_script">TokenScript 调试</string>
     <string name="unsigned_script">不信任</string>
     <string name="show_qr_code_to_redemption_booth">呈递二维码到兑换台</string>
+    <string name="cannot_read_encrypt_file">钱包无法读取加密密钥。需要重新导入</string>
+    <string name="authentication_error">没有提供正确的身份验证来解锁密钥或超时。请再试一遍</string>
+    <string name="device_security_changed">创建此密钥后，移动设备的安全性已更改，并且操作系统使密钥无效。请重新导入您的密钥</string>
+    <string name="fingerprint_authentication_failed">指纹认证失败</string>
 </resources>

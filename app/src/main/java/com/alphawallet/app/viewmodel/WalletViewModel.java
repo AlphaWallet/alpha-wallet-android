@@ -648,5 +648,6 @@ public class WalletViewModel extends BaseViewModel
 
     public void setTokenEnabled(Token token, boolean enabled) {
         changeTokenEnableInteract.setEnable(currentWallet, token, enabled);
+        token.tokenInfo.isEnabled = enabled;
     }
 }

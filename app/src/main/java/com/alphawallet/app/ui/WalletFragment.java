@@ -465,7 +465,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 if (viewHolder instanceof TokenHolder) {
                     Token token = ((TokenHolder) viewHolder).token;
                     viewModel.setTokenEnabled(token, false);
-                    refreshList();
+                    adapter.updateToken(token, false); //smooth update of token
                 }
             }
         }

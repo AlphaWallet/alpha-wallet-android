@@ -207,25 +207,6 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Single<Token[]> fetchEnabledTokensWithBalance(Wallet wallet) {
-        return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getRealmInstance(wallet))
-            {
-                RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
-                        .sort("addedTime", Sort.ASCENDING)
-                        .equalTo("isEnabled", true)
-                        .findAll();
-
-                return convertMulti(realmItems, System.currentTimeMillis(), wallet, realm);
-            }
-            catch (Exception e)
-            {
-                return new Token[0]; //ensure fetch completes
-            }
-        }).flatMap(tokens -> attachTickers(tokens, wallet));
-    }
-
-    @Override
     public Single<Token> saveTicker(Wallet wallet, final Token token) {
         return Single.fromCallable(() -> {
             if (!WalletUtils.isValidAddress(wallet.address)

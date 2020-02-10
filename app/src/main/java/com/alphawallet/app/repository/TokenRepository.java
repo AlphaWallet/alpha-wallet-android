@@ -132,7 +132,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Observable<Token[]> fetchActiveStoredPlusEth(String walletAddress) {
         Wallet wallet = new Wallet(walletAddress);
-        return fetchStoredEnabledTokens(wallet) // fetch tokens from cache
+        return fetchStoredTokens(wallet) // fetch tokens from cache
                 .compose(attachEthereumStored(wallet)) //add cached eth balance
                 .toObservable();
     }
@@ -158,13 +158,6 @@ public class TokenRepository implements TokenRepositoryType {
     public Observable<Token[]> fetchStored(String walletAddress) {
         Wallet wallet = new Wallet(walletAddress);
         return fetchStoredTokens(wallet) // fetch tokens from cache
-                .toObservable();
-    }
-
-    @Override
-    public Observable<Token[]> fetchActiveStored(String walletAddress) {
-        Wallet wallet = new Wallet(walletAddress);
-        return fetchStoredEnabledTokens(wallet) // fetch tokens from cache
                 .toObservable();
     }
 
@@ -605,11 +598,6 @@ public class TokenRepository implements TokenRepositoryType {
     private Single<Token[]> fetchStoredTokens(Wallet wallet) {
         return localSource
                 .fetchTokensWithBalance(wallet);
-    }
-
-    private Single<Token[]> fetchStoredEnabledTokens(Wallet wallet) {
-        return localSource
-                .fetchEnabledTokensWithBalance(wallet);
     }
 
     private Single<Token> fetchCachedToken(NetworkInfo network, Wallet wallet, String address)

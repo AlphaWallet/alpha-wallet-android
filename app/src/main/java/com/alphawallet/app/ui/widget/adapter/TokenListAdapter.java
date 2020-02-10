@@ -2,6 +2,7 @@ package com.alphawallet.app.ui.widget.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,9 +14,13 @@ import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.ui.widget.entity.SortedItem;
+import com.alphawallet.token.tools.Numeric;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class TokenListAdapter extends RecyclerView.Adapter<TokenListAdapter.ViewHolder> {
@@ -35,12 +40,13 @@ public class TokenListAdapter extends RecyclerView.Adapter<TokenListAdapter.View
         ArrayList<Token> filteredList = new ArrayList<>();
         for (Token t : tokens) {
             if (t.tokenInfo.name != null) {
-                if (!filteredList.contains(t)) {
+                if (!t.isEthereum() && !filteredList.contains(t)) {
                     filteredList.add(t);
                 }
             }
         }
 
+        Collections.sort(filteredList);
         return filteredList;
     }
 
@@ -56,7 +62,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<TokenListAdapter.View
     public void onBindViewHolder(@NonNull TokenListAdapter.ViewHolder viewHolder, int i) {
         Token token = data.get(i);
         viewHolder.setIsRecyclable(false);
-        viewHolder.tokenName.setText(token.tokenInfo.name);
+        viewHolder.tokenName.setText(token.getFullName());
         viewHolder.switchEnabled.setChecked(token.tokenInfo.isEnabled);
         viewHolder.switchEnabled.setTag(new Integer(i));
         viewHolder.switchEnabled.setOnCheckedChangeListener((v, b) -> {
@@ -101,4 +107,7 @@ public class TokenListAdapter extends RecyclerView.Adapter<TokenListAdapter.View
     public interface ItemClickListener {
         void onItemClick(Token token, boolean enabled);
     }
+
+
+
 }

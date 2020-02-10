@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Button;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
@@ -50,7 +51,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         viewModel.tokens().observe(this, this::onTokens);
 
         if (getIntent() != null) {
-            String walletAddr = getIntent().getStringExtra("wallet_address");
+            String walletAddr = getIntent().getStringExtra(C.EXTRA_ADDRESS);
             wallet = new Wallet(walletAddr);
             viewModel.fetchTokens(walletAddr);
         } else {

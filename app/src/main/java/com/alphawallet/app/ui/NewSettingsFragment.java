@@ -142,7 +142,7 @@ public class NewSettingsFragment extends Fragment
         layoutTokenManagement.setOnClickListener(v -> {
             if (wallet != null) {
                 Intent intent = new Intent(getActivity(), TokenManagementActivity.class);
-                intent.putExtra("wallet_address", wallet.address);
+                intent.putExtra(EXTRA_ADDRESS, wallet.address);
                 getActivity().startActivity(intent);
             }
         });

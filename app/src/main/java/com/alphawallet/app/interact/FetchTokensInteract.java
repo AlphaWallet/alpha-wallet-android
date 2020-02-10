@@ -34,16 +34,6 @@ public class FetchTokensInteract {
         this.tokenRepository = tokenRepository;
     }
 
-    public Observable<TokenInfo> getTokenInfo(String address, int chainId) {
-        return tokenRepository.update(address, chainId);
-    }
-
-    public Observable<Token[]> fetchStored(Wallet wallet) {
-        return tokenRepository.fetchActiveStored(wallet.address)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
     public Observable<Token> fetchStoredToken(NetworkInfo network, Wallet wallet, String tokenAddress) {
         return tokenRepository.fetchCachedSingleToken(network, wallet.address, tokenAddress)
                 .subscribeOn(Schedulers.io())

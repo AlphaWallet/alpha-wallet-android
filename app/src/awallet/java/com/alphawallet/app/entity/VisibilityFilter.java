@@ -22,7 +22,11 @@ public class VisibilityFilter
     public static boolean filterToken(Token token, boolean filterResult, Context context)
     {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean showZeroBalanceTokens = pref.getBoolean("show_zero_balance_tokens", false);
+        boolean hideZeroBalanceTokens = pref.getBoolean("hide_zero_balance_tokens", false);
+
+        if (hideZeroBalanceTokens && !token.hasPositiveBalance()) {
+            filterResult = false;
+        }
 
         boolean badToken = false;
         if (token.isTerminated() || token.isBad()) badToken = true;

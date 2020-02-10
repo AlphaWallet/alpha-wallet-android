@@ -32,7 +32,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     private RecyclerView tokenList;
     private Button saveButton;
     private TokenListAdapter adapter;
-    private CheckBox showZeroBalanceCheckBox;
+    private CheckBox hideZeroBalanceCheckBox;
 
     private Wallet wallet;
 
@@ -63,11 +63,11 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         }
 
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean showZeroBalanceTokens = pref.getBoolean("show_zero_balance_tokens", false);
-        showZeroBalanceCheckBox = findViewById(R.id.checkbox_show_zero_balance_tokens);
-        showZeroBalanceCheckBox.setChecked(showZeroBalanceTokens);
-        showZeroBalanceCheckBox.setOnCheckedChangeListener((v, checked) -> {
-            pref.edit().putBoolean("show_zero_balance_tokens", checked).apply();
+        boolean hideZeroBalanceTokens = pref.getBoolean("hide_zero_balance_tokens", false);
+        hideZeroBalanceCheckBox = findViewById(R.id.checkbox_hide_zero_balance_tokens);
+        hideZeroBalanceCheckBox.setChecked(hideZeroBalanceTokens);
+        hideZeroBalanceCheckBox.setOnCheckedChangeListener((v, checked) -> {
+            pref.edit().putBoolean("hide_zero_balance_tokens", checked).apply();
         });
     }
 

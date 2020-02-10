@@ -63,6 +63,8 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
 
     private void setupView()
     {
+        View.inflate(getActivity(), R.layout.fragment_watch_wallet, null);
+
         watchAddress = getActivity().findViewById(R.id.input_watch_address);
         importButton = getActivity().findViewById(R.id.import_action_ww);
         importButton.setOnClickListener(this);
@@ -73,11 +75,13 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
         watchAddress.setLayoutListener(getActivity(), this, getActivity().findViewById(R.id.bottom_marker_ww));
     }
 
+    private boolean paused = false;
+
     @Override
     public void onResume()
     {
         super.onResume();
-        if (watchAddress == null && getActivity() != null) setupView();
+        if ((watchAddress == null || watchAddress.getEditText() == null) && getActivity() != null) setupView();
     }
 
     @Override
@@ -142,6 +146,7 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
         if (watchAddress.isErrorState())
             watchAddress.setError(null);
         String value = watchAddress.getText().toString();
+        value = value.replaceAll("\\s+", "");
         final Matcher matcher = pattern.matcher(value);
         if (matcher.find())
         {
@@ -154,6 +159,7 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
         }
         else
         {
+            if (value.length() > 42) watchAddress.setError(getString(R.string.ethereum_address_hint));
             updateButtonState(false);
         }
     }
@@ -164,8 +170,10 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
 
         try
         {
-            Address check = new Address(address);
-            watchAddress.getEditText().setText(check.getValue());
+            if (Utils.isAddressValid(address))
+            {
+                watchAddress.getEditText().setText(address);
+            }
         }
         catch (Exception e)
         {

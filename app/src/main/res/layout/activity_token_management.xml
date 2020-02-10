@@ -9,12 +9,39 @@
 
     <include layout="@layout/layout_manage_tokens_toolbar" />
 
+    <RelativeLayout
+        android:id="@+id/layout_show_zero_balance"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:orientation="horizontal"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:layout_marginTop="?actionBarSize">
+
+        <TextView
+            android:id="@+id/text_show_zero_balance_tokens"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:textAllCaps="true"
+            android:fontFamily="@font/font_bold"
+            android:text="Show zero balance tokens"
+            android:textSize="14sp" />
+
+        <CheckBox
+            android:layout_centerVertical="true"
+            android:id="@+id/checkbox_show_zero_balance_tokens"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true" />
+    </RelativeLayout>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/token_list"
+        android:layout_below="@id/layout_show_zero_balance"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/layout_buttons"
-        android:layout_marginTop="?actionBarSize" />
+        android:layout_above="@id/layout_buttons" />
 
     <LinearLayout
         android:id="@+id/layout_buttons"

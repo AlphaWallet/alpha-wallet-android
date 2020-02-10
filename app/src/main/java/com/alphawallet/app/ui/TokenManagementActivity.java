@@ -1,11 +1,14 @@
 package com.alphawallet.app.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Button;
+import android.widget.CheckBox;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -29,6 +32,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     private RecyclerView tokenList;
     private Button saveButton;
     private TokenListAdapter adapter;
+    private CheckBox showZeroBalanceCheckBox;
 
     private Wallet wallet;
 
@@ -57,6 +61,14 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         } else {
             finish();
         }
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean showZeroBalanceTokens = pref.getBoolean("show_zero_balance_tokens", false);
+        showZeroBalanceCheckBox = findViewById(R.id.checkbox_show_zero_balance_tokens);
+        showZeroBalanceCheckBox.setChecked(showZeroBalanceTokens);
+        showZeroBalanceCheckBox.setOnCheckedChangeListener((v, checked) -> {
+            pref.edit().putBoolean("show_zero_balance_tokens", checked).apply();
+        });
     }
 
     private void onTokens(Token[] tokenArray) {

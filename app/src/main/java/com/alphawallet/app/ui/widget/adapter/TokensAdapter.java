@@ -44,6 +44,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     protected final TokensService tokensService;
     private ContractResult scrollToken; // designates a token that should be scrolled to
 
+    private Context context;
+
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
         @Override
@@ -84,10 +86,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
-    public TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService, TokensService tService) {
+    public TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService, TokensService tService, Context context) {
         this.onTokenClickListener = onTokenClickListener;
         this.assetService = aService;
         this.tokensService = tService;
+        this.context = context;
     }
 
     protected TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService) {
@@ -205,7 +208,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         if (token == null) return false;
         //Add token to display list if it's the base currency, or if it has balance
-        boolean allowThroughFilter = VisibilityFilter.filterToken(token, true);
+        boolean allowThroughFilter = VisibilityFilter.filterToken(token, true, context);
         allowThroughFilter = checkTokenValue(token, allowThroughFilter);
 
         switch (filterType)

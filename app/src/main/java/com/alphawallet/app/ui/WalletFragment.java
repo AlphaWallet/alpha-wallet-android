@@ -108,7 +108,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         viewModel.backupEvent().observe(this, this::backupEvent);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
-        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService());
+        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), getContext());
         adapter.setHasStableIds(true);
         listView.setLayoutManager(new LinearLayoutManager(getContext()));
         listView.setAdapter(adapter);

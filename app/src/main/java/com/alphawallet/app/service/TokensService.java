@@ -484,7 +484,7 @@ public class TokensService
     public void markTokenUpdated(Token toUpdate)
     {
         Token t = getToken(toUpdate.tokenInfo.chainId, toUpdate.tokenInfo.address);
-        if (t != null && t.walletUIUpdateRequired && t.getInterfaceSpec() == toUpdate.getInterfaceSpec() && t.getStringBalance().equals(toUpdate.getStringBalance()))
+        if (t != null && t.walletUIUpdateRequired && t.getInterfaceSpec() == toUpdate.getInterfaceSpec() && t.getFullBalance().equals(toUpdate.getFullBalance()))
         {
             t.walletUIUpdateRequired = false;
         }

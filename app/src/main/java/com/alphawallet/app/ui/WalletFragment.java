@@ -377,13 +377,14 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     @Override
     public void addedToken()
     {
-
+        //token was added, refresh token list
+        refreshList();
     }
 
     @Override
     public void changedLocale()
     {
-
+        refreshList();
     }
 
     public void walletOutOfFocus()
@@ -472,6 +473,12 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
         @Override
         public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+            if (viewHolder.getItemViewType() == TokenHolder.VIEW_TYPE)
+            {
+                Token t = ((TokenHolder)viewHolder).token;
+                if (t.isEthereum()) return 0;
+            }
+
             return super.getSwipeDirs(recyclerView, viewHolder);
         }
     }

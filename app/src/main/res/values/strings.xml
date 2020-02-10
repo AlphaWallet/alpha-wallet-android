@@ -540,4 +540,7 @@
     <string name="show_qr_code_to_redemption_booth">Show QR Code to Redemption Booth:</string>
     <string name="manage_tokens">Manage Tokens</string>
     <string name="apply_filters">Apply Filters</string>
+    <string name="zero_balance_tokens_off">Not Showing Empty Tokens</string>
+    <string name="zero_balance_tokens_are_switched_off">Token balance for this token is empty and will not show unless you switch on empty token balances. Continue?</string>
+    <string name="dialog_switch_zero_balance_tokens_on">Switch On</string>
 </resources>

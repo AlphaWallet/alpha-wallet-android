@@ -527,6 +527,9 @@
     <string name="debug_script">TokenScript 调试</string>
     <string name="unsigned_script">不信任</string>
     <string name="show_qr_code_to_redemption_booth">呈递二维码到兑换台</string>
-    <string name="manage_tokens">Manage Tokens</string>
-    <string name="apply_filters">Apply Filters</string>
+    <string name="manage_tokens">Token管理</string>
+    <string name="apply_filters">过滤Token</string>
+    <string name="zero_balance_tokens_off">不显示余额/余量为0的Token</string>
+    <string name="zero_balance_tokens_are_switched_off">此Token的余量为0，因此不会显示，除非您打开“显示零余额Token”开关。是否继续？</string>
+    <string name="dialog_switch_zero_balance_tokens_on">打开</string>
 </resources>

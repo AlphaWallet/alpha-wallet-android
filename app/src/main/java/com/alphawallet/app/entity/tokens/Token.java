@@ -135,9 +135,8 @@ public class Token implements Parcelable, Comparable<Token>
     }
 
     public String getStringBalance() {
-        //should apply BigDecimal conversion here
-        if (balance != null) return balance.toString();
-        else return "0";
+        BigDecimal correctedBalance = getCorrectedBalance(4);
+        return correctedBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : correctedBalance.toPlainString();
     }
 
     public boolean hasPositiveBalance() {
@@ -151,7 +150,8 @@ public class Token implements Parcelable, Comparable<Token>
     }
 
     public String getFullBalance() {
-        return getStringBalance();
+        if (balance != null) return balance.toString();
+        else return "0";
     }
 
     public Asset getAssetForToken(String tokenId) {
@@ -250,7 +250,7 @@ public class Token implements Parcelable, Comparable<Token>
 
     public BigDecimal getCorrectedBalance(int scale)
     {
-        if (balance.equals(BigDecimal.ZERO)) return BigDecimal.ZERO;
+        if (balance == null || balance.equals(BigDecimal.ZERO)) return BigDecimal.ZERO;
         BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
         BigDecimal ethBalance = tokenInfo.decimals > 0
                 ? balance.divide(decimalDivisor) : balance;

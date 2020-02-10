@@ -28,9 +28,9 @@ public class VisibilityFilter
             filterResult = false;
         }
 
-        boolean badToken = false;
-        if (token.isTerminated() || token.isBad()) badToken = true;
+        boolean badToken = token.isTerminated() || token.isBad();
         if (!token.tokenInfo.isEnabled) filterResult = false;
+        if (token.isEthereum()) filterResult = true;
         return !badToken && filterResult;
     }
 

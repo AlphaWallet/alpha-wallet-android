@@ -547,4 +547,6 @@
     <string name="authentication_error">Authenitcation to unlock key not provided or timed out. Please try again.</string>
     <string name="device_security_changed">Since this key was created the mobile device security has changed and the OS has invalidated the key. Please re-import your key.</string>
     <string name="fingerprint_authentication_failed">Fingerprint authentication failed</string>
+    <string name="action_snackbar_undo">UNDO</string>
+    <string name="token_hidden">hidden</string>
 </resources>

@@ -101,7 +101,22 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     @Override
     public long getItemId(int position) {
-        return position;
+        Object obj = items.get(position);
+        if (obj instanceof TokenSortedItem) {
+            Token token = ((TokenSortedItem) obj).value;
+
+             // This is an attempt to obtain a 'unique' id
+             // to fully utilise the RecyclerView's setHasStableIds feature.
+             // This will drastically reduce 'blinking' when the list changes
+            long id =
+                    (token.tokenInfo != null ? token.tokenInfo.chainId : 0)  +
+                    token.lastTxCheck +
+                    token.lastBlockCheck + token.lastTxTime +
+                    token.lastTxUpdate;
+            return id;
+        } else {
+            return position;
+        }
     }
 
     @Override
@@ -204,6 +219,25 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
+    public void removeToken(Token token) {
+        for (int i = 0; i < items.size(); i++) {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem) {
+                TokenSortedItem tsi = (TokenSortedItem) si;
+                Token thisToken = tsi.value;
+                if (thisToken.getAddress().equals(token.getAddress()) && thisToken.tokenInfo.chainId == token.tokenInfo.chainId) {
+                    items.removeItemAt(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void addToken(Token token) {
+        items.add(new TokenSortedItem(token, token.getNameWeight()));
+        notifyDataSetChanged();
+    }
+
     private boolean canDisplayToken(Token token)
     {
         if (token == null) return false;
@@ -259,7 +293,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private void populateTokens(Token[] tokens)
     {
         items.beginBatchedUpdates();
-        items.add(total);
+//        items.add(total);
 
         for (Token token : tokens)
         {
@@ -309,7 +343,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
         items.beginBatchedUpdates();
         items.clear();
-        items.add(total);
+//        items.add(total);
         for (Token token : filterTokens)
         {
             items.add(new TokenSortedItem(token, token.getNameWeight()));

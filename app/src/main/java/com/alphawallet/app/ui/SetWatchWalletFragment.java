@@ -20,6 +20,8 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.widget.LayoutCallbackListener;
 import com.alphawallet.app.widget.PasswordInputView;
 
+import org.web3j.abi.datatypes.Address;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -158,7 +160,17 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
 
     public void setAddress(String address)
     {
-        watchAddress.getEditText().setText(address);
+        if (address == null) return;
+
+        try
+        {
+            Address check = new Address(address);
+            watchAddress.getEditText().setText(check.getValue());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override

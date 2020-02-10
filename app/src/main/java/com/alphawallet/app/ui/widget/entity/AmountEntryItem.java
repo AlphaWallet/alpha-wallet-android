@@ -119,13 +119,17 @@ public class AmountEntryItem
         usdLabel = activity.findViewById(R.id.amount_edit_usd_symbol);
 
         tokenSymbolLabel = activity.findViewById(R.id.amount_edit_token_symbol);
-        if (token != null) tokenSymbolLabel.setText(token.tokenInfo.symbol);
+        tokenEquivalentSymbol = activity.findViewById(R.id.text_token_symbol);
+        if (token != null)
+        {
+            tokenSymbolLabel.setText(token.tokenInfo.symbol);
+            tokenEquivalentSymbol.setText(token.tokenInfo.symbol);
+        }
 
         tokenEquivalentLayout = activity.findViewById(R.id.layout_token_equivalent_value);
         tokenEquivalent = activity.findViewById(R.id.text_token_value);
         tokenEquivalent.setText("0 ");
-        tokenEquivalentSymbol = activity.findViewById(R.id.text_token_symbol);
-        tokenEquivalentSymbol.setText(token.tokenInfo.symbol);
+
         usdValue = activity.findViewById(R.id.text_usd_value);
 
         switchBtn = activity.findViewById(R.id.img_switch_usd_eth);

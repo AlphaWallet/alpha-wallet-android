@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.TransactionTooLargeException;
 import android.preference.PreferenceManager;
 
+import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -187,7 +188,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         disposable = createTransactionInteract.sign(defaultWallet.getValue(), signRequest, defaultNetwork.getValue().chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(sig -> dAppFunction.DAppReturn(sig, message),
+                .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
                            error -> dAppFunction.DAppError(error, message));
     }
 
@@ -324,5 +325,15 @@ public class DappBrowserViewModel extends BaseViewModel  {
     public void resetSignDialog()
     {
         keyService.resetSigningDialog();
+    }
+
+    public void completeAuthentication(Operation signData)
+    {
+        keyService.completeAuthentication(signData);
+    }
+
+    public void failedAuthentication(Operation signData)
+    {
+        keyService.failedAuthentication(signData);
     }
 }

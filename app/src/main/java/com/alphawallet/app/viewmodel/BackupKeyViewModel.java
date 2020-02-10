@@ -13,6 +13,7 @@ import io.reactivex.schedulers.Schedulers;
 
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
@@ -167,6 +168,16 @@ public class BackupKeyViewModel extends BaseViewModel {
     public void resetSignDialog()
     {
         keyService.resetSigningDialog();
+    }
+
+    public void completeAuthentication(Operation taskCode)
+    {
+        keyService.completeAuthentication(taskCode);
+    }
+
+    public void failedAuthentication(Operation taskCode)
+    {
+        keyService.failedAuthentication(taskCode);
     }
 }
 

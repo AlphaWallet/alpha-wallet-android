@@ -50,7 +50,6 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     SplashViewModel splashViewModel;
 
     private String importData;
-    private PinAuthenticationCallbackInterface authInterface;
     private String importPath = null;
     private Handler handler = new Handler();
     private String errorMessage;
@@ -219,11 +218,11 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
             Operation taskCode = Operation.values()[requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS];
             if (resultCode == RESULT_OK)
             {
-                authInterface.CompleteAuthentication(taskCode);
+                splashViewModel.completeAuthentication(taskCode);
             }
             else
             {
-                authInterface.FailedAuthentication(taskCode);
+                splashViewModel.failedAuthentication(taskCode);
             }
         }
         else if (requestCode == IMPORT_REQUEST_CODE)
@@ -277,12 +276,6 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     public void FetchMnemonic(String mnemonic)
     {
 
-    }
-
-    @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-    {
-        authInterface = authCallback;
     }
 
     @Override

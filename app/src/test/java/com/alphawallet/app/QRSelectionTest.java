@@ -20,6 +20,8 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.MessagePair;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignaturePair;
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
+import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Transaction;
@@ -100,7 +102,7 @@ public class QRSelectionTest
             }
 
             @Override
-            public Single<byte[]> getSignature(Wallet wallet, byte[] message, int chainId)
+            public Single<SignatureFromKey> getSignature(Wallet wallet, byte[] message, int chainId)
             {
                 return null;
             }

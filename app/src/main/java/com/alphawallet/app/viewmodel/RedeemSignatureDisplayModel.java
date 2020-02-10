@@ -8,6 +8,7 @@ import android.os.NetworkOnMainThreadException;
 import android.support.annotation.Nullable;
 
 import com.alphawallet.app.entity.MessagePair;
+import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.SignaturePair;
 import com.alphawallet.app.entity.tokens.Ticket;
@@ -343,5 +344,10 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
     public void resetSignDialog()
     {
         keyService.resetSigningDialog();
+    }
+
+    public void completeAuthentication(Operation signData)
+    {
+        keyService.completeAuthentication(signData);
     }
 }

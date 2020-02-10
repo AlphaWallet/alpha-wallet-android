@@ -74,7 +74,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private boolean usingFeeMaster = false;
     private String paymasterUrlPrefix = "https://paymaster.stormbird.sg/api/";
     private final String TAG = "ITA";
-    private PinAuthenticationCallbackInterface authInterface;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -558,11 +557,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     viewModel.performImport();
                 }
 
-                @Override
-                public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-                {
-                    authInterface = authCallback;
-                }
             };
             viewModel.getAuthorisation(this, cb);
         }
@@ -647,15 +641,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
-        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
+        if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
+        else viewModel.failedAuthentication(SIGN_DATA);
         viewModel.performImport();
         onProgress(true);
-    }
-
-    @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-    {
-        authInterface = authCallback;
     }
 }

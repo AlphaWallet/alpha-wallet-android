@@ -532,4 +532,8 @@
     <string name="zero_balance_tokens_off">不显示余额/余量为0的Token</string>
     <string name="zero_balance_tokens_are_switched_off">此Token的余量为0，因此不会显示，除非您打开“显示零余额Token”开关。是否继续？</string>
     <string name="dialog_switch_zero_balance_tokens_on">打开</string>
+    <string name="cannot_read_encrypt_file">钱包无法读取加密密钥。需要重新导入</string>
+    <string name="authentication_error">没有提供正确的身份验证来解锁密钥或超时。请再试一遍</string>
+    <string name="device_security_changed">创建此密钥后，移动设备的安全性已更改，并且操作系统使密钥无效。请重新导入您的密钥</string>
+    <string name="fingerprint_authentication_failed">指纹认证失败</string>
 </resources>

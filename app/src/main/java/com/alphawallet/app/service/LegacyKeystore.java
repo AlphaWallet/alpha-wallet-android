@@ -2,6 +2,8 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 import android.security.keystore.UserNotAuthenticatedException;
+
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ServiceErrorException;
 
 import javax.crypto.Cipher;
@@ -41,11 +43,11 @@ public class LegacyKeystore
                 boolean fileExists = new File(encryptedDataFilePath).exists();
                 if (!fileExists)
                 {
-                    throw new ServiceErrorException(KEY_IS_GONE, "file and key are gone: " + keyName);
+                    throw new ServiceErrorException(KEY_IS_GONE, context.getString(R.string.cannot_read_encrypt_file));
                 }
                 else
                 {
-                    throw new ServiceErrorException(KEY_IS_GONE, "file is present but the key is gone: " + keyName);
+                    throw new ServiceErrorException(KEY_IS_GONE, context.getString(R.string.cannot_read_encrypt_file));
                 }
             }
 
@@ -54,24 +56,24 @@ public class LegacyKeystore
             boolean aliasExists = new File(KeyService.getFilePath(context, keyName)).exists();
             if (!ivExists || !aliasExists)
             {
-                throw new ServiceErrorException(ServiceErrorCode.IV_OR_ALIAS_NO_ON_DISK);
+                throw new ServiceErrorException(ServiceErrorCode.IV_OR_ALIAS_NO_ON_DISK, context.getString(R.string.cannot_read_encrypt_file));
             }
 
             byte[] iv = KeyService.readBytesFromFile(KeyService.getFilePath(context, keyIV));
             if (iv == null || iv.length == 0)
             {
-                throw new NullPointerException("iv is missing for " + keyName);
+                throw new NullPointerException(context.getString(R.string.cannot_read_encrypt_file));
             }
             Cipher outCipher = Cipher.getInstance(LEGACY_CIPHER_ALGORITHM);
             outCipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
             CipherInputStream cipherInputStream = new CipherInputStream(new FileInputStream(encryptedDataFilePath), outCipher);
             return KeyService.readBytesFromStream(cipherInputStream);
         } catch (UserNotAuthenticatedException e) {
-            throw new ServiceErrorException(ServiceErrorCode.USER_NOT_AUTHENTICATED);
+            throw new ServiceErrorException(ServiceErrorCode.USER_NOT_AUTHENTICATED, context.getString(R.string.authentication_error));
         } catch (InvalidKeyException e) {
-            throw new ServiceErrorException(ServiceErrorCode.INVALID_KEY);
+            throw new ServiceErrorException(ServiceErrorCode.INVALID_KEY, context.getString(R.string.invalid_private_key));
         } catch (IOException | CertificateException | KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException e) {
-            throw new ServiceErrorException(ServiceErrorCode.KEY_STORE_ERROR);
+            throw new ServiceErrorException(ServiceErrorCode.KEY_STORE_ERROR, context.getString(R.string.cannot_read_encrypt_file));
         }
     }
 }

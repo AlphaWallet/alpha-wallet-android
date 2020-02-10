@@ -74,7 +74,6 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     ImportWalletViewModelFactory importWalletViewModelFactory;
     ImportWalletViewModel importWalletViewModel;
     private AWalletAlertDialog dialog;
-    private PinAuthenticationCallbackInterface authInterface;
     private ImportType currentPage;
 
     @Override
@@ -374,12 +373,6 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
     }
 
     @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-    {
-        authInterface = authCallback;
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -388,11 +381,11 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
             Operation taskCode = Operation.values()[requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS];
             if (resultCode == RESULT_OK)
             {
-                authInterface.CompleteAuthentication(taskCode);
+                importWalletViewModel.completeAuthentication(taskCode);
             }
             else
             {
-                authInterface.FailedAuthentication(taskCode);
+                importWalletViewModel.failedAuthentication(taskCode);
             }
         }
         else if (requestCode == BARCODE_READER_REQUEST_CODE)

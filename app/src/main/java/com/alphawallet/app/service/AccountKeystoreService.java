@@ -1,6 +1,7 @@
 package com.alphawallet.app.service;
 
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 
 import java.math.BigInteger;
 
@@ -47,7 +48,7 @@ public interface AccountKeystoreService {
 	 * @param nonce
 	 * @return sign data
 	 */
-	Single<byte[]> signTransaction(
+	Single<SignatureFromKey> signTransaction(
 			Wallet signer,
 			String toAddress,
 			BigInteger amount,
@@ -57,7 +58,7 @@ public interface AccountKeystoreService {
 			byte[] data,
 			long chainId);
 
-	Single<byte[]> signTransaction(
+	Single<SignatureFromKey> signTransaction(
 			Wallet signer,
 			byte[] message,
 			long chainId);

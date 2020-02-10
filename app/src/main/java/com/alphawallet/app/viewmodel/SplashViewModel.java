@@ -13,6 +13,7 @@ import android.preference.PreferenceManager;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.FileData;
+import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
@@ -264,5 +265,15 @@ public class SplashViewModel extends ViewModel
                 + File.separator + ALPHAWALLET_DIR);
 
         return directory.exists();
+    }
+
+    public void completeAuthentication(Operation taskCode)
+    {
+        keyService.completeAuthentication(taskCode);
+    }
+
+    public void failedAuthentication(Operation taskCode)
+    {
+        keyService.failedAuthentication(taskCode);
     }
 }

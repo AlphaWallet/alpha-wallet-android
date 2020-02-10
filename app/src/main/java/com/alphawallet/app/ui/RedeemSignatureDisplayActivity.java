@@ -61,7 +61,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     private Wallet wallet;
     private Token token;
     private TicketRangeParcel ticketRange;
-    private PinAuthenticationCallbackInterface authInterface;
     private Web3TokenView tokenView;
     private boolean signRequest;
 
@@ -219,10 +218,15 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
-        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
-        if (gotAuth) viewModel.updateSignature(wallet);
-        else dialogKeyNotAvailableError();
+        if (gotAuth)
+        {
+            viewModel.completeAuthentication(SIGN_DATA);
+            viewModel.updateSignature(wallet);
+        }
+        else
+        {
+            dialogKeyNotAvailableError();
+        }
     }
 
     private void dialogKeyNotAvailableError()
@@ -235,12 +239,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
             sendBroadcast(new Intent(PRUNE_ACTIVITY));
         });
         dialog.show();
-    }
-
-    @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-    {
-        authInterface = authCallback;
     }
 
     @Override

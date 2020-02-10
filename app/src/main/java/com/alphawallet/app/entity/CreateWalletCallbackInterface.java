@@ -10,5 +10,4 @@ public interface CreateWalletCallbackInterface
     void keyFailure(String message);
     void cancelAuthentication();
     void FetchMnemonic(String mnemonic);
-    void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback);
 }

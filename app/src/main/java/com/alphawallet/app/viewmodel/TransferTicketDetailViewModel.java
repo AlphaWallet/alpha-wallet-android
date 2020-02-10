@@ -228,12 +228,12 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     {
         //first find the asset within the token
         Asset asset = null;
-        int tokenId = Integer.parseInt(hexTokenId, 16);
-        String tokenIdStr = String.valueOf(tokenId);
+        BigInteger tokenId = new BigInteger(hexTokenId, 16);
 
         for (Asset a : token.getTokenAssets())
         {
-            if (a.getTokenId().equals(tokenIdStr))
+            BigInteger assetTokenId = new BigInteger(a.getTokenId());
+            if (assetTokenId.equals(tokenId))
             {
                 asset = a;
                 break;

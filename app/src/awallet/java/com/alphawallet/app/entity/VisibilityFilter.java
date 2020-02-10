@@ -1,5 +1,9 @@
 package com.alphawallet.app.entity;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
@@ -15,12 +19,17 @@ public class VisibilityFilter
     private static int primaryChain = EthereumNetworkRepository.MAINNET_ID;
     private static String primaryChainName = C.ETHEREUM_NETWORK_NAME;
 
-    public static boolean filterToken(Token token, boolean filterResult)
+    public static boolean filterToken(Token token, boolean filterResult, Context context)
     {
-        boolean badToken = false;
-        if (!token.hasDebugTokenscript && !token.hasPositiveBalance()) filterResult = false;
-        if (token.isTerminated() || token.isBad()) badToken = true;
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean hideZeroBalanceTokens = pref.getBoolean("hide_zero_balance_tokens", false);
 
+        if (hideZeroBalanceTokens && !token.hasPositiveBalance()) {
+            filterResult = false;
+        }
+
+        boolean badToken = token.isTerminated() || token.isBad();
+        if (!token.tokenInfo.isEnabled) filterResult = false;
         if (token.isEthereum()) filterResult = true;
         return !badToken && filterResult;
     }

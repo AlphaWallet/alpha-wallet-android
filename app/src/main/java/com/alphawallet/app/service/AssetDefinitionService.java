@@ -1013,7 +1013,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             sigDescriptor.type = SigReturnType.NO_TOKENSCRIPT;
 
             TokenScriptFile tsf = getTokenScriptFile(chainId, contractAddress);
-            if (tsf != null)
+            if (tsf != null && tsf.isValidTokenScript())
             {
                 String hash = tsf.calcMD5();
                 XMLDsigDescriptor sig = getCertificateFromRealm(hash);

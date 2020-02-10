@@ -132,7 +132,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Observable<Token[]> fetchActiveStoredPlusEth(String walletAddress) {
         Wallet wallet = new Wallet(walletAddress);
-        return fetchStoredEnabledTokens(wallet) // fetch tokens from cache
+        return fetchStoredTokens(wallet) // fetch tokens from cache
                 .compose(attachEthereumStored(wallet)) //add cached eth balance
                 .toObservable();
     }
@@ -155,9 +155,9 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Observable<Token[]> fetchActiveStored(String walletAddress) {
+    public Observable<Token[]> fetchStored(String walletAddress) {
         Wallet wallet = new Wallet(walletAddress);
-        return fetchStoredEnabledTokens(wallet) // fetch tokens from cache
+        return fetchStoredTokens(wallet) // fetch tokens from cache
                 .toObservable();
     }
 
@@ -380,7 +380,8 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Completable setEnable(Wallet wallet, Token token, boolean isEnabled) {
         NetworkInfo network = ethereumNetworkRepository.getDefaultNetwork();
-        return Completable.fromAction(() -> localSource.setEnable(network, wallet, token, isEnabled));
+        localSource.setEnable(network, wallet, token, isEnabled);
+        return Completable.fromAction(() -> {});
     }
 
     @Override
@@ -594,9 +595,9 @@ public class TokenRepository implements TokenRepositoryType {
         return getService(chainId).pendingTransactionFlowable().subscribe(subscriber::scanReturn);
     }
 
-    private Single<Token[]> fetchStoredEnabledTokens(Wallet wallet) {
+    private Single<Token[]> fetchStoredTokens(Wallet wallet) {
         return localSource
-                .fetchEnabledTokensWithBalance(wallet);
+                .fetchTokensWithBalance(wallet);
     }
 
     private Single<Token> fetchCachedToken(NetworkInfo network, Wallet wallet, String address)

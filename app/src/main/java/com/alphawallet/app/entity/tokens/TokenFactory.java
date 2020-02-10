@@ -163,6 +163,6 @@ public class TokenFactory
     public TokenInfo createTokenInfo(RealmToken realmItem)
     {
         return new TokenInfo(realmItem.getAddress(), realmItem.getName(), realmItem.getSymbol(),
-                realmItem.getDecimals(), true, realmItem.getChainId());
+                realmItem.getDecimals(), realmItem.isEnabled(), realmItem.getChainId());
     }
 }

@@ -88,7 +88,7 @@ public class ERC721Ticket extends Token implements Parcelable {
 
     @Override
     public String getStringBalance() {
-        return bigIntListToString(balanceArray, false);
+        return String.valueOf(getTicketCount());
     }
 
     @Override

@@ -30,6 +30,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.WarningData;
+import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.util.TabUtils;
 
@@ -107,7 +108,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         viewModel.backupEvent().observe(this, this::backupEvent);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
-        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService());
+        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), getContext());
         adapter.setHasStableIds(true);
         listView.setLayoutManager(new LinearLayoutManager(getContext()));
         listView.setAdapter(adapter);
@@ -376,13 +377,14 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     @Override
     public void addedToken()
     {
-
+        //token was added, refresh token list
+        refreshList();
     }
 
     @Override
     public void changedLocale()
     {
-
+        refreshList();
     }
 
     public void walletOutOfFocus()
@@ -458,16 +460,26 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-            remindMeLater(viewModel.getWallet());
+            if (viewHolder instanceof WarningHolder) {
+                remindMeLater(viewModel.getWallet());
+            } else {
+                if (viewHolder instanceof TokenHolder) {
+                    Token token = ((TokenHolder) viewHolder).token;
+                    viewModel.setTokenEnabled(token, false);
+                    adapter.updateToken(token, false); //smooth update of token
+                }
+            }
         }
 
         @Override
         public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-            if (viewHolder instanceof WarningHolder) {
-                return super.getSwipeDirs(recyclerView, viewHolder);
-            } else {
-                return 0;
+            if (viewHolder.getItemViewType() == TokenHolder.VIEW_TYPE)
+            {
+                Token t = ((TokenHolder)viewHolder).token;
+                if (t.isEthereum()) return 0;
             }
+
+            return super.getSwipeDirs(recyclerView, viewHolder);
         }
     }
 }

@@ -132,6 +132,11 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
+    public String getStringBalance() {
+        return String.valueOf(tokenBalanceAssets.size());
+    }
+
+    @Override
     public Function getTransferFunction(String to, List<BigInteger> tokenIds) throws NumberFormatException
     {
         if (tokenIds.size() > 1)

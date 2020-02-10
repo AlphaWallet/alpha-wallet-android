@@ -3,6 +3,7 @@ package com.alphawallet.app.entity.tokens;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.view.View;
@@ -15,7 +16,6 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.interact.SetupTokensInteract;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-public class Token implements Parcelable
+public class Token implements Parcelable, Comparable<Token>
 {
     public final TokenInfo tokenInfo;
     public BigDecimal balance;
@@ -64,6 +64,7 @@ public class Token implements Parcelable
 
     public int iconifiedWebviewHeight;
     public int nonIconifiedWebviewHeight;
+    private int nameWeight;
 
     public String getNetworkName() { return shortNetworkName; }
 
@@ -89,6 +90,7 @@ public class Token implements Parcelable
         walletUIUpdateRequired = false;
         hasTokenScript = false;
         refreshCheck = false;
+        nameWeight = calculateTokenNameWeight();
     }
 
     public void transferPreviousData(Token oldToken)
@@ -123,6 +125,7 @@ public class Token implements Parcelable
         hasDebugTokenscript = in.readByte() == 1;
         nonIconifiedWebviewHeight = in.readInt();
         iconifiedWebviewHeight = in.readInt();
+        nameWeight = in.readInt();
 
         balanceChanged = false;
         if (readType <= ContractType.CREATION.ordinal())
@@ -132,9 +135,8 @@ public class Token implements Parcelable
     }
 
     public String getStringBalance() {
-        //should apply BigDecimal conversion here
-        if (balance != null) return balance.toString();
-        else return "0";
+        BigDecimal correctedBalance = getCorrectedBalance(4);
+        return correctedBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : correctedBalance.toPlainString();
     }
 
     public boolean hasPositiveBalance() {
@@ -148,7 +150,8 @@ public class Token implements Parcelable
     }
 
     public String getFullBalance() {
-        return getStringBalance();
+        if (balance != null) return balance.toString();
+        else return "0";
     }
 
     public Asset getAssetForToken(String tokenId) {
@@ -193,6 +196,7 @@ public class Token implements Parcelable
         dest.writeByte(hasDebugTokenscript?(byte)1:(byte)0);
         dest.writeInt(nonIconifiedWebviewHeight);
         dest.writeInt(iconifiedWebviewHeight);
+        dest.writeInt(nameWeight);
     }
 
     public void setRealmBalance(RealmToken realmToken)
@@ -246,7 +250,7 @@ public class Token implements Parcelable
 
     public BigDecimal getCorrectedBalance(int scale)
     {
-        if (balance.equals(BigDecimal.ZERO)) return BigDecimal.ZERO;
+        if (balance == null || balance.equals(BigDecimal.ZERO)) return BigDecimal.ZERO;
         BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
         BigDecimal ethBalance = tokenInfo.decimals > 0
                 ? balance.divide(decimalDivisor) : balance;
@@ -494,6 +498,7 @@ public class Token implements Parcelable
         lastTxUpdate = realmToken.getTXUpdateTime();
         lastTxCheck = realmToken.getTXUpdateTime();
         lastTxTime = realmToken.getLastTxTime();
+        tokenInfo.isEnabled = realmToken.getEnabled();
     }
 
     public boolean checkBalanceChange(Token token)
@@ -1050,5 +1055,100 @@ public class Token implements Parcelable
     {
         if (check.ticker == null && ticker != null) return true; //now has ticker
         else return check.ticker != null && ticker != null && !check.ticker.price.equals(ticker.price); //return true if ticker changed
+    }
+
+    @Override
+    public boolean equals(Object v)
+    {
+        boolean retVal = false;
+
+        if (v instanceof Token) {
+            Token t = (Token) v;
+            retVal = t != null && tokenInfo.chainId == t.tokenInfo.chainId && getAddress().equals(t.getAddress());
+        }
+
+        return retVal;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 7;
+        hash = 17 * hash + (this.tokenInfo.name != null ? this.tokenInfo.name.hashCode() : 0);
+        return hash;
+    }
+
+
+    @Override
+    public int compareTo(@NonNull Token otherToken)
+    {
+        return nameWeight - otherToken.nameWeight;
+    }
+
+    public int getNameWeight()
+    {
+        return nameWeight;
+    }
+
+    private int calculateTokenNameWeight()
+    {
+        int weight = 1000; //ensure base eth types are always displayed first
+        String tokenName = getFullName();
+        int override = EthereumNetworkRepository.getPriorityOverride(this);
+        if (override > 0) return override;
+        if(isBad()) return 99999999;
+        if(tokenName.length() == 0)
+        {
+            return Integer.MAX_VALUE;
+        }
+
+        int i = 4;
+        int pos = 0;
+
+        while (i >= 0 && pos < tokenName.length())
+        {
+            char c = tokenName.charAt(pos++);
+            int w = tokeniseCharacter(c);
+            if (w > 0)
+            {
+                int component = (int)Math.pow(26, i)*w;
+                weight += component;
+                i--;
+            }
+        }
+
+        String address = com.alphawallet.token.tools.Numeric.cleanHexPrefix(getAddress());
+        for (i = 0; i < address.length() && i < 2; i++)
+        {
+            char c = address.charAt(i);
+            int w = c - '0';
+            weight += w;
+        }
+
+        if (weight < 2) weight = 2;
+
+        return weight;
+    }
+
+    private int tokeniseCharacter(char c)
+    {
+        int w = Character.toLowerCase(c) - 'a' + 1;
+        if (w > 'z')
+        {
+            //could be ideographic, in which case we may want to display this first
+            //just use a modulus
+            w = w % 10;
+        }
+        else if (w < 0)
+        {
+            //must be a number
+            w = 1 + (c - '0');
+        }
+        else
+        {
+            w += 10;
+        }
+
+        return w;
     }
 }

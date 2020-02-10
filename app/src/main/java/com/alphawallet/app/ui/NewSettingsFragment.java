@@ -63,6 +63,8 @@ public class NewSettingsFragment extends Fragment
     private LinearLayout layoutBackupKey;
     private TextView backupText;
 
+    private Wallet wallet;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -135,6 +137,15 @@ public class NewSettingsFragment extends Fragment
         {
             layoutSwitchnetworks.setVisibility(View.GONE);
         }
+
+        final LinearLayout layoutTokenManagement = view.findViewById(R.id.layout_token_management);
+        layoutTokenManagement.setOnClickListener(v -> {
+            if (wallet != null) {
+                Intent intent = new Intent(getActivity(), TokenManagementActivity.class);
+                intent.putExtra(EXTRA_ADDRESS, wallet.address);
+                getActivity().startActivity(intent);
+            }
+        });
 
         final LinearLayout layoutSwitchLocale = view.findViewById(R.id.layout_locale_lang);
         layoutSwitchLocale.setOnClickListener(v -> {
@@ -375,6 +386,7 @@ public class NewSettingsFragment extends Fragment
     }
 
     private void onDefaultWallet(Wallet wallet) {
+        this.wallet = wallet;
         walletsSubtext.setText(wallet.address);
         switch (wallet.authLevel)
         {

@@ -44,6 +44,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     protected final TokensService tokensService;
     private ContractResult scrollToken; // designates a token that should be scrolled to
 
+    private Context context;
+
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
         @Override
@@ -84,10 +86,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     protected TotalBalanceSortedItem total = new TotalBalanceSortedItem(null);
 
-    public TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService, TokensService tService) {
+    public TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService, TokensService tService, Context context) {
         this.onTokenClickListener = onTokenClickListener;
         this.assetService = aService;
         this.tokensService = tService;
+        this.context = context;
     }
 
     protected TokensAdapter(OnTokenClickListener onTokenClickListener, AssetDefinitionService aService) {
@@ -177,7 +180,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         if (tokensService != null) tokensService.markTokenUpdated(token);
         if (canDisplayToken(token))
         {
-            items.add(new TokenSortedItem(token, calculateWeight(token)));
+            items.add(new TokenSortedItem(token, token.getNameWeight()));
         }
         else
         {
@@ -189,7 +192,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 {
                     TokenSortedItem tsi = (TokenSortedItem) si;
                     Token thisToken = tsi.value;
-                    if (canDisplayToken(thisToken) && thisToken.getAddress().equals(token.getAddress()) && thisToken.tokenInfo.chainId == token.tokenInfo.chainId)
+                    if (thisToken.getAddress().equals(token.getAddress()) && thisToken.tokenInfo.chainId == token.tokenInfo.chainId)
                     {
                         Log.d(TAG, "REMOVE: " + token.getFullName());
                         items.removeItemAt(i);
@@ -205,7 +208,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     {
         if (token == null) return false;
         //Add token to display list if it's the base currency, or if it has balance
-        boolean allowThroughFilter = VisibilityFilter.filterToken(token, true);
+        boolean allowThroughFilter = VisibilityFilter.filterToken(token, true, context);
         allowThroughFilter = checkTokenValue(token, allowThroughFilter);
 
         switch (filterType)
@@ -266,69 +269,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         notifyDataSetChanged();
     }
 
-    private int calculateWeight(Token token)
-    {
-        int weight = 1000; //ensure base eth types are always displayed first
-        String tokenName = token.getFullName();
-        int override = EthereumNetworkRepository.getPriorityOverride(token);
-        if (override > 0) return override;
-        if(token.isBad()) return 99999999;
-        if(tokenName.length() == 0)
-        {
-            return Integer.MAX_VALUE;
-        }
-
-        int i = 4;
-        int pos = 0;
-
-        while (i >= 0 && pos < tokenName.length())
-        {
-            char c = tokenName.charAt(pos++);
-            //Character.isIdeographic()
-            int w = tokeniseCharacter(c);
-            if (w > 0)
-            {
-                int component = (int)Math.pow(26, i)*w;
-                weight += component;
-                i--;
-            }
-        }
-
-        String address = Numeric.cleanHexPrefix(token.getAddress());
-        for (i = 0; i < address.length() && i < 2; i++)
-        {
-            char c = address.charAt(i);
-            int w = c - '0';
-            weight += w;
-        }
-
-        if (weight < 2) weight = 2;
-
-        return weight;
-    }
-
-    private int tokeniseCharacter(char c)
-    {
-        int w = Character.toLowerCase(c) - 'a' + 1;
-        if (w > 'z')
-        {
-            //could be ideographic, in which case we may want to display this first
-            //just use a modulus
-            w = w % 10;
-        }
-        else if (w < 0)
-        {
-            //must be a number
-            w = 1 + (c - '0');
-        }
-        else
-        {
-            w += 10;
-        }
-
-        return w;
-    }
-
     public void setTotal(BigDecimal totalInCurrency) {
         total = new TotalBalanceSortedItem(totalInCurrency);
         //see if we need an update
@@ -372,7 +312,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         items.add(total);
         for (Token token : filterTokens)
         {
-            items.add(new TokenSortedItem(token, calculateWeight(token)));
+            items.add(new TokenSortedItem(token, token.getNameWeight()));
         }
         items.endBatchedUpdates();
     }

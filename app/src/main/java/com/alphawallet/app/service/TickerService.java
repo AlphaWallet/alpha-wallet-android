@@ -288,7 +288,11 @@ public class TickerService implements TickerServiceInterface
                     BigDecimal balance = new BigDecimal(balanceStr);
                     Token newToken = tf.createToken(info, balance, null, System.currentTimeMillis(), ContractType.ERC20, network.getShortName(), System.currentTimeMillis());
                     newToken.setTokenWallet(currentAddress);
-                    if (existingToken != null) newToken.transferPreviousData(existingToken);
+                    if (existingToken != null) //TODO: after token module refactor this won't be necessary.
+                    {
+                        newToken.transferPreviousData(existingToken);
+                        newToken.tokenInfo.isEnabled = existingToken.tokenInfo.isEnabled;
+                    }
                     attachTokenTicker(newToken, erc20Tickers.get(newToken.tokenInfo.address.toLowerCase()));
                     newToken.refreshCheck = false;
                     tokenList.add(newToken);

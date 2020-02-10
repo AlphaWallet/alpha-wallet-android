@@ -189,13 +189,12 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Single<Token[]> fetchEnabledTokensWithBalance(Wallet wallet) {
+    public Single<Token[]> fetchTokensWithBalance(Wallet wallet) {
         return Single.fromCallable(() -> {
             try (Realm realm = realmManager.getRealmInstance(wallet))
             {
                 RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
                         .sort("addedTime", Sort.ASCENDING)
-                        .equalTo("isEnabled", true)
                         .findAll();
 
                 return convertMulti(realmItems, System.currentTimeMillis(), wallet, realm);
@@ -338,7 +337,7 @@ public class TokensRealmSource implements TokenLocalSource {
             realm = realmManager.getRealmInstance(wallet);
             RealmToken realmToken = realm.where(RealmToken.class)
                     .equalTo("address", databaseKey(token))
-                    .equalTo("chainId", network.chainId)
+                    .equalTo("chainId", token.tokenInfo.chainId)
                     .findFirst();
 
             TransactionsRealmCache.addRealm();
@@ -717,6 +716,7 @@ public class TokensRealmSource implements TokenLocalSource {
         for (RealmToken realmItem : realmItems)
         {
             Token t = convertSingle(realmItem, realm, tf, wallet);
+
             if (t != null)
             {
                 tokenList.add(t);

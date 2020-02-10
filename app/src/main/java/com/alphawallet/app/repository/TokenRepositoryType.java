@@ -21,7 +21,7 @@ import io.reactivex.Single;
 
 public interface TokenRepositoryType {
 
-    Observable<Token[]> fetchActiveStored(String walletAddress);
+    Observable<Token[]> fetchStored(String walletAddress);
     Observable<Token[]> fetchActiveStoredPlusEth(String walletAddress);
     Observable<Token> fetchActiveSingle(String walletAddress, Token token);
     Observable<Token> fetchCachedSingleToken(NetworkInfo network, String walletAddress, String tokenAddress);

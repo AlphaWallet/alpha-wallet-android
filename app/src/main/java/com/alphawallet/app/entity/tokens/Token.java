@@ -1151,4 +1151,10 @@ public class Token implements Parcelable, Comparable<Token>
 
         return w;
     }
+
+    public long getUID()
+    {
+        String id = getAddress() + "-" + tokenInfo.chainId;
+        return id.hashCode();
+    }
 }

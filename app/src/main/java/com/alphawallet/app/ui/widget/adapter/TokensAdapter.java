@@ -108,12 +108,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
              // This is an attempt to obtain a 'unique' id
              // to fully utilise the RecyclerView's setHasStableIds feature.
              // This will drastically reduce 'blinking' when the list changes
-            long id =
-                    (token.tokenInfo != null ? token.tokenInfo.chainId : 0)  +
-                    token.lastTxCheck +
-                    token.lastBlockCheck + token.lastTxTime +
-                    token.lastTxUpdate;
-            return id;
+            return token.getUID();
         } else {
             return position;
         }
@@ -199,23 +194,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
         else
         {
-            //remove item
-            for (int i = 0; i < items.size(); i++)
-            {
-                Object si = items.get(i);
-                if (si instanceof TokenSortedItem)
-                {
-                    TokenSortedItem tsi = (TokenSortedItem) si;
-                    Token thisToken = tsi.value;
-                    if (thisToken.getAddress().equals(token.getAddress()) && thisToken.tokenInfo.chainId == token.tokenInfo.chainId)
-                    {
-                        Log.d(TAG, "REMOVE: " + token.getFullName());
-                        items.removeItemAt(i);
-                        notifyItemRemoved(i);
-                        break;
-                    }
-                }
-            }
+            removeToken(token);
         }
     }
 
@@ -234,8 +213,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     }
 
     public void addToken(Token token) {
-        items.add(new TokenSortedItem(token, token.getNameWeight()));
-        notifyDataSetChanged();
+        int insertPos = items.add(new TokenSortedItem(token, token.getNameWeight()));
+        notifyItemInserted(insertPos);
     }
 
     private boolean canDisplayToken(Token token)

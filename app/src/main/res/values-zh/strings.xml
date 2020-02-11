@@ -536,4 +536,6 @@
     <string name="authentication_error">没有提供正确的身份验证来解锁密钥或超时。请再试一遍</string>
     <string name="device_security_changed">创建此密钥后，移动设备的安全性已更改，并且操作系统使密钥无效。请重新导入您的密钥</string>
     <string name="fingerprint_authentication_failed">指纹认证失败</string>
+    <string name="action_snackbar_undo">撤销刚才动作</string>
+    <string name="token_hidden">隐藏了</string>
 </resources>

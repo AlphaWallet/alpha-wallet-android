@@ -484,7 +484,7 @@
     <string name="already_have_a_wallet">I already have a wallet:</string>
     <string name="watch_wallet">Watch Wallet</string>
     <string name="suggestion_address">Enter Ethereum Address</string>
-    <string name="ethereum_address_hint">Ethereum Address: 0x then 20 characters of 0–9 a-f A-F</string>
+    <string name="ethereum_address_hint">Ethereum Address: 0x then 40 characters of 0–9 a-f A-F</string>
     <string name="action_watch_account">Watch an account</string>
     <string name="receive_payment">Receive Payment</string>
     <string name="title_back_up_your_wallet">Back up your Wallet</string>

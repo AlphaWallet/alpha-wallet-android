@@ -364,28 +364,9 @@ public class TokensService
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastUpdateDiff;
-            long cutoffCheck = 40*1000;
-            switch (check.getInterfaceSpec())
-            {
-                case ETHEREUM:
-                case CURRENCY:
-                    cutoffCheck = 20*1000;
-                    break;
-                case ERC875:
-                    cutoffCheck = 30*1000;
-                    break;
-                case ERC875_LEGACY:
-                    cutoffCheck = 60*1000;
-                    break;
-                case ERC721:
-                case ERC721_LEGACY:
-                    continue; //no need to check these token types here
-                case ERC721_TICKET:
-                    cutoffCheck = 20*1000;
-                    break;
-                default:
-                    break;
-            }
+            long cutoffCheck = 30*1000; //maximum update time given by formula (30 seconds / weighting)
+            if (check.isERC721()) continue; //no need to check ERC721
+            if (!check.isEthereum() && !check.tokenInfo.isEnabled) continue; //don't check disabled tokens
 
             if (updateFactor > highestWeighting && (updateFactor > (float)cutoffCheck || check.refreshCheck))
             {

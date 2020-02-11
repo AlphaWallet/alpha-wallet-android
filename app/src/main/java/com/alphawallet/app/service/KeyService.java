@@ -65,7 +65,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     public  static final String FAILED_SIGNATURE = "00000000000000000000000000000000000000000000000000000000000000000";
 
     //This value determines the time interval between the user swiping away the backup warning notice and it re-appearing
-    public static final int TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000 * 60 * 60 * 24 * 30; //30 days //1000 * 60 * 3; //3 minutes for testing
+    public static final long TIME_BETWEEN_BACKUP_WARNING_MILLIS = 1000L * 60L * 60L * 24L * 30L; //30 days //1000 * 60 * 3; //3 minutes for testing
 
     public enum AuthenticationLevel
     {

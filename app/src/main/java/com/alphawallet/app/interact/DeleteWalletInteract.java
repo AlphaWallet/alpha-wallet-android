@@ -18,8 +18,8 @@ public class DeleteWalletInteract {
 
 	public Single<Wallet[]> delete(Wallet wallet)
 	{
-		return walletRepository.deleteWalletFromRealm(wallet.address)
-				.flatMapCompletable(addr -> walletRepository.deleteWallet(addr, ""))
+		return walletRepository.deleteWalletFromRealm(wallet)
+				.flatMapCompletable(deletedWallet -> walletRepository.deleteWallet(deletedWallet.address, ""))
 				.andThen(walletRepository.fetchWallets())
 				.observeOn(AndroidSchedulers.mainThread());
 	}

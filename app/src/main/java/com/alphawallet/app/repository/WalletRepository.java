@@ -90,9 +90,9 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public Single<String> deleteWalletFromRealm(String address)
+	public Single<Wallet> deleteWalletFromRealm(Wallet wallet)
 	{
-		return walletDataRealmSource.deleteWallet(address);
+		return walletDataRealmSource.deleteWallet(wallet);
 	}
 
 	@Override

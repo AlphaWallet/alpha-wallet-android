@@ -495,6 +495,7 @@
     <string name="reimport_wallet_title">是否重新导入钱包？</string>
     <string name="provide_authentication">提供身份验证以创建密钥</string>
     <string name="import_error">导入错误，请再次尝试重新导入。</string>
+    <string name="watch_exists">你为什么想看道现有的钱包 %1$s？</string>
     <string name="welcome_to_alphawallet">欢迎使用 AlphaWallet</string>
     <string name="lock_seed_phrase">锁定助记词</string>
     <string name="no_key">未找到密钥</string>

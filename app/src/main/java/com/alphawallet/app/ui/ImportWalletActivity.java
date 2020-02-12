@@ -502,7 +502,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
 
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(AWalletAlertDialog.WARNING);
-        dialog.setTitle(R.string.reimport_wallet_title);
+        dialog.setTitle(R.string.title_dialog_error);
         dialog.setMessage(getString(R.string.watch_exists, address));
         dialog.setButtonText(R.string.action_cancel);
         dialog.setButtonListener(v -> {

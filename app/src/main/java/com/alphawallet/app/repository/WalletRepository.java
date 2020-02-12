@@ -179,6 +179,11 @@ public class WalletRepository implements WalletRepositoryType
 	@Override
     public boolean keystoreExists(String address)
     {
-        return accountKeystoreService.hasAccount(address);
+		Wallet[] wallets = fetchWallets().blockingGet();
+		for (Wallet w : wallets)
+		{
+			if (w.sameAddress(address)) return true;
+		}
+		return false;
     }
 }

@@ -539,4 +539,5 @@
     <string name="fingerprint_authentication_failed">指纹认证失败</string>
     <string name="action_snackbar_undo">撤销刚才动作</string>
     <string name="token_hidden">隐藏了</string>
+    <string name="confirmations">Confirmations</string>
 </resources>

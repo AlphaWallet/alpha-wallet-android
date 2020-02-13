@@ -25,6 +25,7 @@ import com.alphawallet.app.viewmodel.TransactionDetailViewModel;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -33,6 +34,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.TRANSACTION;
+import static com.alphawallet.app.C.Key.WALLET;
 
 public class TransactionDetailActivity extends BaseActivity implements View.OnClickListener {
 
@@ -44,6 +46,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
     private TextView amount;
     private Token token;
     private String chainName;
+    private Wallet wallet;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -54,6 +57,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         setContentView(R.layout.activity_transaction_detail);
 
         transaction = getIntent().getParcelableExtra(TRANSACTION);
+        wallet = getIntent().getParcelableExtra(WALLET);
         if (transaction == null) {
             finish();
             return;
@@ -68,13 +72,14 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
             findViewById(R.id.pending_spinner).setVisibility(View.VISIBLE);
         }
 
-        BigDecimal gasFee = new BigDecimal(transaction.gasUsed).multiply(new BigDecimal(transaction.gasPrice));
+        setupVisibilities();
+
         amount = findViewById(R.id.amount);
         ((TextView) findViewById(R.id.from)).setText(transaction.from);
         ((TextView) findViewById(R.id.to)).setText(transaction.to);
-        ((TextView) findViewById(R.id.gas_fee)).setText(BalanceUtils.weiToEth(gasFee).toPlainString());
         ((TextView) findViewById(R.id.txn_hash)).setText(transaction.hash);
         ((TextView) findViewById(R.id.txn_time)).setText(getDate(transaction.timeStamp));
+
         ((TextView) findViewById(R.id.block_number)).setText(blockNumber);
         findViewById(R.id.more_detail).setOnClickListener(this);
 
@@ -86,7 +91,8 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
 
         viewModel = ViewModelProviders.of(this, transactionDetailViewModelFactory)
                 .get(TransactionDetailViewModel.class);
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.latestBlock().observe(this, this::onLatestBlock);
+        viewModel.prepare(transaction.chainId);
 
         chainName = viewModel.getNetworkName(transaction.chainId);
 
@@ -118,12 +124,51 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         }
 
         if (!viewModel.hasEtherscanDetail(transaction)) findViewById(R.id.more_detail).setVisibility(View.GONE);
+        setupWalletDetails();
     }
 
-    private void onDefaultWallet(Wallet wallet) {
+    private void onLatestBlock(BigInteger latestBlock)
+    {
+        try
+        {
+            BigInteger txBlock = new BigInteger(transaction.blockNumber);
+            if (!latestBlock.equals(BigInteger.ZERO) && !txBlock.equals(BigInteger.ZERO))
+            {
+                findViewById(R.id.confirmations).setVisibility(View.VISIBLE);
+                findViewById(R.id.title_confirmations).setVisibility(View.VISIBLE);
+                //how many confirmations?
+                BigInteger confirmations = latestBlock.subtract(txBlock);
+                ((TextView) findViewById(R.id.confirmations)).setText(confirmations.toString(10));
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void setupVisibilities()
+    {
+        BigDecimal gasFee = new BigDecimal(transaction.gasUsed).multiply(new BigDecimal(transaction.gasPrice));
+        //any gas fee?
+        BigDecimal gasFeeEth = BalanceUtils.weiToEth(gasFee);
+        if (gasFeeEth.equals(BigDecimal.ZERO))
+        {
+            findViewById(R.id.gas_fee).setVisibility(View.GONE);
+            findViewById(R.id.title_gas_fee).setVisibility(View.GONE);
+        }
+        else
+        {
+            ((TextView) findViewById(R.id.gas_fee)).setText(BalanceUtils.weiToEth(gasFee).toPlainString());
+        }
+
+        findViewById(R.id.confirmations).setVisibility(View.GONE);
+        findViewById(R.id.title_confirmations).setVisibility(View.GONE);
+    }
+
+    private void setupWalletDetails() {
         boolean isSent = transaction.from.toLowerCase().equals(wallet.address);
         String rawValue;
-        String symbol;
         String prefix = "";
 
         if (token == null && (transaction.input == null || transaction.input.equals("0x")))

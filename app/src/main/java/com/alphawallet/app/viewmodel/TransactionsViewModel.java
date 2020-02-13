@@ -382,7 +382,7 @@ public class TransactionsViewModel extends BaseViewModel
     }
 
     public void showDetails(Context context, Transaction transaction) {
-        transactionDetailRouter.open(context, transaction);
+        transactionDetailRouter.open(context, transaction, wallet.getValue());
     }
 
     public TokensService getTokensService()

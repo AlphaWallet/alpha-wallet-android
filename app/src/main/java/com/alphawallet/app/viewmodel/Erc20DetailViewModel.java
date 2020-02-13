@@ -241,7 +241,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     }
 
     public void showDetails(Context context, Transaction transaction) {
-        transactionDetailRouter.open(context, transaction);
+        transactionDetailRouter.open(context, transaction, wallet.getValue());
     }
 
     public AssetDefinitionService getAssetDefinitionService() {

@@ -212,11 +212,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
-    public void addToken(Token token) {
-        int insertPos = items.add(new TokenSortedItem(token, token.getNameWeight()));
-        notifyItemInserted(insertPos);
-    }
-
     private boolean canDisplayToken(Token token)
     {
         if (token == null) return false;

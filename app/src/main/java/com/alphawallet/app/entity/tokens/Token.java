@@ -796,6 +796,13 @@ public class Token implements Parcelable, Comparable<Token>
         return EthereumNetworkRepository.hasRealValue(tokenInfo.chainId);
     }
 
+    /**
+     * Determine how often we check balance of tokens.
+     *
+     * Note that if any transaction relating to a contract is received then we trigger a balance check
+     *
+     * @return
+     */
     protected float calculateBalanceUpdateWeight()
     {
         float updateWeight = 0;
@@ -806,11 +813,11 @@ public class Token implements Parcelable, Comparable<Token>
             {
                 if (isEthereum() || hasPositiveBalance())
                 {
-                    updateWeight = 1.0f;
+                    updateWeight = 1.0f; //30 seconds
                 }
                 else
                 {
-                    updateWeight = 0.5f;
+                    updateWeight = 0.5f; //1 minute
                 }
             }
             else
@@ -818,19 +825,15 @@ public class Token implements Parcelable, Comparable<Token>
                 //testnet: TODO: check time since last transaction - if greater than 1 month slow update further
                 if (isEthereum())
                 {
-                    updateWeight = 0.4f;
+                    updateWeight = 0.5f; //1 minute
                 }
                 else if (hasPositiveBalance())
                 {
-                    updateWeight = 0.25f;
-                }
-                else if (tokenInfo.name != null)
-                {
-                    updateWeight = 0.05f;
+                    updateWeight = 0.3f; //100 seconds
                 }
                 else
                 {
-                    updateWeight = 0.01f;
+                    updateWeight = 0.1f; //5 minutes
                 }
             }
         }
@@ -844,6 +847,7 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean checkBalanceChange(BigDecimal balance)
     {
+        balanceUpdateWeight = calculateBalanceUpdateWeight();
         if (balance != null && this.balance != null)
         {
             return !this.balance.equals(balance);
@@ -1156,5 +1160,10 @@ public class Token implements Parcelable, Comparable<Token>
     {
         String id = getAddress() + "-" + tokenInfo.chainId;
         return id.hashCode();
+    }
+
+    public void setHighestPriorityCheck()
+    {
+        balanceUpdateWeight = 10.0f;
     }
 }

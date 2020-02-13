@@ -296,6 +296,7 @@ public class TransactionsViewModel extends BaseViewModel
                 newTxs.add(tx);
                 txMap.put(tx.hash, tx);
                 if (oldTx != null && oldTx.blockNumber.equals("0")) pendingUpdate = true;
+                checkContractEvents(tx);
             }
         }
 
@@ -327,6 +328,21 @@ public class TransactionsViewModel extends BaseViewModel
 
         //Need to log that we scanned transactions for this token, even if there weren't any transactions.
         addTokenInteract.updateBlockRead(token, defaultWallet().getValue());
+    }
+
+    private void checkContractEvents(Transaction tx)
+    {
+        //Check this received transaction to see if any known contracts are affected, if so promote a balance check for that token
+        TransactionContract tc = tx.getOperation();
+        if (tc != null)
+        {
+            Token token = tokensService.getToken(tx.chainId, tc.address);
+            if (token != null)
+            {
+                //this token needs to have a balance check update
+                token.setHighestPriorityCheck();
+            }
+        }
     }
 
     //run through the newly received tokens from a currency and see if there's any unknown tokens

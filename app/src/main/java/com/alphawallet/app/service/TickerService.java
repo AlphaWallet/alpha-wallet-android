@@ -274,29 +274,27 @@ public class TickerService implements TickerServiceInterface
 
             for (int i = 0; i < tokens.length(); i++)
             {
-                JSONObject t = (JSONObject)tokens.get(i);
-                String balanceStr = t.getString("amount");
+                JSONObject t          = (JSONObject) tokens.get(i);
+                String     balanceStr = t.getString("amount");
                 if (balanceStr.length() == 0 || balanceStr.equals("0")) continue;
-                String    decimalsStr = t.getString("decimals");
-                int       decimals    = (decimalsStr.length() > 0) ? Integer.parseInt(decimalsStr) : 0;
-                Token existingToken = tokensService.getToken(network.chainId, t.getString("address"));
+                String decimalsStr   = t.getString("decimals");
+                int    decimals      = (decimalsStr.length() > 0) ? Integer.parseInt(decimalsStr) : 0;
+                Token  existingToken = tokensService.getToken(network.chainId, t.getString("address"));
                 if (decimals == 0 || (existingToken != null && !existingToken.isERC20())) continue;
-                TokenInfo info        = new TokenInfo(t.getString("address"), t.getString("name"), t.getString("symbol"), decimals, true, network.chainId);
+                TokenInfo info = new TokenInfo(t.getString("address"), t.getString("name"), t.getString("symbol"), decimals, true, network.chainId);
                 //now create token with balance info, only for ERC20 for now
-                if (decimalsStr.length() > 0)
+                BigDecimal balance  = new BigDecimal(balanceStr);
+                Token      newToken = tf.createToken(info, balance, null, System.currentTimeMillis(), ContractType.ERC20, network.getShortName(), System.currentTimeMillis());
+                newToken.setTokenWallet(currentAddress);
+                if (existingToken != null) //TODO: after token module refactor this won't be necessary.
                 {
-                    BigDecimal balance = new BigDecimal(balanceStr);
-                    Token newToken = tf.createToken(info, balance, null, System.currentTimeMillis(), ContractType.ERC20, network.getShortName(), System.currentTimeMillis());
-                    newToken.setTokenWallet(currentAddress);
-                    if (existingToken != null) //TODO: after token module refactor this won't be necessary.
-                    {
-                        newToken.transferPreviousData(existingToken);
-                        newToken.tokenInfo.isEnabled = existingToken.tokenInfo.isEnabled;
-                    }
-                    attachTokenTicker(newToken, erc20Tickers.get(newToken.tokenInfo.address.toLowerCase()));
-                    newToken.refreshCheck = false;
-                    tokenList.add(newToken);
+                    newToken.transferPreviousData(existingToken);
+                    newToken.tokenInfo.isEnabled = existingToken.tokenInfo.isEnabled;
                 }
+                attachTokenTicker(newToken, erc20Tickers.get(newToken.tokenInfo.address.toLowerCase()));
+                newToken.refreshCheck = false;
+                newToken.balanceUpdateWeight = 0.5f; //reduce update priority of tokens sourced from market feed; only update if feed lost for more than 1 minute
+                tokenList.add(newToken);
             }
         }
         catch (JSONException e)

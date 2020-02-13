@@ -131,6 +131,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         importWalletViewModel.error().observe(this, this::onError);
         importWalletViewModel.wallet().observe(this, this::onWallet);
         importWalletViewModel.badSeed().observe(this, this::onBadSeed);
+        importWalletViewModel.watchExists().observe(this, this::onWatchExists);
 
         TabUtils.changeTabsFont(this, tabLayout);
     }
@@ -490,6 +491,21 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         dialog.setButtonText(R.string.dialog_ok);
         dialog.setSecondaryButtonText(R.string.action_cancel);
         dialog.setSecondaryButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    private void onWatchExists(String address)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.WARNING);
+        dialog.setTitle(R.string.title_dialog_error);
+        dialog.setMessage(getString(R.string.watch_exists, address));
+        dialog.setButtonText(R.string.action_cancel);
+        dialog.setButtonListener(v -> {
             dialog.dismiss();
         });
         dialog.show();

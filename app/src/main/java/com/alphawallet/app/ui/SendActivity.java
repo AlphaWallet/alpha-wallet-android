@@ -444,6 +444,10 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             dialog.dismiss();
             validateEIP681Request(currentResult, false);
         });
+        dialog.setSecondaryButtonText(R.string.action_cancel);
+        dialog.setSecondaryButtonListener(v -> {
+            dialog.dismiss();
+        });
         dialog.show();
     }
 

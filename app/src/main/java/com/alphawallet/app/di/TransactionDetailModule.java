@@ -3,6 +3,7 @@ package com.alphawallet.app.di;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.service.TokensService;
@@ -17,11 +18,11 @@ public class TransactionDetailModule {
     @Provides
     TransactionDetailViewModelFactory provideTransactionDetailViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            GenericWalletInteract genericWalletInteract,
             ExternalBrowserRouter externalBrowserRouter,
+            TokenRepositoryType tokenRepository,
             TokensService tokensService) {
         return new TransactionDetailViewModelFactory(
-                findDefaultNetworkInteract, genericWalletInteract, externalBrowserRouter, tokensService);
+                findDefaultNetworkInteract, externalBrowserRouter, tokenRepository, tokensService);
     }
 
     @Provides

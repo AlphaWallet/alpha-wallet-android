@@ -15,32 +15,45 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
 import com.alphawallet.app.service.TokensService;
+
+import java.math.BigInteger;
 
 public class TransactionDetailViewModel extends BaseViewModel {
 
     private final ExternalBrowserRouter externalBrowserRouter;
     private final TokensService tokenService;
     private final FindDefaultNetworkInteract networkInteract;
+    private final TokenRepositoryType tokenRepository;
 
-    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
+    private final MutableLiveData<BigInteger> lastestBlock = new MutableLiveData<>();
+    public LiveData<BigInteger> latestBlock() {
+        return lastestBlock;
+    }
 
     TransactionDetailViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            GenericWalletInteract genericWalletInteract,
             ExternalBrowserRouter externalBrowserRouter,
+            TokenRepositoryType tokenRepository,
             TokensService service) {
         this.networkInteract = findDefaultNetworkInteract;
         this.externalBrowserRouter = externalBrowserRouter;
         this.tokenService = service;
+        this.tokenRepository = tokenRepository;
+    }
 
-        disposable = genericWalletInteract
-                .find()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(defaultWallet::postValue,  t -> {});
+    public void prepare(int chainId)
+    {
+        disposable = tokenRepository.fetchLatestBlockNumber(chainId)
+                .subscribeOn(Schedulers.io())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(lastestBlock::postValue, t -> { this.lastestBlock.postValue(BigInteger.ZERO); });
     }
 
     public void showMoreDetails(Context context, Transaction transaction) {
@@ -92,9 +105,5 @@ public class TransactionDetailViewModel extends BaseViewModel {
     public String getNetworkSymbol(int chainId)
     {
         return networkInteract.getNetworkInfo(chainId).symbol;
-    }
-
-    public LiveData<Wallet> defaultWallet() {
-        return defaultWallet;
     }
 }

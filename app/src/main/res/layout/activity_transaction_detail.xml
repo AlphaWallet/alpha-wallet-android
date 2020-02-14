@@ -141,6 +141,7 @@
                 tools:text="" />
 
             <TextView
+                android:id="@+id/title_gas_fee"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
@@ -157,6 +158,25 @@
                 android:fontFamily="@font/font_regular"
                 android:textSize="14sp"
                 tools:text="0.000044" />
+
+            <TextView
+                android:id="@+id/title_confirmations"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_semibold"
+                android:textAllCaps="true"
+                android:textSize="12sp"
+                android:text="@string/confirmations" />
+
+            <TextView
+                android:id="@+id/confirmations"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/normal_margin"
+                android:layout_marginTop="@dimen/small_margin"
+                android:fontFamily="@font/font_regular"
+                android:textSize="14sp"
+                tools:text="0" />
 
             <TextView
                 android:layout_width="wrap_content"

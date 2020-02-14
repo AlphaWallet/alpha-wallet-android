@@ -373,7 +373,7 @@
     <string name="currency_00">0.00%s</string>
     <string name="telegram">电报</string>
     <string name="transfer_request">转账请求</string>
-    <string name="token_transfer_request">通证转账请求</string>
+    <string name="token_transfer_request">通证转账请求: %1$s</string>
     <string name="generate_payment_request">生成付款请求</string>
     <string name="enter_the_requested_amount">输入请求的金额：</string>
     <string name="feemaster_service_not_available">Feemaster 服务当前不可用，请稍后重试。</string>
@@ -540,4 +540,6 @@
     <string name="action_snackbar_undo">撤销刚才动作</string>
     <string name="token_hidden">隐藏了</string>
     <string name="confirmations">Confirmations</string>
+    <string name="change_chain_message">QR code requests a different chain. Proceed?</string>
+    <string name="change_chain_request">Change Chain Request</string>
 </resources>

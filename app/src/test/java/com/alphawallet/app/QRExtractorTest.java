@@ -1,5 +1,6 @@
 package com.alphawallet.app;
 
+import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.util.QRURLParser;
 import com.alphawallet.app.entity.QrUrlResult;
 
@@ -93,6 +94,8 @@ public class QRExtractorTest {
         extractedString = parser.extractAddressFromQrString("ethereum:0x0000000000000000000000000000000000000XyZ?value=0invalid");
         assertTrue("0x0000000000000000000000000000000000000xyz".equals(extractedString));
 
+        //ethereum:0xB4Eda076896D62419409e6D89f734A336608D18D?token=ENJ&contractAddress=0xF629cBd94d3791C9250152BD8dfBDF380E2a3B9c
+
         // Negative: null when address too short
         extractedString = parser.extractAddressFromQrString("ethereum:0x0000000000000000abc?value=0invalid");
         assertTrue(extractedString == null);
@@ -153,6 +156,13 @@ public class QRExtractorTest {
         assertTrue("ethereum".equals(result.getProtocol()));
         assertTrue("0x89205a3a3b2a69de6dbf7f01ed13b2108b2c43e7".equals(result.getAddress()));
         assertTrue(result.getFunction().equals("transfer(address,uint256)"));
+
+        //ENJIN wallet style non standard EIP681
+        result = parser.parse("ethereum:0xB4Eda076896D62419409e6D89f734A336608D18D?token=ENJ&contractAddress=0xF629cBd94d3791C9250152BD8dfBDF380E2a3B9c");
+        //should be open ended token transfer
+        assertTrue(result.type == EIP681Type.TRANSFER);
+        assertTrue("0xF629cBd94d3791C9250152BD8dfBDF380E2a3B9c".equalsIgnoreCase(result.getAddress()));
+        assertTrue("0xB4Eda076896D62419409e6D89f734A336608D18D".equalsIgnoreCase(result.functionToAddress));
 
         result = parser.parse("ethereum:0xaaf3A96b8f5E663Fc47bCc19f14e10A3FD9c414B@4/pay?uint256=100000&value=1000&gasPrice=700000&gasLimit=27500");
         assertTrue("ethereum".equals(result.getProtocol()));

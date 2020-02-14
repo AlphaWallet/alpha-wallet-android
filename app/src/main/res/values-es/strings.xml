@@ -384,7 +384,7 @@
     <string name="currency_00">0.00 %s</string>
     <string name="telegram">Telegram</string>
     <string name="transfer_request">Transfer request</string>
-    <string name="token_transfer_request">Token transfer request</string>
+    <string name="token_transfer_request">Token transfer request: %1$s</string>
     <string name="generate_payment_request">Generate Payment Request</string>
     <string name="enter_the_requested_amount">Enter the requested amount:</string>
     <string name="feemaster_service_not_available">Feemaster service is currently not available, please try again later.</string>
@@ -551,4 +551,6 @@
     <string name="action_snackbar_undo">UNDO</string>
     <string name="token_hidden">hidden</string>
     <string name="confirmations">Confirmations</string>
+    <string name="change_chain_message">QR code requests a different chain. Proceed?</string>
+    <string name="change_chain_request">Change Chain Request</string>
 </resources>

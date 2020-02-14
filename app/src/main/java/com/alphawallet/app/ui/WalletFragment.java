@@ -490,7 +490,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                                 .make(viewHolder.itemView, token.tokenInfo.name + " " + getContext().getString(R.string.token_hidden), Snackbar.LENGTH_LONG)
                                 .setAction(getString(R.string.action_snackbar_undo), view -> {
                                     viewModel.setTokenEnabled(token, true);
-                                    adapter.addToken(token);
+                                    adapter.updateToken(token, true);
                                 });
 
                         snackbar.show();

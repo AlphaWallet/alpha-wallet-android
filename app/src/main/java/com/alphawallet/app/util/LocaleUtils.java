@@ -3,6 +3,9 @@ package com.alphawallet.app.util;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Build;
+import android.os.LocaleList;
+import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
 
@@ -36,5 +39,33 @@ public class LocaleUtils {
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         return calendar.getTime();
+    }
+
+    // Store device locale at app startup to read the device's setting
+    public static void setDeviceLocale(Context ctx)
+    {
+        PreferenceManager
+                .getDefaultSharedPreferences(ctx)
+                .edit()
+                .putString("device_locale", getCurrentLanguage())
+                .apply();
+    }
+
+    public static Locale getDeviceLocale(Context ctx)
+    {
+        String deviceLocaleStr = PreferenceManager.getDefaultSharedPreferences(ctx).getString("device_locale", "en");
+        return new Locale(deviceLocaleStr);
+    }
+
+    private static String getCurrentLanguage()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        {
+            return LocaleList.getDefault().get(0).getLanguage();
+        }
+        else
+        {
+            return Locale.getDefault().getLanguage();
+        }
     }
 }

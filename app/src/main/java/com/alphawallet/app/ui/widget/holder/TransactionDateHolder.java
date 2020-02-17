@@ -3,16 +3,13 @@ package com.alphawallet.app.ui.widget.holder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.format.DateFormat;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.util.LocaleUtils;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 public class TransactionDateHolder extends BinderViewHolder<Date> {
 
@@ -35,8 +32,7 @@ public class TransactionDateHolder extends BinderViewHolder<Date> {
     }
 
     private String getDate(Date date) {
-        Locale               locale     = Locale.getDefault();
-        java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM, locale);
+        java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(getContext()));
         return dateFormat.format(date);
     }
 }

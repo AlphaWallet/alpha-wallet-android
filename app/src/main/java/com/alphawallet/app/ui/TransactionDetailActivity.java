@@ -5,31 +5,26 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
-import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
-
-import com.alphawallet.app.R;
-
 import com.alphawallet.app.viewmodel.TransactionDetailViewModel;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -197,8 +192,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
 
     private String getDate(long timeStampInSec) {
         Date                 date       = LocaleUtils.getLocalDateFromTimestamp(timeStampInSec);
-        Locale               locale     = Locale.getDefault();
-        java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM, locale);
+        java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(this));
         return dateFormat.format(date);
     }
 

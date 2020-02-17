@@ -383,10 +383,20 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     }
 
     @Override
-    public void addedToken()
+    public void addedToken(int[] chainIds, String[] addrs)
     {
-        //token was added, refresh token list
-        refreshList();
+        //token was added
+        if (chainIds.length != addrs.length)
+        {
+            System.out.println("Receiver data mismatch");
+            return;
+        }
+
+        for (int i = 0; i < chainIds.length; i++)
+        {
+            Token t = viewModel.getTokenFromService(chainIds[i], addrs[i]);
+            if (t != null) adapter.updateToken(t, false);
+        }
     }
 
     @Override

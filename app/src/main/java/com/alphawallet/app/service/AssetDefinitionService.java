@@ -80,6 +80,7 @@ import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import static android.os.FileObserver.ALL_EVENTS;
+import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
 
@@ -438,6 +439,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             // no action
         }
 
@@ -447,7 +449,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private void loadScriptFromServer(String correctedAddress)
     {
         //first check the last time we tried this session
-        if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() - assetChecked.get(correctedAddress)) > 1000*60*60)
+        if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() > (assetChecked.get(correctedAddress) + 1000L*60L*60L)))
         {
             fetchXMLFromServer(correctedAddress)
                     .flatMap(this::updateSignature)
@@ -482,9 +484,24 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (newFile != null && !newFile.getName().equals("cache") && newFile.canRead())
         {
             addContractAddresses(newFile);
-            context.sendBroadcast(new Intent(C.ADDED_TOKEN)); //inform walletview there is a new token
+            TokenDefinition td = getTokenDefinition(newFile);
+            List<ContractResult> tokenContracts = getHoldingContracts(td);
+            if (tokenContracts != null && tokenContracts.size() > 0)
+            {
+                String[] addrs = new String[tokenContracts.size()];
+                int[] chainIds = new int[tokenContracts.size()];
+                int index = 0;
+                for (ContractResult cr : tokenContracts)
+                {
+                    addrs[index] = cr.name;
+                    chainIds[index] = cr.chainId;
+                }
 
-            //TODO: check interface spec
+                Intent intent = new Intent(ADDED_TOKEN);
+                intent.putExtra(C.EXTRA_TOKENID_LIST, addrs);
+                intent.putExtra(C.EXTRA_CHAIN_ID, chainIds);
+                context.sendBroadcast(intent);
+            }
         }
     }
 
@@ -1417,6 +1434,22 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             loadLocalContracts();
         }
+    }
+
+    public List<ContractResult> getHoldingContracts(TokenDefinition td)
+    {
+        List<ContractResult> holdingContracts = new ArrayList<>();
+        ContractInfo holdingContractInfo = td.contracts.get(td.holdingToken);
+        if (holdingContractInfo == null || holdingContractInfo.addresses.size() == 0) return null;
+        for (int chainId : holdingContractInfo.addresses.keySet())
+        {
+            for (String address : holdingContractInfo.addresses.get(chainId))
+            {
+                holdingContracts.add(new ContractResult(address, chainId));
+            }
+        }
+
+        return holdingContracts;
     }
 
     public ContractResult getHoldingContract(String importFileName)

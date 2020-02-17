@@ -513,6 +513,11 @@ public class WalletViewModel extends BaseViewModel
         return (serviceToken != null) ? serviceToken : token;
     }
 
+    public Token getTokenFromService(int chainId, String addr)
+    {
+        return tokensService.getToken(chainId, addr);
+    }
+
     private void tkError(Throwable throwable)
     {
         if (!BuildConfig.DEBUG) Crashlytics.logException(throwable);

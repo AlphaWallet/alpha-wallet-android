@@ -11,11 +11,10 @@ import com.alphawallet.app.R;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class TransactionDateHolder extends BinderViewHolder<Date> {
-
-    private static final String DATE_TEMPLATE = "MMM, dd yyyy";
 
     public static final int VIEW_TYPE = 1004;
     private final TextView title;
@@ -31,10 +30,13 @@ public class TransactionDateHolder extends BinderViewHolder<Date> {
         if (data == null) {
             title.setText(null);
         } else {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-            calendar.setTime(data);
-            title.setText(DateFormat.format(DATE_TEMPLATE, calendar));
+            title.setText(getDate(data));
         }
+    }
+
+    private String getDate(Date date) {
+        Locale               locale     = Locale.getDefault();
+        java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM, locale);
+        return dateFormat.format(date);
     }
 }

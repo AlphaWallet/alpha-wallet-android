@@ -17,6 +17,7 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
 
 import com.alphawallet.app.R;
@@ -27,6 +28,7 @@ import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -194,9 +196,10 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
     }
 
     private String getDate(long timeStampInSec) {
-        Calendar cal = Calendar.getInstance(Locale.ENGLISH);
-        cal.setTimeInMillis(timeStampInSec * 1000);
-        return DateFormat.getLongDateFormat(this).format(cal.getTime());
+        Date                 date       = LocaleUtils.getLocalDateFromTimestamp(timeStampInSec);
+        Locale               locale     = Locale.getDefault();
+        java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM, locale);
+        return dateFormat.format(date);
     }
 
     @Override

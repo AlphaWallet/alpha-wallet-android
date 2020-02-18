@@ -102,7 +102,10 @@ public class SellDetailViewModel extends BaseViewModel {
 
     private void onTicker(Ticker ticker)
     {
-        ethereumPrice.postValue(Double.parseDouble(ticker.price_usd));
+        if (ticker != null && ticker.price_usd != null)
+        {
+            ethereumPrice.postValue(Double.parseDouble(ticker.price_usd));
+        }
     }
 
     public void generateSalesOrders(String contractAddr, BigInteger price, List<BigInteger> tokenSendIndexList, BigInteger firstTicketId)

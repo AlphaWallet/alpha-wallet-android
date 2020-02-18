@@ -48,13 +48,15 @@ public class LocaleUtils {
                 .getDefaultSharedPreferences(ctx)
                 .edit()
                 .putString("device_locale", getCurrentLanguage())
+                .putString("device_country", getCurrentCountry())
                 .apply();
     }
 
     public static Locale getDeviceLocale(Context ctx)
     {
         String deviceLocaleStr = PreferenceManager.getDefaultSharedPreferences(ctx).getString("device_locale", "en");
-        return new Locale(deviceLocaleStr);
+        String deviceCountryStr = PreferenceManager.getDefaultSharedPreferences(ctx).getString("device_country", "US");
+        return new Locale(deviceLocaleStr, deviceCountryStr);
     }
 
     private static String getCurrentLanguage()
@@ -66,6 +68,18 @@ public class LocaleUtils {
         else
         {
             return Locale.getDefault().getLanguage();
+        }
+    }
+
+    private static String getCurrentCountry()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        {
+            return LocaleList.getDefault().get(0).getCountry();
+        }
+        else
+        {
+            return Locale.getDefault().getCountry();
         }
     }
 }

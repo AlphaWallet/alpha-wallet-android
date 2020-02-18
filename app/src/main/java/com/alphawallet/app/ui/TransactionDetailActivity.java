@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,7 +25,10 @@ import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.DateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import javax.inject.Inject;
 
@@ -75,7 +79,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         ((TextView) findViewById(R.id.from)).setText(transaction.from);
         ((TextView) findViewById(R.id.to)).setText(transaction.to);
         ((TextView) findViewById(R.id.txn_hash)).setText(transaction.hash);
-        ((TextView) findViewById(R.id.txn_time)).setText(getDate(transaction.timeStamp));
+        ((TextView) findViewById(R.id.txn_time)).setText(getDateAndTime(transaction.timeStamp));
 
         ((TextView) findViewById(R.id.block_number)).setText(blockNumber);
         findViewById(R.id.more_detail).setOnClickListener(this);
@@ -190,10 +194,14 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         amount.setText(rawValue);
     }
 
-    private String getDate(long timeStampInSec) {
-        Date                 date       = LocaleUtils.getLocalDateFromTimestamp(timeStampInSec);
-        java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(this));
-        return dateFormat.format(date);
+    private String getDateAndTime(long timeStampInSec)
+    {
+        Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
+        calendar.setTimeInMillis(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
+        Date date = calendar.getTime();
+        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(this));
+        DateFormat dateFormat = java.text.DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(this));
+        return dateFormat.format(date) + " " + timeFormat.format(date);
     }
 
     @Override

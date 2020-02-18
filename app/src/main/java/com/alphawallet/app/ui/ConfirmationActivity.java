@@ -440,7 +440,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         dialog.setButtonListener(v -> {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("transaction hash",
-                    EthereumNetworkBase.getEtherscanURLbyNetwork(token.tokenInfo.chainId) + "tx/" + txData.txHash);
+                    EthereumNetworkBase.getEtherscanURLbyNetwork(chainId) + "tx/" + txData.txHash);
             clipboard.setPrimaryClip(clip);
             dialog.dismiss();
         });

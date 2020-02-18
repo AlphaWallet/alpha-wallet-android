@@ -553,4 +553,5 @@
     <string name="confirmations">Confirmations</string>
     <string name="change_chain_message">QR code requests a different chain. Proceed?</string>
     <string name="change_chain_request">Change Chain Request</string>
+    <string name="error_zero_balance">Zero Balance Transaction</string>
 </resources>

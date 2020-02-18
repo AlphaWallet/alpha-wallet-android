@@ -111,7 +111,7 @@ public class TokenscriptViewHolder extends BinderViewHolder<TicketRange> impleme
                 Intent intent = new Intent(getContext(), TokenFunctionActivity.class);
                 intent.putExtra(TICKET, token);
                 intent.putExtra(C.EXTRA_TOKEN_ID, token.bigIntListToString(data.tokenIds, false));
-                intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 getContext().startActivity(intent);
             });
         }

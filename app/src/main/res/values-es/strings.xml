@@ -551,4 +551,5 @@
     <string name="action_snackbar_undo">UNDO</string>
     <string name="token_hidden">hidden</string>
     <string name="confirmations">Confirmations</string>
+    <string name="error_zero_balance">Zero Balance Transaction</string>
 </resources>

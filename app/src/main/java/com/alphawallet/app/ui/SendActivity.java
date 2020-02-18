@@ -207,6 +207,10 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         KeyboardUtils.hideKeyboard(getCurrentFocus());
         boolean isValid = amountInput.checkValidAmount();
 
+        if (isBalanceZero(currentAmount)) {
+            amountInput.setError(R.string.error_zero_balance);
+            isValid = false;
+        }
         if (!isBalanceEnough(currentAmount)) {
             amountInput.setError(R.string.error_insufficient_funds);
             isValid = false;
@@ -451,13 +455,31 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         if (amountInput != null) amountInput.onClear();
     }
 
-    private boolean isBalanceEnough(String eth) {
-        try {
+
+    private boolean isBalanceZero(String balance)
+    {
+        try
+        {
+            BigDecimal amount = new BigDecimal(balance);
+            return amount.equals(BigDecimal.ZERO);
+        }
+        catch (Exception e)
+        {
+            return true;
+        }
+    }
+
+    private boolean isBalanceEnough(String eth)
+    {
+        try
+        {
             //Needs to take into account decimal of token
             int decimals = (token != null && token.tokenInfo != null) ? token.tokenInfo.decimals : 18;
             BigDecimal amount = new BigDecimal(BalanceUtils.baseToSubunit(eth, decimals));
             return (token.balance.subtract(amount).compareTo(BigDecimal.ZERO) >= 0);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             return false;
         }
     }

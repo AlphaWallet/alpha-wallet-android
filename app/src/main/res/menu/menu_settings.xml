@@ -5,7 +5,7 @@
     >
     <item
         android:id="@+id/action_settings"
-        android:icon="@drawable/ic_settings_white_24dp"
+        android:icon="@drawable/ic_settings_dark_24dp"
         android:orderInCategory="20"
         android:title="@string/action_settings"
         app:showAsAction="always"

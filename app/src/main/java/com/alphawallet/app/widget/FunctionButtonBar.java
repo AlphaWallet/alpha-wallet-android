@@ -41,7 +41,6 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
     private StandardFunctionInterface callStandardFunctions;
     private LinearLayout currentHolder = null;
     private int buttonCount;
-    private boolean buttonSetupMode = false;
 
     public FunctionButtonBar(Context ctx)
     {

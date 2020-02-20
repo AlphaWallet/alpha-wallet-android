@@ -39,6 +39,7 @@ public interface EthereumNetworkRepositoryType {
     List<Integer> getFilterNetworkList();
     void setFilterNetworkList(int[] networkList);
 
+	void refreshTickers();
 	boolean checkTickers();
 
 	List<ContractResult> getAllKnownContracts(List<Integer> networkFilters);

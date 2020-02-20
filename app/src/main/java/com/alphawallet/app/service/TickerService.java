@@ -89,7 +89,7 @@ public class TickerService implements TickerServiceInterface
         updateTickers();
     }
 
-    private void updateTickers()
+    public void updateTickers()
     {
         if (tickerUpdateTimer == null || tickerUpdateTimer.isDisposed())
         {

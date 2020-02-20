@@ -8,6 +8,8 @@ import io.reactivex.Single;
 
 public interface TickerServiceInterface
 {
+    void updateTickers();
+
     Single<Double> convertPair(String currency1, String currency2);
     Single<Token[]> getTokensOnNetwork(NetworkInfo info, String address, TokensService tokensService);
     Single<Token> attachTokenTicker(Token token);

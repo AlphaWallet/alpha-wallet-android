@@ -427,6 +427,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return !updatedTickers && tickerService.hasTickers();
     }
 
+    @Override
+    public void refreshTickers()
+    {
+        tickerService.updateTickers();
+    }
+
     public static String defaultDapp()
     {
         return null;

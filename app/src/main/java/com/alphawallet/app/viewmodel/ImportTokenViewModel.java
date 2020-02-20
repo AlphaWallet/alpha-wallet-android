@@ -383,6 +383,7 @@ public class ImportTokenViewModel extends BaseViewModel
                     }
                     determineInterface();
                 }
+                getEthereumTicker(importOrder.chainId);
                 break;
         }
     }

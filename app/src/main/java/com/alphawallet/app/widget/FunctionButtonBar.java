@@ -41,6 +41,7 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
     private StandardFunctionInterface callStandardFunctions;
     private LinearLayout currentHolder = null;
     private int buttonCount;
+    private boolean buttonSetupMode = false;
 
     public FunctionButtonBar(Context ctx)
     {
@@ -79,10 +80,10 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
         adapter = adp;
         functions = assetSvs.getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         removeAllViews();
+        int intrinsicButtonCount = getTokenDefaultButtonCount(token);
 
         //add a new view in
         addNewButtonLine();
-        int intrinsicButtonCount = getStaticButtonCount(token);
         int functionButtonCount = getFunctionButtonCount();
 
         if (functions != null && functions.size() > 0)
@@ -95,58 +96,59 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
             }
         }
 
+        addButtonsForToken(token, true);
+
+        findViewById(R.id.layoutButtons).setVisibility(View.GONE);
+    }
+
+    /**
+     * Gets the count of buttons associated with this token by default
+     * eg ERC721: Transfer. ERC875: Transfer, Sell, Redeem
+     *
+     * @param token
+     * @return
+     */
+    private int getTokenDefaultButtonCount(Token token)
+    {
+        buttonCount = 0;
+        addButtonsForToken(token, false);
+        int intrinsicButtonCount = buttonCount;
+        buttonCount = 0;
+        return intrinsicButtonCount;
+    }
+
+    private void addButtonsForToken(Token token, boolean displayButton)
+    {
         switch (token.getInterfaceSpec())
         {
             case ERC20:
             case ETHEREUM:
-                addButton(R.string.action_send);
-                addButton(R.string.action_receive);
+                addButton(R.string.action_send, displayButton);
+                addButton(R.string.action_receive, displayButton);
                 break;
             default:
                 break;
             case ERC721:
             case ERC721_LEGACY:
-                addButton(R.string.action_transfer);
+                addButton(R.string.action_transfer, displayButton);
                 break;
             case ERC721_TICKET:
-                addButton(R.string.action_use);
-                addButton(R.string.action_transfer);
+                addButton(R.string.action_use, displayButton);
+                addButton(R.string.action_transfer, displayButton);
                 break;
             case ERC875:
             case ERC875_LEGACY:
-                addButton(R.string.action_use);
-                addButton(R.string.action_transfer);
-                addButton(R.string.action_sell);
+                addButton(R.string.action_use, displayButton);
+                addButton(R.string.action_transfer, displayButton);
+                addButton(R.string.action_sell, displayButton);
                 break;
         }
-
-        findViewById(R.id.layoutButtons).setVisibility(View.GONE);
     }
 
     private int getFunctionButtonCount()
     {
         if (functions != null && functions.size() > 0) return functions.size();
         else return 0;
-    }
-
-    private int getStaticButtonCount(Token token)
-    {
-        switch (token.getInterfaceSpec())
-        {
-            case ERC20:
-            case ETHEREUM:
-                return 2;
-            case ERC721:
-            case ERC721_LEGACY:
-                return 1;
-            case ERC721_TICKET:
-                return 2;
-            case ERC875:
-            case ERC875_LEGACY:
-                return 3;
-            default:
-                return 0;
-        }
     }
 
     public void revealButtons()
@@ -172,10 +174,14 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
             }
             else
             {
+                List<BigInteger> selected = adapter.getSelectedTokenIds(selection);
+
                 switch (v.getId())
                 {
                     case R.string.action_sell:
-                        callStandardFunctions.sellTicketRouter(selection);
+                        //single token or grouping
+                        if (selected.size() == 1) callStandardFunctions.sellTicketRouter(selected);
+                        else flashButton(v);
                         break;
                     case R.string.action_send:
                         callStandardFunctions.showSend();
@@ -184,10 +190,14 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
                         callStandardFunctions.showReceive();
                         break;
                     case R.string.action_transfer:
-                        callStandardFunctions.showTransferToken(selection);
+                        //single token or grouping
+                        if (selected.size() == 1) callStandardFunctions.showTransferToken(selected);
+                        else flashButton(v);
                         break;
                     case R.string.action_use:
-                        callStandardFunctions.selectRedeemTokens(selection);
+                        //single token or grouping
+                        if (selected.size() == 1) callStandardFunctions.selectRedeemTokens(selected);
+                        else flashButton(v);
                         break;
                     default:
                         callStandardFunctions.handleClick(v.getId());
@@ -313,6 +323,12 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
         buttonCount = 0;
     }
 
+    private void addButton(int resourceId, boolean displayButton)
+    {
+        if (!displayButton) buttonCount++;
+        else addButton(resourceId);
+    }
+
     private void addButton(int resourceId)
     {
         addButton(context.getString(resourceId)).setId(resourceId);
@@ -360,4 +376,17 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
             functions.put(func, dummyAction);
         }
     }
+
+    /**
+     * Indicate token input error
+     *
+     * @param v
+     */
+    private void flashButton(final View v)
+    {
+        v.setBackgroundResource(R.drawable.button_round_error);
+        handler.postDelayed(() -> {
+            v.setBackgroundResource(R.drawable.selector_round_button);
+        }, 500);
+    };
 }

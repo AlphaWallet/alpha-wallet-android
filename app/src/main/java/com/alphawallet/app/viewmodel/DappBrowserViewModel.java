@@ -9,7 +9,10 @@ import android.os.TransactionTooLargeException;
 import android.preference.PreferenceManager;
 
 import com.alphawallet.app.entity.Operation;
+import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.service.TickerService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.alphawallet.app.C;
@@ -18,7 +21,6 @@ import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
@@ -63,7 +65,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final GasService gasService;
     private final KeyService keyService;
 
-    private double ethToUsd = 0;
     private ArrayList<String> bookmarks;
 
     DappBrowserViewModel(
@@ -101,22 +102,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public LiveData<Token> token() {
         return token;
-    }
-
-    public MutableLiveData<GasSettings> gasSettings() {
-        return gasSettings;
-    }
-
-    public String getUSDValue(double eth)
-    {
-        if (defaultNetwork.getValue().chainId == 1)
-        {
-            return "$" + ImportTokenActivity.getUsdString(ethToUsd * eth);
-        }
-        else
-        {
-            return "$0.00";
-        }
     }
 
     public String getNetworkName()
@@ -165,14 +150,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     private void updateBalance(Token token) {
         this.token.postValue(token);
-    }
-
-    private void onTicker(Ticker ticker)
-    {
-        if (ticker != null && ticker.price_usd != null)
-        {
-            ethToUsd = Double.valueOf(ticker.price_usd);
-        }
     }
 
     public Observable<Wallet> getWallet() {

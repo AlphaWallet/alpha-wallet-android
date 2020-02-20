@@ -17,7 +17,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.entity.Transaction;
@@ -95,14 +94,12 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         viewModel.sig().observe(this, sigData -> toolbarView.onSigData(sigData, this));
     }
 
-    private void onTokenTicker(Ticker ticker)
+    private void onTokenTicker(TokenTicker ticker)
     {
         if (token != null && tokenViewAdapter != null) //might be a delayed return after user closed screen
         {
-            token.ticker = new TokenTicker(ticker, token.getAddress(), null);
-            //token.ticker = new TokenTicker(String.valueOf(token.tokenInfo.chainId), token.getAddress(), ticker.price_usd, ticker.percentChange24h, null);
-            Token[] tokens = {token};
-            tokenViewAdapter.setTokens(tokens);
+            token.ticker = ticker;
+            tokenViewAdapter.updateToken(token, false);
             tokenViewAdapter.notifyDataSetChanged();
         }
     }

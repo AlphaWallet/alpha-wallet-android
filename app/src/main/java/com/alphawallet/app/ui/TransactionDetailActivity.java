@@ -196,9 +196,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
 
     private String getDateAndTime(long timeStampInSec)
     {
-        Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
-        calendar.setTimeInMillis(timeStampInSec * DateUtils.SECOND_IN_MILLIS);
-        Date date = calendar.getTime();
+        Date date = new java.util.Date(timeStampInSec*DateUtils.SECOND_IN_MILLIS);
         DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(this));
         DateFormat dateFormat = java.text.DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(this));
         return dateFormat.format(date) + " " + timeFormat.format(date);

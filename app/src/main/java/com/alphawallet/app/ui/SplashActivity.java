@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -183,31 +184,12 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
             }
             else if (importPath != null)
             {
-                if (splashViewModel.checkDebugDirectory())
-                {
-                    splashViewModel.importScriptFile(this, importPath);
-                }
-                else
-                {
-                    displayEnableDebugSupport();
-                }
+                boolean useAppExternalDir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || !splashViewModel.checkDebugDirectory();
+                splashViewModel.importScriptFile(this, importData, useAppExternalDir);
             }
 
             handler.postDelayed(this, VisibilityFilter.startupDelay());
         }
-    }
-
-    private void displayEnableDebugSupport()
-    {
-        AWalletAlertDialog aDialog = new AWalletAlertDialog(this);
-        aDialog.setTitle(R.string.title_enable_debug);
-        aDialog.setIcon(AWalletAlertDialog.ERROR);
-        aDialog.setMessage(R.string.need_to_enable_debug);
-        aDialog.setButtonText(R.string.ok);
-        aDialog.setButtonListener(v -> {
-            aDialog.dismiss();
-        });
-        aDialog.show();
     }
 
     @Override

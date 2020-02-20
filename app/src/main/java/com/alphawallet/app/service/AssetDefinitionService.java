@@ -8,13 +8,17 @@ import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileObserver;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.SparseArray;
+
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
@@ -99,6 +103,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private SparseArray<Map<String, TokenScriptFile>> assetDefinitions;
     private Map<String, Long> assetChecked;                //Mapping of contract address to when they were last fetched from server
     private FileObserver fileObserver;                     //Observer which scans the override directory waiting for file change
+    private FileObserver fileObserverQ;                    //Observer for Android Q directory
     private final NotificationService notificationService;
     private final RealmManager realmManager;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -243,19 +248,23 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public void checkExternalDirectoryAndLoad()
     {
         //Check the external files directory for Android Q+
-        loadExternalContracts(context.getExternalFilesDir(""));
+        loadExternalContracts(context.getExternalFilesDir(""), false);
 
-        //Now check the legacy /AlphaWallet directory
-        File directory = new File(
-                Environment.getExternalStorageDirectory()
-                        + File.separator + HomeViewModel.ALPHAWALLET_DIR);
-
-        if (!directory.exists())
+        //only works up to Android 9
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
         {
-            directory.mkdir(); //does this throw if we haven't given permission?
-        }
+            //Now check the legacy /AlphaWallet directory
+            File directory = new File(
+                    Environment.getExternalStorageDirectory()
+                            + File.separator + HomeViewModel.ALPHAWALLET_DIR);
 
-        loadExternalContracts(directory);
+            if (!directory.exists())
+            {
+                directory.mkdir(); //does this throw if we haven't given permission?
+            }
+
+            loadExternalContracts(directory, true);
+        }
     }
 
     private TokenDefinition getDefinition(int chainId, String address)
@@ -564,7 +573,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
-    private void loadExternalContracts(File directory)
+    private void loadExternalContracts(File directory, boolean legacyDirectory)
     {
         try
         {
@@ -573,15 +582,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             Observable.fromIterable(getCanonicalizedAssets())
                     .forEach(this::addContractAssets).isDisposed();
 
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q)
-            {
-                String externalDir = context.getExternalFilesDir("").getAbsolutePath();
-                if (directory.getAbsolutePath().contains(externalDir)) startFileListener(directory);
-            }
-            else if (directory.getAbsolutePath().contains(HomeViewModel.ALPHAWALLET_DIR))
-            {
-                startFileListener(directory);
-            }
+            startFileListener(directory.getAbsolutePath(), legacyDirectory);
         }
         catch (IOException|SAXException e)
         {
@@ -932,32 +933,30 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    private void startFileListener(File path)
+    private void startFileListener(String path, boolean isLegacyDir)
     {
-        if (fileObserver != null) return;
-        fileObserver = new FileObserver(path.getPath(), ALL_EVENTS)
+        FileObserver observer = new FileObserver(path)
         {
+            private final String listenerPath = path;
             @Override
-            public void onEvent(int i, @Nullable String s)
+            public void onEvent(int event, @Nullable String file)
             {
                 //watch for new files and file change
-                switch (i)
+                switch (event)
                 {
                     case CREATE:
                     case MODIFY:
                         try
                         {
-                            if (s.contains(".xml") || s.contains(".tsml"))
+                            if (file.contains(".xml") || file.contains(".tsml"))
                             {
+                                System.out.println("FILE: " + file);
                                 //form filename
-                                TokenScriptFile newTSFile = new TokenScriptFile(context,
-                                        Environment.getExternalStorageDirectory()
-                                                + File.separator + HomeViewModel.ALPHAWALLET_DIR, s);
+                                TokenScriptFile newTSFile = new TokenScriptFile(context, listenerPath, file);
 
-                                //TokenScriptFileData fData = fileHashes.get(newTSFile.getAbsolutePath());
                                 if (addContractAddresses(newTSFile))
                                 {
-                                    notificationService.DisplayNotification("Definition Updated", s, NotificationCompat.PRIORITY_MAX);
+                                    notificationService.DisplayNotification("Definition Updated", file, NotificationCompat.PRIORITY_MAX);
                                     cachedDefinition = null;
                                     updateSignature(newTSFile) //update signature data if necessary
                                             .subscribeOn(Schedulers.io())
@@ -977,7 +976,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             }
         };
 
-        fileObserver.startWatching();
+        observer.startWatching();
+
+        if (isLegacyDir)
+        {
+            fileObserver = observer;
+        }
+        else
+        {
+            fileObserverQ = observer;
+        }
     }
 
     public void checkTokenscriptEnabledTokens(TokensService tokensService)

@@ -5,29 +5,28 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
-import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
-
-import com.alphawallet.app.R;
-
 import com.alphawallet.app.viewmodel.TransactionDetailViewModel;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Calendar;
-import java.util.Locale;
+import java.text.DateFormat;
+import java.util.Date;
 
 import javax.inject.Inject;
 
@@ -78,7 +77,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         ((TextView) findViewById(R.id.from)).setText(transaction.from);
         ((TextView) findViewById(R.id.to)).setText(transaction.to);
         ((TextView) findViewById(R.id.txn_hash)).setText(transaction.hash);
-        ((TextView) findViewById(R.id.txn_time)).setText(getDate(transaction.timeStamp));
+        ((TextView) findViewById(R.id.txn_time)).setText(localiseUnixTime(transaction.timeStamp));
 
         ((TextView) findViewById(R.id.block_number)).setText(blockNumber);
         findViewById(R.id.more_detail).setOnClickListener(this);
@@ -193,10 +192,12 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         amount.setText(rawValue);
     }
 
-    private String getDate(long timeStampInSec) {
-        Calendar cal = Calendar.getInstance(Locale.ENGLISH);
-        cal.setTimeInMillis(timeStampInSec * 1000);
-        return DateFormat.getLongDateFormat(this).format(cal.getTime());
+    private String localiseUnixTime(long timeStampInSec)
+    {
+        Date date = new java.util.Date(timeStampInSec*DateUtils.SECOND_IN_MILLIS);
+        DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(this));
+        DateFormat dateFormat = java.text.DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(this));
+        return dateFormat.format(date) + " " + timeFormat.format(date);
     }
 
     @Override

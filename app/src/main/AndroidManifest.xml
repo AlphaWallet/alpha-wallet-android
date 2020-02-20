@@ -100,11 +100,6 @@
                 <data android:scheme="file" />
                 <data android:scheme="content" />
                 <data android:mimeType="*/*" />
-                <!--
-                    Work around Android's ugly primitive PatternMatcher
-                    implementation that can't cope with finding a . early in
-                    the path unless it's explicitly matched.
-                -->
                 <data android:host="*" />
                 <data android:pathPattern=".*\\.tsml" />
                 <data android:pathPattern=".*\\..*\\.tsml" />

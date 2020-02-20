@@ -107,7 +107,7 @@ public class TickerService implements TickerServiceInterface
     private Single<Double> updateCurrencyConversion()
     {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        currentCurrencySymbolTxt = pref.getString("currency_locale", "AUD");
+        currentCurrencySymbolTxt = pref.getString("currency_locale", "USD");
         currentCurrencySymbol = pref.getString("currency_symbol", "$");
         return convertPair("USD", currentCurrencySymbolTxt);
     }

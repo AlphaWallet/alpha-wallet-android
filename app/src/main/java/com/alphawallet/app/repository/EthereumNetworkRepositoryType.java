@@ -2,7 +2,6 @@ package com.alphawallet.app.repository;
 
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.service.TokensService;
@@ -27,8 +26,9 @@ public interface EthereumNetworkRepositoryType {
 
 	void addOnChangeDefaultNetwork(OnNetworkChangeListener onNetworkChanged);
 
-	Single<Ticker> getTicker(int chainId);
-	Single<Ticker> updateTicker(int chainId, TokenTicker ticker);
+	Single<TokenTicker> getTicker(Token token);
+	Single<TokenTicker> getTicker(int chainId);
+	TokenTicker updateTicker(Token token, TokenTicker ticker);
 	Single<Token> attachTokenTicker(Token token);
 	Single<Token[]> attachTokenTickers(Token[] tokens);
 	TokenTicker getTokenTicker(Token token);
@@ -39,6 +39,7 @@ public interface EthereumNetworkRepositoryType {
     List<Integer> getFilterNetworkList();
     void setFilterNetworkList(int[] networkList);
 
+	void refreshTickers();
 	boolean checkTickers();
 
 	List<ContractResult> getAllKnownContracts(List<Integer> networkFilters);

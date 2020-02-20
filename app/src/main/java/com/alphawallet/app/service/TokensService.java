@@ -5,27 +5,17 @@ import android.util.SparseArray;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenFactory;
-import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 
-import io.reactivex.Observable;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.math.BigDecimal;
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import okhttp3.OkHttpClient;
 
 public class TokensService
 {
@@ -469,5 +459,10 @@ public class TokensService
         {
             t.walletUIUpdateRequired = false;
         }
+    }
+
+    public TokenTicker getTokenTicker(Token token)
+    {
+        return ethereumNetworkRepository.getTokenTicker(token);
     }
 }

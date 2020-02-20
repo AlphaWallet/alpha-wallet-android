@@ -9,6 +9,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 
 import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.util.BalanceUtils;
 
 import io.reactivex.Observable;
@@ -23,7 +24,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import java.util.concurrent.TimeUnit;
 
 import static com.alphawallet.token.tools.Convert.getEthString;
-import static com.alphawallet.app.ui.ImportTokenActivity.getUsdString;
 
 /**
  * Created by James on 25/02/2019.
@@ -252,7 +252,7 @@ public class AmountEntryItem
             currentEthPrice = Double.valueOf(ticker.price);
             //now update UI
             setAmount(amountEditText.getText().toString());
-            String currencyLabel = ticker.priceSymbol + getCurrencyLabel(ticker.priceSymbol);
+            String currencyLabel = ticker.priceSymbol + TickerService.getCurrencySymbol();
             usdLabel.setText(currencyLabel);
             updateValues(lastTicker);
         }
@@ -288,9 +288,9 @@ public class AmountEntryItem
             if (amountStr.length() == 0) amountStr = "0";
             if (ticker != null && isValidAmount(amountStr))
             {
-                String usdEquivStr = ticker.priceSymbol + " " + getUsdString(Double.parseDouble(amountStr) * currentEthPrice);
-                if (!hasRealValue) usdEquivStr = "(TEST) " + usdEquivStr;
-                usdValue.setText(usdEquivStr);
+                String amountEquiv = ticker.priceSymbol + " " + TickerService.getCurrencyString(Double.parseDouble(amountStr) * currentEthPrice);
+                if (!hasRealValue) amountEquiv = "(TEST) " + amountEquiv;
+                usdValue.setText(amountEquiv);
             }
             callback.amountChanged(amountStr);
         }
@@ -336,26 +336,5 @@ public class AmountEntryItem
     public void setAmountText(String ethAmount)
     {
         amountEditText.setText(ethAmount);
-    }
-
-    //utility function
-    private String getCurrencyLabel(String currencySymbol)
-    {
-        switch (currencySymbol)
-        {
-            case "GBP":
-                return "£";
-            case "EUR":
-                return "€";
-            case "CNY":
-            case "JPY":
-                return "¥";
-            case "THB":
-                return "฿";
-            case "VND":
-                return "₫";
-            default:
-                return "$";
-        }
     }
 }

@@ -35,15 +35,6 @@ public class GetDefaultWalletBalance {
                                 .stripTrailingZeros().toPlainString());
                     return Single.just(balances);
                 })
-//                .flatMap(balances -> ethereumNetworkRepository
-//                        .getTicker()
-//                        .observeOn(Schedulers.io())
-//                        .flatMap(ticker -> {
-//                            String ethBallance = balances.get(ethereumNetworkRepository.getDefaultNetwork().symbol);
-//                            balances.put(USD_SYMBOL, BalanceUtils.ethToUsd(ticker.price_usd, ethBallance));
-//                            return Single.just(balances);
-//                        })
-//                        .onErrorResumeNext(throwable -> Single.just(balances)))
                 .observeOn(AndroidSchedulers.mainThread());
     }
 

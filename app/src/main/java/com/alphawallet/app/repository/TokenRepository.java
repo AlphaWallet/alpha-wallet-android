@@ -9,7 +9,6 @@ import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SubscribeWrapper;
-import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
@@ -659,9 +658,9 @@ public class TokenRepository implements TokenRepositoryType {
                     }
                 })
                 .flatMap(token -> localSource.fetchTicker(wallet, token)
-                        .flatMap(ticker -> ethereumNetworkRepository.updateTicker(network.chainId, ticker))
+                        .map(ticker -> ethereumNetworkRepository.updateTicker(token, ticker))
                         .map(ticker -> {
-                            token.ticker = new TokenTicker(String.valueOf(network.chainId), wallet.address, ticker.price_usd, ticker.percentChange24h, "USD", null);
+                            token.ticker = ticker;
                             return token;
                         })
                         .flatMap(ttoken -> localSource.saveTicker(wallet, ttoken))
@@ -685,7 +684,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<Ticker> getEthTicker(int chainId)
+    public Single<TokenTicker> getEthTicker(int chainId)
     {
         return ethereumNetworkRepository.getTicker(chainId);
     }

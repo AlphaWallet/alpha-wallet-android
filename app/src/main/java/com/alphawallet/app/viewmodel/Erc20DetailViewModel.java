@@ -12,17 +12,17 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.AddTokenInteract;
-import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -38,12 +38,11 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Token> token = new MutableLiveData<>();
-    private final MutableLiveData<Ticker> tokenTicker = new MutableLiveData<>();
+    private final MutableLiveData<TokenTicker> tokenTicker = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactionUpdate = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
 
     private final MyAddressRouter myAddressRouter;
-    private final FetchTokensInteract fetchTokensInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GenericWalletInteract genericWalletInteract;
@@ -61,7 +60,6 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private Disposable getBalanceDisposable;
 
     public Erc20DetailViewModel(MyAddressRouter myAddressRouter,
-                                FetchTokensInteract fetchTokensInteract,
                                 FetchTransactionsInteract fetchTransactionsInteract,
                                 FindDefaultNetworkInteract findDefaultNetworkInteract,
                                 GenericWalletInteract genericWalletInteract,
@@ -70,7 +68,6 @@ public class Erc20DetailViewModel extends BaseViewModel {
                                 TokensService tokensService,
                                 AddTokenInteract addTokenInteract) {
         this.myAddressRouter = myAddressRouter;
-        this.fetchTokensInteract = fetchTokensInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.genericWalletInteract = genericWalletInteract;
@@ -91,36 +88,12 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     public void startEthereumTicker(Token token)
     {
-        if (token.isEthereum())
+        TokenTicker ticker = tokensService.getTokenTicker(token);
+        if (ticker != null)
         {
-            disposable = Observable.interval(0, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
-                    .doOnNext(l -> fetchTokensInteract
-                            .getEthereumTicker(token.tokenInfo.chainId)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(this::onTicker, this::onError)).subscribe();
+            disposable = Observable.interval(1, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
+                    .doOnNext(l -> tokenTicker.postValue(tokensService.getTokenTicker(token))).subscribe();
         }
-    }
-
-    private void onTicker(Ticker ticker)
-    {
-        if (ticker != null && ticker.price_usd != null) {
-            this.tokenTicker.postValue(ticker);
-        }
-    }
-
-    public boolean hasIFrame(Token token)
-    {
-        return assetDefinitionService.hasTokenView(token.tokenInfo.chainId, token.getAddress(), "view");
-    }
-
-    public String getTokenData(Token token) {
-        return assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "view");
-    }
-
-    public boolean hasAction(Token token)
-    {
-        return assetDefinitionService.hasAction(token.tokenInfo.chainId, token.getAddress());
     }
 
     public void fetchTransactions(Token token, int historyCount) {
@@ -266,7 +239,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return token;
     }
 
-    public LiveData<Ticker> tokenTicker() {
+    public LiveData<TokenTicker> tokenTicker() {
         return tokenTicker;
     }
 

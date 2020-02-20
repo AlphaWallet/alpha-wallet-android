@@ -8,7 +8,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
@@ -262,30 +261,30 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     }
 
     @Override
-    public Single<Ticker> getTicker(int chainId) {
-        NetworkInfo network = networkMap.get(chainId);
-        return tickerService.getNativeTicker(network);
+    public Single<TokenTicker> getTicker(Token token) {
+        return Single.fromCallable(() -> tickerService.getTokenTicker(token));
     }
 
     @Override
-    public Single<Ticker> updateTicker(int chainId, TokenTicker oldTicker) {
-        NetworkInfo network = networkMap.get(chainId);
-        return tickerService.getNativeTicker(network)
-                        .flatMap(ticker -> checkTicker(ticker, oldTicker, network));
+    public Single<TokenTicker> getTicker(int chainId) {
+        return Single.fromCallable(() -> tickerService.getEthTicker(chainId));
     }
 
-    private Single<Ticker> checkTicker(Ticker ticker, TokenTicker oldTicker, NetworkInfo network)
+    /**
+     * Update Ticker or return existing ticker
+     * @param token
+     * @param oldTicker
+     * @return
+     */
+    @Override
+    public TokenTicker updateTicker(Token token, TokenTicker oldTicker) {
+        return checkTicker(tickerService.getTokenTicker(token), oldTicker);
+    }
+
+    private TokenTicker checkTicker(TokenTicker ticker, TokenTicker oldTicker)
     {
-        return Single.fromCallable(() -> {
-            if (ticker.name == null)
-            {
-                return new Ticker(oldTicker, network.getShortName());
-            }
-            else
-            {
-                return ticker;
-            }
-        });
+        if (ticker.updateTime > 0) return ticker;
+        else return oldTicker;
     }
 
     @Override
@@ -426,6 +425,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public boolean checkTickers()
     {
         return !updatedTickers && tickerService.hasTickers();
+    }
+
+    @Override
+    public void refreshTickers()
+    {
+        tickerService.updateTickers();
     }
 
     public static String defaultDapp()

@@ -337,7 +337,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         detachFragment(DISCOVER_DAPPS);
         detachFragment(HISTORY);
         detachFragment(SEARCH);
-        detachFragment(DAPP_BROWSER);
     }
 
     public void homePressed()

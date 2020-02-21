@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -161,6 +162,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private TextView balance;
     private TextView symbol;
 
+    private final Handler handler;
+
     private String currentWebpageTitle;
     private String currentFragment;
 
@@ -183,6 +186,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         myDappsFragment = new MyDappsFragment();
         discoverDappsFragment = new DiscoverDappsFragment();
         browserHistoryFragment = new BrowserHistoryFragment();
+        handler = new Handler();
     }
 
     @Override
@@ -333,6 +337,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         detachFragment(DISCOVER_DAPPS);
         detachFragment(HISTORY);
         detachFragment(SEARCH);
+        detachFragment(DAPP_BROWSER);
     }
 
     public void homePressed()
@@ -1084,7 +1089,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                             else
                             {
                                 //attempt to go to site
-                                loadUrl(qrCode);
+                                loadUrlRemote(qrCode);
                             }
                         }
                     }
@@ -1105,6 +1110,15 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             Toast.makeText(getActivity(), R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * Loads URL from remote process; this converts a request to load URL which isn't on the app's thread
+     * @param qrCode
+     */
+    private void loadUrlRemote(final String qrCode)
+    {
+        handler.post(() -> loadUrl(qrCode));
     }
 
     private void showCameraDenied()

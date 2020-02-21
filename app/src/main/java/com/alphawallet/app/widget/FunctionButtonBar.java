@@ -173,7 +173,8 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
             }
             else
             {
-                List<BigInteger> selected = adapter.getSelectedTokenIds(selection);
+                List<BigInteger> selected = selection;
+                if (adapter != null) selected = adapter.getSelectedTokenIds(selection);
 
                 switch (v.getId())
                 {

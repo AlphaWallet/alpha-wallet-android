@@ -245,11 +245,16 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onSaved(boolean result)
+    private void onSaved(Token result)
     {
-        if (result)
+        if (result != null)
         {
-            sendBroadcast(new Intent(ADDED_TOKEN)); //inform walletview there is a new token
+            String[] addrs = { result.getAddress() };
+            int[] chainIds = { result.tokenInfo.chainId };
+            Intent intent = new Intent(ADDED_TOKEN);
+            intent.putExtra(C.EXTRA_TOKENID_LIST, addrs);
+            intent.putExtra(C.EXTRA_CHAIN_ID, chainIds);
+            sendBroadcast(intent);
             finish();
         }
     }

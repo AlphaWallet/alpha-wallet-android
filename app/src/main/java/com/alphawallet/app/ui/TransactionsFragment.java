@@ -13,23 +13,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.tokens.TokenInterface;
-import com.alphawallet.app.entity.tokens.TokensReceiver;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.TokenInterface;
+import com.alphawallet.app.entity.tokens.TokensReceiver;
 import com.alphawallet.app.ui.widget.adapter.RecycleViewDivider;
 import com.alphawallet.app.ui.widget.adapter.TransactionsAdapter;
-
-import dagger.android.support.AndroidSupportInjection;
-import com.alphawallet.app.R;
-
 import com.alphawallet.app.viewmodel.TransactionsViewModel;
 import com.alphawallet.app.viewmodel.TransactionsViewModelFactory;
 import com.alphawallet.app.widget.EmptyTransactionsView;
 import com.alphawallet.app.widget.SystemView;
 
 import javax.inject.Inject;
+
+import dagger.android.support.AndroidSupportInjection;
 
 import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 
@@ -182,7 +181,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     }
 
     @Override
-    public void addedToken()
+    public void addedToken(int[] chainIds, String[] addrs)
     {
 
     }

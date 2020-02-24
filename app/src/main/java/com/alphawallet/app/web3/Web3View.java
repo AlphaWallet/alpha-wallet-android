@@ -11,9 +11,16 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.FragmentActivity;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.webkit.*;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.TypedData;
@@ -46,6 +53,7 @@ public class Web3View extends WebView {
     private OnGetBalanceListener onGetBalanceListener;
     private JsInjectorClient jsInjectorClient;
     private Web3ViewClient webViewClient;
+    private URLLoadInterface loadInterface;
 
     public Web3View(@NonNull Context context) {
         super(context);
@@ -114,6 +122,11 @@ public class Web3View extends WebView {
 
     public void setRpcUrl(@NonNull String rpcUrl) {
         jsInjectorClient.setRpcUrl(rpcUrl);
+    }
+
+    public void setWebLoadCallback(URLLoadInterface iFace)
+    {
+        loadInterface = iFace;
     }
 
     @Nullable
@@ -274,16 +287,14 @@ public class Web3View extends WebView {
 
             if (!redirect && !loadingError)
             {
-                Intent intent = new Intent(PAGE_LOADED);
-                intent.putExtra("url", url);
-                intent.putExtra("title", view.getTitle());
-                getContext().sendBroadcast(intent);
+                if (loadInterface != null) loadInterface.onWebpageLoaded(url, view.getTitle());
             }
-            else
+            else if (!loadingError && loadInterface != null)
             {
-                redirect = false;
+                loadInterface.onWebpageLoadComplete();
             }
 
+            redirect = false;
             loadingError = false;
         }
 

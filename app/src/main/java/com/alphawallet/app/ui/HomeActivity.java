@@ -761,47 +761,34 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 ((DappBrowserFragment)dappBrowserFragment).gotGeoAccess(permissions, grantResults);
                 break;
             case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
+                if (hasPermission(permissions, grantResults))
+                {
+                    viewModel.loadExternalXMLContracts();
+                    ((NewSettingsFragment)settingsFragment).refresh();
+                }
+                break;
             case RC_ASSET_EXTERNAL_WRITE_PERM:
-                handleWritePermissions(requestCode, permissions, grantResults);
+                if (hasPermission(permissions, grantResults))
+                {
+                    viewModel.downloadAndInstall(buildVersion, this);
+                }
+                else
+                {
+                    showRequirePermissionError();
+                }
                 break;
         }
     }
 
-    private void handleWritePermissions(int requestCode, String[] permissions, int[] grantResults)
+    private boolean hasPermission(String[] permissions, int[] grantResults)
     {
-        //check permission is granted
+        boolean hasPermission = true;
         for (int i = 0; i < permissions.length; i++)
         {
-            String p = permissions[i];
-            if (p.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE))
-            {
-                if (grantResults[i] != -1)
-                {
-                    switch (requestCode)
-                    {
-                        case RC_ASSET_EXTERNAL_WRITE_PERM:
-                            viewModel.loadExternalXMLContracts();
-                            ((NewSettingsFragment)settingsFragment).refresh();
-                            break;
-                        case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
-                            viewModel.downloadAndInstall(buildVersion, this);
-                            break;
-                    }
-                }
-                else
-                {
-                    switch (requestCode)
-                    {
-                        case RC_ASSET_EXTERNAL_WRITE_PERM:
-                            //no warning
-                            break;
-                        case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
-                            showRequirePermissionError();
-                            break;
-                    }
-                }
-            }
+            if (grantResults[i] == -1) hasPermission = false;
         }
+
+        return hasPermission;
     }
 
     private void showRequirePermissionError()

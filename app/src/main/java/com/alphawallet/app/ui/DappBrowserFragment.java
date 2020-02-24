@@ -684,8 +684,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 fileChooserParams = fCParams;
                 picker = fileChooserParams.createIntent();
 
-                if (!checkReadPermission()) return super.onShowFileChooser(webView, filePathCallback, fCParams);
-                else return requestUpload();
+                if (checkReadPermission()) return requestUpload();
+                else return true;
             }
         });
 
@@ -1369,7 +1369,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         boolean geoAccess = false;
         for (int i = 0; i < permissions.length; i++)
         {
-            if (permissions[i].contains("LOCATION") && grantResults[i] != -1) geoAccess = true;
+            if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION) && grantResults[i] != -1) geoAccess = true;
         }
         if (!geoAccess) Toast.makeText(getContext(), "Permission not given", Toast.LENGTH_SHORT).show();
         if (geoCallback != null && geoOrigin != null) geoCallback.invoke(geoOrigin, geoAccess, false);
@@ -1380,10 +1380,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         boolean fileAccess = false;
         for (int i = 0; i < permissions.length; i++)
         {
-            if (permissions[i].contains("FILE") && grantResults[i] != -1) fileAccess = true;
+            if (permissions[i].equals(Manifest.permission.READ_EXTERNAL_STORAGE) && grantResults[i] != -1) fileAccess = true;
         }
 
-        if (fileAccess && picker != null) startActivityForResult(picker, UPLOAD_FILE);
+        if (fileAccess && picker != null) requestUpload();
     }
 
     @Override

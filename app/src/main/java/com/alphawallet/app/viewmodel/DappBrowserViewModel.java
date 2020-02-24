@@ -271,6 +271,10 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return ethereumNetworkRepository.getAvailableNetworkList();
     }
 
+    public int getActiveFilterCount() {
+        return ethereumNetworkRepository.getFilterNetworkList().size();
+    }
+
     public void setNetwork(int chainId)
     {
         NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);

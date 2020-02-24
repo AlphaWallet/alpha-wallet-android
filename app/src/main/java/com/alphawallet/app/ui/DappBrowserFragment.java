@@ -37,8 +37,21 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.DApp;
+import com.alphawallet.app.entity.DAppFunction;
+import com.alphawallet.app.entity.FragmentMessenger;
+import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
+import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.SignTransactionInterface;
+import com.alphawallet.app.entity.URLLoadInterface;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.google.gson.Gson;
 import com.alphawallet.app.ui.widget.OnDappClickListener;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
 import com.alphawallet.app.ui.widget.OnHistoryItemRemovedListener;
@@ -52,6 +65,8 @@ import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.viewmodel.DappBrowserViewModel;
+import com.alphawallet.app.viewmodel.DappBrowserViewModelFactory;
 import com.alphawallet.app.web3.OnSignMessageListener;
 import com.alphawallet.app.web3.OnSignPersonalMessageListener;
 import com.alphawallet.app.web3.OnSignTransactionListener;
@@ -61,6 +76,13 @@ import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.SignMessageDialog;
+import com.alphawallet.app.widget.SignTransactionDialog;
+import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.tools.Numeric;
+import com.alphawallet.token.tools.ParseMagicLink;
+import com.google.gson.Gson;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
@@ -68,35 +90,14 @@ import org.web3j.crypto.Sign;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.SignatureException;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
-import com.alphawallet.token.entity.SalesOrderMalformed;
-import com.alphawallet.token.tools.Numeric;
-import com.alphawallet.token.tools.ParseMagicLink;
-import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.DApp;
-import com.alphawallet.app.entity.DAppFunction;
-import com.alphawallet.app.entity.FragmentMessenger;
-import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
-import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.SignTransactionInterface;
-import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.URLLoadInterface;
-import com.alphawallet.app.entity.URLLoadReceiver;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.viewmodel.DappBrowserViewModel;
-import com.alphawallet.app.viewmodel.DappBrowserViewModelFactory;
-import com.alphawallet.app.widget.AWalletAlertDialog;
-import com.alphawallet.app.widget.SignMessageDialog;
-import com.alphawallet.app.widget.SignTransactionDialog;
 
 import static android.app.Activity.RESULT_OK;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
@@ -121,6 +122,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private ValueCallback<Uri[]> uploadMessage;
     private WebChromeClient.FileChooserParams fileChooserParams;
     private Intent picker;
+    private final Deque<String> forwardFragmentStack = new LinkedList<>();
+    private final Deque<String> backFragmentStack = new LinkedList<>();
+
+    private final String BROWSER_HOME = EthereumNetworkRepository.defaultDapp() != null
+                                        ? DAPP_BROWSER : DAPP_HOME;
 
     private static final String MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
 
@@ -144,8 +150,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private SignMessageDialog dialog;
     private AWalletAlertDialog resultDialog;
     private DappBrowserSuggestionsAdapter adapter;
-    private URLLoadReceiver URLReceiver;
     private String loadOnInit;
+    private boolean homePressed;
 
     private final Fragment dappHomeFragment;
     private final Fragment myDappsFragment;
@@ -167,8 +173,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private String currentWebpageTitle;
     private String currentFragment;
 
-    private WebBackForwardList sessionHistory;
-    private String lastHomeTag;
     private PinAuthenticationCallbackInterface authInterface;
     private Message<String> messageToSign;
     private byte[] messageBytes;
@@ -197,10 +201,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void onResume() {
         super.onResume();
-        if (currentFragment == null) currentFragment = DAPP_HOME;
+        homePressed = false;
+        if (currentFragment == null) currentFragment = BROWSER_HOME;
         attachFragment(currentFragment);
         if (web3 == null && getActivity() != null) //trigger reload
         {
+            web3.setWebLoadCallback(this);
             ((HomeActivity)getActivity()).ResetDappBrowser();
         }
         if (viewModel != null) viewModel.resetDebounce();
@@ -211,13 +217,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         AndroidSupportInjection.inject(this);
         View view = inflater.inflate(R.layout.fragment_webview, container, false);
-        initView(view);
         initViewModel();
+        initView(view);
         setupAddressBar();
         viewModel.prepare(getContext());
-        URLReceiver = new URLLoadReceiver(getActivity(), this);
-
-        lastHomeTag = DAPP_HOME;
         loadOnInit = null;
 
         // Load url from a link within the app
@@ -225,41 +228,51 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             String url = getArguments().getString("url");
             loadOnInit = url;
         } else {
-            String prevFragment = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(CURRENT_FRAGMENT, null);
-            String prevUrl = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(CURRENT_URL, null);
-
+            String initFragment = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(CURRENT_FRAGMENT, "");
+            String lastUrl = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(CURRENT_URL, "");
             if (savedInstanceState != null)
             {
-                currentFragment = savedInstanceState.getString(CURRENT_FRAGMENT, "");
-                String lastUrl = savedInstanceState.getString(CURRENT_URL, "");
-                if (currentFragment.isEmpty())
-                {
-                    attachFragment(DAPP_HOME);
-                }
-                else
-                {
-                    attachFragment(currentFragment);
-                }
+                initFragment = savedInstanceState.getString(CURRENT_FRAGMENT, "");
+                lastUrl = savedInstanceState.getString(CURRENT_URL, "");
+            }
 
-                if (lastUrl.length() > 0)
-                    loadOnInit = lastUrl;
-            }
-            else if (prevFragment != null)
+            //Dapp Browser init priority order:
+            //1. Default DAPP: Load on startup or load last Dapp
+            //2. Last fragment DAPP_BROWSER + browsing URL: load Dapp + init HOME fragment backstack
+            //3. Last fragment not DAPP_BROWSER, load last fragment
+            //4. No previous activity: Load DAPP_HOME.
+
+            if (EthereumNetworkRepository.defaultDapp() != null)
             {
-                attachFragment(prevFragment);
-                if (prevUrl != null && prevFragment.equals(DAPP_BROWSER) && prevUrl.length() > 0)
-                    loadOnInit = prevUrl;
+                attachFragment(DAPP_BROWSER);
+                if (!lastUrl.isEmpty()) loadOnInit = lastUrl;
+                else loadOnInit = EthereumNetworkRepository.defaultDapp();                          //1. Load last used dapp or default dapp
             }
-            else if (EthereumNetworkRepository.defaultDapp() != null)
+            else if (!initFragment.isEmpty())
             {
-                currentFragment = DAPP_BROWSER;
-                loadOnInit = EthereumNetworkRepository.defaultDapp();
-            } else {
-                attachFragment(DAPP_HOME);
+                if (initFragment.equals(DAPP_BROWSER) && !lastUrl.isEmpty()) loadOnInit = lastUrl;  //2. load last dapp
+                else initFragment(initFragment);                                                    //3. load last fragment
+            }
+            else
+            {
+                attachFragment(DAPP_HOME);                                                          //4. default to DAPP_HOME
             }
         }
 
         return view;
+    }
+
+    private void initFragment(String startingFragment)
+    {
+        if (!startingFragment.isEmpty())
+        {
+            addToBackStack(DAPP_HOME);
+            attachFragment(startingFragment);
+        }
+        else
+        {
+            attachFragment(DAPP_HOME);
+        }
     }
 
     @Override
@@ -304,7 +317,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             {
                 case DAPP_HOME:
                     f = dappHomeFragment;
-                    lastHomeTag = DAPP_HOME;
                     break;
                 case DISCOVER_DAPPS:
                     f = discoverDappsFragment;
@@ -315,6 +327,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 case HISTORY:
                     f = browserHistoryFragment;
                     break;
+                case DAPP_BROWSER: //special case - dapp browser is no fragments loaded
+                    addToBackStack(DAPP_BROWSER);
+                    break;
             }
 
             if (f != null) showFragment(f, tag);
@@ -322,7 +337,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     private void showFragment(Fragment fragment, String tag) {
-        this.currentFragment = tag;
+        addToBackStack(tag);
         getChildFragmentManager().beginTransaction()
                 .add(R.id.frame, fragment, tag)
                 .commit();
@@ -342,19 +357,28 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     public void homePressed()
     {
+        homePressed = true;
         detachFragments(false);
+        forwardFragmentStack.clear();
+        backFragmentStack.clear();
+        currentFragment = BROWSER_HOME;
+        if (!BROWSER_HOME.equals(DAPP_BROWSER)) attachFragment(dappHomeFragment, BROWSER_HOME);
+        if (urlTv != null)
+            urlTv.getText().clear();
+        if (web3 != null)
+        {
+            web3.clearHistory();
+            web3.stopLoading();
+        }
+
         if (EthereumNetworkRepository.defaultDapp() != null)
         {
             loadUrl(EthereumNetworkRepository.defaultDapp());
         }
-        else
-        {
-            attachFragment(dappHomeFragment, DAPP_HOME);
-            if (urlTv != null)
-                urlTv.getText().clear();
-            if (web3 != null)
-                web3.stopLoading();
-        }
+
+        //blank forward / backward arrows
+        next.setAlpha(0.3f);
+        back.setAlpha(0.3f);
     }
 
     @Override
@@ -362,14 +386,20 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         detachFragments(true);
         switch (position) {
             case 0: {
+                forwardFragmentStack.clear();
+                addToBackStack(MY_DAPPS);
                 attachFragment(myDappsFragment, MY_DAPPS);
                 break;
             }
             case 1: {
+                forwardFragmentStack.clear();
+                addToBackStack(DISCOVER_DAPPS);
                 attachFragment(discoverDappsFragment, DISCOVER_DAPPS);
                 break;
             }
             case 2: {
+                forwardFragmentStack.clear();
+                addToBackStack(HISTORY);
                 attachFragment(browserHistoryFragment, HISTORY);
                 break;
             }
@@ -381,6 +411,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     @Override
     public void onDappClick(DApp dapp) {
+        forwardFragmentStack.clear();
+        System.out.println("Luddite: Clear: " + currentFragment);
+        addToBackStack(DAPP_BROWSER);
         loadUrl(dapp.getUrl());
     }
 
@@ -392,7 +425,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void onDestroy()
     {
-        if (getContext() != null) getContext().unregisterReceiver(URLReceiver);
         super.onDestroy();
     }
 
@@ -451,6 +483,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         currentNetworkCircle = view.findViewById(R.id.network_colour);
         balance = view.findViewById(R.id.balance);
         symbol = view.findViewById(R.id.symbol);
+        web3.setWebLoadCallback(this);
+
+        if (viewModel.getActiveFilterCount() == 1 && EthereumNetworkRepository.defaultDapp() != null) currentNetworkClicker.setVisibility(View.GONE);
     }
 
     private void displayNothingToShare()
@@ -495,6 +530,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             if (actionId == EditorInfo.IME_ACTION_GO)
             {
                 String urlText = urlTv.getText().toString();
+                forwardFragmentStack.clear();
                 handled = loadUrl(urlText);
                 detachFragments(true);
                 cancelSearchSession();
@@ -535,6 +571,18 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         back.setVisibility(View.GONE);
         clear.setVisibility(View.VISIBLE);
         urlTv.showDropDown();
+    }
+
+    private void addToBackStack(String nextFragment)
+    {
+        if (currentFragment != null && !currentFragment.equals(nextFragment)) backFragmentStack.add(currentFragment);
+        currentFragment = nextFragment;
+    }
+
+    private void addToForwardStack(String prevFragment)
+    {
+        if (currentFragment != null && !currentFragment.equals(prevFragment)) forwardFragmentStack.add(currentFragment);
+        currentFragment = prevFragment;
     }
 
     private void cancelSearchSession() {
@@ -646,6 +694,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
         if (loadOnInit != null)
         {
+            addToBackStack(BROWSER_HOME);
             loadUrl(loadOnInit);
             loadOnInit = null;
         }
@@ -903,31 +952,72 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private void goToPreviousPage() {
         if (web3.canGoBack()) {
+            checkBackClickArrowVisibility(); //to make arrows function correctly - don't want to wait for web page to load to check back/forwards - this looks clunky
             web3.goBack();
             detachFragments(true);
             loadSessionUrl(-1);
         }
-        else
+        else if (backFragmentStack.peekLast() != null)
         {
-            detachFragments(true);
-            if (lastHomeTag != null && !lastHomeTag.equals(DAPP_HOME))
+            String lastPage = backFragmentStack.pollLast();
+            if (!lastPage.equals(currentFragment))
             {
-                attachFragment(lastHomeTag);
-                lastHomeTag = DAPP_HOME;
+                addToForwardStack(lastPage);
+                detachFragments(true);
+                attachFragment(lastPage);
             }
-            else
-            {
-                attachFragment(DAPP_HOME);
-            }
+            setBackForwardButtons();
         }
     }
 
     private void goToNextPage() {
-        if (web3.canGoForward()) {
+        if (currentFragment.equals(DAPP_BROWSER) && web3.canGoForward())
+        {
+            checkForwardClickArrowVisibility();
             web3.goForward();
-            detachFragments(true);
             loadSessionUrl(1);
         }
+        else if (forwardFragmentStack.peekLast() != null)
+        {
+            String nextPage = forwardFragmentStack.pollLast();
+
+            if (!nextPage.equals(currentFragment))
+            {
+                addToBackStack(nextPage);
+                detachFragments(true);
+                attachFragment(nextPage);
+            }
+
+            setBackForwardButtons();
+        }
+    }
+
+    /**
+     * Check if this is the last web item and the last fragment item.
+     */
+    private void checkBackClickArrowVisibility()
+    {
+        //will this be last item?
+        WebBackForwardList sessionHistory = web3.copyBackForwardList();
+        int nextIndex = sessionHistory.getCurrentIndex() - 1;
+        if (backFragmentStack.peekLast() == null && nextIndex <= 0) back.setAlpha(0.3f);
+        else back.setAlpha(1.0f);
+
+        next.setAlpha(1.0f); //if we clicked back then we would have a next available
+    }
+
+    /**
+     * After a forward click while web browser active, check if forward and back arrows should be updated.
+     * Note that the web item only becomes history after the next page is loaded, so if the next item is new, then
+     */
+    private void checkForwardClickArrowVisibility()
+    {
+        WebBackForwardList sessionHistory = web3.copyBackForwardList();
+        int nextIndex = sessionHistory.getCurrentIndex() + 1;
+        if (nextIndex >= sessionHistory.getSize() - 1) next.setAlpha(0.3f);
+        else next.setAlpha(1.0f);
+
+        back.setAlpha(1.0f);
     }
 
     /**
@@ -936,6 +1026,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
      */
     private void loadSessionUrl(int relative)
     {
+        WebBackForwardList sessionHistory = web3.copyBackForwardList();
         int newIndex = sessionHistory.getCurrentIndex() + relative;
         if (newIndex < sessionHistory.getSize())
         {
@@ -950,38 +1041,55 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void onWebpageLoaded(String url, String title)
     {
+        if (homePressed)
+        {
+            homePressed = false;
+            if (BROWSER_HOME.equals(DAPP_BROWSER) && url.equals(EthereumNetworkRepository.defaultDapp()))
+            {
+                web3.clearHistory();
+            }
+        }
         DApp dapp = new DApp(title, url);
         DappBrowserUtils.addToHistory(getContext(), dapp);
         adapter.addSuggestion(dapp);
-        sessionHistory = web3.copyBackForwardList();
-        this.currentFragment = DAPP_BROWSER;
-        setBackForwardButtons();
+        onWebpageLoadComplete();
+    }
+
+    @Override
+    public void onWebpageLoadComplete()
+    {
+        handler.post(this::setBackForwardButtons); //execute on UI thread
     }
 
     private void setBackForwardButtons() {
-        if (sessionHistory == null) {
-            sessionHistory = web3.copyBackForwardList();
-        }
+        WebBackForwardList sessionHistory = web3.copyBackForwardList();
 
-        if (currentFragment.equals(DAPP_HOME)) {
-            back.setAlpha(0.3f);
-        } else {
+        String nextFrag = forwardFragmentStack.peekLast();
+        String backFrag = backFragmentStack.peekLast();
+
+        if (backFrag != null || (currentFragment.equals(DAPP_BROWSER) && web3.canGoBack()))
+        {
             back.setAlpha(1.0f);
         }
+        else
+        {
+            back.setAlpha(0.3f);
+        }
 
-        if (sessionHistory.getCurrentIndex() < sessionHistory.getSize()-1) {
+        if (nextFrag != null || (currentFragment.equals(DAPP_BROWSER) && sessionHistory.getCurrentIndex() < sessionHistory.getSize() - 1))
+        {
             next.setAlpha(1.0f);
-        } else {
+        }
+        else
+        {
             next.setAlpha(0.3f);
         }
     }
 
     private boolean loadUrl(String urlText)
     {
-        if (lastHomeTag == null) lastHomeTag = DAPP_BROWSER;
-        else if (!lastHomeTag.equals(DAPP_BROWSER)) lastHomeTag = currentFragment;
         detachFragments(true);
-        this.currentFragment = DAPP_BROWSER;
+        addToBackStack(DAPP_BROWSER);
         cancelSearchSession();
         if (checkForMagicLink(urlText)) return true;
         web3.loadUrl(Utils.formatUrl(urlText), getWeb3Headers());
@@ -1018,6 +1126,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void onItemClick(String url)
     {
+        forwardFragmentStack.clear();
+        addToBackStack(DAPP_BROWSER);
         loadUrl(url);
     }
 

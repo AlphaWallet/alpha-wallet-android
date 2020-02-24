@@ -7,8 +7,11 @@ import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.v4.content.FileProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
@@ -18,6 +21,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.ui.SplashActivity;
 import com.alphawallet.app.util.Utils;
 
 import io.reactivex.Single;
@@ -29,12 +33,22 @@ import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
 
+import org.xml.sax.SAXException;
+
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.viewmodel.HomeViewModel.ALPHAWALLET_DIR;
@@ -225,33 +239,54 @@ public class SplashViewModel extends ViewModel
     }
 
 
-    public void importScriptFile(Context ctx, String importData)
+    private TokenDefinition parseFile(Context ctx, InputStream xmlInputStream) throws Exception
+    {
+        Locale locale;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            locale = ctx.getResources().getConfiguration().getLocales().get(0);
+        }
+        else
+        {
+            locale = ctx.getResources().getConfiguration().locale;
+        }
+
+        return new TokenDefinition(
+                xmlInputStream, locale, null);
+    }
+
+    public void importScriptFile(Context ctx, String importData, boolean appExternal)
     {
         try
         {
-            importData = importData.replace("/media", Environment.getExternalStorageDirectory().getAbsolutePath());
+            InputStream iStream = ctx.getApplicationContext().getContentResolver().openInputStream(Uri.parse(importData));
+            TokenDefinition td = parseFile(ctx, iStream);
+            if (td.holdingToken == null || td.holdingToken.length() == 0) return; //tokenscript with no holding token is currently meaningless. Is this always the case?
 
-            TokenScriptFile testFile = new TokenScriptFile(ctx, importData);
-            if (testFile.exists() && testFile.canRead())
+            byte[] writeBuffer = new byte[32768];
+            String newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next();
+            newFileName = newFileName + ".tsml";
+
+            if (appExternal)
             {
-                TokenDefinition td = assetDefinitionService.getTokenDefinition(testFile);
-                if (td != null)
-                {
-                    //valid tokenscript file, import to debug area
-                    String newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next();
-                    newFileName = newFileName + ".tsml";
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q)
-                    {
-                        newFileName = ctx.getExternalFilesDir("") + File.separator + newFileName;
-                    }
-                    else
-                    {
-                        newFileName = Environment.getExternalStorageDirectory() + File.separator + ALPHAWALLET_DIR + File.separator + newFileName;
-                    }
-                    Utils.copyFile(importData, newFileName);
-                    //listener system picks up the new file automatically
-                }
+                newFileName = ctx.getExternalFilesDir("") + File.separator + newFileName;
             }
+            else
+            {
+                newFileName = Environment.getExternalStorageDirectory() + File.separator + ALPHAWALLET_DIR + File.separator + newFileName;
+            }
+
+            //Store
+            iStream = ctx.getApplicationContext().getContentResolver().openInputStream(Uri.parse(importData));
+            FileOutputStream fos = new FileOutputStream(newFileName);
+
+            while (iStream.available() > 0)
+            {
+                fos.write(writeBuffer, 0, iStream.read(writeBuffer));
+            }
+
+            iStream.close();
+            fos.flush();
+            fos.close();
         }
         catch (Exception e)
         {

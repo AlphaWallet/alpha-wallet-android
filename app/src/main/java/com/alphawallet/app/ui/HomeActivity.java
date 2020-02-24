@@ -752,42 +752,52 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
     {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == DappBrowserFragment.REQUEST_FILE_ACCESS)
+        switch (requestCode)
         {
-            ((DappBrowserFragment)dappBrowserFragment).gotFileAccess(requestCode);
+            case DappBrowserFragment.REQUEST_FILE_ACCESS:
+                ((DappBrowserFragment)dappBrowserFragment).gotFileAccess(permissions, grantResults);
+                break;
+            case DappBrowserFragment.REQUEST_FINE_LOCATION:
+                ((DappBrowserFragment)dappBrowserFragment).gotGeoAccess(permissions, grantResults);
+                break;
+            case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
+            case RC_ASSET_EXTERNAL_WRITE_PERM:
+                handleWritePermissions(requestCode, permissions, grantResults);
+                break;
         }
-        else if (requestCode == RC_DOWNLOAD_EXTERNAL_WRITE_PERM || requestCode == RC_ASSET_EXTERNAL_WRITE_PERM)
+    }
+
+    private void handleWritePermissions(int requestCode, String[] permissions, int[] grantResults)
+    {
+        //check permission is granted
+        for (int i = 0; i < permissions.length; i++)
         {
-            //check permission is granted
-            for (int i = 0; i < permissions.length; i++)
+            String p = permissions[i];
+            if (p.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE))
             {
-                String p = permissions[i];
-                if (p.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE))
+                if (grantResults[i] != -1)
                 {
-                    if (grantResults[i] != -1)
+                    switch (requestCode)
                     {
-                        switch (requestCode)
-                        {
-                            case RC_ASSET_EXTERNAL_WRITE_PERM:
-                                viewModel.loadExternalXMLContracts();
-                                ((NewSettingsFragment)settingsFragment).refresh();
-                                break;
-                            case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
-                                viewModel.downloadAndInstall(buildVersion, this);
-                                break;
-                        }
+                        case RC_ASSET_EXTERNAL_WRITE_PERM:
+                            viewModel.loadExternalXMLContracts();
+                            ((NewSettingsFragment)settingsFragment).refresh();
+                            break;
+                        case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
+                            viewModel.downloadAndInstall(buildVersion, this);
+                            break;
                     }
-                    else
+                }
+                else
+                {
+                    switch (requestCode)
                     {
-                        switch (requestCode)
-                        {
-                            case RC_ASSET_EXTERNAL_WRITE_PERM:
-                                //no warning
-                                break;
-                            case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
-                                showRequirePermissionError();
-                                break;
-                        }
+                        case RC_ASSET_EXTERNAL_WRITE_PERM:
+                            //no warning
+                            break;
+                        case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
+                            showRequirePermissionError();
+                            break;
                     }
                 }
             }

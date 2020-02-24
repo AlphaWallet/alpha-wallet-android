@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
 import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
@@ -132,6 +133,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private static final int UPLOAD_FILE = 1;
     public static final int REQUEST_FILE_ACCESS = 31;
+    public static final int REQUEST_FINE_LOCATION = 110;
 
     static byte[] getEthereumMessagePrefix(int messageLength) {
         return MESSAGE_PREFIX.concat(String.valueOf(messageLength)).getBytes();
@@ -167,7 +169,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private LinearLayout currentNetworkClicker;
     private TextView balance;
     private TextView symbol;
-
+    private GeolocationPermissions.Callback geoCallback = null;
+    private String geoOrigin;
     private final Handler handler;
 
     private String currentWebpageTitle;
@@ -665,6 +668,14 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             }
 
             @Override
+            public void onGeolocationPermissionsShowPrompt(String origin,
+                                                           GeolocationPermissions.Callback callback)
+            {
+                super.onGeolocationPermissionsShowPrompt(origin, callback);
+                requestGeoPermission(origin, callback);
+            }
+
+            @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
                                              FileChooserParams fCParams)
             {
@@ -681,6 +692,27 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         web3.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                String[] prefixCheck = url.split(":");
+                if (prefixCheck.length > 1)
+                {
+                    Intent intent;
+                    switch (prefixCheck[0])
+                    {
+                        case "tel":
+                            intent = new Intent(Intent.ACTION_DIAL);
+                            intent.setData(Uri.parse(url));
+                            startActivity(Intent.createChooser(intent, "Call " + prefixCheck[1]));
+                            return true;
+                        case "mailto":
+                            intent = new Intent(Intent.ACTION_SENDTO);
+                            intent.setData(Uri.parse(url));
+                            startActivity(Intent.createChooser(intent, "Email: " + prefixCheck[1]));
+                            return true;
+                        default:
+                            break;
+                    }
+                }
+
                 urlTv.setText(url);
                 return false;
             }
@@ -1312,7 +1344,46 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             getActivity().requestPermissions(permissions, REQUEST_FILE_ACCESS);
             return false;
         }
+    }
 
+    // Handles the requesting of the fine location permission.
+    // Note: If you intend allowing geo-location in your app you need to ask the permission.
+    private void requestGeoPermission(String origin, GeolocationPermissions.Callback callback)
+    {
+        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED)
+        {
+            geoCallback = callback;
+            geoOrigin = origin;
+            String[] permissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
+            getActivity().requestPermissions(permissions, REQUEST_FINE_LOCATION);
+        }
+        else
+        {
+            callback.invoke(origin, true, false);
+        }
+    }
+
+    public void gotGeoAccess(String[] permissions, int[] grantResults)
+    {
+        boolean geoAccess = false;
+        for (int i = 0; i < permissions.length; i++)
+        {
+            if (permissions[i].contains("LOCATION") && grantResults[i] != -1) geoAccess = true;
+        }
+        if (!geoAccess) Toast.makeText(getContext(), "Permission not given", Toast.LENGTH_SHORT).show();
+        if (geoCallback != null && geoOrigin != null) geoCallback.invoke(geoOrigin, geoAccess, false);
+    }
+
+    public void gotFileAccess(String[] permissions, int[] grantResults)
+    {
+        boolean fileAccess = false;
+        for (int i = 0; i < permissions.length; i++)
+        {
+            if (permissions[i].contains("FILE") && grantResults[i] != -1) fileAccess = true;
+        }
+
+        if (fileAccess && picker != null) startActivityForResult(picker, UPLOAD_FILE);
     }
 
     @Override
@@ -1364,11 +1435,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 requestUpload();
             }
         }
-    }
-
-    public void gotFileAccess(int requestCode)
-    {
-
     }
 
     @Override

@@ -203,6 +203,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             ((HomeActivity)getActivity()).ResetDappBrowser();
         }
+        if (viewModel != null) viewModel.resetDebounce();
     }
 
     @Nullable

@@ -18,7 +18,7 @@ import static org.junit.Assert.fail;
 
 public class TokenDefinitionTest implements ParseResult
 {
-    private File entryTokenTestFile = new File("src/test/ts/entrytoken.xml");
+    private File entryTokenTestFile = new File("src/test/ts/entrytoken.canonicalized.xml");
 
     @Test
     public void TokenInformationCanBeExtracted() throws IOException, SAXException {

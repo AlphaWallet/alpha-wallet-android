@@ -752,46 +752,43 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
     {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == DappBrowserFragment.REQUEST_FILE_ACCESS)
+        switch (requestCode)
         {
-            ((DappBrowserFragment)dappBrowserFragment).gotFileAccess(requestCode);
-        }
-        else if (requestCode == RC_DOWNLOAD_EXTERNAL_WRITE_PERM || requestCode == RC_ASSET_EXTERNAL_WRITE_PERM)
-        {
-            //check permission is granted
-            for (int i = 0; i < permissions.length; i++)
-            {
-                String p = permissions[i];
-                if (p.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE))
+            case DappBrowserFragment.REQUEST_FILE_ACCESS:
+                ((DappBrowserFragment)dappBrowserFragment).gotFileAccess(permissions, grantResults);
+                break;
+            case DappBrowserFragment.REQUEST_FINE_LOCATION:
+                ((DappBrowserFragment)dappBrowserFragment).gotGeoAccess(permissions, grantResults);
+                break;
+            case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
+                if (hasPermission(permissions, grantResults))
                 {
-                    if (grantResults[i] != -1)
-                    {
-                        switch (requestCode)
-                        {
-                            case RC_ASSET_EXTERNAL_WRITE_PERM:
-                                viewModel.loadExternalXMLContracts();
-                                ((NewSettingsFragment)settingsFragment).refresh();
-                                break;
-                            case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
-                                viewModel.downloadAndInstall(buildVersion, this);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        switch (requestCode)
-                        {
-                            case RC_ASSET_EXTERNAL_WRITE_PERM:
-                                //no warning
-                                break;
-                            case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
-                                showRequirePermissionError();
-                                break;
-                        }
-                    }
+                    viewModel.loadExternalXMLContracts();
+                    ((NewSettingsFragment)settingsFragment).refresh();
                 }
-            }
+                break;
+            case RC_ASSET_EXTERNAL_WRITE_PERM:
+                if (hasPermission(permissions, grantResults))
+                {
+                    viewModel.downloadAndInstall(buildVersion, this);
+                }
+                else
+                {
+                    showRequirePermissionError();
+                }
+                break;
         }
+    }
+
+    private boolean hasPermission(String[] permissions, int[] grantResults)
+    {
+        boolean hasPermission = true;
+        for (int i = 0; i < permissions.length; i++)
+        {
+            if (grantResults[i] == -1) hasPermission = false;
+        }
+
+        return hasPermission;
     }
 
     private void showRequirePermissionError()

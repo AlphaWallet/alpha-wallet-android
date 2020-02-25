@@ -261,6 +261,10 @@
         <activity
             android:name=".ui.BackupKeyActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
+
+        <activity
+            android:name=".ui.StaticViewer"
+            android:label="View Text" />
     </application>
 
 </manifest>

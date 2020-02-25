@@ -79,6 +79,7 @@ public abstract class C {
     public static final String EXTRA_CHAIN_ID = "CHAIN_ID";
     public static final String EXTRA_CALLBACKID = "CALLBACK_ID";
     public static final String EXTRA_LOCALE = "LOCALE_STRING";
+    public static final String EXTRA_PAGE_TITLE = "PTITLE";
 
     public static final String PRUNE_ACTIVITY =
             "com.stormbird.wallet.PRUNE_ACTIVITY";

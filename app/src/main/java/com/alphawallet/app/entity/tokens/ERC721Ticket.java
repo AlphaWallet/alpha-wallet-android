@@ -278,7 +278,7 @@ public class ERC721Ticket extends Token implements Parcelable {
      * @return token requires a transaction refresh
      */
     @Override
-    public boolean requiresTransactionRefresh()
+    public boolean requiresTransactionRefresh(int pendingChain)
     {
         boolean requiresUpdate = balanceChanged;
         balanceChanged = false;

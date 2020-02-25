@@ -863,7 +863,7 @@ public class Token implements Parcelable, Comparable<Token>
         return walletUIUpdateRequired;
     }
 
-    public boolean requiresTransactionRefresh()
+    public boolean requiresTransactionRefresh(int updateChain)
     {
         boolean requiresUpdate = balanceChanged;
         balanceChanged = false;
@@ -875,6 +875,12 @@ public class Token implements Parcelable, Comparable<Token>
         long currentTime = System.currentTimeMillis();
 
         long multiplier = isEthereum() || EthereumNetworkRepository.isPriorityToken(this) ? 1 : 5;
+
+        if (isEthereum() && tokenInfo.chainId == updateChain && (currentTime - lastTxCheck) > 10*1000) //check chain every 10 seconds while transaction is pending
+        {
+            lastTxCheck = currentTime;
+            requiresUpdate = true;
+        }
 
         //ensure chain transactions for the wallet are checked on a regular basis.
         if (checkBackgroundUpdate(currentTime) || (EthereumNetworkRepository.hasTicker(this) && hasPositiveBalance() && (currentTime - lastTxCheck) > multiplier*60*1000)) //need to check main chains once per minute

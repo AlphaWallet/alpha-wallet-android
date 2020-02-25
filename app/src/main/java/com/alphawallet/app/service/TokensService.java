@@ -145,11 +145,12 @@ public class TokensService
         return symbol;
     }
 
-    public Token getRequiresTransactionUpdate()
+    public Token getRequiresTransactionUpdate(Token pending)
     {
+        int chainToUpdate = pending != null ? pending.tokenInfo.chainId : 0;
         for (Token check : getAllLiveTokens())
         {
-            if (check.requiresTransactionRefresh())
+            if (check.requiresTransactionRefresh(chainToUpdate))
             {
                 return check;
             }

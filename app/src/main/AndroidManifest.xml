@@ -92,26 +92,21 @@
                     android:pathPrefix="/"
                     android:scheme="https" />
             </intent-filter>
-            <intent-filter>
-                <data
-                    android:host="*"
-                    android:mimeType="*/*"
-                    android:pathPattern=".*\\.tsml"
-                    android:scheme="file" />
-
-                <data
-                    android:mimeType="application/*"
-                    android:pathPattern=".*\\.tsml"
-                    android:scheme="content" />
-                <data
-                    android:mimeType="application/*"
-                    android:pathPattern=".*\\.xml"
-                    android:scheme="content" />
-
+            <intent-filter android:priority="999">
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.tsml" />
+                <data android:pathPattern=".*\\..*\\.tsml" />
+                <data android:pathPattern=".*\\..*\\..*\\.tsml" />
+                <data android:pathPattern=".*\\.xml" />
+                <data android:pathPattern=".*\\..*\\.xml" />
+                <data android:pathPattern=".*\\..*\\..*\\.xml" />
             </intent-filter>
         </activity>
 

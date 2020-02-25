@@ -213,6 +213,33 @@ public class NewSettingsFragment extends Fragment
             layoutLinkedIn.setVisibility(View.GONE);
         }
 
+        final LinearLayout layoutInstagram = view.findViewById(R.id.layout_instagram);
+        if (MediaLinks.AWALLET_INSTAGRAM_URL != null)
+        {
+            layoutInstagram.setVisibility(View.VISIBLE);
+            layoutInstagram.setOnClickListener(v -> {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(MediaLinks.AWALLET_INSTAGRAM_URL));
+                if (isAppAvailable(C.INSTAGRAM_PACKAGE_NAME))
+                {
+                    intent.setPackage(C.INSTAGRAM_PACKAGE_NAME);
+                }
+                try
+                {
+                    getActivity().startActivity(intent);
+                }
+                catch (Exception e)
+                {
+                    Crashlytics.logException(e);
+                    e.printStackTrace();
+                }
+            });
+        }
+        else
+        {
+            layoutInstagram.setVisibility(View.GONE);
+        }
+
         final LinearLayout layoutTwitter = view.findViewById(R.id.layout_twitter);
         if (MediaLinks.AWALLET_TWITTER_URL != null)
         {

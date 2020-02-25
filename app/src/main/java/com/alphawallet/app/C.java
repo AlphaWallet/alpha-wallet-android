@@ -131,6 +131,7 @@ public abstract class C {
     public static final String FACEBOOK_PACKAGE_NAME = "com.facebook.katana";
     public static final String LINKEDIN_PACKAGE_NAME = "com.linkedin.android";
     public static final String REDDIT_PACKAGE_NAME = "com.reddit.frontpage";
+    public static final String INSTAGRAM_PACKAGE_NAME = "com.instagram.android";
 
     public interface ErrorCode {
         int UNKNOWN = 1;

@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.RawRes;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
@@ -18,6 +20,7 @@ import com.alphawallet.app.entity.HelpItem;
 import com.alphawallet.app.viewmodel.HelpViewModel;
 import com.alphawallet.app.viewmodel.HelpViewModelFactory;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,7 +67,8 @@ public class HelpActivity extends BaseActivity {
         adapter.setWebView(webView);
         List<HelpItem> helpItems = new ArrayList<>();
         for (int i = 0; i < questions.length; i++) {
-            if (getString(questions[i]).length() > 0) helpItems.add(new HelpItem(getString(questions[i]), getString(answers[i])));
+            if (isRawResource(answers[i])) helpItems.add(new HelpItem(getString(questions[i]), answers[i]));
+            else if (getString(questions[i]).length() > 0) helpItems.add(new HelpItem(getString(questions[i]), getString(answers[i])));
         }
         adapter.setHelpItems(helpItems);
 
@@ -135,4 +139,19 @@ public class HelpActivity extends BaseActivity {
         }.execute(request);*/
     }
 
+    private boolean isRawResource(@RawRes int rawRes) {
+        try {
+            InputStream in = getResources().openRawResource(rawRes);
+            if (in.available() > 0)
+            {
+                in.close();
+                return true;
+            }
+            in.close();
+        } catch (Exception ex) {
+            Log.d("READ_JS_TAG", "Ex", ex);
+        }
+
+        return false;
+    }
 }

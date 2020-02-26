@@ -212,6 +212,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             web3.setWebLoadCallback(this);
             ((HomeActivity)getActivity()).ResetDappBrowser();
         }
+        if (viewModel != null) viewModel.resetDebounce();
     }
 
     @Nullable

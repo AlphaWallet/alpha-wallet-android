@@ -543,4 +543,6 @@
     <string name="change_chain_message">QR code requests a different chain. Proceed?</string>
     <string name="change_chain_request">Change Chain Request</string>
     <string name="error_zero_balance">零余额交易</string>
+    <string name="attestations">Attestations</string>
+    <string name="favourites">Favourites</string>
 </resources>

@@ -8,9 +8,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 import com.alphawallet.app.R;
+
+import java.util.ArrayList;
 
 public class AWalletBottomNavigationView extends LinearLayout {
     public static final int WALLET = 0;
@@ -79,20 +79,20 @@ public class AWalletBottomNavigationView extends LinearLayout {
         selectedItem = index;
         switch (index) {
             case TRANSACTIONS:
-                transactions.setImageResource(R.drawable.ic_transactions_active);
-                transactionsLabel.setTextColor(getResources().getColor(R.color.colorAccent, getContext().getTheme()));
+                transactions.setImageResource(R.drawable.ic_tab_activity_blue);
+                transactionsLabel.setTextColor(getResources().getColor(R.color.azure, getContext().getTheme()));
                 break;
             case DAPP_BROWSER:
-                dappBrowser.setImageResource(R.drawable.ic_browser_active);
-                dappBrowserLabel.setTextColor(getResources().getColor(R.color.colorAccent, getContext().getTheme()));
+                dappBrowser.setImageResource(R.drawable.ic_tab_browser_blue);
+                dappBrowserLabel.setTextColor(getResources().getColor(R.color.azure, getContext().getTheme()));
                 break;
             case WALLET:
-                wallet.setImageResource(R.drawable.ic_wallet_active);
-                walletLabel.setTextColor(getResources().getColor(R.color.colorAccent, getContext().getTheme()));
+                wallet.setImageResource(R.drawable.ic_tab_wallet_blue);
+                walletLabel.setTextColor(getResources().getColor(R.color.azure, getContext().getTheme()));
                 break;
             case SETTINGS:
-                settings.setImageResource(R.drawable.ic_settings_active);
-                settingsLabel.setTextColor(getResources().getColor(R.color.colorAccent, getContext().getTheme()));
+                settings.setImageResource(R.drawable.ic_tab_settings_blue);
+                settingsLabel.setTextColor(getResources().getColor(R.color.azure, getContext().getTheme()));
                 break;
         }
     }
@@ -102,15 +102,15 @@ public class AWalletBottomNavigationView extends LinearLayout {
     }
 
     private void deselectAll() {
-        transactions.setImageResource(R.drawable.ic_transactions);
-        dappBrowser.setImageResource(R.drawable.ic_browser);
-        wallet.setImageResource(R.drawable.ic_wallet);
-        settings.setImageResource(R.drawable.ic_settings);
+        transactions.setImageResource(R.drawable.ic_tab_activity);
+        dappBrowser.setImageResource(R.drawable.ic_tab_browser);
+        wallet.setImageResource(R.drawable.ic_tab_wallet);
+        settings.setImageResource(R.drawable.ic_tab_settings);
         //reset text colour
-        transactionsLabel.setTextColor(getContext().getColor(R.color.unselected_grey));
-        dappBrowserLabel.setTextColor(getContext().getColor(R.color.unselected_grey));
-        walletLabel.setTextColor(getContext().getColor(R.color.unselected_grey));
-        settingsLabel.setTextColor(getContext().getColor(R.color.unselected_grey));
+        transactionsLabel.setTextColor(getContext().getColor(R.color.dove));
+        dappBrowserLabel.setTextColor(getContext().getColor(R.color.dove));
+        walletLabel.setTextColor(getContext().getColor(R.color.dove));
+        settingsLabel.setTextColor(getContext().getColor(R.color.dove));
     }
 
     public interface OnBottomNavigationItemSelectedListener {
@@ -147,8 +147,7 @@ public class AWalletBottomNavigationView extends LinearLayout {
         settingsBadge.setText(String.valueOf(settingsBadgeKeys.size()));
     }
 
-    public void hideBrowserTab()
-    {
+    public void hideBrowserTab() {
         LinearLayout browserTab = findViewById(R.id.browser_tab);
         if (browserTab != null) browserTab.setVisibility(View.GONE);
     }

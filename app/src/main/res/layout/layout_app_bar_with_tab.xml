@@ -53,6 +53,6 @@
         app:tabIndicatorFullWidth="true"
         app:tabMode="fixed"
         app:tabSelectedTextColor="@color/tealish"
-        app:tabTextAppearance="@style/TabTextAppearance"
+        app:tabTextAppearance="@style/WalletTabTextAppearance"
         app:tabTextColor="@color/grey_8d" />
 </android.support.design.widget.AppBarLayout>

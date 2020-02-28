@@ -19,7 +19,7 @@
     <string name="yes_continue">是，继续</string>
     <string name="no_repeat">否，重复</string>
     <string name="transfer">转移%s</string>
-    <string name="action_buy">购买</string>
+    <string name="action_buy">购买%s</string>
     <string name="empty"></string>
     <string name="try_again">重试</string>
     <string name="already_have_account">已经有钱包了吗？</string>
@@ -59,7 +59,7 @@
     <string name="action_more_details">更多详情</string>
     <string name="action_add_wallet">添加钱包</string>
     <string name="action_coinbase">Coinbase</string>
-    <string name="action_shapeshift">Shapeshift（仅限加密货币）</string>
+    <string name="action_localeth">LocalEthereum</string>
     <string name="action_changelly">Changelly</string>
     <!-- Subject -->
     <string name="subject_transaction_detail">交易详情</string>

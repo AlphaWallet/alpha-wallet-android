@@ -20,7 +20,7 @@
     <string name="yes_continue">Yes, continue</string>
     <string name="no_repeat">No, repeat</string>
     <string name="transfer">Transfer %s</string>
-    <string name="action_buy">Buy</string>
+    <string name="action_buy">Buy %s</string>
     <string name="empty" />
     <string name="try_again">Try again</string>
     <string name="already_have_account">Already have a wallet?</string>
@@ -67,8 +67,8 @@
     <string name="action_add_wallet">Add wallet</string>
 
     <string name="action_coinbase">Coinbase</string>
-    <string name="action_shapeshift">Shapeshift (Crypto only)</string>
-    <string name="action_changelly">Changelly</string>
+    <string name="action_localeth">LocalEthereum</string>
+    <string name="action_changelly">Changelly (Buy with Credit card)</string>
     <!-- Subject -->
     <string name="subject_transaction_detail">Transaction detail</string>
     <string name="error_fail_generate_qr">Could not generate qr code.</string>

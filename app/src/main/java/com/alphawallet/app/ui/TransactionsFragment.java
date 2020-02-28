@@ -130,13 +130,15 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
         super.onPause();
     }
 
-    private void onTransactions(Transaction[] transaction) {
-        adapter.updateTransactions(transaction);
+    private void onTransactions(Transaction[] transactions) {
+        adapter.updateTransactions(transactions);
+        if (transactions.length > 0) showEmptyTx(false);
     }
 
     private void onNewTransactions(Transaction[] transactions)
     {
         adapter.addNewTransactions(transactions);
+        if (transactions.length > 0) showEmptyTx(false);
     }
 
     @Override
@@ -152,11 +154,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {
-        if (errorEnvelope.code == EMPTY_COLLECTION || adapter.getItemCount() == 0) {
-            showEmptyTx(true);
-        }/* else {
-            systemView.showError(getString(R.string.error_fail_load_transaction), this);
-        }*/
+
     }
 
     private void showEmptyTx(boolean show) {

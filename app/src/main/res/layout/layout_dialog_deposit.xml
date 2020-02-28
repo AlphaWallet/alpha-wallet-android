@@ -18,6 +18,24 @@
         android:layout_height="56dp"
         />
     <FrameLayout
+        android:id="@+id/action_changelly"
+        android:background="@drawable/bg_ripple_primary_color"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        >
+        <TextView
+            android:text="@string/action_changelly"
+            android:textSize="16sp"
+            android:textColor="@color/bottom_dialog_item"
+            android:fontFamily="@font/font_regular"
+            android:gravity="center_vertical"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            />
+    </FrameLayout>
+    <FrameLayout
         android:id="@+id/action_coinbase"
         android:background="@drawable/bg_ripple_primary_color"
         android:layout_width="match_parent"
@@ -36,31 +54,13 @@
             />
     </FrameLayout>
     <FrameLayout
-        android:id="@+id/action_shapeshift"
+        android:id="@+id/action_localeth"
         android:background="@drawable/bg_ripple_primary_color"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         >
         <TextView
-            android:text="@string/action_shapeshift"
-            android:textSize="16sp"
-            android:textColor="@color/bottom_dialog_item"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center_vertical"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            />
-    </FrameLayout>
-    <FrameLayout
-        android:id="@+id/action_changelly"
-        android:background="@drawable/bg_ripple_primary_color"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        >
-        <TextView
-            android:text="@string/action_changelly"
+            android:text="@string/action_localeth"
             android:textSize="16sp"
             android:textColor="@color/bottom_dialog_item"
             android:fontFamily="@font/font_regular"

@@ -503,7 +503,7 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean checkBalanceChange(Token token)
     {
-        return token != null && (!getFullBalance().equals(token.getFullBalance()) || !tokenInfo.name.equals(token.tokenInfo.name));
+        return token != null && (!getFullBalance().equals(token.getFullBalance()) || !getFullName().equals(token.getFullName()));
     }
 
     public String getPendingDiff()

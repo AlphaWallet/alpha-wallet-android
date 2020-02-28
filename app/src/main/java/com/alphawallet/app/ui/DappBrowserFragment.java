@@ -280,7 +280,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     @Override
     public void onAttachFragment(Fragment fragment) {
-        if (fragment.getTag() != null)
+        if (getContext() != null && fragment.getTag() != null)
         {
             switch (fragment.getTag())
             {
@@ -415,7 +415,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void onDappClick(DApp dapp) {
         forwardFragmentStack.clear();
-        System.out.println("Luddite: Clear: " + currentFragment);
         addToBackStack(DAPP_BROWSER);
         loadUrl(dapp.getUrl());
     }
@@ -896,7 +895,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     //return from the openConfirmation above
     public void handleTransactionCallback(int resultCode, Intent data)
     {
-        if (data == null) return;
+        if (data == null || web3 == null) return;
         Web3Transaction web3Tx = data.getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
         if (resultCode == RESULT_OK && web3Tx != null)
         {
@@ -1073,6 +1072,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void onWebpageLoaded(String url, String title)
     {
+        if (getContext() == null) return; //could be a late return from dead fragment
         if (homePressed)
         {
             homePressed = false;

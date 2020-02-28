@@ -247,7 +247,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     {
         if (token != null)
         {
-            new SendTokenRouter().open(ctx, address, token.tokenInfo.symbol, token.tokenInfo.decimals,
+            new SendTokenRouter().open(ctx, address, token.getSymbol(), token.tokenInfo.decimals,
                                        wallet.getValue(), token, token.tokenInfo.chainId);
         }
     }

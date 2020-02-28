@@ -223,7 +223,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         if (isValid) {
             BigInteger amountInSubunits = BalanceUtils.baseToSubunit(currentAmount, decimals);
             boolean sendingTokens = !token.isEthereum();
-            viewModel.openConfirmation(this, to, amountInSubunits, token.getAddress(), token.tokenInfo.decimals, token.tokenInfo.symbol, sendingTokens, ensHandler.getEnsName(), currentChain);
+            viewModel.openConfirmation(this, to, amountInSubunits, token.getAddress(), token.tokenInfo.decimals, token.getSymbol(), sendingTokens, ensHandler.getEnsName(), currentChain);
         }
     }
 
@@ -523,7 +523,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         tokenSymbolText = findViewById(R.id.symbol);
         chainName = findViewById(R.id.text_chain_name);
 
-        String symbol = TextUtils.isEmpty(token.tokenInfo.symbol) ? "" : token.tokenInfo.symbol.toUpperCase();
+        String symbol = token.getSymbol();
 
         tokenSymbolText.setText(TextUtils.isEmpty(token.tokenInfo.name)
                 ? symbol

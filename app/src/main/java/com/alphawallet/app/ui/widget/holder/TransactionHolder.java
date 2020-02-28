@@ -104,7 +104,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         String tokenSymbol = "";
         if (token != null)
         {
-            tokenSymbol = token.tokenInfo.symbol;
+            tokenSymbol = token.getSymbol();
             if (chainName != null)
             {
                 Utils.setChainColour(chainName, token.tokenInfo.chainId);
@@ -164,7 +164,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         type.setText(R.string.pending_transaction);
         String symbol = getString(R.string.eth);
         Token t = tokensService.getToken(transaction.chainId, tokensService.getCurrentAddress());
-        if (t != null) symbol = t.tokenInfo.symbol;
+        if (t != null) symbol = t.getSymbol();
 
         String valueStr = getValueStr(transaction.value, true, symbol, 18, transaction.to.equalsIgnoreCase(transaction.from));
         value.setText(valueStr);

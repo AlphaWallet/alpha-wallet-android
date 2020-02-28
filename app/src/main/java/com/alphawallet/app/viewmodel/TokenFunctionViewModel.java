@@ -163,7 +163,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.EXTRA_TO_ADDRESS, toAddress);
         intent.putExtra(C.EXTRA_AMOUNT, value.toString());
         intent.putExtra(C.EXTRA_DECIMALS, nativeEth.tokenInfo.decimals);
-        intent.putExtra(C.EXTRA_SYMBOL, nativeEth.tokenInfo.symbol);
+        intent.putExtra(C.EXTRA_SYMBOL, nativeEth.getSymbol());
         intent.putExtra(C.EXTRA_SENDING_TOKENS, false);
         intent.putExtra(C.EXTRA_ENS_DETAILS, info);
         intent.putExtra(C.EXTRA_NETWORKID, nativeEth.tokenInfo.chainId);

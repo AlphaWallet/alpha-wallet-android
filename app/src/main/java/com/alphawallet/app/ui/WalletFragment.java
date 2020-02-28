@@ -551,4 +551,9 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
             icon.draw(c);
         }
     }
+
+    public Wallet getCurrentWallet()
+    {
+        return viewModel.getWallet();
+    }
 }

@@ -9,7 +9,6 @@ import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.AddTokenRouter;
-import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.viewmodel.HomeViewModelFactory;
@@ -21,7 +20,6 @@ class HomeModule {
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             ImportTokenRouter importTokenRouter,
-            ExternalBrowserRouter externalBrowserRouter,
             AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
             GenericWalletInteract genericWalletInteract,
@@ -30,7 +28,6 @@ class HomeModule {
                 preferenceRepository,
                 localeRepository,
                 importTokenRouter,
-                externalBrowserRouter,
                 addTokenRouter,
                 assetDefinitionService,
                 genericWalletInteract,
@@ -45,11 +42,6 @@ class HomeModule {
     @Provides
     AddTokenRouter provideAddTokenRouter() {
         return new AddTokenRouter();
-    }
-
-    @Provides
-    ExternalBrowserRouter provideExternalBrowserRouter() {
-        return new ExternalBrowserRouter();
     }
 
     @Provides

@@ -426,7 +426,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     private void openExchangeDialog() {
-        Wallet wallet = viewModel.defaultWallet().getValue();
+        Wallet wallet = ((WalletFragment)walletFragment).getCurrentWallet();
         if (wallet == null) {
             Toast.makeText(this, getString(R.string.error_wallet_not_selected), Toast.LENGTH_SHORT)
                     .show();
@@ -440,8 +440,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private void onDepositClick(View view, Uri uri) {
-        viewModel.openDeposit(view.getContext(), uri);
+    private void onDepositClick(View view, String url)
+    {
+        showPage(DAPP_BROWSER);
+        ((DappBrowserFragment)dappBrowserFragment).onItemClick(url);
+        dialog.dismiss();
+        dialog = null;
     }
 
     @Override

@@ -61,6 +61,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         tokenView.setOnReadyCallback(this);
         functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null);
         functionBar.revealButtons();
+        functionBar.setSelection(idList);
     }
 
     @Override
@@ -125,19 +126,19 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     @Override
     public void selectRedeemTokens(List<BigInteger> selection)
     {
-        viewModel.selectRedeemToken(this, token, idList);
+        viewModel.selectRedeemToken(this, token, selection);
     }
 
     @Override
     public void sellTicketRouter(List<BigInteger> selection)
     {
-        viewModel.openUniversalLink(this, token, token.bigIntListToString(idList, false));
+        viewModel.openUniversalLink(this, token, token.bigIntListToString(selection, false));
     }
 
     @Override
     public void showTransferToken(List<BigInteger> selection)
     {
-        viewModel.showTransferToken(this, token, token.bigIntListToString(idList, false));
+        viewModel.showTransferToken(this, token, token.bigIntListToString(selection, false));
     }
 
     @Override

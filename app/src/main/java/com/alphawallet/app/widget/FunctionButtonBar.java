@@ -41,6 +41,7 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
     private StandardFunctionInterface callStandardFunctions;
     private LinearLayout currentHolder = null;
     private int buttonCount;
+    private Token token = null;
 
     public FunctionButtonBar(Context ctx)
     {
@@ -77,6 +78,7 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
     {
         callStandardFunctions = functionInterface;
         adapter = adp;
+        this.token = token;
         functions = assetSvs.getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         removeAllViews();
         int intrinsicButtonCount = getTokenDefaultButtonCount(token);
@@ -180,8 +182,8 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
                 {
                     case R.string.action_sell:
                         //single token or grouping
-                        if (selected.size() == 1) callStandardFunctions.sellTicketRouter(selected);
-                        else flashButton(v);
+                        if (token != null && !token.checkSelectionValidity(selected)) flashButton(v);
+                        else callStandardFunctions.sellTicketRouter(selected);
                         break;
                     case R.string.action_send:
                         callStandardFunctions.showSend();
@@ -191,13 +193,13 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
                         break;
                     case R.string.action_transfer:
                         //single token or grouping
-                        if (selected.size() == 1) callStandardFunctions.showTransferToken(selected);
-                        else flashButton(v);
+                        if (token != null && !token.checkSelectionValidity(selected)) flashButton(v);
+                        else callStandardFunctions.showTransferToken(selected);
                         break;
                     case R.string.action_use:
                         //single token or grouping
-                        if (selected.size() == 1) callStandardFunctions.selectRedeemTokens(selected);
-                        else flashButton(v);
+                        if (token != null && !token.checkSelectionValidity(selected)) flashButton(v);
+                        else callStandardFunctions.selectRedeemTokens(selected);
                         break;
                     default:
                         callStandardFunctions.handleClick(v.getId());
@@ -389,4 +391,9 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
             v.setBackgroundResource(R.drawable.selector_round_button);
         }, 500);
     };
+
+    public void setSelection(List<BigInteger> idList)
+    {
+        selection = idList;
+    }
 }

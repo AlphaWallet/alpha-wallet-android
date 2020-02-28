@@ -192,7 +192,8 @@
     <string name="ethereum_blockchain">基于以太坊智能合约</string>
     <string name="issuer">发行方:</string>
     <string name="root_title">设备安全性受损</string>
-    <string name="root_body">任何 \'rooted\' 应用 都可以查看到AlphaWallet\的 密匙数据并盗取你的数字资产! 请立即在此设备上删除你的钱包并在安全的设备上恢复你的钱包.</string>
+    <!--<string name="root_body">任何 \'rooted\' 应用 都可以查看到AlphaWallet\的 密匙数据并盗取你的数字资产! 请立即在此设备上删除你的钱包并在安全的设备上恢复你的钱包.</string>-->
+    <string name="root_body">你的手机是 \'rooted\'，但密钥仍受Android安全区域加密保护。 攻击媒介可能来自第三方键盘应用或剪贴板查看器，当您输入密钥时便会学习。 AlphaWallet尽最大努力通过关闭键盘自动建议来减轻这种情况。 如果您以\'root\'身份运行，建议您仅使用主流键盘应用程序，运行高质量的防病毒应用程序，并使用受人尊敬的开源根管理器，例如Magisk或SuperSU。 最终，关键安全是您的责任。</string>
     <string name="contact_us">需要更多的帮助? 联系我们</string>
     <string name="confirm_sale_title">确认出售?</string>
     <string name="dialog_cancel_back">取消并退回</string>

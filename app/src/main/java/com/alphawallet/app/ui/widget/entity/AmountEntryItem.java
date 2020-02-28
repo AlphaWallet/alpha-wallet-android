@@ -122,8 +122,8 @@ public class AmountEntryItem
         tokenEquivalentSymbol = activity.findViewById(R.id.text_token_symbol);
         if (token != null)
         {
-            tokenSymbolLabel.setText(token.tokenInfo.symbol);
-            tokenEquivalentSymbol.setText(token.tokenInfo.symbol);
+            tokenSymbolLabel.setText(token.getSymbol());
+            tokenEquivalentSymbol.setText(token.getSymbol());
         }
 
         tokenEquivalentLayout = activity.findViewById(R.id.layout_token_equivalent_value);

@@ -139,7 +139,7 @@ public class TokensService
         Token token = getToken(chainId, addr);
         if (token != null)
         {
-            symbol = token.tokenInfo.symbol;
+            symbol = token.getSymbol();
         }
 
         return symbol;

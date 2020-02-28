@@ -455,7 +455,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             }
             else
             {
-                functionEffect = functionEffect + " " + token.tokenInfo.symbol + " to " + actionMethod;
+                functionEffect = functionEffect + " " + token.getSymbol() + " to " + actionMethod;
                 //functionEffect = functionEffect + " to " + actionMethod;
             }
 
@@ -467,7 +467,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                 value = action.function.tx.args.get("value").value;
                 BigDecimal valCorrected = getCorrectedBalance(value, 18);
                 Token currency = viewModel.getCurrency(token.tokenInfo.chainId);
-                functionEffect = valCorrected.toString() + " " + currency.tokenInfo.symbol + " to " + actionMethod;
+                functionEffect = valCorrected.toString() + " " + currency.getSymbol() + " to " + actionMethod;
             }
 
             //finished resolving attributes, blank definition cache so definition is re-loaded when next needed
@@ -520,7 +520,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
 
         //eg Send 2(*1) ETH(*2) to Alex's Amazing Coffee House(*3) (0xdeadacec0ffee(*4))
-        String extraInfo = String.format(getString(R.string.tokenscript_send_native), functionEffect, token.tokenInfo.symbol, actionMethod, to);
+        String extraInfo = String.format(getString(R.string.tokenscript_send_native), functionEffect, token.getSymbol(), actionMethod, to);
 
         //Clear the cache to refresh any resolved values
         viewModel.getAssetDefinitionService().clearCache();
@@ -548,7 +548,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(AWalletAlertDialog.ERROR);
         alertDialog.setTitle(R.string.error_insufficient_funds);
-        alertDialog.setMessage(getString(R.string.current_funds, currency.getCorrectedBalance(currency.tokenInfo.decimals), currency.tokenInfo.symbol));
+        alertDialog.setMessage(getString(R.string.current_funds, currency.getCorrectedBalance(currency.tokenInfo.decimals), currency.getSymbol()));
         alertDialog.setButtonText(R.string.button_ok);
         alertDialog.setButtonListener(v ->alertDialog.dismiss());
         alertDialog.show();

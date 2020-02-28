@@ -243,6 +243,12 @@ public class Token implements Parcelable, Comparable<Token>
         }
     }
 
+    public String getSymbol()
+    {
+        if (tokenInfo.symbol == null) return "";
+        else return tokenInfo.symbol.toUpperCase();
+    }
+
     public void clickReact(BaseViewModel viewModel, Context context)
     {
         viewModel.showErc20TokenDetail(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);

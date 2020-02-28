@@ -242,7 +242,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 String contractTxt = contractAddress + " " + contractName;
                 contractAddrText.setText(contractTxt);
-                symbolText.setText(token.tokenInfo.symbol);
+                symbolText.setText(token.getSymbol());
                 amountString = symbol;
                 transactionBytes = viewModel.getERC721TransferBytes(to, contractAddress, amountStr, chainId);
                 break;

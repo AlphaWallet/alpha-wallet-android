@@ -116,7 +116,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         super.onStop();
         viewModel.stopGasSettingsFetch();
 
-        if (BuildConfig.BUILD_TYPE.equals("debug_test"))
+        if (BuildConfig.BUILD_TYPE.equals("lifecycle_debug"))
         {
             //blank members
             viewModel.unloadScriptsForDebug();

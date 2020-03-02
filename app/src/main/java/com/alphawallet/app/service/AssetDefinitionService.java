@@ -1494,7 +1494,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      */
     public void unload()
     {
-        if (!BuildConfig.BUILD_TYPE.equals("debug_test"))
+        if (!BuildConfig.BUILD_TYPE.equals("lifecycle_debug"))
         {
             Toast.makeText(context, "Debug Test method used outside of Life-Cycle testing", Toast.LENGTH_LONG).show();
             return;

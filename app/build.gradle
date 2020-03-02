@@ -79,7 +79,7 @@ android {
             minifyEnabled false
             debuggable true
         }
-        debug_test {
+        lifecycle_debug {
             minifyEnabled false
             debuggable true
             signingConfig android.signingConfigs.debug

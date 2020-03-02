@@ -262,7 +262,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void onWalletName(String name) {
         String prefix = "";
-        if (BuildConfig.BUILD_TYPE.equals("debug_test"))
+        if (BuildConfig.BUILD_TYPE.equals("lifecycle_debug"))
         {
             prefix = "DEBUG TEST: ";
         }

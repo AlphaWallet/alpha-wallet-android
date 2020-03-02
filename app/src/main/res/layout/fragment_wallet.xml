@@ -16,10 +16,10 @@
         android:background="@drawable/background_tab_layout"
         app:tabBackground="@color/white"
         app:tabGravity="center"
-        app:tabIndicatorColor="@color/azure"
+        app:tabIndicatorColor="@color/colorHighlight"
         app:tabIndicatorFullWidth="true"
         app:tabMode="scrollable"
-        app:tabSelectedTextColor="@color/azure"
+        app:tabSelectedTextColor="@color/colorHighlight"
         app:tabTextAppearance="@style/WalletTabTextAppearance"
         app:tabTextColor="@color/dove">
 

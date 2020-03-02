@@ -11,6 +11,7 @@
 	<color name="colorAccent">#54C1E3</color>
 	<color name="colorPrimaryLight">#AA54C1E3</color>
 	<color name="colorTheme">#FFFFFF</color>
+	<color name="colorHighlight">@color/azure</color>
     <!--<color name="title">#89000000</color>-->
 	<color name="secondary_text">#40000000</color>
 

@@ -174,10 +174,15 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
     private void initTabLayout(View view) {
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
-        if (VisibilityFilter.hideTabBar()) { tabLayout.setVisibility(View.GONE); return; }
+        if (VisibilityFilter.hideTabBar()) {
+            tabLayout.setVisibility(View.GONE);
+            return;
+        }
         tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.currency));
+//        tabLayout.addTab(tabLayout.newTab().setText(R.string.favourites));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.collectibles));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.attestations));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -194,6 +199,8 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                     case 2:
                         adapter.setFilterType(TokensAdapter.FILTER_COLLECTIBLES);
                         viewModel.fetchTokens();
+                        break;
+                    case 3: // TODO: Filter Attestations
                         break;
                     default:
                         break;

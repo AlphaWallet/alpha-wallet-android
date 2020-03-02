@@ -49,16 +49,6 @@
         android:background="@color/white"
         tools:visibility="gone" />
 
-    <!--<android.support.design.widget.BottomNavigationView-->
-    <!--android:id="@+id/bottom_navigation"-->
-    <!--android:background="?android:attr/windowBackground"-->
-    <!--android:layout_gravity="bottom"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--app:itemIconTint="@drawable/selector_menu_item_color"-->
-    <!--app:menu="@menu/menu_main_network"-->
-    <!--/>-->
-
     <com.alphawallet.app.widget.AWalletBottomNavigationView
         android:id="@+id/nav"
         android:layout_width="match_parent"
@@ -69,17 +59,17 @@
         android:id="@+id/layout_success_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/blur"
         android:gravity="center"
-        android:visibility="gone"
-        android:background="@color/blur">
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/success_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center|center_horizontal|center_vertical"
-            android:src="@drawable/big_green_tick"
-            android:foregroundGravity="center" />
+            android:foregroundGravity="center"
+            android:src="@drawable/big_green_tick" />
 
     </LinearLayout>
 

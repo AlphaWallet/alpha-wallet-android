@@ -33,15 +33,12 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DisplayState;
 import com.alphawallet.app.entity.ENSCallback;
 import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.FinishReceiver;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteUrlAdapter;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
@@ -77,7 +74,6 @@ import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
@@ -97,8 +93,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private ProgressView progressView;
     private AWalletAlertDialog dialog;
 
-    private FinishReceiver finishReceiver;
-
     private Token token;
     private NonFungibleTokenAdapter adapter;
 
@@ -114,7 +108,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private DisplayState transferStatus;
 
     private ENSHandler ensHandler;
-    private Handler handler;
+    private final Handler handler = new Handler();
 
     private AWalletConfirmationDialog confirmationDialog;
 
@@ -143,7 +137,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         setContentView(R.layout.activity_transfer_detail);
 
         token = getIntent().getParcelableExtra(TICKET);
-        handler = new Handler();
 
         Wallet wallet = getIntent().getParcelableExtra(WALLET);
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
@@ -244,8 +237,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         });
 
         setupScreen();
-
-        finishReceiver = new FinishReceiver(this);
     }
 
     private void setupAddressEditField()
@@ -486,15 +477,20 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
                     EthereumNetworkBase.getEtherscanURLbyNetwork(token.tokenInfo.chainId) + "tx/" + hash);
             clipboard.setPrimaryClip(clip);
             dialog.dismiss();
-            sendBroadcast(new Intent(PRUNE_ACTIVITY));
+            handler.post(this::goHome);
         });
         dialog.setOnDismissListener(v -> {
             dialog.dismiss();
-            sendBroadcast(new Intent(PRUNE_ACTIVITY));
-            new HomeRouter().open(this, true);
-            finish();
+            handler.post(this::goHome);
         });
         dialog.show();
+    }
+
+    private void goHome()
+    {
+        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 
     private void hideDialog()
@@ -581,7 +577,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     protected void onDestroy()
     {
         super.onDestroy();
-        unregisterReceiver(finishReceiver);
         viewModel.stopGasSettingsFetch();
         if (confirmationDialog != null && confirmationDialog.isShowing())
         {
@@ -649,7 +644,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
                 break;
 
             case SEND_INTENT_REQUEST_CODE:
-                sendBroadcast(new Intent(PRUNE_ACTIVITY));
+                goHome();
                 break;
 
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:

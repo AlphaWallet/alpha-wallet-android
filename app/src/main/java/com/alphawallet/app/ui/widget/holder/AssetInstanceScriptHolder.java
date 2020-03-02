@@ -43,7 +43,6 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     private final AssetDefinitionService assetDefinitionService; //need to cache this locally, unless we cache every string we need in the constructor
     private boolean activeClick;
     private final Handler handler;
-    private boolean reloaded;
 
     public AssetInstanceScriptHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService assetService, boolean iconified)
     {
@@ -65,7 +64,6 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     @Override
     public void bind(@Nullable TicketRange data, @NonNull Bundle addition)
     {
-        reloaded = false;
         activeClick = false;
         try
         {

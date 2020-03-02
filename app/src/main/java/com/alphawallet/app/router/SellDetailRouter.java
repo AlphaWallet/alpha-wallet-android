@@ -20,7 +20,7 @@ public class SellDetailRouter {
         intent.putExtra(C.Key.TICKET, token);
         intent.putExtra(C.EXTRA_TOKENID_LIST, ticketIDs);
         intent.putExtra(C.EXTRA_STATE, SellDetailActivity.SET_MARKET_SALE);
-        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
         context.startActivity(intent);
     }
 
@@ -31,7 +31,7 @@ public class SellDetailRouter {
         intent.putExtra(C.EXTRA_TOKENID_LIST, ticketIDs);
         intent.putExtra(C.EXTRA_STATE, state);
         intent.putExtra(C.EXTRA_PRICE, price);
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
         context.startActivity(intent);
     }
 }

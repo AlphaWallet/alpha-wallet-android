@@ -176,16 +176,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private String currentWebpageTitle;
     private String currentFragment;
 
-    private PinAuthenticationCallbackInterface authInterface;
     private Message<String> messageToSign;
     private byte[] messageBytes;
     private DAppFunction dAppFunction;
-    private SignType signType;
-
-    private enum SignType
-    {
-        SIGN_PERSONAL_MESSAGE, SIGN_MESSAGE
-    }
 
     public DappBrowserFragment()
     {
@@ -207,12 +200,28 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         homePressed = false;
         if (currentFragment == null) currentFragment = BROWSER_HOME;
         attachFragment(currentFragment);
-        if (web3 == null && getActivity() != null) //trigger reload
+        onRestart();
+    }
+
+    public void onRestart()
+    {
+        if (web3 == null || viewModel == null)
         {
-            web3.setWebLoadCallback(this);
-            ((HomeActivity)getActivity()).ResetDappBrowser();
+            View view = getView();
+            initViewModel();
+            initView(view);
+            setupAddressBar();
+            viewModel.prepare(getContext());
+            loadOnInit = null;
+            initDappBrowser(null);
         }
-        if (viewModel != null) viewModel.resetDebounce();
+    }
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+        handler.removeCallbacksAndMessages(null);
     }
 
     @Nullable
@@ -225,7 +234,26 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         setupAddressBar();
         viewModel.prepare(getContext());
         loadOnInit = null;
+        initDappBrowser(savedInstanceState);
 
+        return view;
+    }
+
+    private void initFragment(String startingFragment)
+    {
+        if (!startingFragment.isEmpty())
+        {
+            addToBackStack(DAPP_HOME);
+            attachFragment(startingFragment);
+        }
+        else
+        {
+            attachFragment(DAPP_HOME);
+        }
+    }
+
+    private void initDappBrowser(@Nullable Bundle savedInstanceState)
+    {
         // Load url from a link within the app
         if (getArguments() != null && getArguments().getString("url") != null) {
             String url = getArguments().getString("url");
@@ -260,21 +288,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             {
                 attachFragment(DAPP_HOME);                                                          //4. default to DAPP_HOME
             }
-        }
-
-        return view;
-    }
-
-    private void initFragment(String startingFragment)
-    {
-        if (!startingFragment.isEmpty())
-        {
-            addToBackStack(DAPP_HOME);
-            attachFragment(startingFragment);
-        }
-        else
-        {
-            attachFragment(DAPP_HOME);
         }
     }
 
@@ -615,6 +628,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.token().observe(this, this::onUpdateBalance);
+        viewModel.resetDebounce();
     }
 
     private void onUpdateBalance(Token token) {

@@ -96,7 +96,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private AWalletAlertDialog alertDialog;
     private Message<String> messageToSign;
     private FunctionButtonBar functionBar;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private boolean reloaded;
     private boolean isClosing;
 
@@ -591,7 +591,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     public void functionSuccess()
     {
         isClosing = true;
-        if (handler == null) handler = new Handler();
         LinearLayout successOverlay = findViewById(R.id.layout_success_overlay);
         if (successOverlay != null) successOverlay.setVisibility(View.VISIBLE);
         handler.postDelayed(closer, 1000);
@@ -745,7 +744,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     protected void showProgressSpinner(boolean show)
     {
-        if (handler == null) handler = new Handler();
         if (show) handler.post(progress);
         else handler.post(progressOff);
     }

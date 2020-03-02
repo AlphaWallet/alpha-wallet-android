@@ -278,4 +278,9 @@ public class ConfirmationViewModel extends BaseViewModel {
     {
         keyService.failedAuthentication(signData);
     }
+
+    public void stopGasPriceUpdate()
+    {
+        gasService.stopGasListener();
+    }
 }

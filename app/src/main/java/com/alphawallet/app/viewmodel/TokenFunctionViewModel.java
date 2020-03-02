@@ -85,7 +85,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.EXTRA_TOKENID_LIST, ticketIDs);
         intent.putExtra(C.EXTRA_STATE, SellDetailActivity.SET_A_PRICE);
         intent.putExtra(C.EXTRA_PRICE, 0);
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         context.startActivity(intent);
     }
 
@@ -107,7 +107,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.EXTRA_STATE, method);
         BigInteger firstId = tokenIds != null ? tokenIds.get(0) : BigInteger.ZERO;
         intent.putExtra(C.EXTRA_TOKEN_ID, firstId.toString(16));
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         ctx.startActivity(intent);
     }
 
@@ -153,7 +153,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.EXTRA_ACTION_NAME, additionalDetails);
         intent.putExtra(C.EXTRA_FUNCTION_NAME, functionName);
         intent.putExtra(C.TOKEN_TYPE, ConfirmationType.TOKENSCRIPT.ordinal());
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         ctx.startActivity(intent);
     }
 
@@ -168,7 +168,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.EXTRA_ENS_DETAILS, info);
         intent.putExtra(C.EXTRA_NETWORKID, nativeEth.tokenInfo.chainId);
         intent.putExtra(C.TOKEN_TYPE, ConfirmationType.ETH.ordinal());
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         ctx.startActivity(intent);
     }
 
@@ -222,5 +222,15 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void failedAuthentication(Operation signData)
     {
         keyService.failedAuthentication(signData);
+    }
+
+    public void reloadScriptsIfRequired()
+    {
+        assetDefinitionService.reloadAssets();
+    }
+
+    public void unloadScriptsForDebug()
+    {
+        assetDefinitionService.unload();
     }
 }

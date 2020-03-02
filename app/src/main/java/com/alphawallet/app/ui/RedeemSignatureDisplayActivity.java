@@ -21,8 +21,6 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
-import com.alphawallet.app.entity.FinishReceiver;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.SignaturePair;
 import com.alphawallet.app.entity.tokens.Token;
@@ -55,8 +53,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     @Inject
     protected RedeemSignatureDisplayModelFactory redeemSignatureDisplayModelFactory;
     private RedeemSignatureDisplayModel viewModel;
-
-    private FinishReceiver finishReceiver;
 
     private Wallet wallet;
     private Token token;
@@ -100,7 +96,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         token.displayTicketHolder(ticketRange.range, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
         tokenView.setOnReadyCallback(this);
         tokenView.setLayout(token, false);
-        finishReceiver = new FinishReceiver(this);
     }
 
     private void onSignRequest(Boolean aBoolean)
@@ -140,13 +135,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     {
         super.onPause();
         viewModel.resetSignDialog();
-    }
-
-    @Override
-    protected void onDestroy()
-    {
-        super.onDestroy();
-        unregisterReceiver(finishReceiver);
     }
 
     @Override

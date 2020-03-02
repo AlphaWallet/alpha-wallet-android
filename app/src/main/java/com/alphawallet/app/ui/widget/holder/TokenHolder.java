@@ -56,7 +56,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
 
-    private Handler handler;
+    private final Handler handler;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
@@ -86,6 +86,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         extendedInfo = findViewById(R.id.layout_extended_info);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
+        handler = new Handler();
     }
 
     @Override
@@ -204,7 +205,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         public void run()
         {
             tokenLayout.setElevation(0.0f);
-            handler = null;
         }
     };
 
@@ -213,7 +213,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         if (onTokenClickListener != null) {
             tokenLayout.setElevation(-10.0f);
             onTokenClickListener.onTokenClick(v, token, null, true);
-            handler = new Handler();
             handler.postDelayed(clearElevation, 800);
         }
     }

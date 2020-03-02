@@ -166,10 +166,6 @@ public class HomeViewModel extends BaseViewModel {
         LocaleUtils.setLocale(activity, currentLocale);
     }
 
-    public void loadExternalXMLContracts() {
-        assetDefinitionService.checkExternalDirectoryAndLoad();
-    }
-
     public void downloadAndInstall(String build, Context ctx) {
         createDirectory();
         downloadAPK(build, ctx);
@@ -291,5 +287,10 @@ public class HomeViewModel extends BaseViewModel {
 
     public void setFindWalletAddressDialogShown(boolean isShown) {
         preferenceRepository.setFindWalletAddressDialogShown(isShown);
+    }
+
+    public void loadExternalXMLContracts()
+    {
+        assetDefinitionService.checkExternalDirectoryAndLoad();
     }
 }

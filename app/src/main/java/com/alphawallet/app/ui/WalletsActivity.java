@@ -25,26 +25,25 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.alphawallet.app.ui.widget.adapter.WalletsAdapter;
-
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.ui.widget.adapter.WalletsAdapter;
 import com.alphawallet.app.viewmodel.WalletsViewModel;
 import com.alphawallet.app.viewmodel.WalletsViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AddWalletView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
+
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
 
 public class WalletsActivity extends BaseActivity implements
         View.OnClickListener,
@@ -63,7 +62,7 @@ public class WalletsActivity extends BaseActivity implements
     private Dialog dialog;
     private AWalletAlertDialog aDialog;
     private WalletsAdapter adapter;
-    private Handler handler;
+    private final Handler handler = new Handler();
 
     private boolean walletChange = false;
     private boolean requiresHomeRefresh;
@@ -97,8 +96,6 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.updateENSName().observe(this, this::updateWalletName);
         viewModel.noWalletsError().observe(this, this::noWallets);
         viewModel.findNetwork();
-
-        if (handler == null) handler = new Handler();
     }
 
     protected Activity getThisActivity()
@@ -145,7 +142,7 @@ public class WalletsActivity extends BaseActivity implements
     private void onCreateWalletError(ErrorEnvelope errorEnvelope)
     {
         dialogError = errorEnvelope.message;
-        if (handler != null) handler.post(displayWalletError);
+        handler.post(displayWalletError);
     }
 
     private Runnable displayWalletError = new Runnable()
@@ -172,9 +169,10 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroy()
+    {
         super.onDestroy();
-        handler = null;
+        handler.removeCallbacksAndMessages(null);
     }
 
     @Override

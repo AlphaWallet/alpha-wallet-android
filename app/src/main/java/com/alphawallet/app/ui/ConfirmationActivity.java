@@ -15,9 +15,7 @@ import android.widget.TextView;
 
 import com.alphawallet.app.entity.ConfirmationType;
 import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.GasSettings;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.TransactionData;
@@ -47,7 +45,6 @@ import java.math.BigInteger;
 
 import static com.alphawallet.token.tools.Convert.getEthString;
 import static com.alphawallet.app.C.ETH_SYMBOL;
-import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.ConfirmationType.ETH;
 import static com.alphawallet.app.entity.ConfirmationType.WEB3TRANSACTION;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
@@ -60,8 +57,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     @Inject
     ConfirmationViewModelFactory confirmationViewModelFactory;
     ConfirmationViewModel viewModel;
-
-    private FinishReceiver finishReceiver;
 
     private TextView fromAddressText;
     private TextView toAddressText;
@@ -87,6 +82,9 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private String to;
     private String transactionHex;
     private Token token;
+    private String symbol;
+    private String ensName;
+    private String tokenList;
     private int chainId;
     private Wallet sendingWallet;
 
@@ -99,12 +97,63 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         AndroidInjection.inject(this);
 
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_confirm);
-        transaction = null;
-        toolbar();
 
+        toolbar();
         setTitle(getString(R.string.title_transaction_details));
+
+        setupViewModel();
+        getIntents();
+        initView();
+    }
+
+    private void getIntents()
+    {
+        transaction = getIntent().getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
+        to = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
+        contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
+        confirmationType = ConfirmationType.values()[getIntent().getIntExtra(C.TOKEN_TYPE, 0)];
+        ensName = getIntent().getStringExtra(C.EXTRA_ENS_DETAILS);
+        amountStr = getIntent().getStringExtra(C.EXTRA_AMOUNT);
+        decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
+        symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
+        tokenList = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
+        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        chainId = token != null ? token.tokenInfo.chainId : getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
+
+        try
+        {
+            if (amountStr != null)
+                amount = new BigDecimal(amountStr);
+        }
+        catch (NumberFormatException e)
+        {
+            //Cannot convert
+        }
+
+        if (token == null)
+            token = viewModel.getToken(chainId, contractAddress);
+
+        if (symbol == null) symbol = (token == null) ? C.ETH_SYMBOL : token.getSymbol();
+    }
+
+    private void setupViewModel()
+    {
+        viewModel = ViewModelProviders.of(this, confirmationViewModelFactory)
+                .get(ConfirmationViewModel.class);
+
+        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.gasSettings().observe(this, this::onGasSettings);
+        viewModel.sendTransaction().observe(this, this::onTransaction);
+        viewModel.sendDappTransaction().observe(this, this::onDappTransaction);
+        viewModel.progress().observe(this, this::onProgress);
+        viewModel.error().observe(this, this::onError);
+        viewModel.pushToast().observe(this, this::displayToast);
+        viewModel.sendGasSettings().observe(this, this::onSendGasSettings);
+    }
+
+    private void initView()
+    {
         fromAddressText = findViewById(R.id.text_from);
         toAddressText = findViewById(R.id.text_to);
         valueText = findViewById(R.id.text_value);
@@ -122,40 +171,10 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         chainName = findViewById(R.id.text_chain_name);
         sendButton.setOnClickListener(view -> onSend());
 
-        transaction = getIntent().getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
-
-        to = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
-        contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-        confirmationType = ConfirmationType.values()[getIntent().getIntExtra(C.TOKEN_TYPE, 0)];
-        String ensName = getIntent().getStringExtra(C.EXTRA_ENS_DETAILS);
-        amountStr = getIntent().getStringExtra(C.EXTRA_AMOUNT);
-        decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
-        String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
-        symbol = symbol == null ? C.ETH_SYMBOL : symbol;
-        String tokenList = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
-        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-        chainId = token != null ? token.tokenInfo.chainId : getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
-
-        String amountString;
-
-        viewModel = ViewModelProviders.of(this, confirmationViewModelFactory)
-                .get(ConfirmationViewModel.class);
+        String amountString = "";
 
         Utils.setChainColour(chainName, chainId);
         chainName.setText(viewModel.getNetworkName(chainId));
-
-        try
-        {
-            if (amountStr != null)
-                amount = new BigDecimal(amountStr);
-        }
-        catch (NumberFormatException e)
-        {
-            //Cannot convert
-        }
-
-        if (token == null)
-            token = viewModel.getToken(chainId, contractAddress);
 
         switch (confirmationType) {
             case ETH:
@@ -263,17 +282,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         }
 
         valueText.setText(amountString);
-
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
-        viewModel.gasSettings().observe(this, this::onGasSettings);
-        viewModel.sendTransaction().observe(this, this::onTransaction);
-        viewModel.sendDappTransaction().observe(this, this::onDappTransaction);
-        viewModel.progress().observe(this, this::onProgress);
-        viewModel.error().observe(this, this::onError);
-        viewModel.pushToast().observe(this, this::displayToast);
-        viewModel.sendGasSettings().observe(this, this::onSendGasSettings);
-        finishReceiver = new FinishReceiver(this);
-
         getGasSettings();
     }
 
@@ -295,6 +303,23 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
             break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+        viewModel.stopGasPriceUpdate();
+        hideDialog();
+    }
+
+    @Override
+    public void onRestart()
+    {
+        super.onRestart();
+        getIntents();
+        setupViewModel();
+        initView(); //also resumes gas listener
     }
 
     @Override
@@ -330,8 +355,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        hideDialog();
-        unregisterReceiver(finishReceiver);
     }
 
     private void onSend()
@@ -421,14 +444,20 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                     EthereumNetworkBase.getEtherscanURLbyNetwork(token.tokenInfo.chainId) + "tx/" + hash);
             clipboard.setPrimaryClip(clip);
             dialog.dismiss();
-            sendBroadcast(new Intent(PRUNE_ACTIVITY));
+            goHome();
         });
         dialog.setOnDismissListener(v -> {
             dialog.dismiss();
-            new HomeRouter().open(this, true);
-            finish();
+            goHome();
         });
         dialog.show();
+    }
+
+    private void goHome()
+    {
+        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 
     private void onDappTransaction(TransactionData txData) {

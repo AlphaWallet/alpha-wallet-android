@@ -75,7 +75,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     private ProgressView progressView;
     private TokensAdapter adapter;
     private View selectedToken;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private String importFileName;
     private RecyclerView listView;
 
@@ -253,7 +253,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     @Override
     public void onResume() {
         super.onResume();
-        if (handler == null) handler = new Handler();
         selectedToken = null;
         viewModel.setVisibility(isVisible);
         viewModel.prepare();
@@ -441,7 +440,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 break;
         }
 
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
     }
 

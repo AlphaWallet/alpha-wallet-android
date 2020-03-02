@@ -3,11 +3,7 @@ package com.alphawallet.app.entity.tokens;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Base64;
-import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.alphawallet.app.entity.ContractType;
@@ -17,10 +13,8 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.ui.BaseActivity;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
-import com.alphawallet.app.web3.Web3TokenView;
 
 import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
@@ -28,7 +22,6 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,10 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import com.alphawallet.token.entity.TicketRange;
-import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.alphawallet.app.R;
 
@@ -166,7 +156,7 @@ public class Ticket extends Token implements Parcelable
     @Override
     public void clickReact(BaseViewModel viewModel, Context context)
     {
-        viewModel.showRedeemToken(context, this);
+        viewModel.showAssetDisplay(context, this);
     }
 
     @Override

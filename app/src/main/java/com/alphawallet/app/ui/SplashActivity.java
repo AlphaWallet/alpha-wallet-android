@@ -51,7 +51,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
 
     private String importData;
     private String importPath = null;
-    private Handler handler = new Handler();
+    private final Handler handler = new Handler();
     private String errorMessage;
 
     @Override
@@ -224,14 +224,13 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     public void onDestroy()
     {
         super.onDestroy();
-        handler = null;
     }
 
     @Override
     public void keyFailure(String message)
     {
         errorMessage = message;
-        if (handler != null) handler.post(displayError);
+        handler.post(displayError);
     }
 
     Runnable displayError = new Runnable()

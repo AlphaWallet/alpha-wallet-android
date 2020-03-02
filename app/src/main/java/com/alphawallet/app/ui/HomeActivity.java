@@ -81,12 +81,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private SystemView systemView;
     private Dialog dialog;
-    private ScrollControlViewPager viewPager;
+    private ScrollControlViewPager viewPager = null;
     private PagerAdapter pagerAdapter;
     private LinearLayout successOverlay;
     private ImageView successImage;
-    private Handler handler;
-    private HomeReceiver homeReceiver;
+    private final Handler handler;
+    private HomeReceiver homeReceiver = null;
     private AWalletConfirmationDialog cDialog;
     private String buildVersion;
     private final Fragment settingsFragment;
@@ -98,8 +98,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private static boolean updatePrompt = false;
     private TutoShowcase backupWalletDialog;
     private TutoShowcase findWalletAddressDialog;
-    private PinAuthenticationCallbackInterface authInterface;
-    private String importFileName;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -110,18 +108,19 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     public HomeActivity()
     {
-        importFileName = null;
         if (VisibilityFilter.hideDappBrowser()) dappBrowserFragment = new Fragment();
         else dappBrowserFragment = new DappBrowserFragment();
         transactionsFragment = new TransactionsFragment();
         settingsFragment = new NewSettingsFragment();
         walletFragment = new WalletFragment();
+        final HomeActivity thisActivity = this;
         lifeCycle = new LifecycleObserver()
         {
             @OnLifecycleEvent(Lifecycle.Event.ON_START)
             private void onMoveToForeground()
             {
                 Log.d("LIFE", "AlphaWallet into foreground");
+                System.out.println("YOLESS: Foreground HomeActivity");
                 ((WalletFragment)walletFragment).walletInFocus();
             }
 
@@ -129,7 +128,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             private void onMoveToBackground()
             {
                 Log.d("LIFE", "AlphaWallet into background");
+                System.out.println("YOLESS: Background HomeActivity");
                 ((WalletFragment)walletFragment).walletOutOfFocus();
+                if (homeReceiver != null) unregisterReceiver(homeReceiver);
+                homeReceiver = null;
             }
 
             @Override
@@ -140,6 +142,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         };
 
         ProcessLifecycleOwner.get().getLifecycle().addObserver(lifeCycle);
+        handler = new Handler();
     }
 
     @Override
@@ -165,17 +168,32 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
         }
 
-        viewModel = ViewModelProviders.of(this, homeViewModelFactory)
-                .get(HomeViewModel.class);
-        viewModel.setLocale(this);
-
         setContentView(R.layout.activity_home);
 
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-
+        setupViewModel();
+        setupViewPager();
         toolbar();
+        dissableDisplayHomeAsUp();
 
+        if (VisibilityFilter.hideDappBrowser())
+        {
+            removeDappBrowser();
+        }
+        else if (getIntent() != null && getIntent().getStringExtra("url") != null) {
+            String url = getIntent().getStringExtra("url");
+
+            Bundle bundle = new Bundle();
+            bundle.putString("url", url);
+            dappBrowserFragment.setArguments(bundle);
+            showPage(DAPP_BROWSER);
+        }
+
+        viewModel.cleanDatabases(this);
+    }
+
+    private void setupViewPager()
+    {
+        initBottomNavigation();
         viewPager = findViewById(R.id.view_pager);
         viewPager.lockPages(true);
         pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
@@ -198,46 +216,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
         });
 
-        initBottomNavigation();
-        dissableDisplayHomeAsUp();
-
-        SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
-        systemView = findViewById(R.id.system_view);
-        findViewById(R.id.toolbar).setBackgroundResource(R.color.colorPrimary);
-
-        RecyclerView list = findViewById(R.id.list);
-
-        systemView.attachRecyclerView(list);
-        systemView.attachSwipeRefreshLayout(refreshLayout);
-
-        viewModel.progress().observe(this, systemView::showProgress);
-        viewModel.error().observe(this, this::onError);
-        viewModel.installIntent().observe(this, this::onInstallIntent);
-        viewModel.walletName().observe(this, this::onWalletName);
-        viewModel.backUpMessage().observe(this, this::onBackup);
-
         if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false)) {
             showPage(SETTINGS);
         } else {
             showPage(WALLET);
         }
-
-        viewModel.loadExternalXMLContracts();
-
-        if (VisibilityFilter.hideDappBrowser())
-        {
-            removeDappBrowser();
-        }
-        else if (getIntent() != null && getIntent().getStringExtra("url") != null) {
-            String url = getIntent().getStringExtra("url");
-
-            Bundle bundle = new Bundle();
-            bundle.putString("url", url);
-            dappBrowserFragment.setArguments(bundle);
-            showPage(DAPP_BROWSER);
-        }
-
-        viewModel.cleanDatabases(this);
     }
 
     private void onBackup(String address)
@@ -278,10 +261,16 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     private void onWalletName(String name) {
+        String prefix = "";
+        if (BuildConfig.BUILD_TYPE.equals("debug_test"))
+        {
+            prefix = "DEBUG TEST: ";
+        }
+
         if (name != null && !name.isEmpty()) {
-            walletTitle = name;
+            walletTitle = prefix + name;
         } else {
-            walletTitle = getString(R.string.toolbar_header_wallet);
+            walletTitle = prefix + getString(R.string.toolbar_header_wallet);
         }
 
         if (viewPager.getCurrentItem() == WALLET) {
@@ -300,6 +289,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         super.onResume();
         viewModel.prepare();
         viewModel.getWalletName();
+        if (homeReceiver == null) homeReceiver = new HomeReceiver(this, this);
+        System.out.println("YOLESS: OnResume HomeActivity");
         checkRoot();
         successOverlay = findViewById(R.id.layout_success_overlay);
         successImage = findViewById(R.id.success_image);
@@ -335,8 +326,27 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             e.printStackTrace();
         }
+    }
 
-        if (homeReceiver == null) homeReceiver = new HomeReceiver(this, this);
+    private void setupViewModel()
+    {
+        viewModel = ViewModelProviders.of(this, homeViewModelFactory)
+                .get(HomeViewModel.class);
+        viewModel.setLocale(this);
+        SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
+        systemView = findViewById(R.id.system_view);
+        findViewById(R.id.toolbar).setBackgroundResource(R.color.colorPrimary);
+
+        RecyclerView list = findViewById(R.id.list);
+
+        systemView.attachRecyclerView(list);
+        systemView.attachSwipeRefreshLayout(refreshLayout);
+
+        viewModel.progress().observe(this, systemView::showProgress);
+        viewModel.error().observe(this, this::onError);
+        viewModel.installIntent().observe(this, this::onInstallIntent);
+        viewModel.walletName().observe(this, this::onWalletName);
+        viewModel.backUpMessage().observe(this, this::onBackup);
     }
 
     @Override
@@ -453,7 +463,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         super.onDestroy();
         viewModel.onClean();
-        unregisterReceiver(homeReceiver);
+        System.out.println("YOLESS: Ondestroy HomeActivity");
     }
 
     private void showPage(int page) {
@@ -571,8 +581,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
         successImage.setImageResource(R.drawable.big_green_tick);
         successOverlay.setVisibility(View.VISIBLE);
-
-        handler = new Handler();
         handler.postDelayed(this, 1000);
     }
 
@@ -588,7 +596,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             successOverlay.setVisibility(View.GONE);
             successOverlay.setAlpha(1.0f);
-            handler = null;
         }
     }
 
@@ -603,15 +610,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         //Key was upgraded
         //viewModel.upgradeWallet(keyAddress);
-    }
-
-    public void ResetDappBrowser()
-    {
-        getSupportFragmentManager()
-                    .beginTransaction()
-                    .detach(dappBrowserFragment)
-                    .attach(dappBrowserFragment)
-                    .commit();
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {

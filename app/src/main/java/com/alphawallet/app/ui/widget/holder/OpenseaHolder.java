@@ -42,7 +42,7 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
     private final LinearLayout layoutToken;
     private OnTokenClickListener tokenClickListener;
     private final AppCompatRadioButton itemSelect;
-    private Handler handler;
+    private final Handler handler;
     private boolean activeClick;
 
     public OpenseaHolder(int resId, ViewGroup parent, Token token) {
@@ -55,6 +55,7 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
         layoutToken = findViewById(R.id.layout_token);
         itemSelect = findViewById(R.id.radioBox);
         this.token = token;
+        handler = new Handler();
     }
 
     @Override
@@ -62,7 +63,6 @@ public class OpenseaHolder extends BinderViewHolder<TicketRange> implements Runn
     {
         String assetName;
         activeClick = false;
-        handler = new Handler();
         //retrieve asset from token
         Asset asset = getAsset(data);
 

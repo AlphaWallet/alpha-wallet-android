@@ -28,7 +28,7 @@ repositories {
 
 android {
     compileSdkVersion 29
-    buildToolsVersion '28.0.3'
+    buildToolsVersion '29.0.3'
     sourceSets {
         main {
 
@@ -60,6 +60,8 @@ android {
         buildConfigField "String", AmberdataAPI, AMBERDATA_API_KEY
         buildConfigField "String", InfuraAPI, INFURA_API_KEY
 
+
+
         ndk {
             abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
         }
@@ -68,18 +70,23 @@ android {
     productFlavors {
 	awallet {
 		dimension "targetting"
-        versionCode 84
-        versionName "2.20.0"
+        versionCode 92
+        versionName "2.22.0"
 	}
     }
     buildTypes {
         debug {
             minifyEnabled false
-//            proguardFiles getDefaultProguardFile('proguard-android.txt'),
-//                    'proguard-rules.pro'
+            debuggable true
+        }
+        debug_test {
+            minifyEnabled false
+            debuggable true
+            signingConfig android.signingConfigs.debug
         }
         release {
             minifyEnabled false
+            debuggable false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

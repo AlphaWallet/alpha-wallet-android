@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
@@ -65,7 +66,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     private String[] mnemonicArray;
     private ImageView spacerImage;
     private LinearLayout successOverlay;
-    private Handler handler;
+    private final Handler handler = new Handler();
 
     private AWalletAlertDialog alertDialog;
 
@@ -125,6 +126,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         }
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     private void LockOrientation()
     {
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
@@ -146,7 +148,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         if (successOverlay != null && showSuccess)
         {
             successOverlay.setVisibility(View.VISIBLE);
-            handler = new Handler();
             handler.postDelayed(this, 1000);
         }
 
@@ -272,7 +273,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         {
             successOverlay.setVisibility(View.GONE);
             successOverlay.setAlpha(1.0f);
-            handler = null;
         }
     }
 

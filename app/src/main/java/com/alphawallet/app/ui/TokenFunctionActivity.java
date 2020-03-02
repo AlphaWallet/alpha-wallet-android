@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.RelativeLayout;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
@@ -47,12 +48,41 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private FunctionButtonBar functionBar;
     private boolean reloaded;
 
-    private void initViews() {
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        AndroidInjection.inject(this);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_script_view);
+
+        getIntents();
+        setupViewModel();
+        initViews();
+        toolbar();
+        setTitle(getString(R.string.token_function));
+    }
+
+    private void getIntents()
+    {
         token = getIntent().getParcelableExtra(TICKET);
         String displayIds = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
+        idList = token.stringHexToBigIntegerList(displayIds);
+    }
+
+    private void setupViewModel()
+    {
+        viewModel = ViewModelProviders.of(this, tokenFunctionViewModelFactory)
+                .get(TokenFunctionViewModel.class);
+        viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
+        viewModel.getCurrentWallet();
+        viewModel.reloadScriptsIfRequired();
+    }
+
+    private void initViews()
+    {
         RelativeLayout frameLayout = findViewById(R.id.layout_select_ticket);
         tokenView = findViewById(R.id.web3_tokenview);
-        idList = token.stringHexToBigIntegerList(displayIds);
+        functionBar = findViewById(R.id.layoutButtons);
+
         reloaded = false;
 
         TicketRange data = new TicketRange(idList, token.tokenInfo.address, false);
@@ -62,34 +92,36 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null);
         functionBar.revealButtons();
         functionBar.setSelection(idList);
-    }
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_script_view);
-
-        viewModel = ViewModelProviders.of(this, tokenFunctionViewModelFactory)
-                .get(TokenFunctionViewModel.class);
         SystemView systemView = findViewById(R.id.system_view);
         ProgressView progressView = findViewById(R.id.progress_view);
         systemView.hide();
         progressView.hide();
-        functionBar = findViewById(R.id.layoutButtons);
-
-        initViews();
-        toolbar();
-        setTitle(getString(R.string.token_function));
-
-        viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
-        viewModel.getCurrentWallet();
     }
 
     @Override
-    public void onResume()
+    public void onRestart()
     {
-        super.onResume();
+        super.onRestart();
+        getIntents();
+        setupViewModel();
+        initViews();
+        toolbar();
+        setTitle(getString(R.string.token_function));
+    }
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+        viewModel.stopGasSettingsFetch();
+
+        if (BuildConfig.BUILD_TYPE.equals("debug_test"))
+        {
+            //blank members
+            viewModel.unloadScriptsForDebug();
+            viewModel = null;
+        }
     }
 
     @Override
@@ -101,14 +133,6 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     public boolean onOptionsItemSelected(MenuItem item) {
         return super.onOptionsItemSelected(item);
     }
-
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
-        viewModel.stopGasSettingsFetch();
-    }
-
 
     @Override
     public void onPageLoaded(WebView view)

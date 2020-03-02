@@ -72,7 +72,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     private Token token;
     private String contractAddress;
     private ENSHandler ensHandler;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private AWalletAlertDialog dialog;
     private TextView chainName;
     private int currentChain;
@@ -98,7 +98,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
         viewModel = ViewModelProviders.of(this, sendViewModelFactory)
                 .get(SendViewModel.class);
-        handler = new Handler();
 
         contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
 

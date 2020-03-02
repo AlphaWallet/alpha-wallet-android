@@ -219,11 +219,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         return assetDefinitionService;
     }
 
-    public void showAssets(Context ctx, Ticket ticket, boolean isClearStack)
-    {
-        assetDisplayRouter.open(ctx, ticket, isClearStack);
-    }
-
     public void openConfirm(Context ctx, String to, Token token, String hexTokenId, String ensDetails)
     {
         //first find the asset within the token

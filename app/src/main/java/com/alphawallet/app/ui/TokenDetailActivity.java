@@ -191,7 +191,7 @@ public class TokenDetailActivity extends BaseActivity {
         intent.putExtra(TICKET, token);
         intent.putExtra(EXTRA_TOKENID_LIST, asset.getTokenId(16));
         intent.putExtra(EXTRA_STATE, TRANSFER_TO_ADDRESS.ordinal());
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
     }
 }

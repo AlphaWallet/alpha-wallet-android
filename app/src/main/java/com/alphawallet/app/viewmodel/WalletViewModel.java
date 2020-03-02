@@ -439,7 +439,7 @@ public class WalletViewModel extends BaseViewModel
     }
 
     @Override
-    public void showRedeemToken(Context context, Token token) {
+    public void showAssetDisplay(Context context, Token token) {
         assetDisplayRouter.open(context, token);
     }
 

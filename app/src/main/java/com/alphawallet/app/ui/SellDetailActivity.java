@@ -20,7 +20,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.tokens.Token;
@@ -72,8 +71,6 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     protected SellDetailModelFactory viewModelFactory;
     protected SellDetailViewModel viewModel;
 
-    private FinishReceiver finishReceiver;
-
     private Token token;
     private Wallet wallet;
     private NonFungibleTokenAdapter adapter;
@@ -105,7 +102,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     private TextView confirmTotalCostText;
     private TextView currencyText;
     private boolean activeClick;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private PinAuthenticationCallbackInterface authInterface;
 
     @Override
@@ -156,15 +153,6 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         confirmPricePerTicketText = findViewById(R.id.text_confirm_price_per_ticket);
         confirmTotalCostText = findViewById(R.id.text_confirm_total_cost);
         currencyText = findViewById(R.id.text_currency);
-
-        finishReceiver = new FinishReceiver(this);
-    }
-
-    @Override
-    protected void onDestroy()
-    {
-        super.onDestroy();
-        unregisterReceiver(finishReceiver);
     }
 
     private void setupPage(Wallet wallet)
@@ -531,7 +519,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         dialog.setPrimaryButtonListener(v1 -> {
             sellTicketFinal();
-            sendBroadcast(new Intent(PRUNE_ACTIVITY));
+            goHome();
         });
         dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
         dialog.show();
@@ -546,10 +534,11 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         startActivityForResult(sendIntent, SEND_INTENT_REQUEST_CODE);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        handler = new Handler();
+    private void goHome()
+    {
+        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 
     @Override
@@ -590,7 +579,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         switch (requestCode)
         {
             case SEND_INTENT_REQUEST_CODE:
-                sendBroadcast(new Intent(PRUNE_ACTIVITY));
+                goHome();
                 break;
 
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:

@@ -19,6 +19,7 @@ import com.alphawallet.app.router.RedeemAssetSelectRouter;
 import com.alphawallet.app.router.TransferTicketRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.OpenseaService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.RedeemAssetSelectActivity;
 import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.app.ui.TransferTicketDetailActivity;
@@ -49,11 +50,10 @@ public class AssetDisplayViewModel extends BaseViewModel
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final FetchTokensInteract fetchTokensInteract;
     private final GenericWalletInteract genericWalletInteract;
-    private final TransferTicketRouter transferTicketRouter;
-    private final RedeemAssetSelectRouter redeemAssetSelectRouter;
     private final MyAddressRouter myAddressRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final OpenseaService openseaService;
+    private final TokensService tokensService;
 
     private Token refreshToken;
 
@@ -68,20 +68,18 @@ public class AssetDisplayViewModel extends BaseViewModel
     AssetDisplayViewModel(
             FetchTokensInteract fetchTokensInteract,
             GenericWalletInteract genericWalletInteract,
-            TransferTicketRouter transferTicketRouter,
-            RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             MyAddressRouter myAddressRouter,
             AssetDefinitionService assetDefinitionService,
-            OpenseaService openseaService) {
+            OpenseaService openseaService,
+            TokensService tokensService) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.redeemAssetSelectRouter = redeemAssetSelectRouter;
-        this.transferTicketRouter = transferTicketRouter;
         this.myAddressRouter = myAddressRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.openseaService = openseaService;
+        this.tokensService = tokensService;
     }
 
     @Override
@@ -99,13 +97,6 @@ public class AssetDisplayViewModel extends BaseViewModel
         return ticket;
     }
     public LiveData<XMLDsigDescriptor> sig() { return sig; }
-
-    public void selectAssetIdsToRedeem(Context context, Token token) {
-        if (getBalanceDisposable != null) {
-            getBalanceDisposable.dispose();
-        }
-        redeemAssetSelectRouter.open(context, token);
-    }
 
     public OpenseaService getOpenseaService()
     {
@@ -155,13 +146,6 @@ public class AssetDisplayViewModel extends BaseViewModel
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
-    public void showTransferToken(Context context, Token ticket) {
-        if (getBalanceDisposable != null) {
-            getBalanceDisposable.dispose();
-        }
-        transferTicketRouter.open(context, ticket);
-    }
-
     public void showContractInfo(Context ctx, Token token)
     {
         myAddressRouter.open(ctx, defaultWallet.getValue(), token);
@@ -174,7 +158,7 @@ public class AssetDisplayViewModel extends BaseViewModel
         intent.putExtra(C.EXTRA_TOKENID_LIST, tokenIds);
         intent.putExtra(C.EXTRA_STATE, SellDetailActivity.SET_A_PRICE);
         intent.putExtra(C.EXTRA_PRICE, 0);
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
 
@@ -191,7 +175,7 @@ public class AssetDisplayViewModel extends BaseViewModel
         Intent intent = new Intent(ctx, RedeemAssetSelectActivity.class);
         intent.putExtra(C.Key.TICKET, token);
         intent.putExtra(C.Key.TICKET_RANGE, parcel);
-        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         ctx.startActivity(intent);
     }
 
@@ -208,7 +192,7 @@ public class AssetDisplayViewModel extends BaseViewModel
             intent.putExtra(C.EXTRA_STATE, TRANSFER_TO_ADDRESS.ordinal());
         }
 
-        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         ctx.startActivity(intent);
     }
 
@@ -227,5 +211,20 @@ public class AssetDisplayViewModel extends BaseViewModel
         failSig.type = SigReturnType.NO_TOKENSCRIPT;
         failSig.subject = throwable.getMessage();
         sig.postValue(failSig);
+    }
+
+    public void setTokenViewDimensions(Token token)
+    {
+        tokensService.addToken(token);
+    }
+
+    public void reloadScriptsIfRequired()
+    {
+        assetDefinitionService.reloadAssets();
+    }
+
+    public void unload()
+    {
+        assetDefinitionService.unload();
     }
 }

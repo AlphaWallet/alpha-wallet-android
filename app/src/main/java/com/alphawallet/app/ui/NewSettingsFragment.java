@@ -1,67 +1,68 @@
 package com.alphawallet.app.ui;
 
 
-import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 
-import com.alphawallet.app.entity.MediaLinks;
+import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.util.LocaleUtils;
+import com.alphawallet.app.viewmodel.NewSettingsViewModel;
+import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
+import com.alphawallet.app.widget.SettingsItemView;
 
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.viewmodel.NewSettingsViewModel;
-import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
-import com.alphawallet.app.widget.AWalletConfirmationDialog;
-import com.crashlytics.android.Crashlytics;
 
-import static com.alphawallet.app.C.*;
+import static com.alphawallet.app.C.EXTRA_ADDRESS;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 
-public class NewSettingsFragment extends Fragment
-{
+public class NewSettingsFragment extends Fragment {
     @Inject
     NewSettingsViewModelFactory newSettingsViewModelFactory;
 
     private NewSettingsViewModel viewModel;
 
-    private TextView walletsSubtext;
-    private TextView backupStatusText;
-    private TextView localeSubtext;
-    private Switch notificationState;
-    private LinearLayout layoutEnableXML;
+    private LinearLayout walletSettingsLayout;
+    private LinearLayout systemSettingsLayout;
+    private LinearLayout supportSettingsLayout;
+
+    private SettingsItemView myAddressSetting;
+    private SettingsItemView changeWalletSetting;
+    private SettingsItemView backUpWalletSetting;
+    private SettingsItemView notificationsSetting;
+    private SettingsItemView biometricsSetting;
+    private SettingsItemView selectNetworksSetting;
+    private SettingsItemView manageTokensSetting;
+    private SettingsItemView advancedSetting;
+    private SettingsItemView supportSetting;
+
     private LinearLayout layoutBackup;
+    private View warningSeparator;
     private Button backupButton;
     private TextView backupTitle;
     private TextView backupDetail;
-    private RelativeLayout backupLayoutBackground;
     private ImageView backupMenuButton;
-    private ImageView backupStatusImage;
     private View backupPopupAnchor;
-    private LinearLayout layoutBackupKey;
-    private TextView backupText;
 
     private Wallet wallet;
 
@@ -72,276 +73,138 @@ public class NewSettingsFragment extends Fragment
         viewModel = ViewModelProviders.of(this, newSettingsViewModelFactory).get(NewSettingsViewModel.class);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.backUpMessage().observe(this, this::backupWarning);
-        viewModel.setLocale(getContext());
 
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        walletsSubtext = view.findViewById(R.id.wallets_subtext);
-        localeSubtext = view.findViewById(R.id.locale_lang_subtext);
-        notificationState = view.findViewById(R.id.switch_notifications);
-        backupStatusText = view.findViewById(R.id.text_backup_status);
-        backupStatusImage = view.findViewById(R.id.image_backup_status);
-        backupText = view.findViewById(R.id.backup_text);
+        initializeSettinngs(view);
 
-        TextView helpText = view.findViewById(R.id.text_version);
-        try
-        {
-            String version = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0).versionName;
-            helpText.setText(version);
-        }
-        catch (PackageManager.NameNotFoundException e)
-        {
-            e.printStackTrace();
-        }
+        addSettingsToLayout();
 
-        localeSubtext.setText(LocaleUtils.getDisplayLanguage(viewModel.getDefaultLocale(), viewModel.getDefaultLocale()));
+        setInitialSettingsData(view);
 
-        updateNotificationState();
-
-        final LinearLayout layoutWalletAddress = view.findViewById(R.id.layout_wallet_address);
-        layoutWalletAddress.setOnClickListener(v -> {
-            viewModel.showMyAddress(getContext());
-        });
-
-        final LinearLayout layoutManageWallets = view.findViewById(R.id.layout_manage_wallets);
-        if (VisibilityFilter.canChangeWallets())
-        {
-            layoutManageWallets.setOnClickListener(v -> {
-                viewModel.showManageWallets(getContext(), false);
-            });
-        }
-        else
-        {
-            layoutManageWallets.setVisibility(View.GONE);
-        }
-
-        layoutBackupKey = view.findViewById(R.id.layout_backup_wallet);
-        layoutBackupKey.setOnClickListener(v -> {
-            Wallet wallet = viewModel.defaultWallet().getValue();
-            if (wallet != null)
-            {
-                openBackupActivity(wallet);
-            }
-        });
-
-        final LinearLayout layoutSwitchnetworks = view.findViewById(R.id.layout_switch_network);
-        if (EthereumNetworkRepository.showNetworkFilters())
-        {
-            layoutSwitchnetworks.setOnClickListener(v -> {
-                Intent intent = new Intent(getActivity(), SelectNetworkActivity.class);
-                intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
-                getActivity().startActivity(intent);
-            });
-        }
-        else
-        {
-            layoutSwitchnetworks.setVisibility(View.GONE);
-        }
-
-        final LinearLayout layoutTokenManagement = view.findViewById(R.id.layout_token_management);
-        layoutTokenManagement.setOnClickListener(v -> {
-            if (wallet != null) {
-                Intent intent = new Intent(getActivity(), TokenManagementActivity.class);
-                intent.putExtra(EXTRA_ADDRESS, wallet.address);
-                getActivity().startActivity(intent);
-            }
-        });
-
-        final LinearLayout layoutSwitchLocale = view.findViewById(R.id.layout_locale_lang);
-        layoutSwitchLocale.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), SelectLocaleActivity.class);
-            String currentLocale = viewModel.getDefaultLocale();
-            intent.putExtra(EXTRA_LOCALE, currentLocale);
-            intent.putParcelableArrayListExtra(EXTRA_STATE, viewModel.getLocaleList(getContext()));
-            getActivity().startActivityForResult(intent, C.UPDATE_LOCALE);
-        });
-
-        final LinearLayout layoutHelp = view.findViewById(R.id.layout_help_faq);
-        layoutHelp.setOnClickListener(v -> {
-            viewModel.showHelp(getContext());
-        });
-
-        final LinearLayout layoutTelegram = view.findViewById(R.id.layout_telegram);
-        if (MediaLinks.AWALLET_TELEGRAM_URL != null)
-        {
-            layoutTelegram.setOnClickListener(v -> {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(MediaLinks.AWALLET_TELEGRAM_URL));
-                if (isAppAvailable(C.TELEGRAM_PACKAGE_NAME))
-                {
-                    intent.setPackage(C.TELEGRAM_PACKAGE_NAME);
-                }
-                try
-                {
-                    getActivity().startActivity(intent);
-                }
-                catch (Exception e)
-                {
-                    Crashlytics.logException(e);
-                    e.printStackTrace();
-                }
-            });
-        }
-        else
-        {
-            layoutTelegram.setVisibility(View.GONE);
-        }
-
-        final LinearLayout layoutLinkedIn = view.findViewById(R.id.layout_linkedin);
-        if (MediaLinks.AWALLET_LINKEDIN_URL != null)
-        {
-            layoutLinkedIn.setOnClickListener(v -> {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(MediaLinks.AWALLET_LINKEDIN_URL));
-                if (isAppAvailable(C.LINKEDIN_PACKAGE_NAME))
-                {
-                    intent.setPackage(C.LINKEDIN_PACKAGE_NAME);
-                }
-                try
-                {
-                    getActivity().startActivity(intent);
-                }
-                catch (Exception e)
-                {
-                    Crashlytics.logException(e);
-                    e.printStackTrace();
-                }
-            });
-        }
-        else
-        {
-            layoutLinkedIn.setVisibility(View.GONE);
-        }
-
-        final LinearLayout layoutTwitter = view.findViewById(R.id.layout_twitter);
-        if (MediaLinks.AWALLET_TWITTER_URL != null)
-        {
-            layoutTwitter.setOnClickListener(v -> {
-                Intent intent;
-                try
-                {
-                    getActivity().getPackageManager().getPackageInfo(C.TWITTER_PACKAGE_NAME, 0);
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_TWITTER_URL));
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                }
-                catch (Exception e)
-                {
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_TWITTER_URL));
-                }
-                try
-                {
-                    getActivity().startActivity(intent);
-                }
-                catch (Exception e)
-                {
-                    Crashlytics.logException(e);
-                    e.printStackTrace();
-                }
-            });
-        }
-        else
-        {
-            layoutTwitter.setVisibility(View.GONE);
-        }
-
-        final LinearLayout layoutReddit = view.findViewById(R.id.layout_reddit);
-        if (MediaLinks.AWALLET_REDDIT_URL != null)
-        {
-            layoutReddit.setOnClickListener(v -> {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                if (isAppAvailable(C.REDDIT_PACKAGE_NAME))
-                {
-                    intent.setPackage(C.REDDIT_PACKAGE_NAME);
-                }
-                
-                intent.setData(Uri.parse(MediaLinks.AWALLET_REDDIT_URL));
-
-                try
-                {
-                    getActivity().startActivity(intent);
-                }
-                catch (Exception e)
-                {
-                    Crashlytics.logException(e);
-                    e.printStackTrace();
-                }
-            });
-        }
-        else
-        {
-            layoutReddit.setVisibility(View.GONE);
-        }
-
-        final LinearLayout layoutNotifications = view.findViewById(R.id.layout_notification_settings);
-        layoutNotifications.setOnClickListener(v -> {
-            boolean currentState = viewModel.getNotificationState();
-            currentState = !currentState;
-            viewModel.setNotificationState(currentState);
-            updateNotificationState();
-        });
-
-        layoutBackup = view.findViewById(R.id.layout_item_warning);
-        backupTitle = view.findViewById(R.id.text_title);
-        backupDetail = view.findViewById(R.id.text_detail);
-        backupLayoutBackground = view.findViewById(R.id.layout_backup_text);
-        backupButton = view.findViewById(R.id.button_backup);
-        backupMenuButton = view.findViewById(R.id.btn_menu);
-        backupPopupAnchor = view.findViewById(R.id.popup_anchor);
-        layoutBackup.setVisibility(View.GONE);
-
-        final LinearLayout layoutFacebook = view.findViewById(R.id.layout_facebook);
-        if (MediaLinks.AWALLET_FACEBOOK_URL != null)
-        {
-            layoutFacebook.setOnClickListener(v -> {
-                Intent intent;
-                try
-                {
-                    getActivity().getPackageManager().getPackageInfo(C.FACEBOOK_PACKAGE_NAME, 0);
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_FACEBOOK_URL));
-                    //intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_FACEBOOK_ID));
-                }
-                catch (Exception e)
-                {
-                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_FACEBOOK_URL));
-                }
-                try
-                {
-                    getActivity().startActivity(intent);
-                }
-                catch (Exception e)
-                {
-                    Crashlytics.logException(e);
-                    e.printStackTrace();
-                }
-            });
-        }
-        else
-        {
-            layoutFacebook.setVisibility(View.GONE);
-        }
-
-        final TextView textScriptVersion = view.findViewById(R.id.text_tokenscript_standard);
-        textScriptVersion.setText(TOKENSCRIPT_CURRENT_SCHEMA);
-
-        layoutEnableXML = view.findViewById(R.id.layout_xml_override);
-        if (checkWritePermission() == false && EthereumNetworkRepository.extraChains() == null) {
-            layoutEnableXML.setVisibility(View.VISIBLE);
-            layoutEnableXML.setOnClickListener(v -> {
-                //ask OS to ask user if we can use the 'AlphaWallet' directory
-                showXMLOverrideDialog();
-            });
-        }
+        initBackupWarningViews(view);
 
         return view;
     }
 
-    private void openBackupActivity(Wallet wallet)
-    {
+    private void initBackupWarningViews(View view) {
+        layoutBackup = view.findViewById(R.id.layout_item_warning);
+        backupTitle = view.findViewById(R.id.text_title);
+        backupDetail = view.findViewById(R.id.text_detail);
+        backupButton = view.findViewById(R.id.button_backup);
+        backupMenuButton = view.findViewById(R.id.btn_menu);
+        backupPopupAnchor = view.findViewById(R.id.popup_anchor);
+        layoutBackup.setVisibility(View.GONE);
+        warningSeparator = view.findViewById(R.id.warning_separator);
+    }
+
+    private void initializeSettinngs(View view) {
+        walletSettingsLayout = view.findViewById(R.id.layout_settings_wallet);
+        systemSettingsLayout = view.findViewById(R.id.layout_settings_system);
+        supportSettingsLayout = view.findViewById(R.id.layout_settings_support);
+
+        myAddressSetting =
+                new SettingsItemView.Builder(getContext())
+                        .withIcon(R.drawable.ic_settings_wallet_address)
+                        .withTitle(R.string.title_show_wallet_address)
+                        .withListener(this::onShowWalletAddressSettingClicked)
+                        .build();
+
+        changeWalletSetting =
+                new SettingsItemView.Builder(getContext())
+                        .withIcon(R.drawable.ic_settings_change_wallet)
+                        .withTitle(R.string.title_change_add_wallet)
+                        .withListener(this::onChangeWalletSettingClicked)
+                        .build();
+
+        backUpWalletSetting =
+                new SettingsItemView.Builder(getContext())
+                        .withIcon(R.drawable.ic_settings_backup)
+                        .withTitle(R.string.title_back_up_wallet)
+                        .withListener(this::onBackUpWalletSettingClicked)
+                        .build();
+
+        manageTokensSetting =
+                new SettingsItemView.Builder(getContext())
+                        .withIcon(R.drawable.ic_settings_advanced)
+                        .withTitle(R.string.manage_tokens)
+                        .withListener(this::onManageTokensSettingClicked)
+                        .build();
+
+        notificationsSetting =
+                new SettingsItemView.Builder(getContext())
+                        .withType(SettingsItemView.Type.TOGGLE)
+                        .withIcon(R.drawable.ic_settings_notifications)
+                        .withTitle(R.string.title_notifications)
+                        .withListener(this::onNotificationsSettingClicked)
+                        .build();
+
+        biometricsSetting =
+                new SettingsItemView.Builder(getContext())
+                        .withType(SettingsItemView.Type.TOGGLE)
+                        .withIcon(R.drawable.ic_settings_biometrics)
+                        .withTitle(R.string.title_biometrics)
+                        .withListener(this::onBiometricsSettingClicked)
+                        .build();
+
+        selectNetworksSetting =
+                new SettingsItemView.Builder(getContext())
+                        .withIcon(R.drawable.ic_settings_networks)
+                        .withTitle(R.string.select_network_filters)
+                        .withListener(this::onSelectNetworksSettingClicked)
+                        .build();
+
+        advancedSetting =
+                new SettingsItemView.Builder(getContext())
+                        .withIcon(R.drawable.ic_settings_advanced)
+                        .withTitle(R.string.title_advanced)
+                        .withListener(this::onAdvancedSettingClicked)
+                        .build();
+
+        supportSetting =
+                new SettingsItemView.Builder(getContext())
+                        .withIcon(R.drawable.ic_settings_support)
+                        .withTitle(R.string.title_support)
+                        .withListener(this::onSupportSettingClicked)
+                        .build();
+    }
+
+    private void addSettingsToLayout() {
+        walletSettingsLayout.addView(myAddressSetting, 0);
+
+        if (VisibilityFilter.canChangeWallets())
+            walletSettingsLayout.addView(changeWalletSetting, 1);
+
+        walletSettingsLayout.addView(backUpWalletSetting, 2);
+
+        walletSettingsLayout.addView(manageTokensSetting, 3);
+
+        systemSettingsLayout.addView(notificationsSetting, 0);
+
+        systemSettingsLayout.addView(biometricsSetting, 1);
+
+        if (EthereumNetworkRepository.showNetworkFilters())
+            systemSettingsLayout.addView(selectNetworksSetting, 2);
+
+        systemSettingsLayout.addView(advancedSetting, 3);
+
+        supportSettingsLayout.addView(supportSetting, 0);
+    }
+
+    private void setInitialSettingsData(View view) {
+        TextView appVersionText = view.findViewById(R.id.text_version);
+        appVersionText.setText(String.format("%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
+        TextView tokenScriptVersionText = view.findViewById(R.id.text_tokenscript_standard);
+        tokenScriptVersionText.setText(TOKENSCRIPT_CURRENT_SCHEMA);
+
+        notificationsSetting.setToggleState(viewModel.getNotificationState());
+    }
+
+    private void openBackupActivity(Wallet wallet) {
         Intent intent = new Intent(getContext(), BackupKeyActivity.class);
         intent.putExtra(WALLET, wallet);
 
-        switch (wallet.type)
-        {
+        switch (wallet.type) {
             case HDKEY:
                 intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_HD_KEY);
                 break;
@@ -352,13 +215,11 @@ public class NewSettingsFragment extends Fragment
         }
 
         //override if this is an upgrade
-        switch (wallet.authLevel)
-        {
+        switch (wallet.authLevel) {
             case NOT_SET:
             case STRONGBOX_NO_AUTHENTICATION:
             case TEE_NO_AUTHENTICATION:
-                if (wallet.lastBackupTime > 0)
-                {
+                if (wallet.lastBackupTime > 0) {
                     intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.UPGRADE_KEY);
                 }
                 break;
@@ -370,53 +231,33 @@ public class NewSettingsFragment extends Fragment
         getActivity().startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
     }
 
-    private boolean isAppAvailable(String packageName) {
-        PackageManager pm = getActivity().getPackageManager();
-        try {
-            pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private void updateNotificationState() {
-        boolean state = viewModel.getNotificationState();
-        notificationState.setChecked(state);
-    }
-
     private void onDefaultWallet(Wallet wallet) {
         this.wallet = wallet;
-        walletsSubtext.setText(wallet.address);
-        switch (wallet.authLevel)
-        {
+        if (wallet.address != null) {
+            myAddressSetting.setSubtitle(wallet.address);
+        }
+
+        switch (wallet.authLevel) {
             case NOT_SET:
             case STRONGBOX_NO_AUTHENTICATION:
             case TEE_NO_AUTHENTICATION:
-                if (wallet.lastBackupTime > 0)
-                {
-                    backupText.setText(R.string.action_upgrade_key);
-                    backupStatusText.setText(R.string.not_locked);
-                    backupStatusImage.setImageResource(R.drawable.ic_orange_bar);
-                }
-                else
-                {
-                    backupText.setText(R.string.back_up_this_wallet);
-                    backupStatusText.setText(R.string.back_up_now);
-                    backupStatusImage.setImageResource(R.drawable.ic_red_bar);
+                if (wallet.lastBackupTime > 0) {
+                    backUpWalletSetting.setTitle(getString(R.string.action_upgrade_key));
+                    backUpWalletSetting.setSubtitle(getString(R.string.not_locked));
+                } else {
+                    backUpWalletSetting.setTitle(getString(R.string.back_up_this_wallet));
+                    backUpWalletSetting.setSubtitle(getString(R.string.back_up_now));
                 }
                 break;
             case TEE_AUTHENTICATION:
             case STRONGBOX_AUTHENTICATION:
-                backupText.setText(R.string.back_up_this_wallet);
-                backupStatusText.setText(R.string.key_secure);
-                backupStatusImage.setImageResource(R.drawable.ic_green_bar);
+                backUpWalletSetting.setTitle(getString(R.string.back_up_this_wallet));
+                backUpWalletSetting.setSubtitle(getString(R.string.key_secure));
                 break;
         }
 
-        if (wallet.type == WalletType.WATCH)
-        {
-            layoutBackupKey.setVisibility(View.GONE);
+        if (wallet.type == WalletType.WATCH) {
+            backUpWalletSetting.setVisibility(View.GONE);
         }
     }
 
@@ -426,90 +267,41 @@ public class NewSettingsFragment extends Fragment
         viewModel.prepare();
     }
 
-    private void showXMLOverrideDialog() {
-        AWalletConfirmationDialog cDialog = new AWalletConfirmationDialog(getActivity());
-        cDialog.setTitle(R.string.enable_xml_override_dir);
-        cDialog.setSmallText(R.string.explain_xml_override);
-        cDialog.setMediumText(R.string.ask_user_about_xml_override);
-        cDialog.setPrimaryButtonText(R.string.dialog_ok);
-        cDialog.setPrimaryButtonListener(v -> {
-            //ask for OS permission and write directory
-            askWritePermission();
-            cDialog.dismiss();
-        });
-        cDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
-        cDialog.setSecondaryButtonListener(v -> {
-            cDialog.dismiss();
-        });
-        cDialog.show();
-    }
-
-    private boolean checkWritePermission() {
-        return ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED;
-    }
-
-    public void refresh() {
-        if (layoutEnableXML != null) {
-            if (checkWritePermission() || EthereumNetworkRepository.extraChains() != null) {
-                layoutEnableXML.setVisibility(View.GONE);
-            } else {
-                layoutEnableXML.setVisibility(View.VISIBLE);
-            }
-        }
-    }
-
-    public void backupSeedSuccess()
-    {
+    public void backupSeedSuccess() {
         if (viewModel != null) viewModel.TestWalletBackup();
         if (layoutBackup != null) layoutBackup.setVisibility(View.GONE);
     }
 
-    private void askWritePermission() {
-        if (getActivity() != null)
-        {
-            final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-            Log.w("SettingsFragment", "Folder write permission is not granted. Requesting permission");
-            ActivityCompat.requestPermissions(getActivity(), permissions, HomeActivity.RC_ASSET_EXTERNAL_WRITE_PERM);
-        }
-    }
-
-    private void backupWarning(String s)
-    {
-        if (s.equals(viewModel.defaultWallet().getValue().address))
-        {
+    private void backupWarning(String s) {
+        if (s.equals(viewModel.defaultWallet().getValue().address)) {
             addBackupNotice(GenericWalletInteract.BackupLevel.WALLET_HAS_HIGH_VALUE);
-        }
-        else
-        {
-            if (layoutBackup != null)
-            {
+        } else {
+            if (layoutBackup != null) {
                 layoutBackup.setVisibility(View.GONE);
             }
             //remove the number prompt
-            if (getActivity() != null) ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+            if (getActivity() != null)
+                ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
             onDefaultWallet(viewModel.defaultWallet().getValue());
         }
     }
 
-    void addBackupNotice(GenericWalletInteract.BackupLevel walletValue)
-    {
+    void addBackupNotice(GenericWalletInteract.BackupLevel walletValue) {
         layoutBackup.setVisibility(View.VISIBLE);
-        //current Wallet only
-        Wallet wallet = viewModel.defaultWallet().getValue();
-        if (wallet != null)
-        {
+        warningSeparator.setVisibility(View.VISIBLE);
+        if (wallet != null) {
             backupButton.setText(getString(R.string.back_up_wallet_action, wallet.address.substring(0, 5)));
             backupButton.setOnClickListener(v -> openBackupActivity(wallet));
             backupTitle.setText(getString(R.string.wallet_not_backed_up));
-            backupLayoutBackground.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.warning_red));
-            backupButton.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.warning_dark_red));
+            layoutBackup.setBackgroundResource(R.drawable.background_warning_red_8dp);
             backupDetail.setText(getString(R.string.backup_wallet_detail));
-            if (getActivity() !=null) ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
-
             backupMenuButton.setOnClickListener(v -> {
                 showPopup(backupPopupAnchor, wallet.address);
             });
+
+            if (getActivity() != null) {
+                ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
+            }
         }
     }
 
@@ -523,12 +315,60 @@ public class NewSettingsFragment extends Fragment
             viewModel.setIsDismissed(walletAddress, true).subscribe(this::backedUp);
             popupWindow.dismiss();
         });
-        popupWindow.showAsDropDown(view, 0, 20);
+        popupWindow.showAsDropDown(view, 0, 0);
     }
 
-    private void backedUp(String walletAddress)
-    {
+    private void backedUp(String walletAddress) {
         layoutBackup.setVisibility(View.GONE);
-        if (getActivity() != null) ((HomeActivity)getActivity()).postponeWalletBackupWarning(walletAddress);
+        warningSeparator.setVisibility(View.GONE);
+        if (getActivity() != null)
+            ((HomeActivity) getActivity()).postponeWalletBackupWarning(walletAddress);
+    }
+
+    private void onShowWalletAddressSettingClicked() {
+        viewModel.showMyAddress(getContext());
+    }
+
+    private void onChangeWalletSettingClicked() {
+        viewModel.showManageWallets(getContext(), false);
+    }
+
+    private void onBackUpWalletSettingClicked() {
+        Wallet wallet = viewModel.defaultWallet().getValue();
+        if (wallet != null) {
+            openBackupActivity(wallet);
+        }
+    }
+
+    private void onNotificationsSettingClicked() {
+        viewModel.setNotificationState(notificationsSetting.getToggleState());
+    }
+
+    private void onBiometricsSettingClicked() {
+        // TODO: Implementation
+    }
+
+    private void onSelectNetworksSettingClicked() {
+        Intent intent = new Intent(getActivity(), SelectNetworkActivity.class);
+        intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
+        getActivity().startActivity(intent);
+    }
+
+    private void onAdvancedSettingClicked() {
+        Intent intent = new Intent(getActivity(), AdvancedSettingsActivity.class);
+        startActivity(intent);
+    }
+
+    private void onSupportSettingClicked() {
+        Intent intent = new Intent(getActivity(), SupportSettingsActivity.class);
+        startActivity(intent);
+    }
+
+    private void onManageTokensSettingClicked() {
+        if (wallet != null) {
+            Intent intent = new Intent(getActivity(), TokenManagementActivity.class);
+            intent.putExtra(EXTRA_ADDRESS, wallet.address);
+            startActivity(intent);
+        }
     }
 }

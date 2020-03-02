@@ -8,6 +8,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
+
     <style name="AppTheme.NoActionBar" parent="AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -63,4 +64,8 @@
         <item name="textAllCaps">false</item>
     </style>
 
+    <style name="SettingsItemSwitchAppearance" parent="Theme.AppCompat.Light">
+        <item name="colorControlActivated">@color/azure</item>
+        <item name="colorSwitchThumbNormal">@color/dove</item>
+    </style>
 </resources>

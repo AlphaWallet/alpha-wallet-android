@@ -1,21 +1,19 @@
 package com.alphawallet.app.di;
 
-import dagger.Module;
-import dagger.Provides;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.GetDefaultWalletBalance;
-
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepository;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
-import com.alphawallet.app.router.HelpRouter;
-import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
+
+import dagger.Module;
+import dagger.Provides;
 
 @Module
 class NewSettingsModule {
@@ -24,10 +22,8 @@ class NewSettingsModule {
             GenericWalletInteract genericWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             MyAddressRouter myAddressRouter,
-            HelpRouter helpRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             ManageWalletsRouter manageWalletsRouter,
-            HomeRouter homeRouter,
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             TokensService tokensService
@@ -36,10 +32,8 @@ class NewSettingsModule {
                 genericWalletInteract,
                 getDefaultWalletBalance,
                 myAddressRouter,
-                helpRouter,
                 ethereumNetworkRepository,
                 manageWalletsRouter,
-                homeRouter,
                 preferenceRepository,
                 localeRepository,
                 tokensService);
@@ -62,18 +56,8 @@ class NewSettingsModule {
     }
 
     @Provides
-    HelpRouter provideHelpRouter() {
-        return new HelpRouter();
-    }
-
-    @Provides
     ManageWalletsRouter provideManageWalletsRouter() {
         return new ManageWalletsRouter();
-    }
-
-    @Provides
-    HomeRouter provideHomeRouter() {
-        return new HomeRouter();
     }
 
     @Provides

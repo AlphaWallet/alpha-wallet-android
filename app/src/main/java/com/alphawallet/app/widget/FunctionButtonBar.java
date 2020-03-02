@@ -177,28 +177,26 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
             {
                 List<BigInteger> selected = selection;
                 if (adapter != null) selected = adapter.getSelectedTokenIds(selection);
+                boolean selectionValid = (token == null || token.checkSelectionValidity(selected));
 
                 switch (v.getId())
                 {
-                    case R.string.action_sell:
-                        //single token or grouping
-                        if (token != null && !token.checkSelectionValidity(selected)) flashButton(v);
+                    case R.string.action_sell:      //ERC875 only
+                        if (!selectionValid) flashButton(v);
                         else callStandardFunctions.sellTicketRouter(selected);
                         break;
-                    case R.string.action_send:
+                    case R.string.action_send:      //Eth + ERC20
                         callStandardFunctions.showSend();
                         break;
-                    case R.string.action_receive:
+                    case R.string.action_receive:   //Everything
                         callStandardFunctions.showReceive();
                         break;
-                    case R.string.action_transfer:
-                        //single token or grouping
-                        if (token != null && !token.checkSelectionValidity(selected)) flashButton(v);
+                    case R.string.action_transfer:  //Any NFT
+                        if (!selectionValid) flashButton(v);
                         else callStandardFunctions.showTransferToken(selected);
                         break;
-                    case R.string.action_use:
-                        //single token or grouping
-                        if (token != null && !token.checkSelectionValidity(selected)) flashButton(v);
+                    case R.string.action_use:    //NFT with Redeem
+                        if (!selectionValid) flashButton(v);
                         else callStandardFunctions.selectRedeemTokens(selected);
                         break;
                     default:

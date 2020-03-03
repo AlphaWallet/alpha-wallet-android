@@ -25,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.ui.widget.adapter.WalletsAdapter;
 
 import javax.inject.Inject;
@@ -190,7 +191,7 @@ public class WalletsActivity extends BaseActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_add, menu);
+        if (VisibilityFilter.canChangeWallets()) getMenuInflater().inflate(R.menu.menu_add, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

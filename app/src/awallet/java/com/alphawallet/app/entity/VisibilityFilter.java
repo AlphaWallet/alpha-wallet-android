@@ -95,4 +95,7 @@ public class VisibilityFilter
 
     //Hide EIP681 generation (Payment request, generates a QR code another wallet user can scan to have all payment fields filled in)
     public static boolean hideEIP681() { return false; }
+
+    //In main wallet menu, if wallet allows adding new tokens
+    public static boolean canAddTokens() { return true; }
 }

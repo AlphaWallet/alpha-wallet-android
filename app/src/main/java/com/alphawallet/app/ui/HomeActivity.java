@@ -353,7 +353,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         switch (viewPager.getCurrentItem())
         {
             case WALLET:
-                getMenuInflater().inflate(R.menu.menu_add, menu);
+                if (VisibilityFilter.canAddTokens()) getMenuInflater().inflate(R.menu.menu_add, menu);
                 break;
             default:
                 break;

@@ -1,6 +1,7 @@
 package com.alphawallet.app.widget;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -19,9 +20,11 @@ public class SettingsItemView extends LinearLayout {
     private TextView subtitle;
     private Switch toggle;
     private ImageView arrow;
-
     private Type type;
-    private OnSettingsItemClickedListener listener;
+    private int iconRes;
+    private int titleRes;
+    private int subtitleRes;
+    private String typeStr;
 
     public enum Type {
         DEFAULT,
@@ -71,7 +74,7 @@ public class SettingsItemView extends LinearLayout {
             view.setTitle(titleResId);
             view.setSubtitle(subtitleResId);
             view.setSettingsItemType(type);
-            view.setLayoutListener(listener);
+            view.setListener(listener);
             return view;
         }
     }
@@ -86,8 +89,31 @@ public class SettingsItemView extends LinearLayout {
 
     public SettingsItemView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
         inflate(context, R.layout.layout_settings_item, this);
+
         setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        initializeViews();
+
+        processAttrs(context, attrs);
+    }
+
+    private void processAttrs(Context context, AttributeSet attrs) {
+        if (attrs != null) {
+            getAttrs(context, attrs);
+            if (iconRes != -1) icon.setImageResource(iconRes);
+            if (titleRes != -1) title.setText(titleRes);
+            if (subtitleRes != -1) setSubtitle(subtitleRes);
+            if (typeStr.equals("toggle")) {
+                setSettingsItemType(Type.TOGGLE);
+            } else {
+                setSettingsItemType(Type.DEFAULT);
+            }
+        }
+    }
+
+    private void initializeViews() {
         layout = findViewById(R.id.layout_setting);
         icon = findViewById(R.id.setting_icon);
         title = findViewById(R.id.setting_title);
@@ -96,7 +122,24 @@ public class SettingsItemView extends LinearLayout {
         arrow = findViewById(R.id.arrow_right);
     }
 
-    public void setLayoutListener(OnSettingsItemClickedListener listener) {
+    private void getAttrs(Context context, AttributeSet attrs) {
+        TypedArray a = context.getTheme().obtainStyledAttributes(
+                attrs,
+                R.styleable.SettingsItemView,
+                0, 0
+        );
+
+        try {
+            iconRes = a.getResourceId(R.styleable.SettingsItemView_settingIcon, -1);
+            titleRes = a.getResourceId(R.styleable.SettingsItemView_settingTitle, -1);
+            subtitleRes = a.getResourceId(R.styleable.SettingsItemView_settingSubtitle, -1);
+            typeStr = a.getString(R.styleable.SettingsItemView_settingType);
+        } finally {
+            a.recycle();
+        }
+    }
+
+    public void setListener(OnSettingsItemClickedListener listener) {
         if (listener != null) {
             if (type == Type.TOGGLE) {
                 layout.setOnClickListener(v -> {

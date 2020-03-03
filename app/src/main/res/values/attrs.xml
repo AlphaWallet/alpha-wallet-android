@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <declare-styleable name="SettingsItemView">
+        <attr name="settingIcon" format="integer" />
+        <attr name="settingTitle" format="integer" />
+        <attr name="settingSubtitle" format="integer" />
+        <attr name="settingType" format="string" />
+    </declare-styleable>
     <declare-styleable name="InputAddressView" />
     <declare-styleable name="InputView">
         <attr name="label" format="integer" />

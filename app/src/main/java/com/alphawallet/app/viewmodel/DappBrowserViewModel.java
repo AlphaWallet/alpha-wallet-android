@@ -8,7 +8,11 @@ import android.content.Intent;
 import android.os.TransactionTooLargeException;
 import android.preference.PreferenceManager;
 
+import com.alphawallet.app.entity.Operation;
+import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.service.TickerService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.alphawallet.app.C;
@@ -17,7 +21,6 @@ import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
@@ -47,6 +50,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DappBrowserViewModel extends BaseViewModel  {
+    private static final long DEBOUNCE_LIMIT = 5L * 1000L; //5 seconds debounce time
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
@@ -62,8 +66,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final GasService gasService;
     private final KeyService keyService;
 
-    private double ethToUsd = 0;
     private ArrayList<String> bookmarks;
+    private long debounceTime = 0;
 
     DappBrowserViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -100,22 +104,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public LiveData<Token> token() {
         return token;
-    }
-
-    public MutableLiveData<GasSettings> gasSettings() {
-        return gasSettings;
-    }
-
-    public String getUSDValue(double eth)
-    {
-        if (defaultNetwork.getValue().chainId == 1)
-        {
-            return "$" + ImportTokenActivity.getUsdString(ethToUsd * eth);
-        }
-        else
-        {
-            return "$0.00";
-        }
     }
 
     public String getNetworkName()
@@ -166,14 +154,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
         this.token.postValue(token);
     }
 
-    private void onTicker(Ticker ticker)
-    {
-        if (ticker != null && ticker.price_usd != null)
-        {
-            ethToUsd = Double.valueOf(ticker.price_usd);
-        }
-    }
-
     public Observable<Wallet> getWallet() {
         if (defaultWallet().getValue() != null) {
             return Observable.fromCallable(() -> defaultWallet().getValue());
@@ -187,7 +167,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         disposable = createTransactionInteract.sign(defaultWallet.getValue(), signRequest, defaultNetwork.getValue().chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(sig -> dAppFunction.DAppReturn(sig, message),
+                .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
                            error -> dAppFunction.DAppError(error, message));
     }
 
@@ -224,9 +204,16 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public void openConfirmation(Activity context, Web3Transaction transaction, String requesterURL, NetworkInfo networkInfo) throws TransactionTooLargeException
     {
-        String networkName = networkInfo.name;
-        boolean mainNet = networkInfo.isMainNetwork;
-        confirmationRouter.open(context, transaction, networkName, mainNet, requesterURL, networkInfo.chainId);
+        if (System.currentTimeMillis() > (debounceTime + DEBOUNCE_LIMIT)) //debounce transaction click
+        {
+            debounceTime = System.currentTimeMillis();
+            confirmationRouter.open(context, transaction, networkInfo.name, requesterURL, networkInfo.chainId);
+        }
+    }
+
+    public void resetDebounce()
+    {
+        debounceTime = 0;
     }
 
     private ArrayList<String> getBrowserBookmarksFromPrefs(Context context) {
@@ -284,6 +271,10 @@ public class DappBrowserViewModel extends BaseViewModel  {
         return ethereumNetworkRepository.getAvailableNetworkList();
     }
 
+    public int getActiveFilterCount() {
+        return ethereumNetworkRepository.getFilterNetworkList().size();
+    }
+
     public void setNetwork(int chainId)
     {
         NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
@@ -324,5 +315,15 @@ public class DappBrowserViewModel extends BaseViewModel  {
     public void resetSignDialog()
     {
         keyService.resetSigningDialog();
+    }
+
+    public void completeAuthentication(Operation signData)
+    {
+        keyService.completeAuthentication(signData);
+    }
+
+    public void failedAuthentication(Operation signData)
+    {
+        keyService.failedAuthentication(signData);
     }
 }

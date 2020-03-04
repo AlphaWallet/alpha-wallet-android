@@ -63,7 +63,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
     private TextView verifyTextBox;
     private LinearLayout skipButton;
     private String[] mnemonicArray;
-    private PinAuthenticationCallbackInterface authInterface;
     private ImageView spacerImage;
     private LinearLayout successOverlay;
     private Handler handler;
@@ -781,12 +780,6 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
 
     }
 
-    @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-    {
-        authInterface = authCallback;
-    }
-
     private void initViewModel()
     {
         viewModel = ViewModelProviders.of(this, backupKeyViewModelFactory)
@@ -836,11 +829,11 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
                 if (resultCode == RESULT_OK)
                 {
-                    authInterface.CompleteAuthentication(taskCode);
+                    viewModel.completeAuthentication(taskCode);
                 }
                 else
                 {
-                    authInterface.FailedAuthentication(taskCode);
+                    viewModel.failedAuthentication(taskCode);
                 }
                 break;
         }

@@ -78,7 +78,10 @@ public class AddEditDappActivity extends BaseActivity {
                 button.setText(R.string.action_add);
                 name.setText(dapp.getName());
                 url.setText(dapp.getUrl());
-                button.setOnClickListener(v -> add(dapp));
+                button.setOnClickListener(v -> {
+                    dapp.setName(name.getEditableText().toString());
+                    dapp.setUrl(url.getEditableText().toString());
+                    add(dapp); });
                 break;
             }
             case MODE_EDIT: {
@@ -86,7 +89,9 @@ public class AddEditDappActivity extends BaseActivity {
                 button.setText(R.string.action_save);
                 url.setText(dapp.getUrl());
                 name.setText(dapp.getName());
-                button.setOnClickListener(v -> save(dapp));
+                button.setOnClickListener(v -> {
+                    save(dapp);
+                });
                 break;
             }
             default: {

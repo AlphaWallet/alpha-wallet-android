@@ -246,4 +246,18 @@ public class Utils {
         for (int i = 0; i < ticketSendIndexList.size(); i++) indexList[i] = ticketSendIndexList.get(i).intValue();
         return indexList;
     }
+
+    public static boolean isHex(String hexStr)
+    {
+        if (hexStr == null) return false;
+        for (Character c : hexStr.toCharArray())
+        {
+            if ((c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

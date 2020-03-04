@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 
+import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.alphawallet.app.C;
@@ -35,6 +36,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
 
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> badSeed = new MutableLiveData<>();
+    private final MutableLiveData<String> watchExists = new MutableLiveData<>();
 
     ImportWalletViewModel(ImportWalletInteract importWalletInteract, KeyService keyService, GasService gasService) {
         this.importWalletInteract = importWalletInteract;
@@ -62,6 +64,13 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     @Override
     public void onWatchWallet(String address)
     {
+        //do we already have this as a wallet?
+        if (keystoreExists(address))
+        {
+            watchExists.postValue(address);
+            return;
+        }
+
         progress.postValue(true);
         //user just asked for a watch wallet
         disposable = importWalletInteract.storeWatchWallet(address, ensResolver)
@@ -74,6 +83,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
         return wallet;
     }
     public LiveData<Boolean> badSeed() { return badSeed; }
+    public LiveData<String> watchExists() { return watchExists; }
 
     private void onWallet(Wallet wallet) {
         progress.postValue(false);
@@ -151,5 +161,15 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     public void resetSignDialog()
     {
         keyService.resetSigningDialog();
+    }
+
+    public void completeAuthentication(Operation taskCode)
+    {
+        keyService.completeAuthentication(taskCode);
+    }
+
+    public void failedAuthentication(Operation taskCode)
+    {
+        keyService.failedAuthentication(taskCode);
     }
 }

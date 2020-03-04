@@ -14,25 +14,17 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.token.tools.Convert;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import javax.inject.Inject;
-import dagger.android.AndroidInjection;
-import com.alphawallet.token.entity.MagicLinkData;
-import com.alphawallet.token.entity.TicketRange;
-import com.alphawallet.token.tools.ParseMagicLink;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.HomeRouter;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.viewmodel.ImportTokenViewModel;
 import com.alphawallet.app.viewmodel.ImportTokenViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -40,11 +32,22 @@ import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
+import com.alphawallet.token.entity.MagicLinkData;
+import com.alphawallet.token.entity.TicketRange;
+import com.alphawallet.token.tools.Convert;
+import com.alphawallet.token.tools.ParseMagicLink;
+
+import java.math.BigDecimal;
+
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+
+import static com.alphawallet.app.C.IMPORT_STRING;
+import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.token.tools.Convert.getEthString;
 import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
 import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
-import static com.alphawallet.app.C.IMPORT_STRING;
-import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
@@ -74,7 +77,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private boolean usingFeeMaster = false;
     private String paymasterUrlPrefix = "https://paymaster.stormbird.sg/api/";
     private final String TAG = "ITA";
-    private PinAuthenticationCallbackInterface authInterface;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -123,6 +125,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         viewModel.ticketNotValid().observe(this, this::onInvalidTicket);
         viewModel.feemasterAvailable().observe(this, this::onFeemasterAvailable);
         viewModel.sig().observe(this, sigData -> toolbarView.onSigData(sigData, this));
+        viewModel.tickerUpdate().observe(this, this::onTickerUpdate);
 
         ticketRange = null;
     }
@@ -258,6 +261,17 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         viewModel.prepare(importString);
     }
 
+    private void onTickerUpdate(TokenTicker ticker)
+    {
+        MagicLinkData order = viewModel.getSalesOrder();
+        double conversionRate = Double.valueOf(ticker.price);
+        String currencyStr = TickerService.getCurrencyString(order.price * conversionRate);
+        priceUSD.setText(currencyStr);
+        priceUSD.setVisibility(View.VISIBLE);
+        priceUSDLabel.setText(TickerService.getCurrencySymbolTxt());
+        priceUSDLabel.setVisibility(View.VISIBLE);
+    }
+
     private void onImportRange(TicketRange importTokens)
     {
         setTicket(true, false, false);
@@ -270,7 +284,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         //get current symbol
         String networkSymbol = viewModel.network().getValue().symbol;
         String ethPrice = getEthString(order.price) + " " + networkSymbol;
-        String priceUsd = "$" + getUsdString(viewModel.getUSDPrice() * order.price);
 
         updateImportPageForFunction();
 
@@ -289,16 +302,11 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
             }
 
             priceETH.setVisibility(View.VISIBLE);
-            priceUSD.setVisibility(View.GONE);
-            priceUSDLabel.setVisibility(View.GONE);
         }
         else
         {
             priceETH.setText(ethPrice);
-            priceUSD.setText(priceUsd);
             priceETH.setVisibility(View.VISIBLE);
-            priceUSD.setVisibility(View.VISIBLE);
-            priceUSDLabel.setVisibility(View.VISIBLE);
             Button importTickets = findViewById(R.id.import_ticket);
             importTickets.setText(R.string.action_purchase);
             displayImportAction();
@@ -495,7 +503,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         hideDialog();
         aDialog = new AWalletAlertDialog(this);
         aDialog.setIcon(AWalletAlertDialog.ERROR);
-        aDialog.setTitle(R.string.error_transaction_failed);
+        aDialog.setTitle(R.string.error_import_failed);
         aDialog.setMessage(error.message);
         aDialog.setCancelable(true);
         aDialog.setButtonText(R.string.button_ok);
@@ -558,11 +566,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                     viewModel.performImport();
                 }
 
-                @Override
-                public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-                {
-                    authInterface = authCallback;
-                }
             };
             viewModel.getAuthorisation(this, cb);
         }
@@ -579,13 +582,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         {
             viewModel.performImport();
         }
-    }
-
-    public static String getUsdString(double usdPrice)
-    {
-        DecimalFormat df = new DecimalFormat("#,##0.00");
-        df.setRoundingMode(RoundingMode.CEILING);
-        return df.format(usdPrice);
     }
 
     public String getMagiclinkFromClipboard(Context ctx)
@@ -647,15 +643,9 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
-        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
+        if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
+        else viewModel.failedAuthentication(SIGN_DATA);
         viewModel.performImport();
         onProgress(true);
-    }
-
-    @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-    {
-        authInterface = authCallback;
     }
 }

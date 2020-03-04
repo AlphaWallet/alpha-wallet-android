@@ -6,17 +6,26 @@ import android.os.Parcelable;
 public class HelpItem implements Parcelable {
     private String question;
     private String answer;
+    private int resource;
 
     private String eventName;
 
     public HelpItem(String question, String answer) {
         this.question = question;
         this.answer = answer;
+        this.resource = 0;
+    }
+
+    public HelpItem(String question, int resource) {
+        this.question = question;
+        this.answer = "";
+        this.resource = resource;
     }
 
     private HelpItem(Parcel in) {
         question = in.readString();
         answer = in.readString();
+        resource = in.readInt();
     }
 
     public String getQuestion() {
@@ -25,6 +34,10 @@ public class HelpItem implements Parcelable {
 
     public String getAnswer() {
         return this.answer;
+    }
+
+    public int getResource() {
+        return this.resource;
     }
 
     public static final Creator<HelpItem> CREATOR = new Creator<HelpItem>() {
@@ -48,5 +61,6 @@ public class HelpItem implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(question);
         parcel.writeString(answer);
+        parcel.writeInt(resource);
     }
 }

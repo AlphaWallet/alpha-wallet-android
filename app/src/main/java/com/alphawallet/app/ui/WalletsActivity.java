@@ -25,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.ui.widget.adapter.WalletsAdapter;
 
 import javax.inject.Inject;
@@ -68,7 +69,6 @@ public class WalletsActivity extends BaseActivity implements
     private boolean walletChange = false;
     private boolean requiresHomeRefresh;
     private NetworkInfo networkInfo;
-    private PinAuthenticationCallbackInterface authInterface;
     private String dialogError;
 
     @Override
@@ -191,7 +191,7 @@ public class WalletsActivity extends BaseActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_add, menu);
+        if (VisibilityFilter.canChangeWallets()) getMenuInflater().inflate(R.menu.menu_add, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -219,11 +219,11 @@ public class WalletsActivity extends BaseActivity implements
             Operation taskCode = Operation.values()[requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS];
             if (resultCode == RESULT_OK)
             {
-                authInterface.CompleteAuthentication(taskCode);
+                viewModel.completeAuthentication(taskCode);
             }
             else
             {
-                authInterface.FailedAuthentication(taskCode);
+                viewModel.failedAuthentication(taskCode);
             }
         }
         else if (requestCode == C.IMPORT_REQUEST_CODE)
@@ -376,12 +376,6 @@ public class WalletsActivity extends BaseActivity implements
     public void FetchMnemonic(String mnemonic)
     {
 
-    }
-
-    @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-    {
-        authInterface = authCallback;
     }
 
     private class WalletDivider extends RecyclerView.ItemDecoration

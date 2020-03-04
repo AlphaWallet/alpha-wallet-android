@@ -5,5 +5,5 @@ import android.view.View;
 
 public interface OnDepositClickListener {
 
-    void onDepositClick(View view, Uri uri);
+    void onDepositClick(View view, String url);
 }

@@ -4,7 +4,6 @@ import dagger.Module;
 import dagger.Provides;
 
 import com.alphawallet.app.interact.AddTokenInteract;
-import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -22,7 +21,6 @@ import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
 class Erc20DetailModule {
     @Provides
     Erc20DetailViewModelFactory provideErc20DetailViewModelFactory(MyAddressRouter myAddressRouter,
-                                                                   FetchTokensInteract fetchTokensInteract,
                                                                    FetchTransactionsInteract fetchTransactionsInteract,
                                                                    FindDefaultNetworkInteract findDefaultNetworkInteract,
                                                                    GenericWalletInteract genericWalletInteract,
@@ -31,10 +29,9 @@ class Erc20DetailModule {
                                                                    TokensService tokensService,
                                                                    AddTokenInteract addTokenInteract) {
         return new Erc20DetailViewModelFactory(myAddressRouter,
-                fetchTokensInteract,
                 fetchTransactionsInteract,
                 findDefaultNetworkInteract,
-                                               genericWalletInteract,
+                genericWalletInteract,
                 transactionDetailRouter,
                 assetDefinitionService,
                 tokensService, addTokenInteract);
@@ -43,11 +40,6 @@ class Erc20DetailModule {
     @Provides
     MyAddressRouter provideMyAddressRouter() {
         return new MyAddressRouter();
-    }
-
-    @Provides
-    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
-        return new FetchTokensInteract(tokenRepository);
     }
 
     @Provides

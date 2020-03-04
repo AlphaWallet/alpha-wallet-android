@@ -10,13 +10,11 @@ import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.AddTokenRouter;
-import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 
 public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final PreferenceRepositoryType preferenceRepository;
-    private final ExternalBrowserRouter externalBrowserRouter;
     private final ImportTokenRouter importTokenRouter;
     private final AddTokenRouter addTokenRouter;
     private final LocaleRepositoryType localeRepository;
@@ -29,7 +27,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             ImportTokenRouter importTokenRouter,
-            ExternalBrowserRouter externalBrowserRouter,
             AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
             GenericWalletInteract genericWalletInteract,
@@ -38,7 +35,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.importTokenRouter = importTokenRouter;
-        this.externalBrowserRouter = externalBrowserRouter;
         this.addTokenRouter = addTokenRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.genericWalletInteract = genericWalletInteract;
@@ -53,7 +49,6 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 preferenceRepository,
                 localeRepository,
                 importTokenRouter,
-                externalBrowserRouter,
                 addTokenRouter,
                 assetDefinitionService,
                 genericWalletInteract,

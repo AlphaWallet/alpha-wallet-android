@@ -1,4 +1,4 @@
-package com.alphawallet.app.entity;
+package com.alphawallet.app.entity.cryptokeys;
 
 public class KeyServiceException extends Exception
 {

@@ -2,7 +2,9 @@ package com.alphawallet.app.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -61,7 +63,6 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     public TextView date;
     public TextView price;
 
-    private AWalletAlertDialog dialog;
     private String lastCheck;
 
     LinearLayout progressLayout;
@@ -78,6 +79,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     public TextView chainName;
     private QrUrlResult currentResult;
     private InputView tokenType;
+    private boolean zeroBalanceToken = false;
 
     private AWalletAlertDialog aDialog;
 
@@ -155,14 +157,16 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         viewModel.prepare();
     }
 
-    private void onTokenType(ContractType contractType)
+    private void onTokenType(Token contractTypeToken)
     {
         tokenType = findViewById(R.id.input_token_type);
         showProgress(false);
-        if (contractType != ContractType.OTHER)
+        if (contractTypeToken.getInterfaceSpec() != ContractType.OTHER)
         {
+            if (!contractTypeToken.hasPositiveBalance()) zeroBalanceToken = true;
             tokenType.setVisibility(View.VISIBLE);
-            tokenType.setText(contractType.toString());
+            String showBalance = contractTypeToken.getStringBalance() + " " + contractTypeToken.getInterfaceSpec().toString();
+            tokenType.setText(showBalance);
         }
     }
 
@@ -202,15 +206,15 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
     private void showCameraDenied()
     {
-        dialog = new AWalletAlertDialog(this);
-        dialog.setTitle(R.string.title_dialog_error);
-        dialog.setMessage(R.string.error_camera_permission_denied);
-        dialog.setIcon(ERROR);
-        dialog.setButtonText(R.string.button_ok);
-        dialog.setButtonListener(v -> {
-                                     dialog.dismiss();
+        aDialog = new AWalletAlertDialog(this);
+        aDialog.setTitle(R.string.title_dialog_error);
+        aDialog.setMessage(R.string.error_camera_permission_denied);
+        aDialog.setIcon(ERROR);
+        aDialog.setButtonText(R.string.button_ok);
+        aDialog.setButtonListener(v -> {
+            aDialog.dismiss();
                                  });
-        dialog.show();
+        aDialog.show();
     }
 
     private void finishAndLaunchSend()
@@ -241,11 +245,16 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onSaved(boolean result)
+    private void onSaved(Token result)
     {
-        if (result)
+        if (result != null)
         {
-            sendBroadcast(new Intent(ADDED_TOKEN)); //inform walletview there is a new token
+            String[] addrs = { result.getAddress() };
+            int[] chainIds = { result.tokenInfo.chainId };
+            Intent intent = new Intent(ADDED_TOKEN);
+            intent.putExtra(C.EXTRA_TOKENID_LIST, addrs);
+            intent.putExtra(C.EXTRA_CHAIN_ID, chainIds);
+            sendBroadcast(intent);
             finish();
         }
     }
@@ -256,15 +265,15 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {
-        dialog = new AWalletAlertDialog(this);
-        dialog.setTitle(R.string.title_dialog_error);
-        dialog.setMessage(R.string.error_add_token);
-        dialog.setIcon(ERROR);
-        dialog.setButtonText(R.string.try_again);
-        dialog.setButtonListener(v -> {
-            dialog.dismiss();
+        aDialog = new AWalletAlertDialog(this);
+        aDialog.setTitle(R.string.title_dialog_error);
+        aDialog.setMessage(R.string.error_add_token);
+        aDialog.setIcon(ERROR);
+        aDialog.setButtonText(R.string.try_again);
+        aDialog.setButtonListener(v -> {
+            aDialog.dismiss();
         });
-        dialog.show();
+        aDialog.show();
     }
 
     @Override
@@ -297,7 +306,8 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
-    private void onSave() {
+    private void saveFinal()
+    {
         boolean isValid = true;
         String address = inputAddressView.getAddress();
         String symbol = symbolInputView.getText().toString().toLowerCase();
@@ -337,6 +347,41 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
             viewModel.save(address, symbol, decimals, name, viewModel.getSelectedChain());
             showProgress(true);
         }
+    }
+
+    private void onSave() {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        if (zeroBalanceToken && pref.getBoolean("hide_zero_balance_tokens", false))
+        {
+            userAddingZeroBalanceToken();
+        }
+        else
+        {
+            saveFinal();
+        }
+    }
+
+    private void userAddingZeroBalanceToken()
+    {
+        //warn user we are switching on zero balance tokens
+        aDialog = new AWalletAlertDialog(this);
+        aDialog.setTitle(R.string.zero_balance_tokens_off);
+        aDialog.setIcon(AWalletAlertDialog.WARNING);
+        aDialog.setMessage(R.string.zero_balance_tokens_are_switched_off);
+        aDialog.setButtonText(R.string.dialog_switch_zero_balance_tokens_on);
+        aDialog.setButtonListener(v -> {
+            aDialog.dismiss();
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+            pref.edit().putBoolean("hide_zero_balance_tokens", false).apply();
+            saveFinal();
+        });
+        aDialog.setSecondaryButtonText(R.string.action_cancel);
+        aDialog.setSecondaryButtonListener(v -> {
+            //don't switch on the zero balance tokens
+            aDialog.dismiss();
+            saveFinal();
+        });
+        aDialog.show();
     }
 
     private void onNoContractFound(Boolean noContract)

@@ -64,6 +64,8 @@ public class NewSettingsFragment extends Fragment
     private TextView backupText;
     private TextView currencySubtext;
 
+    private Wallet wallet;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -139,6 +141,15 @@ public class NewSettingsFragment extends Fragment
             layoutSwitchnetworks.setVisibility(View.GONE);
         }
 
+        final LinearLayout layoutTokenManagement = view.findViewById(R.id.layout_token_management);
+        layoutTokenManagement.setOnClickListener(v -> {
+            if (wallet != null) {
+                Intent intent = new Intent(getActivity(), TokenManagementActivity.class);
+                intent.putExtra(EXTRA_ADDRESS, wallet.address);
+                getActivity().startActivity(intent);
+            }
+        });
+
         final LinearLayout layoutSwitchLocale = view.findViewById(R.id.layout_locale_lang);
         layoutSwitchLocale.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), SelectLocaleActivity.class);
@@ -212,6 +223,33 @@ public class NewSettingsFragment extends Fragment
         else
         {
             layoutLinkedIn.setVisibility(View.GONE);
+        }
+
+        final LinearLayout layoutInstagram = view.findViewById(R.id.layout_instagram);
+        if (MediaLinks.AWALLET_INSTAGRAM_URL != null)
+        {
+            layoutInstagram.setVisibility(View.VISIBLE);
+            layoutInstagram.setOnClickListener(v -> {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(MediaLinks.AWALLET_INSTAGRAM_URL));
+                if (isAppAvailable(C.INSTAGRAM_PACKAGE_NAME))
+                {
+                    intent.setPackage(C.INSTAGRAM_PACKAGE_NAME);
+                }
+                try
+                {
+                    getActivity().startActivity(intent);
+                }
+                catch (Exception e)
+                {
+                    Crashlytics.logException(e);
+                    e.printStackTrace();
+                }
+            });
+        }
+        else
+        {
+            layoutInstagram.setVisibility(View.GONE);
         }
 
         final LinearLayout layoutTwitter = view.findViewById(R.id.layout_twitter);
@@ -387,6 +425,7 @@ public class NewSettingsFragment extends Fragment
     }
 
     private void onDefaultWallet(Wallet wallet) {
+        this.wallet = wallet;
         walletsSubtext.setText(wallet.address);
         switch (wallet.authLevel)
         {

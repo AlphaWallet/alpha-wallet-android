@@ -2,16 +2,22 @@ package com.alphawallet.app.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -30,6 +36,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.WarningData;
+import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.util.TabUtils;
 
@@ -107,10 +114,12 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         viewModel.backupEvent().observe(this, this::backupEvent);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
-        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService());
+        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), getContext());
         adapter.setHasStableIds(true);
         listView.setLayoutManager(new LinearLayoutManager(getContext()));
         listView.setAdapter(adapter);
+        if (listView.getItemAnimator() != null)
+            ((SimpleItemAnimator) listView.getItemAnimator()).setSupportsChangeAnimations(false);
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeCallback(adapter));
         itemTouchHelper.attachToRecyclerView(listView);
@@ -207,7 +216,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     }
 
     private void onTotal(BigDecimal totalInCurrency) {
-        adapter.setTotal(totalInCurrency);
+//        adapter.setTotal(totalInCurrency);
     }
 
     @Override
@@ -374,15 +383,26 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     }
 
     @Override
-    public void addedToken()
+    public void addedToken(int[] chainIds, String[] addrs)
     {
+        //token was added
+        if (chainIds.length != addrs.length)
+        {
+            System.out.println("Receiver data mismatch");
+            return;
+        }
 
+        for (int i = 0; i < chainIds.length; i++)
+        {
+            Token t = viewModel.getTokenFromService(chainIds[i], addrs[i]);
+            if (t != null) adapter.updateToken(t, false);
+        }
     }
 
     @Override
     public void changedLocale()
     {
-
+        refreshList();
     }
 
     public void walletOutOfFocus()
@@ -445,10 +465,19 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
     public class SwipeCallback extends ItemTouchHelper.SimpleCallback {
         private TokensAdapter mAdapter;
+        private Drawable icon;
+        private ColorDrawable background;
 
-        public SwipeCallback(TokensAdapter adapter) {
+        SwipeCallback(TokensAdapter adapter) {
             super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
             mAdapter = adapter;
+            if (getActivity() != null) {
+                icon = ContextCompat.getDrawable(getActivity(), R.drawable.ic_hide_token);
+                if (icon != null) {
+                    icon.setTint(ContextCompat.getColor(getActivity(), R.color.white));
+                }
+                background = new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.cancel_red));
+            }
         }
 
         @Override
@@ -458,16 +487,73 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-            remindMeLater(viewModel.getWallet());
+            if (viewHolder instanceof WarningHolder) {
+                remindMeLater(viewModel.getWallet());
+            } else {
+                if (viewHolder instanceof TokenHolder) {
+                    Token token = ((TokenHolder) viewHolder).token;
+                    viewModel.setTokenEnabled(token, false);
+                    adapter.removeToken(token);
+
+                    if (getContext() != null) {
+                        Snackbar snackbar = Snackbar
+                                .make(viewHolder.itemView, token.tokenInfo.name + " " + getContext().getString(R.string.token_hidden), Snackbar.LENGTH_LONG)
+                                .setAction(getString(R.string.action_snackbar_undo), view -> {
+                                    viewModel.setTokenEnabled(token, true);
+                                    adapter.updateToken(token, true);
+                                });
+
+                        snackbar.show();
+                    }
+                }
+            }
         }
 
         @Override
         public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-            if (viewHolder instanceof WarningHolder) {
-                return super.getSwipeDirs(recyclerView, viewHolder);
-            } else {
-                return 0;
+            if (viewHolder.getItemViewType() == TokenHolder.VIEW_TYPE)
+            {
+                Token t = ((TokenHolder)viewHolder).token;
+                if (t.isEthereum()) return 0;
             }
+
+            return super.getSwipeDirs(recyclerView, viewHolder);
         }
+
+        @Override
+        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+
+            View itemView = viewHolder.itemView;
+            int offset = 20;
+            int iconMargin = (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
+            int iconTop = itemView.getTop() + (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
+            int iconBottom = iconTop + icon.getIntrinsicHeight();
+
+            if (dX > 0) {
+                int iconLeft = itemView.getLeft() + iconMargin + icon.getIntrinsicWidth();
+                int iconRight = itemView.getLeft() + iconMargin;
+                icon.setBounds(iconRight, iconTop, iconLeft, iconBottom);
+                background.setBounds(itemView.getLeft(), itemView.getTop(),
+                        itemView.getLeft() + ((int) dX) + offset,
+                        itemView.getBottom());
+            } else if (dX < 0) {
+                int iconLeft = itemView.getRight() - iconMargin - icon.getIntrinsicWidth();
+                int iconRight = itemView.getRight() - iconMargin;
+                icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+                background.setBounds(itemView.getRight() + ((int) dX) - offset,
+                        itemView.getTop(), itemView.getRight(), itemView.getBottom());
+            } else {
+                background.setBounds(0, 0, 0, 0);
+            }
+
+            background.draw(c);
+            icon.draw(c);
+        }
+    }
+
+    public Wallet getCurrentWallet()
+    {
+        return viewModel.getWallet();
     }
 }

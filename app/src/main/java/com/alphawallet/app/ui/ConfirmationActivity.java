@@ -93,7 +93,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private ConfirmationType confirmationType;
     private byte[] transactionBytes = null;
     private Web3Transaction transaction;
-    private PinAuthenticationCallbackInterface authInterface;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -243,7 +242,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 String contractTxt = contractAddress + " " + contractName;
                 contractAddrText.setText(contractTxt);
-                symbolText.setText(token.tokenInfo.symbol);
+                symbolText.setText(token.getSymbol());
                 amountString = symbol;
                 transactionBytes = viewModel.getERC721TransferBytes(to, contractAddress, amountStr, chainId);
                 break;
@@ -348,6 +347,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
     private void finaliseTransaction()
     {
+        onProgress(true);
         switch (confirmationType) {
             case ETH:
                 viewModel.createTransaction(
@@ -440,7 +440,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         dialog.setButtonListener(v -> {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("transaction hash",
-                    EthereumNetworkBase.getEtherscanURLbyNetwork(token.tokenInfo.chainId) + "tx/" + txData.txHash);
+                    EthereumNetworkBase.getEtherscanURLbyNetwork(chainId) + "tx/" + txData.txHash);
             clipboard.setPrimaryClip(clip);
             dialog.dismiss();
         });
@@ -524,7 +524,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 intent.putExtra(C.EXTRA_SUCCESS, false);
                 setResult(RESULT_CANCELED, intent);
             }
-            finish();
+            if (error.message == null || !error.message.equals(getString(R.string.authentication_error))) finish();
         });
         dialog.show();
     }
@@ -550,15 +550,9 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
-        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
+        if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
+        else viewModel.failedAuthentication(SIGN_DATA);
         //got authorisation, continue with transaction
         if (gotAuth) finaliseTransaction();
-    }
-
-    @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-    {
-        authInterface = authCallback;
     }
 }

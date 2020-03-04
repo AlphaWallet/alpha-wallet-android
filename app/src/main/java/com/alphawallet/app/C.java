@@ -80,6 +80,7 @@ public abstract class C {
     public static final String EXTRA_CHAIN_ID = "CHAIN_ID";
     public static final String EXTRA_CALLBACKID = "CALLBACK_ID";
     public static final String EXTRA_LOCALE = "LOCALE_STRING";
+    public static final String EXTRA_PAGE_TITLE = "PTITLE";
     public static final String EXTRA_CURRENCY = "CURRENCY_STRING";
 
     public static final String PRUNE_ACTIVITY =
@@ -133,6 +134,7 @@ public abstract class C {
     public static final String FACEBOOK_PACKAGE_NAME = "com.facebook.katana";
     public static final String LINKEDIN_PACKAGE_NAME = "com.linkedin.android";
     public static final String REDDIT_PACKAGE_NAME = "com.reddit.frontpage";
+    public static final String INSTAGRAM_PACKAGE_NAME = "com.instagram.android";
 
     public interface ErrorCode {
         int UNKNOWN = 1;

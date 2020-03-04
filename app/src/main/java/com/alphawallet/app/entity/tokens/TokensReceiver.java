@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 
 import com.alphawallet.app.C;
 
@@ -24,13 +25,16 @@ public class TokensReceiver extends BroadcastReceiver
     {
         if (intent != null && intent.getAction() != null)
         {
+            Bundle bundle = intent.getExtras();
             switch (intent.getAction())
             {
                 case C.RESET_WALLET:
                     tokenInterface.resetTokens();
                     break;
                 case C.ADDED_TOKEN:
-                    tokenInterface.addedToken();
+                    String[] addrs = intent.getStringArrayExtra(C.EXTRA_TOKENID_LIST);
+                    int[] chainIds = intent.getIntArrayExtra(C.EXTRA_CHAIN_ID);
+                    tokenInterface.addedToken(chainIds, addrs);
                     break;
                 case C.CHANGED_LOCALE:
                     tokenInterface.changedLocale();

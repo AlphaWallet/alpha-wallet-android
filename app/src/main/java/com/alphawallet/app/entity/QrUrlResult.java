@@ -2,6 +2,8 @@ package com.alphawallet.app.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -15,7 +17,7 @@ import java.util.List;
 public class QrUrlResult implements Parcelable
 {
     private String protocol;
-    private String address;
+    private String address; //becomes the token address for a transfer
     private String functionStr;
     public int chainId;
     public BigInteger weiValue;
@@ -23,7 +25,7 @@ public class QrUrlResult implements Parcelable
     public BigInteger gasLimit;
     public BigInteger gasPrice;
     public BigDecimal tokenAmount;
-    public String functionToAddress;
+    public String functionToAddress; //destination address
     public String function; //formed function hex
     public EIP681Type type;
 
@@ -124,6 +126,7 @@ public class QrUrlResult implements Parcelable
 
     public void createFunctionPrototype(List<EthTypeParam> params)
     {
+        boolean override = false;
         if (params.size() == 0)
         {
             if (weiValue.compareTo(BigInteger.ZERO) > 0) type = EIP681Type.PAYMENT;
@@ -134,7 +137,17 @@ public class QrUrlResult implements Parcelable
         StringBuilder sb = new StringBuilder();
         StringBuilder fd = new StringBuilder();
 
-        if (functionStr != null) sb.append(functionStr);
+        if (functionStr != null && functionStr.length() > 0) sb.append(functionStr);
+        else
+        {
+            //isn't a function
+            if (params.size() > 0)
+            {
+                override = true;
+                //assume transfer request
+                type = EIP681Type.TRANSFER;
+            }
+        }
 
         sb.append("(");
         fd.append(sb.toString());
@@ -163,6 +176,14 @@ public class QrUrlResult implements Parcelable
                 case "address":
                     functionToAddress = param.value;
                     break;
+                case "token":
+                    //ignore token name for now
+                    break;
+                case "contractAddress":
+                    //If contractAddress is explicitly defined; then this.address must have been the destination address
+                    functionToAddress = address;
+                    address = param.value;
+                    break;
                 default:
                     break;
             }
@@ -173,17 +194,35 @@ public class QrUrlResult implements Parcelable
         functionStr = sb.toString();
         functionDetail = fd.toString();
 
-        if (functionStr.startsWith("transfer"))
+        if (!override)
         {
-            type = EIP681Type.TRANSFER;
+            if (functionStr.startsWith("transfer"))
+            {
+                type = EIP681Type.TRANSFER;
+            }
+            else if (params.size() > 0)
+            {
+                type = EIP681Type.FUNCTION_CALL;
+            }
+            else
+            {
+                type = EIP681Type.OTHER;
+            }
         }
-        else if (params.size() > 0)
-        {
-            type = EIP681Type.FUNCTION_CALL;
-        }
-        else
+
+        if (type == EIP681Type.TRANSFER && isEmpty(functionToAddress))
         {
             type = EIP681Type.OTHER;
         }
+
+        if (type == EIP681Type.FUNCTION_CALL && isEmpty(functionDetail))
+        {
+            type = EIP681Type.OTHER;
+        }
+    }
+
+    private boolean isEmpty(String val)
+    {
+        return (val == null || val.length() == 0);
     }
 }

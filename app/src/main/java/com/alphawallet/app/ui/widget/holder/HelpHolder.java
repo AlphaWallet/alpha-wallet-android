@@ -1,9 +1,13 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.animation.LayoutTransition;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RawRes;
+import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
@@ -11,8 +15,13 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.HelpItem;
+import com.alphawallet.app.ui.StaticViewer;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class HelpHolder extends BinderViewHolder<HelpItem> implements View.OnClickListener {
 
@@ -23,6 +32,7 @@ public class HelpHolder extends BinderViewHolder<HelpItem> implements View.OnCli
     private final TextView questionText;
     private final TextView answerText;
     private final WebView webView;
+    private int rawResource;
 
 
     public HelpHolder(int resId, ViewGroup parent, WebView w) {
@@ -33,12 +43,14 @@ public class HelpHolder extends BinderViewHolder<HelpItem> implements View.OnCli
         answerText = findViewById(R.id.text_answer);
         webView = w;
         itemView.setOnClickListener(this);
+        rawResource = 0;
     }
 
     @Override
     public void bind(@Nullable HelpItem helpItem, @NonNull Bundle addition) {
         questionText.setText(helpItem.getQuestion());
-        answerText.setText(helpItem.getAnswer());
+        if (helpItem.getResource() > 0) rawResource = helpItem.getResource();
+        else answerText.setText(helpItem.getAnswer());
 
         LinearLayout container = findViewById(R.id.item_help);
 
@@ -47,7 +59,12 @@ public class HelpHolder extends BinderViewHolder<HelpItem> implements View.OnCli
 
     @Override
     public void onClick(View v) {
-        if (answerText.getText().toString().contains(".html"))
+        if (rawResource > 0)
+        {
+            String base64Text = getResource(rawResource);
+            openViewer(base64Text, questionText.getText().toString());
+        }
+        else if (answerText.getText().toString().contains(".html"))
         {
             //intent to open web page
             webView.setVisibility(View.VISIBLE);
@@ -65,5 +82,29 @@ public class HelpHolder extends BinderViewHolder<HelpItem> implements View.OnCli
                 answerLayout.setVisibility(View.GONE);
             }
         }
+    }
+
+    private void openViewer(String base64Text, String title)
+    {
+        Intent intent = new Intent(getContext(), StaticViewer.class);
+        intent.putExtra(C.EXTRA_STATE, base64Text);
+        intent.putExtra(C.EXTRA_PAGE_TITLE, title);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getContext().startActivity(intent);
+    }
+
+    private String getResource(@RawRes int rawRes) {
+        byte[] buffer = new byte[0];
+        try {
+            InputStream in = getContext().getResources().openRawResource(rawRes);
+            buffer = new byte[in.available()];
+            int len = in.read(buffer);
+            if (len < 1) {
+                throw new IOException("Nothing is read.");
+            }
+        } catch (Exception ex) {
+            Log.d("READ_JS_TAG", "Ex", ex);
+        }
+        return Base64.encodeToString(buffer, Base64.DEFAULT);
     }
 }

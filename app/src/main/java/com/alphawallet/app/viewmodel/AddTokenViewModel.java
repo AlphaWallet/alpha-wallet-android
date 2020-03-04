@@ -18,6 +18,7 @@ import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.SetupTokensInteract;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.ImportTokenActivity;
@@ -32,6 +33,8 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 
 import javax.annotation.Nullable;
+
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,8 +44,8 @@ public class AddTokenViewModel extends BaseViewModel {
     private final MutableLiveData<TokenInfo> tokenInfo = new MutableLiveData<>();
     private final MutableLiveData<Integer> switchNetwork = new MutableLiveData<>();
     private final MutableLiveData<Token> finalisedToken = new MutableLiveData<>();
-    private final MutableLiveData<ContractType> tokentype = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> result = new MutableLiveData<>();
+    private final MutableLiveData<Token> tokentype = new MutableLiveData<>();
+    private final MutableLiveData<Token> result = new MutableLiveData<>();
     private final MutableLiveData<Boolean> noContract = new MutableLiveData<>();
 
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -63,9 +66,9 @@ public class AddTokenViewModel extends BaseViewModel {
         return wallet;
     }
     public MutableLiveData<Token> tokenFinalised() { return finalisedToken; }
-    public MutableLiveData<ContractType> tokenType() { return tokentype; }
+    public MutableLiveData<Token> tokenType() { return tokentype; }
     public MutableLiveData<Boolean> noContract() { return noContract; }
-    public LiveData<Boolean> result() { return result; }
+    public LiveData<Token> result() { return result; }
     public LiveData<Integer> switchNetwork() { return switchNetwork; }
     public LiveData<TokenInfo> tokenInfo() {
         return tokenInfo;
@@ -120,7 +123,7 @@ public class AddTokenViewModel extends BaseViewModel {
         assetDefinitionService.getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
         tokensService.addToken(token);
         progress.postValue(false);
-        result.postValue(true);
+        result.postValue(token);
     }
 
     @Override
@@ -185,15 +188,18 @@ public class AddTokenViewModel extends BaseViewModel {
 
     private void onTokensSetup(TokenInfo tokenData) {
         tokenInfo.postValue(tokenData);
-        disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenData)
+        disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenData).toObservable()
+                .flatMap(contractType -> addTokenInteract.add(tokenData, contractType, wallet.getValue()))
+                //.flatMap(token -> fetchTokensInteract.updateDefaultBalance(token, wallet.getValue()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(tokentype::postValue, this::tokenTypeError);
+                .subscribe(tokentype::postValue, error -> tokenTypeError(error, tokenData));
     }
 
-    private void tokenTypeError(Throwable throwable)
+    private void tokenTypeError(Throwable throwable, TokenInfo data)
     {
-        tokentype.postValue(ContractType.OTHER);
+        Token badToken = new Token(data, BigDecimal.ZERO, 0, "", ContractType.NOT_SET);
+        tokentype.postValue(badToken);
     }
 
     public void prepare()
@@ -248,6 +254,12 @@ public class AddTokenViewModel extends BaseViewModel {
     {
         List<Integer> networkIds = new ArrayList<>();
         networkIds.add(primaryChainId); //test selected chain first
+        for (int chainId : tokensService.getNetworkFilters())
+        {
+            if (!networkIds.contains(chainId)) networkIds.add(chainId);
+        }
+
+        //Now scan unselected networks
         for (NetworkInfo networkInfo : ethereumNetworkRepository.getAvailableNetworkList())
         {
             if (!networkIds.contains(networkInfo.chainId)) networkIds.add(networkInfo.chainId);

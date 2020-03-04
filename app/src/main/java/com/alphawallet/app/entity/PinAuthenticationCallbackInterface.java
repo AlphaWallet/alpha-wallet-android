@@ -6,6 +6,6 @@ package com.alphawallet.app.entity;
  */
 public interface PinAuthenticationCallbackInterface
 {
-    void CompleteAuthentication(Operation taskCode);
-    void FailedAuthentication(Operation taskCode);
+    void completeAuthentication(Operation taskCode);
+    void failedAuthentication(Operation taskCode);
 }

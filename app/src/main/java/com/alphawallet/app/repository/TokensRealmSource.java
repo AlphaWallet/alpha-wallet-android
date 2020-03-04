@@ -45,7 +45,6 @@ public class TokensRealmSource implements TokenLocalSource {
     public static final String TAG = "TLS";
     public static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
     private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
-    private static final String COINMARKETCAP_IMAGE_URL = "https://files.coinmarketcap.com/static/img/coins/128x128/%s.png";
 
     private final RealmManager realmManager;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -189,13 +188,12 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Single<Token[]> fetchEnabledTokensWithBalance(Wallet wallet) {
+    public Single<Token[]> fetchTokensWithBalance(Wallet wallet) {
         return Single.fromCallable(() -> {
             try (Realm realm = realmManager.getRealmInstance(wallet))
             {
                 RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
                         .sort("addedTime", Sort.ASCENDING)
-                        .equalTo("isEnabled", true)
                         .findAll();
 
                 return convertMulti(realmItems, System.currentTimeMillis(), wallet, realm);
@@ -265,11 +263,10 @@ public class TokensRealmSource implements TokenLocalSource {
             realmItem = realm.createObject(RealmTokenTicker.class, tickerName);
             realmItem.setCreatedTime(now);
         }
-        realmItem.setId(token.ticker.id);
         realmItem.setPercentChange24h(token.ticker.percentChange24h);
         realmItem.setPrice(token.ticker.price);
         realmItem.setImage(TextUtils.isEmpty(token.ticker.image)
-                           ? String.format(COINMARKETCAP_IMAGE_URL, token.ticker.id)
+                           ? ""
                            : token.ticker.image);
         realmItem.setUpdatedTime(now);
         realmItem.setCurrencySymbol(token.ticker.priceSymbol);
@@ -309,7 +306,7 @@ public class TokensRealmSource implements TokenLocalSource {
                 e.printStackTrace();
             }
             return tokenTicker == null
-                    ? new TokenTicker("0", "", "0", "0", "USD", null)
+                    ? new TokenTicker()
                     : tokenTicker;
         });
     }
@@ -323,8 +320,7 @@ public class TokensRealmSource implements TokenLocalSource {
             String currencySymbol = rawItem.getCurrencySymbol();
             if (currencySymbol == null || currencySymbol.length() == 0)
                 currencySymbol = "USD";
-            tokenTicker = new TokenTicker(rawItem.getId(), rawItem.getContract(), rawItem.getPrice(), rawItem.getPercentChange24h(), currencySymbol, rawItem.getImage());
-            if (rawItem.getUpdatedTime() < minCreatedTime) tokenTicker.isCurrent = false;
+            tokenTicker = new TokenTicker(rawItem.getPrice(), rawItem.getPercentChange24h(), currencySymbol, rawItem.getImage(), rawItem.getUpdatedTime());
         }
 
         return tokenTicker;
@@ -338,7 +334,7 @@ public class TokensRealmSource implements TokenLocalSource {
             realm = realmManager.getRealmInstance(wallet);
             RealmToken realmToken = realm.where(RealmToken.class)
                     .equalTo("address", databaseKey(token))
-                    .equalTo("chainId", network.chainId)
+                    .equalTo("chainId", token.tokenInfo.chainId)
                     .findFirst();
 
             TransactionsRealmCache.addRealm();
@@ -418,7 +414,7 @@ public class TokensRealmSource implements TokenLocalSource {
                             .equalTo("contract", newToken.getAddress() + "-" + newToken.tokenInfo.chainId)
                             .findFirst();
 
-                    newToken.ticker = convertRealmTicker(rawItem);
+                    newToken.ticker = ethereumNetworkRepository.updateTicker(newToken, convertRealmTicker(rawItem));
                     result.put(info.chainId, newToken);
                 }
             }
@@ -717,6 +713,7 @@ public class TokensRealmSource implements TokenLocalSource {
         for (RealmToken realmItem : realmItems)
         {
             Token t = convertSingle(realmItem, realm, tf, wallet);
+
             if (t != null)
             {
                 tokenList.add(t);

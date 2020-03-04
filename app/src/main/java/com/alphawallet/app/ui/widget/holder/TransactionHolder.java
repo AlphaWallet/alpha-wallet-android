@@ -104,7 +104,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         String tokenSymbol = "";
         if (token != null)
         {
-            tokenSymbol = token.tokenInfo.symbol;
+            tokenSymbol = token.getSymbol();
             if (chainName != null)
             {
                 Utils.setChainColour(chainName, token.tokenInfo.chainId);
@@ -162,7 +162,11 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         pendingSpinner.setVisibility(View.VISIBLE);
         typeIcon.setVisibility(View.GONE);
         type.setText(R.string.pending_transaction);
-        String valueStr = getValueStr(transaction.value, true, getString(R.string.eth), 18, transaction.to.equalsIgnoreCase(transaction.from));
+        String symbol = getString(R.string.eth);
+        Token t = tokensService.getToken(transaction.chainId, tokensService.getCurrentAddress());
+        if (t != null) symbol = t.getSymbol();
+
+        String valueStr = getValueStr(transaction.value, true, symbol, 18, transaction.to.equalsIgnoreCase(transaction.from));
         value.setText(valueStr);
         value.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
         value.setVisibility(View.VISIBLE);
@@ -175,7 +179,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         {
             address.setText(transaction.to);
         }
-
     }
 
     private void fillERC875(boolean txSuccess, Transaction trans, ERC875ContractTransaction ct)

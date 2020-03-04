@@ -25,7 +25,6 @@ import com.alphawallet.app.service.AlphaWalletService;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.service.ImportTokenService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.KeystoreAccountService;
 import com.alphawallet.app.service.MarketQueueService;
@@ -63,8 +62,8 @@ public class RepositoriesModule {
 
 	@Singleton
     @Provides
-	TickerServiceInterface provideTickerService(OkHttpClient httpClient, Gson gson) {
-		return new TickerService(httpClient, gson);
+	TickerServiceInterface provideTickerService(OkHttpClient httpClient, Gson gson, Context context) {
+		return new TickerService(httpClient, gson, context);
     }
 
 	@Singleton
@@ -177,13 +176,6 @@ public class RepositoriesModule {
                                                TransactionRepositoryType transactionRepository,
                                                Gson gson) {
 		return new AlphaWalletService(okHttpClient, transactionRepository, gson);
-	}
-
-	@Singleton
-	@Provides
-    ImportTokenService provideImportTokenService(OkHttpClient okHttpClient,
-                                                 TransactionRepositoryType transactionRepository) {
-		return new ImportTokenService(okHttpClient, transactionRepository);
 	}
 
 	@Singleton

@@ -3,6 +3,7 @@ package com.alphawallet.app.entity.tokens;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.view.View;
@@ -41,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-public class Token implements Parcelable
+public class Token implements Parcelable, Comparable<Token>
 {
     public final TokenInfo tokenInfo;
     public BigDecimal balance;
@@ -63,6 +64,7 @@ public class Token implements Parcelable
 
     public int iconifiedWebviewHeight;
     public int nonIconifiedWebviewHeight;
+    private int nameWeight;
 
     public String getNetworkName() { return shortNetworkName; }
 
@@ -88,6 +90,7 @@ public class Token implements Parcelable
         walletUIUpdateRequired = false;
         hasTokenScript = false;
         refreshCheck = false;
+        nameWeight = calculateTokenNameWeight();
     }
 
     public void transferPreviousData(Token oldToken)
@@ -122,6 +125,7 @@ public class Token implements Parcelable
         hasDebugTokenscript = in.readByte() == 1;
         nonIconifiedWebviewHeight = in.readInt();
         iconifiedWebviewHeight = in.readInt();
+        nameWeight = in.readInt();
 
         balanceChanged = false;
         if (readType <= ContractType.CREATION.ordinal())
@@ -131,9 +135,8 @@ public class Token implements Parcelable
     }
 
     public String getStringBalance() {
-        //should apply BigDecimal conversion here
-        if (balance != null) return balance.toString();
-        else return "0";
+        BigDecimal correctedBalance = getCorrectedBalance(4);
+        return correctedBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : correctedBalance.toPlainString();
     }
 
     public boolean hasPositiveBalance() {
@@ -147,7 +150,8 @@ public class Token implements Parcelable
     }
 
     public String getFullBalance() {
-        return getStringBalance();
+        if (balance != null) return balance.toString();
+        else return "0";
     }
 
     public Asset getAssetForToken(String tokenId) {
@@ -192,6 +196,7 @@ public class Token implements Parcelable
         dest.writeByte(hasDebugTokenscript?(byte)1:(byte)0);
         dest.writeInt(nonIconifiedWebviewHeight);
         dest.writeInt(iconifiedWebviewHeight);
+        dest.writeInt(nameWeight);
     }
 
     public void setRealmBalance(RealmToken realmToken)
@@ -238,6 +243,12 @@ public class Token implements Parcelable
         }
     }
 
+    public String getSymbol()
+    {
+        if (tokenInfo.symbol == null) return "";
+        else return tokenInfo.symbol.toUpperCase();
+    }
+
     public void clickReact(BaseViewModel viewModel, Context context)
     {
         viewModel.showErc20TokenDetail(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
@@ -245,7 +256,7 @@ public class Token implements Parcelable
 
     public BigDecimal getCorrectedBalance(int scale)
     {
-        if (balance.equals(BigDecimal.ZERO)) return BigDecimal.ZERO;
+        if (balance == null || balance.equals(BigDecimal.ZERO)) return BigDecimal.ZERO;
         BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
         BigDecimal ethBalance = tokenInfo.decimals > 0
                 ? balance.divide(decimalDivisor) : balance;
@@ -493,11 +504,12 @@ public class Token implements Parcelable
         lastTxUpdate = realmToken.getTXUpdateTime();
         lastTxCheck = realmToken.getTXUpdateTime();
         lastTxTime = realmToken.getLastTxTime();
+        tokenInfo.isEnabled = realmToken.getEnabled();
     }
 
     public boolean checkBalanceChange(Token token)
     {
-        return token != null && (!getFullBalance().equals(token.getFullBalance()) || !tokenInfo.name.equals(token.tokenInfo.name));
+        return token != null && (!getFullBalance().equals(token.getFullBalance()) || !getFullName().equals(token.getFullName()));
     }
 
     public String getPendingDiff()
@@ -790,6 +802,13 @@ public class Token implements Parcelable
         return EthereumNetworkRepository.hasRealValue(tokenInfo.chainId);
     }
 
+    /**
+     * Determine how often we check balance of tokens.
+     *
+     * Note that if any transaction relating to a contract is received then we trigger a balance check
+     *
+     * @return
+     */
     protected float calculateBalanceUpdateWeight()
     {
         float updateWeight = 0;
@@ -800,11 +819,11 @@ public class Token implements Parcelable
             {
                 if (isEthereum() || hasPositiveBalance())
                 {
-                    updateWeight = 1.0f;
+                    updateWeight = 1.0f; //30 seconds
                 }
                 else
                 {
-                    updateWeight = 0.5f;
+                    updateWeight = 0.5f; //1 minute
                 }
             }
             else
@@ -812,19 +831,15 @@ public class Token implements Parcelable
                 //testnet: TODO: check time since last transaction - if greater than 1 month slow update further
                 if (isEthereum())
                 {
-                    updateWeight = 0.4f;
+                    updateWeight = 0.5f; //1 minute
                 }
                 else if (hasPositiveBalance())
                 {
-                    updateWeight = 0.25f;
-                }
-                else if (tokenInfo.name != null)
-                {
-                    updateWeight = 0.05f;
+                    updateWeight = 0.3f; //100 seconds
                 }
                 else
                 {
-                    updateWeight = 0.01f;
+                    updateWeight = 0.1f; //5 minutes
                 }
             }
         }
@@ -838,6 +853,7 @@ public class Token implements Parcelable
 
     public boolean checkBalanceChange(BigDecimal balance)
     {
+        balanceUpdateWeight = calculateBalanceUpdateWeight();
         if (balance != null && this.balance != null)
         {
             return !this.balance.equals(balance);
@@ -853,7 +869,7 @@ public class Token implements Parcelable
         return walletUIUpdateRequired;
     }
 
-    public boolean requiresTransactionRefresh()
+    public boolean requiresTransactionRefresh(int updateChain)
     {
         boolean requiresUpdate = balanceChanged;
         balanceChanged = false;
@@ -866,14 +882,26 @@ public class Token implements Parcelable
 
         long multiplier = isEthereum() || EthereumNetworkRepository.isPriorityToken(this) ? 1 : 5;
 
+        if (isEthereum() && tokenInfo.chainId == updateChain && (currentTime - lastTxCheck) > 10*1000) //check chain every 10 seconds while transaction is pending
+        {
+            lastTxCheck = currentTime;
+            requiresUpdate = true;
+        }
+
         //ensure chain transactions for the wallet are checked on a regular basis.
-        if (EthereumNetworkRepository.hasTicker(this) && hasPositiveBalance() && (currentTime - lastTxCheck) > multiplier*60*1000) //need to check main chains once per minute
+        if (checkBackgroundUpdate(currentTime) || (EthereumNetworkRepository.hasTicker(this) && hasPositiveBalance() && (currentTime - lastTxCheck) > multiplier*60*1000)) //need to check main chains once per minute
         {
             lastTxCheck = currentTime; //don't check again
             requiresUpdate = true;
         }
 
         return requiresUpdate;
+    }
+
+    private boolean checkBackgroundUpdate(long currentTime)
+    {
+        //check balance of empty mainnet chains once per hour
+        return isEthereum() && !hasPositiveBalance() && (currentTime - lastTxCheck) > 60 * 60 * 1000;
     }
 
     public boolean getIsSent(Transaction transaction)
@@ -1043,5 +1071,111 @@ public class Token implements Parcelable
     {
         if (check.ticker == null && ticker != null) return true; //now has ticker
         else return check.ticker != null && ticker != null && !check.ticker.price.equals(ticker.price); //return true if ticker changed
+    }
+
+    @Override
+    public boolean equals(Object v)
+    {
+        boolean retVal = false;
+
+        if (v instanceof Token) {
+            Token t = (Token) v;
+            retVal = t != null && tokenInfo.chainId == t.tokenInfo.chainId && getAddress().equals(t.getAddress());
+        }
+
+        return retVal;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 7;
+        hash = 17 * hash + (this.tokenInfo.name != null ? this.tokenInfo.name.hashCode() : 0);
+        return hash;
+    }
+
+
+    @Override
+    public int compareTo(@NonNull Token otherToken)
+    {
+        return nameWeight - otherToken.nameWeight;
+    }
+
+    public int getNameWeight()
+    {
+        return nameWeight;
+    }
+
+    private int calculateTokenNameWeight()
+    {
+        int weight = 1000; //ensure base eth types are always displayed first
+        String tokenName = getFullName();
+        int override = EthereumNetworkRepository.getPriorityOverride(this);
+        if (override > 0) return override;
+        if(isBad()) return 99999999;
+        if(tokenName.length() == 0)
+        {
+            return Integer.MAX_VALUE;
+        }
+
+        int i = 4;
+        int pos = 0;
+
+        while (i >= 0 && pos < tokenName.length())
+        {
+            char c = tokenName.charAt(pos++);
+            int w = tokeniseCharacter(c);
+            if (w > 0)
+            {
+                int component = (int)Math.pow(26, i)*w;
+                weight += component;
+                i--;
+            }
+        }
+
+        String address = com.alphawallet.token.tools.Numeric.cleanHexPrefix(getAddress());
+        for (i = 0; i < address.length() && i < 2; i++)
+        {
+            char c = address.charAt(i);
+            int w = c - '0';
+            weight += w;
+        }
+
+        if (weight < 2) weight = 2;
+
+        return weight;
+    }
+
+    private int tokeniseCharacter(char c)
+    {
+        int w = Character.toLowerCase(c) - 'a' + 1;
+        if (w > 'z')
+        {
+            //could be ideographic, in which case we may want to display this first
+            //just use a modulus
+            w = w % 10;
+        }
+        else if (w < 0)
+        {
+            //must be a number
+            w = 1 + (c - '0');
+        }
+        else
+        {
+            w += 10;
+        }
+
+        return w;
+    }
+
+    public long getUID()
+    {
+        String id = getAddress() + "-" + tokenInfo.chainId;
+        return id.hashCode();
+    }
+
+    public void setHighestPriorityCheck()
+    {
+        balanceUpdateWeight = 10.0f;
     }
 }

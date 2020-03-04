@@ -2,7 +2,14 @@ package com.alphawallet.app.repository;
 
 import android.util.Log;
 
+import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.app.repository.entity.RealmERC721Asset;
+import com.alphawallet.app.repository.entity.RealmERC721Token;
 import com.alphawallet.app.repository.entity.RealmKeyType;
+import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.repository.entity.RealmTransaction;
+import com.alphawallet.app.repository.entity.RealmTransactionOperation;
 import com.alphawallet.app.repository.entity.RealmWalletData;
 
 import java.util.*;
@@ -12,10 +19,13 @@ import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmObject;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.service.AWRealmMigration;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
 
@@ -168,11 +178,12 @@ public class WalletDataRealmSource {
     }
 
     public Single<Wallet> storeWallet(Wallet wallet) {
-        return Single.fromCallable(() -> {
+        return deleteWallet(wallet) //refresh data
+        .flatMap(deletedWallet -> Single.fromCallable(() -> {
             storeKeyData(wallet);
             storeWalletData(wallet);
             return wallet;
-        });
+        }));
     }
 
     public Single<Wallet> updateWalletData(Wallet wallet) {
@@ -271,24 +282,48 @@ public class WalletDataRealmSource {
         });
     }
 
-    public Single<String> deleteWallet(String walletAddr)
+    public Single<Wallet> deleteWallet(Wallet wallet)
     {
         return Single.fromCallable(() -> {
             try (Realm realm = realmManager.getWalletDataRealmInstance())
             {
-                RealmWalletData realmWallet = realm.where(RealmWalletData.class).equalTo("address", walletAddr).findFirst();
+                RealmWalletData realmWallet = realm.where(RealmWalletData.class).equalTo("address", wallet.address).findFirst();
                 realm.beginTransaction();
                 if (realmWallet != null) realmWallet.deleteFromRealm();
                 realm.commitTransaction();
             }
             try (Realm realm = realmManager.getWalletTypeRealmInstance())
             {
-                RealmKeyType realmKey = realm.where(RealmKeyType.class).equalTo("address", walletAddr).findFirst();
+                RealmKeyType realmKey = realm.where(RealmKeyType.class).equalTo("address", wallet.address).findFirst();
                 realm.beginTransaction();
                 if (realmKey != null) realmKey.deleteFromRealm();
                 realm.commitTransaction();
             }
-            return walletAddr;
+            //now delete the token and transaction data
+            try (Realm realm = realmManager.getRealmInstance(wallet))
+            {
+                RealmResults<RealmToken>       tokens = realm.where(RealmToken.class).findAll();
+                RealmResults<RealmERC721Asset> assets = realm.where(RealmERC721Asset.class).findAll();
+                RealmResults<RealmERC721Token> erc721tokens = realm.where(RealmERC721Token.class).findAll();
+                RealmResults<RealmTransaction> transactions = realm.where(RealmTransaction.class).findAll();
+                RealmResults<RealmTransactionOperation> transactionOps = realm.where(RealmTransactionOperation.class).findAll();
+
+                realm.beginTransaction();
+                tokens.deleteAllFromRealm();
+                assets.deleteAllFromRealm();
+                erc721tokens.deleteAllFromRealm();
+                transactions.deleteAllFromRealm();
+                transactionOps.deleteAllFromRealm();
+                realm.commitTransaction();
+            }
+            try (Realm realm = realmManager.getAuxRealmInstance(wallet.address))
+            {
+                RealmResults<RealmAuxData> allResults = realm.where(RealmAuxData.class).findAll();
+                realm.beginTransaction();
+                allResults.deleteAllFromRealm();
+                realm.commitTransaction();
+            }
+            return wallet;
         });
     }
 
@@ -310,7 +345,6 @@ public class WalletDataRealmSource {
             return walletAddr;
         });
     }
-
 
     private void storeKeyData(Wallet wallet)
     {

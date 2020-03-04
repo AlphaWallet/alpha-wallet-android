@@ -7,6 +7,7 @@ import android.content.Intent;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ConfirmationType;
 import com.alphawallet.app.entity.DAppFunction;
+import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
@@ -125,7 +126,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         disposable = createTransactionInteract.sign(wallet, signRequest, chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(sig -> dAppFunction.DAppReturn(sig, message),
+                .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
                            error -> dAppFunction.DAppError(error, message));
     }
 
@@ -162,7 +163,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.EXTRA_TO_ADDRESS, toAddress);
         intent.putExtra(C.EXTRA_AMOUNT, value.toString());
         intent.putExtra(C.EXTRA_DECIMALS, nativeEth.tokenInfo.decimals);
-        intent.putExtra(C.EXTRA_SYMBOL, nativeEth.tokenInfo.symbol);
+        intent.putExtra(C.EXTRA_SYMBOL, nativeEth.getSymbol());
         intent.putExtra(C.EXTRA_SENDING_TOKENS, false);
         intent.putExtra(C.EXTRA_ENS_DETAILS, info);
         intent.putExtra(C.EXTRA_NETWORKID, nativeEth.tokenInfo.chainId);
@@ -211,5 +212,15 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void resetSignDialog()
     {
         keyService.resetSigningDialog();
+    }
+
+    public void completeAuthentication(Operation signData)
+    {
+        keyService.completeAuthentication(signData);
+    }
+
+    public void failedAuthentication(Operation signData)
+    {
+        keyService.failedAuthentication(signData);
     }
 }

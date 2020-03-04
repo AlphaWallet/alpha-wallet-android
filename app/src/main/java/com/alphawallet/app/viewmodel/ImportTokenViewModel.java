@@ -13,13 +13,14 @@ import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
@@ -92,12 +93,12 @@ public class ImportTokenViewModel extends BaseViewModel
     private final MutableLiveData<Boolean> feemasterAvailable = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> txError = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
+    private final MutableLiveData<TokenTicker> tickerUpdate = new MutableLiveData<>();
 
     private MagicLinkData importOrder;
     private String universalImportLink;
     private Token importToken;
     private List<BigInteger> availableBalance = new ArrayList<>();
-    private double ethToUsd = 0;
     private TicketRange currentRange;
     private int networkCount;
     private boolean foundNetwork;
@@ -149,7 +150,7 @@ public class ImportTokenViewModel extends BaseViewModel
     public LiveData<Boolean> feemasterAvailable() { return feemasterAvailable; }
     public LiveData<ErrorEnvelope> txError() { return txError; }
     public LiveData<XMLDsigDescriptor> sig() { return sig; }
-    public double getUSDPrice() { return ethToUsd; }
+    public LiveData<TokenTicker> tickerUpdate() { return tickerUpdate; }
 
     public void prepare(String importDataStr) {
         universalImportLink = importDataStr;
@@ -191,10 +192,6 @@ public class ImportTokenViewModel extends BaseViewModel
             //see if we picked up a network from the link
             checkContractNetwork.postValue(importOrder.contractAddress);
         }
-        catch (SalesOrderMalformed e)
-        {
-            invalidLink.postValue(true);
-        }
         catch (Exception e)
         {
             invalidLink.postValue(true);
@@ -231,7 +228,6 @@ public class ImportTokenViewModel extends BaseViewModel
                 break;
         }
 
-        getEthereumTicker(importOrder.chainId); //simultaneously fetch the current eth price
         gasService.startGasListener(importOrder.chainId); //start fetching gas price
     }
 
@@ -342,11 +338,13 @@ public class ImportTokenViewModel extends BaseViewModel
                     currentRange.tokenIds.add(importOrder.tokenIds.get(i));
                 }
                 importRange.setValue(currentRange);
+                getEthereumTicker(importOrder.chainId);
                 break;
             case currencyLink:
                 //setup UI for currency import
                 currentRange = null;
                 importRange.setValue(currentRange);
+                getEthereumTicker(importOrder.chainId);
                 break;
             case unassigned:
             case normal:
@@ -385,6 +383,7 @@ public class ImportTokenViewModel extends BaseViewModel
                     }
                     determineInterface();
                 }
+                getEthereumTicker(importOrder.chainId);
                 break;
         }
     }
@@ -513,8 +512,8 @@ public class ImportTokenViewModel extends BaseViewModel
         {
             switch (result)
             {
-                case 501:
-                    txError.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "Duplicate transaction passed."));
+                case 400:
+                    txError.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "Token already claimed."));
                     break;
                 case 401:
                     txError.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "Signature invalid."));
@@ -543,11 +542,11 @@ public class ImportTokenViewModel extends BaseViewModel
                 .subscribe(this::onTicker, this::onError);
     }
 
-    private void onTicker(Ticker ticker)
+    private void onTicker(TokenTicker ticker)
     {
-        if (ticker != null && ticker.price_usd != null)
+        if (ticker != null && ticker.updateTime > 0)
         {
-            ethToUsd = Double.valueOf(ticker.price_usd);
+            tickerUpdate.postValue(ticker);
         }
     }
 
@@ -712,5 +711,15 @@ public class ImportTokenViewModel extends BaseViewModel
         failSig.type = SigReturnType.NO_TOKENSCRIPT;
         failSig.subject = throwable.getMessage();
         sig.postValue(failSig);
+    }
+
+    public void completeAuthentication(Operation signData)
+    {
+        keyService.completeAuthentication(signData);
+    }
+
+    public void failedAuthentication(Operation signData)
+    {
+        keyService.failedAuthentication(signData);
     }
 }

@@ -8,12 +8,17 @@ import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileObserver;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.SparseArray;
+
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
@@ -26,6 +31,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.app.repository.entity.RealmCertificateData;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.token.entity.AttributeInterface;
@@ -67,6 +73,7 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -77,6 +84,7 @@ import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import static android.os.FileObserver.ALL_EVENTS;
+import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
 
@@ -88,14 +96,15 @@ import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVE
 
 public class AssetDefinitionService implements ParseResult, AttributeInterface
 {
+    private static final String CERTIFICATE_DB = "CERTIFICATE_CACHE-db.realm";
+
     private final Context context;
     private final OkHttpClient okHttpClient;
 
     private SparseArray<Map<String, TokenScriptFile>> assetDefinitions;
     private Map<String, Long> assetChecked;                //Mapping of contract address to when they were last fetched from server
     private FileObserver fileObserver;                     //Observer which scans the override directory waiting for file change
-    private Map<String, TokenScriptFileData> fileHashes;                //Mapping of files and hashes.
-
+    private FileObserver fileObserverQ;                    //Observer for Android Q directory
     private final NotificationService notificationService;
     private final RealmManager realmManager;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -115,7 +124,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         okHttpClient = client;
         assetChecked = new HashMap<>();
         tokenTypeName = new SparseArray<>();
-        fileHashes = new ConcurrentHashMap<>();
         notificationService = svs;
         realmManager = rm;
         ethereumNetworkRepository = eth;
@@ -241,19 +249,23 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public void checkExternalDirectoryAndLoad()
     {
         //Check the external files directory for Android Q+
-        loadExternalContracts(context.getExternalFilesDir(""));
+        loadExternalContracts(context.getExternalFilesDir(""), false);
 
-        //Now check the legacy /AlphaWallet directory
-        File directory = new File(
-                Environment.getExternalStorageDirectory()
-                        + File.separator + HomeViewModel.ALPHAWALLET_DIR);
-
-        if (!directory.exists())
+        //only works up to Android 9
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
         {
-            directory.mkdir(); //does this throw if we haven't given permission?
-        }
+            //Now check the legacy /AlphaWallet directory
+            File directory = new File(
+                    Environment.getExternalStorageDirectory()
+                            + File.separator + HomeViewModel.ALPHAWALLET_DIR);
 
-        loadExternalContracts(directory);
+            if (!directory.exists())
+            {
+                directory.mkdir(); //does this throw if we haven't given permission?
+            }
+
+            loadExternalContracts(directory, true);
+        }
     }
 
     private TokenDefinition getDefinition(int chainId, String address)
@@ -431,14 +443,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         try
         {
             TokenScriptFile tsf = getTokenScriptFile(chainId, address);
-            TokenScriptFileData fd = fileHashes.get(tsf.getAbsolutePath());
-            if (tsf.fileUnchanged(fd))
-            {
-                issuer = fd.sigDescriptor.keyName;
-            }
+            XMLDsigDescriptor sig = getCertificateFromRealm(tsf.calcMD5());
+            if (sig != null && sig.keyName != null) issuer = sig.keyName;
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             // no action
         }
 
@@ -448,9 +458,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private void loadScriptFromServer(String correctedAddress)
     {
         //first check the last time we tried this session
-        if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() - assetChecked.get(correctedAddress)) > 1000*60*60)
+        if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() > (assetChecked.get(correctedAddress) + 1000L*60L*60L)))
         {
             fetchXMLFromServer(correctedAddress)
+                    .flatMap(this::updateSignature)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::handleFileLoad, this::onError).isDisposed();
@@ -482,9 +493,24 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (newFile != null && !newFile.getName().equals("cache") && newFile.canRead())
         {
             addContractAddresses(newFile);
-            context.sendBroadcast(new Intent(C.ADDED_TOKEN)); //inform walletview there is a new token
+            TokenDefinition td = getTokenDefinition(newFile);
+            List<ContractResult> tokenContracts = getHoldingContracts(td);
+            if (tokenContracts != null && tokenContracts.size() > 0)
+            {
+                String[] addrs = new String[tokenContracts.size()];
+                int[] chainIds = new int[tokenContracts.size()];
+                int index = 0;
+                for (ContractResult cr : tokenContracts)
+                {
+                    addrs[index] = cr.name;
+                    chainIds[index] = cr.chainId;
+                }
 
-            //TODO: check interface spec
+                Intent intent = new Intent(ADDED_TOKEN);
+                intent.putExtra(C.EXTRA_TOKENID_LIST, addrs);
+                intent.putExtra(C.EXTRA_CHAIN_ID, chainIds);
+                context.sendBroadcast(intent);
+            }
         }
     }
 
@@ -496,6 +522,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             //peek to see if this file exists
             File existingFile = getXMLFile(address);
+            result = existingFile;
             long fileTime = 0;
             if (existingFile != null && existingFile.exists())
             {
@@ -563,7 +590,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
-    private void loadExternalContracts(File directory)
+    private void loadExternalContracts(File directory, boolean legacyDirectory)
     {
         try
         {
@@ -572,15 +599,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             Observable.fromIterable(getCanonicalizedAssets())
                     .forEach(this::addContractAssets).isDisposed();
 
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q)
-            {
-                String externalDir = context.getExternalFilesDir("").getAbsolutePath();
-                if (directory.getAbsolutePath().contains(externalDir)) startFileListener(directory);
-            }
-            else if (directory.getAbsolutePath().contains(HomeViewModel.ALPHAWALLET_DIR))
-            {
-                startFileListener(directory);
-            }
+            startFileListener(directory.getAbsolutePath(), legacyDirectory);
         }
         catch (IOException|SAXException e)
         {
@@ -623,11 +642,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 for (int network : holdingContracts.addresses.keySet())
                 {
                     addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), asset));
-                    TokenScriptFileData fd = new TokenScriptFileData();
-                    fd.hash = tsf.calcMD5();
-                    fd.sigDescriptor = new XMLDsigDescriptor();
-                    fd.sigDescriptor.result = "pass";
-                    fileHashes.put(asset, fd);
+                    XMLDsigDescriptor AWSig = new XMLDsigDescriptor();
+                    String hash = tsf.calcMD5();
+                    AWSig.result = "pass";
+                    AWSig.issuer = "AlphaWallet";
+                    AWSig.keyName = "AlphaWallet";
+                    AWSig.type = SigReturnType.SIGNATURE_PASS;
+                    tsf.determineSignatureType(AWSig);
+                    storeCertificateData(hash, AWSig);
                 }
                 return true;
             }
@@ -697,7 +719,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 .filter(File::isFile)
                 .filter(this::allowableExtension)
                 .filter(File::canRead)
-                .forEach(this::addContractAddresses).isDisposed();
+                .flatMap(file -> updateSignature(file).toObservable()) //check we have signature when initialising
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::addContractAddresses)
+                .isDisposed();
     }
 
     /**
@@ -744,16 +770,88 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     }
 
     /**
-     * check the downloaded XML files for updates when wallet restarts.
+     * check the repo server for updates to downloaded TokenScripts
      */
     private void checkDownloadedFiles()
     {
-        //check all definitions in the download zone
-        Disposable d = Observable.fromIterable(getScriptsInSecureZone())
+        Observable.fromIterable(getScriptsInSecureZone())
                 .concatMap(addr -> fetchXMLFromServer(addr).toObservable())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::handleFileLoad, this::onError);
+                .subscribe(this::handleFileLoad, this::onError).isDisposed();
+    }
+
+    private Single<File> updateSignature(File file)
+    {
+        return Single.fromCallable(() -> {
+            TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
+            String hash = tsf.calcMD5();
+
+            //pull data from realm
+            XMLDsigDescriptor sig = getCertificateFromRealm(hash);
+            if (sig == null || sig.keyName == null)
+            {
+                //fetch signature and store in realm
+                sig = alphaWalletService.checkTokenScriptSignature(tsf);
+                tsf.determineSignatureType(sig);
+                storeCertificateData(hash, sig);
+            }
+
+            return file;
+        });
+    }
+
+    private void storeCertificateData(String hash, XMLDsigDescriptor sig)
+    {
+        try (Realm realm = realmManager.getRealmInstance(CERTIFICATE_DB))
+        {
+            //if signature present, then just update
+            RealmCertificateData realmData = realm.where(RealmCertificateData.class)
+                    .equalTo("instanceKey", hash)
+                    .findFirst();
+
+            TransactionsRealmCache.addRealm();
+            realm.beginTransaction();
+            if (realmData == null) realmData = realm.createObject(RealmCertificateData.class, hash);
+            realmData.setFromSig(sig);
+            realm.commitTransaction();
+            realm.close();
+            TransactionsRealmCache.subRealm();
+        }
+        catch (Exception e)
+        {
+            TransactionsRealmCache.subRealm();
+            e.printStackTrace();
+        }
+    }
+
+    private XMLDsigDescriptor getCertificateFromRealm(String hash)
+    {
+        XMLDsigDescriptor sig = null;
+        try (Realm realm = realmManager.getRealmInstance(CERTIFICATE_DB))
+        {
+            RealmCertificateData realmCert = realm.where(RealmCertificateData.class)
+                    .equalTo("instanceKey", hash)
+                    .findFirst();
+
+            if (realmCert != null)
+            {
+                sig = new XMLDsigDescriptor();
+                sig.issuer = realmCert.getIssuer();
+                sig.certificateName = realmCert.getCertificateName();
+                sig.keyName = realmCert.getKeyName();
+                sig.keyType = realmCert.getKeyType();
+                sig.result = realmCert.getResult();
+                sig.subject = realmCert.getSubject();
+                sig.type = realmCert.getType();
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return sig;
     }
 
     /**
@@ -852,37 +950,35 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    private void startFileListener(File path)
+    private void startFileListener(String path, boolean isLegacyDir)
     {
-        if (fileObserver != null) return;
-        fileObserver = new FileObserver(path.getPath(), ALL_EVENTS)
+        FileObserver observer = new FileObserver(path)
         {
+            private final String listenerPath = path;
             @Override
-            public void onEvent(int i, @Nullable String s)
+            public void onEvent(int event, @Nullable String file)
             {
                 //watch for new files and file change
-                switch (i)
+                switch (event)
                 {
                     case CREATE:
                     case MODIFY:
                         try
                         {
-                            if (s.contains(".xml") || s.contains(".tsml"))
+                            if (file.contains(".xml") || file.contains(".tsml"))
                             {
+                                System.out.println("FILE: " + file);
                                 //form filename
-                                TokenScriptFile newTSFile = new TokenScriptFile(context,
-                                        Environment.getExternalStorageDirectory()
-                                                + File.separator + HomeViewModel.ALPHAWALLET_DIR, s);
+                                TokenScriptFile newTSFile = new TokenScriptFile(context, listenerPath, file);
 
-                                TokenScriptFileData fData = fileHashes.get(newTSFile.getAbsolutePath());
                                 if (addContractAddresses(newTSFile))
                                 {
-                                    if (fData == null) fData = new TokenScriptFileData();
-                                    fData.hash = newTSFile.calcMD5();
-                                    fData.sigDescriptor = null;
-                                    notificationService.DisplayNotification("Definition Updated", s, NotificationCompat.PRIORITY_MAX);
+                                    notificationService.DisplayNotification("Definition Updated", file, NotificationCompat.PRIORITY_MAX);
                                     cachedDefinition = null;
-                                    fileHashes.put(newTSFile.getAbsolutePath(), fData);
+                                    updateSignature(newTSFile) //update signature data if necessary
+                                            .subscribeOn(Schedulers.io())
+                                            .observeOn(AndroidSchedulers.mainThread())
+                                            .subscribe().isDisposed();
                                 }
                             }
                         }
@@ -897,7 +993,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             }
         };
 
-        fileObserver.startWatching();
+        observer.startWatching();
+
+        if (isLegacyDir)
+        {
+            fileObserver = observer;
+        }
+        else
+        {
+            fileObserverQ = observer;
+        }
     }
 
     public void checkTokenscriptEnabledTokens(TokensService tokensService)
@@ -933,25 +1038,17 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             sigDescriptor.type = SigReturnType.NO_TOKENSCRIPT;
 
             TokenScriptFile tsf = getTokenScriptFile(chainId, contractAddress);
-            if (tsf.isValidTokenScript())
+            if (tsf != null && tsf.isValidTokenScript())
             {
-                TokenScriptFileData fd = fileHashes.get(tsf.getAbsolutePath());
-                if (tsf.fileUnchanged(fd))
+                String hash = tsf.calcMD5();
+                XMLDsigDescriptor sig = getCertificateFromRealm(hash);
+                if (sig == null)
                 {
-                    return fd.sigDescriptor;
+                    sig = alphaWalletService.checkTokenScriptSignature(tsf);
+                    tsf.determineSignatureType(sig);
+                    storeCertificateData(hash, sig);
                 }
-                else
-                {
-                    if (fd == null)
-                    {
-                        fd = new TokenScriptFileData();
-                        fileHashes.put(tsf.getAbsolutePath(), fd);
-                    }
-                    fd.sigDescriptor = alphaWalletService.checkTokenScriptSignature(tsf);
-                    tsf.determineSignatureType(fd);
-                }
-                fd.hash = tsf.calcMD5();
-                sigDescriptor = fd.sigDescriptor;
+                sigDescriptor = sig;
             }
 
             return sigDescriptor;
@@ -1182,6 +1279,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
+    //private Token
+
     private void addOpenSeaAttributes(StringBuilder attrs, Token erc721Token, BigInteger tokenId)
     {
         Asset tokenAsset = erc721Token.getAssetForToken(tokenId.toString());
@@ -1206,7 +1305,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         TokenScriptResult.addPair(attrs, "name", name);
-        TokenScriptResult.addPair(attrs, "symbol", token.tokenInfo.symbol);
+        TokenScriptResult.addPair(attrs, "symbol", token.getSymbol());
         TokenScriptResult.addPair(attrs, "_count", String.valueOf(count));
         TokenScriptResult.addPair(attrs, "contractAddress", token.tokenInfo.address);
         TokenScriptResult.addPair(attrs, "chainId", String.valueOf(token.tokenInfo.chainId));
@@ -1343,6 +1442,22 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             loadLocalContracts();
         }
+    }
+
+    public List<ContractResult> getHoldingContracts(TokenDefinition td)
+    {
+        List<ContractResult> holdingContracts = new ArrayList<>();
+        ContractInfo holdingContractInfo = td.contracts.get(td.holdingToken);
+        if (holdingContractInfo == null || holdingContractInfo.addresses.size() == 0) return null;
+        for (int chainId : holdingContractInfo.addresses.keySet())
+        {
+            for (String address : holdingContractInfo.addresses.get(chainId))
+            {
+                holdingContracts.add(new ContractResult(address, chainId));
+            }
+        }
+
+        return holdingContracts;
     }
 
     public ContractResult getHoldingContract(String importFileName)

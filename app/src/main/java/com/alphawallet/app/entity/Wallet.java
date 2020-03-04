@@ -62,7 +62,7 @@ public class Wallet implements Parcelable {
 	};
 
 	public boolean sameAddress(String address) {
-		return this.address.equals(address);
+		return this.address.equalsIgnoreCase(address);
 	}
 
 	@Override

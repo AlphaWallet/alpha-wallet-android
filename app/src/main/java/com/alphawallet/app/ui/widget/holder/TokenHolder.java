@@ -1,20 +1,13 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.StaticLayout;
-import android.text.TextPaint;
-import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,19 +18,17 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.util.Utils;
-
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.util.Utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-
-import static com.alphawallet.app.ui.ImportTokenActivity.getUsdString;
 
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener, View.OnLongClickListener {
 
@@ -108,16 +99,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             chainName.setVisibility(View.VISIBLE);
             chainName.setText(token.getNetworkName());
             Utils.setChainColour(chainName, token.tokenInfo.chainId);
-            String issuerName = assetDefinition.getIssuerName(token);
-            issuerPlaceholder.setVisibility(View.VISIBLE);
-            if(issuerName != null)
-            {
-                issuer.setText(issuerName);
-            }
-            else
-            {
-                issuerPlaceholder.setVisibility(View.GONE);
-            }
+            setIssuerDetails();
 
             if (token.ticker != null) animateTextWhileWaiting();
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
@@ -144,8 +126,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
     public void fillCurrency(BigDecimal ethBalance, TokenTicker ticker) {
         stopTextAnimation();
-        BigDecimal usdBalance = ethBalance.multiply(new BigDecimal(ticker.price)).setScale(2, RoundingMode.DOWN);
-        String converted = getUsdString(usdBalance.doubleValue());
+        BigDecimal fiatBalance = ethBalance.multiply(new BigDecimal(ticker.price)).setScale(2, RoundingMode.DOWN);
+        String converted = TickerService.getCurrencyString(fiatBalance.doubleValue());
         String formattedPercents = "";
         int color = Color.RED;
         double percentage = 0;
@@ -156,8 +138,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             text24Hours.setText(formattedPercents);
             text24Hours.setTextColor(color);
         } catch (Exception ex) { /* Quietly */ }
-        String lbl = getString(R.string.token_balance,
-                               ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "" : "$",
+        String lbl = getString(R.string.token_balance, "",
                                converted);
 
         Spannable spannable;
@@ -165,7 +146,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         {
             spannable = new SpannableString(lbl);
             spannable.setSpan(new ForegroundColorSpan(color),
-                              converted.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                              converted.length(), lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             this.balanceCurrency.setText(spannable);
         }
         else
@@ -194,17 +175,16 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             appreciation = appreciation.multiply(BigDecimal.valueOf(-1));
         }
 
-        String convertedAppreciation = getUsdString(appreciation.doubleValue());
+        String convertedAppreciation = TickerService.getCurrencyString(appreciation.doubleValue());
 
-        lbl = getString(R.string.token_balance,
-                        ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "" : "$",
+        lbl = getString(R.string.token_balance, "",
                         convertedAppreciation);
 
         if (ethBalance.compareTo(BigDecimal.ZERO) > 0)
         {
             spannable = new SpannableString(lbl);
             spannable.setSpan(new ForegroundColorSpan(color),
-                              convertedAppreciation.length() + 1, lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                              convertedAppreciation.length(), lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             this.textAppreciation.setText(spannable);
         }
         else
@@ -266,6 +246,24 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         text24Hours.startAnimation(anim);
         textAppreciation.startAnimation(anim);
         balanceCurrency.startAnimation(anim);
+    }
+
+    private void setIssuerDetails()
+    {
+        String issuerName = assetDefinition.getIssuerName(token);
+        if(issuerName != null)
+        {
+            issuer.setVisibility(View.VISIBLE);
+            issuerPlaceholder.setVisibility(View.VISIBLE);
+            contractSeparator.setVisibility(View.VISIBLE);
+            issuer.setText(issuerName);
+        }
+        else
+        {
+            issuer.setVisibility(View.GONE);
+            issuerPlaceholder.setVisibility(View.GONE);
+            contractSeparator.setVisibility(View.GONE);
+        }
     }
 
     private void stopTextAnimation() {

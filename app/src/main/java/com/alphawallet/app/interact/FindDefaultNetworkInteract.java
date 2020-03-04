@@ -1,8 +1,9 @@
 package com.alphawallet.app.interact;
 
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Ticker;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -21,8 +22,8 @@ public class FindDefaultNetworkInteract {
     }
 
     //get the ticker
-    public Single<Ticker> getTicker(int chainId) {
-        return ethereumNetworkRepository.getTicker(chainId);
+    public Single<TokenTicker> getTicker(Token token) {
+        return ethereumNetworkRepository.getTicker(token);
     }
 
     public String getNetworkName(int chainId)

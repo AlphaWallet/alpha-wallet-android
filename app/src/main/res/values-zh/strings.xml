@@ -19,7 +19,7 @@
     <string name="yes_continue">是，继续</string>
     <string name="no_repeat">否，重复</string>
     <string name="transfer">转移%s</string>
-    <string name="action_buy">购买</string>
+    <string name="action_buy">购买%s</string>
     <string name="empty"></string>
     <string name="try_again">重试</string>
     <string name="already_have_account">已经有钱包了吗？</string>
@@ -59,7 +59,7 @@
     <string name="action_more_details">更多详情</string>
     <string name="action_add_wallet">添加钱包</string>
     <string name="action_coinbase">Coinbase</string>
-    <string name="action_shapeshift">Shapeshift（仅限加密货币）</string>
+    <string name="action_localeth">LocalEthereum</string>
     <string name="action_changelly">Changelly</string>
     <!-- Subject -->
     <string name="subject_transaction_detail">交易详情</string>
@@ -67,6 +67,7 @@
     <string name="error_invalid_address">无效地址</string>
     <string name="error_invalid_amount">无效金额</string>
     <string name="error_transaction_failed">交易错误</string>
+    <string name="error_import_failed">导入令牌失败</string>
     <string name="error_must_numeric">必须为一个数值。</string>
     <string name="transaction_succeeded">交易成功</string>
     <string name="NA">不适用</string>
@@ -191,7 +192,7 @@
     <string name="ethereum_blockchain">基于以太坊智能合约</string>
     <string name="issuer">发行方:</string>
     <string name="root_title">设备安全性受损</string>
-    <string name="root_body">任何 \'rooted\' 应用 都可以查看到AlphaWallet\的 密匙数据并盗取你的数字资产! 请立即在此设备上删除你的钱包并在安全的设备上恢复你的钱包.</string>
+    <string name="root_body">你的手机有root权限，但私钥仍受Android安全区域加密保护。 第三方键盘或剪贴板查看器是个攻击媒介，当您输入密钥时便可读取您的密钥。 AlphaWallet尽最大努力通过关闭键盘自动更正来减少这种情况。 如果您以root身份运行，建议您仅使用主流键盘应用程序，运行高质量的防病毒应用程序，并使用广受认可和好评的开源根管理器，例如Magisk或SuperSU。 最终，私钥安全还是您的责任。</string>
     <string name="contact_us">需要更多的帮助? 联系我们</string>
     <string name="confirm_sale_title">确认出售?</string>
     <string name="dialog_cancel_back">取消并退回</string>
@@ -372,7 +373,7 @@
     <string name="currency_00">0.00%s</string>
     <string name="telegram">电报</string>
     <string name="transfer_request">转账请求</string>
-    <string name="token_transfer_request">通证转账请求</string>
+    <string name="token_transfer_request">通证转账请求: %1$s</string>
     <string name="generate_payment_request">生成付款请求</string>
     <string name="enter_the_requested_amount">输入请求的金额：</string>
     <string name="feemaster_service_not_available">Feemaster 服务当前不可用，请稍后重试。</string>
@@ -472,7 +473,7 @@
     <string name="already_have_a_wallet">我已经有一个钱包：</string>
     <string name="watch_wallet">查看钱包</string>
     <string name="suggestion_address">输入以大太坊地址</string>
-    <string name="ethereum_address_hint">Ethereum Address: 0x then 20 characters of 0-9 a-f A-F</string>
+    <string name="ethereum_address_hint">Ethereum Address: 0x then 40 characters of 0–9 a-f A-F</string>
     <string name="action_watch_account">查看账户</string>
     <string name="receive_payment">接收付款</string>
     <string name="title_back_up_your_wallet">备份您的钱包</string>
@@ -494,6 +495,7 @@
     <string name="reimport_wallet_title">是否重新导入钱包？</string>
     <string name="provide_authentication">提供身份验证以创建密钥</string>
     <string name="import_error">导入错误，请再次尝试重新导入。</string>
+    <string name="watch_exists">你为什么想看道现有的钱包 %1$s？</string>
     <string name="welcome_to_alphawallet">欢迎使用 AlphaWallet</string>
     <string name="lock_seed_phrase">锁定助记词</string>
     <string name="no_key">未找到密钥</string>
@@ -523,4 +525,23 @@
     <string name="reddit">Reddit</string>
     <string name="tokenscript_standard">TokenScript 标准</string>
     <string name="version">版本</string>
+    <string name="debug_script">TokenScript 调试</string>
+    <string name="unsigned_script">不信任</string>
+    <string name="show_qr_code_to_redemption_booth">呈递二维码到兑换台</string>
+    <string name="manage_tokens">Token管理</string>
+    <string name="apply_filters">过滤Token</string>
+    <string name="zero_balance_tokens_off">不显示余额/余量为0的Token</string>
+    <string name="zero_balance_tokens_are_switched_off">此Token的余量为0，因此不会显示，除非您打开“显示零余额Token”开关。是否继续？</string>
+    <string name="dialog_switch_zero_balance_tokens_on">打开</string>
+    <string name="cannot_read_encrypt_file">钱包无法读取加密密钥。需要重新导入</string>
+    <string name="authentication_error">没有提供正确的身份验证来解锁密钥或超时。请再试一遍</string>
+    <string name="device_security_changed">创建此密钥后，移动设备的安全性已更改，并且操作系统使密钥无效。请重新导入您的密钥</string>
+    <string name="fingerprint_authentication_failed">指纹认证失败</string>
+    <string name="action_snackbar_undo">撤销刚才动作</string>
+    <string name="token_hidden">隐藏了</string>
+    <string name="confirmations">Confirmations</string>
+    <string name="change_chain_message">QR code requests a different chain. Proceed?</string>
+    <string name="change_chain_request">Change Chain Request</string>
+    <string name="error_zero_balance">零余额交易</string>
+    <string name="instagram">Instagram</string>
 </resources>

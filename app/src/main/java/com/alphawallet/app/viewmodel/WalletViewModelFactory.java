@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import com.alphawallet.app.interact.AddTokenInteract;
+import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -34,6 +35,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final TokensService tokensService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final ChangeTokenEnableInteract changeTokenEnableInteract;
 
     public WalletViewModelFactory(FetchTokensInteract fetchTokensInteract,
                                   AddTokenRouter addTokenRouter,
@@ -47,7 +49,8 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   TokensService tokensService,
                                   OpenseaService openseaService,
                                   FetchTransactionsInteract fetchTransactionsInteract,
-                                  EthereumNetworkRepositoryType ethereumNetworkRepository) {
+                                  EthereumNetworkRepositoryType ethereumNetworkRepository,
+                                  ChangeTokenEnableInteract changeTokenEnableInteract) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
@@ -61,6 +64,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         this.tokensService = tokensService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.changeTokenEnableInteract = changeTokenEnableInteract;
     }
 
     @NonNull
@@ -79,6 +83,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 tokensService,
                 openseaService,
                 fetchTransactionsInteract,
-                ethereumNetworkRepository);
+                ethereumNetworkRepository,
+                changeTokenEnableInteract);
     }
 }

@@ -26,6 +26,7 @@ import com.alphawallet.app.entity.AmountUpdateCallback;
 import com.alphawallet.app.entity.EIP681Request;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -174,6 +175,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
+        if (VisibilityFilter.hideEIP681()) return super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_receive, menu);
         //only pay when token null, eth or erc20
         if (token != null && token.isNonFungible() || currentMode == MODE_POS)// || EthereumNetworkRepository.isPriorityToken(token)) //Currently only allow request for native chain currency, can get here via routes where token is not set.
@@ -300,8 +302,9 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
                 int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, -1);
                 NetworkInfo info = viewModel.setNetwork(networkId);
 
-                // restart activity
-                if (info != null && networkInfo.chainId != info.chainId) {
+                // restart activity if required
+                if (info != null && (networkInfo == null || networkInfo.chainId != info.chainId))
+                {
                     Intent intent = getIntent();
                     intent.putExtra(KEY_MODE, MODE_POS);
                     intent.putExtra(OVERRIDE_DEFAULT, info.chainId);

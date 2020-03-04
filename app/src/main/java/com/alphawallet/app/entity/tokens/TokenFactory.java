@@ -68,6 +68,7 @@ public class TokenFactory
         switch (type)
         {
             case ETHEREUM:
+                tokenInfo.isEnabled = true; //native eth always enabled
             case ERC20:
                 if (realmBalance == null || realmBalance.length() == 0) realmBalance = "0";
                 BigDecimal balance = new BigDecimal(realmBalance);
@@ -163,6 +164,6 @@ public class TokenFactory
     public TokenInfo createTokenInfo(RealmToken realmItem)
     {
         return new TokenInfo(realmItem.getAddress(), realmItem.getName(), realmItem.getSymbol(),
-                realmItem.getDecimals(), true, realmItem.getChainId());
+                realmItem.getDecimals(), realmItem.isEnabled(), realmItem.getChainId());
     }
 }

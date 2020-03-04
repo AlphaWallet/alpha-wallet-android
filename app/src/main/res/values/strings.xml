@@ -20,7 +20,7 @@
     <string name="yes_continue">Yes, continue</string>
     <string name="no_repeat">No, repeat</string>
     <string name="transfer">Transfer %s</string>
-    <string name="action_buy">Buy</string>
+    <string name="action_buy">Buy %s</string>
     <string name="empty" />
     <string name="try_again">Try again</string>
     <string name="already_have_account">Already have a wallet?</string>
@@ -67,14 +67,15 @@
     <string name="action_add_wallet">Add wallet</string>
 
     <string name="action_coinbase">Coinbase</string>
-    <string name="action_shapeshift">Shapeshift (Crypto only)</string>
-    <string name="action_changelly">Changelly</string>
+    <string name="action_localeth">LocalEthereum</string>
+    <string name="action_changelly">Changelly (Buy with Credit card)</string>
     <!-- Subject -->
     <string name="subject_transaction_detail">Transaction detail</string>
     <string name="error_fail_generate_qr">Could not generate qr code.</string>
     <string name="error_invalid_address">Invalid address</string>
     <string name="error_invalid_amount">Invalid amount</string>
     <string name="error_transaction_failed">Transaction error</string>
+    <string name="error_import_failed">Failed to import token</string>
     <string name="error_must_numeric">must be a numeric value.</string>
     <string name="transaction_succeeded">Transaction successful</string>
     <string name="NA">N/A</string>
@@ -201,7 +202,7 @@
     <string name="ethereum_blockchain">Ethereum Blockchain</string>
     <string name="issuer">Issuer:</string>
     <string name="root_title">DEVICE SECURITY COMPROMISED</string>
-    <string name="root_body">Any \'rooted\' app can access aWallet\'s keychain data and steal your wallet! Wipe this wallet immediately and restore on a secure device.</string>
+    <string name="root_body">Your phone is rooted but the keys are still protected by Android secure enclave encryption. The attack vector would be from a keyboard app or clipboard viewer learning your key when you enter it. AlphaWallet does its best to mitigate this risk by switching off keyboard auto-suggest. If you run root, recommend you only use mainstream keyboard apps, run a good quality anti-virus app and use a respected open source root manager such as Magisk or SuperSU to limit access to root privileges. Ultimately key safety is your responsibility.</string>
     <string name="contact_us">Still need help? Contact us</string>
     <string name="confirm_sale_title">Confirm Sale?</string>
     <string name="dialog_cancel_back">Cancel and Go Back</string>
@@ -383,7 +384,7 @@
     <string name="currency_00">0.00 %s</string>
     <string name="telegram">Telegram</string>
     <string name="transfer_request">Transfer request</string>
-    <string name="token_transfer_request">Token transfer request</string>
+    <string name="token_transfer_request">Token transfer request: %1$s</string>
     <string name="generate_payment_request">Generate Payment Request</string>
     <string name="enter_the_requested_amount">Enter the requested amount:</string>
     <string name="feemaster_service_not_available">Feemaster service is currently not available, please try again later.</string>
@@ -483,7 +484,7 @@
     <string name="already_have_a_wallet">I already have a wallet:</string>
     <string name="watch_wallet">Watch Wallet</string>
     <string name="suggestion_address">Enter Ethereum Address</string>
-    <string name="ethereum_address_hint">Ethereum Address: 0x then 20 characters of 0–9 a-f A-F</string>
+    <string name="ethereum_address_hint">Ethereum Address: 0x then 40 characters of 0–9 a-f A-F</string>
     <string name="action_watch_account">Watch an account</string>
     <string name="receive_payment">Receive Payment</string>
     <string name="title_back_up_your_wallet">Back up your Wallet</string>
@@ -505,6 +506,7 @@
     <string name="reimport_wallet_title">Re-Import Wallet?</string>
     <string name="provide_authentication">Provide authentication to create key</string>
     <string name="import_error">Import Error, Try re-import again.</string>
+    <string name="watch_exists">Wallet %1$s already full wallet - no need to watch</string>
     <string name="welcome_to_alphawallet">Welcome to AlphaWallet</string>
     <string name="lock_seed_phrase">LOCK SEED PHRASE</string>
     <string name="no_key">No Key found</string>
@@ -534,6 +536,25 @@
     <string name="reddit">Reddit</string>
     <string name="tokenscript_standard">TokenScript Standard</string>
     <string name="version">Version</string>
+    <string name="debug_script">TokenScript debug</string>
+    <string name="unsigned_script">untrusted</string>
+    <string name="show_qr_code_to_redemption_booth">Show QR Code to Redemption Booth:</string>
+    <string name="manage_tokens">Manage Tokens</string>
+    <string name="apply_filters">Apply Filters</string>
+    <string name="zero_balance_tokens_off">Not Showing Empty Tokens</string>
+    <string name="zero_balance_tokens_are_switched_off">Token balance for this token is empty and will not show unless you switch on empty token balances. Continue?</string>
+    <string name="dialog_switch_zero_balance_tokens_on">Switch On</string>
+    <string name="cannot_read_encrypt_file">Wallet can not read encrypted key; re-import required.</string>
+    <string name="authentication_error">Authenitcation to unlock key not provided or timed out. Please try again.</string>
+    <string name="device_security_changed">Since this key was created the mobile device security has changed and the OS has invalidated the key. Please re-import your key.</string>
+    <string name="fingerprint_authentication_failed">Fingerprint authentication failed</string>
+    <string name="action_snackbar_undo">UNDO</string>
+    <string name="token_hidden">hidden</string>
+    <string name="confirmations">Confirmations</string>
+    <string name="change_chain_message">QR code requests a different chain. Proceed?</string>
+    <string name="change_chain_request">Change Chain Request</string>
+    <string name="error_zero_balance">Zero Balance Transaction</string>
+    <string name="instagram">Instagram</string>
     <string name="settings_locale_currency">Change Currency</string>
     <string name="dialog_title_select_currency">Select Currency:</string>
 </resources>

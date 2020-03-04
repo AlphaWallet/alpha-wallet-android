@@ -4,6 +4,7 @@ package com.alphawallet.app.entity.opensea;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.alphawallet.app.util.Utils;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -60,6 +61,12 @@ public class Asset implements Parcelable {
 
     public Asset(String tokenId, AssetContract contract)
     {
+        if (Utils.isHex(tokenId))
+        {
+            //tokenId in hex - convert to decimal
+            BigInteger bi = new BigInteger(tokenId, 16);
+            tokenId = bi.toString(10);
+        }
         this.tokenId = tokenId;
         this.assetContract = contract;
     }

@@ -353,7 +353,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         switch (viewPager.getCurrentItem())
         {
             case WALLET:
-                getMenuInflater().inflate(R.menu.menu_add, menu);
+                if (VisibilityFilter.canAddTokens()) getMenuInflater().inflate(R.menu.menu_add, menu);
                 break;
             default:
                 break;
@@ -426,7 +426,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     private void openExchangeDialog() {
-        Wallet wallet = viewModel.defaultWallet().getValue();
+        Wallet wallet = ((WalletFragment)walletFragment).getCurrentWallet();
         if (wallet == null) {
             Toast.makeText(this, getString(R.string.error_wallet_not_selected), Toast.LENGTH_SHORT)
                     .show();
@@ -440,8 +440,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private void onDepositClick(View view, Uri uri) {
-        viewModel.openDeposit(view.getContext(), uri);
+    private void onDepositClick(View view, String url)
+    {
+        showPage(DAPP_BROWSER);
+        ((DappBrowserFragment)dappBrowserFragment).onItemClick(url);
+        dialog.dismiss();
+        dialog = null;
     }
 
     @Override
@@ -592,12 +596,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void GotAuthorisation(boolean gotAuth)
     {
 
-    }
-
-    @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface callBack)
-    {
-        authInterface = callBack;
     }
 
     @Override
@@ -758,46 +756,43 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
     {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == DappBrowserFragment.REQUEST_FILE_ACCESS)
+        switch (requestCode)
         {
-            ((DappBrowserFragment)dappBrowserFragment).gotFileAccess(requestCode);
-        }
-        else if (requestCode == RC_DOWNLOAD_EXTERNAL_WRITE_PERM || requestCode == RC_ASSET_EXTERNAL_WRITE_PERM)
-        {
-            //check permission is granted
-            for (int i = 0; i < permissions.length; i++)
-            {
-                String p = permissions[i];
-                if (p.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE))
+            case DappBrowserFragment.REQUEST_FILE_ACCESS:
+                ((DappBrowserFragment)dappBrowserFragment).gotFileAccess(permissions, grantResults);
+                break;
+            case DappBrowserFragment.REQUEST_FINE_LOCATION:
+                ((DappBrowserFragment)dappBrowserFragment).gotGeoAccess(permissions, grantResults);
+                break;
+            case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
+                if (hasPermission(permissions, grantResults))
                 {
-                    if (grantResults[i] != -1)
-                    {
-                        switch (requestCode)
-                        {
-                            case RC_ASSET_EXTERNAL_WRITE_PERM:
-                                viewModel.loadExternalXMLContracts();
-                                ((NewSettingsFragment)settingsFragment).refresh();
-                                break;
-                            case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
-                                viewModel.downloadAndInstall(buildVersion, this);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        switch (requestCode)
-                        {
-                            case RC_ASSET_EXTERNAL_WRITE_PERM:
-                                //no warning
-                                break;
-                            case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
-                                showRequirePermissionError();
-                                break;
-                        }
-                    }
+                    viewModel.loadExternalXMLContracts();
+                    ((NewSettingsFragment)settingsFragment).refresh();
                 }
-            }
+                break;
+            case RC_ASSET_EXTERNAL_WRITE_PERM:
+                if (hasPermission(permissions, grantResults))
+                {
+                    viewModel.downloadAndInstall(buildVersion, this);
+                }
+                else
+                {
+                    showRequirePermissionError();
+                }
+                break;
         }
+    }
+
+    private boolean hasPermission(String[] permissions, int[] grantResults)
+    {
+        boolean hasPermission = true;
+        for (int i = 0; i < permissions.length; i++)
+        {
+            if (grantResults[i] == -1) hasPermission = false;
+        }
+
+        return hasPermission;
     }
 
     private void showRequirePermissionError()
@@ -873,13 +868,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         ((DappBrowserFragment)dappBrowserFragment).GotAuthorisation(resultCode == RESULT_OK);
                         break;
                     default:
-                        //continue with generating the authenticated key
-                        if (resultCode == RESULT_OK) authInterface.CompleteAuthentication(taskCode);
-                        else
-                        {
-                            authInterface.FailedAuthentication(taskCode);
-                            GotAuthorisation(false);
-                        }
                         break;
                 }
                 break;

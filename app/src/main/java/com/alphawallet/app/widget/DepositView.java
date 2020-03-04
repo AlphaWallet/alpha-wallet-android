@@ -1,7 +1,9 @@
 package com.alphawallet.app.widget;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
@@ -16,30 +18,10 @@ import com.alphawallet.app.entity.Wallet;
 
 public class DepositView extends FrameLayout implements View.OnClickListener {
 
-    private static final Uri coinbaseri = Uri.parse("https://buy.coinbase.com/widget")
-            .buildUpon()
-            .appendQueryParameter("code", C.COINBASE_WIDGET_CODE)
-            .appendQueryParameter("amount", "0")
-//            .address={address}
-            .appendQueryParameter("crypto_currency", C.ETH_SYMBOL)
-            .build();
-    private static final Uri shapeshiftUri = Uri.parse("https://shapeshift.io/shifty.html")
-            .buildUpon()
-            .appendQueryParameter("apiKey", C.SHAPESHIFT_KEY)
-            .appendQueryParameter("amount", "0")
-//            ?destination=\(address)
-            .appendQueryParameter("output", C.ETH_SYMBOL)
-            .build();
-
-    private static final Uri changellyteUri = Uri.parse("https://changelly.com/widget/v1?auth=email&from=BTC")
-            .buildUpon()
-            .appendQueryParameter("to", C.ETH_SYMBOL)
-            .appendQueryParameter("merchant_id", C.CHANGELLY_REF_ID)
-//            address=\\(address)
-            .appendQueryParameter("amount", "0")
-            .appendQueryParameter("ref_id", C.CHANGELLY_REF_ID)
-            .appendQueryParameter("color", "00cf70")
-            .build();
+    private static final String coinbaseUrl = "https://buy.coinbase.com/";
+    private static final String localethereum = "https://localethereum.com/";
+    private static final String changelly = "https://payments.changelly.com/?crypto=ETH&amount=0";
+    private final Context context;
 
     private OnDepositClickListener onDepositClickListener;
     @NonNull
@@ -51,7 +33,7 @@ public class DepositView extends FrameLayout implements View.OnClickListener {
 
     public DepositView(Context context, @LayoutRes int layoutId, @NonNull Wallet wallet) {
         super(context);
-
+        this.context = context;
         init(layoutId, wallet);
     }
 
@@ -59,30 +41,33 @@ public class DepositView extends FrameLayout implements View.OnClickListener {
         this.wallet = wallet;
         LayoutInflater.from(getContext()).inflate(layoutId, this, true);
         findViewById(R.id.action_coinbase).setOnClickListener(this);
-        findViewById(R.id.action_shapeshift).setOnClickListener(this);
+        findViewById(R.id.action_localeth).setOnClickListener(this);
         findViewById(R.id.action_changelly).setOnClickListener(this);
     }
 
+    /**
+     * After user selects where they want to buy, open Dapp browser at the site
+     * @param v
+     */
     @Override
     public void onClick(View v) {
-        Uri uri;
+        String url;
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        String userCurrency = pref.getString("currency_locale", "USD");
         switch (v.getId()) {
-            case R.id.action_shapeshift: {
-                uri = shapeshiftUri.buildUpon()
-                        .appendQueryParameter("destination", wallet.address).build();
+            case R.id.action_localeth: {
+                url = localethereum;
             } break;
             case R.id.action_changelly: {
-                uri = changellyteUri.buildUpon()
-                        .appendQueryParameter("address", wallet.address).build();
+                url = changelly + "&fiat=" + userCurrency;
             } break;
             default:
             case R.id.action_coinbase: {
-                uri = coinbaseri.buildUpon()
-                        .appendQueryParameter("address", wallet.address).build();
+                url = coinbaseUrl;
             } break;
         }
         if (onDepositClickListener != null) {
-            onDepositClickListener.onDepositClick(v, uri);
+            onDepositClickListener.onDepositClick(v, url);
         }
     }
 

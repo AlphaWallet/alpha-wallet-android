@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Base64;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,7 +16,6 @@ import android.widget.ProgressBar;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DAppFunction;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.tokens.Token;
@@ -97,7 +95,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private StringBuilder attrs;
     private AWalletAlertDialog alertDialog;
     private Message<String> messageToSign;
-    private PinAuthenticationCallbackInterface authInterface;
     private FunctionButtonBar functionBar;
     private Handler handler;
     private boolean reloaded;
@@ -458,7 +455,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             }
             else
             {
-                functionEffect = functionEffect + " " + token.tokenInfo.symbol + " to " + actionMethod;
+                functionEffect = functionEffect + " " + token.getSymbol() + " to " + actionMethod;
                 //functionEffect = functionEffect + " to " + actionMethod;
             }
 
@@ -470,7 +467,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                 value = action.function.tx.args.get("value").value;
                 BigDecimal valCorrected = getCorrectedBalance(value, 18);
                 Token currency = viewModel.getCurrency(token.tokenInfo.chainId);
-                functionEffect = valCorrected.toString() + " " + currency.tokenInfo.symbol + " to " + actionMethod;
+                functionEffect = valCorrected.toString() + " " + currency.getSymbol() + " to " + actionMethod;
             }
 
             //finished resolving attributes, blank definition cache so definition is re-loaded when next needed
@@ -523,7 +520,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
 
         //eg Send 2(*1) ETH(*2) to Alex's Amazing Coffee House(*3) (0xdeadacec0ffee(*4))
-        String extraInfo = String.format(getString(R.string.tokenscript_send_native), functionEffect, token.tokenInfo.symbol, actionMethod, to);
+        String extraInfo = String.format(getString(R.string.tokenscript_send_native), functionEffect, token.getSymbol(), actionMethod, to);
 
         //Clear the cache to refresh any resolved values
         viewModel.getAssetDefinitionService().clearCache();
@@ -535,7 +532,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void errorInvalidAddress(String address)
     {
-        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
+        hideDialog();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(AWalletAlertDialog.ERROR);
         alertDialog.setTitle(R.string.error_invalid_address);
@@ -547,11 +544,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void errorInsufficientFunds(Token currency)
     {
-        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
+        hideDialog();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(AWalletAlertDialog.ERROR);
         alertDialog.setTitle(R.string.error_insufficient_funds);
-        alertDialog.setMessage(getString(R.string.current_funds, currency.getCorrectedBalance(currency.tokenInfo.decimals), currency.tokenInfo.symbol));
+        alertDialog.setMessage(getString(R.string.current_funds, currency.getCorrectedBalance(currency.tokenInfo.decimals), currency.getSymbol()));
         alertDialog.setButtonText(R.string.button_ok);
         alertDialog.setButtonListener(v ->alertDialog.dismiss());
         alertDialog.show();
@@ -559,7 +556,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void tokenscriptError(String elementName)
     {
-        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
+        hideDialog();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(AWalletAlertDialog.ERROR);
         alertDialog.setTitle(R.string.tokenscript_error);
@@ -586,6 +583,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void signMessage(byte[] sign, DAppFunction dAppFunction, Message<String> message)
     {
+        showProgressSpinner(true);
         viewModel.signMessage(sign, dAppFunction, message, token.tokenInfo.chainId);
     }
 
@@ -605,6 +603,24 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         public void run()
         {
             finish();
+        }
+    };
+
+    private Runnable progress = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            onProgress(true);
+        }
+    };
+
+    private Runnable progressOff = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            onProgress(false);
         }
     };
 
@@ -641,6 +657,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         dialog.setAddress(token.getAddress());
         dialog.setMessage(message.value);
         dialog.setOnApproveListener(v -> {
+            dialog.dismiss();
             messageToSign = message;
             viewModel.getAuthorisation(this, this);
         });
@@ -699,6 +716,23 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         return val.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros();
     }
 
+    private void onProgress(boolean shouldShowProgress) {
+        hideDialog();
+        if (shouldShowProgress) {
+            alertDialog = new AWalletAlertDialog(this);
+            alertDialog.setProgressMode();
+            alertDialog.setTitle(R.string.dialog_title_sign_message);
+            alertDialog.setCancelable(false);
+            alertDialog.show();
+        }
+    }
+
+    private void hideDialog() {
+        if (alertDialog != null && alertDialog.isShowing()) {
+            alertDialog.dismiss();
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode,resultCode,intent);
@@ -709,11 +743,18 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
     }
 
+    protected void showProgressSpinner(boolean show)
+    {
+        if (handler == null) handler = new Handler();
+        if (show) handler.post(progress);
+        else handler.post(progressOff);
+    }
+
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth && authInterface != null) authInterface.CompleteAuthentication(SIGN_DATA);
-        else if (!gotAuth && authInterface != null) authInterface.FailedAuthentication(SIGN_DATA);
+        if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
+        else viewModel.failedAuthentication(SIGN_DATA);
 
         if (gotAuth)
         {
@@ -722,19 +763,19 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                 @Override
                 public void DAppError(Throwable error, Message<String> message)
                 {
+                    showProgressSpinner(false);
                     tokenView.onSignCancel(message);
-                    dialog.dismiss();
                     functionFailed();
                 }
 
                 @Override
                 public void DAppReturn(byte[] data, Message<String> message)
                 {
+                    showProgressSpinner(false);
                     String signHex = Numeric.toHexString(data);
                     signHex = Numeric.cleanHexPrefix(signHex);
                     tokenView.onSignPersonalMessageSuccessful(message, signHex);
                     testRecoverAddressFromSignature(message.value, signHex);
-                    dialog.dismiss();
                 }
             };
 
@@ -744,12 +785,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                     + convertedMessage;
             signMessage(signMessage.getBytes(), dAppFunction, messageToSign);
         }
-    }
-
-    @Override
-    public void setupAuthenticationCallback(PinAuthenticationCallbackInterface authCallback)
-    {
-        authInterface = authCallback;
     }
 
     @Override

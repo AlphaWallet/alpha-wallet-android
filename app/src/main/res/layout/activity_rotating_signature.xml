@@ -5,29 +5,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <include
+        layout="@layout/layout_simple_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true" />
+
     <FrameLayout
+        android:layout_below="@id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorPrimary">
-
-        <include
-            layout="@layout/layout_simple_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="10dp"
             android:layout_marginTop="10dp"
             android:fontFamily="@font/font_light"
             android:gravity="center"
             android:paddingLeft="40dp"
             android:paddingRight="40dp"
-            android:text="Show QR Code to Redemption Booth:"
-            android:textColor="@color/white"
+            android:text="@string/show_qr_code_to_redemption_booth"
+            android:textColor="@color/colorPrimaryDark"
             android:textSize="25sp" />
 
         <LinearLayout

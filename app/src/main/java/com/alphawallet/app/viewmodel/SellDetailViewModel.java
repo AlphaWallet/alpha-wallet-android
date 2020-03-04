@@ -7,10 +7,12 @@ import android.content.Context;
 
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.Ticker;
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -94,13 +96,16 @@ public class SellDetailViewModel extends BaseViewModel {
         this.defaultWallet.setValue(wallet);
         //now get the ticker
         disposable = findDefaultNetworkInteract
-                .getTicker(token.tokenInfo.chainId)
+                .getTicker(token)
                 .subscribe(this::onTicker, this::onError);
     }
 
-    private void onTicker(Ticker ticker)
+    private void onTicker(TokenTicker ticker)
     {
-        ethereumPrice.postValue(Double.parseDouble(ticker.price_usd));
+        if (ticker != null && ticker.updateTime != 0)
+        {
+            ethereumPrice.postValue(Double.parseDouble(ticker.price));
+        }
     }
 
     public void generateSalesOrders(String contractAddr, BigInteger price, List<BigInteger> tokenSendIndexList, BigInteger firstTicketId)
@@ -135,10 +140,10 @@ public class SellDetailViewModel extends BaseViewModel {
         sellDetailRouter.openUniversalLink(context, token, token.bigIntListToString(selection, false), defaultWallet.getValue(), SellDetailActivity.SET_EXPIRY, price);
     }
 
-    private void gotSignature(byte[] signature)
+    private void gotSignature(SignatureFromKey signature)
     {
         initParser();
-        String universalLink = parser.completeUniversalLink(token.tokenInfo.chainId, linkMessage, signature);
+        String universalLink = parser.completeUniversalLink(token.tokenInfo.chainId, linkMessage, signature.signature);
         //Now open the share icon
         universalLinkReady.postValue(universalLink);
     }
@@ -159,5 +164,15 @@ public class SellDetailViewModel extends BaseViewModel {
     public void resetSignDialog()
     {
         keyService.resetSigningDialog();
+    }
+
+    public void completeAuthentication(Operation signData)
+    {
+        keyService.completeAuthentication(signData);
+    }
+
+    public void failedAuthentication(Operation signData)
+    {
+        keyService.failedAuthentication(signData);
     }
 }

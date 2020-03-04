@@ -2,6 +2,8 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
+import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 
@@ -214,7 +216,7 @@ public class MarketQueueService {
     }
 
     //sign a trade transaction
-    public Single<byte[]> sign(Wallet wallet, TradeInstance t, byte[] data, int chainId) {
+    public Single<SignatureFromKey> sign(Wallet wallet, TradeInstance t, byte[] data, int chainId) {
         return transactionRepository.getSignature(wallet, data, chainId);
     }
 

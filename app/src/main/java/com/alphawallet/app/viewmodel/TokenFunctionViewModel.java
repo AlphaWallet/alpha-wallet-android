@@ -223,4 +223,9 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         keyService.failedAuthentication(signData);
     }
+
+    public void reloadScriptsIfRequired()
+    {
+        assetDefinitionService.reloadAssets();
+    }
 }

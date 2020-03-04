@@ -1,5 +1,6 @@
 package com.alphawallet.app.service;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -11,6 +12,7 @@ import android.os.FileObserver;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.SparseArray;
 
 import com.alphawallet.app.BuildConfig;
@@ -143,6 +145,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             loadContracts(context.getFilesDir());
             checkDownloadedFiles();
+            checkExternalDirectoryAndLoad();
         }
         catch (IOException| SAXException e)
         {
@@ -241,10 +244,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     }
 
     /**
-     * Called at startup once we know we've got folder write permission.
+     * Called on service init. Only check the legacy 'AlpahWallet' dir if using Android 9 or less
      * Note - Android 6.0 and above needs user to verify folder access permission
-     * TODO: if user doesn't give permission then use the app private folder and tell user they can't
-     *  load contracts themselves
+     * Also called if user gives external file access permission on Android 9 or less phone, to check
+     * If they have placed any files here.
      */
     public void checkExternalDirectoryAndLoad()
     {
@@ -252,7 +255,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         loadExternalContracts(context.getExternalFilesDir(""), false);
 
         //only works up to Android 9
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && checkWritePermission())
         {
             //Now check the legacy /AlphaWallet directory
             File directory = new File(
@@ -266,6 +269,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             loadExternalContracts(directory, true);
         }
+    }
+
+    private boolean checkWritePermission() {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     private TokenDefinition getDefinition(int chainId, String address)
@@ -1436,7 +1444,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     /**
      * If the OS has scavenged the TokenScript contract lookup map then re-init
      */
-    private void reloadAssets()
+    public void reloadAssets()
     {
         if (assetDefinitions == null || assetDefinitions.size() == 0)
         {

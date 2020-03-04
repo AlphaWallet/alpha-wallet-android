@@ -7,10 +7,9 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.MyAddressRouter;
-import com.alphawallet.app.router.RedeemAssetSelectRouter;
-import com.alphawallet.app.router.TransferTicketRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.OpenseaService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.AssetDisplayViewModelFactory;
 
 import dagger.Module;
@@ -26,14 +25,13 @@ public class AssetDisplayModule {
     AssetDisplayViewModelFactory redeemTokenViewModelFactory(
             FetchTokensInteract fetchTokensInteract,
             GenericWalletInteract genericWalletInteract,
-            TransferTicketRouter transferTicketRouter,
-            RedeemAssetSelectRouter redeemAssetSelectRouter,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             MyAddressRouter myAddressRouter,
             AssetDefinitionService assetDefinitionService,
-            OpenseaService openseaService) {
+            OpenseaService openseaService,
+            TokensService tokensService) {
         return new AssetDisplayViewModelFactory(
-                fetchTokensInteract, genericWalletInteract, transferTicketRouter, redeemAssetSelectRouter, findDefaultNetworkInteract, myAddressRouter, assetDefinitionService, openseaService);
+                fetchTokensInteract, genericWalletInteract, findDefaultNetworkInteract, myAddressRouter, assetDefinitionService, openseaService, tokensService);
     }
 
     @Provides
@@ -51,16 +49,6 @@ public class AssetDisplayModule {
     @Provides
     GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
         return new GenericWalletInteract(walletRepository);
-    }
-
-    @Provides
-    TransferTicketRouter provideTransferTicketRouter() {
-        return new TransferTicketRouter();
-    }
-
-    @Provides
-    RedeemAssetSelectRouter provideRedeemAssetRouter() {
-        return new RedeemAssetSelectRouter();
     }
 
     @Provides

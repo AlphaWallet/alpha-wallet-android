@@ -222,8 +222,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             showPage(WALLET);
         }
 
-        viewModel.loadExternalXMLContracts();
-
         if (VisibilityFilter.hideDappBrowser())
         {
             removeDappBrowser();

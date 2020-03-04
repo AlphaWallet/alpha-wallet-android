@@ -380,8 +380,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
 
         //blank forward / backward arrows
-        next.setAlpha(0.3f);
-        back.setAlpha(0.3f);
+        setBackForwardButtons();
     }
 
     @Override
@@ -1093,28 +1092,36 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         handler.post(this::setBackForwardButtons); //execute on UI thread
     }
 
-    private void setBackForwardButtons() {
-        WebBackForwardList sessionHistory = web3.copyBackForwardList();
+    private void setBackForwardButtons()
+    {
+        WebBackForwardList sessionHistory = null;
+        if (web3 != null) sessionHistory = web3.copyBackForwardList();
 
         String nextFrag = forwardFragmentStack.peekLast();
         String backFrag = backFragmentStack.peekLast();
 
-        if (backFrag != null || (currentFragment.equals(DAPP_BROWSER) && web3.canGoBack()))
+        if (back != null)
         {
-            back.setAlpha(1.0f);
-        }
-        else
-        {
-            back.setAlpha(0.3f);
+            if (backFrag != null || (currentFragment.equals(DAPP_BROWSER) && (web3 != null && web3.canGoBack())))
+            {
+                back.setAlpha(1.0f);
+            }
+            else
+            {
+                back.setAlpha(0.3f);
+            }
         }
 
-        if (nextFrag != null || (currentFragment.equals(DAPP_BROWSER) && sessionHistory.getCurrentIndex() < sessionHistory.getSize() - 1))
+        if (next != null)
         {
-            next.setAlpha(1.0f);
-        }
-        else
-        {
-            next.setAlpha(0.3f);
+            if (nextFrag != null || (currentFragment.equals(DAPP_BROWSER) && (sessionHistory != null && sessionHistory.getCurrentIndex() < sessionHistory.getSize() - 1)))
+            {
+                next.setAlpha(1.0f);
+            }
+            else
+            {
+                next.setAlpha(0.3f);
+            }
         }
     }
 

@@ -104,6 +104,16 @@ public class TickerService implements TickerServiceInterface
         }
     }
 
+    @Override
+    public boolean isTickerUpdateTimerDisposed() {
+        return tickerUpdateTimer != null && !tickerUpdateTimer.isDisposed();
+    }
+
+    @Override
+    public void disposeTickerUpdateTimer() {
+        tickerUpdateTimer.dispose();
+    }
+
     private Single<Double> updateCurrencyConversion()
     {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);

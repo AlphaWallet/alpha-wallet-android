@@ -14,6 +14,7 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.ui.HomeActivity;
@@ -52,6 +53,7 @@ public class HomeViewModel extends BaseViewModel {
     private final GenericWalletInteract genericWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
     private final CurrencyRepositoryType currencyRepository;
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -67,7 +69,8 @@ public class HomeViewModel extends BaseViewModel {
             AssetDefinitionService assetDefinitionService,
             GenericWalletInteract genericWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
-            CurrencyRepositoryType currencyRepository) {
+            CurrencyRepositoryType currencyRepository,
+            EthereumNetworkRepositoryType ethereumNetworkRepository) {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
         this.addTokenRouter = addTokenRouter;
@@ -76,6 +79,7 @@ public class HomeViewModel extends BaseViewModel {
         this.genericWalletInteract = genericWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.currencyRepository = currencyRepository;
+        this.ethereumNetworkRepository = ethereumNetworkRepository;
     }
 
     @Override
@@ -299,5 +303,6 @@ public class HomeViewModel extends BaseViewModel {
 
     public void updateCurrency(String currencyCode){
         currencyRepository.setDefaultCurrency(currencyCode);
+        ethereumNetworkRepository.refreshTickers();
     }
 }

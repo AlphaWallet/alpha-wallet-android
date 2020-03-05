@@ -6,6 +6,7 @@ import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepository;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
+import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepository;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
@@ -26,7 +27,8 @@ class HomeModule {
             AssetDefinitionService assetDefinitionService,
             GenericWalletInteract genericWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
-            CurrencyRepositoryType currencyRepository) {
+            CurrencyRepositoryType currencyRepository,
+            EthereumNetworkRepositoryType ethereumNetworkRepository) {
         return new HomeViewModelFactory(
                 preferenceRepository,
                 localeRepository,
@@ -35,7 +37,8 @@ class HomeModule {
                 assetDefinitionService,
                 genericWalletInteract,
                 fetchWalletsInteract,
-                currencyRepository);
+                currencyRepository,
+                ethereumNetworkRepository);
     }
 
     @Provides

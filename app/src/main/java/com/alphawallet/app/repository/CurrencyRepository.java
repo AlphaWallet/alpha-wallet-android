@@ -24,7 +24,8 @@ public class CurrencyRepository implements CurrencyRepositoryType {
 
     @Override
     public void setDefaultCurrency(String currencyCode) {
-        preferences.setDefaultCurrency(currencyCode);
+        CurrencyItem currencyItem = getCurrencyByISO(currencyCode);
+        preferences.setDefaultCurrency(currencyItem);
     }
 
     public String getDefaultCurrency() {

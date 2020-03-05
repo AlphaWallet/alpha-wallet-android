@@ -144,7 +144,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         ((HomeActivity)getActivity()).showBackupWalletDialog(wallet.lastBackupTime > 0);
     }
 
-    private void refreshList()
+    public void refreshList()
     {
         adapter.clear();
         viewModel.reloadTokens();

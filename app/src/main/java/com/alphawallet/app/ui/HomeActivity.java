@@ -951,5 +951,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if (data == null) return;
         String currencyCode = data.getStringExtra(C.EXTRA_CURRENCY);
         viewModel.updateCurrency(currencyCode);
+        ((WalletFragment)walletFragment).refreshList();
     }
 }

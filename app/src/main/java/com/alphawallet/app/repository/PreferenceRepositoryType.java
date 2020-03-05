@@ -1,5 +1,7 @@
 package com.alphawallet.app.repository;
 
+import com.alphawallet.app.entity.CurrencyItem;
+
 public interface PreferenceRepositoryType {
     String getCurrentWalletAddress();
 
@@ -32,7 +34,7 @@ public interface PreferenceRepositoryType {
 
     void setFindWalletAddressDialogShown(boolean isShown);
 
-    void setDefaultCurrency(String currency);
+    void setDefaultCurrency(CurrencyItem currency);
 
     String getDefaultCurrency();
 }

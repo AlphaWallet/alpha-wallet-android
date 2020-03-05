@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import com.alphawallet.app.repository.CurrencyRepositoryType;
+import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.interact.FetchWalletsInteract;
@@ -22,6 +23,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final GenericWalletInteract genericWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
     private final CurrencyRepositoryType currencyRepository;
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
     public HomeViewModelFactory(
             PreferenceRepositoryType preferenceRepository,
@@ -31,7 +33,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             AssetDefinitionService assetDefinitionService,
             GenericWalletInteract genericWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
-            CurrencyRepositoryType currencyRepository) {
+            CurrencyRepositoryType currencyRepository,
+            EthereumNetworkRepositoryType ethereumNetworkRepository) {
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.importTokenRouter = importTokenRouter;
@@ -40,6 +43,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.genericWalletInteract = genericWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.currencyRepository = currencyRepository;
+        this.ethereumNetworkRepository = ethereumNetworkRepository;
     }
 
     @NonNull
@@ -53,7 +57,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 assetDefinitionService,
                 genericWalletInteract,
                 fetchWalletsInteract,
-                currencyRepository
+                currencyRepository,
+                ethereumNetworkRepository
                 );
     }
 }

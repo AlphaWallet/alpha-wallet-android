@@ -62,6 +62,7 @@ public class NewSettingsFragment extends Fragment
     private View backupPopupAnchor;
     private LinearLayout layoutBackupKey;
     private TextView backupText;
+    private TextView currencySubtext;
 
     private Wallet wallet;
 
@@ -82,6 +83,7 @@ public class NewSettingsFragment extends Fragment
         backupStatusText = view.findViewById(R.id.text_backup_status);
         backupStatusImage = view.findViewById(R.id.image_backup_status);
         backupText = view.findViewById(R.id.backup_text);
+        currencySubtext = view.findViewById(R.id.locale_currency_subtext);
 
         TextView helpText = view.findViewById(R.id.text_version);
         try
@@ -95,6 +97,7 @@ public class NewSettingsFragment extends Fragment
         }
 
         localeSubtext.setText(LocaleUtils.getDisplayLanguage(viewModel.getDefaultLocale(), viewModel.getDefaultLocale()));
+        currencySubtext.setText(viewModel.getDefaultCurrency());
 
         updateNotificationState();
 
@@ -156,6 +159,15 @@ public class NewSettingsFragment extends Fragment
             getActivity().startActivityForResult(intent, C.UPDATE_LOCALE);
         });
 
+        final LinearLayout layoutSwitchCurrency = view.findViewById(R.id.layout_locale_currency);
+        layoutSwitchCurrency.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), SelectCurrencyActivity.class);
+            String currentCurrency = viewModel.getDefaultCurrency();
+            intent.putExtra(EXTRA_CURRENCY, currentCurrency);
+            intent.putParcelableArrayListExtra(EXTRA_STATE, viewModel.getCurrencyList());
+            getActivity().startActivityForResult(intent, C.UPDATE_CURRENCY);
+        });
+
         final LinearLayout layoutHelp = view.findViewById(R.id.layout_help_faq);
         layoutHelp.setOnClickListener(v -> {
             viewModel.showHelp(getContext());
@@ -211,6 +223,33 @@ public class NewSettingsFragment extends Fragment
         else
         {
             layoutLinkedIn.setVisibility(View.GONE);
+        }
+
+        final LinearLayout layoutInstagram = view.findViewById(R.id.layout_instagram);
+        if (MediaLinks.AWALLET_INSTAGRAM_URL != null)
+        {
+            layoutInstagram.setVisibility(View.VISIBLE);
+            layoutInstagram.setOnClickListener(v -> {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(MediaLinks.AWALLET_INSTAGRAM_URL));
+                if (isAppAvailable(C.INSTAGRAM_PACKAGE_NAME))
+                {
+                    intent.setPackage(C.INSTAGRAM_PACKAGE_NAME);
+                }
+                try
+                {
+                    getActivity().startActivity(intent);
+                }
+                catch (Exception e)
+                {
+                    Crashlytics.logException(e);
+                    e.printStackTrace();
+                }
+            });
+        }
+        else
+        {
+            layoutInstagram.setVisibility(View.GONE);
         }
 
         final LinearLayout layoutTwitter = view.findViewById(R.id.layout_twitter);
@@ -424,6 +463,7 @@ public class NewSettingsFragment extends Fragment
     public void onResume() {
         super.onResume();
         viewModel.prepare();
+        updateData();
     }
 
     private void showXMLOverrideDialog() {
@@ -530,5 +570,9 @@ public class NewSettingsFragment extends Fragment
     {
         layoutBackup.setVisibility(View.GONE);
         if (getActivity() != null) ((HomeActivity)getActivity()).postponeWalletBackupWarning(walletAddress);
+    }
+
+    private void updateData() {
+        currencySubtext.setText(viewModel.getDefaultCurrency());
     }
 }

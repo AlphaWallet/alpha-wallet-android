@@ -242,7 +242,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 String contractTxt = contractAddress + " " + contractName;
                 contractAddrText.setText(contractTxt);
-                symbolText.setText(token.tokenInfo.symbol);
+                symbolText.setText(token.getSymbol());
                 amountString = symbol;
                 transactionBytes = viewModel.getERC721TransferBytes(to, contractAddress, amountStr, chainId);
                 break;
@@ -440,7 +440,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         dialog.setButtonListener(v -> {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("transaction hash",
-                    EthereumNetworkBase.getEtherscanURLbyNetwork(token.tokenInfo.chainId) + "tx/" + txData.txHash);
+                    EthereumNetworkBase.getEtherscanURLbyNetwork(chainId) + "tx/" + txData.txHash);
             clipboard.setPrimaryClip(clip);
             dialog.dismiss();
         });

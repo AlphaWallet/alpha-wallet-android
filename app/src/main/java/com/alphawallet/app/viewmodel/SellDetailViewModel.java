@@ -9,10 +9,10 @@ import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.Ticker;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -96,13 +96,16 @@ public class SellDetailViewModel extends BaseViewModel {
         this.defaultWallet.setValue(wallet);
         //now get the ticker
         disposable = findDefaultNetworkInteract
-                .getTicker(token.tokenInfo.chainId)
+                .getTicker(token)
                 .subscribe(this::onTicker, this::onError);
     }
 
-    private void onTicker(Ticker ticker)
+    private void onTicker(TokenTicker ticker)
     {
-        ethereumPrice.postValue(Double.parseDouble(ticker.price_usd));
+        if (ticker != null && ticker.updateTime != 0)
+        {
+            ethereumPrice.postValue(Double.parseDouble(ticker.price));
+        }
     }
 
     public void generateSalesOrders(String contractAddr, BigInteger price, List<BigInteger> tokenSendIndexList, BigInteger firstTicketId)

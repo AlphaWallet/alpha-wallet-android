@@ -101,7 +101,17 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     @Override
     public long getItemId(int position) {
-        return position;
+        Object obj = items.get(position);
+        if (obj instanceof TokenSortedItem) {
+            Token token = ((TokenSortedItem) obj).value;
+
+             // This is an attempt to obtain a 'unique' id
+             // to fully utilise the RecyclerView's setHasStableIds feature.
+             // This will drastically reduce 'blinking' when the list changes
+            return token.getUID();
+        } else {
+            return position;
+        }
     }
 
     @Override
@@ -184,21 +194,19 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
         else
         {
-            //remove item
-            for (int i = 0; i < items.size(); i++)
-            {
-                Object si = items.get(i);
-                if (si instanceof TokenSortedItem)
-                {
-                    TokenSortedItem tsi = (TokenSortedItem) si;
-                    Token thisToken = tsi.value;
-                    if (thisToken.getAddress().equals(token.getAddress()) && thisToken.tokenInfo.chainId == token.tokenInfo.chainId)
-                    {
-                        Log.d(TAG, "REMOVE: " + token.getFullName());
-                        items.removeItemAt(i);
-                        notifyItemRemoved(i);
-                        break;
-                    }
+            removeToken(token);
+        }
+    }
+
+    public void removeToken(Token token) {
+        for (int i = 0; i < items.size(); i++) {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem) {
+                TokenSortedItem tsi = (TokenSortedItem) si;
+                Token thisToken = tsi.value;
+                if (thisToken.getAddress().equals(token.getAddress()) && thisToken.tokenInfo.chainId == token.tokenInfo.chainId) {
+                    items.removeItemAt(i);
+                    break;
                 }
             }
         }
@@ -259,7 +267,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private void populateTokens(Token[] tokens)
     {
         items.beginBatchedUpdates();
-        items.add(total);
+//        items.add(total);
 
         for (Token token : tokens)
         {
@@ -309,7 +317,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
         items.beginBatchedUpdates();
         items.clear();
-        items.add(total);
+//        items.add(total);
         for (Token token : filterTokens)
         {
             items.add(new TokenSortedItem(token, token.getNameWeight()));

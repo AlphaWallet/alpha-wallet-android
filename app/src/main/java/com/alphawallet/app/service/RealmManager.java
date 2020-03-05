@@ -15,11 +15,15 @@ public class RealmManager {
 
     private final Map<String, RealmConfiguration> realmConfigurations = new HashMap<>();
 
-    public Realm getRealmInstance(Wallet wallet) {
-        return getRealmInstance(wallet.address + "-db.realm");
+    public String getRealmInstanceName(Wallet wallet) {
+        return wallet.address + "-db.realm";
     }
 
-    public Realm getRealmInstance(String name) {
+    public Realm getRealmInstance(Wallet wallet) {
+        return getRealmInstance(getRealmInstanceName(wallet));
+    }
+
+    Realm getRealmInstance(String name) {
         try
         {
             RealmConfiguration config = realmConfigurations.get(name);
@@ -49,25 +53,12 @@ public class RealmManager {
         }
     }
 
-    private String getName(NetworkInfo networkInfo, Wallet wallet) {
-        return wallet.address + "-" + networkInfo.name + "-db.realm";
-    }
-
-    public Realm getERC721RealmInstance(Wallet wallet) {
-        String name = get721Name(wallet);
-        return getRealmInstance(name);
-    }
-
     public Realm getWalletDataRealmInstance() {
         return getRealmInstance("WalletData-db.realm");
     }
 
     public Realm getWalletTypeRealmInstance() {
         return getRealmInstance("WalletType-db.realm");
-    }
-
-    private String get721Name(Wallet wallet) {
-        return wallet.address + "-721-db.realm";
     }
 
     public Realm getAuxRealmInstance(String walletAddress)

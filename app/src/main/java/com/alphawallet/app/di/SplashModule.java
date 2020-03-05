@@ -4,6 +4,8 @@ import dagger.Module;
 import dagger.Provides;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 
+import com.alphawallet.app.repository.CurrencyRepository;
+import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.LocaleRepository;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
@@ -20,8 +22,15 @@ public class SplashModule {
                                                          PreferenceRepositoryType preferenceRepository,
                                                          LocaleRepositoryType localeRepository,
                                                          KeyService keyService,
-                                                         AssetDefinitionService assetDefinitionService) {
-        return new SplashViewModelFactory(fetchWalletsInteract, preferenceRepository, localeRepository, keyService, assetDefinitionService);
+                                                         AssetDefinitionService assetDefinitionService,
+                                                         CurrencyRepositoryType currencyRepository) {
+        return new SplashViewModelFactory(
+                fetchWalletsInteract,
+                preferenceRepository,
+                localeRepository,
+                keyService,
+                assetDefinitionService,
+                currencyRepository);
     }
 
     @Provides
@@ -32,5 +41,10 @@ public class SplashModule {
     @Provides
     LocaleRepositoryType provideLocaleRepositoryType(PreferenceRepositoryType preferenceRepository) {
         return new LocaleRepository(preferenceRepository);
+    }
+
+    @Provides
+    CurrencyRepositoryType provideCurrencyRepositoryType(PreferenceRepositoryType preferenceRepository) {
+        return new CurrencyRepository(preferenceRepository);
     }
 }

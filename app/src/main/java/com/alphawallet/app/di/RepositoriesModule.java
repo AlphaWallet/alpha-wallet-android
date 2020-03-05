@@ -62,8 +62,8 @@ public class RepositoriesModule {
 
 	@Singleton
     @Provides
-	TickerServiceInterface provideTickerService(OkHttpClient httpClient, Gson gson) {
-		return new TickerService(httpClient, gson);
+	TickerServiceInterface provideTickerService(OkHttpClient httpClient, Gson gson, Context context) {
+		return new TickerService(httpClient, gson, context);
     }
 
 	@Singleton

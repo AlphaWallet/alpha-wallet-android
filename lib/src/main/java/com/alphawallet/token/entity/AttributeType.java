@@ -316,4 +316,33 @@ public class AttributeType {
     {
         this.as = as;
     }
+
+    /**
+     * Detects a function call with more than one tokenId present - this means we shouldn't cache the result.
+     *
+     * @return does the function rely on more than one tokenId input?
+     */
+    public boolean isMultiTokenCall()
+    {
+        int tokenIdCount = 0;
+        if (function != null && function.parameters != null && function.parameters.size() > 1)
+        {
+            for (MethodArg arg : function.parameters)
+            {
+                if (arg.isTokenId()) tokenIdCount++;
+            }
+        }
+
+        return tokenIdCount > 1;
+    }
+
+    /**
+     * Any property of the function that makes it volatile should go in here. Recommend we add a 'volatile' keyword.
+     *
+     * @return
+     */
+    public boolean isVolatile()
+    {
+        return isMultiTokenCall();
+    }
 }

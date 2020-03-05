@@ -172,7 +172,9 @@ public class TransactionsViewModel extends BaseViewModel
     {
         if (fetchTransactionDisposable == null)
         {
-            Token t = tokensService.getRequiresTransactionUpdate();
+            Token pending = getPendingTransaction();
+            //see if pending transaction is at top of list
+            Token t = tokensService.getRequiresTransactionUpdate(pending);
 
             if (t != null)
             {
@@ -186,6 +188,21 @@ public class TransactionsViewModel extends BaseViewModel
                                 .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
             }
         }
+    }
+
+    private Token getPendingTransaction()
+    {
+        Token t = null;
+        for (Transaction tx : txMap.values())
+        {
+            if (tx.blockNumber.equals("0"))
+            {
+                t = tokensService.getToken(tx.chainId, tokensService.getCurrentAddress());
+                break;
+            }
+        }
+
+        return t;
     }
 
     private void onTxError(Throwable throwable)
@@ -262,6 +279,7 @@ public class TransactionsViewModel extends BaseViewModel
 
         this.transactions.postValue(txMap.values().toArray(new Transaction[0]));
         fetchTransactionDisposable = null;
+        if (transactions.length == 0) showEmpty.postValue(true);
     }
 
     private void checkTokenTransactions(Transaction tx)
@@ -296,6 +314,7 @@ public class TransactionsViewModel extends BaseViewModel
                 newTxs.add(tx);
                 txMap.put(tx.hash, tx);
                 if (oldTx != null && oldTx.blockNumber.equals("0")) pendingUpdate = true;
+                checkContractEvents(tx);
             }
         }
 
@@ -327,6 +346,21 @@ public class TransactionsViewModel extends BaseViewModel
 
         //Need to log that we scanned transactions for this token, even if there weren't any transactions.
         addTokenInteract.updateBlockRead(token, defaultWallet().getValue());
+    }
+
+    private void checkContractEvents(Transaction tx)
+    {
+        //Check this received transaction to see if any known contracts are affected, if so promote a balance check for that token
+        TransactionContract tc = tx.getOperation();
+        if (tc != null)
+        {
+            Token token = tokensService.getToken(tx.chainId, tc.address);
+            if (token != null)
+            {
+                //this token needs to have a balance check update
+                token.setHighestPriorityCheck();
+            }
+        }
     }
 
     //run through the newly received tokens from a currency and see if there's any unknown tokens
@@ -366,7 +400,7 @@ public class TransactionsViewModel extends BaseViewModel
     }
 
     public void showDetails(Context context, Transaction transaction) {
-        transactionDetailRouter.open(context, transaction);
+        transactionDetailRouter.open(context, transaction, wallet.getValue());
     }
 
     public TokensService getTokensService()

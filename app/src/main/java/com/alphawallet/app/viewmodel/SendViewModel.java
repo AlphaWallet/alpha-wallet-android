@@ -119,7 +119,7 @@ public class SendViewModel extends BaseViewModel {
     {
         disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenInfo).toObservable()
                 .flatMap(contractType -> addTokenInteract.add(tokenInfo, contractType, new Wallet(walletAddress)))
-                .flatMap(token -> fetchTokensInteract.updateDefaultBalance(token, new Wallet(walletAddress)))
+                .map(tokensService::addToken)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(finalisedToken::postValue, this::onError);

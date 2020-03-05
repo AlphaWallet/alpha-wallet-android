@@ -8,10 +8,10 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 import android.view.View;
 
 import com.alphawallet.app.BuildConfig;
@@ -19,7 +19,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -27,6 +26,7 @@ import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.SplashViewModel;
 import com.alphawallet.app.viewmodel.SplashViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -70,6 +70,8 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
             Fabric.with(this, new Crashlytics.Builder().core(core).build());
         }
 
+        LocaleUtils.setDeviceLocale(getBaseContext());
+
         // Get the intent that started this activity
         Intent intent = getIntent();
         Uri data = intent.getData();
@@ -94,6 +96,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         splashViewModel.wallets().observe(this, this::onWallets);
         splashViewModel.createWallet().observe(this, this::onWalletCreate);
         splashViewModel.setLocale(getApplicationContext());
+        splashViewModel.setCurrency();
 
         long getAppUpdateTime = getAppLastUpdateTime();
 
@@ -182,31 +185,12 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
             }
             else if (importPath != null)
             {
-                if (splashViewModel.checkDebugDirectory())
-                {
-                    splashViewModel.importScriptFile(this, importPath);
-                }
-                else
-                {
-                    displayEnableDebugSupport();
-                }
+                boolean useAppExternalDir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q || !splashViewModel.checkDebugDirectory();
+                splashViewModel.importScriptFile(this, importData, useAppExternalDir);
             }
 
             handler.postDelayed(this, VisibilityFilter.startupDelay());
         }
-    }
-
-    private void displayEnableDebugSupport()
-    {
-        AWalletAlertDialog aDialog = new AWalletAlertDialog(this);
-        aDialog.setTitle(R.string.title_enable_debug);
-        aDialog.setIcon(AWalletAlertDialog.ERROR);
-        aDialog.setMessage(R.string.need_to_enable_debug);
-        aDialog.setButtonText(R.string.ok);
-        aDialog.setButtonListener(v -> {
-            aDialog.dismiss();
-        });
-        aDialog.show();
     }
 
     @Override

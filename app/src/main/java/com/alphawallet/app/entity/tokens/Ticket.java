@@ -413,7 +413,7 @@ public class Ticket extends Token implements Parcelable
      * @return token requires a transaction refresh
      */
     @Override
-    public boolean requiresTransactionRefresh()
+    public boolean requiresTransactionRefresh(int pendingChain)
     {
         boolean requiresUpdate = balanceChanged;
         balanceChanged = false;
@@ -486,6 +486,7 @@ public class Ticket extends Token implements Parcelable
     @Override
     public boolean checkBalanceChange(List<BigInteger> balanceArray)
     {
+        balanceUpdateWeight = calculateBalanceUpdateWeight();
         if (balanceArray.size() != this.balanceArray.size()) return true; //quick check for new tokens
         for (int index = 0; index < balanceArray.size(); index++) //see if spawnable token ID has changed
         {

@@ -3,19 +3,15 @@ package com.alphawallet.app.ui.widget.holder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.format.DateFormat;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.util.LocaleUtils;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 
 public class TransactionDateHolder extends BinderViewHolder<Date> {
-
-    private static final String DATE_TEMPLATE = "MMM, dd yyyy";
 
     public static final int VIEW_TYPE = 1004;
     private final TextView title;
@@ -31,10 +27,12 @@ public class TransactionDateHolder extends BinderViewHolder<Date> {
         if (data == null) {
             title.setText(null);
         } else {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-            calendar.setTime(data);
-            title.setText(DateFormat.format(DATE_TEMPLATE, calendar));
+            title.setText(getDate(data));
         }
+    }
+
+    private String getDate(Date date) {
+        java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(getContext()));
+        return dateFormat.format(date);
     }
 }

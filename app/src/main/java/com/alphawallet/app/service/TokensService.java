@@ -5,27 +5,17 @@ import android.util.SparseArray;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenFactory;
-import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 
-import io.reactivex.Observable;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.math.BigDecimal;
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import okhttp3.OkHttpClient;
 
 public class TokensService
 {
@@ -149,17 +139,18 @@ public class TokensService
         Token token = getToken(chainId, addr);
         if (token != null)
         {
-            symbol = token.tokenInfo.symbol;
+            symbol = token.getSymbol();
         }
 
         return symbol;
     }
 
-    public Token getRequiresTransactionUpdate()
+    public Token getRequiresTransactionUpdate(Token pending)
     {
+        int chainToUpdate = pending != null ? pending.tokenInfo.chainId : 0;
         for (Token check : getAllLiveTokens())
         {
-            if (check.requiresTransactionRefresh())
+            if (check.requiresTransactionRefresh(chainToUpdate))
             {
                 return check;
             }
@@ -364,28 +355,9 @@ public class TokensService
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastUpdateDiff;
-            long cutoffCheck = 40*1000;
-            switch (check.getInterfaceSpec())
-            {
-                case ETHEREUM:
-                case CURRENCY:
-                    cutoffCheck = 20*1000;
-                    break;
-                case ERC875:
-                    cutoffCheck = 30*1000;
-                    break;
-                case ERC875_LEGACY:
-                    cutoffCheck = 60*1000;
-                    break;
-                case ERC721:
-                case ERC721_LEGACY:
-                    continue; //no need to check these token types here
-                case ERC721_TICKET:
-                    cutoffCheck = 20*1000;
-                    break;
-                default:
-                    break;
-            }
+            long cutoffCheck = 30*1000; //maximum update time given by formula (30 seconds / weighting)
+            if (check.isERC721()) continue; //no need to check ERC721
+            if (!check.isEthereum() && !check.tokenInfo.isEnabled) continue; //don't check disabled tokens
 
             if (updateFactor > highestWeighting && (updateFactor > (float)cutoffCheck || check.refreshCheck))
             {
@@ -488,5 +460,10 @@ public class TokensService
         {
             t.walletUIUpdateRequired = false;
         }
+    }
+
+    public TokenTicker getTokenTicker(Token token)
+    {
+        return ethereumNetworkRepository.getTokenTicker(token);
     }
 }

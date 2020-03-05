@@ -25,6 +25,7 @@ import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.util.KeyboardUtils;
@@ -401,8 +402,8 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
             int quantity = Integer.parseInt(textQuantity.getText().toString());
             double ethPrice = Double.parseDouble(sellPrice.getText().toString());
             if (quantity > 0 && ethPrice > 0) {
-                String usdText = "$" + ImportTokenActivity.getUsdString(ethPrice * ethToUsd * (double) quantity);
-                usdPrice.setText(usdText);
+                String fiatText = TickerService.getCurrencyString(ethPrice * ethToUsd * (double) quantity);
+                usdPrice.setText(fiatText);
             }
         } catch (NumberFormatException e) {
 

@@ -243,6 +243,12 @@ public class Token implements Parcelable, Comparable<Token>
         }
     }
 
+    public String getSymbol()
+    {
+        if (tokenInfo.symbol == null) return "";
+        else return tokenInfo.symbol.toUpperCase();
+    }
+
     public void clickReact(BaseViewModel viewModel, Context context)
     {
         viewModel.showErc20TokenDetail(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
@@ -503,7 +509,7 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean checkBalanceChange(Token token)
     {
-        return token != null && (!getFullBalance().equals(token.getFullBalance()) || !tokenInfo.name.equals(token.tokenInfo.name));
+        return token != null && (!getFullBalance().equals(token.getFullBalance()) || !getFullName().equals(token.getFullName()));
     }
 
     public String getPendingDiff()
@@ -796,6 +802,13 @@ public class Token implements Parcelable, Comparable<Token>
         return EthereumNetworkRepository.hasRealValue(tokenInfo.chainId);
     }
 
+    /**
+     * Determine how often we check balance of tokens.
+     *
+     * Note that if any transaction relating to a contract is received then we trigger a balance check
+     *
+     * @return
+     */
     protected float calculateBalanceUpdateWeight()
     {
         float updateWeight = 0;
@@ -806,11 +819,11 @@ public class Token implements Parcelable, Comparable<Token>
             {
                 if (isEthereum() || hasPositiveBalance())
                 {
-                    updateWeight = 1.0f;
+                    updateWeight = 1.0f; //30 seconds
                 }
                 else
                 {
-                    updateWeight = 0.5f;
+                    updateWeight = 0.5f; //1 minute
                 }
             }
             else
@@ -818,19 +831,15 @@ public class Token implements Parcelable, Comparable<Token>
                 //testnet: TODO: check time since last transaction - if greater than 1 month slow update further
                 if (isEthereum())
                 {
-                    updateWeight = 0.4f;
+                    updateWeight = 0.5f; //1 minute
                 }
                 else if (hasPositiveBalance())
                 {
-                    updateWeight = 0.25f;
-                }
-                else if (tokenInfo.name != null)
-                {
-                    updateWeight = 0.05f;
+                    updateWeight = 0.3f; //100 seconds
                 }
                 else
                 {
-                    updateWeight = 0.01f;
+                    updateWeight = 0.1f; //5 minutes
                 }
             }
         }
@@ -844,6 +853,7 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean checkBalanceChange(BigDecimal balance)
     {
+        balanceUpdateWeight = calculateBalanceUpdateWeight();
         if (balance != null && this.balance != null)
         {
             return !this.balance.equals(balance);
@@ -859,7 +869,7 @@ public class Token implements Parcelable, Comparable<Token>
         return walletUIUpdateRequired;
     }
 
-    public boolean requiresTransactionRefresh()
+    public boolean requiresTransactionRefresh(int updateChain)
     {
         boolean requiresUpdate = balanceChanged;
         balanceChanged = false;
@@ -871,6 +881,12 @@ public class Token implements Parcelable, Comparable<Token>
         long currentTime = System.currentTimeMillis();
 
         long multiplier = isEthereum() || EthereumNetworkRepository.isPriorityToken(this) ? 1 : 5;
+
+        if (isEthereum() && tokenInfo.chainId == updateChain && (currentTime - lastTxCheck) > 10*1000) //check chain every 10 seconds while transaction is pending
+        {
+            lastTxCheck = currentTime;
+            requiresUpdate = true;
+        }
 
         //ensure chain transactions for the wallet are checked on a regular basis.
         if (checkBackgroundUpdate(currentTime) || (EthereumNetworkRepository.hasTicker(this) && hasPositiveBalance() && (currentTime - lastTxCheck) > multiplier*60*1000)) //need to check main chains once per minute
@@ -1053,8 +1069,9 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean checkTickerChange(Token check)
     {
-        if (check.ticker == null && ticker != null) return true; //now has ticker
-        else return check.ticker != null && ticker != null && !check.ticker.price.equals(ticker.price); //return true if ticker changed
+        if (check.ticker == null && ticker == null) return false;
+        else if (check.ticker == null || ticker == null) return true; //ticker situation changed
+        else return !check.ticker.price.equals(ticker.price); //return true if ticker changed
     }
 
     @Override
@@ -1150,5 +1167,16 @@ public class Token implements Parcelable, Comparable<Token>
         }
 
         return w;
+    }
+
+    public long getUID()
+    {
+        String id = getAddress() + "-" + tokenInfo.chainId;
+        return id.hashCode();
+    }
+
+    public void setHighestPriorityCheck()
+    {
+        balanceUpdateWeight = 10.0f;
     }
 }

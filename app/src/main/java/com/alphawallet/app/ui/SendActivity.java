@@ -197,6 +197,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
     private void resumeEIP681(Token t)
     {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
         token = t;
         setupTokenContent();
         validateEIP681Request(currentResult, false);
@@ -207,6 +208,10 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         KeyboardUtils.hideKeyboard(getCurrentFocus());
         boolean isValid = amountInput.checkValidAmount();
 
+        if (isBalanceZero(currentAmount)) {
+            amountInput.setError(R.string.error_zero_balance);
+            isValid = false;
+        }
         if (!isBalanceEnough(currentAmount)) {
             amountInput.setError(R.string.error_insufficient_funds);
             isValid = false;
@@ -218,7 +223,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         if (isValid) {
             BigInteger amountInSubunits = BalanceUtils.baseToSubunit(currentAmount, decimals);
             boolean sendingTokens = !token.isEthereum();
-            viewModel.openConfirmation(this, to, amountInSubunits, token.getAddress(), token.tokenInfo.decimals, token.tokenInfo.symbol, sendingTokens, ensHandler.getEnsName(), currentChain);
+            viewModel.openConfirmation(this, to, amountInSubunits, token.getAddress(), token.tokenInfo.decimals, token.getSymbol(), sendingTokens, ensHandler.getEnsName(), currentChain);
         }
     }
 
@@ -326,6 +331,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
     private void showCameraDenied()
     {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setTitle(R.string.title_dialog_error);
         dialog.setMessage(R.string.error_camera_permission_denied);
@@ -339,6 +345,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
     private void showTokenFetch()
     {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setTitle(R.string.searching_for_token);
         dialog.setIcon(AWalletAlertDialog.NONE);
@@ -362,11 +369,14 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             //change chain if this is a scan from outside send page
             if (overrideNetwork)
             {
-                Utils.setChainColour(chainName, result.chainId);
-                chainName.setText(info.name);
-                currentChain = result.chainId;
-                amountInput.onClear();
-                viewModel.startGasPriceChecker(result.chainId);
+                changeChain(result.chainId);
+            }
+            else if (info.chainId != currentChain)
+            {
+                //Display chain change warning
+                currentResult = result;
+                showChainChangeDialog(result.chainId);
+                return;
             }
         }
 
@@ -402,25 +412,52 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                 else if (resultToken.isERC20())
                 {
                     //ERC20 send request
+                    token = resultToken;
+                    setupTokenContent();
                     amountInput = new AmountEntryItem(this, tokenRepository, resultToken);
                     amountInput.setAmountText(result.tokenAmount.toString());
                     toAddressEditText.setText(result.functionToAddress);
                     sendText.setVisibility(View.VISIBLE);
-                    sendText.setText(R.string.token_transfer_request);
+                    sendText.setText(getString(R.string.token_transfer_request, resultToken.getFullName()));
                 }
                 break;
 
             case FUNCTION_CALL:
-                //Generic function
-                amountInput = new AmountEntryItem(this, tokenRepository, null);
-                amountInput.setAmountText(result.functionDetail);
+                //Generic function call, not handled yet
+                displayScanError(R.string.toast_qr_code_no_address, getString(R.string.no_tokens));
+                //amountInput = new AmountEntryItem(this, tokenRepository, null);
+                //amountInput.setAmountText(result.functionDetail);
                 if (result.functionToAddress != null) toAddressEditText.setText(result.functionToAddress);
                 break;
+
+            default:
+                displayScanError();
         }
+    }
+
+    private void showChainChangeDialog(int chainId)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.WARNING);
+        dialog.setTitle(R.string.change_chain_request);
+        dialog.setMessage(R.string.change_chain_message);
+        dialog.setButtonText(R.string.dialog_ok);
+        dialog.setButtonListener(v -> {
+            changeChain(chainId);
+            dialog.dismiss();
+            validateEIP681Request(currentResult, false);
+        });
+        dialog.setSecondaryButtonText(R.string.action_cancel);
+        dialog.setSecondaryButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
     }
 
     private void displayScanError()
     {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(AWalletAlertDialog.ERROR);
         dialog.setTitle(R.string.toast_qr_code_no_address);
@@ -431,6 +468,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
     private void displayScanError(int titleId, String message)
     {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(AWalletAlertDialog.ERROR);
         dialog.setTitle(titleId);
@@ -451,13 +489,31 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         if (amountInput != null) amountInput.onClear();
     }
 
-    private boolean isBalanceEnough(String eth) {
-        try {
+
+    private boolean isBalanceZero(String balance)
+    {
+        try
+        {
+            BigDecimal amount = new BigDecimal(balance);
+            return amount.equals(BigDecimal.ZERO);
+        }
+        catch (Exception e)
+        {
+            return true;
+        }
+    }
+
+    private boolean isBalanceEnough(String eth)
+    {
+        try
+        {
             //Needs to take into account decimal of token
             int decimals = (token != null && token.tokenInfo != null) ? token.tokenInfo.decimals : 18;
             BigDecimal amount = new BigDecimal(BalanceUtils.baseToSubunit(eth, decimals));
             return (token.balance.subtract(amount).compareTo(BigDecimal.ZERO) >= 0);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             return false;
         }
     }
@@ -467,7 +523,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         tokenSymbolText = findViewById(R.id.symbol);
         chainName = findViewById(R.id.text_chain_name);
 
-        String symbol = TextUtils.isEmpty(token.tokenInfo.symbol) ? "" : token.tokenInfo.symbol.toUpperCase();
+        String symbol = token.getSymbol();
 
         tokenSymbolText.setText(TextUtils.isEmpty(token.tokenInfo.name)
                 ? symbol
@@ -505,5 +561,16 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     public void amountChanged(String newAmount)
     {
         currentAmount = newAmount;
+    }
+
+    private void changeChain(int chainId)
+    {
+        NetworkInfo info = viewModel.getNetworkInfo(chainId);
+        if (info == null) return;
+        Utils.setChainColour(chainName, chainId);
+        chainName.setText(info.name);
+        currentChain = chainId;
+        amountInput.onClear();
+        viewModel.startGasPriceChecker(chainId);
     }
 }

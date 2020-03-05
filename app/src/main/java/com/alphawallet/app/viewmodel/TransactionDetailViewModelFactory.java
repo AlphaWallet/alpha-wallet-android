@@ -6,25 +6,26 @@ import android.support.annotation.NonNull;
 
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.service.TokensService;
 
 public class TransactionDetailViewModelFactory implements ViewModelProvider.Factory {
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
-    private final GenericWalletInteract genericWalletInteract;
     private final ExternalBrowserRouter externalBrowserRouter;
     private final TokensService tokensService;
+    private final TokenRepositoryType tokenRepository;
 
     public TransactionDetailViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            GenericWalletInteract genericWalletInteract,
             ExternalBrowserRouter externalBrowserRouter,
+            TokenRepositoryType tokenRepository,
             TokensService tokensService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
-        this.genericWalletInteract = genericWalletInteract;
         this.externalBrowserRouter = externalBrowserRouter;
         this.tokensService = tokensService;
+        this.tokenRepository = tokenRepository;
     }
 
     @NonNull
@@ -32,8 +33,8 @@ public class TransactionDetailViewModelFactory implements ViewModelProvider.Fact
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         return (T) new TransactionDetailViewModel(
                 findDefaultNetworkInteract,
-                genericWalletInteract,
                 externalBrowserRouter,
+                tokenRepository,
                 tokensService);
     }
 }

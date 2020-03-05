@@ -1,4 +1,4 @@
-# AlphaWallet - No Nonsense Ethereum Wallet
+# AlphaWallet - An advanced Ethereum mobile wallet
 
 [![Build Status](https://api.travis-ci.com/AlphaWallet/alpha-wallet-android.svg?branch=master)](https://api.travis-ci.com/AlphaWallet/alpha-wallet-android.svg?branch=master) 
 [![License](https://img.shields.io/badge/license-GPL3-green.svg?style=flat)](https://github.com/fastlane/fastlane/blob/master/LICENSE)

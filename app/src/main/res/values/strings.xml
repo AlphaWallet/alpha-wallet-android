@@ -556,5 +556,5 @@
     <string name="error_zero_balance">Zero Balance Transaction</string>
     <string name="instagram">Instagram</string>
     <string name="settings_locale_currency">Change Currency</string>
-    <string name="dialog_title_select_currency">Select Currency:</string>
+    <string name="dialog_title_select_currency">Select FIAT Currency</string>
 </resources>

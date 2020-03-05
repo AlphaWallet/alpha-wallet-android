@@ -10,20 +10,10 @@
     android:paddingTop="15dp">
 
     <ImageView
-        android:id="@+id/checkbox"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
-        android:layout_gravity="center_vertical"
-        android:layout_marginEnd="16dp"
-        android:src="@drawable/ic_checkbox" />
-
-    <ImageView
         android:id="@+id/flag"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_toEndOf="@+id/checkbox"
+        android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="16dp"
@@ -33,6 +23,8 @@
         android:id="@+id/code"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_toStartOf="@+id/checkbox"
+        android:layout_marginEnd="16dp"
         android:layout_toEndOf="@+id/flag"
         android:fontFamily="@font/font_bold"
         android:textSize="18sp"
@@ -47,5 +39,15 @@
         android:fontFamily="@font/font_light"
         android:textSize="12sp"
         tools:text="AUD" />
+
+    <ImageView
+        android:id="@+id/checkbox"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/ic_checkbox" />
 
 </RelativeLayout>

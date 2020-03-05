@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 public class CurrencyRepository implements CurrencyRepositoryType {
     public static final CurrencyItem[] CURRENCIES = {
-            new CurrencyItem("USD", "United States Dollar", "$", R.drawable.flag_usd),
+            new CurrencyItem("USD", "American Dollar", "$", R.drawable.flag_usd),
             new CurrencyItem("EUR", "Euro", "€", R.drawable.flag_eur),
             new CurrencyItem("GBP", "British Pound", "£", R.drawable.flag_gbp),
             new CurrencyItem("AUD", "Australian Dollar", "$", R.drawable.flag_aud),

@@ -92,6 +92,8 @@ public abstract class C {
             "com.stormbird.wallet.ADDED";
     public static final String CHANGED_LOCALE =
             "com.stormbird.wallet.CHANGED_LOCALE";
+    public static final String REFRESH_TOKENS =
+            "com.stormbird.wallet.REFRESH_TOKENS";
     public static final String DOWNLOAD_READY =
             "com.stormbird.wallet.DOWNLOAD_READY";
     public static final String PAGE_LOADED =

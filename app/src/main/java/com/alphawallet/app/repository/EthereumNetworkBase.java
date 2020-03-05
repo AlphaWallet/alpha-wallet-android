@@ -430,10 +430,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public void refreshTickers()
     {
-        if(tickerService.isTickerUpdateTimerDisposed()){
-            tickerService.disposeTickerUpdateTimer();
-        }
-        tickerService.updateTickers();
+        tickerService.updateTickers(true);
     }
 
     public static String defaultDapp()

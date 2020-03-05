@@ -1,10 +1,12 @@
 package com.alphawallet.app.service;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AmberDataElement;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -86,32 +88,31 @@ public class TickerService implements TickerServiceInterface
         this.gson = gson;
         this.context = ctx;
 
-        updateTickers();
+        updateTickers(false);
     }
 
-    public void updateTickers()
+    public void updateTickers(boolean forceUpdate)
     {
         if (tickerUpdateTimer == null || tickerUpdateTimer.isDisposed())
         {
             tickerUpdateTimer = Observable.interval(0, UPDATE_TICKER_CYCLE, TimeUnit.MINUTES)
-                    .doOnNext(l -> updateCurrencyConversion()
-                            .flatMap(this::addArtisTicker)
-                            .flatMap(this::fetchTickers)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(this::checkTickers, this::onTickersError).isDisposed())
+                    .doOnNext(l -> tickerUpdate())
                     .subscribe();
+        }
+        else if (forceUpdate)
+        {
+            tickerUpdate();
         }
     }
 
-    @Override
-    public boolean isTickerUpdateTimerDisposed() {
-        return tickerUpdateTimer != null && !tickerUpdateTimer.isDisposed();
-    }
-
-    @Override
-    public void disposeTickerUpdateTimer() {
-        tickerUpdateTimer.dispose();
+    private void tickerUpdate()
+    {
+        updateCurrencyConversion()
+                .flatMap(this::addArtisTicker)
+                .flatMap(this::fetchTickers)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::checkTickers, this::onTickersError).isDisposed();
     }
 
     private Single<Double> updateCurrencyConversion()
@@ -172,6 +173,8 @@ public class TickerService implements TickerServiceInterface
     private void checkTickers(Map<Integer, TokenTicker> tickerMap)
     {
         System.out.println("Tickers received: " + tickerMap.size());
+        //send a message to walletview to do a minimal update of ticker values if anything changes
+        context.sendBroadcast(new Intent(C.REFRESH_TOKENS));
     }
 
     @Override
@@ -235,7 +238,7 @@ public class TickerService implements TickerServiceInterface
     @Override
     public boolean hasTickers()
     {
-        updateTickers(); // ensure ticker update thread is functioning (app could have been memory scavenged).
+        updateTickers(false); // ensure ticker update thread is functioning (app could have been memory scavenged).
         return erc20Tickers.size() > 0;
     }
 

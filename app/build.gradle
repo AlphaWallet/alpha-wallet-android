@@ -42,7 +42,7 @@ android {
         def CoinmarketCapAPI = "CoinmarketCapAPI"
         def AmberdataAPI = "AmberdataAPI"
         def InfuraAPI = "InfuraAPI"
-        def COINMARKET_CAP_KEY = "\"obtain-api-key-from-coinmarketcap-com\""
+        def COINMARKET_CAP_KEY = "\"ea2d0a6b-7e77-4015-bccf-4877e5c5b882\""
         def AMBERDATA_API_KEY = "\"obtain-api-key-from-amberdata-io\"";
         def INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\"";
         if (project.hasProperty("coinmarketcapAPI")) {

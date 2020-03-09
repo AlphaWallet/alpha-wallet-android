@@ -28,9 +28,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
+            android:background="@color/greyffive"
             android:layout_above="@id/layoutButtons"
-            android:orientation="vertical"
-            android:layout_marginTop="10dp">
+            android:orientation="vertical">
 
             <include layout="@layout/item_ticket" />
 

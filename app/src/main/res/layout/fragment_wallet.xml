@@ -33,28 +33,12 @@
         android:layout_height="1dp"
         android:background="@color/greydd"/>
 
-    <LinearLayout
-        android:id="@+id/layout_spacer"
-        android:layout_below="@id/spacer_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <View
-            android:id="@+id/view_tab_space"
-            android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:visibility="gone"
-            android:background="@color/greyffive"/>
-
-    </LinearLayout>
-
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/greyffive"
-        android:layout_below="@id/layout_spacer"
+        android:layout_below="@id/spacer_view"
         android:paddingBottom="3dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 

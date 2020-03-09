@@ -76,7 +76,7 @@
         android:elevation="1dp"
         android:minHeight="100dp"
         android:orientation="horizontal"
-        android:visibility="visible"
+        android:visibility="gone"
         android:paddingBottom="20dp"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
@@ -88,7 +88,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="5dp"
                 android:fontFamily="@font/font_bold"
-                android:text="x3"
+                android:text=""
                 android:textColor="@color/green"
                 android:textSize="21sp" />
 

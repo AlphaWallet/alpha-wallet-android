@@ -16,17 +16,14 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CurrencyItem;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.app.ui.widget.divider.ListDivider;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class SelectCurrencyActivity extends BaseActivity implements StandardFunctionInterface
 {
     private RecyclerView listView;
     private CustomAdapter adapter;
-    private FunctionButtonBar functionBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -37,7 +34,6 @@ public class SelectCurrencyActivity extends BaseActivity implements StandardFunc
 
         setContentView(R.layout.dialog_awallet_currency_list);
         listView = findViewById(R.id.dialog_list);
-        functionBar = findViewById(R.id.layoutButtons);
         toolbar();
         setTitle(getString(R.string.dialog_title_select_currency));
 
@@ -46,14 +42,11 @@ public class SelectCurrencyActivity extends BaseActivity implements StandardFunc
 
         adapter = new CustomAdapter(currencyItems, currentCurrency);
         listView.setAdapter(adapter);
-
-        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.action_confirm));
-        functionBar.setupFunctions(this, functions);
+        listView.addItemDecoration(new ListDivider(this));
     }
 
     @Override
-    public void handleClick(int view)
-    {
+    public void onBackPressed() {
         Intent intent = new Intent();
         String item = adapter.getSelectedItemId();
         intent.putExtra(C.EXTRA_CURRENCY, item);
@@ -63,11 +56,8 @@ public class SelectCurrencyActivity extends BaseActivity implements StandardFunc
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                handleClick(0);
-                break;
-            }
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -147,9 +137,9 @@ public class SelectCurrencyActivity extends BaseActivity implements StandardFunc
             });
 
             if (currencyItem.isSelected()) {
-                holder.checkbox.setImageResource(R.drawable.ic_checkbox_active);
+                holder.checkbox.setImageResource(R.drawable.ic_radio_on);
             } else {
-                holder.checkbox.setImageResource(R.drawable.ic_checkbox);
+                holder.checkbox.setImageResource(R.drawable.ic_radio_off);
             }
         }
 

@@ -950,6 +950,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         if (data == null) return;
         String currencyCode = data.getStringExtra(C.EXTRA_CURRENCY);
+
+        //Check if selected currency code is previous selected one then don't update
+        if(viewModel.getDefaultCurrency().equals(currencyCode)) return;
+
         viewModel.updateCurrency(currencyCode);
         ((WalletFragment)walletFragment).refreshList();
     }

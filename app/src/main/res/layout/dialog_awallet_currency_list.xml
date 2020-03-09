@@ -8,7 +8,7 @@
     android:scrollbarAlwaysDrawVerticalTrack="true"
     android:scrollbars="vertical">
 
-    <include layout="@layout/layout_network_filter_toolbar" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <LinearLayout
         android:id="@+id/layout_list"
@@ -16,8 +16,7 @@
         android:layout_height="match_parent"
         android:layout_marginTop="?android:attr/actionBarSize"
         android:background="@drawable/background_card"
-        android:orientation="vertical"
-        >
+        android:orientation="vertical">
 
         <View
             android:layout_width="match_parent"
@@ -28,13 +27,11 @@
             android:id="@+id/dialog_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingBottom="16dp"
-            android:paddingTop="16dp"/>
+            android:paddingLeft="8dp"
+            android:paddingTop="8dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="8dp" />
 
     </LinearLayout>
-
-    <include layout="@layout/layout_function_buttons" />
 
 </RelativeLayout>

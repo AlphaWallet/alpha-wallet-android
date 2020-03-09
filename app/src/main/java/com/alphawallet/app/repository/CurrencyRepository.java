@@ -8,12 +8,12 @@ import java.util.Arrays;
 
 public class CurrencyRepository implements CurrencyRepositoryType {
     public static final CurrencyItem[] CURRENCIES = {
-            new CurrencyItem("USD", "American Dollar", "$", R.drawable.flag_usd),
-            new CurrencyItem("EUR", "Euro", "€", R.drawable.flag_eur),
-            new CurrencyItem("GBP", "British Pound", "£", R.drawable.flag_gbp),
-            new CurrencyItem("AUD", "Australian Dollar", "$", R.drawable.flag_aud),
-            new CurrencyItem("CNY", "China Yuan Renminbi","¥", R.drawable.flag_cny),
-            new CurrencyItem("INR", "Indian Rupee","₹", R.drawable.flag_inr)
+            new CurrencyItem("USD", "American Dollar", "$", R.drawable.ic_flags_usa),
+            new CurrencyItem("EUR", "Euro", "€", R.drawable.ic_flags_euro),
+            new CurrencyItem("GBP", "British Pound", "£", R.drawable.ic_flags_uk),
+            new CurrencyItem("AUD", "Australian Dollar", "$", R.drawable.ic_flags_australia),
+            new CurrencyItem("CNY", "China Yuan Renminbi","¥", R.drawable.ic_flags_china),
+            new CurrencyItem("INR", "Indian Rupee","₹", R.drawable.ic_flags_india)
     };
 
     private final PreferenceRepositoryType preferences;

@@ -305,4 +305,8 @@ public class HomeViewModel extends BaseViewModel {
         currencyRepository.setDefaultCurrency(currencyCode);
         ethereumNetworkRepository.refreshTickers();
     }
+
+    public String getDefaultCurrency(){
+        return currencyRepository.getDefaultCurrency();
+    }
 }

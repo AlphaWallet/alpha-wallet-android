@@ -562,4 +562,5 @@
     <string name="title_clear_browser_cache">Clear Browser Caches</string>
     <string name="title_tokenscript">TokenScript</string>
     <string name="title_change_language">Change Language</string>
+    <string name="add_hide_tokens">Add / Hide Tokens</string>
 </resources>

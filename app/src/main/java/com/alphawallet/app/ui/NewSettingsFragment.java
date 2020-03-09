@@ -52,7 +52,6 @@ public class NewSettingsFragment extends Fragment {
     private SettingsItemView notificationsSetting;
     private SettingsItemView biometricsSetting;
     private SettingsItemView selectNetworksSetting;
-    private SettingsItemView manageTokensSetting;
     private SettingsItemView advancedSetting;
     private SettingsItemView supportSetting;
 
@@ -124,13 +123,6 @@ public class NewSettingsFragment extends Fragment {
                         .withListener(this::onBackUpWalletSettingClicked)
                         .build();
 
-        manageTokensSetting =
-                new SettingsItemView.Builder(getContext())
-                        .withIcon(R.drawable.ic_settings_advanced)
-                        .withTitle(R.string.manage_tokens)
-                        .withListener(this::onManageTokensSettingClicked)
-                        .build();
-
         notificationsSetting =
                 new SettingsItemView.Builder(getContext())
                         .withType(SettingsItemView.Type.TOGGLE)
@@ -176,8 +168,6 @@ public class NewSettingsFragment extends Fragment {
             walletSettingsLayout.addView(changeWalletSetting, 1);
 
         walletSettingsLayout.addView(backUpWalletSetting, 2);
-
-        walletSettingsLayout.addView(manageTokensSetting, 3);
 
         systemSettingsLayout.addView(notificationsSetting, 0);
 
@@ -362,13 +352,5 @@ public class NewSettingsFragment extends Fragment {
     private void onSupportSettingClicked() {
         Intent intent = new Intent(getActivity(), SupportSettingsActivity.class);
         startActivity(intent);
-    }
-
-    private void onManageTokensSettingClicked() {
-        if (wallet != null) {
-            Intent intent = new Intent(getActivity(), TokenManagementActivity.class);
-            intent.putExtra(EXTRA_ADDRESS, wallet.address);
-            startActivity(intent);
-        }
     }
 }

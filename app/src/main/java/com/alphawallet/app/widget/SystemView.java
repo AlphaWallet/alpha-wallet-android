@@ -82,6 +82,13 @@ public class SystemView extends FrameLayout implements View.OnClickListener {
 		setVisibility(VISIBLE);
 	}
 
+	// Shows the central progress spinner
+	public void showCentralSpinner()
+	{
+		hideAllComponents();
+		progress.setVisibility(VISIBLE);
+	}
+
 	public void showProgress(boolean shouldShow) {
 	    if (shouldShow && swipeRefreshLayout != null && swipeRefreshLayout.isRefreshing()) {
 	        return;

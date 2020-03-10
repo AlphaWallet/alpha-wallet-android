@@ -34,4 +34,6 @@
 
     </LinearLayout>
 
+    <include layout="@layout/layout_function_buttons" />
+
 </RelativeLayout>

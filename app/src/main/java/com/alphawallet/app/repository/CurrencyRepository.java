@@ -13,7 +13,8 @@ public class CurrencyRepository implements CurrencyRepositoryType {
             new CurrencyItem("GBP", "British Pound", "£", R.drawable.ic_flags_uk),
             new CurrencyItem("AUD", "Australian Dollar", "$", R.drawable.ic_flags_australia),
             new CurrencyItem("CNY", "China Yuan Renminbi","¥", R.drawable.ic_flags_china),
-            new CurrencyItem("INR", "Indian Rupee","₹", R.drawable.ic_flags_india)
+            new CurrencyItem("INR", "Indian Rupee","₹", R.drawable.ic_flags_india),
+            new CurrencyItem("SGD", "Singapore Dollar","$", R.drawable.ic_flag_sgd)
     };
 
     private final PreferenceRepositoryType preferences;

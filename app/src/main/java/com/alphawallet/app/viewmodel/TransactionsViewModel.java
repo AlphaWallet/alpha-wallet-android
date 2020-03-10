@@ -224,7 +224,6 @@ public class TransactionsViewModel extends BaseViewModel
 
     public void prepare()
     {
-        progress.postValue(true);
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);

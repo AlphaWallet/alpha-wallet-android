@@ -209,6 +209,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
+        systemView.showProgress(false);
 
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
@@ -955,6 +956,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if(viewModel.getDefaultCurrency().equals(currencyCode)) return;
 
         viewModel.updateCurrency(currencyCode);
-        ((WalletFragment)walletFragment).refreshList();
+        ((WalletFragment)walletFragment).indicateFetch();
     }
 }

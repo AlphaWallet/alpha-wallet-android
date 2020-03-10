@@ -41,6 +41,7 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
     private StandardFunctionInterface callStandardFunctions;
     private LinearLayout currentHolder = null;
     private int buttonCount;
+    private Token token = null;
 
     public FunctionButtonBar(Context ctx)
     {
@@ -77,6 +78,7 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
     {
         callStandardFunctions = functionInterface;
         adapter = adp;
+        this.token = token;
         functions = assetSvs.getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         removeAllViews();
         int intrinsicButtonCount = getTokenDefaultButtonCount(token);
@@ -175,29 +177,27 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
             {
                 List<BigInteger> selected = selection;
                 if (adapter != null) selected = adapter.getSelectedTokenIds(selection);
+                boolean selectionValid = (token == null || token.checkSelectionValidity(selected));
 
                 switch (v.getId())
                 {
-                    case R.string.action_sell:
-                        //single token or grouping
-                        if (selected.size() == 1) callStandardFunctions.sellTicketRouter(selected);
-                        else flashButton(v);
+                    case R.string.action_sell:      //ERC875 only
+                        if (!selectionValid) flashButton(v);
+                        else callStandardFunctions.sellTicketRouter(selected);
                         break;
-                    case R.string.action_send:
+                    case R.string.action_send:      //Eth + ERC20
                         callStandardFunctions.showSend();
                         break;
-                    case R.string.action_receive:
+                    case R.string.action_receive:   //Everything
                         callStandardFunctions.showReceive();
                         break;
-                    case R.string.action_transfer:
-                        //single token or grouping
-                        if (selected.size() == 1) callStandardFunctions.showTransferToken(selected);
-                        else flashButton(v);
+                    case R.string.action_transfer:  //Any NFT
+                        if (!selectionValid) flashButton(v);
+                        else callStandardFunctions.showTransferToken(selected);
                         break;
-                    case R.string.action_use:
-                        //single token or grouping
-                        if (selected.size() == 1) callStandardFunctions.selectRedeemTokens(selected);
-                        else flashButton(v);
+                    case R.string.action_use:    //NFT with Redeem
+                        if (!selectionValid) flashButton(v);
+                        else callStandardFunctions.selectRedeemTokens(selected);
                         break;
                     default:
                         callStandardFunctions.handleClick(v.getId());
@@ -389,4 +389,9 @@ public class FunctionButtonBar extends LinearLayout implements OnTokenClickListe
             v.setBackgroundResource(R.drawable.selector_round_button);
         }, 500);
     };
+
+    public void setSelection(List<BigInteger> idList)
+    {
+        selection = idList;
+    }
 }

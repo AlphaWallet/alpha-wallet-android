@@ -964,6 +964,12 @@ public class Token implements Parcelable, Comparable<Token>
         return contractType == ContractType.ETHEREUM;
     }
     public boolean isERC721Ticket() { return false; }
+    public boolean hasGroupedTransfer() { return false; } //Can the NFT token's transfer function handle multiple tokens?
+    public boolean checkSelectionValidity(List<BigInteger> selection) //check a selection of ID's for Transfer/Redeem/Sell
+    {
+        return selection.size() != 0 && (selection.size() == 1 || hasGroupedTransfer());
+    }
+
 
     public BigDecimal getCorrectedAmount(String newAmount)
     {

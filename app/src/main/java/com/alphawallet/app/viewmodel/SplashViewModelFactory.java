@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
+import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.interact.FetchWalletsInteract;
@@ -17,21 +18,30 @@ public class SplashViewModelFactory implements ViewModelProvider.Factory {
     private final LocaleRepositoryType localeRepository;
     private final KeyService keyService;
     private final AssetDefinitionService assetDefinitionService;
+    private final CurrencyRepositoryType currencyRepository;
 
     public SplashViewModelFactory(FetchWalletsInteract fetchWalletsInteract,
                                   PreferenceRepositoryType preferenceRepository,
                                   LocaleRepositoryType localeRepository,
                                   KeyService keyService,
-                                  AssetDefinitionService assetDefinitionService) {
+                                  AssetDefinitionService assetDefinitionService,
+                                  CurrencyRepositoryType currencyRepository) {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.keyService = keyService;
         this.assetDefinitionService = assetDefinitionService;
+        this.currencyRepository = currencyRepository;
     }
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new SplashViewModel(fetchWalletsInteract, preferenceRepository, localeRepository, keyService, assetDefinitionService);
+        return (T) new SplashViewModel(
+                fetchWalletsInteract,
+                preferenceRepository,
+                localeRepository,
+                keyService,
+                assetDefinitionService,
+                currencyRepository);
     }
 }

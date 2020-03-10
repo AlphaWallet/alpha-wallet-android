@@ -9,6 +9,7 @@ public abstract class C {
     public static final int REQUEST_BACKUP_WALLET = 1011;
     public static final int REQUEST_TRANSACTION_CALLBACK = 1012;
     public static final int UPDATE_LOCALE = 1013;
+    public static final int UPDATE_CURRENCY = 1014;
 
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";
@@ -80,6 +81,7 @@ public abstract class C {
     public static final String EXTRA_CALLBACKID = "CALLBACK_ID";
     public static final String EXTRA_LOCALE = "LOCALE_STRING";
     public static final String EXTRA_PAGE_TITLE = "PTITLE";
+    public static final String EXTRA_CURRENCY = "CURRENCY_STRING";
 
     public static final String PRUNE_ACTIVITY =
             "com.stormbird.wallet.PRUNE_ACTIVITY";
@@ -90,6 +92,8 @@ public abstract class C {
             "com.stormbird.wallet.ADDED";
     public static final String CHANGED_LOCALE =
             "com.stormbird.wallet.CHANGED_LOCALE";
+    public static final String REFRESH_TOKENS =
+            "com.stormbird.wallet.REFRESH_TOKENS";
     public static final String DOWNLOAD_READY =
             "com.stormbird.wallet.DOWNLOAD_READY";
     public static final String PAGE_LOADED =
@@ -168,4 +172,6 @@ public abstract class C {
 
     // Settings Badge Keys
     public static final String KEY_NEEDS_BACKUP = "needsBackup";
+
+    public static final String DEFAULT_CURRENCY_CODE = "USD";
 }

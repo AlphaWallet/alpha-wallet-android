@@ -8,6 +8,8 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
 
+import com.alphawallet.app.entity.CurrencyItem;
+import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
@@ -48,6 +50,7 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final PreferenceRepositoryType preferenceRepository;
     private final LocaleRepositoryType localeRepository;
     private final TokensService tokensService;
+    private final CurrencyRepositoryType currencyRepository;
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -65,7 +68,8 @@ public class NewSettingsViewModel extends BaseViewModel {
             HomeRouter homeRouter,
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
-            TokensService tokensService) {
+            TokensService tokensService,
+            CurrencyRepositoryType currencyRepository) {
         this.genericWalletInteract = genericWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.myAddressRouter = myAddressRouter;
@@ -76,6 +80,7 @@ public class NewSettingsViewModel extends BaseViewModel {
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.tokensService = tokensService;
+        this.currencyRepository = currencyRepository;
     }
 
     public void showHome(Context context, boolean clearStack) {
@@ -155,7 +160,6 @@ public class NewSettingsViewModel extends BaseViewModel {
     public LiveData<String> backUpMessage() { return backUpMessage; }
 
     public void prepare() {
-        progress.postValue(true);
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -211,5 +215,13 @@ public class NewSettingsViewModel extends BaseViewModel {
     public Single<String> setIsDismissed(String walletAddr, boolean isDismissed)
     {
         return genericWalletInteract.setIsDismissed(walletAddr, isDismissed);
+    }
+
+    public String getDefaultCurrency() {
+        return currencyRepository.getDefaultCurrency();
+    }
+
+    public ArrayList<CurrencyItem> getCurrencyList() {
+        return currencyRepository.getCurrencyList();
     }
 }

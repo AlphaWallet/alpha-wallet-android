@@ -92,8 +92,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         systemView = view.findViewById(R.id.system_view);
         progressView = view.findViewById(R.id.progress_view);
         progressView.hide();
-
-        progressView.setWhiteCircle();
+        systemView.hide();
 
         listView = view.findViewById(R.id.list);
 
@@ -144,7 +143,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         ((HomeActivity)getActivity()).showBackupWalletDialog(wallet.lastBackupTime > 0);
     }
 
-    private void refreshList()
+    public void refreshList()
     {
         adapter.clear();
         viewModel.reloadTokens();
@@ -389,7 +388,20 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         //first abort the current operation
         viewModel.clearProcess();
         adapter.clear();
-        //viewModel.prepare();
+        viewModel.fetchTokens();
+    }
+
+    @Override
+    public void refreshTokens()
+    {
+        //only update the tokens in place if something has changed, using TokenSortedItem rules.
+        viewModel.fetchTokens();
+        systemView.showProgress(false); //indicate update complete
+    }
+
+    public void indicateFetch()
+    {
+        systemView.showCentralSpinner();
     }
 
     @Override

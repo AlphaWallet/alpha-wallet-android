@@ -119,7 +119,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
     }
 
     public void prepare(Context context) {
-        progress.postValue(true);
         loadBookmarks(context);
 
         disposable = findDefaultNetworkInteract

@@ -1075,8 +1075,9 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean checkTickerChange(Token check)
     {
-        if (check.ticker == null && ticker != null) return true; //now has ticker
-        else return check.ticker != null && ticker != null && !check.ticker.price.equals(ticker.price); //return true if ticker changed
+        if (check.ticker == null && ticker == null) return false;
+        else if (check.ticker == null || ticker == null) return true; //ticker situation changed
+        else return !check.ticker.price.equals(ticker.price); //return true if ticker changed
     }
 
     @Override

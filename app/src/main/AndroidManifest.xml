@@ -254,6 +254,10 @@
             android:label="Select Language" />
 
         <activity
+            android:name=".ui.SelectCurrencyActivity"
+            android:label="Select Currency" />
+
+        <activity
             android:name=".ui.BackupKeyActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
 

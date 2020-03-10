@@ -160,7 +160,6 @@ public class NewSettingsViewModel extends BaseViewModel {
     public LiveData<String> backUpMessage() { return backUpMessage; }
 
     public void prepare() {
-        progress.postValue(true);
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);

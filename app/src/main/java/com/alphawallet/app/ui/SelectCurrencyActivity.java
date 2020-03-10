@@ -17,13 +17,17 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CurrencyItem;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
+import com.alphawallet.app.widget.FunctionButtonBar;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class SelectCurrencyActivity extends BaseActivity implements StandardFunctionInterface
 {
     private RecyclerView listView;
     private CustomAdapter adapter;
+    private FunctionButtonBar functionBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,6 +47,10 @@ public class SelectCurrencyActivity extends BaseActivity implements StandardFunc
         adapter = new CustomAdapter(currencyItems, currentCurrency);
         listView.setAdapter(adapter);
         listView.addItemDecoration(new ListDivider(this));
+        functionBar = findViewById(R.id.layoutButtons); //use standard bottom function button bar to make it easy to customise or update UI
+        functionBar.setVisibility(View.VISIBLE);
+        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.button_ok));
+        functionBar.setupFunctions(this, functions);
     }
 
     @Override
@@ -146,6 +154,15 @@ public class SelectCurrencyActivity extends BaseActivity implements StandardFunc
         @Override
         public int getItemCount() {
             return dataSet.size();
+        }
+    }
+
+    @Override
+    public void handleClick(int view)
+    {
+        if (view == R.string.button_ok) //handle OK button
+        {
+            onBackPressed();
         }
     }
 }

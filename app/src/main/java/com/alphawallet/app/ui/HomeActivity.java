@@ -337,6 +337,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         if (homeReceiver == null) homeReceiver = new HomeReceiver(this, this);
+
     }
 
     @Override
@@ -770,7 +771,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         {
                             case RC_ASSET_EXTERNAL_WRITE_PERM:
                                 viewModel.loadExternalXMLContracts();
-                                ((NewSettingsFragment)settingsFragment).refresh();
                                 break;
                             case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
                                 viewModel.downloadAndInstall(buildVersion, this);

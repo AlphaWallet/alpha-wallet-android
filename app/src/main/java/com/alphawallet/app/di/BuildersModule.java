@@ -1,6 +1,7 @@
 package com.alphawallet.app.di;
 
 import com.alphawallet.app.ui.AddTokenActivity;
+import com.alphawallet.app.ui.AdvancedSettingsActivity;
 import com.alphawallet.app.ui.AssetDisplayActivity;
 import com.alphawallet.app.ui.BackupKeyActivity;
 import com.alphawallet.app.ui.ConfirmationActivity;
@@ -148,4 +149,7 @@ public abstract class BuildersModule {
 
 	@ContributesAndroidInjector(modules = TokenManagementModule.class)
 	abstract TokenManagementActivity bindTokenManagementActivity();
+
+	@ContributesAndroidInjector(modules = AdvancedSettingsModule.class)
+	abstract AdvancedSettingsActivity bindAdvancedSettingsActivity();
 }

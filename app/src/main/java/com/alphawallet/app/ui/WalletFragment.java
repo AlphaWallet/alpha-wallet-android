@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.alphawallet.app.entity.BackupTokenCallback;
@@ -54,6 +55,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
+import static com.alphawallet.app.C.EXTRA_ADDRESS;
 import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 import static com.alphawallet.app.C.Key.WALLET;
 
@@ -78,6 +80,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     private Handler handler;
     private String importFileName;
     private RecyclerView listView;
+    private LinearLayout layoutManageTokens;
 
     private boolean isVisible;
 
@@ -99,6 +102,9 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
         systemView.attachRecyclerView(listView);
         systemView.attachSwipeRefreshLayout(refreshLayout);
+
+        layoutManageTokens = view.findViewById(R.id.layout_manage_tokens);
+        layoutManageTokens.setOnClickListener(this::onManageTokensClicked);
 
         viewModel = ViewModelProviders.of(this, walletViewModelFactory)
                 .get(WalletViewModel.class);
@@ -136,6 +142,15 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
         viewModel.clearProcess();
         return view;
+    }
+
+    private void onManageTokensClicked(View view) {
+        Wallet wallet = viewModel.defaultWallet().getValue();
+        if (wallet != null) {
+            Intent intent = new Intent(getActivity(), TokenManagementActivity.class);
+            intent.putExtra(EXTRA_ADDRESS, wallet.address);
+            startActivity(intent);
+        }
     }
 
     private void onDefaultWallet(Wallet wallet)

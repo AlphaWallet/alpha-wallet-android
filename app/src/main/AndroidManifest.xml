@@ -256,6 +256,14 @@
         <activity
             android:name=".ui.BackupKeyActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
+
+        <activity
+            android:name=".ui.SupportSettingsActivity"
+            android:label="Support Settings" />
+
+        <activity
+            android:name=".ui.AdvancedSettingsActivity"
+            android:label="Advanced Settings" />
     </application>
 
 </manifest>

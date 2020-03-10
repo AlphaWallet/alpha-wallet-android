@@ -95,8 +95,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         systemView = view.findViewById(R.id.system_view);
         progressView = view.findViewById(R.id.progress_view);
         progressView.hide();
-
-        progressView.setWhiteCircle();
+        systemView.hide();
 
         listView = view.findViewById(R.id.list);
 
@@ -187,22 +186,27 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         adapter.updateToken(token, false);
     }
 
-    private void initTabLayout(View view) {
+    private void initTabLayout(View view)
+    {
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
-        if (VisibilityFilter.hideTabBar()) {
+        if (VisibilityFilter.hideTabBar())
+        {
             tabLayout.setVisibility(View.GONE);
             return;
         }
         tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.currency));
-//        tabLayout.addTab(tabLayout.newTab().setText(R.string.favourites));
+        //        tabLayout.addTab(tabLayout.newTab().setText(R.string.favourites));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.collectibles));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.attestations));
 
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener()
+        {
             @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                switch(tab.getPosition()) {
+            public void onTabSelected(TabLayout.Tab tab)
+            {
+                switch (tab.getPosition())
+                {
                     case 0:
                         adapter.setFilterType(TokensAdapter.FILTER_ALL);
                         viewModel.fetchTokens();
@@ -223,18 +227,17 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
             }
 
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
+            public void onTabUnselected(TabLayout.Tab tab)
+            {
 
             }
 
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {
+            public void onTabReselected(TabLayout.Tab tab)
+            {
 
             }
         });
-
-        //TabUtils.changeTabsFont(getContext(), tabLayout);
-        //TabUtils.reflex(tabLayout);
     }
 
     private void onTotal(BigDecimal totalInCurrency) {
@@ -401,14 +404,37 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         //first abort the current operation
         viewModel.clearProcess();
         adapter.clear();
-        //viewModel.prepare();
+        viewModel.fetchTokens();
     }
 
     @Override
-    public void addedToken()
+    public void refreshTokens()
     {
-        //token was added, refresh token list
-        refreshList();
+        //only update the tokens in place if something has changed, using TokenSortedItem rules.
+        viewModel.fetchTokens();
+        systemView.showProgress(false); //indicate update complete
+    }
+
+    public void indicateFetch()
+    {
+        systemView.showCentralSpinner();
+    }
+
+    @Override
+    public void addedToken(int[] chainIds, String[] addrs)
+    {
+        //token was added
+        if (chainIds.length != addrs.length)
+        {
+            System.out.println("Receiver data mismatch");
+            return;
+        }
+
+        for (int i = 0; i < chainIds.length; i++)
+        {
+            Token t = viewModel.getTokenFromService(chainIds[i], addrs[i]);
+            if (t != null) adapter.updateToken(t, false);
+        }
     }
 
     @Override
@@ -562,5 +588,10 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
             background.draw(c);
             icon.draw(c);
         }
+    }
+
+    public Wallet getCurrentWallet()
+    {
+        return viewModel.getWallet();
     }
 }

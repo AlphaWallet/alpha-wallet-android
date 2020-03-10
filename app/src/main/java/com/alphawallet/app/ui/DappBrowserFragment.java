@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
 import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
@@ -132,6 +133,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private static final int UPLOAD_FILE = 1;
     public static final int REQUEST_FILE_ACCESS = 31;
+    public static final int REQUEST_FINE_LOCATION = 110;
 
     static byte[] getEthereumMessagePrefix(int messageLength) {
         return MESSAGE_PREFIX.concat(String.valueOf(messageLength)).getBytes();
@@ -167,7 +169,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private LinearLayout currentNetworkClicker;
     private TextView balance;
     private TextView symbol;
-
+    private GeolocationPermissions.Callback geoCallback = null;
+    private String geoOrigin;
     private final Handler handler;
 
     private String currentWebpageTitle;
@@ -277,7 +280,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     @Override
     public void onAttachFragment(Fragment fragment) {
-        if (fragment.getTag() != null)
+        if (getContext() != null && fragment.getTag() != null)
         {
             switch (fragment.getTag())
             {
@@ -377,8 +380,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
 
         //blank forward / backward arrows
-        next.setAlpha(0.3f);
-        back.setAlpha(0.3f);
+        setBackForwardButtons();
     }
 
     @Override
@@ -412,7 +414,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void onDappClick(DApp dapp) {
         forwardFragmentStack.clear();
-        System.out.println("Luddite: Clear: " + currentFragment);
         addToBackStack(DAPP_BROWSER);
         loadUrl(dapp.getUrl());
     }
@@ -619,7 +620,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         balance.setVisibility(View.VISIBLE);
         symbol.setVisibility(View.VISIBLE);
         balance.setText(token.getScaledBalance());
-        symbol.setText(token.tokenInfo.symbol);
+        symbol.setText(token.getSymbol());
     }
 
     private void onDefaultWallet(Wallet wallet) {
@@ -666,6 +667,14 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             }
 
             @Override
+            public void onGeolocationPermissionsShowPrompt(String origin,
+                                                           GeolocationPermissions.Callback callback)
+            {
+                super.onGeolocationPermissionsShowPrompt(origin, callback);
+                requestGeoPermission(origin, callback);
+            }
+
+            @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
                                              FileChooserParams fCParams)
             {
@@ -674,14 +683,35 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 fileChooserParams = fCParams;
                 picker = fileChooserParams.createIntent();
 
-                if (!checkReadPermission()) return super.onShowFileChooser(webView, filePathCallback, fCParams);
-                else return requestUpload();
+                if (checkReadPermission()) return requestUpload();
+                else return true;
             }
         });
 
         web3.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                String[] prefixCheck = url.split(":");
+                if (prefixCheck.length > 1)
+                {
+                    Intent intent;
+                    switch (prefixCheck[0])
+                    {
+                        case "tel":
+                            intent = new Intent(Intent.ACTION_DIAL);
+                            intent.setData(Uri.parse(url));
+                            startActivity(Intent.createChooser(intent, "Call " + prefixCheck[1]));
+                            return true;
+                        case "mailto":
+                            intent = new Intent(Intent.ACTION_SENDTO);
+                            intent.setData(Uri.parse(url));
+                            startActivity(Intent.createChooser(intent, "Email: " + prefixCheck[1]));
+                            return true;
+                        default:
+                            break;
+                    }
+                }
+
                 urlTv.setText(url);
                 return false;
             }
@@ -864,7 +894,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     //return from the openConfirmation above
     public void handleTransactionCallback(int resultCode, Intent data)
     {
-        if (data == null) return;
+        if (data == null || web3 == null) return;
         Web3Transaction web3Tx = data.getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
         if (resultCode == RESULT_OK && web3Tx != null)
         {
@@ -1041,6 +1071,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void onWebpageLoaded(String url, String title)
     {
+        if (getContext() == null) return; //could be a late return from dead fragment
         if (homePressed)
         {
             homePressed = false;
@@ -1061,28 +1092,36 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         handler.post(this::setBackForwardButtons); //execute on UI thread
     }
 
-    private void setBackForwardButtons() {
-        WebBackForwardList sessionHistory = web3.copyBackForwardList();
+    private void setBackForwardButtons()
+    {
+        WebBackForwardList sessionHistory = null;
+        if (web3 != null) sessionHistory = web3.copyBackForwardList();
 
         String nextFrag = forwardFragmentStack.peekLast();
         String backFrag = backFragmentStack.peekLast();
 
-        if (backFrag != null || (currentFragment.equals(DAPP_BROWSER) && web3.canGoBack()))
+        if (back != null)
         {
-            back.setAlpha(1.0f);
-        }
-        else
-        {
-            back.setAlpha(0.3f);
+            if (backFrag != null || (currentFragment.equals(DAPP_BROWSER) && (web3 != null && web3.canGoBack())))
+            {
+                back.setAlpha(1.0f);
+            }
+            else
+            {
+                back.setAlpha(0.3f);
+            }
         }
 
-        if (nextFrag != null || (currentFragment.equals(DAPP_BROWSER) && sessionHistory.getCurrentIndex() < sessionHistory.getSize() - 1))
+        if (next != null)
         {
-            next.setAlpha(1.0f);
-        }
-        else
-        {
-            next.setAlpha(0.3f);
+            if (nextFrag != null || (currentFragment.equals(DAPP_BROWSER) && (sessionHistory != null && sessionHistory.getCurrentIndex() < sessionHistory.getSize() - 1)))
+            {
+                next.setAlpha(1.0f);
+            }
+            else
+            {
+                next.setAlpha(0.3f);
+            }
         }
     }
 
@@ -1313,7 +1352,46 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             getActivity().requestPermissions(permissions, REQUEST_FILE_ACCESS);
             return false;
         }
+    }
 
+    // Handles the requesting of the fine location permission.
+    // Note: If you intend allowing geo-location in your app you need to ask the permission.
+    private void requestGeoPermission(String origin, GeolocationPermissions.Callback callback)
+    {
+        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED)
+        {
+            geoCallback = callback;
+            geoOrigin = origin;
+            String[] permissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
+            getActivity().requestPermissions(permissions, REQUEST_FINE_LOCATION);
+        }
+        else
+        {
+            callback.invoke(origin, true, false);
+        }
+    }
+
+    public void gotGeoAccess(String[] permissions, int[] grantResults)
+    {
+        boolean geoAccess = false;
+        for (int i = 0; i < permissions.length; i++)
+        {
+            if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION) && grantResults[i] != -1) geoAccess = true;
+        }
+        if (!geoAccess) Toast.makeText(getContext(), "Permission not given", Toast.LENGTH_SHORT).show();
+        if (geoCallback != null && geoOrigin != null) geoCallback.invoke(geoOrigin, geoAccess, false);
+    }
+
+    public void gotFileAccess(String[] permissions, int[] grantResults)
+    {
+        boolean fileAccess = false;
+        for (int i = 0; i < permissions.length; i++)
+        {
+            if (permissions[i].equals(Manifest.permission.READ_EXTERNAL_STORAGE) && grantResults[i] != -1) fileAccess = true;
+        }
+
+        if (fileAccess && picker != null) requestUpload();
     }
 
     @Override
@@ -1365,11 +1443,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 requestUpload();
             }
         }
-    }
-
-    public void gotFileAccess(int requestCode)
-    {
-
     }
 
     @Override

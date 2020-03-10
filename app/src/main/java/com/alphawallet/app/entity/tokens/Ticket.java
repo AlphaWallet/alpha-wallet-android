@@ -413,7 +413,7 @@ public class Ticket extends Token implements Parcelable
      * @return token requires a transaction refresh
      */
     @Override
-    public boolean requiresTransactionRefresh()
+    public boolean requiresTransactionRefresh(int pendingChain)
     {
         boolean requiresUpdate = balanceChanged;
         balanceChanged = false;
@@ -513,6 +513,8 @@ public class Ticket extends Token implements Parcelable
     @Override
     public boolean isERC875() { return true; }
     public boolean isNonFungible() { return true; }
+    @Override
+    public boolean hasGroupedTransfer() { return true; }
 
     @Override
     public boolean groupWithToken(TicketRange currentGroupingRange, TicketRangeElement newElement, long currentGroupTime)

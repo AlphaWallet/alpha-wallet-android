@@ -172,7 +172,9 @@ public class TransactionsViewModel extends BaseViewModel
     {
         if (fetchTransactionDisposable == null)
         {
-            Token t = tokensService.getRequiresTransactionUpdate();
+            Token pending = getPendingTransaction();
+            //see if pending transaction is at top of list
+            Token t = tokensService.getRequiresTransactionUpdate(pending);
 
             if (t != null)
             {
@@ -186,6 +188,21 @@ public class TransactionsViewModel extends BaseViewModel
                                 .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
             }
         }
+    }
+
+    private Token getPendingTransaction()
+    {
+        Token t = null;
+        for (Transaction tx : txMap.values())
+        {
+            if (tx.blockNumber.equals("0"))
+            {
+                t = tokensService.getToken(tx.chainId, tokensService.getCurrentAddress());
+                break;
+            }
+        }
+
+        return t;
     }
 
     private void onTxError(Throwable throwable)
@@ -207,7 +224,6 @@ public class TransactionsViewModel extends BaseViewModel
 
     public void prepare()
     {
-        progress.postValue(true);
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
@@ -262,6 +278,7 @@ public class TransactionsViewModel extends BaseViewModel
 
         this.transactions.postValue(txMap.values().toArray(new Transaction[0]));
         fetchTransactionDisposable = null;
+        if (transactions.length == 0) showEmpty.postValue(true);
     }
 
     private void checkTokenTransactions(Transaction tx)

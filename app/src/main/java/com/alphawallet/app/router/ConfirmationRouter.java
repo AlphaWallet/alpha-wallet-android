@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.TransactionTooLargeException;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.ConfirmationActivity;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
@@ -49,7 +50,7 @@ public class ConfirmationRouter {
         context.startActivityForResult(intent, C.REQUEST_TRANSACTION_CALLBACK);
     }
 
-    public void openERC721Transfer(Context context, String to, String tokenId, String contractAddress, String name, String tokenName, String ensDetails, int chainId)
+    public void openERC721Transfer(Context context, String to, String tokenId, String contractAddress, String name, String tokenName, String ensDetails, Token token)
     {
         Intent intent = new Intent(context, ConfirmationActivity.class);
         intent.putExtra(C.EXTRA_TO_ADDRESS, to);
@@ -62,7 +63,8 @@ public class ConfirmationRouter {
         intent.putExtra(C.EXTRA_TOKENID_LIST, tokenId);
         intent.putExtra(C.EXTRA_ACTION_NAME, name);
         intent.putExtra(C.EXTRA_ENS_DETAILS, ensDetails);
-        intent.putExtra(C.EXTRA_NETWORKID, chainId);
+        intent.putExtra(C.EXTRA_TOKEN_ID, token);
+        intent.putExtra(C.EXTRA_NETWORKID, token.tokenInfo.chainId);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }

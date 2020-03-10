@@ -243,6 +243,12 @@ public class Token implements Parcelable, Comparable<Token>
         }
     }
 
+    public String getSymbol()
+    {
+        if (tokenInfo.symbol == null) return "";
+        else return tokenInfo.symbol.toUpperCase();
+    }
+
     public void clickReact(BaseViewModel viewModel, Context context)
     {
         viewModel.showErc20TokenDetail(context, tokenInfo.address, tokenInfo.symbol, tokenInfo.decimals, this);
@@ -503,7 +509,7 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean checkBalanceChange(Token token)
     {
-        return token != null && (!getFullBalance().equals(token.getFullBalance()) || !tokenInfo.name.equals(token.tokenInfo.name));
+        return token != null && (!getFullBalance().equals(token.getFullBalance()) || !getFullName().equals(token.getFullName()));
     }
 
     public String getPendingDiff()
@@ -863,7 +869,7 @@ public class Token implements Parcelable, Comparable<Token>
         return walletUIUpdateRequired;
     }
 
-    public boolean requiresTransactionRefresh()
+    public boolean requiresTransactionRefresh(int updateChain)
     {
         boolean requiresUpdate = balanceChanged;
         balanceChanged = false;
@@ -875,6 +881,12 @@ public class Token implements Parcelable, Comparable<Token>
         long currentTime = System.currentTimeMillis();
 
         long multiplier = isEthereum() || EthereumNetworkRepository.isPriorityToken(this) ? 1 : 5;
+
+        if (isEthereum() && tokenInfo.chainId == updateChain && (currentTime - lastTxCheck) > 10*1000) //check chain every 10 seconds while transaction is pending
+        {
+            lastTxCheck = currentTime;
+            requiresUpdate = true;
+        }
 
         //ensure chain transactions for the wallet are checked on a regular basis.
         if (checkBackgroundUpdate(currentTime) || (EthereumNetworkRepository.hasTicker(this) && hasPositiveBalance() && (currentTime - lastTxCheck) > multiplier*60*1000)) //need to check main chains once per minute
@@ -952,6 +964,12 @@ public class Token implements Parcelable, Comparable<Token>
         return contractType == ContractType.ETHEREUM;
     }
     public boolean isERC721Ticket() { return false; }
+    public boolean hasGroupedTransfer() { return false; } //Can the NFT token's transfer function handle multiple tokens?
+    public boolean checkSelectionValidity(List<BigInteger> selection) //check a selection of ID's for Transfer/Redeem/Sell
+    {
+        return selection.size() != 0 && (selection.size() == 1 || hasGroupedTransfer());
+    }
+
 
     public BigDecimal getCorrectedAmount(String newAmount)
     {
@@ -1057,8 +1075,9 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean checkTickerChange(Token check)
     {
-        if (check.ticker == null && ticker != null) return true; //now has ticker
-        else return check.ticker != null && ticker != null && !check.ticker.price.equals(ticker.price); //return true if ticker changed
+        if (check.ticker == null && ticker == null) return false;
+        else if (check.ticker == null || ticker == null) return true; //ticker situation changed
+        else return !check.ticker.price.equals(ticker.price); //return true if ticker changed
     }
 
     @Override

@@ -283,7 +283,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     private TokenTicker checkTicker(TokenTicker ticker, TokenTicker oldTicker)
     {
-        if (ticker.updateTime > 0) return ticker;
+        if (ticker != null && ticker.updateTime > 0) return ticker;
         else return oldTicker;
     }
 
@@ -430,7 +430,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public void refreshTickers()
     {
-        tickerService.updateTickers();
+        tickerService.updateTickers(true);
     }
 
     public static String defaultDapp()

@@ -304,8 +304,6 @@ public class WalletViewModel extends BaseViewModel
 
     private void onFetchTokensCompletable()
     {
-        progress.postValue(false);
-
         tokensReady.postValue(true);
 
         if (updateTokens != null && !updateTokens.isDisposed())
@@ -452,7 +450,6 @@ public class WalletViewModel extends BaseViewModel
         if (unknownAddresses == null) unknownAddresses = new ConcurrentLinkedQueue<>();
         if (currentWallet == null)
         {
-            progress.postValue(true);
             disposable = genericWalletInteract
                     .find()
                     .subscribe(this::onDefaultWallet, this::onError);
@@ -511,6 +508,11 @@ public class WalletViewModel extends BaseViewModel
     {
         Token serviceToken = tokensService.getToken(token.tokenInfo.chainId, token.getAddress());
         return (serviceToken != null) ? serviceToken : token;
+    }
+
+    public Token getTokenFromService(int chainId, String addr)
+    {
+        return tokensService.getToken(chainId, addr);
     }
 
     private void tkError(Throwable throwable)

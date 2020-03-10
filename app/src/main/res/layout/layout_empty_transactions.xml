@@ -3,8 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    >
+    android:layout_height="wrap_content">
+
     <ImageView
         android:src="@mipmap/ic_alpha"
         android:layout_gravity="center_horizontal"
@@ -13,12 +13,21 @@
         />
     <TextView
         android:text="@string/no_transactions_yet"
-        android:textColor="@color/white"
+        android:textColor="@color/text_dark_gray"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/big_margin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         />
+    <TextView
+        android:id="@+id/no_transactions_subtext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:fontFamily="@font/font_regular"
+        android:text=""
+        android:textColor="@color/text_dark_gray"
+        android:textSize="13sp" />
     <Button
         android:id="@+id/action_buy"
         android:text="@string/action_buy"

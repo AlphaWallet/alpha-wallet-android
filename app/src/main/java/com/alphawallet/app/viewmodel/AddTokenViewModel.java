@@ -45,7 +45,7 @@ public class AddTokenViewModel extends BaseViewModel {
     private final MutableLiveData<Integer> switchNetwork = new MutableLiveData<>();
     private final MutableLiveData<Token> finalisedToken = new MutableLiveData<>();
     private final MutableLiveData<Token> tokentype = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> result = new MutableLiveData<>();
+    private final MutableLiveData<Token> result = new MutableLiveData<>();
     private final MutableLiveData<Boolean> noContract = new MutableLiveData<>();
 
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -68,7 +68,7 @@ public class AddTokenViewModel extends BaseViewModel {
     public MutableLiveData<Token> tokenFinalised() { return finalisedToken; }
     public MutableLiveData<Token> tokenType() { return tokentype; }
     public MutableLiveData<Boolean> noContract() { return noContract; }
-    public LiveData<Boolean> result() { return result; }
+    public LiveData<Token> result() { return result; }
     public LiveData<Integer> switchNetwork() { return switchNetwork; }
     public LiveData<TokenInfo> tokenInfo() {
         return tokenInfo;
@@ -123,7 +123,7 @@ public class AddTokenViewModel extends BaseViewModel {
         assetDefinitionService.getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
         tokensService.addToken(token);
         progress.postValue(false);
-        result.postValue(true);
+        result.postValue(token);
     }
 
     @Override

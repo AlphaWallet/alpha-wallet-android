@@ -80,7 +80,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     private NonFungibleTokenAdapter adapter;
     private AWalletAlertDialog dialog;
     private Web3TokenView testView;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private boolean iconifiedCheck;
     private int checkVal;
 
@@ -88,15 +88,36 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         AndroidInjection.inject(this);
-
-        token = getIntent().getParcelableExtra(TICKET);
+        setContentView(R.layout.activity_asset_display);
 
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_asset_display);
         toolbar();
+        getIntents();
+        setupSystemViews();
+        setupViewModel();
+        initView();
 
-        setTitle(token.getShortName());
+        finishReceiver = new FinishReceiver(this);
+    }
+
+    private void getIntents()
+    {
+        token = getIntent().getParcelableExtra(TICKET);
+    }
+
+    private void setupViewModel()
+    {
+        viewModel = ViewModelProviders.of(this, assetDisplayViewModelFactory)
+                .get(AssetDisplayViewModel.class);
+
+        viewModel.pushToast().observe(this, this::displayToast);
+        viewModel.ticket().observe(this, this::onTokenUpdate);
+        viewModel.sig().observe(this, this::onSigData);
+    }
+
+    private void setupSystemViews()
+    {
         systemView = findViewById(R.id.system_view);
         systemView.hide();
         progressView = findViewById(R.id.progress_view);
@@ -104,33 +125,26 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
         systemView.attachSwipeRefreshLayout(refreshLayout);
         refreshLayout.setOnRefreshListener(this::refreshAssets);
-        handler = new Handler();
+    }
 
+    private void initView()
+    {
         testView = findViewById(R.id.test_web3);
-        
+
         list = findViewById(R.id.listTickets);
         toolbarView = findViewById(R.id.toolbar);
-
-        viewModel = ViewModelProviders.of(this, assetDisplayViewModelFactory)
-                .get(AssetDisplayViewModel.class);
-
-        viewModel.pushToast().observe(this, this::displayToast);
-        viewModel.ticket().observe(this, this::onTokenUpdate);
-        viewModel.sig().observe(this, this::onSigData);
 
         functionBar = findViewById(R.id.layoutButtons);
 
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setHapticFeedbackEnabled(true);
 
-        finishReceiver = new FinishReceiver(this);
         findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE);
         viewModel.checkTokenScriptValidity(token);
+        setTitle(token.getShortName());
 
-        token.iconifiedWebviewHeight = 0;
-        token.nonIconifiedWebviewHeight = 0;
         iconifiedCheck = true;
-        if (token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
+        if (token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address) && token.iconifiedWebviewHeight == 0)
         {
             initWebViewCheck(iconifiedCheck);
             handler.postDelayed(this, 1500);
@@ -173,7 +187,24 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     {
         super.onResume();
         viewModel.prepare(token);
-        if (functionBar == null) functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter);
+    }
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+        handler.removeCallbacksAndMessages(null);
+    }
+
+    @Override
+    public void onRestart()
+    {
+        super.onRestart();
+        getIntents();
+        setupSystemViews();
+        setupViewModel();
+        viewModel.reloadScriptsIfRequired();
+        initView();
     }
 
     @Override
@@ -276,6 +307,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
                 if (iconifiedCheck)token.iconifiedWebviewHeight = bottom - top;
                 else token.nonIconifiedWebviewHeight = bottom - top;
                 checkVal++;
+                viewModel.setTokenViewDimensions(token);
             }
 
             if (checkVal == 3) addRunCall(0); //received the third webview render update - this is always the final size we want, but sometimes there's only 1 or 2 updates

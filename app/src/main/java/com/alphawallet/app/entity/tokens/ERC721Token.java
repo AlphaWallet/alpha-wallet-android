@@ -270,7 +270,7 @@ public class ERC721Token extends Token implements Parcelable
     public boolean isNonFungible() { return true; }
 
     @Override
-    public boolean requiresTransactionRefresh()
+    public boolean requiresTransactionRefresh(int pendingChain)
     {
         return false;
     }

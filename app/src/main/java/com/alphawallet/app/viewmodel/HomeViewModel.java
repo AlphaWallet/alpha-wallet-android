@@ -12,7 +12,9 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.ui.HomeActivity;
@@ -26,7 +28,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.AddTokenRouter;
-import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 
@@ -41,18 +42,18 @@ public class HomeViewModel extends BaseViewModel {
     public static final String ALPHAWALLET_FILE_URL = "https://1x.alphawallet.com/dl/latest.apk";
 
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
-    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<String> backUpMessage = new MutableLiveData<>();
 
     private final PreferenceRepositoryType preferenceRepository;
-    private final ExternalBrowserRouter externalBrowserRouter;
     private final ImportTokenRouter importTokenRouter;
     private final AddTokenRouter addTokenRouter;
     private final LocaleRepositoryType localeRepository;
     private final AssetDefinitionService assetDefinitionService;
     private final GenericWalletInteract genericWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
+    private final CurrencyRepositoryType currencyRepository;
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -64,19 +65,21 @@ public class HomeViewModel extends BaseViewModel {
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             ImportTokenRouter importTokenRouter,
-            ExternalBrowserRouter externalBrowserRouter,
             AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
             GenericWalletInteract genericWalletInteract,
-            FetchWalletsInteract fetchWalletsInteract) {
+            FetchWalletsInteract fetchWalletsInteract,
+            CurrencyRepositoryType currencyRepository,
+            EthereumNetworkRepositoryType ethereumNetworkRepository) {
         this.preferenceRepository = preferenceRepository;
-        this.externalBrowserRouter = externalBrowserRouter;
         this.importTokenRouter = importTokenRouter;
         this.addTokenRouter = addTokenRouter;
         this.localeRepository = localeRepository;
         this.assetDefinitionService = assetDefinitionService;
         this.genericWalletInteract = genericWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
+        this.currencyRepository = currencyRepository;
+        this.ethereumNetworkRepository = ethereumNetworkRepository;
     }
 
     @Override
@@ -86,10 +89,6 @@ public class HomeViewModel extends BaseViewModel {
 
     public LiveData<NetworkInfo> defaultNetwork() {
         return defaultNetwork;
-    }
-
-    public LiveData<Wallet> defaultWallet() {
-        return defaultWallet;
     }
 
     public LiveData<Transaction[]> transactions() {
@@ -154,10 +153,6 @@ public class HomeViewModel extends BaseViewModel {
             clipboard.setPrimaryClip(clipData);
         }
         importTokenRouter.open(context, importData);
-    }
-
-    public void openDeposit(Context context, Uri uri) {
-        externalBrowserRouter.open(context, uri);
     }
 
     public void showAddToken(Context context, String address) {
@@ -304,5 +299,14 @@ public class HomeViewModel extends BaseViewModel {
 
     public void setFindWalletAddressDialogShown(boolean isShown) {
         preferenceRepository.setFindWalletAddressDialogShown(isShown);
+    }
+
+    public void updateCurrency(String currencyCode){
+        currencyRepository.setDefaultCurrency(currencyCode);
+        ethereumNetworkRepository.refreshTickers();
+    }
+
+    public String getDefaultCurrency(){
+        return currencyRepository.getDefaultCurrency();
     }
 }

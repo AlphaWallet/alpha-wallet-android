@@ -242,7 +242,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
         if (asset != null)
         {
-            confirmationRouter.openERC721Transfer(ctx, to, hexTokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails, token.tokenInfo.chainId);
+            confirmationRouter.openERC721Transfer(ctx, to, hexTokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails, token);
         }
     }
 

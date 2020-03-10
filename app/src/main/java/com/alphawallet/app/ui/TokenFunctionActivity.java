@@ -47,12 +47,41 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private FunctionButtonBar functionBar;
     private boolean reloaded;
 
-    private void initViews() {
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        AndroidInjection.inject(this);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_script_view);
+
+        getIntents();
+        setupViewModel();
+        initViews();
+        toolbar();
+        setTitle(getString(R.string.token_function));
+    }
+
+    private void getIntents()
+    {
         token = getIntent().getParcelableExtra(TICKET);
         String displayIds = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
+        idList = token.stringHexToBigIntegerList(displayIds);
+    }
+
+    private void setupViewModel()
+    {
+        viewModel = ViewModelProviders.of(this, tokenFunctionViewModelFactory)
+                .get(TokenFunctionViewModel.class);
+        viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
+        viewModel.getCurrentWallet();
+        viewModel.reloadScriptsIfRequired();
+    }
+
+    private void initViews()
+    {
         RelativeLayout frameLayout = findViewById(R.id.layout_select_ticket);
         tokenView = findViewById(R.id.web3_tokenview);
-        idList = token.stringHexToBigIntegerList(displayIds);
+        functionBar = findViewById(R.id.layoutButtons);
+
         reloaded = false;
 
         TicketRange data = new TicketRange(idList, token.tokenInfo.address, false);
@@ -61,28 +90,23 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         tokenView.setOnReadyCallback(this);
         functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null);
         functionBar.revealButtons();
-    }
+        functionBar.setSelection(idList);
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_script_view);
-
-        viewModel = ViewModelProviders.of(this, tokenFunctionViewModelFactory)
-                .get(TokenFunctionViewModel.class);
         SystemView systemView = findViewById(R.id.system_view);
         ProgressView progressView = findViewById(R.id.progress_view);
         systemView.hide();
         progressView.hide();
-        functionBar = findViewById(R.id.layoutButtons);
+    }
 
+    @Override
+    public void onRestart()
+    {
+        super.onRestart();
+        getIntents();
+        setupViewModel();
         initViews();
         toolbar();
         setTitle(getString(R.string.token_function));
-
-        viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
-        viewModel.getCurrentWallet();
     }
 
     @Override
@@ -125,19 +149,19 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     @Override
     public void selectRedeemTokens(List<BigInteger> selection)
     {
-        viewModel.selectRedeemToken(this, token, idList);
+        viewModel.selectRedeemToken(this, token, selection);
     }
 
     @Override
     public void sellTicketRouter(List<BigInteger> selection)
     {
-        viewModel.openUniversalLink(this, token, token.bigIntListToString(idList, false));
+        viewModel.openUniversalLink(this, token, token.bigIntListToString(selection, false));
     }
 
     @Override
     public void showTransferToken(List<BigInteger> selection)
     {
-        viewModel.showTransferToken(this, token, token.bigIntListToString(idList, false));
+        viewModel.showTransferToken(this, token, token.bigIntListToString(selection, false));
     }
 
     @Override

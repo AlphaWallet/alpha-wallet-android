@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_holding_view"
+    android:orientation="vertical"
+    android:layout_height="wrap_content"
+    android:background="@color/greyffive"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp"
+    android:layout_width="match_parent">
+
+<RelativeLayout
     android:id="@+id/layout_select_ticket"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingStart="6dp"
+    android:paddingEnd="6dp"
+    android:background="@color/white"
     android:minHeight="100dp"
     android:animateLayoutChanges="false">
 
@@ -49,6 +61,7 @@
             <com.alphawallet.app.web3.Web3TokenView
                 android:id="@+id/web3_tokenview"
                 android:layout_width="wrap_content"
+                android:minHeight="200dp"
                 android:layout_height="wrap_content">
 
             </com.alphawallet.app.web3.Web3TokenView>
@@ -59,11 +72,8 @@
         android:id="@+id/layout_legacy"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/background_card_shadow"
+        android:background="@color/white"
         android:elevation="1dp"
-        android:layout_marginBottom="6dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
         android:minHeight="100dp"
         android:orientation="horizontal"
         android:visibility="gone"
@@ -110,3 +120,4 @@
     </LinearLayout>
 
 </RelativeLayout>
+</LinearLayout>

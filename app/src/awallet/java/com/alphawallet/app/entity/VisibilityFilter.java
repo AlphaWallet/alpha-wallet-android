@@ -69,19 +69,13 @@ public class VisibilityFilter
         return 0;
     }
 
-    public static int getIssuerName()
-    {
-        return R.string.eth;
-    }
-
     //Switch off dapp browser
     public static boolean hideDappBrowser()
     {
         return false;
     }
 
-    public static boolean hideNetworkSettings() { return true; }
-
+    //Hides the filter tab bar at the top of the wallet screen (ALL/CURRENCY/COLLECTIBLES)
     public static boolean hideTabBar()
     {
         return false;
@@ -98,4 +92,10 @@ public class VisibilityFilter
     {
         return true;
     }
+
+    //Hide EIP681 generation (Payment request, generates a QR code another wallet user can scan to have all payment fields filled in)
+    public static boolean hideEIP681() { return false; }
+
+    //In main wallet menu, if wallet allows adding new tokens
+    public static boolean canAddTokens() { return true; }
 }

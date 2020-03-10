@@ -26,7 +26,7 @@ public class TokenSortedItem extends SortedItem<Token> {
             else if (!oldToken.getFullBalance().equals(newToken.getFullBalance())) return false;
             else if (!oldToken.pendingBalance.equals(newToken.pendingBalance)) return false;
             else if (!oldToken.getFullName().equals(newToken.getFullName())) return false;
-            else if (oldToken.ticker == null && newToken.ticker != null) return false;
+            else if (oldToken.checkTickerChange(newToken)) return false;
             else if (oldToken.getInterfaceSpec() != newToken.getInterfaceSpec()) return false;
 
             //Had a redeem

@@ -87,6 +87,8 @@ public class AdvancedSettingsActivity extends BaseActivity {
                 .withListener(this::onChangeLanguageClicked)
                 .build();
 
+        //TODO: add change currency here. Use R.drawable.ic_currency for the icon
+
         changeLanguage.setSubtitle(LocaleUtils.getDisplayLanguage(viewModel.getDefaultLocale(), viewModel.getDefaultLocale()));
     }
 

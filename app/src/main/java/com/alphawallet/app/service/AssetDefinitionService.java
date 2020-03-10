@@ -1,5 +1,6 @@
 package com.alphawallet.app.service;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -11,6 +12,7 @@ import android.os.FileObserver;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.SparseArray;
 
 import com.alphawallet.app.BuildConfig;
@@ -84,6 +86,7 @@ import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import static android.os.FileObserver.ALL_EVENTS;
+import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
 
@@ -142,6 +145,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             loadContracts(context.getFilesDir());
             checkDownloadedFiles();
+            checkExternalDirectoryAndLoad();
         }
         catch (IOException| SAXException e)
         {
@@ -240,10 +244,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     }
 
     /**
-     * Called at startup once we know we've got folder write permission.
+     * Called on service init. Only check the legacy 'AlpahWallet' dir if using Android 9 or less
      * Note - Android 6.0 and above needs user to verify folder access permission
-     * TODO: if user doesn't give permission then use the app private folder and tell user they can't
-     *  load contracts themselves
+     * Also called if user gives external file access permission on Android 9 or less phone, to check
+     * If they have placed any files here.
      */
     public void checkExternalDirectoryAndLoad()
     {
@@ -251,7 +255,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         loadExternalContracts(context.getExternalFilesDir(""), false);
 
         //only works up to Android 9
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && checkWritePermission())
         {
             //Now check the legacy /AlphaWallet directory
             File directory = new File(
@@ -265,6 +269,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             loadExternalContracts(directory, true);
         }
+    }
+
+    private boolean checkWritePermission() {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     private TokenDefinition getDefinition(int chainId, String address)
@@ -447,6 +456,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             // no action
         }
 
@@ -456,7 +466,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private void loadScriptFromServer(String correctedAddress)
     {
         //first check the last time we tried this session
-        if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() - assetChecked.get(correctedAddress)) > 1000*60*60)
+        if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() > (assetChecked.get(correctedAddress) + 1000L*60L*60L)))
         {
             fetchXMLFromServer(correctedAddress)
                     .flatMap(this::updateSignature)
@@ -491,9 +501,24 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (newFile != null && !newFile.getName().equals("cache") && newFile.canRead())
         {
             addContractAddresses(newFile);
-            context.sendBroadcast(new Intent(C.ADDED_TOKEN)); //inform walletview there is a new token
+            TokenDefinition td = getTokenDefinition(newFile);
+            List<ContractResult> tokenContracts = getHoldingContracts(td);
+            if (tokenContracts != null && tokenContracts.size() > 0)
+            {
+                String[] addrs = new String[tokenContracts.size()];
+                int[] chainIds = new int[tokenContracts.size()];
+                int index = 0;
+                for (ContractResult cr : tokenContracts)
+                {
+                    addrs[index] = cr.name;
+                    chainIds[index] = cr.chainId;
+                }
 
-            //TODO: check interface spec
+                Intent intent = new Intent(ADDED_TOKEN);
+                intent.putExtra(C.EXTRA_TOKENID_LIST, addrs);
+                intent.putExtra(C.EXTRA_CHAIN_ID, chainIds);
+                context.sendBroadcast(intent);
+            }
         }
     }
 
@@ -1288,7 +1313,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         TokenScriptResult.addPair(attrs, "name", name);
-        TokenScriptResult.addPair(attrs, "symbol", token.tokenInfo.symbol);
+        TokenScriptResult.addPair(attrs, "symbol", token.getSymbol());
         TokenScriptResult.addPair(attrs, "_count", String.valueOf(count));
         TokenScriptResult.addPair(attrs, "contractAddress", token.tokenInfo.address);
         TokenScriptResult.addPair(attrs, "chainId", String.valueOf(token.tokenInfo.chainId));
@@ -1419,12 +1444,28 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     /**
      * If the OS has scavenged the TokenScript contract lookup map then re-init
      */
-    private void reloadAssets()
+    public void reloadAssets()
     {
         if (assetDefinitions == null || assetDefinitions.size() == 0)
         {
             loadLocalContracts();
         }
+    }
+
+    public List<ContractResult> getHoldingContracts(TokenDefinition td)
+    {
+        List<ContractResult> holdingContracts = new ArrayList<>();
+        ContractInfo holdingContractInfo = td.contracts.get(td.holdingToken);
+        if (holdingContractInfo == null || holdingContractInfo.addresses.size() == 0) return null;
+        for (int chainId : holdingContractInfo.addresses.keySet())
+        {
+            for (String address : holdingContractInfo.addresses.get(chainId))
+            {
+                holdingContracts.add(new ContractResult(address, chainId));
+            }
+        }
+
+        return holdingContracts;
     }
 
     public ContractResult getHoldingContract(String importFileName)

@@ -96,6 +96,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         splashViewModel.wallets().observe(this, this::onWallets);
         splashViewModel.createWallet().observe(this, this::onWalletCreate);
         splashViewModel.setLocale(getApplicationContext());
+        splashViewModel.setCurrency();
 
         long getAppUpdateTime = getAppLastUpdateTime();
 

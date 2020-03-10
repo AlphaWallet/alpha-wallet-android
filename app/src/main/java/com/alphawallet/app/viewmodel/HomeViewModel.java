@@ -12,7 +12,9 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.ui.HomeActivity;
@@ -50,6 +52,8 @@ public class HomeViewModel extends BaseViewModel {
     private final AssetDefinitionService assetDefinitionService;
     private final GenericWalletInteract genericWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
+    private final CurrencyRepositoryType currencyRepository;
+    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -64,7 +68,9 @@ public class HomeViewModel extends BaseViewModel {
             AddTokenRouter addTokenRouter,
             AssetDefinitionService assetDefinitionService,
             GenericWalletInteract genericWalletInteract,
-            FetchWalletsInteract fetchWalletsInteract) {
+            FetchWalletsInteract fetchWalletsInteract,
+            CurrencyRepositoryType currencyRepository,
+            EthereumNetworkRepositoryType ethereumNetworkRepository) {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
         this.addTokenRouter = addTokenRouter;
@@ -72,6 +78,8 @@ public class HomeViewModel extends BaseViewModel {
         this.assetDefinitionService = assetDefinitionService;
         this.genericWalletInteract = genericWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
+        this.currencyRepository = currencyRepository;
+        this.ethereumNetworkRepository = ethereumNetworkRepository;
     }
 
     @Override
@@ -291,5 +299,14 @@ public class HomeViewModel extends BaseViewModel {
 
     public void setFindWalletAddressDialogShown(boolean isShown) {
         preferenceRepository.setFindWalletAddressDialogShown(isShown);
+    }
+
+    public void updateCurrency(String currencyCode){
+        currencyRepository.setDefaultCurrency(currencyCode);
+        ethereumNetworkRepository.refreshTickers();
+    }
+
+    public String getDefaultCurrency(){
+        return currencyRepository.getDefaultCurrency();
     }
 }

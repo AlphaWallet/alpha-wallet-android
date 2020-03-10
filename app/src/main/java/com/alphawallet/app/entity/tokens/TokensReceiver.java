@@ -17,6 +17,7 @@ public class TokensReceiver extends BroadcastReceiver
         ctx.registerReceiver(this, new IntentFilter(C.RESET_WALLET));
         ctx.registerReceiver(this, new IntentFilter(C.ADDED_TOKEN));
         ctx.registerReceiver(this, new IntentFilter(C.CHANGED_LOCALE));
+        ctx.registerReceiver(this, new IntentFilter(C.REFRESH_TOKENS));
         this.tokenInterface = tokenInterface;
     }
 
@@ -38,6 +39,9 @@ public class TokensReceiver extends BroadcastReceiver
                     break;
                 case C.CHANGED_LOCALE:
                     tokenInterface.changedLocale();
+                    break;
+                case C.REFRESH_TOKENS:
+                    tokenInterface.refreshTokens(); //only refresh tokens in wallet view
                     break;
                 default:
                     break;

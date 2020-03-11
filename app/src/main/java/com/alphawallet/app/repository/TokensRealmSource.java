@@ -254,21 +254,20 @@ public class TokensRealmSource implements TokenLocalSource {
     private void writeTickerToRealm(Realm realm, final Token token)
     {
         if (token.ticker == null) return;
-        long now = System.currentTimeMillis();
         String tickerName = databaseKey(token);
         RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
                 .equalTo("contract", tickerName)
                 .findFirst();
         if (realmItem == null) {
             realmItem = realm.createObject(RealmTokenTicker.class, tickerName);
-            realmItem.setCreatedTime(now);
+            realmItem.setCreatedTime(token.ticker.updateTime);
         }
         realmItem.setPercentChange24h(token.ticker.percentChange24h);
         realmItem.setPrice(token.ticker.price);
         realmItem.setImage(TextUtils.isEmpty(token.ticker.image)
                            ? ""
                            : token.ticker.image);
-        realmItem.setUpdatedTime(now);
+        realmItem.setUpdatedTime(token.ticker.updateTime);
         realmItem.setCurrencySymbol(token.ticker.priceSymbol);
     }
 

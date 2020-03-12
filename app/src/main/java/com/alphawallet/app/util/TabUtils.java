@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.res.ResourcesCompat;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -21,12 +22,13 @@ public class TabUtils {
     }
 
     public static void decorateTabLayout(Context context, TabLayout tabLayout) {
-        if (tabLayout.getTabCount() <= 3) {
-            tabLayout.setTabMode(TabLayout.MODE_FIXED);
-            tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-        } else {
-            tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
-            tabLayout.setTabGravity(TabLayout.GRAVITY_CENTER);
+        int tabCount = tabLayout.getTabCount();
+
+        if (tabCount > 3) {
+            View tab = ((ViewGroup) tabLayout.getChildAt(0)).getChildAt(tabCount - 1);
+            ViewGroup.MarginLayoutParams tabParams = (ViewGroup.MarginLayoutParams) tab.getLayoutParams();
+            tabParams.rightMargin = Utils.dp2px(context, 12);
+            tab.requestLayout();
         }
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {

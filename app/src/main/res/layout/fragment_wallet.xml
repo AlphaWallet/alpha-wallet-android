@@ -21,9 +21,7 @@
         app:tabMode="scrollable"
         app:tabSelectedTextColor="@color/colorHighlight"
         app:tabTextAppearance="@style/WalletTabTextAppearance"
-        app:tabTextColor="@color/dove">
-
-    </android.support.design.widget.TabLayout>
+        app:tabTextColor="@color/dove" />
 
     <View
         android:id="@+id/spacer_view"

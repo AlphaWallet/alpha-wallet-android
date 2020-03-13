@@ -562,6 +562,22 @@ public class TickerService implements TickerServiceInterface
                 Collections.singletonList(new TypeReference<Uint256>() {}));
     }
 
+    public void addCustomTicker(int chainId, TokenTicker ticker)
+    {
+        if (ticker != null)
+        {
+            ethTickers.put(chainId, ticker);
+        }
+    }
+
+    public void addCustomTicker(String address, TokenTicker ticker)
+    {
+        if (ticker != null && address != null)
+        {
+            erc20Tickers.put(address, ticker);
+        }
+    }
+
     private Single<TokenTicker> getSigmaTicker(double rate)
     {
         return Single.fromCallable(() -> {

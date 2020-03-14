@@ -17,4 +17,6 @@ public interface TickerServiceInterface
     boolean hasTickers();
     TokenTicker getTokenTicker(Token token);
     TokenTicker getEthTicker(int chainId);
+    void addCustomTicker(int chainId, TokenTicker ticker);
+    void addCustomTicker(String address, TokenTicker ticker);
 }

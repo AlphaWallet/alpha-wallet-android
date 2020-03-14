@@ -162,23 +162,27 @@ public class NewSettingsFragment extends Fragment {
     }
 
     private void addSettingsToLayout() {
-        walletSettingsLayout.addView(myAddressSetting, 0);
+        int walletIndex = 0;
+        int systemIndex = 0;
+        int supportIndex = 0;
+
+        walletSettingsLayout.addView(myAddressSetting, walletIndex++);
 
         if (VisibilityFilter.canChangeWallets())
-            walletSettingsLayout.addView(changeWalletSetting, 1);
+            walletSettingsLayout.addView(changeWalletSetting, walletIndex++);
 
-        walletSettingsLayout.addView(backUpWalletSetting, 2);
+        walletSettingsLayout.addView(backUpWalletSetting, walletIndex++);
 
-        systemSettingsLayout.addView(notificationsSetting, 0);
+        systemSettingsLayout.addView(notificationsSetting, systemIndex++);
 
-        systemSettingsLayout.addView(biometricsSetting, 1);
+        systemSettingsLayout.addView(biometricsSetting, systemIndex++);
 
         if (EthereumNetworkRepository.showNetworkFilters())
-            systemSettingsLayout.addView(selectNetworksSetting, 2);
+            systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);
 
-        systemSettingsLayout.addView(advancedSetting, 3);
+        systemSettingsLayout.addView(advancedSetting, systemIndex++);
 
-        supportSettingsLayout.addView(supportSetting, 0);
+        supportSettingsLayout.addView(supportSetting, supportIndex++);
     }
 
     private void setInitialSettingsData(View view) {

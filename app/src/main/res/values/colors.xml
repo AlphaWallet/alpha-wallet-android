@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="green">#2fbb4f</color>
-	<color name="red">#f7506c</color>
-	<color name="white">#FFFFFFFF</color>
-	<color name="black">#313849</color>
-
 	<color name="colorPrimary">#FFFFFF</color>
-	<!--<color name="colorPrimaryDark">#1E76CE</color>-->
 	<color name="colorPrimaryDark">#707070</color>
 	<color name="colorAccent">#54C1E3</color>
 	<color name="colorPrimaryLight">#AA54C1E3</color>
 	<color name="colorTheme">#FFFFFF</color>
 	<color name="colorHighlight">@color/azure</color>
-    <!--<color name="title">#89000000</color>-->
 	<color name="secondary_text">#40000000</color>
 	<color name="toolbar_text_color">@color/black</color>
 
@@ -99,10 +92,32 @@
 	<color name="artis_sigma1">#53A271</color>
 	<color name="artis_tau1">#F97599</color>
 
-	<color name="azure">#007fed</color>
-	<color name="dove">#727272</color>
+	<!-- Fiji Colour Pallette -->
+	<color name="black">#000000</color>
 	<color name="mine">#2f2f2f</color>
+	<color name="dove">#727272</color>
+	<color name="dusty">#999999</color>
+	<color name="silver">#727272</color>
+	<color name="mike">#727272</color>
+	<color name="alto">#727272</color>
+	<color name="mercury">#727272</color>
+	<color name="concrete">#727272</color>
 	<color name="alabaster">#fbfbfb</color>
+	<color name="white">#ffffff</color>
+	<color name="solitude">#e6f3ff</color>
+	<color name="azure">#007fed</color>
+	<color name="azure_hover">#1993fd</color>
+	<color name="cerulean">#00bfff</color>
+	<color name="green">#75b943</color>
+	<color name="green_hover">#87cf52</color>
+	<color name="emerald">#53d76b</color>
+	<color name="danger">#ff3b30</color>
+	<color name="radical">#fc3159</color>
+	<color name="pumpkin">#fd9426</color>
+	<color name="indigo">#595ad5</color>
+	<!-- End Fiji Colour Pallette -->
+
+	<color name="red">#f7506c</color>
 	<color name="water_blue">#1899c2</color>
 	<color name="bluish">#2784af</color>
 	<color name="dark_sky_blue">#54c1e3</color>

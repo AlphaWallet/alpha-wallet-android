@@ -12,24 +12,19 @@ import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ImportWalletCallback;
 import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.QrUrlResult;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.ui.widget.OnImportKeystoreListener;
 import com.alphawallet.app.ui.widget.OnImportPrivateKeyListener;
 import com.alphawallet.app.ui.widget.OnImportSeedListener;
@@ -38,23 +33,27 @@ import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.QRURLParser;
 import com.alphawallet.app.util.TabUtils;
-
-import dagger.android.AndroidInjection;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.viewmodel.ImportWalletViewModel;
 import com.alphawallet.app.viewmodel.ImportWalletViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.utils.Numeric;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.ErrorCode.ALREADY_ADDED;
 import static com.alphawallet.app.C.RESET_WALLET;
@@ -111,8 +110,11 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
             @Override
             public void onPageScrollStateChanged(int state) { }
         });
+
         TabLayout tabLayout = findViewById(R.id.tabLayout);
         tabLayout.setupWithViewPager(viewPager);
+
+        TabUtils.decorateTabLayout(this, tabLayout);
 
         if (isWatch)
         {
@@ -132,8 +134,6 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         importWalletViewModel.wallet().observe(this, this::onWallet);
         importWalletViewModel.badSeed().observe(this, this::onBadSeed);
         importWalletViewModel.watchExists().observe(this, this::onWatchExists);
-
-        TabUtils.changeTabsFont(this, tabLayout);
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.alphawallet.app.ui;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -26,34 +25,36 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupTokenCallback;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInterface;
 import com.alphawallet.app.entity.tokens.TokensReceiver;
-import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.util.TabUtils;
-
-import dagger.android.support.AndroidSupportInjection;
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
 
-import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import dagger.android.support.AndroidSupportInjection;
 
 import static com.alphawallet.app.C.EXTRA_ADDRESS;
 import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
@@ -196,7 +197,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         }
         tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.currency));
-        //        tabLayout.addTab(tabLayout.newTab().setText(R.string.favourites));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.collectibles));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.attestations));
 
@@ -229,15 +229,15 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
             @Override
             public void onTabUnselected(TabLayout.Tab tab)
             {
-
             }
 
             @Override
             public void onTabReselected(TabLayout.Tab tab)
             {
-
             }
         });
+
+        TabUtils.decorateTabLayout(getContext(), tabLayout);
     }
 
     private void onTotal(BigDecimal totalInCurrency) {

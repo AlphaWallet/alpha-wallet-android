@@ -19,11 +19,13 @@
             android:background="@drawable/item_eth_circle" />
 
         <ImageView
+            android:id="@+id/refresh"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_centerInParent="true"
-            android:src="@drawable/ic_autorenew_white_24dp" />
+            android:enabled="true"
+            android:src="@drawable/refresh_spinner_white" />
     </RelativeLayout>
 
     <TextView

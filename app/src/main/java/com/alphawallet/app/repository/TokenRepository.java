@@ -52,6 +52,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -132,8 +133,46 @@ public class TokenRepository implements TokenRepositoryType {
     public Observable<Token[]> fetchActiveStoredPlusEth(String walletAddress) {
         Wallet wallet = new Wallet(walletAddress);
         return fetchStoredTokens(wallet) // fetch tokens from cache
+                .compose(attachDefaultTokens(wallet))
                 .compose(attachEthereumStored(wallet)) //add cached eth balance
                 .toObservable();
+    }
+
+    private SingleTransformer<Token[], Token[]> attachDefaultTokens(Wallet wallet)
+    {
+        return upstream -> Single.zip(
+                upstream, ethereumNetworkRepository.getBlankOverrideTokens(wallet),
+                (tokens, defaultTokens) ->
+                {
+                    List<Token> result = mergeTokens(tokens, defaultTokens);
+                    return result.toArray(new Token[0]);
+                });
+    }
+
+    private List<Token> mergeTokens(Token[] tokens, Token[] defaultTokens)
+    {
+        Map<Integer, Map<String, Token>> tokenMergeMap = new HashMap<>();
+        for (Token t : defaultTokens)
+        {
+            if (!tokenMergeMap.containsKey(t.tokenInfo.chainId)) tokenMergeMap.put(t.tokenInfo.chainId, new HashMap<>());
+            tokenMergeMap.get(t.tokenInfo.chainId).put(t.tokenInfo.address, t);
+        }
+
+        //replace with cached tokens
+        for (Token t : tokens)
+        {
+            if (!tokenMergeMap.containsKey(t.tokenInfo.chainId)) tokenMergeMap.put(t.tokenInfo.chainId, new HashMap<>());
+            tokenMergeMap.get(t.tokenInfo.chainId).put(t.tokenInfo.address, t);
+        }
+
+        List<Token> tokenList = new ArrayList<>();
+
+        for (int i : tokenMergeMap.keySet())
+        {
+            tokenList.addAll(tokenMergeMap.get(i).values());
+        }
+
+        return tokenList;
     }
 
     @Override

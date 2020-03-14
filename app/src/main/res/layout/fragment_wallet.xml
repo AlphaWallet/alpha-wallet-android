@@ -14,6 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top"
         android:background="@drawable/background_tab_layout"
+        android:paddingStart="12dp"
         app:tabBackground="@color/white"
         app:tabGravity="center"
         app:tabIndicatorColor="@color/colorHighlight"
@@ -21,9 +22,7 @@
         app:tabMode="scrollable"
         app:tabSelectedTextColor="@color/colorHighlight"
         app:tabTextAppearance="@style/WalletTabTextAppearance"
-        app:tabTextColor="@color/dove">
-
-    </android.support.design.widget.TabLayout>
+        app:tabTextColor="@color/dove" />
 
     <View
         android:id="@+id/spacer_view"

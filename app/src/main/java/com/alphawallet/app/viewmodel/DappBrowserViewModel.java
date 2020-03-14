@@ -141,9 +141,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
         //get the balance token
-        Token override = EthereumNetworkRepository.getBlankOverrideToken();
-
-        disposable = fetchTokensInteract.fetchBaseCurrencyBalance(defaultNetwork.getValue(), override, wallet)
+        disposable = fetchTokensInteract.fetchBaseCurrencyBalance(defaultNetwork.getValue(), ethereumNetworkRepository.getBlankOverrideToken(), wallet)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::updateBalance, this::onError);

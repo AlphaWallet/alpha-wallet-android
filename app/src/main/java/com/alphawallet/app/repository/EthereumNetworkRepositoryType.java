@@ -2,6 +2,7 @@ package com.alphawallet.app.repository;
 
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.service.TokensService;
@@ -43,4 +44,7 @@ public interface EthereumNetworkRepositoryType {
 	boolean checkTickers();
 
 	List<ContractResult> getAllKnownContracts(List<Integer> networkFilters);
+	Single<Token[]> getBlankOverrideTokens(Wallet wallet);
+	Token getBlankOverrideToken();
+	Token getBlankOverrideToken(NetworkInfo networkInfo);
 }

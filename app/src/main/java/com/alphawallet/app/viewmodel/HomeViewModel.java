@@ -9,7 +9,6 @@ import android.os.Environment;
 
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -299,11 +298,6 @@ public class HomeViewModel extends BaseViewModel {
 
     public void setFindWalletAddressDialogShown(boolean isShown) {
         preferenceRepository.setFindWalletAddressDialogShown(isShown);
-    }
-
-    public void updateCurrency(String currencyCode){
-        currencyRepository.setDefaultCurrency(currencyCode);
-        ethereumNetworkRepository.refreshTickers();
     }
 
     public String getDefaultCurrency(){

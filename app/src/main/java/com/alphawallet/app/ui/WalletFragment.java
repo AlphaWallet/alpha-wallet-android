@@ -105,6 +105,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
 
         layoutManageTokens = view.findViewById(R.id.layout_manage_tokens);
         layoutManageTokens.setOnClickListener(this::onManageTokensClicked);
+        if (!VisibilityFilter.showManageTokens()) layoutManageTokens.setVisibility(View.GONE);
 
         viewModel = ViewModelProviders.of(this, walletViewModelFactory)
                 .get(WalletViewModel.class);

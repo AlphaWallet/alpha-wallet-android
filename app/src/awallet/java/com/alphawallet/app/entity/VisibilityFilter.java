@@ -101,4 +101,7 @@ public class VisibilityFilter
 
     //Implement minimal dappbrowser with no URL bar.
     public static boolean minimiseBrowserURLBar() { return false; }
+
+    //Allow showing token management view
+    public static boolean showManageTokens() { return true; }
 }

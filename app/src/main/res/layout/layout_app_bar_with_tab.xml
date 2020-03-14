@@ -34,7 +34,7 @@
             android:fontFamily="@font/font_semibold"
             android:gravity="center"
             android:text="@string/title_import"
-            android:textColor="@color/semi_dark_grey"
+            android:textColor="@color/toolbar_text_color"
             android:textSize="20sp" />
 
 

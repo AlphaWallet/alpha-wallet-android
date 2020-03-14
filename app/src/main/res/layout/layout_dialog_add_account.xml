@@ -32,7 +32,7 @@
             android:contentDescription="@string/action_create_new_account"
             android:paddingEnd="5dp"
             android:paddingStart="15dp"
-            app:srcCompat="@drawable/ic_add_black_24dp" />
+            app:srcCompat="@drawable/ic_add_24dp" />
 
         <TextView
             android:layout_width="wrap_content"

@@ -42,7 +42,7 @@
             android:paddingRight="2dp"
             android:singleLine="true"
             android:text=""
-            android:textColor="@color/semi_dark_grey"
+            android:textColor="@color/toolbar_text_color"
             android:textSize="20sp"
             android:visibility="visible" />
 

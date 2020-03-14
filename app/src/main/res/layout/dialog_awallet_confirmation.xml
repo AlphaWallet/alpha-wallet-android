@@ -111,7 +111,7 @@
                 android:visibility="gone"
                 android:layout_gravity="center_vertical"
                 android:contentDescription="@string/action_share"
-                android:background="@drawable/ic_share_dark_24dp" />
+                android:background="@drawable/ic_share_light_24dp" />
 
         </LinearLayout>
 

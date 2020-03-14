@@ -8,6 +8,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
@@ -439,9 +440,26 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return null;
     }
 
-    public static Token getBlankOverrideToken(NetworkInfo networkInfo)
+    public Token getBlankOverrideToken(NetworkInfo networkInfo)
     {
         return createCurrencyToken(networkInfo);
+    }
+
+    public Single<Token[]> getBlankOverrideTokens(Wallet wallet)
+    {
+        return Single.fromCallable(() -> {
+            if (getBlankOverrideToken() == null)
+            {
+                return new Token[0];
+            }
+            else
+            {
+                Token[] tokens = new Token[1];
+                tokens[0] = getBlankOverrideToken();
+                tokens[0].setTokenWallet(wallet.address);
+                return tokens;
+            }
+        });
     }
 
     private static Token createCurrencyToken(NetworkInfo network)
@@ -455,7 +473,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return eth;
     }
 
-    public static Token getBlankOverrideToken()
+    public Token getBlankOverrideToken()
     {
         return null;
     }

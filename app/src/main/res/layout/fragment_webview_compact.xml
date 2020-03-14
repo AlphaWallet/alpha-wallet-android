@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/layout_url_bar_compact" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_below="@id/address_bar"
+        android:indeterminate="false"
+        android:progressDrawable="@drawable/background_horizontal_progress" />
+
+    <FrameLayout
+        android:id="@+id/frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/progressBar"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+        <com.alphawallet.app.ui.widget.entity.DappBrowserSwipeLayout
+            android:id="@+id/swipe_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.alphawallet.app.web3.Web3View
+                android:id="@+id/web3view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </com.alphawallet.app.ui.widget.entity.DappBrowserSwipeLayout>
+    </FrameLayout>
+</RelativeLayout>

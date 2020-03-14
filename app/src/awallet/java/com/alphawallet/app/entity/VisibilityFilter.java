@@ -98,4 +98,7 @@ public class VisibilityFilter
 
     //In main wallet menu, if wallet allows adding new tokens
     public static boolean canAddTokens() { return true; }
+
+    //Implement minimal dappbrowser with no URL bar.
+    public static boolean minimiseBrowserURLBar() { return false; }
 }

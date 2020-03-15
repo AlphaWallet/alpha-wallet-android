@@ -6,17 +6,14 @@
 	<color name="colorPrimaryLight">#AA54C1E3</color>
 	<color name="colorTheme">#FFFFFF</color>
 	<color name="colorHighlight">@color/azure</color>
+
 	<color name="secondary_text">#40000000</color>
 	<color name="toolbar_text_color">@color/black</color>
-
 	<color name="bottom_dialog_title">#89000000</color>
 	<color name="bottom_dialog_item">#dd000000</color>
-
     <color name="semitransparentWhite">#AAFFFFFF</color>
-
 	<color name="white20">#32FFFFFF</color>
 	<color name="translucentWhite">#80FFFFFF</color>
-
     <color name="transparent">#00000000</color>
     <color name="item_icon_tint">#89000000</color>
 	<color name="blur">#80000000</color>
@@ -27,8 +24,6 @@
 	<color name="button_colour">#69c800</color>
 	<color name="button_pressed_colour">#b4cd99</color>
 	<color name="button_disabled_colour">#b4cd99</color>
-
-
 	<color name="semi_dark_grey">#707070</color>
 	<color name="text_black">#2f2f2f</color>
 	<color name="text_dark_gray">#4a4a4a</color>
@@ -39,7 +34,6 @@
 	<color name="button_disabled">#b4cd99</color>
 	<color name="greyf6">#f6f6f6</color>
 	<color name="greyaa">#2a2a2a</color>
-	<color name="greyee">#eeeeee</color>
 	<color name="greye5">#e5e5e5</color>
 	<color name="greyc2">#c2c2c2</color>
 	<color name="greyf9">#f9f9f9</color>
@@ -59,8 +53,6 @@
 	<color name="greye9">#e9e9e9</color>
 	<color name="grey75">#757575</color>
 	<color name="greydd">#dddddd</color>
-
-
 	<color name="onboarding_indicator_unselected">#d8d8d8</color>
 	<color name="onboarding_indicator_selected">#b7b7b7</color>
 	<color name="golden_yellow">#f9d021</color>
@@ -73,11 +65,10 @@
 	<color name="nasty_green">#75b943</color>
 	<color name="inactive_green">#d7ebc8</color>
 	<color name="material_green">#009688</color>
-
 	<color name="viewfinder_mask">#60000000</color>
 	<color name="viewfinder_laser">#ffcc0000</color>
 	<color name="viewfinder_border">#ffafed44</color>
-
+	
 	<color name="pending">#f5a623</color>
 	<color name="incomplete">#fb6523</color>
 	<color name="mainnet">#2986AF</color>

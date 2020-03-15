@@ -78,11 +78,21 @@ public class SupportSettingsActivity extends BaseActivity {
 
     private void addSettingsToLayout() {
         supportSettingsLayout = findViewById(R.id.layout);
-        supportSettingsLayout.addView(telegram);
-        supportSettingsLayout.addView(twitter);
-        supportSettingsLayout.addView(reddit);
-        supportSettingsLayout.addView(facebook);
-        supportSettingsLayout.addView(blog);
+        if (MediaLinks.AWALLET_TELEGRAM_URL != null) {
+            supportSettingsLayout.addView(telegram);
+        }
+        if (MediaLinks.AWALLET_TWITTER_URL != null) {
+            supportSettingsLayout.addView(twitter);
+        }
+        if (MediaLinks.AWALLET_REDDIT_URL != null) {
+            supportSettingsLayout.addView(reddit);
+        }
+        if (MediaLinks.AWALLET_FACEBOOK_URL != null) {
+            supportSettingsLayout.addView(facebook);
+        }
+        if (MediaLinks.AWALLET_BLOG_URL != null) {
+            supportSettingsLayout.addView(blog);
+        }
         supportSettingsLayout.addView(faq);
     }
 

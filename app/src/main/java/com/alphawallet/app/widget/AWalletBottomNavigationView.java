@@ -79,19 +79,19 @@ public class AWalletBottomNavigationView extends LinearLayout {
         selectedItem = index;
         switch (index) {
             case TRANSACTIONS:
-                transactions.setImageResource(R.drawable.ic_tab_activity_blue);
+                transactions.setImageResource(R.drawable.ic_tab_activity_active);
                 transactionsLabel.setTextColor(getResources().getColor(R.color.colorHighlight, getContext().getTheme()));
                 break;
             case DAPP_BROWSER:
-                dappBrowser.setImageResource(R.drawable.ic_tab_browser_blue);
+                dappBrowser.setImageResource(R.drawable.ic_tab_browser_active);
                 dappBrowserLabel.setTextColor(getResources().getColor(R.color.colorHighlight, getContext().getTheme()));
                 break;
             case WALLET:
-                wallet.setImageResource(R.drawable.ic_tab_wallet_blue);
+                wallet.setImageResource(R.drawable.ic_tab_wallet_active);
                 walletLabel.setTextColor(getResources().getColor(R.color.colorHighlight, getContext().getTheme()));
                 break;
             case SETTINGS:
-                settings.setImageResource(R.drawable.ic_tab_settings_blue);
+                settings.setImageResource(R.drawable.ic_tab_settings_active);
                 settingsLabel.setTextColor(getResources().getColor(R.color.colorHighlight, getContext().getTheme()));
                 break;
         }

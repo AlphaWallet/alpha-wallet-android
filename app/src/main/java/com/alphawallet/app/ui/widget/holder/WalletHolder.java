@@ -117,7 +117,8 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 				break;
 		}
 
-		walletSelected.setVisibility(addition.getBoolean(IS_DEFAULT_ADDITION, false) ? View.VISIBLE : View.GONE);
+		walletSelected.setImageResource(addition.getBoolean(IS_DEFAULT_ADDITION, false) ? R.drawable.ic_radio_on : R.drawable.ic_radio_off);
+
 		container.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 		currency.setText(wallet.balanceSymbol);
 

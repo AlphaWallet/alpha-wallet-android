@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="@color/colorPrimary">
+    android:background="@color/colorPrimary"
+    android:fitsSystemWindows="true">
 
     <include layout="@layout/layout_app_bar" />
 
@@ -14,8 +14,12 @@
         android:layout_height="match_parent"
         android:layout_marginTop="?android:attr/actionBarSize"
         android:background="@color/mercury"
-        android:orientation="vertical"
-        android:paddingTop="20dp">
+        android:orientation="vertical">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/mercury" />
 
         <android.support.v4.widget.SwipeRefreshLayout
             android:id="@+id/refresh_layout"
@@ -27,8 +31,7 @@
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/list"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:paddingBottom="15dp" />
+                android:layout_height="wrap_content" />
         </android.support.v4.widget.SwipeRefreshLayout>
     </LinearLayout>
 

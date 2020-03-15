@@ -42,7 +42,7 @@
             android:lines="1"
             android:maxLines="1"
             android:text="Setting Subtitle"
-            android:textColor="#727272"
+            android:textColor="@color/dove"
             android:textSize="12sp"
             android:visibility="gone" />
     </LinearLayout>

@@ -30,8 +30,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
-            android:fontFamily="@font/font_bold"
-            android:textSize="18sp"
+            android:fontFamily="@font/font_regular"
+            android:textColor="@color/black"
+            android:textSize="17sp"
             tools:text="AUD" />
 
         <TextView
@@ -39,6 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_light"
+            android:textColor="@color/dove"
             android:textSize="12sp"
             tools:text="AUD" />
     </LinearLayout>

@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?android:attr/actionBarSize"
-        android:background="@color/colorPrimary"
+        android:background="@drawable/background_card"
         android:orientation="vertical">
 
         <View
@@ -22,12 +22,10 @@
             android:layout_height="1dp"
             android:background="@color/greyee" />
 
-        <ListView
-            android:id="@+id/dialog_list"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:divider="@color/greyee"
-            android:dividerHeight="1dp" />
+            android:layout_height="wrap_content" />
 
         <View
             android:layout_width="match_parent"

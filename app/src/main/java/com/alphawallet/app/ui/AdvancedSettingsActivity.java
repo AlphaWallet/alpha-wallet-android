@@ -9,7 +9,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.webkit.WebView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -109,7 +111,9 @@ public class AdvancedSettingsActivity extends BaseActivity {
     }
 
     private void onClearBrowserCacheClicked() {
-        // TODO: Implementation
+        WebView webView = new WebView(this);
+        webView.clearCache(true);
+        Toast.makeText(this, getString(R.string.toast_browser_cache_cleared), Toast.LENGTH_SHORT).show();
     }
 
     private void onTokenScriptClicked() {

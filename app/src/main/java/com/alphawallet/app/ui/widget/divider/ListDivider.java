@@ -19,7 +19,8 @@ public class ListDivider extends RecyclerView.ItemDecoration {
     public ListDivider(Context context) {
         TypedArray a = context.obtainStyledAttributes(ATTRS);
         this.mDivider = a.getDrawable(0);
-        marginPx = (int) (10 * context.getResources().getDisplayMetrics().density);
+//        marginPx = (int) (10 * context.getResources().getDisplayMetrics().density);
+        marginPx = 0;
         if (this.mDivider == null) {
             Log.w("DividerItem", "@android:attr/listDivider was not set in the theme used for this DividerItemDecoration. Please set that attribute all call setDrawable()");
         }

@@ -11,69 +11,62 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.LocaleItem;
-import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.widget.FunctionButtonBar;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-public class SelectLocaleActivity extends BaseActivity implements StandardFunctionInterface
-{
+public class SelectLocaleActivity extends BaseActivity {
     private ListView listView;
     private CustomAdapter adapter;
-    private FunctionButtonBar functionBar;
+    private String currentLocale;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        String currentLocale = getIntent().getStringExtra(C.EXTRA_LOCALE);
+        currentLocale = getIntent().getStringExtra(C.EXTRA_LOCALE);
         ArrayList<LocaleItem> localeItems = getIntent().getParcelableArrayListExtra(C.EXTRA_STATE);
 
         setContentView(R.layout.dialog_awallet_list);
         listView = findViewById(R.id.dialog_list);
-        functionBar = findViewById(R.id.layoutButtons);
         toolbar();
-        setTitle(getString(R.string.dialog_title_select_locale));
+        setTitle(getString(R.string.settings_locale_lang));
 
         adapter = new CustomAdapter(this, localeItems, currentLocale);
         listView.setAdapter(adapter);
-
-        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.action_confirm));
-        functionBar.setupFunctions(this, functions);
     }
 
-    @Override
-    public void handleClick(int view)
-    {
+    private void setLocale(String id) {
         Intent intent = new Intent();
-        String item = adapter.getSelectedItemId();
-        intent.putExtra(C.EXTRA_LOCALE, item);
+        intent.putExtra(C.EXTRA_LOCALE, id);
         setResult(RESULT_OK, intent);
         finish();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                handleClick(0);
-                break;
-            }
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public class CustomAdapter extends ArrayAdapter<LocaleItem>
-    {
+    @Override
+    public void onBackPressed() {
+        String id = adapter.getSelectedItemId();
+        if (id != null && id != currentLocale) {
+            setLocale(id);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    public class CustomAdapter extends ArrayAdapter<LocaleItem> {
         private ArrayList<LocaleItem> dataSet;
         private String selectedItem;
         private String selectedItemId;
@@ -97,7 +90,7 @@ public class SelectLocaleActivity extends BaseActivity implements StandardFuncti
         private class ViewHolder {
             ImageView checkbox;
             TextView name;
-            LinearLayout itemLayout;
+            RelativeLayout itemLayout;
         }
 
         private CustomAdapter(Context ctx, ArrayList<LocaleItem> data, String selectedItemId) {
@@ -114,8 +107,7 @@ public class SelectLocaleActivity extends BaseActivity implements StandardFuncti
 
         @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent)
-        {
+        public View getView(int position, View convertView, ViewGroup parent) {
             LocaleItem item = getItem(position);
             final ViewHolder viewHolder;
             View view = convertView;
@@ -145,9 +137,9 @@ public class SelectLocaleActivity extends BaseActivity implements StandardFuncti
                 });
 
                 if (item.isSelected()) {
-                    viewHolder.checkbox.setImageResource(R.drawable.ic_checkbox_active);
+                    viewHolder.checkbox.setImageResource(R.drawable.ic_radio_on);
                 } else {
-                    viewHolder.checkbox.setImageResource(R.drawable.ic_checkbox);
+                    viewHolder.checkbox.setImageResource(R.drawable.ic_radio_off);
                 }
             }
 

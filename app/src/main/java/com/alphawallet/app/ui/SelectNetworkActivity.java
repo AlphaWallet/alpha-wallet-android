@@ -4,25 +4,21 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.adapter.NetworkListAdapter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.SelectNetworkViewModel;
 import com.alphawallet.app.viewmodel.SelectNetworkViewModelFactory;
-import com.alphawallet.app.widget.FunctionButtonBar;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -31,18 +27,15 @@ import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.repository.EthereumNetworkRepository.MAINNET_ID;
 
-public class SelectNetworkActivity extends BaseActivity implements StandardFunctionInterface
+public class SelectNetworkActivity extends BaseActivity
 {
     @Inject
     SelectNetworkViewModelFactory viewModelFactory;
     private SelectNetworkViewModel viewModel;
-    //private Button confirmButton;
     private ListView listView;
     private NetworkListAdapter adapter;
     private boolean singleItem;
     private String selectedChainId;
-    private LinearLayout filterButton;
-    private FunctionButtonBar functionBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,8 +43,6 @@ public class SelectNetworkActivity extends BaseActivity implements StandardFunct
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_awallet_list);
         listView = findViewById(R.id.dialog_list);
-        filterButton = findViewById(R.id.filter_button);
-        functionBar = findViewById(R.id.layoutButtons);
         toolbar();
         setTitle(getString(R.string.select_network_filters));
 
@@ -66,22 +57,16 @@ public class SelectNetworkActivity extends BaseActivity implements StandardFunct
         if (selectedChainId == null || selectedChainId.isEmpty()) {
             selectedChainId = viewModel.getFilterNetworkList();
         }
-
-        if (singleItem)
-        {
-            setTitle(getString(R.string.select_single_network));
-            filterButton.setVisibility(View.VISIBLE);
-            filterButton.setOnClickListener(v -> { viewModel.openFilterSelect(this); });
-        }
-
-        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.action_confirm));
-        functionBar.setupFunctions(this, functions);
     }
 
     @Override
-    public void handleClick(int view)
-    {
-        handleSetNetworks();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (singleItem)
+        {
+            setTitle(getString(R.string.select_single_network));
+            getMenuInflater().inflate(R.menu.menu_filter_network, menu);
+        }
+        return super.onCreateOptionsMenu(menu);
     }
 
     private void setupFilterList()
@@ -113,7 +98,6 @@ public class SelectNetworkActivity extends BaseActivity implements StandardFunct
         
         adapter = new NetworkListAdapter(this, list, selectedChainId, singleItem);
         listView.setAdapter(adapter);
-        listView.setDividerHeight(0);
     }
 
     @Override
@@ -123,8 +107,16 @@ public class SelectNetworkActivity extends BaseActivity implements StandardFunct
                 handleSetNetworks();
                 break;
             }
+            case R.id.action_filter: {
+                viewModel.openFilterSelect(this);
+            }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        handleSetNetworks();
     }
 
     private void handleSetNetworks()

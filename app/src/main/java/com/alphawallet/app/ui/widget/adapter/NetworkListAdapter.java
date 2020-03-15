@@ -7,14 +7,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.LocaleItem;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.ui.widget.entity.NetworkItem;
 
@@ -45,7 +44,7 @@ public class NetworkListAdapter extends ArrayAdapter<NetworkItem> {
     private class ViewHolder {
         ImageView checkbox;
         TextView name;
-        LinearLayout itemLayout;
+        RelativeLayout itemLayout;
     }
 
     public NetworkListAdapter(Context context, ArrayList<NetworkItem> data, String selectedItem, boolean singleItem) {
@@ -104,11 +103,10 @@ public class NetworkListAdapter extends ArrayAdapter<NetworkItem> {
             });
 
             if (item.isSelected()) {
-                int resource = singleItem ? R.drawable.ic_checkbox_active : R.drawable.button_square_checked;
+                int resource = singleItem ? R.drawable.ic_radio_on : R.drawable.ic_radio_checked;
                 viewHolder.checkbox.setImageResource(resource);
             } else {
-                int resource = singleItem ? R.drawable.ic_checkbox : R.drawable.button_square_unchecked;
-                viewHolder.checkbox.setImageResource(resource);
+                viewHolder.checkbox.setImageResource(R.drawable.ic_radio_off);
             }
 
             if (!singleItem && dataSet.get(position).getName().equals(VisibilityFilter.primaryNetworkName()))

@@ -188,9 +188,11 @@ public class AdvancedSettingsActivity extends BaseActivity {
         switch (requestCode) {
             case C.UPDATE_LOCALE: {
                 updateLocale(data);
+                break;
             }
             case C.UPDATE_CURRENCY: {
                 updateCurrency(data);
+                break;
             }
             default: {
                 super.onActivityResult(requestCode, resultCode, data);

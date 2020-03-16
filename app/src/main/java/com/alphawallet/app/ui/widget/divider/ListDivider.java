@@ -6,52 +6,37 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 
+import com.alphawallet.app.R;
+
 public class ListDivider extends RecyclerView.ItemDecoration {
-    private final int[] ATTRS = new int[]{16843284};
     private Drawable mDivider;
-    private final Rect mBounds = new Rect();
-    private int marginPx;
 
     public ListDivider(Context context) {
-        TypedArray a = context.obtainStyledAttributes(ATTRS);
-        this.mDivider = a.getDrawable(0);
-        marginPx = (int) (10 * context.getResources().getDisplayMetrics().density);
-        if (this.mDivider == null) {
-            Log.w("DividerItem", "@android:attr/listDivider was not set in the theme used for this DividerItemDecoration. Please set that attribute all call setDrawable()");
-        }
-
-        a.recycle();
+        mDivider = ContextCompat.getDrawable(context, R.drawable.line_divider);
     }
 
-    public void setDrawable(@NonNull Drawable drawable) {
-        this.mDivider = drawable;
-    }
-
-    public void onDraw(Canvas canvas, RecyclerView parent, RecyclerView.State state) {
-        canvas.save();
-        int left = marginPx;
-        int right = parent.getWidth() - marginPx;
-        canvas.clipRect(left, parent.getPaddingTop(), right, parent.getHeight() - parent.getPaddingBottom());
+    @Override
+    public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
+        int left = parent.getPaddingLeft();
+        int right = parent.getWidth() - parent.getPaddingRight();
 
         int childCount = parent.getChildCount();
-
-        for (int i = 0; i < childCount; ++i) {
+        for (int i = 0; i < childCount; i++) {
             View child = parent.getChildAt(i);
-            parent.getDecoratedBoundsWithMargins(child, this.mBounds);
-            int bottom = this.mBounds.bottom + Math.round(child.getTranslationY());
-            int top = bottom - this.mDivider.getIntrinsicHeight();
-            this.mDivider.setBounds(left, top, right, bottom);
-            this.mDivider.draw(canvas);
+
+            RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
+
+            int top = child.getBottom() + params.bottomMargin;
+            int bottom = top + mDivider.getIntrinsicHeight();
+
+            mDivider.setBounds(left, top, right, bottom);
+            mDivider.draw(c);
         }
-
-        canvas.restore();
-    }
-
-    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-        outRect.set(0, 0, 0, this.mDivider.getIntrinsicHeight());
     }
 }

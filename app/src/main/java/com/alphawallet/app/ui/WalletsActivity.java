@@ -5,13 +5,8 @@ import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
@@ -20,32 +15,31 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.alphawallet.app.entity.VisibilityFilter;
-import com.alphawallet.app.ui.widget.adapter.WalletsAdapter;
-
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.ui.widget.adapter.WalletsAdapter;
+import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletsViewModel;
 import com.alphawallet.app.viewmodel.WalletsViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AddWalletView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
+
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
 
 public class WalletsActivity extends BaseActivity implements
         View.OnClickListener,
@@ -127,7 +121,7 @@ public class WalletsActivity extends BaseActivity implements
 
         adapter = new WalletsAdapter(this, this::onSetWalletDefault);
         list.setAdapter(adapter);
-        list.addItemDecoration(new WalletDivider(this));
+        list.addItemDecoration(new ListDivider(this));
 
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
@@ -376,58 +370,5 @@ public class WalletsActivity extends BaseActivity implements
     public void FetchMnemonic(String mnemonic)
     {
 
-    }
-
-    private class WalletDivider extends RecyclerView.ItemDecoration
-    {
-        private final int[] ATTRS = new int[]{16843284};
-        private Drawable mDivider;
-        private final Rect mBounds = new Rect();
-        private int marginPx;
-
-        public WalletDivider(Context context)
-        {
-            TypedArray a = context.obtainStyledAttributes(ATTRS);
-            this.mDivider = a.getDrawable(0);
-            marginPx = (int) (10 * getResources().getDisplayMetrics().density);
-            if (this.mDivider == null)
-            {
-                Log.w("DividerItem", "@android:attr/listDivider was not set in the theme used for this DividerItemDecoration. Please set that attribute all call setDrawable()");
-            }
-
-            a.recycle();
-        }
-
-        public void setDrawable(@NonNull Drawable drawable)
-        {
-            this.mDivider = drawable;
-        }
-
-        public void onDraw(Canvas canvas, RecyclerView parent, RecyclerView.State state)
-        {
-            canvas.save();
-            int left = marginPx;
-            int right = parent.getWidth() - marginPx;
-            canvas.clipRect(left, parent.getPaddingTop(), right, parent.getHeight() - parent.getPaddingBottom());
-
-            int childCount = parent.getChildCount();
-
-            for (int i = 0; i < childCount; ++i)
-            {
-                View child = parent.getChildAt(i);
-                parent.getDecoratedBoundsWithMargins(child, this.mBounds);
-                int bottom = this.mBounds.bottom + Math.round(child.getTranslationY());
-                int top = bottom - this.mDivider.getIntrinsicHeight();
-                this.mDivider.setBounds(left, top, right, bottom);
-                this.mDivider.draw(canvas);
-            }
-
-            canvas.restore();
-        }
-
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state)
-        {
-            outRect.set(0, 0, 0, this.mDivider.getIntrinsicHeight());
-        }
     }
 }

@@ -15,46 +15,43 @@ import android.widget.TextView;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CurrencyItem;
-import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
-import com.alphawallet.app.widget.FunctionButtonBar;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-public class SelectCurrencyActivity extends BaseActivity implements StandardFunctionInterface
-{
-    private RecyclerView listView;
+public class SelectCurrencyActivity extends BaseActivity {
+    private RecyclerView recyclerView;
     private CustomAdapter adapter;
-    private FunctionButtonBar functionBar;
+    private String currentCurrency;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        String currentCurrency = getIntent().getStringExtra(C.EXTRA_CURRENCY);
-        ArrayList<CurrencyItem> currencyItems = getIntent().getParcelableArrayListExtra(C.EXTRA_STATE);
-
-        setContentView(R.layout.dialog_awallet_currency_list);
-        listView = findViewById(R.id.dialog_list);
+        setContentView(R.layout.activity_list);
         toolbar();
         setTitle(getString(R.string.dialog_title_select_currency));
+        currentCurrency = getIntent().getStringExtra(C.EXTRA_CURRENCY);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        listView.setLayoutManager(linearLayoutManager);
-
-        adapter = new CustomAdapter(currencyItems, currentCurrency);
-        listView.setAdapter(adapter);
-        listView.addItemDecoration(new ListDivider(this));
-        functionBar = findViewById(R.id.layoutButtons); //use standard bottom function button bar to make it easy to customise or update UI
-        functionBar.setVisibility(View.VISIBLE);
-        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.button_ok));
-        functionBar.setupFunctions(this, functions);
+        ArrayList<CurrencyItem> currencyItems = getIntent().getParcelableArrayListExtra(C.EXTRA_STATE);
+        if (currencyItems != null) {
+            recyclerView = findViewById(R.id.list);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            adapter = new CustomAdapter(currencyItems, currentCurrency);
+            recyclerView.setAdapter(adapter);
+            recyclerView.addItemDecoration(new ListDivider(this));
+        }
     }
 
     @Override
     public void onBackPressed() {
+        if (!currentCurrency.equals(adapter.getSelectedItemId())) {
+            setCurrency();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    private void setCurrency() {
         Intent intent = new Intent();
         String item = adapter.getSelectedItemId();
         intent.putExtra(C.EXTRA_CURRENCY, item);
@@ -70,8 +67,7 @@ public class SelectCurrencyActivity extends BaseActivity implements StandardFunc
         return super.onOptionsItemSelected(item);
     }
 
-    public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder>
-    {
+    public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
         private ArrayList<CurrencyItem> dataSet;
         private String selectedItem;
         private String selectedItemId;
@@ -95,7 +91,7 @@ public class SelectCurrencyActivity extends BaseActivity implements StandardFunc
         @Override
         public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View itemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_dialog_currency_list, parent, false);
+                    .inflate(R.layout.item_list_currency, parent, false);
 
             return new CustomViewHolder(itemView);
         }
@@ -154,15 +150,6 @@ public class SelectCurrencyActivity extends BaseActivity implements StandardFunc
         @Override
         public int getItemCount() {
             return dataSet.size();
-        }
-    }
-
-    @Override
-    public void handleClick(int view)
-    {
-        if (view == R.string.button_ok) //handle OK button
-        {
-            onBackPressed();
         }
     }
 }

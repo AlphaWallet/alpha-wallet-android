@@ -1,5 +1,6 @@
 package com.alphawallet.app.service;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -8,24 +9,20 @@ import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileObserver;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.SparseArray;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
-import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
-import com.alphawallet.app.entity.tokenscript.TokenScriptFileData;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
@@ -40,7 +37,6 @@ import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.ContractInfo;
 import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
-import com.alphawallet.token.entity.NonFungibleToken;
 import com.alphawallet.token.entity.ParseResult;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.TSAction;
@@ -48,10 +44,12 @@ import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TransactionResult;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.TokenDefinition;
+
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.crypto.WalletUtils;
 import org.xml.sax.SAXException;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -70,20 +68,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+
 import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import static android.os.FileObserver.ALL_EVENTS;
+
 import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
@@ -113,6 +110,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final AlphaWalletService alphaWalletService;
     private TokenDefinition cachedDefinition = null;
     private SparseArray<Map<String, SparseArray<String>>> tokenTypeName;
+    private final Semaphore assetLoadingLock;
 
     private final TokenscriptFunction tokenscriptUtility;
 
@@ -131,23 +129,31 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         this.tokensService = tokensService;
         tokenscriptUtility = new TokenscriptFunction() { }; //no overriden functions
         tokenLocalSource = trs;
-
+        assetLoadingLock = new Semaphore(1);
         loadLocalContracts();
     }
 
     private void loadLocalContracts()
     {
-        assetDefinitions = new SparseArray<>();
-
         try
         {
-            loadContracts(context.getFilesDir());
-            checkDownloadedFiles();
+            assetLoadingLock.acquire();
         }
-        catch (IOException| SAXException e)
+        catch (InterruptedException e)
         {
             e.printStackTrace();
         }
+
+        assetDefinitions = new SparseArray<>();
+
+        loadContracts(context.getFilesDir())
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(this::addContractAddresses,
+                           error -> { onError(error); loadInternalAssets(); },
+                           this::loadInternalAssets).isDisposed();
+
+        checkDownloadedFiles();
     }
 
     @Override
@@ -240,32 +246,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    /**
-     * Called at startup once we know we've got folder write permission.
-     * Note - Android 6.0 and above needs user to verify folder access permission
-     * TODO: if user doesn't give permission then use the app private folder and tell user they can't
-     *  load contracts themselves
-     */
-    public void checkExternalDirectoryAndLoad()
-    {
-        //Check the external files directory for Android Q+
-        loadExternalContracts(context.getExternalFilesDir(""), false);
-
-        //only works up to Android 9
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
-        {
-            //Now check the legacy /AlphaWallet directory
-            File directory = new File(
-                    Environment.getExternalStorageDirectory()
-                            + File.separator + HomeViewModel.ALPHAWALLET_DIR);
-
-            if (!directory.exists())
-            {
-                directory.mkdir(); //does this throw if we haven't given permission?
-            }
-
-            loadExternalContracts(directory, true);
-        }
+    private boolean checkWritePermission() {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     private TokenDefinition getDefinition(int chainId, String address)
@@ -327,7 +310,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      */
     public TokenDefinition getAssetDefinition(int chainId, String address)
     {
-        reloadAssets(); //if OS scaveneged the lookup map then rebuild.
         TokenDefinition assetDef = null;
         if (address == null) return null;
 
@@ -346,11 +328,25 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return assetDef; // if nothing found use default
     }
 
-    public Single<TokenDefinition> getAssetdefinitionASync(int chainId, final String address)
+    public Single<TokenDefinition> getAssetDefinitionASync(int chainId, final String address)
     {
         if (address == null) return Single.fromCallable(TokenDefinition::new);
         String contractName = address;
         if (contractName.equalsIgnoreCase(tokensService.getCurrentAddress())) contractName = "ethereum";
+
+        // hold until asset definitions have finished loading
+        try
+        {
+            assetLoadingLock.acquire();
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            assetLoadingLock.release();
+        }
 
         final TokenDefinition assetDef = getDefinition(chainId, contractName.toLowerCase());
         if (assetDef != null) return Single.fromCallable(() -> assetDef);
@@ -517,17 +513,22 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private Single<File> fetchXMLFromServer(String address)
     {
         return Single.fromCallable(() -> {
-            File result = context.getCacheDir();
-            if (address.equals("")) return result;
+            final File defaultReturn = new File("");
+            if (address.equals("")) return defaultReturn;
 
             //peek to see if this file exists
-            File existingFile = getXMLFile(address);
-            result = existingFile;
+            File result = getXMLFile(address);
             long fileTime = 0;
-            if (existingFile != null && existingFile.exists())
+            if (result != null && result.exists())
             {
-                fileTime = existingFile.lastModified();
+                fileTime = result.lastModified();
             }
+            else
+            {
+                result = defaultReturn;
+            }
+
+            if (assetChecked.get(address) != null && (System.currentTimeMillis() > (assetChecked.get(address) + 1000L*60L*60L))) return result;
 
             SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH);
             format.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -590,21 +591,52 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
-    private void loadExternalContracts(File directory, boolean legacyDirectory)
+    //This loads bundled Tokenscripts in the /assets directory eg xdaicanonicalized
+    private void loadInternalAssets()
     {
-        try
-        {
-            loadContracts(directory);
+        Observable.fromIterable(getCanonicalizedAssets())
+                .subscribeOn(Schedulers.io())
+                .subscribe(this::addContractAssets, error -> { onError(error); checkAndroidExternal(); }, this::checkAndroidExternal).isDisposed();
+    }
 
-            Observable.fromIterable(getCanonicalizedAssets())
-                    .forEach(this::addContractAssets).isDisposed();
+    //Check the external directory - Android/data/(applicationId)
+    private void checkAndroidExternal()
+    {
+        loadContracts(context.getExternalFilesDir(""))
+                .subscribeOn(Schedulers.io())
+                .subscribe(this::addContractAddresses, error -> { onError(error); checkLegacyDirectory(); }, this::checkLegacyDirectory).isDisposed();
+    }
 
-            startFileListener(directory.getAbsolutePath(), legacyDirectory);
-        }
-        catch (IOException|SAXException e)
+    private void checkLegacyDirectory()
+    {
+        startFileListener(context.getExternalFilesDir("").getAbsolutePath(), false);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && checkWritePermission())
         {
-            e.printStackTrace();
+            //Now check the legacy AlphaWallet directory
+            File directory = new File(
+                    Environment.getExternalStorageDirectory()
+                            + File.separator + HomeViewModel.ALPHAWALLET_DIR);
+
+            if (!directory.exists())
+            {
+                directory.mkdir();
+            }
+
+            loadContracts(directory)
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(this::addContractAddresses, error -> { onError(error); finishLoading(); }, this::finishLoading).isDisposed();
+
+            startFileListener(directory.getAbsolutePath(), true);
         }
+        else
+        {
+            finishLoading();
+        }
+    }
+
+    private void finishLoading()
+    {
+        assetLoadingLock.release();
     }
 
     private void addContractsToNetwork(Integer network, Map<String, File> newTokenDescriptionAddresses)
@@ -710,20 +742,18 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return false;
     }
 
-    private void loadContracts(File directory) throws IOException, SAXException
+    private Observable<File> loadContracts(File directory)
     {
         File[] files = directory.listFiles();
-        if (files == null || files.length == 0) return;
+        if (files == null || files.length == 0) return Observable.fromCallable(() -> new File(""));
 
-        Observable.fromArray(files)
+        return Observable.fromArray(files)
                 .filter(File::isFile)
                 .filter(this::allowableExtension)
                 .filter(File::canRead)
                 .flatMap(file -> updateSignature(file).toObservable()) //check we have signature when initialising
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::addContractAddresses)
-                .isDisposed();
+                .observeOn(Schedulers.io());
     }
 
     /**
@@ -784,17 +814,20 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private Single<File> updateSignature(File file)
     {
         return Single.fromCallable(() -> {
-            TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
-            String hash = tsf.calcMD5();
-
-            //pull data from realm
-            XMLDsigDescriptor sig = getCertificateFromRealm(hash);
-            if (sig == null || sig.keyName == null)
+            if (file.canRead())
             {
-                //fetch signature and store in realm
-                sig = alphaWalletService.checkTokenScriptSignature(tsf);
-                tsf.determineSignatureType(sig);
-                storeCertificateData(hash, sig);
+                TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
+                String hash = tsf.calcMD5();
+
+                //pull data from realm
+                XMLDsigDescriptor sig = getCertificateFromRealm(hash);
+                if (sig == null || sig.keyName == null)
+                {
+                    //fetch signature and store in realm
+                    sig = alphaWalletService.checkTokenScriptSignature(tsf);
+                    tsf.determineSignatureType(sig);
+                    storeCertificateData(hash, sig);
+                }
             }
 
             return file;
@@ -892,7 +925,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public boolean hasTokenView(int chainId, String contractAddr, String type)
     {
-        reloadAssets();
         TokenDefinition td = getAssetDefinition(chainId, contractAddr);
         if (td != null && td.attributeSets.containsKey("cards"))
         {
@@ -905,7 +937,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public String getTokenView(int chainId, String contractAddr, String type)
     {
-        reloadAssets();
         String viewHTML = "";
         TokenDefinition td = getAssetDefinition(chainId, contractAddr);
         if (td != null && td.attributeSets.containsKey("cards"))
@@ -1209,7 +1240,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     @Override
                     public void onStart()
                     {
-                        if (!WalletUtils.isValidAddress(tokensService.getCurrentAddress())) return;
+                        if (tokensService.getCurrentAddress() == null || !WalletUtils.isValidAddress(tokensService.getCurrentAddress())) return;
                         realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress());
                         ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
                         RealmAuxData realmToken = realm.where(RealmAuxData.class)
@@ -1431,17 +1462,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         String view = getTokenView(token.tokenInfo.chainId, token.tokenInfo.address, "view");
         String iconifiedView = getTokenView(token.tokenInfo.chainId, token.tokenInfo.address, "view-iconified");
         return view.equals(iconifiedView);
-    }
-
-    /**
-     * If the OS has scavenged the TokenScript contract lookup map then re-init
-     */
-    private void reloadAssets()
-    {
-        if (assetDefinitions == null || assetDefinitions.size() == 0)
-        {
-            loadLocalContracts();
-        }
     }
 
     public List<ContractResult> getHoldingContracts(TokenDefinition td)

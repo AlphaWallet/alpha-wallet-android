@@ -223,8 +223,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             showPage(WALLET);
         }
 
-        viewModel.loadExternalXMLContracts();
-
         if (VisibilityFilter.hideDappBrowser())
         {
             removeDappBrowser();
@@ -768,7 +766,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
                 if (hasPermission(permissions, grantResults))
                 {
-                    viewModel.loadExternalXMLContracts();
                     ((NewSettingsFragment)settingsFragment).refresh();
                 }
                 break;

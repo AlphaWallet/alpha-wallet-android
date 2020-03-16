@@ -697,7 +697,7 @@ public class ImportTokenViewModel extends BaseViewModel
 
     public void checkTokenScriptSignature(final int chainId, final String address)
     {
-        disposable = assetDefinitionService.getAssetdefinitionASync(chainId, address)
+        disposable = assetDefinitionService.getAssetDefinitionASync(chainId, address)
                 .flatMap(def -> assetDefinitionService.getSignatureData(chainId, address))
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())

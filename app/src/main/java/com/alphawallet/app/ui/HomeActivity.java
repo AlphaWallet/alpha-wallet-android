@@ -701,7 +701,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void changeCurrency()
     {
         ((WalletFragment)walletFragment).indicateFetch();
-        ((WalletFragment)walletFragment).refreshTokens();
+        viewModel.updateTickers();
     }
 
     private void hideDialog()

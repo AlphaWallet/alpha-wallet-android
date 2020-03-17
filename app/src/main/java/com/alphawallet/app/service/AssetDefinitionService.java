@@ -457,7 +457,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() > (assetChecked.get(correctedAddress) + 1000L*60L*60L)))
         {
             fetchXMLFromServer(correctedAddress)
-                    .flatMap(this::updateSignature)
+                    .flatMap(this::cacheSignature)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::handleFileLoad, this::onError).isDisposed();
@@ -751,7 +751,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 .filter(File::isFile)
                 .filter(this::allowableExtension)
                 .filter(File::canRead)
-                .flatMap(file -> updateSignature(file).toObservable()) //check we have signature when initialising
+                .flatMap(file -> cacheSignature(file).toObservable()) //check we have signature when initialising
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io());
     }
@@ -811,8 +811,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 .subscribe(this::handleFileLoad, this::onError).isDisposed();
     }
 
-    private Single<File> updateSignature(File file)
+    /* Add cached signature if uncached files found. */
+    private Single<File> cacheSignature(File file)
     {
+        // note that outdated cache is never deleted - we don't have that level of finesse
         return Single.fromCallable(() -> {
             if (file.canRead())
             {
@@ -1006,7 +1008,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                 {
                                     notificationService.DisplayNotification("Definition Updated", file, NotificationCompat.PRIORITY_MAX);
                                     cachedDefinition = null;
-                                    updateSignature(newTSFile) //update signature data if necessary
+                                    cacheSignature(newTSFile) //update signature data if necessary
                                             .subscribeOn(Schedulers.io())
                                             .observeOn(AndroidSchedulers.mainThread())
                                             .subscribe().isDisposed();

@@ -137,7 +137,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         try
         {
-            assetLoadingLock.acquire();
+            assetLoadingLock.acquire(); // wonder when is this released? Read comments 9 lines down
         }
         catch (InterruptedException e)
         {
@@ -146,6 +146,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         assetDefinitions = new SparseArray<>();
 
+        /* the following Observable<File> has a subscription with loadInternalAssets() at completion or error
+           which in turn has checkAndroidExternal() at completion or error
+           which in turn has checkLegacyDirectory() at completion or error
+           which in turn has finishLoading() at completion or error
+           which releases the Semaphore.
+           One might argue that getting a full list of files to check and do away with only one subscription
+           might not be bad.   -- Weiwu, code review.
+         */
         loadContracts(context.getFilesDir())
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())

@@ -3,9 +3,6 @@ package com.alphawallet.app.di;
 import android.content.Context;
 
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.service.TickerServiceInterface;
-import com.google.gson.Gson;
-
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.SharedPreferenceRepository;
@@ -23,7 +20,6 @@ import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.service.AccountKeystoreService;
 import com.alphawallet.app.service.AlphaWalletService;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.KeystoreAccountService;
@@ -31,9 +27,12 @@ import com.alphawallet.app.service.MarketQueueService;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.OpenseaService;
 import com.alphawallet.app.service.RealmManager;
+import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.service.TickerServiceInterface;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsNetworkClient;
 import com.alphawallet.app.service.TransactionsNetworkClientType;
+import com.google.gson.Gson;
 
 import java.io.File;
 
@@ -147,8 +146,8 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository, RealmManager realmManager, OkHttpClient okHttpClient) {
-		return new TokensService(ethereumNetworkRepository, realmManager, okHttpClient);
+	TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository, RealmManager realmManager, OkHttpClient okHttpClient, PreferenceRepositoryType preferenceRepository) {
+		return new TokensService(ethereumNetworkRepository, realmManager, okHttpClient, preferenceRepository);
 	}
 
 	@Singleton

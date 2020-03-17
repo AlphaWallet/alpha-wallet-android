@@ -3,13 +3,9 @@ package com.alphawallet.app.entity.tokens;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Base64;
-import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.ERC875ContractTransaction;
 import com.alphawallet.app.entity.TicketRangeElement;
@@ -17,10 +13,9 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.ui.BaseActivity;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
-import com.alphawallet.app.web3.Web3TokenView;
+import com.alphawallet.token.entity.TicketRange;
 
 import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
@@ -28,20 +23,11 @@ import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import com.alphawallet.token.entity.TicketRange;
-import com.alphawallet.token.entity.TokenScriptResult;
-import com.alphawallet.token.tools.TokenDefinition;
-import com.alphawallet.app.R;
 
 /**
  * Created by James on 27/01/2018.  It might seem counter intuitive
@@ -307,44 +293,6 @@ public class Ticket extends Token implements Parcelable
         }
 
         return indexList;
-    }
-
-    public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx)
-    {
-        displayTicketHolder(range, activity, assetService, ctx, false);
-    }
-
-    /**
-     * This is a single method that populates any instance of graphic ticket anywhere
-     *
-     * @param range
-     * @param activity
-     * @param assetService
-     * @param ctx needed to create date/time format objects
-     */
-    @Override
-    public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx, boolean iconified)
-    {
-        TokenDefinition td = assetService.getAssetDefinition(tokenInfo.chainId, tokenInfo.address);
-        if (td != null)
-        {
-            //use webview
-            displayTokenscriptView(range, assetService, activity, ctx, iconified);
-        }
-        else
-        {
-            activity.findViewById(R.id.layout_legacy).setVisibility(View.VISIBLE);
-            activity.findViewById(R.id.layout_webwrapper).setVisibility(View.GONE);
-
-            TextView amount = activity.findViewById(R.id.amount);
-            TextView name = activity.findViewById(R.id.name);
-
-            String nameStr = getTokenTitle();
-            String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
-
-            name.setText(nameStr);
-            amount.setText(seatCount);
-        }
     }
 
     public void checkIsMatchedInXML(AssetDefinitionService assetService)

@@ -875,6 +875,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         ((DappBrowserFragment)dappBrowserFragment).GotAuthorisation(resultCode == RESULT_OK);
                         break;
                     default:
+                        //continue with generating the authenticated key - NB currently no flow reaches this code but in future it could
+                        if (resultCode == RESULT_OK) authInterface.completeAuthentication(taskCode);
+                        else
+                        {
+                            authInterface.failedAuthentication(taskCode);
+                            GotAuthorisation(false);
+                        }
                         break;
                 }
                 break;

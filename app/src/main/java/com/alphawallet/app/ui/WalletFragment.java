@@ -582,6 +582,5 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     public void hideTabBar(View view)
     {
         view.findViewById(R.id.tab_layout).setVisibility(View.GONE);
-        view.findViewById(R.id.view_tab_space).setVisibility(View.VISIBLE);
     }
 }

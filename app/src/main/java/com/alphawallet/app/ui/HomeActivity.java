@@ -949,4 +949,17 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         sendBroadcast(new Intent(CHANGED_LOCALE));
         viewModel.updateLocale(newLocale, this);
     }
+
+    @Override
+    public void onBackPressed() {
+        //Check if current page is WALLET or not
+        if(viewPager.getCurrentItem() != WALLET)
+        {
+            showPage(WALLET);
+        }
+        else
+        {
+            super.onBackPressed();
+        }
+    }
 }

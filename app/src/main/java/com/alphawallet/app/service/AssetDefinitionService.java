@@ -110,10 +110,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final AlphaWalletService alphaWalletService;
     private TokenDefinition cachedDefinition = null;
     private SparseArray<Map<String, SparseArray<String>>> tokenTypeName;
-    private final Semaphore assetLoadingLock;
+    private final Semaphore assetLoadingLock;  // used to block if someone calls getAssetDefinitionASync() while loading
 
     private final TokenscriptFunction tokenscriptUtility;
 
+    /* Designed with the assmuption that only a single instance of this class at any given time */
     public AssetDefinitionService(OkHttpClient client, Context ctx, NotificationService svs,
                                   RealmManager rm, EthereumNetworkRepositoryType eth, TokensService tokensService,
                                   TokenLocalSource trs, AlphaWalletService alphaService)
@@ -133,6 +134,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         loadLocalContracts();
     }
 
+    /* Spawns a few threads to load contracts, then spawns more, than
+     * spawns more. The user of this class might get the object
+     * initialised and go ahead with calling its methods. You will see
+     * semaphore used to block the caller if the spawned threads are
+     * not finished.*/
     private void loadLocalContracts()
     {
         try

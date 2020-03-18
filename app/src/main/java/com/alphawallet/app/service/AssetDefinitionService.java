@@ -1470,7 +1470,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public boolean viewsEqual(Token token)
     {
         String view = getTokenView(token.tokenInfo.chainId, token.tokenInfo.address, "view");
-        String iconifiedView = getTokenView(token.tokenInfo.chainId, token.tokenInfo.address, "view-iconified");
+        String iconifiedView = getTokenView(token.tokenInfo.chainId, token.tokenInfo.address, "item-view");
         return view.equals(iconifiedView);
     }
 

@@ -1100,7 +1100,7 @@ public class Token implements Parcelable, Comparable<Token>
         if (waitSpinner != null) waitSpinner.setVisibility(View.GONE);
         tokenView.setVisibility(View.VISIBLE);
 
-        String view = assetService.getTokenView(tokenInfo.chainId, getAddress(), iconified ? "view-iconified" : "view");
+        String view = assetService.getTokenView(tokenInfo.chainId, getAddress(), iconified ? "item-view" : "view");
         String style = assetService.getTokenView(tokenInfo.chainId, getAddress(), "style");
         String viewData = tokenView.injectWeb3TokenInit(ctx, view, attrs.toString());
         viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first

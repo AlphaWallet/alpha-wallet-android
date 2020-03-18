@@ -96,7 +96,7 @@ public class TokenscriptViewHolder extends BinderViewHolder<TicketRange> impleme
         waitSpinner.setVisibility(View.GONE);
         tokenView.setVisibility(View.VISIBLE);
 
-        String viewType = iconified ? "view-iconified" : "view";
+        String viewType = iconified ? "item-view" : "view";
         String view = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), viewType);
         String style = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
         String viewData = tokenView.injectWeb3TokenInit(getContext(), view, tokenAttrs);

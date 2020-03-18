@@ -16,7 +16,7 @@ import static org.junit.Assert.fail;
 
 public class TokenscriptFunctionTest implements ParseResult {
     //have to put file as a string because app cannot read files
-    private final String entryTokenTestFile = "<ts:token xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:ts=\"http://tokenscript.org/2019/10/tokenscript\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" custodian=\"false\" xsi:schemaLocation=\"http://tokenscript.org/2019/07/tokenscript\">\n" +
+    private final String entryTokenTestFile = "<ts:token xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:ts=\"http://tokenscript.org/2020/03/tokenscript.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" custodian=\"false\" xsi:schemaLocation=\"http://tokenscript.org/2020/03/tokenscript.xsd\">\n" +
             "  <ts:name>\n" +
             "    <ts:plurals xml:lang=\"en\">\n" +
             "      <ts:string quantity=\"one\">Ticket</ts:string>\n" +

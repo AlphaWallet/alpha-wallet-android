@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,6 +23,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
     public final static String IS_DEFAULT_ADDITION = "is_default";
     public static final String IS_LAST_ITEM = "is_last";
 
+    private final ImageButton manageWalletBtn;
     private final ImageView walletIcon;
     private final TextView walletBalanceText;
     private final TextView walletNameText;
@@ -35,6 +37,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 
     public WalletHolder(int resId, ViewGroup parent, WalletClickCallback callback) {
         super(resId, parent);
+        manageWalletBtn = findViewById(R.id.manage_wallet_btn);
         walletIcon = findViewById(R.id.wallet_icon);
         walletBalanceText = findViewById(R.id.wallet_balance);
         walletNameText = findViewById(R.id.wallet_name);
@@ -43,7 +46,9 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
         walletSelectedIcon = findViewById(R.id.selected_wallet_indicator);
         clickCallback = callback;
         walletSelectedIcon.setOnClickListener(this);
+        manageWalletBtn.setOnClickListener(this);
         walletIcon.setOnClickListener(this);
+        findViewById(R.id.wallet_info_layout).setOnClickListener(this);
     }
 
     @Override
@@ -52,6 +57,8 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
         walletAddressText.setText(null);
         if (data != null) {
             wallet = data;
+
+            manageWalletBtn.setVisibility(View.VISIBLE);
 
             if (wallet.name != null && !wallet.name.isEmpty()) {
                 walletNameText.setText(wallet.name);
@@ -117,10 +124,12 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.selected_wallet_indicator:
+            case R.id.wallet_info_layout:
+            case R.id.wallet_icon:
                 clickCallback.onWalletClicked(wallet);
                 break;
 
-            case R.id.wallet_icon:
+            case R.id.manage_wallet_btn:
                 Intent intent = new Intent(getContext(), WalletActionsActivity.class);
                 intent.putExtra("wallet", wallet);
                 intent.putExtra("currency", currencySymbol);

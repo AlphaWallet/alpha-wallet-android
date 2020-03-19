@@ -73,7 +73,6 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
                 .get(TokenFunctionViewModel.class);
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
         viewModel.getCurrentWallet();
-        viewModel.reloadScriptsIfRequired();
     }
 
     private void initViews()

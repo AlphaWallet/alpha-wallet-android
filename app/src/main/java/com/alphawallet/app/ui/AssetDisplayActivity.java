@@ -203,7 +203,6 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         getIntents();
         setupSystemViews();
         setupViewModel();
-        viewModel.reloadScriptsIfRequired();
         initView();
     }
 

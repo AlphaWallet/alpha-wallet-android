@@ -772,11 +772,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 ((DappBrowserFragment)dappBrowserFragment).gotGeoAccess(permissions, grantResults);
                 break;
             case RC_DOWNLOAD_EXTERNAL_WRITE_PERM:
-                if (hasPermission(permissions, grantResults))
-                {
-                    viewModel.loadExternalXMLContracts();
-                    //((NewSettingsFragment)settingsFragment).refresh();
-                }
                 break;
             case RC_ASSET_EXTERNAL_WRITE_PERM:
                 if (hasPermission(permissions, grantResults))

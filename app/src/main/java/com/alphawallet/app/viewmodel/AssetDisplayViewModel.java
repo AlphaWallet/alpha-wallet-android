@@ -215,9 +215,4 @@ public class AssetDisplayViewModel extends BaseViewModel
     {
         tokensService.addToken(token);
     }
-
-    public void reloadScriptsIfRequired()
-    {
-        assetDefinitionService.reloadAssets();
-    }
 }

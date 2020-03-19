@@ -46,6 +46,7 @@ public class WalletsActivity extends BaseActivity implements
         AddWalletView.OnNewWalletClickListener,
         AddWalletView.OnImportWalletClickListener,
         AddWalletView.OnWatchWalletClickListener,
+        AddWalletView.OnCloseActionListener,
         CreateWalletCallbackInterface
 {
     @Inject
@@ -71,7 +72,7 @@ public class WalletsActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wallets);
         toolbar();
-        setTitle(getString(R.string.title_change_wallet));
+        setTitle(getString(R.string.title_change_add_wallet));
         initViews();
         requiresHomeRefresh = false;
     }
@@ -265,6 +266,11 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.importWallet(this);
     }
 
+    @Override
+    public void onClose(View view) {
+        hideDialog();
+    }
+
     private void onUpdatedBalance(Wallet wallet) {
         adapter.updateWalletbalance(wallet);
     }
@@ -274,6 +280,7 @@ public class WalletsActivity extends BaseActivity implements
         addWalletView.setOnNewWalletClickListener(this);
         addWalletView.setOnImportWalletClickListener(this);
         addWalletView.setOnWatchWalletClickListener(this);
+        addWalletView.setOnCloseActionListener(this);
         dialog = new BottomSheetDialog(this);
         dialog.setContentView(addWalletView);
         dialog.setCancelable(true);

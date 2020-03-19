@@ -1,111 +1,87 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/white"
     android:orientation="vertical">
 
-    <TextView
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="20dp"
-        android:fontFamily="@font/font_light"
-        android:gravity="center_vertical"
-        android:paddingStart="30dp"
-        android:text="@string/title_dialog_add_account"
-        android:textColor="@color/text_black"
-        android:textSize="25sp" />
+        android:layout_height="60dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
 
-    <LinearLayout
+        <ImageView
+            android:id="@+id/close_action"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_close" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:fontFamily="@font/font_semibold"
+            android:text="@string/title_dialog_add_account"
+            android:textColor="@color/text_black"
+            android:textSize="17sp" />
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury"/>
+
+    <TextView
         android:id="@+id/new_account_action"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/selector_list_item"
-        android:orientation="horizontal"
-        android:padding="15dp">
+        android:layout_height="60dp"
+        android:layout_gravity="center_vertical"
+        android:fontFamily="@font/font_regular"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="15dp"
+        android:text="@string/action_create_new_account"
+        android:textColor="@color/black"
+        android:textSize="17sp" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:contentDescription="@string/action_create_new_account"
-            android:paddingEnd="5dp"
-            android:paddingStart="15dp"
-            app:srcCompat="@drawable/ic_add_24dp" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:fontFamily="@font/font_light"
-            android:gravity="center_vertical"
-            android:paddingEnd="15dp"
-            android:paddingStart="15dp"
-            android:text="@string/action_create_new_account"
-            android:textColor="@color/text_black"
-            android:textSize="18sp" />
-    </LinearLayout>
-
-    <LinearLayout
+    <TextView
         android:id="@+id/import_account_action"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/selector_list_item"
-        android:orientation="horizontal"
-        android:padding="15dp">
+        android:layout_height="60dp"
+        android:layout_gravity="center_vertical"
+        android:fontFamily="@font/font_regular"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="15dp"
+        android:text="@string/title_import"
+        android:textColor="@color/black"
+        android:textSize="17sp" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:contentDescription="@string/action_create_new_account"
-            android:paddingEnd="5dp"
-            android:paddingStart="15dp"
-            app:srcCompat="@drawable/ic_import_export_black_24dp" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/mercury"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:fontFamily="@font/font_light"
-            android:gravity="center_vertical"
-            android:paddingEnd="15dp"
-            android:paddingStart="15dp"
-            android:text="@string/already_have_account"
-            android:textColor="@color/text_black"
-            android:textSize="18sp" />
-    </LinearLayout>
-
-    <LinearLayout
+    <TextView
         android:id="@+id/watch_account_action"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/selector_list_item"
-        android:orientation="horizontal"
-        android:padding="15dp">
+        android:layout_height="60dp"
+        android:layout_gravity="center_vertical"
+        android:fontFamily="@font/font_regular"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="15dp"
+        android:text="@string/action_watch_account"
+        android:textColor="@color/black"
+        android:textSize="17sp" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:contentDescription="@string/action_watch_account"
-            android:paddingEnd="5dp"
-            android:paddingStart="15dp"
-            app:srcCompat="@drawable/ic_import_export_black_24dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:fontFamily="@font/font_light"
-            android:gravity="center_vertical"
-            android:paddingEnd="15dp"
-            android:paddingStart="15dp"
-            android:text="@string/action_watch_account"
-            android:textColor="@color/text_black"
-            android:textSize="18sp" />
-    </LinearLayout>
 </LinearLayout>
 
 

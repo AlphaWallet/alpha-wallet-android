@@ -102,7 +102,11 @@ public class SettingsItemView extends LinearLayout {
     private void processAttrs(Context context, AttributeSet attrs) {
         if (attrs != null) {
             getAttrs(context, attrs);
-            if (iconRes != -1) icon.setImageResource(iconRes);
+            if (iconRes != -1) {
+                icon.setImageResource(iconRes);
+            } else {
+                icon.setVisibility(View.GONE);
+            }
             if (titleRes != -1) title.setText(titleRes);
             if (subtitleRes != -1) setSubtitle(subtitleRes);
             if (typeStr.equals("toggle")) {

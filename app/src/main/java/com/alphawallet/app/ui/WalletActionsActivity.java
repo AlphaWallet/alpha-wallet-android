@@ -1,6 +1,9 @@
 package com.alphawallet.app.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,7 +36,7 @@ import static com.alphawallet.app.C.BACKUP_WALLET_SUCCESS;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.SHARE_REQUEST_CODE;
 
-public class WalletActionsActivity extends BaseActivity implements Runnable {
+public class WalletActionsActivity extends BaseActivity implements Runnable, View.OnClickListener {
     @Inject
     WalletActionsViewModelFactory walletActionsViewModelFactory;
     WalletActionsViewModel viewModel;
@@ -43,6 +46,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable {
     private TextView walletNameText;
     private TextView walletAddressSeparator;
     private TextView walletAddressText;
+    private ImageView walletSelectedIcon;
     private SettingsItemView deleteWalletSetting;
     private SettingsItemView backUpSetting;
     private LinearLayout successOverlay;
@@ -158,7 +162,8 @@ public class WalletActionsActivity extends BaseActivity implements Runnable {
         walletAddressText = findViewById(R.id.wallet_address);
         deleteWalletSetting = findViewById(R.id.delete);
         backUpSetting = findViewById(R.id.setting_backup);
-        findViewById(R.id.selected_wallet_indicator).setVisibility(View.GONE);
+        walletSelectedIcon = findViewById(R.id.selected_wallet_indicator);
+        walletSelectedIcon.setOnClickListener(this);
 
         walletIcon.setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
 
@@ -186,6 +191,8 @@ public class WalletActionsActivity extends BaseActivity implements Runnable {
         } else if (wallet.type == WalletType.WATCH) {
             findViewById(R.id.layout_backup_method).setVisibility(View.GONE);
         }
+
+        walletSelectedIcon.setImageResource(R.drawable.ic_copy);
     }
 
     private void onDeleteWalletSettingClicked() {
@@ -320,5 +327,22 @@ public class WalletActionsActivity extends BaseActivity implements Runnable {
             successOverlay.setVisibility(View.GONE);
             successOverlay.setAlpha(1.0f);
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.selected_wallet_indicator:
+                copyToClipboard();
+                break;
+        }
+    }
+
+    private void copyToClipboard() {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("walletAddress", wallet.address);
+        clipboard.setPrimaryClip(clip);
+
+        Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
     }
 }

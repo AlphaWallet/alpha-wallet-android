@@ -17,21 +17,21 @@
         android:background="@color/colorPrimary"
         android:orientation="vertical">
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/mercury" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@color/alabaster" />
+
         <LinearLayout
             android:id="@+id/layout_backup_method"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/mercury" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@color/alabaster" />
 
             <View
                 android:layout_width="match_parent"

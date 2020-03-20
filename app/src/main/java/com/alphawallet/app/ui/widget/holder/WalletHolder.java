@@ -6,8 +6,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
@@ -23,8 +23,10 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
     public final static String IS_DEFAULT_ADDITION = "is_default";
     public static final String IS_LAST_ITEM = "is_last";
 
-    private final ImageButton manageWalletBtn;
+    private final LinearLayout manageWalletLayout;
+    private final ImageView manageWalletBtn;
     private final ImageView walletIcon;
+    private final LinearLayout walletInfoLayout;
     private final TextView walletBalanceText;
     private final TextView walletNameText;
     private final TextView walletAddressSeparator;
@@ -45,10 +47,8 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
         walletAddressText = findViewById(R.id.wallet_address);
         walletSelectedIcon = findViewById(R.id.selected_wallet_indicator);
         clickCallback = callback;
-        walletSelectedIcon.setOnClickListener(this);
-        manageWalletBtn.setOnClickListener(this);
-        walletIcon.setOnClickListener(this);
-        findViewById(R.id.wallet_info_layout).setOnClickListener(this);
+        walletInfoLayout = findViewById(R.id.wallet_info_layout);
+        manageWalletLayout = findViewById(R.id.layout_manage_wallet);
     }
 
     @Override
@@ -87,6 +87,12 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
             walletSelectedIcon.setImageResource(addition.getBoolean(IS_DEFAULT_ADDITION, false) ? R.drawable.ic_radio_on : R.drawable.ic_radio_off);
 
             checkLastBackUpTime();
+
+            walletInfoLayout.setOnClickListener(this);
+
+            manageWalletLayout.setOnClickListener(this);
+
+            walletSelectedIcon.setOnClickListener(this);
         }
 
     }
@@ -125,11 +131,10 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
         switch (view.getId()) {
             case R.id.selected_wallet_indicator:
             case R.id.wallet_info_layout:
-            case R.id.wallet_icon:
                 clickCallback.onWalletClicked(wallet);
                 break;
 
-            case R.id.manage_wallet_btn:
+            case R.id.layout_manage_wallet:
                 Intent intent = new Intent(getContext(), WalletActionsActivity.class);
                 intent.putExtra("wallet", wallet);
                 intent.putExtra("currency", currencySymbol);

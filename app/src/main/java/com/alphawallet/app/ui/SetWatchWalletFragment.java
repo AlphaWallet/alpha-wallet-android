@@ -72,7 +72,7 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
         updateButtonState(false);
         pattern = Pattern.compile(validator, Pattern.MULTILINE);
 
-        watchAddress.setLayoutListener(getActivity(), this, getActivity().findViewById(R.id.bottom_marker_ww));
+        watchAddress.setLayoutListener(getActivity(), this);
     }
 
     private boolean paused = false;

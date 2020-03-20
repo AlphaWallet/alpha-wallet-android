@@ -468,7 +468,7 @@ public class BackupKeyActivity extends BaseActivity implements View.OnClickListe
         inputView.getEditText().addTextChangedListener(this);
         nextButton.setText(R.string.share_keystore);
         updateButtonState(false);
-        inputView.setLayoutListener(this, this, null);
+        inputView.setLayoutListener(this, this);
     }
 
     private void TestSeedPhrase()

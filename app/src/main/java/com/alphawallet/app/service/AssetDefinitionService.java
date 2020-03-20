@@ -131,19 +131,32 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         tokenscriptUtility = new TokenscriptFunction() { }; //no overriden functions
         tokenLocalSource = trs;
         assetLoadingLock = new Semaphore(1);
-        loadLocalContracts();
+        loadAssetScripts();
     }
 
-    /* Spawns a few threads to load contracts, then spawns more, than
-     * spawns more. The user of this class might get the object
-     * initialised and go ahead with calling its methods. You will see
-     * semaphore used to block the caller if the spawned threads are
-     * not finished.*/
-    private void loadLocalContracts()
+    /**
+     * Load all TokenScripts
+     *
+     * 1. Acquire the loading lock to prevent use of scripts until fully loaded.
+     * 2. Load scripts in the private data area which are only sourced from downloading from official repo
+     * 3. Load scripts bundled with the App (loadInternalAssets)
+     * 4. Load scripts that were installed via AlphaWallet script install intent (checkAndroidExternal)
+     * 5. Load scripts manually copied to /AlphaWallet directory, for Android 9 and less (checkLegacyDirectory)
+     * 6. Release semaphore
+     *
+     * This order has to be observed because it's an expected developer override order. If a script is placed in the /AlphaWallet directory
+     * it is expected to override the one fetched from the repo server.
+     * If a developer clicks on a script intent this script is expected to override the one fetched from the server.
+     * TODO: This also requires a script management page where overrides can be removed.
+     */
+    private void loadAssetScripts()
     {
         try
         {
-            assetLoadingLock.acquire(); // wonder when is this released? Read comments 9 lines down
+            assetLoadingLock.acquire(); // Java semaphore:
+                                        // https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Semaphore.html
+                                        // acquire the semaphore here to prevent attributes from being fetched until loading is complete
+                                        // See flow above for details
         }
         catch (InterruptedException e)
         {
@@ -152,14 +165,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         assetDefinitions = new SparseArray<>();
 
-        /* the following Observable<File> has a subscription with loadInternalAssets() at completion or error
-           which in turn has checkAndroidExternal() at completion or error
-           which in turn has checkLegacyDirectory() at completion or error
-           which in turn has finishLoading() at completion or error
-           which releases the Semaphore.
-           One might argue that getting a full list of files to check and do away with only one subscription
-           might not be bad.   -- Weiwu, code review.
-         */
         loadContracts(context.getFilesDir())
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
@@ -610,7 +615,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         Observable.fromIterable(getCanonicalizedAssets())
                 .subscribeOn(Schedulers.io())
-                .subscribe(this::addContractAssets, error -> { onError(error); checkAndroidExternal(); }, this::checkAndroidExternal).isDisposed();
+                .subscribe(this::addContractAssets, error -> { onError(error); checkAndroidExternal(); }, 
+                           this::checkAndroidExternal).isDisposed();
     }
 
     //Check the external directory - Android/data/(applicationId)
@@ -618,7 +624,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         loadContracts(context.getExternalFilesDir(""))
                 .subscribeOn(Schedulers.io())
-                .subscribe(this::addContractAddresses, error -> { onError(error); checkLegacyDirectory(); }, this::checkLegacyDirectory).isDisposed();
+                .subscribe(this::addContractAddresses, error -> { onError(error); checkLegacyDirectory(); }, 
+                           this::checkLegacyDirectory).isDisposed();
     }
 
     private void checkLegacyDirectory()
@@ -638,7 +645,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             loadContracts(directory)
                     .subscribeOn(Schedulers.io())
-                    .subscribe(this::addContractAddresses, error -> { onError(error); finishLoading(); }, this::finishLoading).isDisposed();
+                    .subscribe(this::addContractAddresses, error -> { onError(error); finishLoading(); }, 
+                               this::finishLoading).isDisposed();
 
             startFileListener(directory.getAbsolutePath(), true);
         }

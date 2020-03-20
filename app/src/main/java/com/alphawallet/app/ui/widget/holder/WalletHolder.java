@@ -84,7 +84,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 
             walletAddressText.setText(Utils.formatAddress(wallet.address));
 
-            walletSelectedIcon.setImageResource(addition.getBoolean(IS_DEFAULT_ADDITION, false) ? R.drawable.ic_radio_on : R.drawable.ic_radio_off);
+            walletSelectedIcon.setImageResource(addition.getBoolean(IS_DEFAULT_ADDITION, false) ? R.drawable.ic_radio_checked : R.drawable.ic_radio_off);
 
             checkLastBackUpTime();
 

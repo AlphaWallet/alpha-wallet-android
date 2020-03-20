@@ -58,6 +58,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
         editText = findViewById(R.id.edit_text);
         instruction = findViewById(R.id.instruction);
         togglePassword = findViewById(R.id.toggle_password);
+        findViewById(R.id.text_word_count).setVisibility(View.GONE);
 
         setViews();
         setImeOptions();

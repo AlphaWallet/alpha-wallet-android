@@ -15,7 +15,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
@@ -47,7 +46,6 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
     private RecyclerView listSuggestions;
     private List<String> suggestions;
     private SuggestionsAdapter suggestionsAdapter;
-    private LinearLayout holdingView;
     Typeface boldTypeface = Typeface.defaultFromStyle(Typeface.BOLD);
     Typeface normalTypeface = Typeface.defaultFromStyle(Typeface.NORMAL);
     private boolean deletePressed;

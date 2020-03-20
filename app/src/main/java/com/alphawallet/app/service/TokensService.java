@@ -272,9 +272,9 @@ public class TokensService
         return unknowns;
     }
 
-    public void setCurrentAddress(String currentAddress)
+    public void setCurrentAddress(String newWalletAddr)
     {
-        this.currentAddress = currentAddress.toLowerCase();
+        if (newWalletAddr != null) this.currentAddress = newWalletAddr.toLowerCase();
     }
     public String getCurrentAddress() { return this.currentAddress; }
 

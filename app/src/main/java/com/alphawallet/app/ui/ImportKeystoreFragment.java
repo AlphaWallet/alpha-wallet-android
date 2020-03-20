@@ -67,8 +67,8 @@ public class ImportKeystoreFragment extends Fragment implements View.OnClickList
         keystore.getEditText().addTextChangedListener(this);
         password.getEditText().addTextChangedListener(this);
 
-        keystore.setLayoutListener(getActivity(), this, getActivity().findViewById(R.id.bottom_marker_ks));
-        password.setLayoutListener(getActivity(), this, getActivity().findViewById(R.id.bottom_marker_ks));
+        keystore.setLayoutListener(getActivity(), this);
+        password.setLayoutListener(getActivity(), this);
     }
 
     @Override

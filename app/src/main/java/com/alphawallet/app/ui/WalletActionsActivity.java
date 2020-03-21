@@ -1,44 +1,55 @@
 package com.alphawallet.app.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.util.Blockies;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.WalletActionsViewModel;
 import com.alphawallet.app.viewmodel.WalletActionsViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.SettingsItemView;
 
-import static com.alphawallet.app.C.*;
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+
+import static com.alphawallet.app.C.BACKUP_WALLET_SUCCESS;
 import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.C.SHARE_REQUEST_CODE;
 
-public class WalletActionsActivity extends BaseActivity implements View.OnClickListener, Runnable {
+public class WalletActionsActivity extends BaseActivity implements Runnable, View.OnClickListener {
     @Inject
     WalletActionsViewModelFactory walletActionsViewModelFactory;
     WalletActionsViewModel viewModel;
 
-    private TextView walletBalance;
-    private TextView walletAddress;
+    private ImageView walletIcon;
+    private TextView walletBalanceText;
+    private TextView walletNameText;
+    private TextView walletAddressSeparator;
+    private TextView walletAddressText;
+    private ImageView walletSelectedIcon;
+    private SettingsItemView deleteWalletSetting;
+    private SettingsItemView backUpSetting;
     private LinearLayout successOverlay;
-    private Button save;
-    private EditText walletName;
-    private TextView delete;
-    private TextView backUp;
     private AWalletAlertDialog aDialog;
     private final Handler handler = new Handler();
 
@@ -144,94 +155,72 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
     }
 
     private void initViews() {
-        walletBalance = findViewById(R.id.wallet_balance);
-        walletBalance.setText(String.format("%s %s", wallet.balance, currencySymbol));
+        walletIcon = findViewById(R.id.wallet_icon);
+        walletBalanceText = findViewById(R.id.wallet_balance);
+        walletNameText = findViewById(R.id.wallet_name);
+        walletAddressSeparator = findViewById(R.id.wallet_address_separator);
+        walletAddressText = findViewById(R.id.wallet_address);
+        deleteWalletSetting = findViewById(R.id.delete);
+        backUpSetting = findViewById(R.id.setting_backup);
+        walletSelectedIcon = findViewById(R.id.selected_wallet_indicator);
+        walletSelectedIcon.setOnClickListener(this);
 
-        walletAddress = findViewById(R.id.wallet_address);
-        walletAddress.setText(wallet.address);
+        walletIcon.setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
 
-        save = findViewById(R.id.button_save);
-        save.setOnClickListener(this);
+        walletBalanceText.setText(String.format("%s %s", wallet.balance, currencySymbol));
 
-        TextWatcher walletNameWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                save.setEnabled(!wallet.name.equals(editable.toString()));
-            }
-        };
-
-        walletName = findViewById(R.id.wallet_name);
-        if (wallet.name.isEmpty()) {
-            walletName.setText(getString(R.string.wallet_name_template, walletCount));
-            save.setEnabled(true);
+        if (wallet.ENSname != null && !wallet.ENSname.isEmpty()) {
+            walletNameText.setText(wallet.ENSname);
+            walletNameText.setVisibility(View.VISIBLE);
+            walletAddressSeparator.setVisibility(View.VISIBLE);
         } else {
-            walletName.setText(wallet.name);
+            walletNameText.setVisibility(View.GONE);
+            walletAddressSeparator.setVisibility(View.GONE);
         }
 
-        walletName.addTextChangedListener(walletNameWatcher);
+        walletAddressText.setText(Utils.formatAddress(wallet.address));
 
-        delete = findViewById(R.id.delete);
-        delete.setOnClickListener(this);
+        deleteWalletSetting.setListener(this::onDeleteWalletSettingClicked);
 
-        backUp = findViewById(R.id.backup);
-        backUp.setOnClickListener(this);
+        backUpSetting.setListener(this::onBackUpSettingClicked);
 
-        if (wallet.type == WalletType.KEYSTORE)
-        {
-            backUp.setText(R.string.export_keystore_json);
+        if (wallet.type == WalletType.KEYSTORE) {
+            backUpSetting.setTitle(getString(R.string.export_keystore_json));
             TextView backupDetail = findViewById(R.id.backup_text);
             backupDetail.setText(R.string.export_keystore_detail);
-        }
-        else if (wallet.type == WalletType.WATCH)
-        {
+        } else if (wallet.type == WalletType.WATCH) {
             findViewById(R.id.layout_backup_method).setVisibility(View.GONE);
         }
+
+        walletSelectedIcon.setImageResource(R.drawable.ic_copy);
     }
 
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.delete: {
-                confirmDelete(wallet);
-                break;
-            }
-            case R.id.backup: {
-                if (wallet.type == WalletType.HDKEY)
-                {
-                    testSeedPhrase(wallet);
-                }
-                else
-                {
-                    exportJSON(wallet);
-                }
-                break;
-            }
-            case R.id.button_save: {
-                wallet.name = walletName.getText().toString();
-                viewModel.storeWallet(wallet);
-                save.setEnabled(false);
-                if (isNewWallet)
-                {
-                    viewModel.showHome(this);
-                    finish(); //drop back to home screen, no need to recreate everything
-                }
-                break;
-            }
+    private void onDeleteWalletSettingClicked() {
+        confirmDelete(wallet);
+    }
+
+    private void onBackUpSettingClicked() {
+        doBackUp();
+    }
+
+    private void saveWalletName() {
+//        wallet.name = walletNameText.getText().toString();
+        viewModel.storeWallet(wallet);
+        if (isNewWallet) {
+            viewModel.showHome(this);
+            finish(); //drop back to home screen, no need to recreate everything
         }
     }
 
-    private void testSeedPhrase(Wallet wallet)
-    {
+    private void doBackUp() {
+        if (wallet.type == WalletType.HDKEY) {
+            testSeedPhrase(wallet);
+        } else {
+            exportJSON(wallet);
+        }
+    }
+
+    private void testSeedPhrase(Wallet wallet) {
         Intent intent = new Intent(this, BackupKeyActivity.class);
         intent.putExtra(WALLET, wallet);
         intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.SHOW_SEED_PHRASE);
@@ -239,18 +228,14 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
         startActivityForResult(intent, C.REQUEST_BACKUP_WALLET);
     }
 
-    private void showWalletsActivity()
-    {
+    private void showWalletsActivity() {
         finish();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                onBackPressed();
-                break;
-            }
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
         }
         return false;
     }
@@ -269,8 +254,7 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
         aDialog.show();
     }
 
-    private void exportJSON(Wallet wallet)
-    {
+    private void exportJSON(Wallet wallet) {
         Intent intent = new Intent(this, BackupKeyActivity.class);
         intent.putExtra(WALLET, wallet);
         intent.putExtra("TYPE", BackupKeyActivity.BackupOperationType.BACKUP_KEYSTORE_KEY);
@@ -305,17 +289,14 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
                 });
                 aDialog.show();
             }
-        }
-        else if (requestCode == C.REQUEST_BACKUP_WALLET && resultCode == RESULT_OK)
-        {
+        } else if (requestCode == C.REQUEST_BACKUP_WALLET && resultCode == RESULT_OK) {
             successOverlay.setVisibility(View.VISIBLE);
             handler.postDelayed(this, 1000);
             backupSuccessful();
         }
     }
 
-    private void backupSuccessful()
-    {
+    private void backupSuccessful() {
         Intent intent = new Intent(BACKUP_WALLET_SUCCESS);
         intent.putExtra("Key", wallet.address);
         sendBroadcast(intent);
@@ -338,17 +319,30 @@ public class WalletActionsActivity extends BaseActivity implements View.OnClickL
     }
 
     @Override
-    public void run()
-    {
-        if (successOverlay.getAlpha() > 0)
-        {
+    public void run() {
+        if (successOverlay.getAlpha() > 0) {
             successOverlay.animate().alpha(0.0f).setDuration(500);
             handler.postDelayed(this, 750);
-        }
-        else
-        {
+        } else {
             successOverlay.setVisibility(View.GONE);
             successOverlay.setAlpha(1.0f);
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.selected_wallet_indicator:
+                copyToClipboard();
+                break;
+        }
+    }
+
+    private void copyToClipboard() {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("walletAddress", wallet.address);
+        clipboard.setPrimaryClip(clip);
+
+        Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
     }
 }

@@ -24,7 +24,7 @@
     <string name="empty" />
     <string name="try_again">Try again</string>
     <string name="already_have_account">Already have a wallet?</string>
-    <string name="action_create_new_account">Create new wallet</string>
+    <string name="action_create_new_account">Create a New Wallet</string>
     <string name="unknown_error">An error has occurred.</string>
     <string name="no_tokens">No tokens found.</string>
 
@@ -482,10 +482,10 @@
     <string name="create_a_new_wallet">Create a new Wallet</string>
     <string name="watch">WATCH</string>
     <string name="already_have_a_wallet">I already have a wallet:</string>
-    <string name="watch_wallet">Watch Wallet</string>
+    <string name="watch_wallet">Watch-only Wallets</string>
     <string name="suggestion_address">Enter Ethereum Address</string>
     <string name="ethereum_address_hint">Ethereum Address: 0x then 40 characters of 0–9 a-f A-F</string>
-    <string name="action_watch_account">Watch an account</string>
+    <string name="action_watch_account">Watch Wallet</string>
     <string name="receive_payment">Receive Payment</string>
     <string name="title_back_up_your_wallet">Back up your Wallet</string>
     <string name="nudge_user_to_backup_wallet">Your funds will be at risk if you do not back up before using your wallet.</string>
@@ -578,4 +578,5 @@
     <string name="settings_locale_currency">Change Currency</string>
     <string name="dialog_title_select_currency">Select FIAT Currency</string>
     <string name="toast_browser_cache_cleared">Browser cache cleared</string>
+    <string name="your_wallets">Your Wallets</string>
 </resources>

@@ -7,149 +7,144 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RadioButton;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.ui.WalletActionsActivity;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
+import com.alphawallet.app.util.Blockies;
+import com.alphawallet.app.util.Utils;
 
 public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnClickListener {
 
-	public static final int VIEW_TYPE = 1001;
-	public final static String IS_DEFAULT_ADDITION = "is_default";
+    public static final int VIEW_TYPE = 1001;
+    public final static String IS_DEFAULT_ADDITION = "is_default";
     public static final String IS_LAST_ITEM = "is_last";
 
-    private final RelativeLayout container;
-    private final RadioButton defaultAction;
-	private final TextView address;
-	private final TextView balance;
-	private final TextView currency;
+    private final LinearLayout manageWalletLayout;
+    private final ImageView manageWalletBtn;
+    private final ImageView walletIcon;
+    private final LinearLayout walletInfoLayout;
+    private final TextView walletBalanceText;
+    private final TextView walletNameText;
+    private final TextView walletAddressSeparator;
+    private final TextView walletAddressText;
+    private final ImageView walletSelectedIcon;
+
     private final WalletClickCallback clickCallback;
-	private Wallet wallet;
-	private String currencySymbol;
-	private TextView walletName;
-	private final ImageView walletSelected;
-	private ImageView currentSelection;
+    private Wallet wallet;
+    private String currencySymbol;
 
-	public WalletHolder(int resId, ViewGroup parent, WalletClickCallback callback) {
-		super(resId, parent);
+    public WalletHolder(int resId, ViewGroup parent, WalletClickCallback callback) {
+        super(resId, parent);
+        manageWalletBtn = findViewById(R.id.manage_wallet_btn);
+        walletIcon = findViewById(R.id.wallet_icon);
+        walletBalanceText = findViewById(R.id.wallet_balance);
+        walletNameText = findViewById(R.id.wallet_name);
+        walletAddressSeparator = findViewById(R.id.wallet_address_separator);
+        walletAddressText = findViewById(R.id.wallet_address);
+        walletSelectedIcon = findViewById(R.id.selected_wallet_indicator);
+        clickCallback = callback;
+        walletInfoLayout = findViewById(R.id.wallet_info_layout);
+        manageWalletLayout = findViewById(R.id.layout_manage_wallet);
+    }
 
-		container = findViewById(R.id.container);
-		defaultAction = findViewById(R.id.default_action);
-		address = findViewById(R.id.address);
-		balance = findViewById(R.id.balance_eth);
-		currency = findViewById(R.id.text_currency);
-		walletName = findViewById(R.id.wallet_name);
-		walletSelected = findViewById(R.id.selected_tick);
-		clickCallback = callback;
-		findViewById(R.id.click_layer).setOnClickListener(this);
-		findViewById(R.id.btn_more).setOnClickListener(this);
-	}
+    @Override
+    public void bind(@Nullable Wallet data, @NonNull Bundle addition) {
+        wallet = null;
+        walletAddressText.setText(null);
+        if (data != null) {
+            wallet = data;
 
-	@Override
-	public void bind(@Nullable Wallet data, @NonNull Bundle addition) {
-		wallet = null;
-		address.setText(null);
-		defaultAction.setEnabled(true);
-		if (data == null)
-		{
-			return;
-		}
-		this.wallet = data;
-		if (wallet.ENSname != null && wallet.ENSname.length() > 0)
-		{
-			address.setText(wallet.ENSname);
-		}
-		else
-		{
-			address.setText(wallet.address);
-		}
-		if (wallet.name != null && !wallet.name.isEmpty()) {
-			walletName.setText(wallet.name);
-		} else {
-			walletName.setText("--");
-		}
-		balance.setText(wallet.balance);
-		if (addition.getBoolean(IS_DEFAULT_ADDITION, false))
-		{
-			container.setElevation(0.0f);
-		}
-		else
-		{
-			container.setElevation(5.0f);
-		}
+            manageWalletBtn.setVisibility(View.VISIBLE);
 
-		boolean isBackedUp = wallet.lastBackupTime > 0;
+            if (wallet.name != null && !wallet.name.isEmpty()) {
+                walletNameText.setText(wallet.name);
+                walletAddressSeparator.setVisibility(View.VISIBLE);
+                walletNameText.setVisibility(View.VISIBLE);
+            } else {
+                walletAddressSeparator.setVisibility(View.GONE);
+                walletNameText.setVisibility(View.GONE);
+            }
 
-		switch (wallet.type)
-		{
-			case KEYSTORE_LEGACY:
-			case KEYSTORE:
-			case HDKEY:
-				switch (wallet.authLevel)
-				{
-					case NOT_SET:
-					case TEE_NO_AUTHENTICATION:
-					case STRONGBOX_NO_AUTHENTICATION:
-						if (!isBackedUp)
-						{
-							defaultAction.setBackgroundResource(R.mipmap.ic_key_noauth);
-						}
-						else
-						{
-							defaultAction.setBackgroundResource(R.mipmap.ic_key_auth);
-						}
-						break;
-					case TEE_AUTHENTICATION:
-					case STRONGBOX_AUTHENTICATION:
-						defaultAction.setBackgroundResource(R.mipmap.ic_key_fullauth);
-						break;
-				}
-				break;
-			case WATCH:
-				defaultAction.setBackgroundResource(R.drawable.ic_ethereum);
-				break;
-			case NOT_DEFINED:
-			case TEXT_MARKER:
-				break;
-		}
+            if (wallet.ENSname != null && wallet.ENSname.length() > 0) {
+                walletNameText.setText(wallet.ENSname);
+                walletAddressSeparator.setVisibility(View.VISIBLE);
+                walletNameText.setVisibility(View.VISIBLE);
+            } else {
+                walletAddressSeparator.setVisibility(View.GONE);
+                walletNameText.setVisibility(View.GONE);
+            }
 
-		walletSelected.setImageResource(addition.getBoolean(IS_DEFAULT_ADDITION, false) ? R.drawable.ic_radio_on : R.drawable.ic_radio_off);
+            walletIcon.setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
 
-		container.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));
-		currency.setText(wallet.balanceSymbol);
+            walletBalanceText.setText(String.format("%s %s", wallet.balance, currencySymbol));
 
-		if (addition.getBoolean(IS_DEFAULT_ADDITION, false))
-		{
-			currentSelection = walletSelected;
-		}
-	}
+            walletAddressText.setText(Utils.formatAddress(wallet.address));
 
-	@Override
-	public void onClick(View view) {
-		switch (view.getId()) {
-            case R.id.click_layer:
-				clickCallback.onWalletClicked(wallet);
-				if (currentSelection != null && currentSelection.getVisibility() == View.VISIBLE) currentSelection.setVisibility(View.GONE);
-				walletSelected.setVisibility(View.VISIBLE);
-				container.setElevation(0.0f);
-				break;
+            walletSelectedIcon.setImageResource(addition.getBoolean(IS_DEFAULT_ADDITION, false) ? R.drawable.ic_radio_checked : R.drawable.ic_radio_off);
 
-			case R.id.btn_more:
-				Intent intent = new Intent(getContext(), WalletActionsActivity.class);
-				intent.putExtra("wallet", wallet);
-				intent.putExtra("currency", currencySymbol);
-				intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-				getContext().startActivity(intent);
-				break;
-		}
-	}
+            checkLastBackUpTime();
 
-    public void setCurrencySymbol(String symbol)
-    {
-		currencySymbol = symbol;
+            walletInfoLayout.setOnClickListener(this);
+
+            manageWalletLayout.setOnClickListener(this);
+
+            walletSelectedIcon.setOnClickListener(this);
+        }
+
+    }
+
+    private void checkLastBackUpTime() {
+        boolean isBackedUp = wallet.lastBackupTime > 0;
+        switch (wallet.type) {
+            case KEYSTORE_LEGACY:
+            case KEYSTORE:
+            case HDKEY:
+                switch (wallet.authLevel) {
+                    case NOT_SET:
+                    case TEE_NO_AUTHENTICATION:
+                    case STRONGBOX_NO_AUTHENTICATION:
+                        if (!isBackedUp) {
+                            // TODO: Display indicator
+                        } else {
+                            // TODO: Display indicator
+                        }
+                        break;
+                    case TEE_AUTHENTICATION:
+                    case STRONGBOX_AUTHENTICATION:
+                        // TODO: Display indicator
+                        break;
+                }
+                break;
+            case WATCH:
+            case NOT_DEFINED:
+            case TEXT_MARKER:
+                break;
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.selected_wallet_indicator:
+            case R.id.wallet_info_layout:
+                clickCallback.onWalletClicked(wallet);
+                break;
+
+            case R.id.layout_manage_wallet:
+                Intent intent = new Intent(getContext(), WalletActionsActivity.class);
+                intent.putExtra("wallet", wallet);
+                intent.putExtra("currency", currencySymbol);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                getContext().startActivity(intent);
+                break;
+        }
+    }
+
+    public void setCurrencySymbol(String symbol) {
+        currencySymbol = symbol;
     }
 }

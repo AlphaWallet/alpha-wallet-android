@@ -1,133 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/colorPrimary"
     android:descendantFocusability="blocksDescendants"
-    android:elevation="5dp"
     android:minHeight="80dp"
     android:orientation="horizontal"
-    android:paddingStart="20dp"
+    android:paddingStart="5dp"
     android:paddingEnd="15dp">
 
-    <RelativeLayout
-        android:id="@+id/click_layer"
+    <LinearLayout
+        android:id="@+id/layout_manage_wallet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp">
+
+        <ImageView
+            android:id="@+id/manage_wallet_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"
+            android:paddingStart="11dp"
+            android:src="@drawable/ic_menu"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/wallet_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="10dp" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/wallet_info_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toLeftOf="@id/btn_more"
-        android:background="@color/transparent"
-        android:orientation="horizontal">
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="8dp"
+        android:layout_toStartOf="@id/selected_wallet_indicator"
+        android:layout_toEndOf="@+id/layout_manage_wallet"
+        android:orientation="vertical">
 
-        <RadioButton
-            android:id="@+id/default_action"
+        <TextView
+            android:id="@+id/wallet_balance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="15dp"
-            android:background="@drawable/ic_ethereum"
-            android:buttonTint="@color/transparent" />
+            android:fontFamily="@font/font_regular"
+            android:text="3.2345"
+            android:textColor="@color/text_black"
+            android:textIsSelectable="true"
+            android:textSize="20sp" />
 
         <LinearLayout
-            android:id="@+id/text_wrapper"
+            android:id="@+id/layout_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="8dp"
-            android:layout_toLeftOf="@id/selected_tick"
-            android:layout_toRightOf="@+id/default_action"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
-            <LinearLayout
-                android:id="@+id/layout_eth"
+            <TextView
+                android:id="@+id/wallet_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:fontFamily="@font/font_regular"
+                android:text="user.eth"
+                android:textColor="@color/dove"
+                android:textSize="12sp" />
 
-                <TextView
-                    android:id="@+id/balance_eth"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_regular"
-                    android:text="3.2345"
-                    android:textColor="@color/text_black"
-                    android:textIsSelectable="true"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:id="@+id/text_currency"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:fontFamily="@font/font_regular"
-                    android:text="@string/eth"
-                    android:textColor="@color/text_black"
-                    android:textSize="20sp"
-                    tools:text="ETH" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_address"
+            <TextView
+                android:id="@+id/wallet_address_separator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:fontFamily="@font/font_regular"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:text="|"
+                android:textColor="@color/dove"
+                android:textSize="12sp" />
 
-                <TextView
-                    android:id="@+id/wallet_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_regular"
-                    android:text="user.eth"
-                    android:textColor="@color/dove"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_regular"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
-                    android:text="|"
-                    android:textColor="@color/dove"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/address"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="middle"
-                    android:fontFamily="@font/font_regular"
-                    android:singleLine="true"
-                    android:text="0xe9f5cc10a54125828d7fc6b6fb0f784f731e33bf"
-                    android:textColor="@color/dove"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
+            <TextView
+                android:id="@+id/wallet_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="middle"
+                android:fontFamily="@font/font_regular"
+                android:singleLine="true"
+                android:text="0xe9f5cc10a54125828d7fc6b6fb0f784f731e33bf"
+                android:textColor="@color/dove"
+                android:textSize="12sp" />
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/selected_tick"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_radio_off"
-            android:visibility="visible" />
-    </RelativeLayout>
+    </LinearLayout>
 
     <ImageView
-        android:id="@+id/btn_more"
+        android:id="@+id/selected_wallet_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_marginTop="@dimen/normal_margin"
-        android:layout_marginBottom="@dimen/normal_margin"
-        android:contentDescription="@string/empty"
-        android:padding="2dp"
-        android:src="@drawable/ic_more_vert" />
+        android:src="@drawable/ic_radio_off"
+        android:visibility="visible" />
 </RelativeLayout>

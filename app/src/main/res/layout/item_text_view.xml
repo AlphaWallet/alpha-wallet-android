@@ -1,27 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="50dp"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingLeft="15dp"
-    android:layout_marginTop="25dp"
-    android:layout_marginBottom="25dp"
-    android:paddingRight="15dp">
+    android:background="@color/alabaster"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
 
     <TextView
         android:id="@+id/text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:fontFamily="@font/font_semibold"
         android:gravity="center_horizontal"
         android:shadowColor="@color/greyf6"
-        android:shadowDx="1"
-        android:shadowDy="1"
         android:text="@string/legacy_wallets"
-        android:textColor="@color/text_dark_gray"
-        android:textSize="20sp" />
+        android:textAllCaps="true"
+        android:textColor="@color/dove"
+        android:textSize="15sp" />
 
-</RelativeLayout>
+</LinearLayout>

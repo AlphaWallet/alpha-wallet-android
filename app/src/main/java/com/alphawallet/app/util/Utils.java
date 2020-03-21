@@ -260,4 +260,12 @@ public class Utils {
 
         return false;
     }
+
+    public static String formatAddress(String address) {
+        String result = "";
+        String firstSix = address.substring(0, 6);
+        String lastSix = address.substring(address.length()-4);
+        StringBuilder formatted = new StringBuilder(result);
+        return formatted.append(firstSix).append("...").append(lastSix).toString().toLowerCase();
+    }
 }

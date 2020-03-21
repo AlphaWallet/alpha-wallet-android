@@ -231,10 +231,11 @@ public class SelectNetworkActivity extends BaseActivity {
                 });
 
                 if (item.isSelected()) {
-                    int resource = singleItem ? R.drawable.ic_radio_on : R.drawable.ic_radio_checked;
+                    int resource = singleItem ? R.drawable.ic_radio_on : R.drawable.ic_checkbox_on;
                     holder.checkbox.setImageResource(resource);
                 } else {
-                    holder.checkbox.setImageResource(R.drawable.ic_radio_off);
+                    int resource = singleItem ? R.drawable.ic_radio_off : R.drawable.ic_checkbox_off;
+                    holder.checkbox.setImageResource(resource);
                 }
 
                 if (!singleItem && dataSet.get(position).getName().equals(VisibilityFilter.primaryNetworkName())) {

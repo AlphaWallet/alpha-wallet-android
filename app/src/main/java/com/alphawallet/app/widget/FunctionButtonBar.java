@@ -322,4 +322,38 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         handleAction(action);
         bottomSheet.hide();
     }
+
+    public void setPrimaryButtonText(Integer resource) {
+        if (resource != null) {
+            primaryButton.setVisibility(View.VISIBLE);
+            primaryButton.setText(resource);
+        } else {
+            primaryButton.setVisibility(View.GONE);
+        }
+    }
+
+    public void setSecondaryButtonText(Integer resource) {
+        if (resource != null) {
+            secondaryButton.setVisibility(View.VISIBLE);
+            secondaryButton.setText(resource);
+        } else {
+            secondaryButton.setVisibility(View.GONE);
+        }
+    }
+
+    public void setPrimaryButtonEnabled(boolean enabled) {
+        primaryButton.setEnabled(enabled);
+    }
+
+    public void setSecondaryButtonEnabled(boolean enabled) {
+        secondaryButton.setEnabled(enabled);
+    }
+
+    public void setPrimaryButtonClickListener(OnClickListener listener) {
+        primaryButton.setOnClickListener(listener);
+    }
+
+    public void setSecondaryButtonClickListener(OnClickListener listener) {
+        secondaryButton.setOnClickListener(listener);
+    }
 }

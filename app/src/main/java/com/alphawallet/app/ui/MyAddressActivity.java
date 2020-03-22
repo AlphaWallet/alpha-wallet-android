@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -346,12 +347,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, displayAddress);
-        if (clipboard != null) {
-            clipboard.setPrimaryClip(clip);
-        }
-        Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
+        copyToClipboard();
     }
 
     private boolean checkWritePermission() {
@@ -390,21 +386,20 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     }
 
     @Override
-    public void handleClick(int view)
+    public void handleClick(String action)
     {
-        switch (view)
-        {
-            case R.string.copy_wallet_address:
-            case R.string.copy_contract_address:
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText(KEY_ADDRESS, displayAddress);
-                if (clipboard != null) {
-                    clipboard.setPrimaryClip(clip);
-                }
-                Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
-                break;
-            default:
-                break;
+        if (action.equals(getString(R.string.copy_wallet_address)) ||
+        action.equals(getString(R.string.copy_contract_address))) {
+            copyToClipboard();
         }
+    }
+
+    private void copyToClipboard() {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, displayAddress);
+        if (clipboard != null) {
+            clipboard.setPrimaryClip(clip);
+        }
+        Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
     }
 }

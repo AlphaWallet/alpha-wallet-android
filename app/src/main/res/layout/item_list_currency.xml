@@ -53,6 +53,6 @@
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_gravity="center_vertical"
-        android:src="@drawable/ic_radio_checked" />
+        android:src="@drawable/selector_radio" />
 
 </RelativeLayout>

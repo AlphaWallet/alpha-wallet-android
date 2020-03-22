@@ -49,6 +49,9 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
         clickCallback = callback;
         walletInfoLayout = findViewById(R.id.wallet_info_layout);
         manageWalletLayout = findViewById(R.id.layout_manage_wallet);
+        walletSelectedIcon.setOnClickListener(this);
+        walletInfoLayout.setOnClickListener(this);
+        manageWalletLayout.setOnClickListener(this);
     }
 
     @Override
@@ -84,17 +87,10 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 
             walletAddressText.setText(Utils.formatAddress(wallet.address));
 
-            walletSelectedIcon.setImageResource(addition.getBoolean(IS_DEFAULT_ADDITION, false) ? R.drawable.ic_radio_checked : R.drawable.ic_radio_off);
+            walletSelectedIcon.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 
             checkLastBackUpTime();
-
-            walletInfoLayout.setOnClickListener(this);
-
-            manageWalletLayout.setOnClickListener(this);
-
-            walletSelectedIcon.setOnClickListener(this);
         }
-
     }
 
     private void checkLastBackUpTime() {
@@ -128,6 +124,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 
     @Override
     public void onClick(View view) {
+        if (wallet == null) { return; }
         switch (view.getId()) {
             case R.id.selected_wallet_indicator:
             case R.id.wallet_info_layout:

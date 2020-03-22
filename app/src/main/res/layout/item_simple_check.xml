@@ -24,6 +24,6 @@
         android:layout_centerVertical="true"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="12dp"
-        android:src="@drawable/selector_radio" />
+        android:src="@drawable/selector_checkbox" />
 
 </RelativeLayout>

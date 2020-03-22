@@ -124,7 +124,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 
     @Override
     public void onClick(View view) {
-        if (wallet == null) { return; }
+        if (wallet == null) { return; } //protect against click between constructor and bind
         switch (view.getId()) {
             case R.id.selected_wallet_indicator:
             case R.id.wallet_info_layout:

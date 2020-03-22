@@ -186,6 +186,9 @@ dependencies {
 
     implementation 'com.github.florent37:tutoshowcase:1.0.1'
 
+    // Do not upgrade unless we have migrated to AndroidX
+    implementation 'com.google.android:flexbox:1.0.0'
+
     // PW
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 }

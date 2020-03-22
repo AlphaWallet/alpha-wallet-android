@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
@@ -10,60 +9,39 @@
     <include layout="@layout/layout_white_toolbar" />
 
     <RelativeLayout
-        android:id="@+id/relativeLayout3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/background_card"
-        android:focusable="true"
-        android:focusableInTouchMode="true">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/text_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="20dp"
-            android:fontFamily="@font/font_light"
+            android:fontFamily="@font/font_regular"
             android:gravity="center_horizontal"
-            android:text="@string/backup_seed_phrase"
+            android:paddingStart="50dp"
+            android:paddingEnd="50dp"
+            android:text="@string/write_down_seed_phrase"
+            android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="28sp" />
 
-        <LinearLayout
-            android:id="@+id/layout_center_holder"
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/layout_word_holder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@id/button_holder"
-            android:layout_below="@+id/text_title"
-            android:layout_marginTop="0dp"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:layout_below="@id/text_title"
+            android:layout_marginLeft="12dp"
+            android:layout_marginTop="49dp"
+            android:layout_marginRight="12dp"
+            app:flexDirection="row"
+            app:flexWrap="wrap" />
 
-            <LinearLayout
-                android:id="@+id/layout_word_holder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginEnd="10dp"
-                android:orientation="vertical"
-                android:visibility="visible" />
-
-        </LinearLayout>
-
-
-        <LinearLayout
-            android:id="@+id/button_holder"
+        <com.alphawallet.app.widget.FunctionButtonBar
+            android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:orientation="vertical">
-
-            <include layout="@layout/item_bottom_buttons" />
-        </LinearLayout>
+            android:layout_alignParentBottom="true" />
 
     </RelativeLayout>
 

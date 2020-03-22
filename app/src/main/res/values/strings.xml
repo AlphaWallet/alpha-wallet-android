@@ -437,7 +437,7 @@
     <string name="authentication_failed">Authentication Failed</string>
     <string name="backup_seed_phrase">Back up your wallet with seed phrase</string>
     <string name="backup_seed_phrase_detail">Making a backup is very simple and safe: just write down 12 words and keep them in a safe place, offline.</string>
-    <string name="action_back_up_my_wallet">back up my wallet</string>
+    <string name="action_back_up_my_wallet">Back up my wallet</string>
     <string name="write_down_seed_phrase">Write down seed phrase\non paper</string>
     <string name="wrote_down_seed_phrase">OK, I wrote this down</string>
     <string name="verify_seed_phrase">Verify Seed Phrase</string>
@@ -492,7 +492,7 @@
     <string name="action_close">Close</string>
     <string name="back_up_this_wallet">Back up this Wallet</string>
     <string name="not_locked">Not Locked</string>
-    <string name="back_up_now">Back up Now!</string>
+    <string name="back_up_now">Back up now!</string>
     <string name="key_secure">100% Secure</string>
     <string name="lock_key_upgrade">Lock your seed phrase to increase security</string>
     <string name="upgrade_key_security_detail">AlphaWallet security is being upgraded to the best achievable. Lock your seed phrase with biometrics.</string>
@@ -508,7 +508,7 @@
     <string name="import_error">Import Error, Try re-import again.</string>
     <string name="watch_exists">Wallet %1$s already full wallet - no need to watch</string>
     <string name="welcome_to_alphawallet">Welcome to AlphaWallet</string>
-    <string name="lock_seed_phrase">LOCK SEED PHRASE</string>
+    <string name="lock_seed_phrase">Lock Seed Phrase</string>
     <string name="no_key">No Key found</string>
     <string name="pending_transaction">Pending Transaction ...</string>
     <string name="title_enable_debug">Local Scripts Not Enabled</string>

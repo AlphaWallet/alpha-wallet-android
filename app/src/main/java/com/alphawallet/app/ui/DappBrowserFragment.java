@@ -376,11 +376,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             web3.clearHistory();
             web3.stopLoading();
-        }
 
-        if (EthereumNetworkRepository.defaultDapp() != null)
-        {
-            loadUrl(EthereumNetworkRepository.defaultDapp());
+            if (EthereumNetworkRepository.defaultDapp() != null)
+            {
+                loadUrl(EthereumNetworkRepository.defaultDapp());
+            }
         }
 
         //blank forward / backward arrows
@@ -472,8 +472,14 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setRefreshInterface(this);
         toolbar = view.findViewById(R.id.address_bar);
-        if (VisibilityFilter.minimiseBrowserURLBar()) toolbar.inflateMenu(R.menu.menu_scan);
-        else toolbar.inflateMenu(R.menu.menu_bookmarks);
+        if (VisibilityFilter.minimiseBrowserURLBar())
+        {
+            toolbar.inflateMenu(R.menu.menu_scan);
+        }
+        else
+        {
+            toolbar.inflateMenu(R.menu.menu_bookmarks);
+        }
         refresh = view.findViewById(R.id.refresh);
         setupMenu(view);
 
@@ -603,12 +609,15 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private void cancelSearchSession() {
         detachFragment(SEARCH);
-        toolbar.getMenu().setGroupVisible(R.id.dapp_browser_menu, true);
-        currentNetwork.setVisibility(View.VISIBLE);
-        next.setVisibility(View.VISIBLE);
-        back.setVisibility(View.VISIBLE);
-        clear.setVisibility(View.GONE);
-        urlTv.dismissDropDown();
+        if (toolbar != null)
+        {
+            toolbar.getMenu().setGroupVisible(R.id.dapp_browser_menu, true);
+            currentNetwork.setVisibility(View.VISIBLE);
+            next.setVisibility(View.VISIBLE);
+            back.setVisibility(View.VISIBLE);
+            clear.setVisibility(View.GONE);
+            urlTv.dismissDropDown();
+        }
         KeyboardUtils.hideKeyboard(urlTv);
         setBackForwardButtons();
     }

@@ -100,7 +100,7 @@ public class SelectNetworkActivity extends BaseActivity {
             }
         }
 
-        adapter = new CustomAdapter(list, selectedChainId, singleItem);
+        adapter = new CustomAdapter(list, singleItem);
         recyclerView.setAdapter(adapter);
     }
 
@@ -147,19 +147,8 @@ public class SelectNetworkActivity extends BaseActivity {
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
         private ArrayList<NetworkItem> dataSet;
-        private String selectedItem;
-        private String selectedItemId;
         private int chainId;
-        private boolean singleItem;
-
-        private void setSelectedItem(String selectedItem, int chainId) {
-            this.selectedItem = selectedItem;
-            this.chainId = chainId;
-        }
-
-        private int getSelectedChainId() {
-            return this.chainId;
-        }
+        private final boolean singleItem;
 
         public Integer[] getSelectedItems() {
             List<Integer> enabledIds = new ArrayList<>();
@@ -172,8 +161,9 @@ public class SelectNetworkActivity extends BaseActivity {
 
         @Override
         public CustomAdapter.CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            int buttonTypeId = singleItem ? R.layout.item_simple_radio : R.layout.item_simple_check;
             View itemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_simple_radio, parent, false);
+                    .inflate(buttonTypeId, parent, false);
 
             return new CustomAdapter.CustomViewHolder(itemView);
         }
@@ -191,9 +181,8 @@ public class SelectNetworkActivity extends BaseActivity {
             }
         }
 
-        private CustomAdapter(ArrayList<NetworkItem> data, String selectedItem, boolean singleItem) {
+        private CustomAdapter(ArrayList<NetworkItem> data, boolean singleItem) {
             this.dataSet = data;
-            this.selectedItem = selectedItem;
             this.singleItem = singleItem;
 
             if (!singleItem) {
@@ -213,30 +202,8 @@ public class SelectNetworkActivity extends BaseActivity {
             //
             if (item != null) {
                 holder.name.setText(item.getName());
-                holder.itemLayout.setOnClickListener(v -> {
-                    if (singleItem) {
-                        for (NetworkItem networkItem : dataSet) {
-                            networkItem.setSelected(false);
-                        }
-                        dataSet.get(position).setSelected(true);
-                    } else if (!dataSet.get(position).getName().equals(VisibilityFilter.primaryNetworkName())) {
-                        if (dataSet.get(position).isSelected()) {
-                            dataSet.get(position).setSelected(false);
-                        } else {
-                            dataSet.get(position).setSelected(true);
-                        }
-                    }
-                    setSelectedItem(dataSet.get(position).getName(), dataSet.get(position).getChainId());
-                    notifyDataSetChanged();
-                });
-
-                if (item.isSelected()) {
-                    int resource = singleItem ? R.drawable.ic_radio_on : R.drawable.ic_checkbox_on;
-                    holder.checkbox.setImageResource(resource);
-                } else {
-                    int resource = singleItem ? R.drawable.ic_radio_off : R.drawable.ic_checkbox_off;
-                    holder.checkbox.setImageResource(resource);
-                }
+                holder.itemLayout.setOnClickListener(v -> clickListener(holder, position));
+                holder.checkbox.setSelected(item.isSelected());
 
                 if (!singleItem && dataSet.get(position).getName().equals(VisibilityFilter.primaryNetworkName())) {
                     holder.checkbox.setAlpha(0.5f);
@@ -244,6 +211,20 @@ public class SelectNetworkActivity extends BaseActivity {
                     holder.checkbox.setAlpha(1.0f);
                 }
             }
+        }
+
+        private void clickListener(final CustomAdapter.CustomViewHolder holder, final int position)
+        {
+            if (singleItem) {
+                for (NetworkItem networkItem : dataSet) {
+                    networkItem.setSelected(false);
+                }
+                dataSet.get(position).setSelected(true);
+                notifyDataSetChanged();
+            } else if (!dataSet.get(position).getName().equals(VisibilityFilter.primaryNetworkName())) {
+                dataSet.get(position).setSelected(!dataSet.get(position).isSelected());
+            }
+            holder.checkbox.setSelected(dataSet.get(position).isSelected());
         }
 
         @Override

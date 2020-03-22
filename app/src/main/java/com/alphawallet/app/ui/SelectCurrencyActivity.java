@@ -69,12 +69,7 @@ public class SelectCurrencyActivity extends BaseActivity {
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
         private ArrayList<CurrencyItem> dataSet;
-        private String selectedItem;
         private String selectedItemId;
-
-        private void setSelectedItem(String selectedItem) {
-            this.selectedItem = selectedItem;
-        }
 
         private void setSelectedItemId(String selectedItemId) {
             this.selectedItemId = selectedItemId;
@@ -82,10 +77,6 @@ public class SelectCurrencyActivity extends BaseActivity {
 
         private String getSelectedItemId() {
             return this.selectedItemId;
-        }
-
-        private String getSelectedItem() {
-            return this.selectedItem;
         }
 
         @Override
@@ -135,16 +126,11 @@ public class SelectCurrencyActivity extends BaseActivity {
                     dataSet.get(i).setSelected(false);
                 }
                 dataSet.get(position).setSelected(true);
-                setSelectedItem(dataSet.get(position).getName());
                 setSelectedItemId(dataSet.get(position).getCode());
                 notifyDataSetChanged();
             });
 
-            if (currencyItem.isSelected()) {
-                holder.checkbox.setImageResource(R.drawable.ic_radio_on);
-            } else {
-                holder.checkbox.setImageResource(R.drawable.ic_radio_off);
-            }
+            holder.checkbox.setSelected(currencyItem.isSelected());
         }
 
         @Override

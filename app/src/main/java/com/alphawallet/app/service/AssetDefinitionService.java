@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
 import io.reactivex.Completable;
@@ -98,7 +99,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final Context context;
     private final OkHttpClient okHttpClient;
 
-    private SparseArray<Map<String, TokenScriptFile>> assetDefinitions;
+    private final SparseArray<Map<String, TokenScriptFile>> assetDefinitions;
     private Map<String, Long> assetChecked;                //Mapping of contract address to when they were last fetched from server
     private FileObserver fileObserver;                     //Observer which scans the override directory waiting for file change
     private FileObserver fileObserverQ;                    //Observer for Android Q directory
@@ -131,6 +132,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         tokenscriptUtility = new TokenscriptFunction() { }; //no overriden functions
         tokenLocalSource = trs;
         assetLoadingLock = new Semaphore(1);
+        assetDefinitions = new SparseArray<>();
         loadAssetScripts();
     }
 
@@ -162,8 +164,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             e.printStackTrace();
         }
-
-        assetDefinitions = new SparseArray<>();
 
         loadContracts(context.getFilesDir())
                 .subscribeOn(Schedulers.io())
@@ -310,6 +310,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private TokenScriptFile getTokenScriptFile(int chainId, String address)
     {
+        if (address.equalsIgnoreCase(tokensService.getCurrentAddress()))
+        {
+            address = "ethereum";
+        }
+
         if (assetDefinitions.get(chainId) != null && assetDefinitions.get(chainId).containsKey(address))
         {
             return assetDefinitions.get(chainId).get(address);
@@ -413,7 +418,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             TokenDefinition td = getAssetDefinition(chainId, address);
             if (td == null) return null;
 
-            if (tokenTypeName.get(chainId) == null) tokenTypeName.put(chainId, new HashMap<>());
+            if (tokenTypeName.get(chainId) == null) tokenTypeName.put(chainId, new ConcurrentHashMap<>());
             if (!tokenTypeName.get(chainId).containsKey(address)) tokenTypeName.get(chainId).put(address, new SparseArray<>());
             tokenTypeName.get(chainId).get(address).put(count, td.getTokenName(count));
             return td.getTokenName(count);
@@ -463,6 +468,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         catch (Exception e)
         {
+            System.out.println(token.getFullName());
             e.printStackTrace();
             // no action
         }
@@ -664,7 +670,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private void addContractsToNetwork(Integer network, Map<String, File> newTokenDescriptionAddresses)
     {
         String externalDir = context.getExternalFilesDir("").getAbsolutePath();
-        if (assetDefinitions.get(network) == null) assetDefinitions.put(network, new HashMap<>());
+        if (assetDefinitions.get(network) == null) assetDefinitions.put(network, new ConcurrentHashMap<>());
         for (String address : newTokenDescriptionAddresses.keySet())
         {
             if (assetDefinitions.get(network).containsKey(address))
@@ -679,7 +685,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private Map<String, File> networkAddresses(List<String> strings, String path)
     {
-        Map<String, File> addrMap = new HashMap<>();
+        Map<String, File> addrMap = new ConcurrentHashMap<>();
         for (String address : strings) addrMap.put(address, new File(path));
         return addrMap;
     }
@@ -836,7 +842,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     /* Add cached signature if uncached files found. */
     private Single<File> cacheSignature(File file)
     {
-        // note that outdated cache is never deleted - we don't have that level of finesse
+        // note that outdated cache is never deleted - we don't have that level of finesse:
+        // Note from developer to commenter above: outdated certificate is simply replaced in the realm - there's no history.
+        //      However there is an issue here - if the tokenscript is removed then this entry will be orphaned.
+        //      Once we cache the tokenscript contracts we will know if the script has been removed and can remove this file too.
         return Single.fromCallable(() -> {
             if (file.canRead())
             {
@@ -938,6 +947,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public boolean hasDefinition(int chainId, String address)
     {
+        if (address.equalsIgnoreCase(tokensService.getCurrentAddress()))
+        {
+            address = "ethereum";
+        }
         return assetDefinitions.get(chainId) != null && assetDefinitions.get(chainId).containsKey(address);
     }
 

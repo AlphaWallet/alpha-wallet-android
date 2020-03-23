@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.res.ResourcesCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -500,6 +501,7 @@ public class BackupKeyActivity extends BaseActivity implements
         seedWord.setMaxLines(1);
         seedWord.setText(word);
         seedWord.setTypeface(ResourcesCompat.getFont(this, R.font.font_regular));
+        seedWord.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16.0f);
         seedWord.setBackgroundResource(R.drawable.background_seed_word);
         seedWord.setTextColor(getColor(R.color.mine));
         seedWord.setLayoutParams(params);

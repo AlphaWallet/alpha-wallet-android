@@ -134,13 +134,15 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         functions = assetSvs.getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         resetButtonCount();
 
+        if (!token.isNonFungible()) addStandardTokenFunctions(token);
+
         if (functions != null && functions.size() > 0) {
             for (String function : functions.keySet()) {
                 addFunction(function);
             }
         }
 
-        addTokenFunctions(token);
+        if (token.isNonFungible()) addStandardTokenFunctions(token); //For non-fungible, include custom functions first - usually these are more frequently used
 
         findViewById(R.id.layoutButtons).setVisibility(View.GONE);
     }
@@ -158,14 +160,17 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         }
     }
 
-    private void addTokenFunctions(Token token) {
+    /**
+     * Adds intrinsic token functions
+     *
+     * @param token
+     */
+    private void addStandardTokenFunctions(Token token) {
         switch (token.getInterfaceSpec()) {
             case ERC20:
             case ETHEREUM:
                 addFunction(R.string.action_send);
                 addFunction(R.string.action_receive);
-                break;
-            default:
                 break;
             case ERC721:
             case ERC721_LEGACY:
@@ -180,6 +185,9 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
                 addFunction(R.string.action_use);
                 addFunction(R.string.action_transfer);
                 addFunction(R.string.action_sell);
+                break;
+            default:
+                addFunction(R.string.action_receive);
                 break;
         }
     }
@@ -209,18 +217,15 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     private void handleStandardFunctionClick(String action) {
         if (action.equals(context.getString(R.string.action_sell))) { //ERC875 only
-            if (!isSelectionValid()) displayInvalidSelectionError();
-            else callStandardFunctions.sellTicketRouter(selection);
+            if (isSelectionValid()) callStandardFunctions.sellTicketRouter(selection);
         } else if (action.equals(context.getString(R.string.action_send))) { //Eth + ERC20
             callStandardFunctions.showSend();
         } else if (action.equals(context.getString(R.string.action_receive))) { //Everything
             callStandardFunctions.showReceive();
         } else if (action.equals(context.getString(R.string.action_transfer))) { //Any NFT
-            if (!isSelectionValid()) displayInvalidSelectionError();
-            else callStandardFunctions.showTransferToken(selection);
+            if (isSelectionValid()) callStandardFunctions.showTransferToken(selection);
         } else if (action.equals(context.getString(R.string.action_use))) { //NFT with Redeem
-            if (!isSelectionValid()) displayInvalidSelectionError();
-            else callStandardFunctions.selectRedeemTokens(selection);
+            if (isSelectionValid()) callStandardFunctions.selectRedeemTokens(selection);
         } else {
             callStandardFunctions.handleClick(action);
         }
@@ -241,7 +246,13 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private boolean isSelectionValid() {
         List<BigInteger> selected = selection;
         if (adapter != null) selected = adapter.getSelectedTokenIds(selection);
-        return (token == null || token.checkSelectionValidity(selected));
+        if (token == null || token.checkSelectionValidity(selected)) {
+            return true;
+        }
+        else {
+            displayInvalidSelectionError();
+            return false;
+        }
     }
 
     private boolean hasCorrectTokens(TSAction action) {

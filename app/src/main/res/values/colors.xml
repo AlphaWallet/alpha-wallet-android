@@ -100,6 +100,7 @@
 	<color name="azure_hover">#1993fd</color>
 	<color name="cerulean">#00bfff</color>
 	<color name="green">#75b943</color>
+	<color name="green_disabled">#7775b943</color>
 	<color name="green_hover">#87cf52</color>
 	<color name="emerald">#53d76b</color>
 	<color name="danger">#ff3b30</color>

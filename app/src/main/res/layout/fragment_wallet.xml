@@ -19,7 +19,7 @@
             app:layout_scrollFlags="scroll|enterAlways"
             app:titleEnabled="false">
 
-            <include layout="@layout/layout_simple_toolbar_no_divider"/>
+            <include layout="@layout/layout_simple_toolbar_no_divider" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
@@ -40,7 +40,6 @@
             app:tabTextAppearance="@style/WalletTabTextAppearance"
             app:tabTextColor="@color/dove" />
 
-        <include layout="@layout/layout_manage_tokens" />
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout
@@ -55,6 +54,7 @@
             android:id="@+id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <com.alphawallet.app.widget.ProgressView

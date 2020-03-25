@@ -85,7 +85,6 @@ public class WalletFragment extends BaseFragment implements
     private Handler handler;
     private String importFileName;
     private RecyclerView recyclerView;
-    private LinearLayout layoutManageTokens;
     private SwipeRefreshLayout refreshLayout;
 
     private boolean isVisible;
@@ -157,35 +156,22 @@ public class WalletFragment extends BaseFragment implements
         systemView = view.findViewById(R.id.system_view);
         progressView = view.findViewById(R.id.progress_view);
         recyclerView = view.findViewById(R.id.list);
-        layoutManageTokens = view.findViewById(R.id.layout_manage_tokens);
 
         progressView.hide();
         systemView.hide();
 
         systemView.attachRecyclerView(recyclerView);
         systemView.attachSwipeRefreshLayout(refreshLayout);
-
-        if (!VisibilityFilter.showManageTokens()) {
-            layoutManageTokens.setVisibility(View.GONE);
-        }
-
-        layoutManageTokens.setOnClickListener(this::onManageTokensClicked);
-    }
-
-    private void onManageTokensClicked(View view) {
-        Wallet wallet = viewModel.defaultWallet().getValue();
-        if (wallet != null) {
-            Intent intent = new Intent(getActivity(), TokenManagementActivity.class);
-            intent.putExtra(EXTRA_ADDRESS, wallet.address);
-            startActivity(intent);
-        }
     }
 
     private void onDefaultWallet(Wallet wallet)
     {
-        //Do we display new user backup popup?
-        ((HomeActivity)getActivity()).showBackupWalletDialog(wallet.lastBackupTime > 0);
+        if (VisibilityFilter.showManageTokens()) {
+            adapter.setWalletAddress(wallet.address);
+        }
 
+        //Do we display new user backup popup?
+        ((HomeActivity) getActivity()).showBackupWalletDialog(wallet.lastBackupTime > 0);
     }
 
     private void refreshList()

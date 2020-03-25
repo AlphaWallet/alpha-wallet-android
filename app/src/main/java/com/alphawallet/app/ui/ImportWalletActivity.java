@@ -85,6 +85,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         LockOrientation();
 
         toolbar();
+        setTitle(getString(R.string.title_import));
 
         currentPage = ImportType.SEED_FORM_INDEX;
         String receivedState = getIntent().getStringExtra(C.EXTRA_STATE);
@@ -124,7 +125,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         }
         else
         {
-            setTitle(R.string.empty);
+            setTitle(getString(R.string.title_import));
         }
 
         importWalletViewModel = ViewModelProviders.of(this, importWalletViewModelFactory)

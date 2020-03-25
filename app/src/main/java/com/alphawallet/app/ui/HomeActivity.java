@@ -79,7 +79,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     HomeViewModelFactory homeViewModelFactory;
     private HomeViewModel viewModel;
 
-    private SystemView systemView;
     private Dialog dialog;
     private ScrollControlViewPager viewPager;
     private PagerAdapter pagerAdapter;
@@ -201,17 +200,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         initBottomNavigation();
         dissableDisplayHomeAsUp();
 
-        SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
-        systemView = findViewById(R.id.system_view);
-        findViewById(R.id.toolbar).setBackgroundResource(R.color.colorPrimary);
-
-        RecyclerView list = findViewById(R.id.list);
-
-        systemView.attachRecyclerView(list);
-        systemView.attachSwipeRefreshLayout(refreshLayout);
-        systemView.showProgress(false);
-
-        viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.installIntent().observe(this, this::onInstallIntent);
         viewModel.walletName().observe(this, this::onWalletName);
@@ -345,31 +333,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        switch (viewPager.getCurrentItem())
-        {
-            case WALLET:
-                if (VisibilityFilter.canAddTokens()) getMenuInflater().inflate(R.menu.menu_add, menu);
-                break;
-            default:
-                break;
-        }
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_add: {
-                viewModel.showAddToken(this, null);
-            }
-            break;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -36,7 +36,7 @@ import static com.alphawallet.app.C.EXTRA_ADDRESS;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 
-public class NewSettingsFragment extends Fragment {
+public class NewSettingsFragment extends BaseFragment {
     @Inject
     NewSettingsViewModelFactory newSettingsViewModelFactory;
 
@@ -74,6 +74,10 @@ public class NewSettingsFragment extends Fragment {
         viewModel.backUpMessage().observe(this, this::backupWarning);
 
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
+
+        toolbar(view);
+
+        setToolbarTitle(R.string.toolbar_header_settings);
 
         initializeSettinngs(view);
 

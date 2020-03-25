@@ -11,7 +11,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -64,7 +63,12 @@ import static com.alphawallet.app.C.Key.WALLET;
  * Created by justindeguzman on 2/28/18.
  */
 
-public class WalletFragment extends Fragment implements OnTokenClickListener, View.OnClickListener, TokenInterface, Runnable, BackupTokenCallback
+public class WalletFragment extends BaseFragment implements
+        OnTokenClickListener,
+        View.OnClickListener,
+        TokenInterface,
+        Runnable,
+        BackupTokenCallback
 {
     private static final String TAG = "WFRAG";
 
@@ -80,8 +84,9 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     private View selectedToken;
     private Handler handler;
     private String importFileName;
-    private RecyclerView listView;
+    private RecyclerView recyclerView;
     private LinearLayout layoutManageTokens;
+    private SwipeRefreshLayout refreshLayout;
 
     private boolean isVisible;
 
@@ -90,29 +95,54 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
         AndroidSupportInjection.inject(this);
+
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
 
-        SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
-        systemView = view.findViewById(R.id.system_view);
-        progressView = view.findViewById(R.id.progress_view);
-        progressView.hide();
-        systemView.hide();
+        if (VisibilityFilter.canAddTokens()) {
+            toolbar(view, R.menu.menu_add, this::onMenuItemClick);
+        } else {
+            toolbar(view);
+        }
 
-        listView = view.findViewById(R.id.list);
+        initViews(view);
 
-        systemView.attachRecyclerView(listView);
-        systemView.attachSwipeRefreshLayout(refreshLayout);
+        initViewModel();
 
-        layoutManageTokens = view.findViewById(R.id.layout_manage_tokens);
-        layoutManageTokens.setOnClickListener(this::onManageTokensClicked);
-        if (!VisibilityFilter.showManageTokens()) layoutManageTokens.setVisibility(View.GONE);
+        tokenReceiver = new TokensReceiver(getActivity(), this);
 
+        isVisible = true;
+
+        setImportToken();
+
+        initList();
+
+        initTabLayout(view);
+
+        viewModel.clearProcess();
+
+        return view;
+    }
+
+    private void initList() {
+        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), getContext());
+        adapter.setHasStableIds(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapter);
+        if (recyclerView.getItemAnimator() != null)
+            ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeCallback(adapter));
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+
+        refreshLayout.setOnRefreshListener(this::refreshList);
+    }
+
+    private void initViewModel() {
         viewModel = ViewModelProviders.of(this, walletViewModelFactory)
                 .get(WalletViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.tokens().observe(this, this::onTokens);
-        viewModel.total().observe(this, this::onTotal);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.currentWalletBalance().observe(this, this::onBalanceChanged);
         viewModel.refreshTokens().observe(this, this::refreshTokens);
@@ -120,29 +150,26 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         viewModel.tokensReady().observe(this, this::tokensReady);
         viewModel.backupEvent().observe(this, this::backupEvent);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+    }
 
-        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), getContext());
-        adapter.setHasStableIds(true);
-        listView.setLayoutManager(new LinearLayoutManager(getContext()));
-        listView.setAdapter(adapter);
-        if (listView.getItemAnimator() != null)
-            ((SimpleItemAnimator) listView.getItemAnimator()).setSupportsChangeAnimations(false);
+    private void initViews(View view) {
+        refreshLayout = view.findViewById(R.id.refresh_layout);
+        systemView = view.findViewById(R.id.system_view);
+        progressView = view.findViewById(R.id.progress_view);
+        recyclerView = view.findViewById(R.id.list);
+        layoutManageTokens = view.findViewById(R.id.layout_manage_tokens);
 
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeCallback(adapter));
-        itemTouchHelper.attachToRecyclerView(listView);
+        progressView.hide();
+        systemView.hide();
 
-        refreshLayout.setOnRefreshListener(this::refreshList);
+        systemView.attachRecyclerView(recyclerView);
+        systemView.attachSwipeRefreshLayout(refreshLayout);
 
-        tokenReceiver = new TokensReceiver(getActivity(), this);
+        if (!VisibilityFilter.showManageTokens()) {
+            layoutManageTokens.setVisibility(View.GONE);
+        }
 
-        initTabLayout(view);
-
-        isVisible = true;
-
-        setImportToken();
-
-        viewModel.clearProcess();
-        return view;
+        layoutManageTokens.setOnClickListener(this::onManageTokensClicked);
     }
 
     private void onManageTokensClicked(View view) {
@@ -158,6 +185,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     {
         //Do we display new user backup popup?
         ((HomeActivity)getActivity()).showBackupWalletDialog(wallet.lastBackupTime > 0);
+
     }
 
     private void refreshList()
@@ -241,24 +269,6 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         TabUtils.decorateTabLayout(getContext(), tabLayout);
     }
 
-    private void onTotal(BigDecimal totalInCurrency) {
-//        adapter.setTotal(totalInCurrency);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_add: {
-                viewModel.showAddToken(getActivity());
-            }
-            break;
-            case android.R.id.home: {
-                break;
-            }
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     @Override
     public void onTokenClick(View view, Token token, List<BigInteger> ids, boolean selected) {
         if (selectedToken == null)
@@ -283,7 +293,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         selectedToken = null;
         viewModel.setVisibility(isVisible);
         viewModel.prepare();
-        listView = getActivity().findViewById(R.id.list);
+        recyclerView = getActivity().findViewById(R.id.list);
     }
 
     private void onTokens(Token[] tokens)
@@ -316,9 +326,9 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     private void checkScrollPosition()
     {
         int scrollPos = adapter.getScrollPosition();
-        if (scrollPos > 0 && listView != null)
+        if (scrollPos > 0 && recyclerView != null)
         {
-            ((LinearLayoutManager)listView.getLayoutManager()).scrollToPositionWithOffset(scrollPos, 0);
+            ((LinearLayoutManager) recyclerView.getLayoutManager()).scrollToPositionWithOffset(scrollPos, 0);
         }
     }
 
@@ -336,8 +346,8 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 wData.title = getString(R.string.time_to_backup_wallet);
                 wData.detail = getString(R.string.recommend_monthly_backup);
                 wData.buttonText = getString(R.string.back_up_wallet_action, viewModel.getWalletAddr().substring(0, 5));
-                wData.colour = ContextCompat.getColor(getContext(), R.color.slate_grey);
-                wData.buttonColour = ContextCompat.getColor(getContext(), R.color.backup_grey);
+                wData.colour = R.color.slate_grey;
+                wData.buttonColour = R.color.backup_grey;
                 wData.wallet = viewModel.getWallet();
                 adapter.addWarning(wData);
                 break;
@@ -346,8 +356,8 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 wData.title = getString(R.string.wallet_not_backed_up);
                 wData.detail = getString(R.string.not_backed_up_detail);
                 wData.buttonText = getString(R.string.back_up_wallet_action, viewModel.getWalletAddr().substring(0, 5));
-                wData.colour = ContextCompat.getColor(getContext(), R.color.warning_red);
-                wData.buttonColour = ContextCompat.getColor(getContext(), R.color.warning_dark_red);
+                wData.colour = R.color.warning_red;
+                wData.buttonColour = R.color.warning_dark_red;
                 wData.wallet = viewModel.getWallet();
                 adapter.addWarning(wData);
                 break;
@@ -594,5 +604,13 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     public Wallet getCurrentWallet()
     {
         return viewModel.getWallet();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        if (menuItem.getItemId() == R.id.action_add) {
+            viewModel.showAddToken(getContext());
+        }
+        return super.onMenuItemClick(menuItem);
     }
 }

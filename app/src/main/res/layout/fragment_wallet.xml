@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,80 +7,48 @@
     android:background="@color/colorTheme"
     android:orientation="vertical">
 
-    <android.support.design.widget.TabLayout
-        android:id="@+id/tab_layout"
-        style="@style/WalletTabLayoutStyle"
+    <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:background="@drawable/background_tab_layout"
-        android:paddingStart="12dp"
-        app:tabBackground="@color/white"
-        app:tabGravity="center"
-        app:tabIndicatorColor="@color/colorHighlight"
-        app:tabIndicatorFullWidth="true"
-        app:tabMode="scrollable"
-        app:tabSelectedTextColor="@color/colorHighlight"
-        app:tabTextAppearance="@style/WalletTabTextAppearance"
-        app:tabTextColor="@color/dove" />
+        android:elevation="0dp"
+        app:elevation="0dp">
 
-    <View
-        android:id="@+id/spacer_view"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@id/tab_layout"
-        android:background="@color/greydd" />
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:titleEnabled="false">
 
-    <RelativeLayout
-        android:id="@+id/outer_layout_manage_tokens"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/spacer_view">
+            <include layout="@layout/layout_simple_toolbar_no_divider"/>
 
-        <LinearLayout
-            android:id="@+id/layout_manage_tokens"
-            android:layout_width="wrap_content"
-            android:layout_height="60dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="16dp"
-            android:gravity="center_vertical"
-            android:background="@color/alabaster"
-            android:orientation="horizontal">
+        </android.support.design.widget.CollapsingToolbarLayout>
 
-            <TextView
-                android:id="@+id/text_add_hide_tokens"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/add_hide_tokens"
-                android:textColor="@color/colorHighlight"
-                android:textSize="17sp" />
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tab_layout"
+            style="@style/WalletTabLayoutStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="@drawable/background_tab_layout"
+            android:paddingStart="12dp"
+            app:layout_scrollFlags="enterAlways"
+            app:tabGravity="center"
+            app:tabIndicatorColor="@color/colorHighlight"
+            app:tabIndicatorFullWidth="true"
+            app:tabMode="scrollable"
+            app:tabSelectedTextColor="@color/colorHighlight"
+            app:tabTextAppearance="@style/WalletTabTextAppearance"
+            app:tabTextColor="@color/dove" />
 
-            <ImageView
-                android:id="@+id/img_add_token"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_add_token" />
-        </LinearLayout>
-
-    </RelativeLayout>
-
-    <View
-        android:id="@+id/spacer_view2"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@id/outer_layout_manage_tokens"
-        android:background="@color/greydd" />
+        <include layout="@layout/layout_manage_tokens" />
+    </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/spacer_view2"
-        android:background="@color/greyffive"
-        android:paddingBottom="3dp"
+        android:layout_marginBottom="?actionBarSize"
+        android:background="@color/alabaster"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <android.support.v7.widget.RecyclerView
@@ -104,4 +72,5 @@
         android:layout_marginTop="?actionBarSize"
         tools:visibility="gone" />
 
-</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>
+

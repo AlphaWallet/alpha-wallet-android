@@ -6,10 +6,7 @@
     android:background="@color/white"
     android:orientation="vertical">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/greydd" />
+    <include layout="@layout/layout_simple_toolbar" />
 
     <ScrollView
         android:layout_width="match_parent"

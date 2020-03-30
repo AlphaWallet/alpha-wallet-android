@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
     android:animateLayoutChanges="true"
-    android:background="@drawable/background_mine_8dp"
+    android:background="@drawable/background_round_nofill_8dp"
     android:elevation="2dp"
     android:orientation="horizontal"
     android:paddingStart="16dp"

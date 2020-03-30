@@ -3,17 +3,17 @@ package com.alphawallet.app.ui.widget.adapter;
 import android.content.Context;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.ViewGroup;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractResult;
-import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.VisibilityFilter;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.entity.ManageTokensData;
+import com.alphawallet.app.ui.widget.entity.ManageTokensSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenSortedItem;
 import com.alphawallet.app.ui.widget.entity.TotalBalanceSortedItem;
@@ -21,11 +21,10 @@ import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.entity.WarningSortedItem;
 import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
+import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
-
-import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -45,6 +44,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private ContractResult scrollToken; // designates a token that should be scrolled to
 
     private Context context;
+
+    private String walletAddress;
 
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -124,6 +125,9 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 holder = tokenHolder;
             }
             break;
+            case ManageTokensHolder.VIEW_TYPE:
+                holder = new ManageTokensHolder(R.layout.layout_manage_tokens, parent);
+                break;
             case WarningHolder.VIEW_TYPE:
                 holder = new WarningHolder(R.layout.item_warning, parent);
                 break;
@@ -155,9 +159,19 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         return items.size();
     }
 
+    public void setWalletAddress(String walletAddress) {
+        this.walletAddress = walletAddress;
+    }
+
+    private void addManageTokensLayout() {
+        if (walletAddress != null && !walletAddress.isEmpty()) {
+            items.add(new ManageTokensSortedItem(new ManageTokensData(walletAddress), 0));
+        }
+    }
+
     public void addWarning(WarningData data)
     {
-        items.add(new WarningSortedItem(data, 0));
+        items.add(new WarningSortedItem(data, 1));
     }
 
     public void removeBackupWarning()
@@ -176,7 +190,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     public void setTokens(Token[] tokens)
     {
-        populateTokens(tokens);
+        populateTokens(tokens, false);
     }
 
     /**
@@ -264,11 +278,13 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         }
     }
 
-    private void populateTokens(Token[] tokens)
+    private void populateTokens(Token[] tokens, boolean clear)
     {
         items.beginBatchedUpdates();
-//        items.add(total);
-
+        if (clear) {
+            items.clear();
+        }
+        addManageTokensLayout();
         for (Token token : tokens)
         {
             updateToken(token, true);
@@ -315,14 +331,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
             }
         }
 
-        items.beginBatchedUpdates();
-        items.clear();
-//        items.add(total);
-        for (Token token : filterTokens)
-        {
-            items.add(new TokenSortedItem(token, token.getNameWeight()));
-        }
-        items.endBatchedUpdates();
+        populateTokens(filterTokens.toArray(new Token[0]), true);
     }
 
     public void setFilterType(int filterType)
@@ -336,6 +345,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         items.beginBatchedUpdates();
         items.clear();
         items.endBatchedUpdates();
+
         notifyDataSetChanged();
     }
 

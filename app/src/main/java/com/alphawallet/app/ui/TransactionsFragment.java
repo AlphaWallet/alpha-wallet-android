@@ -32,7 +32,7 @@ import dagger.android.support.AndroidSupportInjection;
 
 import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 
-public class TransactionsFragment extends Fragment implements View.OnClickListener, TokenInterface
+public class TransactionsFragment extends BaseFragment implements View.OnClickListener, TokenInterface
 {
     @Inject
     TransactionsViewModelFactory transactionsViewModelFactory;
@@ -53,7 +53,8 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         AndroidSupportInjection.inject(this);
         View view = inflater.inflate(R.layout.fragment_transactions, container, false);
-
+        toolbar(view);
+        setToolbarTitle(R.string.toolbar_header_transactions);
         viewModel = ViewModelProviders.of(this, transactionsViewModelFactory)
                 .get(TransactionsViewModel.class);
 

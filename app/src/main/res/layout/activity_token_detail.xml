@@ -12,28 +12,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <Button
-            android:id="@+id/button_transfer"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp"
-            android:text="@string/action_transfer"
-            android:textAllCaps="false"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
+        <include layout="@layout/layout_function_buttons" />
 
         <ScrollView
             android:id="@+id/scroll_details"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="visible"
-            android:layout_above="@id/button_transfer"
+            android:layout_above="@id/layoutButtons"
             android:background="@drawable/background_card">
 
             <RelativeLayout

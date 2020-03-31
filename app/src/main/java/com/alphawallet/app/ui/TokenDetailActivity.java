@@ -84,6 +84,9 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         {
             functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null);
             functionBar.revealButtons();
+            List<BigInteger> selection = new ArrayList<>();
+            selection.add(new BigInteger(asset.getTokenId(16), 16));
+            functionBar.setSelection(selection);
         }
     }
 
@@ -125,9 +128,6 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     @Override
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
-        //override selection
-        selection = new ArrayList<>();
-        selection.add(new BigInteger(asset.getTokenId(16), 16));
         //does the function have a view? If it's transaction only then handle here
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         TSAction action = functions.get(function);

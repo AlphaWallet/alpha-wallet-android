@@ -31,6 +31,8 @@ import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
+import java.math.BigInteger;
+
 /**
  * Created by James on 3/04/2019.
  * Stormbird in Singapore
@@ -216,9 +218,9 @@ public class Web3TokenView extends WebView
         assetHolder = holder;
     }
 
-    public String injectWeb3TokenInit(Context ctx, String view, String tokenContent)
+    public String injectWeb3TokenInit(Context ctx, String view, String tokenContent, BigInteger tokenId)
     {
-        return jsInjectorClient.injectWeb3TokenInit(ctx, view, tokenContent);
+        return jsInjectorClient.injectWeb3TokenInit(ctx, view, tokenContent, tokenId);
     }
 
     public String injectJS(String view, String buildToken)
@@ -231,9 +233,9 @@ public class Web3TokenView extends WebView
         return jsInjectorClient.injectJSAtEnd(view, JSCode);
     }
 
-    public String injectStyleData(String viewData, String style)
+    public String injectStyleAndWrapper(String viewData, String style)
     {
-        return jsInjectorClient.injectStyle(viewData, style);
+        return jsInjectorClient.injectStyleAndWrap(viewData, style);
     }
 
     public void setLayout(Token token, boolean iconified)

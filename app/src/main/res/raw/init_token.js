@@ -37,7 +37,7 @@ web3 = {
 web3.tokens.data.currentInstance = _currentTokenInstance
 
 function refresh() {
-   web3.tokens.dataChanged('test', 'test')
+   web3.tokens.dataChanged('test', web3.tokens.data, '%5$s') //TODO: Cache previous value of token to feed into first arg
 }
 
 window.onload = refresh;

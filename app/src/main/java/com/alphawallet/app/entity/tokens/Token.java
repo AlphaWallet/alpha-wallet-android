@@ -1090,29 +1090,32 @@ public class Token implements Parcelable, Comparable<Token>
         assetService.resolveAttrs(this, tokenId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(throwable, ctx, assetService, attrs, waitSpinner, tokenView, iconified),
-                           () -> displayTicket(ctx, assetService, attrs, waitSpinner, tokenView, iconified))
+                .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(throwable, ctx, assetService, attrs,
+                                                                             waitSpinner, tokenView, iconified, tokenId),
+                           () -> displayTicket(ctx, assetService, attrs, waitSpinner, tokenView, iconified, tokenId))
                 .isDisposed();
     }
 
-    private void displayTicket(Context ctx, AssetDefinitionService assetService, StringBuilder attrs, ProgressBar waitSpinner, Web3TokenView tokenView, boolean iconified)
+    private void displayTicket(Context ctx, AssetDefinitionService assetService, StringBuilder attrs, ProgressBar waitSpinner,
+                               Web3TokenView tokenView, boolean iconified, BigInteger tokenId)
     {
         if (waitSpinner != null) waitSpinner.setVisibility(View.GONE);
         tokenView.setVisibility(View.VISIBLE);
 
         String view = assetService.getTokenView(tokenInfo.chainId, getAddress(), iconified ? "item-view" : "view");
         String style = assetService.getTokenView(tokenInfo.chainId, getAddress(), "style");
-        String viewData = tokenView.injectWeb3TokenInit(ctx, view, attrs.toString());
-        viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
+        String viewData = tokenView.injectWeb3TokenInit(ctx, view, attrs.toString(), tokenId);
+        viewData = tokenView.injectStyleAndWrapper(viewData, style); //style injected last so it comes first
 
         String base64 = android.util.Base64.encodeToString(viewData.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
         tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
     }
 
-    private void onError(Throwable throwable, Context ctx, AssetDefinitionService assetService, StringBuilder attrs, ProgressBar waitSpinner, Web3TokenView tokenView, boolean iconified)
+    private void onError(Throwable throwable, Context ctx, AssetDefinitionService assetService, StringBuilder attrs,
+                         ProgressBar waitSpinner, Web3TokenView tokenView, boolean iconified, BigInteger tokenId)
     {
         throwable.printStackTrace();
-        displayTicket(ctx, assetService, attrs, waitSpinner, tokenView, iconified);
+        displayTicket(ctx, assetService, attrs, waitSpinner, tokenView, iconified, tokenId);
     }
 
     private void onAttr(TokenScriptResult.Attribute attribute, StringBuilder attrs)

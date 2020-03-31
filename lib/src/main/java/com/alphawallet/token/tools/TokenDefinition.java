@@ -894,39 +894,21 @@ public class TokenDefinition {
     }
 
     /**
-     * Check for 'appearance' attribute set
-     * @param tag
-     * @return
-     */
-    public String getAppearance(String tag)
-    {
-        Map<String, String> appearanceSet = attributeSets.get("appearance");
-        if (appearanceSet != null)
-        {
-            return appearanceSet.get(tag);
-        }
-        else
-        {
-            return "";
-        }
-    }
-
-    /**
      * Check for 'cards' attribute set
      * @param tag
      * @return
      */
     public String getCardData(String tag)
     {
+        String view = null;
         Map<String, String> appearanceSet = attributeSets.get("cards");
         if (appearanceSet != null)
         {
-            return appearanceSet.get(tag);
+            view = appearanceSet.get(tag);
+            if (view == null && tag.equals("item-view")) view = getCardData("view-iconified"); //deal with legacy views
         }
-        else
-        {
-            return "";
-        }
+
+        return view != null ? view : "";
     }
 
     public Map<String, TSAction> getActions()

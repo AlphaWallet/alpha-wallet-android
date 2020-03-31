@@ -3,6 +3,7 @@ package com.alphawallet.token.tools;
 import com.alphawallet.token.entity.*;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,6 +27,7 @@ public class TokenDefinition {
     public Map<String, Map<String, String>> attributeSets = new HashMap<>(); //TODO: add language, in case user changes language during operation - see Weiwu's comment further down
     public Map<String, TSAction> actions = new HashMap<>();
     private Map<String, String> names = new HashMap<>(); // store plural etc for token name
+    private Map<String, Module> moduleLookup = null; //used to protect against name collision
 
     public String nameSpace;
     public TokenscriptContext context;
@@ -73,10 +75,35 @@ public class TokenDefinition {
         return defs;
     }
 
+    public EventDefinition parseEvent(Element resolve, Syntax syntax)
+    {
+        EventDefinition ev = new EventDefinition();
+
+        for (int i = 0; i < resolve.getAttributes().getLength(); i++)
+        {
+            Node thisAttr = resolve.getAttributes().item(i);
+            String attrValue = thisAttr.getNodeValue();
+            switch (thisAttr.getNodeName())
+            {
+                case "event":
+                    ev.eventName = attrValue;
+                    ev.eventModule = moduleLookup.get(attrValue);
+                    break;
+                case "filter":
+                    ev.filter = attrValue;
+                    break;
+                case "select":
+                    ev.select = attrValue;
+                    break;
+            }
+        }
+
+        return ev;
+    }
+
     public FunctionDefinition parseFunction(Element resolve, Syntax syntax)
     {
         FunctionDefinition function = new FunctionDefinition();
-        //this value is obtained from a contract call
         String contract = resolve.getAttribute("contract");
         function.contract = contracts.get(contract);
         function.method = resolve.getAttribute("function");
@@ -670,7 +697,7 @@ public class TokenDefinition {
         }
     }
 
-    private void parseOrigins(Element origins)
+    private void parseOrigins(Element origins) throws SAXParseException
     {
         for (Node n = origins.getFirstChild(); n != null; n = n.getNextSibling())
         {
@@ -690,7 +717,7 @@ public class TokenDefinition {
         }
     }
 
-    private void handleAddresses(Element contract)
+    private void handleAddresses(Element contract) throws Exception
     {
         NodeList nList = contract.getElementsByTagNameNS(nameSpace, "address");
         ContractInfo info = new ContractInfo();
@@ -698,28 +725,87 @@ public class TokenDefinition {
         info.contractInterface = contract.getAttribute("interface");
         contracts.put(name, info);
 
-        for (int addrIndex = 0; addrIndex < nList.getLength(); addrIndex++)
+        for (Node n = contract.getFirstChild(); n != null; n = n.getNextSibling())
         {
-            Node node = nList.item(addrIndex);
-            if (node.getNodeType() == ELEMENT_NODE)
+            if (n.getNodeType() == ELEMENT_NODE)
             {
-                Element addressElement = (Element) node;
-                String networkStr = addressElement.getAttribute("network");
-                int network = 1;
-                if (networkStr != null) network = Integer.parseInt(networkStr);
-                String address = addressElement.getTextContent().toLowerCase();
-                List<String> addresses = info.addresses.get(network);
-                if (addresses == null)
+                Element element = (Element) n;
+                switch (element.getLocalName())
                 {
-                    addresses = new ArrayList<>();
-                    info.addresses.put(network, addresses);
-                }
-
-                if (!addresses.contains(address))
-                {
-                    addresses.add(address);
+                    case "address":
+                        handleAddress(element, info);
+                        break;
+                    case "module":
+                        handleModule(element, info);
+                        break;
                 }
             }
+        }
+    }
+
+    private void handleModule(Element module, ContractInfo info) throws Exception
+    {
+        String moduleName = module.getAttribute("name");
+        if (moduleName == null) throw new Exception("Module requires name");
+        if (moduleLookup == null)
+        {
+            moduleLookup = new HashMap<>();
+        }
+        else if (moduleLookup.containsKey(moduleName))
+        {
+            throw new Exception("Duplicate Module name: " + moduleName);
+        }
+
+        for (Node n = module.getFirstChild(); n != null; n = n.getNextSibling())
+        {
+            if (n.getNodeType() == ELEMENT_NODE)
+            {
+                switch (n.getNodeName())
+                {
+                    case "sequence":
+                        Module eventModule = handleElementSequence((Element)n, info, moduleName);
+                        if (info.eventModules == null) info.eventModules = new HashMap<>();
+                        info.eventModules.put(moduleName, eventModule);
+                        moduleLookup.put(moduleName, eventModule);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
+    private Module handleElementSequence(Element sequence, ContractInfo info, String moduleName) throws Exception
+    {
+        Module module = new Module(info);
+        for (Node n = sequence.getFirstChild(); n != null; n = n.getNextSibling())
+        {
+            if (n.getNodeType() == ELEMENT_NODE)
+            {
+                Element element = (Element)n;
+                module.addSequenceElement(element, moduleName);
+            }
+        }
+
+        return module;
+    }
+
+    private void handleAddress(Element addressElement, ContractInfo info)
+    {
+        String networkStr = addressElement.getAttribute("network");
+        int network = 1;
+        if (networkStr != null) network = Integer.parseInt(networkStr);
+        String address = addressElement.getTextContent().toLowerCase();
+        List<String> addresses = info.addresses.get(network);
+        if (addresses == null)
+        {
+            addresses = new ArrayList<>();
+            info.addresses.put(network, addresses);
+        }
+
+        if (!addresses.contains(address))
+        {
+            addresses.add(address);
         }
     }
 

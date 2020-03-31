@@ -13,6 +13,7 @@ import com.alphawallet.app.router.TransferTicketDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.OpenseaService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 /**
@@ -26,16 +27,17 @@ public class TokenFunctionModule
     @Provides
     TokenFunctionViewModelFactory provideTokenFunctionViewModelFactory(
             AssetDefinitionService assetDefinitionService,
-            TransferTicketDetailRouter transferTicketRouter,
             CreateTransactionInteract createTransactionInteract,
             GasService gasService,
             TokensService tokensService,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
-            GenericWalletInteract genericWalletInteract) {
+            GenericWalletInteract genericWalletInteract,
+            OpenseaService openseaService,
+            FetchTokensInteract fetchTokensInteract) {
 
         return new TokenFunctionViewModelFactory(
-                assetDefinitionService, transferTicketRouter, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract);
+                assetDefinitionService, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract, openseaService, fetchTokensInteract);
     }
 
     @Provides

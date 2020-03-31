@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -13,6 +14,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
+import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
+import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.token.entity.TSAction;
 import com.bumptech.glide.Glide;
 import com.alphawallet.app.util.KittyUtils;
 
@@ -23,13 +29,27 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.opensea.Trait;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+
 import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
 
-public class TokenDetailActivity extends BaseActivity {
+public class TokenDetailActivity extends BaseActivity implements StandardFunctionInterface
+{
+    @Inject
+    protected TokenFunctionViewModelFactory tokenFunctionViewModelFactory;
+    private TokenFunctionViewModel viewModel;
+
     private ImageView image;
     private LinearLayout layoutImage;
     private TextView title;
@@ -41,6 +61,7 @@ public class TokenDetailActivity extends BaseActivity {
     private TextView openExternal;
     private TextView labelAttributes;
     private GridLayout grid;
+    private FunctionButtonBar functionBar;
     private Token token;
     private Asset asset;
 
@@ -58,20 +79,29 @@ public class TokenDetailActivity extends BaseActivity {
         grid = findViewById(R.id.grid);
         grid.setAlignmentMode(GridLayout.ALIGN_BOUNDS);
         grid.setUseDefaultMargins(false);
+        functionBar = findViewById(R.id.layoutButtons);
+        if (functionBar != null)
+        {
+            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null);
+            functionBar.revealButtons();
+        }
     }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        AndroidInjection.inject(this);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_token_detail);
-        initViews();
-        toolbar();
-        setTitle(R.string.empty);
+        viewModel = ViewModelProviders.of(this, tokenFunctionViewModelFactory)
+                .get(TokenFunctionViewModel.class);
 
         if (getIntent() != null && getIntent().getExtras() != null) {
             asset = getIntent().getExtras().getParcelable("asset");
             token = getIntent().getExtras().getParcelable("token");
-            title.setText(String.format("%s %s", "1", token.getFullName()));
+            initViews();
+            toolbar();
+            setTitle(token.getFullName());
             setupPage();
         } else {
             finish();
@@ -84,9 +114,34 @@ public class TokenDetailActivity extends BaseActivity {
         setNameAndDesc(asset);
         setExternalLink(asset);
         setTraits(asset);
-        findViewById(R.id.button_transfer).setOnClickListener(v -> {
-            openTransferDirectDialog();
-        });
+    }
+
+    @Override
+    public void showTransferToken(List<BigInteger> selection)
+    {
+        openTransferDirectDialog();
+    }
+
+    @Override
+    public void handleTokenScriptFunction(String function, List<BigInteger> selection)
+    {
+        //override selection
+        selection = new ArrayList<>();
+        selection.add(new BigInteger(asset.getTokenId(16), 16));
+        //does the function have a view? If it's transaction only then handle here
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        TSAction action = functions.get(function);
+
+        //handle TS function
+        if (action != null && action.view == null && action.function != null)
+        {
+            //go straight to function call
+            viewModel.handleFunction(action, selection.get(0), token, this);
+        }
+        else
+        {
+            viewModel.showFunction(this, token, function, selection);
+        }
     }
 
     private void setTraits(Asset asset) {

@@ -41,6 +41,7 @@ import com.alphawallet.token.entity.ParseResult;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TokenScriptResult;
+import com.alphawallet.token.entity.TokenscriptElement;
 import com.alphawallet.token.entity.TransactionResult;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.TokenDefinition;
@@ -1524,5 +1525,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return cr;
+    }
+
+    public String convertInputValue(AttributeType attr, TokenscriptElement e, String valueFromInput)
+    {
+        return tokenscriptUtility.convertInputValue(attr, e, valueFromInput);
     }
 }

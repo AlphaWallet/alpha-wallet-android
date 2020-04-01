@@ -125,6 +125,7 @@ public class JsInjectorClient {
         String tokenIdWrapperName = "token-card-" + tokenId.toString(10);
         initSrc = String.format(initSrc, tokenContent, walletAddress, EthereumNetworkRepository.getNodeURLByNetworkId(chainId), chainId, tokenIdWrapperName);
         //now insert this source into the view
+        // note that the <div> is not closed because it is closed in njectStyleAndWrap().
         String wrapper = "<div id=\"token-card-" + tokenId.toString(10) + "\" class=\"token-card\">";
         initSrc = "<script>\n" + initSrc + "</script>\n" + wrapper;
         return injectJS(view, initSrc);
@@ -212,6 +213,7 @@ public class JsInjectorClient {
                 "padding: 0pt;\n" +
                 "margin: 0pt;\n" +
                 "}</style><body>\n";
+        // the opening of the following </div> is in injectWeb3TokenInit();
         return injectHeader + style + view + "</div></body>";
     }
 

@@ -4,13 +4,14 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
-import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.interact.CreateTransactionInteract;
+import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.router.TransferTicketDetailRouter;
+import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.OpenseaService;
 import com.alphawallet.app.service.TokensService;
 
 /**
@@ -20,36 +21,39 @@ import com.alphawallet.app.service.TokensService;
 public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
 {
     private final AssetDefinitionService assetDefinitionService;
-    private final TransferTicketDetailRouter transferTicketRouter;
     private final CreateTransactionInteract createTransactionInteract;
     private final GasService gasService;
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
     private final GenericWalletInteract genericWalletInteract;
+    private final OpenseaService openseaService;
+    private final FetchTokensInteract fetchTokensInteract;
 
     public TokenFunctionViewModelFactory(
             AssetDefinitionService assetDefinitionService,
-             TransferTicketDetailRouter transferTicketRouter,
             CreateTransactionInteract createTransactionInteract,
             GasService gasService,
             TokensService tokensService,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
-            GenericWalletInteract genericWalletInteract) {
+            GenericWalletInteract genericWalletInteract,
+            OpenseaService openseaService,
+            FetchTokensInteract fetchTokensInteract) {
         this.assetDefinitionService = assetDefinitionService;
-        this.transferTicketRouter = transferTicketRouter;
         this.createTransactionInteract = createTransactionInteract;
         this.gasService = gasService;
         this.tokensService = tokensService;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.keyService = keyService;
         this.genericWalletInteract = genericWalletInteract;
+        this.openseaService = openseaService;
+        this.fetchTokensInteract = fetchTokensInteract;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new TokenFunctionViewModel(assetDefinitionService, transferTicketRouter, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract);
+        return (T) new TokenFunctionViewModel(assetDefinitionService, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract, openseaService, fetchTokensInteract);
     }
 }

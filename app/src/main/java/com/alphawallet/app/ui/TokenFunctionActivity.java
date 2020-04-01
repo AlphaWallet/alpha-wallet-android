@@ -8,26 +8,28 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.RelativeLayout;
 
-import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.web3.Web3TokenView;
-import com.alphawallet.app.web3.entity.PageReadyCallback;
-
-import dagger.android.AndroidInjection;
-
-import com.alphawallet.app.widget.FunctionButtonBar;
-import com.alphawallet.token.entity.TSAction;
-import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
+import com.alphawallet.app.web3.Web3TokenView;
+import com.alphawallet.app.web3.entity.PageReadyCallback;
+import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
+import com.alphawallet.token.entity.TSAction;
+import com.alphawallet.token.entity.TicketRange;
 
-import javax.inject.Inject;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.TICKET;
 
@@ -46,9 +48,10 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private List<BigInteger> idList = null;
     private FunctionButtonBar functionBar;
     private boolean reloaded;
+    private AWalletAlertDialog dialog;
 
-    private void initViews() {
-        token = getIntent().getParcelableExtra(TICKET);
+    private void initViews(Token t) {
+        token = t;
         String displayIds = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
         RelativeLayout frameLayout = findViewById(R.id.layout_select_ticket);
         tokenView = findViewById(R.id.web3_tokenview);
@@ -72,24 +75,31 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
         viewModel = ViewModelProviders.of(this, tokenFunctionViewModelFactory)
                 .get(TokenFunctionViewModel.class);
+        viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
+        viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
+        viewModel.tokenUpdate().observe(this, this::onTokenUpdate);
         SystemView systemView = findViewById(R.id.system_view);
         ProgressView progressView = findViewById(R.id.progress_view);
         systemView.hide();
         progressView.hide();
         functionBar = findViewById(R.id.layoutButtons);
-
-        initViews();
+        initViews(getIntent().getParcelableExtra(TICKET));
         toolbar();
         setTitle(getString(R.string.token_function));
 
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
-        viewModel.getCurrentWallet();
+    }
+
+    private void onTokenUpdate(Token t)
+    {
+        initViews(t);
     }
 
     @Override
     public void onResume()
     {
         super.onResume();
+        viewModel.prepare(token);
     }
 
     @Override
@@ -132,13 +142,13 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     @Override
     public void sellTicketRouter(List<BigInteger> selection)
     {
-        viewModel.openUniversalLink(this, token, token.bigIntListToString(selection, false));
+        viewModel.openUniversalLink(this, token, selection);
     }
 
     @Override
     public void showTransferToken(List<BigInteger> selection)
     {
-        viewModel.showTransferToken(this, token, token.bigIntListToString(selection, false));
+        viewModel.showTransferToken(this, token, selection);
     }
 
     @Override
@@ -162,6 +172,43 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     @Override
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
-        viewModel.showFunction(this, token, function, idList);
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        TSAction action = functions.get(function);
+        if (action != null && action.view == null && action.function != null)
+        {
+            viewModel.handleFunction(action, selection.get(0), token, this);
+        }
+        else
+        {
+            viewModel.showFunction(this, token, function, idList);
+        }
+    }
+
+    private void errorInsufficientFunds(Token currency)
+    {
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.error_insufficient_funds);
+        dialog.setMessage(getString(R.string.current_funds, currency.getCorrectedBalance(currency.tokenInfo.decimals), currency.getSymbol()));
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private void errorInvalidAddress(String address)
+    {
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.error_invalid_address);
+        dialog.setMessage(getString(R.string.invalid_address_explain, address));
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
+        dialog.show();
     }
 }

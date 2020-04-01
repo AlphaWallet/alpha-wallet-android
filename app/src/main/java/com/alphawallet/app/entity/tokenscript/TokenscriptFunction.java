@@ -4,6 +4,7 @@ import io.reactivex.Observable;
 
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.token.entity.*;
 import com.alphawallet.token.tools.TokenDefinition;
 import okhttp3.OkHttpClient;
@@ -40,6 +41,8 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
  */
 public abstract class TokenscriptFunction
 {
+    public static final String TOKENSCRIPT_CONVERSION_ERROR = "<error>";
+
     public Function generateTransactionFunction(String walletAddress, BigInteger tokenId, TokenDefinition definition, FunctionDefinition function, AttributeInterface attrIf)
     {
         //pre-parse tokenId.
@@ -402,6 +405,43 @@ public abstract class TokenscriptFunction
                             params, returnTypes);
     }
 
+    public static byte[] convertArgToBytes(String inputValue)
+    {
+        byte[] argBytes = new byte[1];
+        try
+        {
+            String hexValue = inputValue;
+            if (!Numeric.containsHexPrefix(inputValue))
+            {
+                BigInteger value;
+                try
+                {
+                    value = new BigInteger(inputValue);
+                }
+                catch (NumberFormatException e)
+                {
+                    e.printStackTrace();
+                    value = new BigInteger(inputValue, 16);
+                }
+
+                hexValue = Numeric.toHexStringNoPrefix(value.toByteArray());
+                //fix sign condition
+                if (hexValue.length() > 64 && hexValue.startsWith("00"))
+                {
+                    hexValue = hexValue.substring(2);
+                }
+            }
+
+            argBytes = Numeric.hexStringToByteArray(hexValue);
+        }
+        catch (Exception e)
+        {
+            //no action
+        }
+
+        return argBytes;
+    }
+
     private void handleTransactionResult(TransactionResult result, Function function, String responseValue, FunctionDefinition fd, long lastTransactionTime)
     {
         try
@@ -676,5 +716,84 @@ public abstract class TokenscriptFunction
         }
 
         return result;
+    }
+
+    public String convertInputValue(AttributeType attr, TokenscriptElement e, String valueFromInput)
+    {
+        String convertedValue = "";
+        try
+        {
+            byte[] inputBytes;
+            switch (attr.as)
+            {
+                //UTF8, Unsigned, Signed, Mapping, Boolean, UnsignedInput, TokenId
+                case Unsigned:
+                case Signed:
+                case UnsignedInput:
+                    inputBytes = TokenscriptFunction.convertArgToBytes(valueFromInput);
+                    BigInteger unsignedValue = new BigInteger(inputBytes);
+                    convertedValue = unsignedValue.toString();
+                    e.value = unsignedValue.toString();
+                    break;
+                case UTF8:
+                    e.value = valueFromInput;
+                    convertedValue = valueFromInput;
+                    break;
+                case Bytes:
+                    //apply bitmask to user entry and shift it because bytes is the other way round
+                    inputBytes = TokenscriptFunction.convertArgToBytes(valueFromInput);
+                    if (inputBytes.length <= 32)
+                    {
+                        BigInteger val = new BigInteger(1, inputBytes).and(attr.bitmask).shiftRight(attr.bitshift);
+                        e.value = val.toString(16);
+                    }
+                    else
+                    {
+                        e.value = com.alphawallet.token.tools.Numeric.toHexString(inputBytes);
+                    }
+                    convertedValue = e.value;
+                    break;
+                case e18:
+                    e.value = BalanceUtils.EthToWei(valueFromInput);
+                    convertedValue = e.value;
+                    break;
+                case e8:
+                    e.value = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("100000000"));
+                    convertedValue = e.value;
+                    break;
+                case e4:
+                    e.value = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("1000"));
+                    convertedValue = e.value;
+                    break;
+                case e2:
+                    e.value = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("100"));
+                    convertedValue = e.value;
+                    break;
+                case Mapping:
+                    //makes no sense as input
+                    break;
+                case Boolean:
+                    //attempt to decode
+                    if (valueFromInput.equalsIgnoreCase("true") || valueFromInput.equals("1"))
+                    {
+                        e.value = "TRUE";
+                    }
+                    else
+                    {
+                        e.value = "FALSE";
+                    }
+                    convertedValue = e.value;
+                    break;
+                case TokenId:
+                    break;
+            }
+        }
+        catch (Exception excp)
+        {
+            excp.printStackTrace();
+            convertedValue = TOKENSCRIPT_CONVERSION_ERROR + excp.getMessage();
+        }
+
+        return convertedValue;
     }
 }

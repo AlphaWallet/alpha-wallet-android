@@ -121,7 +121,7 @@ public class TokenscriptViewHolder extends BinderViewHolder<TicketRange> impleme
     {
         tokenId = data.tokenIds.get(0);
         attrs = assetDefinitionService.getTokenAttrs(token, tokenId, data.tokenIds.size());
-        assetDefinitionService.resolveAttrs(token, tokenId)
+        assetDefinitionService.resolveAttrs(token, tokenId, null) // Can a view have local attributes?
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onAttr, this::onError, () -> displayTicket(attrs.toString(), data))

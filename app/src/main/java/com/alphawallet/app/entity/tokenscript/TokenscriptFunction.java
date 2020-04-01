@@ -599,7 +599,7 @@ public abstract class TokenscriptFunction
     {
         if (definition != null && definition.attributeTypes.containsKey(arg.element.ref))
         {
-            arg.element.value = fetchAttrResult(walletAddress, arg.element.ref, tokenId, null, definition, attrIf, 0).blockingSingle().text;
+            arg.element.value = fetchAttrResult(walletAddress, definition.attributeTypes.get(arg.element.ref), tokenId, null, definition, attrIf, 0).blockingSingle().text;
         }
     }
 
@@ -618,7 +618,7 @@ public abstract class TokenscriptFunction
      *       any cached results. However if we're tracking the referenced contract as a token then it should be safe
      *
      * @param walletAddress
-     * @param attribute
+     * @param attr
      * @param tokenId
      * @param cAddr
      * @param td
@@ -626,10 +626,9 @@ public abstract class TokenscriptFunction
      * @param transactionUpdate
      * @return
      */
-    public Observable<TokenScriptResult.Attribute> fetchAttrResult(String walletAddress, String attribute, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf, long transactionUpdate)
+    public Observable<TokenScriptResult.Attribute> fetchAttrResult(String walletAddress, AttributeType attr, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf, long transactionUpdate)
     {
-        AttributeType attr = td.attributeTypes.get(attribute);
-        if (attr == null || isAttrIncomplete(attr)) return Observable.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));
+        if (attr == null) return Observable.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));
         if (attr.function == null)  // static attribute from tokenId (eg city mapping from tokenId)
         {
             return staticAttribute(attr, tokenId);
@@ -653,32 +652,6 @@ public abstract class TokenscriptFunction
                         .map(result -> parseFunctionResult(result, attr));    // write returned data into attribute
             }
         }
-    }
-
-    private boolean isAttrIncomplete(AttributeType attr)
-    {
-        if (attr.function == null) return false;
-
-        for (MethodArg arg : attr.function.parameters)
-        {
-            int index = arg.getTokenIndex();
-            if (arg.isTokenId() && index >= 0 && (arg.element.value == null || arg.element.value.length() == 0))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public Observable<TokenScriptResult.Attribute> resolveAttributes(String walletAddress, BigInteger tokenId, AttributeInterface attrIf, ContractAddress cAddr, TokenDefinition td, long transactionUpdate)
-    {
-        td.context = new TokenscriptContext();
-        td.context.cAddr = cAddr;
-        td.context.attrInterface = attrIf;
-
-        return Observable.fromIterable(new ArrayList<>(td.attributeTypes.values()))
-                .flatMap(attr -> fetchAttrResult(walletAddress, attr.id, tokenId, cAddr, td, attrIf, transactionUpdate));
     }
 
     private Observable<TokenScriptResult.Attribute> staticAttribute(AttributeType attr, BigInteger tokenId)

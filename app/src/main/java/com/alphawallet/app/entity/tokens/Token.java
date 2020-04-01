@@ -1089,7 +1089,7 @@ public class Token implements Parcelable, Comparable<Token>
 
         final StringBuilder attrs = assetService.getTokenAttrs(this, tokenId, range.tokenIds.size());
 
-        assetService.resolveAttrs(this, tokenId)
+        assetService.resolveAttrs(this, tokenId, null) //Can a view have local attributes?
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(throwable, ctx, assetService, attrs,

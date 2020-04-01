@@ -45,6 +45,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ERROR;
+
 public class Token implements Parcelable, Comparable<Token>
 {
     public final TokenInfo tokenInfo;
@@ -1107,8 +1109,15 @@ public class Token implements Parcelable, Comparable<Token>
         String viewData = tokenView.injectWeb3TokenInit(ctx, view, attrs.toString(), tokenId);
         viewData = tokenView.injectStyleAndWrapper(viewData, style); //style injected last so it comes first
 
-        String base64 = android.util.Base64.encodeToString(viewData.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
-        tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
+        if (viewData.contains(TOKENSCRIPT_ERROR))
+        {
+            tokenView.showError(viewData);
+        }
+        else
+        {
+            String base64 = android.util.Base64.encodeToString(viewData.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+            tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
+        }
     }
 
     private void onError(Throwable throwable, Context ctx, AssetDefinitionService assetService, StringBuilder attrs,

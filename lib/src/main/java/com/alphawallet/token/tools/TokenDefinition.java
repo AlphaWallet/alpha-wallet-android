@@ -38,6 +38,9 @@ public class TokenDefinition {
     private static final String TOKENSCRIPT_NAMESPACE = "http://tokenscript.org/" + TOKENSCRIPT_CURRENT_SCHEMA + "/tokenscript";
     private static final String TOKENSCRIPT_BASE_URL = "http://tokenscript.org/";
 
+    public static final String TOKENSCRIPT_ERROR = "<h2 style=\"color:rgba(207, 0, 15, 1);\">TokenScript Error</h2>";
+    private static final String LEGACY_WARNING_TEMPLATE = "<html>" + TOKENSCRIPT_ERROR + "<h3>ts:${ERR1} is deprecated.<br/>Use ts:${ERR2}</h3>";
+
     /* the following are incorrect, waiting to be further improved
      with suitable XML, because none of these String typed class variables
      are going to be one-per-XML-file:
@@ -905,10 +908,33 @@ public class TokenDefinition {
         if (appearanceSet != null)
         {
             view = appearanceSet.get(tag);
-            if (view == null && tag.equals("item-view")) view = getCardData("view-iconified"); //deal with legacy views
+            if (view == null) view = checkLegacyCards(tag, appearanceSet);
         }
 
         return view != null ? view : "";
+    }
+
+    private String checkLegacyCards(String tag, Map<String, String> appearanceSet)
+    {
+        String legacyWarningMessage = null;
+
+        switch (tag)
+        {
+            case "item-view":
+                if (appearanceSet.containsKey("view-iconified"))
+                {
+                    legacyWarningMessage = LEGACY_WARNING_TEMPLATE.replace("${ERR1}", "view-iconified")
+                                                                  .replace("${ERR2}", tag) + "<br/>See <a href=\"http://tokenscript.org/2020/03/tokenscript\">http://tokenscript.org/2020/03/tokenscript</a>";
+                }
+                break;
+            //add instances here when any view name is deprecated
+            default:
+                break;
+        }
+
+        if (legacyWarningMessage != null) legacyWarningMessage += "</html>"; //close error message
+
+        return legacyWarningMessage;
     }
 
     public Map<String, TSAction> getActions()

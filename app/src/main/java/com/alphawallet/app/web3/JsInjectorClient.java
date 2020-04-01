@@ -126,7 +126,7 @@ public class JsInjectorClient {
         initSrc = String.format(initSrc, tokenContent, walletAddress, EthereumNetworkRepository.getNodeURLByNetworkId(chainId), chainId, tokenIdWrapperName);
         //now insert this source into the view
         String wrapper = "<div id=\"token-card-" + tokenId.toString(10) + "\" class=\"token-card\">";
-        initSrc = wrapper + "<script>\n" + initSrc + "</script>\n";
+        initSrc = "<script>\n" + initSrc + "</script>\n" + wrapper;
         return injectJS(view, initSrc);
     }
 
@@ -167,6 +167,9 @@ public class JsInjectorClient {
         }
         if (index < 0) {
             index = body.indexOf("</head");
+        }
+        if (index < 0) {
+            index = 0; //just wrap whole view
         }
         return index;
     }

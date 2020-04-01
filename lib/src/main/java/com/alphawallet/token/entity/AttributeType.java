@@ -43,41 +43,13 @@ public class AttributeType {
         id = attr.getAttribute("id");
         name = id; //set name to id if not specified
         as = As.Unsigned; //default value
-        try {
-            switch (attr.getAttribute("syntax")) { // We don't validate syntax here; schema does it.
-                case "1.3.6.1.4.1.1466.115.121.1.6":
-                    syntax = TokenDefinition.Syntax.BitString;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.7":
-                    syntax = TokenDefinition.Syntax.Boolean;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.11":
-                    syntax = TokenDefinition.Syntax.CountryString;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.28":
-                    syntax = TokenDefinition.Syntax.JPEG;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.36":
-                    syntax = TokenDefinition.Syntax.NumericString;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.24":
-                    syntax = TokenDefinition.Syntax.GeneralizedTime;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.26":
-                    syntax = TokenDefinition.Syntax.IA5String;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.27":
-                    syntax = TokenDefinition.Syntax.Integer;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.15":
-                    syntax = TokenDefinition.Syntax.DirectoryString;
-                    break;
-                default: // unknown syntax treat as Directory String
-                    syntax = TokenDefinition.Syntax.DirectoryString;
-            }
-        } catch (NullPointerException e) { // missing <syntax>
+
+        if(attr.getAttribute("syntax") != null) {
+            syntax = getSyntax(attr.getAttribute("syntax"));
+        } else {
             syntax = TokenDefinition.Syntax.DirectoryString; // 1.3.6.1.4.1.1466.115.121.1.15
         }
+
         for(Node node = attr.getFirstChild();
             node!=null; node=node.getNextSibling()){
             if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -110,6 +82,30 @@ public class AttributeType {
             while (bitmask.mod(BigInteger.ONE.shiftLeft(++bitshift)).equals(BigInteger.ZERO)) ; // !!
             bitshift--;
         }
+    }
+
+    private TokenDefinition.Syntax getSyntax(String ISO) {
+        switch (ISO) {
+            case "1.3.6.1.4.1.1466.115.121.1.6":
+                return TokenDefinition.Syntax.BitString;
+            case "1.3.6.1.4.1.1466.115.121.1.7":
+                return TokenDefinition.Syntax.Boolean;
+            case "1.3.6.1.4.1.1466.115.121.1.11":
+                return TokenDefinition.Syntax.CountryString;
+            case "1.3.6.1.4.1.1466.115.121.1.28":
+                return TokenDefinition.Syntax.JPEG;
+            case "1.3.6.1.4.1.1466.115.121.1.36":
+                return TokenDefinition.Syntax.NumericString;
+            case "1.3.6.1.4.1.1466.115.121.1.24":
+                return TokenDefinition.Syntax.GeneralizedTime;
+            case "1.3.6.1.4.1.1466.115.121.1.26":
+                return TokenDefinition.Syntax.IA5String;
+            case "1.3.6.1.4.1.1466.115.121.1.27":
+                return TokenDefinition.Syntax.Integer;
+            case "1.3.6.1.4.1.1466.115.121.1.15":
+                return TokenDefinition.Syntax.DirectoryString;
+        }
+        return null;
     }
 
     private void handleOrigins(Element origin)
@@ -249,26 +245,36 @@ public class AttributeType {
 
     //Sometimes value needs to be processed from the raw input.
     //Currently only time
-    public BigInteger processValue(BigInteger val) throws UnsupportedEncodingException, ParseException
+    public BigInteger processValue(BigInteger val)
     {
         switch (syntax)
         {
             case GeneralizedTime:
-                try
-                {
-                    DateTime dt = DateTimeFactory.getDateTime(toString(val));
-                    val = BigInteger.valueOf(dt.toEpoch());
-                }
-                catch (ParseException|UnsupportedEncodingException p)
-                {
-                    p.printStackTrace();
-                }
-                break;
-            default:
+                return parseGeneralizedTime(val);
+            case DirectoryString:
+            case IA5String:
+            case Integer:
+            case Boolean:
+            case BitString:
+            case CountryString:
+            case JPEG:
+            case NumericString:
                 break;
         }
-
         return val;
+    }
+
+    private BigInteger parseGeneralizedTime(BigInteger value) {
+        try
+        {
+            DateTime dt = DateTimeFactory.getDateTime(toString(value));
+            return BigInteger.valueOf(dt.toEpoch());
+        }
+        catch (ParseException|UnsupportedEncodingException p)
+        {
+            p.printStackTrace();
+            return value;
+        }
     }
 
     private String checkAlphaNum(String data)

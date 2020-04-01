@@ -134,9 +134,9 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
             TSAction action = functions.get(actionMethod);
             String magicValues = viewModel.getAssetDefinitionService().getMagicValuesForInjection(token.tokenInfo.chainId);
-            String injectedView = tokenView.injectWeb3TokenInit(this, action.view, tokenAttrs);
+            String injectedView = tokenView.injectWeb3TokenInit(this, action.view, tokenAttrs, tokenId);
             injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
-            if (action.style != null) injectedView = tokenView.injectStyleData(injectedView, action.style);
+            injectedView = tokenView.injectStyleAndWrapper(injectedView, action.style);
 
             String base64 = Base64.encodeToString(injectedView.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
             tokenView.loadData(base64, "text/html; charset=utf-8", "base64");

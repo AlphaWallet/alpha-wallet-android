@@ -8,11 +8,11 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.inputmethod.BaseInputConnection;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputConnection;
+import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -31,12 +31,18 @@ import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
+import java.math.BigInteger;
+
+import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ERROR;
+
 /**
  * Created by James on 3/04/2019.
  * Stormbird in Singapore
  */
 public class Web3TokenView extends WebView
 {
+    public static final String RENDERING_ERROR = "<html>" + TOKENSCRIPT_ERROR + "${ERR1}</html>";
+
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
     private static final String JS_PROTOCOL_ON_SUCCESSFUL = "executeCallback(%1$s, null, \"%2$s\")";
     private static final String JS_PROTOCOL_ON_FAILURE = "executeCallback(%1$s, \"%2$s\", null)";
@@ -44,6 +50,7 @@ public class Web3TokenView extends WebView
     private JsInjectorClient jsInjectorClient;
     private TokenScriptClient tokenScriptClient;
     private PageReadyCallback assetHolder;
+    private boolean showingError = false;
 
     protected WebCompletionCallback keyPressCallback;
 
@@ -89,6 +96,7 @@ public class Web3TokenView extends WebView
 
         setInitialScale(0);
         clearCache(true);
+        showingError = false;
 
         addJavascriptInterface(new SignCallbackJSInterface(
                 this,
@@ -98,10 +106,31 @@ public class Web3TokenView extends WebView
                 innerOnSignTypedMessageListener), "alpha");
 
         super.setWebViewClient(tokenScriptClient);
+
+        setWebChromeClient(new WebChromeClient()
+        {
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage msg)
+            {
+                if (!showingError && msg.messageLevel() == ConsoleMessage.MessageLevel.ERROR)
+                {
+                    String errorMessage = RENDERING_ERROR.replace("${ERR1}", msg.message());
+                    showError(errorMessage);
+                }
+                return true;
+            }
+        });
+    }
+
+    public void showError(String error)
+    {
+        showingError = true;
+        loadData(error, "text/html", "utf-8");
     }
 
     @Override
-    public void setWebChromeClient(WebChromeClient client) {
+    public void setWebChromeClient(WebChromeClient client)
+    {
         super.setWebChromeClient(client);
     }
 
@@ -216,9 +245,9 @@ public class Web3TokenView extends WebView
         assetHolder = holder;
     }
 
-    public String injectWeb3TokenInit(Context ctx, String view, String tokenContent)
+    public String injectWeb3TokenInit(Context ctx, String view, String tokenContent, BigInteger tokenId)
     {
-        return jsInjectorClient.injectWeb3TokenInit(ctx, view, tokenContent);
+        return jsInjectorClient.injectWeb3TokenInit(ctx, view, tokenContent, tokenId);
     }
 
     public String injectJS(String view, String buildToken)
@@ -231,9 +260,9 @@ public class Web3TokenView extends WebView
         return jsInjectorClient.injectJSAtEnd(view, JSCode);
     }
 
-    public String injectStyleData(String viewData, String style)
+    public String injectStyleAndWrapper(String viewData, String style)
     {
-        return jsInjectorClient.injectStyle(viewData, style);
+        return jsInjectorClient.injectStyleAndWrap(viewData, style);
     }
 
     public void setLayout(Token token, boolean iconified)
@@ -285,6 +314,12 @@ public class Web3TokenView extends WebView
                 if (keyPressCallback != null) keyPressCallback.enterKeyPressed();
             }
             super.onUnhandledKeyEvent(view, event);
+        }
+
+        @Override
+        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error)
+        {
+            showError(RENDERING_ERROR.replace("${ERR1}", error.getDescription()));
         }
     }
 }

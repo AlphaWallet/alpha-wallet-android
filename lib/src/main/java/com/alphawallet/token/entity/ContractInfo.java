@@ -12,4 +12,16 @@ public class ContractInfo
 {
     public String contractInterface = null;
     public Map<Integer, List<String>> addresses = new HashMap<>();
+    public Map<String, Module> eventModules = null;
+
+    public boolean hasContractTokenScript(int chainId, String address)
+    {
+        if (addresses == null)
+        {
+            return false;
+        } else {
+            List<String> addrs = addresses.get(chainId);
+            return addrs != null && addrs.contains(address);
+        }
+    }
 }

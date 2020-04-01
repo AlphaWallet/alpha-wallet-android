@@ -34,45 +34,22 @@ public class AttributeType {
     public Map<BigInteger, String> members;
     private TokenDefinition definition;
     public FunctionDefinition function = null;
+    public EventDefinition event = null;
     public boolean userInput = false;
 
     public AttributeType(Element attr, TokenDefinition def)
     {
         definition = def;
         id = attr.getAttribute("id");
+        name = id; //set name to id if not specified
         as = As.Unsigned; //default value
-        try {
-            switch (attr.getAttribute("syntax")) { // We don't validate syntax here; schema does it.
-                case "1.3.6.1.4.1.1466.115.121.1.6":
-                    syntax = TokenDefinition.Syntax.BitString;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.7":
-                    syntax = TokenDefinition.Syntax.Boolean;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.11":
-                    syntax = TokenDefinition.Syntax.CountryString;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.28":
-                    syntax = TokenDefinition.Syntax.JPEG;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.36":
-                    syntax = TokenDefinition.Syntax.NumericString;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.24":
-                    syntax = TokenDefinition.Syntax.GeneralizedTime;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.26":
-                    syntax = TokenDefinition.Syntax.IA5String;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.27":
-                    syntax = TokenDefinition.Syntax.Integer;
-                    break;
-                default: // unknown syntax treat as Directory String
-                    syntax = TokenDefinition.Syntax.DirectoryString;
-            }
-        } catch (NullPointerException e) { // missing <syntax>
+
+        if(attr.getAttribute("syntax") != null) {
+            syntax = getSyntax(attr.getAttribute("syntax"));
+        } else {
             syntax = TokenDefinition.Syntax.DirectoryString; // 1.3.6.1.4.1.1466.115.121.1.15
         }
+
         for(Node node = attr.getFirstChild();
             node!=null; node=node.getNextSibling()){
             if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -107,6 +84,30 @@ public class AttributeType {
         }
     }
 
+    private TokenDefinition.Syntax getSyntax(String ISO) {
+        switch (ISO) {
+            case "1.3.6.1.4.1.1466.115.121.1.6":
+                return TokenDefinition.Syntax.BitString;
+            case "1.3.6.1.4.1.1466.115.121.1.7":
+                return TokenDefinition.Syntax.Boolean;
+            case "1.3.6.1.4.1.1466.115.121.1.11":
+                return TokenDefinition.Syntax.CountryString;
+            case "1.3.6.1.4.1.1466.115.121.1.28":
+                return TokenDefinition.Syntax.JPEG;
+            case "1.3.6.1.4.1.1466.115.121.1.36":
+                return TokenDefinition.Syntax.NumericString;
+            case "1.3.6.1.4.1.1466.115.121.1.24":
+                return TokenDefinition.Syntax.GeneralizedTime;
+            case "1.3.6.1.4.1.1466.115.121.1.26":
+                return TokenDefinition.Syntax.IA5String;
+            case "1.3.6.1.4.1.1466.115.121.1.27":
+                return TokenDefinition.Syntax.Integer;
+            case "1.3.6.1.4.1.1466.115.121.1.15":
+                return TokenDefinition.Syntax.DirectoryString;
+        }
+        return null;
+    }
+
     private void handleOrigins(Element origin)
     {
         for(Node node = origin.getFirstChild();
@@ -119,7 +120,15 @@ public class AttributeType {
                 switch (node.getLocalName())
                 {
                     case "ethereum":
-                        function = definition.parseFunction(resolve, syntax);
+                        if (resolve.hasAttribute("event"))
+                        {
+                            event = definition.parseEvent(resolve, syntax);
+                            event.attributeId = id;
+                        }
+                        else if (resolve.hasAttribute("function"))
+                        {
+                            function = definition.parseFunction(resolve, syntax);
+                        }
                         //drop through (no break)
                     case "token-id":
                         //this value is obtained from the token id
@@ -231,6 +240,40 @@ public class AttributeType {
                 return data;
             default:
                 return data;
+        }
+    }
+
+    //Sometimes value needs to be processed from the raw input.
+    //Currently only time
+    public BigInteger processValue(BigInteger val)
+    {
+        switch (syntax)
+        {
+            case GeneralizedTime:
+                return parseGeneralizedTime(val);
+            case DirectoryString:
+            case IA5String:
+            case Integer:
+            case Boolean:
+            case BitString:
+            case CountryString:
+            case JPEG:
+            case NumericString:
+                break;
+        }
+        return val;
+    }
+
+    private BigInteger parseGeneralizedTime(BigInteger value) {
+        try
+        {
+            DateTime dt = DateTimeFactory.getDateTime(toString(value));
+            return BigInteger.valueOf(dt.toEpoch());
+        }
+        catch (ParseException|UnsupportedEncodingException p)
+        {
+            p.printStackTrace();
+            return value;
         }
     }
 

@@ -20,6 +20,7 @@ import com.alphawallet.app.ui.SelectNetworkActivity;
 import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.SplashActivity;
+import com.alphawallet.app.ui.TokenDetailActivity;
 import com.alphawallet.app.ui.TokenFunctionActivity;
 import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.ui.TransactionDetailActivity;
@@ -72,7 +73,7 @@ public abstract class BuildersModule {
 	abstract RedeemSignatureDisplayActivity bindSignatureDisplayActivity();
 
 	@ActivityScope
-	@ContributesAndroidInjector(modules = AssetDisplayModule.class)
+	@ContributesAndroidInjector(modules = TokenFunctionModule.class)
 	abstract AssetDisplayActivity bindAssetDisplayActivity();
 
 	@ActivityScope
@@ -142,6 +143,10 @@ public abstract class BuildersModule {
 	@ActivityScope
 	@ContributesAndroidInjector(modules = TokenFunctionModule.class)
 	abstract FunctionActivity bindFunctionActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = TokenFunctionModule.class)
+	abstract TokenDetailActivity bindTokenDetailActivity();
 
 	@ContributesAndroidInjector(modules = SelectNetworkModule.class)
 	abstract SelectNetworkActivity bindSelectNetworkActivity();

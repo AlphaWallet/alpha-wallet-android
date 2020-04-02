@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import com.alphawallet.app.R;
 
 import com.alphawallet.app.entity.Event;
+import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
@@ -14,10 +15,12 @@ import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTransactionClickListener;
 import com.alphawallet.app.ui.widget.entity.DateSortedItem;
+import com.alphawallet.app.ui.widget.entity.EventSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
 import com.alphawallet.app.ui.widget.entity.TimestampSortedItem;
 import com.alphawallet.app.ui.widget.entity.TransactionSortedItem;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
+import com.alphawallet.app.ui.widget.holder.EventHolder;
 import com.alphawallet.app.ui.widget.holder.TransactionDateHolder;
 import com.alphawallet.app.ui.widget.holder.TransactionHolder;
 
@@ -97,16 +100,20 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
             resId = R.layout.item_transaction;
         }
         BinderViewHolder holder = null;
-        switch (viewType) {
-            case TransactionHolder.VIEW_TYPE: {
+        switch (viewType)
+        {
+            case TransactionHolder.VIEW_TYPE:
                 TransactionHolder transactionHolder
                         = new TransactionHolder(resId, parent, tokensService, fetchTransactionsInteract);
                 transactionHolder.setOnTransactionClickListener(onTransactionClickListener);
                 holder = transactionHolder;
-            } break;
-            case TransactionDateHolder.VIEW_TYPE: {
+                break;
+            case TransactionDateHolder.VIEW_TYPE:
                 holder = new TransactionDateHolder(R.layout.item_transactions_date_head, parent);
-            }
+                break;
+            case EventHolder.VIEW_TYPE:
+                holder = new EventHolder(R.layout.item_transaction, parent, tokensService, fetchTransactionsInteract);
+                break;
         }
         return holder;
     }
@@ -187,10 +194,19 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         notifyDataSetChanged();
     }
 
-    //TODO: Display events in Actions list
     public void addEvents(Event[] events)
     {
-
+        items.beginBatchedUpdates();
+        for (Event ev : events)
+        {
+            EventMeta data = new EventMeta(ev.getHash(), ev.getTimeStamp(), ev.getEventText(), ev.getChainId());
+            EventSortedItem sortedItem = new EventSortedItem(
+                    EventHolder.VIEW_TYPE, data, TimestampSortedItem.DESC);
+            items.add(sortedItem);
+            items.add(DateSortedItem.round(ev.getTimeStamp()));
+        }
+        items.endBatchedUpdates();
+        notifyDataSetChanged();
     }
 
     public int updateRecentTransactions(Transaction[] transactions)

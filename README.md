@@ -28,7 +28,3 @@ For Android:
 
 For iOS:
 <https://github.com/AlphaWallet/alpha-wallet-ios/blob/master/AlphaWallet/Browser/ViewModel/Dapps.swift>
-
-## GPL Acknowledgement
-
-The codebase for this app is originally forked from the Trust ethereum wallet and has had many major modifications. Their Android repo can be seen here: https://github.com/TrustWallet/trust-wallet-android-source

@@ -41,6 +41,7 @@ import com.alphawallet.token.entity.ParseResult;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TokenScriptResult;
+import com.alphawallet.token.entity.TokenscriptContext;
 import com.alphawallet.token.entity.TokenscriptElement;
 import com.alphawallet.token.entity.TransactionResult;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
@@ -1144,7 +1145,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                 Observable.fromIterable(token.getNonZeroArrayBalance())
                                         .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
                                         .filter(txResult -> txResult.needsUpdating(token.lastTxTime))
-                                        .concatMap(result -> tokenscriptUtility.fetchAttrResult(token.getWallet(), attr.id, result.tokenId, cAddr, td, this, token.lastTxTime))
+                                        .concatMap(result -> tokenscriptUtility.fetchAttrResult(token.getWallet(), td.attributeTypes.get(attr.id), result.tokenId, cAddr, td, this, token.lastTxTime))
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe();
@@ -1155,7 +1156,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             TransactionResult tr = getFunctionResult(cAddr, attr, BigInteger.ZERO);
                             if (tr.needsUpdating(token.lastTxTime))
                             {
-                                tokenscriptUtility.fetchAttrResult(token.getWallet(), attr.id, tr.tokenId, cAddr, td, this, token.lastTxTime)
+                                tokenscriptUtility.fetchAttrResult(token.getWallet(), td.attributeTypes.get(attr.id), tr.tokenId, cAddr, td, this, token.lastTxTime)
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe();
@@ -1405,16 +1406,24 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return sb.toString();
     }
 
-    public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, BigInteger tokenId)
+    public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, BigInteger tokenId, List<AttributeType> extraAttrs)
     {
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
-        //return definition.resolveAttributes(tokenId, this, cAddr);
-        //resolveAttributes(BigInteger tokenId, AttributeInterface attrIf, ContractAddress cAddr, TokenDefinition td)
-        return tokenscriptUtility.resolveAttributes(token.getWallet(), tokenId, this, cAddr, definition, token.lastTxTime);
+
+        definition.context = new TokenscriptContext();
+        definition.context.cAddr = cAddr;
+        definition.context.attrInterface = this;
+
+        List<AttributeType> attrList = new ArrayList<>(definition.attributeTypes.values());
+        if (extraAttrs != null) attrList.addAll(extraAttrs);
+
+        return Observable.fromIterable(attrList)
+                .flatMap(attr -> tokenscriptUtility.fetchAttrResult(token.getWallet(), attr, tokenId,
+                                                                    cAddr, definition, this, token.lastTxTime));
     }
 
-    public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, List<BigInteger> tokenIds)
+    public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, List<BigInteger> tokenIds, List<AttributeType> extraAttrs)
     {
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         //pre-fill tokenIds
@@ -1425,7 +1434,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         //TODO: store transaction fetch time for multiple tokenIds
 
-        return resolveAttrs(token, tokenIds.get(0));
+        return resolveAttrs(token, tokenIds.get(0), extraAttrs);
     }
 
     private void resolveTokenIds(AttributeType attrType, List<BigInteger> tokenIds)

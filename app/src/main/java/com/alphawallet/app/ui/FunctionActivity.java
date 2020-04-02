@@ -160,11 +160,16 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             e.printStackTrace();
         }
 
-        viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onAttr, this::onError, () -> displayFunction(attrs.toString()))
-                .isDisposed();
+        // Fetch attributes local to this action and add them to the injected token properties
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        TSAction action = functions.get(actionMethod);
+        List<AttributeType> localAttrs = (action != null && action.attributeTypes != null) ? new ArrayList<>(action.attributeTypes.values()) : null;
+
+        viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds, localAttrs)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onAttr, this::onError, () -> displayFunction(attrs.toString()))
+                    .isDisposed();
     }
 
     private void addMultipleTokenIds(StringBuilder sb)

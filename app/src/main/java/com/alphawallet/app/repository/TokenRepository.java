@@ -244,14 +244,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Observable<Token> fetchActiveSingle(String walletAddress, Token token)
+    public Single<Token> fetchActiveSingle(String walletAddress, Token token)
     {
         NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
         Wallet wallet = new Wallet(walletAddress);
-        return Single.merge(
-                fetchCachedToken(network, wallet, token.getAddress()),
-                updateBalance(network, wallet, token)) // Looking for new tokens
-                .toObservable();
+        return fetchCachedToken(network, wallet, token.getAddress())
+               .flatMap(t -> updateBalance(network, wallet, t)); // Looking for new tokens
     }
 
     @Override

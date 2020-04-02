@@ -10,6 +10,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import com.alphawallet.app.entity.ActionEventCallback;
+import com.alphawallet.app.entity.Event;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.TransactionContract;
 import com.alphawallet.app.entity.tokens.Token;
@@ -32,7 +34,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
-public class TransactionsViewModel extends BaseViewModel
+public class TransactionsViewModel extends BaseViewModel implements ActionEventCallback
 {
     private static final String TAG = "TVM";
     private static final int MAX_DISPLAYABLE_TRANSACTIONS = 10000; //only display up to the last 10000 transactions
@@ -43,6 +45,7 @@ public class TransactionsViewModel extends BaseViewModel
     private final MutableLiveData<Boolean> clearAdapter = new MutableLiveData<>();
     private final MutableLiveData<Boolean> refreshAdapter = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> newTransactions = new MutableLiveData<>();
+    private final MutableLiveData<Event[]> event = new MutableLiveData<>();
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GenericWalletInteract genericWalletInteract;
@@ -117,6 +120,7 @@ public class TransactionsViewModel extends BaseViewModel
 
     private void startEventTimer()
     {
+        assetDefinitionService.setEventCallback(this);
         fetchTransactionDisposable = null;
         //reset transaction timers
         if (eventTimer == null || eventTimer.isDisposed())
@@ -221,6 +225,7 @@ public class TransactionsViewModel extends BaseViewModel
     public LiveData<Boolean> showEmpty() { return showEmpty; }
     public LiveData<Boolean> clearAdapter() { return clearAdapter; }
     public LiveData<Boolean> refreshAdapter() { return refreshAdapter; }
+    public LiveData<Event[]> event() { return event; }
 
     public void prepare()
     {
@@ -410,5 +415,26 @@ public class TransactionsViewModel extends BaseViewModel
     public FetchTransactionsInteract provideTransactionsInteract()
     {
         return fetchTransactionsInteract;
+    }
+
+    @Override
+    public void receivedEvent(String selectedParamName, String selectedParamValue, long timeStamp, int chainId)
+    {
+        //added an event
+        String eventText = "Event: " + selectedParamName + " becomes " + selectedParamValue;
+        Event[] events = new Event[1];
+        events[0] = new Event(eventText, timeStamp, chainId);
+        event.postValue(events);
+    }
+
+    @Override
+    public void eventsLoaded(Event[] events)
+    {
+        event.postValue(events);
+    }
+
+    public void restartEventListener()
+    {
+        assetDefinitionService.startEventListeners();
     }
 }

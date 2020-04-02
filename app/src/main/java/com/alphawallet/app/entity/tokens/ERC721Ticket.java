@@ -316,6 +316,8 @@ public class ERC721Ticket extends Token implements Parcelable {
 
     @Override
     public boolean isERC721Ticket() { return true; }
+    @Override
+    public boolean isNonFungible() { return true; }
 
     @Override
     public boolean groupWithToken(TicketRange currentGroupingRange, TicketRangeElement newElement, long currentGroupTime)

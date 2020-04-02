@@ -29,6 +29,8 @@ import org.web3j.crypto.WalletUtils;
 
 public class Utils {
 
+    private static final String ISOLATE_NUMERIC = "(0?x?[0-9a-fA-F]+)";
+
     public static int dp2px(Context context, int dp) {
         Resources r = context.getResources();
         return (int) TypedValue.applyDimension(
@@ -259,5 +261,26 @@ public class Utils {
         }
 
         return false;
+    }
+
+    public static String isolateNumeric(String valueFromInput)
+    {
+        try
+        {
+            Matcher regexResult = Pattern.compile(ISOLATE_NUMERIC).matcher(valueFromInput);
+            if (regexResult.find())
+            {
+                if (regexResult.groupCount() >= 1)
+                {
+                    valueFromInput = regexResult.group(0);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            // Silent fail - no action; just return input; this function is only to clean junk from a number
+        }
+
+        return valueFromInput;
     }
 }

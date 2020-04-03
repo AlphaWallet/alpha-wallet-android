@@ -345,6 +345,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private TokenScriptFile getTokenScriptFile(int chainId, String address)
     {
+        if (address.equalsIgnoreCase(tokensService.getCurrentAddress()))
+        {
+            address = "ethereum";
+        }
+
         if (assetDefinitions.get(chainId) != null && assetDefinitions.get(chainId).containsKey(address))
         {
             return assetDefinitions.get(chainId).get(address);
@@ -773,6 +778,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private boolean addContractAddresses(File file)
     {
         try (FileInputStream input = new FileInputStream(file)) {
+            if (file.getAbsolutePath().contains("ENS"))
+            {
+                System.out.println("YOLESS");
+            }
             TokenDefinition tokenDef = parseFile(input);
             ContractInfo holdingContracts = tokenDef.contracts.get(tokenDef.holdingToken);
             if (holdingContracts != null)

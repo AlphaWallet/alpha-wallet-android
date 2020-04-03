@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -135,6 +136,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         String tokenList = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
         chainId = token != null ? token.tokenInfo.chainId : getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
+        String functionDetails = getIntent().getStringExtra(C.EXTRA_FUNCTION_NAME);
 
         String amountString;
 
@@ -191,6 +193,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 contractAddrText.setText(contractAddress);
                 amountString = getIntent().getStringExtra(C.EXTRA_ACTION_NAME);
+                if (!TextUtils.isEmpty(functionDetails)) amountString = functionDetails;
                 symbolText.setVisibility(View.GONE);
 
                 transactionHex = getIntent().getStringExtra(C.EXTRA_TRANSACTION_DATA);

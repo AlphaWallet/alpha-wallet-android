@@ -12,6 +12,7 @@ import android.os.FileObserver;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.SparseArray;
 
 import com.alphawallet.app.C;
@@ -41,7 +42,6 @@ import com.alphawallet.token.entity.ContractInfo;
 import com.alphawallet.token.entity.EventDefinition;
 import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
-import com.alphawallet.token.entity.NonFungibleToken;
 import com.alphawallet.token.entity.ParseResult;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.TSAction;
@@ -53,6 +53,7 @@ import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 
+import org.jetbrains.annotations.NotNull;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.crypto.WalletUtils;
@@ -60,7 +61,6 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthLog;
-import org.web3j.protocol.core.methods.response.EthTransaction;
 import org.web3j.protocol.core.methods.response.Log;
 import org.xml.sax.SAXException;
 
@@ -76,7 +76,6 @@ import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -85,7 +84,6 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
@@ -1842,6 +1840,18 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             requireEventSend = false;
             generateAndSendEvents();
+        }
+    }
+
+    public void resolveReference(@NotNull Token token, TSAction action, TokenscriptElement arg, BigInteger tokenId)
+    {
+        TokenDefinition td = getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
+        if (td == null || TextUtils.isEmpty(arg.ref)) return;
+        AttributeType attributeType = (action != null && action.attributeTypes != null) ? action.attributeTypes.get(arg.ref) : null; // try locals first
+        if (attributeType == null) attributeType = td.attributeTypes.get(arg.ref); // now try globals
+        if (attributeType != null)
+        {
+            arg.value = tokenscriptUtility.fetchAttrResult(tokensService.getCurrentAddress(), attributeType, tokenId, null, td, this, 0).blockingSingle().text;
         }
     }
 }

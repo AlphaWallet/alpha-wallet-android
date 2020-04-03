@@ -76,6 +76,7 @@ import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -115,7 +116,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 {
     private static final String CERTIFICATE_DB = "CERTIFICATE_CACHE-db.realm";
     private static final long CHECK_TX_LOGS_INTERVAL = 15;
-
     private final Context context;
     private final OkHttpClient okHttpClient;
 
@@ -153,6 +153,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         okHttpClient = client;
         assetChecked = new ConcurrentHashMap<>();
         tokenTypeName = new SparseArray<>();
+        assetDefinitions = new SparseArray<>();
         notificationService = svs;
         realmManager = rm;
         ethereumNetworkRepository = eth;
@@ -160,7 +161,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         this.tokensService = tokensService;
         this.eventUtils = new EventUtils() { }; //no overridden functions
         tokenscriptUtility = new TokenscriptFunction() { }; //no overridden functions
-        assetDefinitions = new SparseArray<>();
         tokenLocalSource = trs;
         assetLoadingLock = new Semaphore(1);
         eventConnection = new Semaphore(1);
@@ -169,13 +169,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     /**
      * Load all TokenScripts
-     *
-     * 1. Acquire the loading lock to prevent use of scripts until fully loaded.
-     * 2. Load scripts in the private data area which are only sourced from downloading from official repo
-     * 3. Load scripts bundled with the App (loadInternalAssets)
-     * 4. Load scripts that were installed via AlphaWallet script install intent (checkAndroidExternal)
-     * 5. Load scripts manually copied to /AlphaWallet directory, for Android 9 and less (checkLegacyDirectory)
-     * 6. Release semaphore
      *
      * This order has to be observed because it's an expected developer override order. If a script is placed in the /AlphaWallet directory
      * it is expected to override the one fetched from the repo server.
@@ -194,14 +187,121 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             e.printStackTrace();
         }
 
-        loadContracts(context.getFilesDir())
+        loadInternalAssets();
+        checkDownloadedFiles();
+    }
+
+    //This loads bundled TokenScripts in the /assets directory eg xdaicanonicalized
+    private void loadInternalAssets()
+    {
+        Observable.fromIterable(getCanonicalizedAssets())
+                .subscribeOn(Schedulers.io())
+                .subscribe(this::addContractAssets, error -> { onError(error); parseAllFileScripts(); },
+                           this::parseAllFileScripts).isDisposed();
+    }
+
+    private void parseAllFileScripts()
+    {
+        final File[] files = buildFileList(); //build an ordered list of files that need parsing
+                                        //1. Signed files downloaded from server.
+                                        //2. Files placed in the Android OS external directory (Android/data/<App Package Name>/files)
+                                        //3. Files placed in the /AlphaWallet directory.
+                                        //Depending on the order placed, files can be overridden. A file downloaded from the server is
+                                        //overridden by a script for the same token placed in the /AlphaWallet directory.
+
+        Observable.fromArray(files)
+                .filter(File::isFile)
+                .filter(this::allowableExtension)
+                .filter(File::canRead)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
-                .subscribe(this::addContractAddresses,
-                           error -> { onError(error); loadInternalAssets(); },
-                           this::loadInternalAssets).isDisposed();
+                .blockingForEach(file -> {  //load sequentially
+                    cacheSignature(file)
+                            .map(this::addContractAddresses)
+                            .subscribe(success -> fileLoadComplete(success, file),
+                                       error -> handleFileLoadError(error, file))
+                            .isDisposed();
+                } );
 
-        checkDownloadedFiles();
+        //executes after observable completes due to blockingForEach
+        startDirectoryListeners();
+        finishLoading();
+    }
+
+    private void handleFileLoadError(Throwable throwable, File file)
+    {
+        //TODO: parse error and add to error list for Token Management page
+        System.out.println("ERROR WHILE PARSING: " + file.getName() + " : " + throwable.getMessage());
+    }
+
+    private void fileLoadComplete(Boolean success, File file)
+    {
+        if (!success)
+        {
+            //TODO: parse error and add to error list for Token Management page
+            System.out.println("File: " + file.getName() + " has no origin token");
+        }
+    }
+
+    //Start listening to the two script directories for files dropped in.
+    //Why two directories? User may not want to allow AlphaWallet to have read file permission,
+    //but we still want to allow them to be able to click on scripts in eg Telegram and install them
+    //without needing to go through a permission screen
+    //Using AlphaWallet directory is more convenient for developers using eg Android Studio to drop files into their phone
+    private void startDirectoryListeners()
+    {
+        //listen for new files dropped into app external directory
+        fileObserverQ = startFileListener(context.getExternalFilesDir("").getAbsolutePath());
+
+        //listen for new files dropped into AlphaWallet directory, if we have permission
+        if (checkReadPermission())
+        {
+            File alphaWalletDir = new File(
+                    Environment.getExternalStorageDirectory()
+                            + File.separator + HomeViewModel.ALPHAWALLET_DIR);
+
+            fileObserver = startFileListener(alphaWalletDir.getAbsolutePath());
+        }
+    }
+
+    public void onDestroy()
+    {
+        if (fileObserver != null) fileObserver.stopWatching();
+        if (fileObserverQ != null) fileObserverQ.stopWatching();
+        if (eventListener != null && !eventListener.isDisposed()) eventListener.dispose();
+    }
+
+    private File[] buildFileList()
+    {
+        List<File> fileList = new ArrayList<>();
+        try
+        {
+            File[] files = context.getFilesDir().listFiles();
+            if (files != null) fileList.addAll(Arrays.asList(files)); //first add files in app internal area - these are downloaded from the server
+            files = context.getExternalFilesDir("").listFiles();
+            if (files != null) fileList.addAll(Arrays.asList(files)); //now add files in the app's external directory; /Android/data/[app-id]/files. These override internal
+
+            if (checkReadPermission())
+            {
+                File alphaWalletDir = new File(
+                        Environment.getExternalStorageDirectory()
+                                + File.separator + HomeViewModel.ALPHAWALLET_DIR);
+
+                if (alphaWalletDir.exists())
+                {
+                    files = alphaWalletDir.listFiles();
+                    if (files != null) fileList.addAll(Arrays.asList(files));
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        if (fileList.size() == 0) finishLoading();
+
+        return fileList.toArray(new File[0]);
     }
 
     @Override
@@ -298,8 +398,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    private boolean checkWritePermission() {
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    private boolean checkReadPermission() {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
@@ -541,7 +641,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 xmlInputStream, locale, this);
     }
 
-    private void handleFileLoad(File newFile)
+    private void handleFileLoad(File newFile) throws Exception
     {
         if (newFile != null && !newFile.getName().equals("cache") && newFile.canRead())
         {
@@ -648,52 +748,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
-    //This loads bundled Tokenscripts in the /assets directory eg xdaicanonicalized
-    private void loadInternalAssets()
-    {
-        Observable.fromIterable(getCanonicalizedAssets())
-                .subscribeOn(Schedulers.io())
-                .subscribe(this::addContractAssets, error -> { onError(error); checkAndroidExternal(); },
-                           this::checkAndroidExternal).isDisposed();
-    }
-
-    //Check the external directory - Android/data/(applicationId)
-    private void checkAndroidExternal()
-    {
-        loadContracts(context.getExternalFilesDir(""))
-                .subscribeOn(Schedulers.io())
-                .subscribe(this::addContractAddresses, error -> { onError(error); checkLegacyDirectory(); },
-                           this::checkLegacyDirectory).isDisposed();
-    }
-
-    private void checkLegacyDirectory()
-    {
-        startFileListener(context.getExternalFilesDir("").getAbsolutePath(), false);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && checkWritePermission())
-        {
-            //Now check the legacy AlphaWallet directory
-            File directory = new File(
-                    Environment.getExternalStorageDirectory()
-                            + File.separator + HomeViewModel.ALPHAWALLET_DIR);
-
-            if (!directory.exists())
-            {
-                directory.mkdir();
-            }
-
-            loadContracts(directory)
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(this::addContractAddresses, error -> { onError(error); finishLoading(); },
-                               this::finishLoading).isDisposed();
-
-            startFileListener(directory.getAbsolutePath(), true);
-        }
-        else
-        {
-            finishLoading();
-        }
-    }
-
     private void finishLoading()
     {
         assetLoadingLock.release();
@@ -773,29 +827,23 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return null;
     }
 
-    private boolean addContractAddresses(File file)
+    private boolean addContractAddresses(File file) throws Exception
     {
-        try (FileInputStream input = new FileInputStream(file)) {
-            if (file.getAbsolutePath().contains("ENS"))
+        FileInputStream input = new FileInputStream(file);
+        TokenDefinition tokenDef = parseFile(input);
+        ContractInfo holdingContracts = tokenDef.contracts.get(tokenDef.holdingToken);
+        if (holdingContracts != null)
+        {
+            for (int network : holdingContracts.addresses.keySet())
             {
-                System.out.println("YOLESS");
+                addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), file.getAbsolutePath()));
             }
-            TokenDefinition tokenDef = parseFile(input);
-            ContractInfo holdingContracts = tokenDef.contracts.get(tokenDef.holdingToken);
-            if (holdingContracts != null)
-            {
-                addToEventList(tokenDef, holdingContracts);
-                for (int network : holdingContracts.addresses.keySet())
-                {
-                    addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), file.getAbsolutePath()));
-                }
-                return true;
-            }
-        } catch (Exception e) {
-            System.out.println("ERROR While parsing: " + file.getAbsolutePath());
-            e.printStackTrace();
+            return true;
         }
-        return false;
+        else
+        {
+            return false;
+        }
     }
 
     private void addToEventList(TokenDefinition tokenDef, ContractInfo cInfo)
@@ -994,20 +1042,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return false;
-    }
-
-    private Observable<File> loadContracts(File directory)
-    {
-        File[] files = directory.listFiles();
-        if (files == null || files.length == 0) return Observable.fromCallable(() -> new File(""));
-
-        return Observable.fromArray(files)
-                .filter(File::isFile)
-                .filter(this::allowableExtension)
-                .filter(File::canRead)
-                .flatMap(file -> cacheSignature(file).toObservable()) //check we have signature when initialising
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io());
     }
 
     /**
@@ -1237,7 +1271,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    private void startFileListener(String path, boolean isLegacyDir)
+    private FileObserver startFileListener(String path)
     {
         FileObserver observer = new FileObserver(path)
         {
@@ -1271,6 +1305,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         }
                         catch (Exception e)
                         {
+                            //TODO: Display error popup
                             e.printStackTrace();
                         }
                         break;
@@ -1282,14 +1317,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         observer.startWatching();
 
-        if (isLegacyDir)
-        {
-            fileObserver = observer;
-        }
-        else
-        {
-            fileObserverQ = observer;
-        }
+        return observer;
     }
 
     public void checkTokenscriptEnabledTokens(TokensService tokensService)

@@ -1,6 +1,7 @@
 package com.alphawallet.token.entity;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,16 +21,16 @@ public class EventDefinition
 
     public String getFilterTopicValue()
     {
-        // (\+\d{4}|\-\d{4})
+        // This regex splits up the "filterArgName=${filterValue}" directive and gets the 'filterValue'
         Matcher m = Pattern.compile("\\$\\{([^}]+)\\}").matcher(filter);
-        String item = m.find() ? m.group(1) : null;
-        return item;
+        return (m.find() && m.groupCount() >= 1) ? m.group(1) : null;
     }
 
     public String getFilterTopicIndex()
     {
+        // Get the filter name from the directive and strip whitespace
         String[] item = filter.split("=");
-        return item[0];
+        return item[0].replaceAll("\\s+", "");
     }
 
     public int getTopicIndex(String filterTopic)

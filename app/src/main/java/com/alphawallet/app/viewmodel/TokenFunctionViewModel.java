@@ -148,7 +148,7 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     private void onToken(Token t)
     {
-        if (token.checkBalanceChange(t))
+        if (assetDefinitionService.checkTokenForNewEvent(t) || token.checkBalanceChange(t))
         {
             t.transferPreviousData(token);
             token = t;

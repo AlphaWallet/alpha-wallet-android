@@ -46,6 +46,7 @@ public class Web3TokenView extends WebView
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
     private static final String JS_PROTOCOL_ON_SUCCESSFUL = "executeCallback(%1$s, null, \"%2$s\")";
     private static final String JS_PROTOCOL_ON_FAILURE = "executeCallback(%1$s, \"%2$s\", null)";
+    private static final String REFRESH_ERROR = "refresh is not defined";
 
     private JsInjectorClient jsInjectorClient;
     private TokenScriptClient tokenScriptClient;
@@ -114,6 +115,7 @@ public class Web3TokenView extends WebView
             {
                 if (!showingError && msg.messageLevel() == ConsoleMessage.MessageLevel.ERROR)
                 {
+                    if (msg.message().contains(REFRESH_ERROR)) return true; //don't stop for refresh error
                     String errorMessage = RENDERING_ERROR.replace("${ERR1}", msg.message());
                     showError(errorMessage);
                 }

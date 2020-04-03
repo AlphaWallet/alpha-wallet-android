@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 import com.alphawallet.app.R;
 
+import com.alphawallet.app.entity.Event;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
@@ -184,6 +185,12 @@ public class TransactionsAdapter extends RecyclerView.Adapter<BinderViewHolder> 
         }
         items.endBatchedUpdates();
         notifyDataSetChanged();
+    }
+
+    //TODO: Display events in Actions list
+    public void addEvents(Event[] events)
+    {
+
     }
 
     public int updateRecentTransactions(Transaction[] transactions)

@@ -61,7 +61,6 @@ public class Token implements Parcelable, Comparable<Token>
     public boolean balanceChanged;
     public boolean walletUIUpdateRequired;
     public boolean hasTokenScript;
-    public boolean hasDebugTokenscript;
     public boolean refreshCheck;
     public long lastTxCheck;
     public long lastTxUpdate;
@@ -108,7 +107,6 @@ public class Token implements Parcelable, Comparable<Token>
             lastTxUpdate = oldToken.lastTxUpdate;
             balanceChanged = oldToken.balanceChanged;
             hasTokenScript = oldToken.hasTokenScript;
-            hasDebugTokenscript = oldToken.hasDebugTokenscript;
             lastTxTime = oldToken.lastTxTime;
         }
         refreshCheck = false;
@@ -127,7 +125,6 @@ public class Token implements Parcelable, Comparable<Token>
         lastTxUpdate = in.readLong();
         lastTxTime = in.readLong();
         hasTokenScript = in.readByte() == 1;
-        hasDebugTokenscript = in.readByte() == 1;
         nonIconifiedWebviewHeight = in.readInt();
         iconifiedWebviewHeight = in.readInt();
         nameWeight = in.readInt();
@@ -161,6 +158,23 @@ public class Token implements Parcelable, Comparable<Token>
 
     public Asset getAssetForToken(String tokenId) {
         return null;
+    }
+    public List<BigInteger> getUniqueTokenIds()
+    {
+        List<BigInteger> uniqueIds = new ArrayList<>();
+        if (isNonFungible())
+        {
+            for (BigInteger id : getArrayBalance())
+            {
+                if (!uniqueIds.contains(id)) uniqueIds.add(id);
+            }
+        }
+        else
+        {
+            uniqueIds.add(BigInteger.ZERO);
+        }
+
+        return uniqueIds;
     }
 
     public void addAssetToTokenBalanceAssets(Asset asset) {
@@ -198,7 +212,6 @@ public class Token implements Parcelable, Comparable<Token>
         dest.writeLong(lastTxUpdate);
         dest.writeLong(lastTxTime);
         dest.writeByte(hasTokenScript?(byte)1:(byte)0);
-        dest.writeByte(hasDebugTokenscript?(byte)1:(byte)0);
         dest.writeInt(nonIconifiedWebviewHeight);
         dest.writeInt(iconifiedWebviewHeight);
         dest.writeInt(nameWeight);

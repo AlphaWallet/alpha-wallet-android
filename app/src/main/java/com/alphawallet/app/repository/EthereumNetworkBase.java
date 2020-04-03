@@ -42,8 +42,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
        These hardcoded keys are fallbacks used by AlphaWallet forks.
      */
     public static final String BACKUP_INFURA_KEY = "da3717f25f824cc1baa32d812386d93f";
-    public static final String MAINNET_FALLBACK_RPC_URL = "https://ropsten.infura.io/v3/" + BuildConfig.InfuraAPI;
-    public static final String MAINNET_RPC_URL = !BuildConfig.AmberdataAPI.startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + BuildConfig.AmberdataAPI : MAINNET_FALLBACK_RPC_URL;
+    public static final String MAINNET_FALLBACK_RPC_URL = "https://mainnet.infura.io/v3/" + BuildConfig.InfuraAPI;
+    public static final String MAINNET_RPC_URL = MAINNET_FALLBACK_RPC_URL;//!BuildConfig.AmberdataAPI.startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + BuildConfig.AmberdataAPI : MAINNET_FALLBACK_RPC_URL;
     public static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
     public static final String XDAI_RPC_URL = "https://dai.poa.network";
     public static final String POA_RPC_URL = "https://core.poa.network/";

@@ -20,6 +20,7 @@ import com.alphawallet.app.entity.ActionEventCallback;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Event;
+import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.ERC721Token;
@@ -137,6 +138,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private ActionEventCallback eventCallback;
     private boolean requireEventSend = false;
     private final Semaphore eventConnection;
+    private FragmentMessenger homeMessenger;
 
     private final TokenscriptFunction tokenscriptUtility;
     private final EventUtils eventUtils;
@@ -1305,8 +1307,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         }
                         catch (Exception e)
                         {
-                            //TODO: Display error popup
-                            e.printStackTrace();
+                            homeMessenger.tokenScriptError(e.getMessage());
                         }
                         break;
                     default:
@@ -1881,5 +1882,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             arg.value = tokenscriptUtility.fetchAttrResult(tokensService.getCurrentAddress(), attributeType, tokenId, null, td, this, 0).blockingSingle().text;
         }
+    }
+
+    public void setErrorCallback(FragmentMessenger callback)
+    {
+        homeMessenger = callback;
     }
 }

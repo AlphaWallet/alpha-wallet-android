@@ -1307,7 +1307,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         }
                         catch (Exception e)
                         {
-                            homeMessenger.tokenScriptError(e.getMessage());
+                            if (homeMessenger != null) homeMessenger.tokenScriptError(e.getMessage());
                         }
                         break;
                     default:

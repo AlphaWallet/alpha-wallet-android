@@ -266,7 +266,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
             long decimals,
             long timestamp)
     {
-        boolean isSent = from.toLowerCase().equals(defaultAddress);
+        boolean isSent = from.equalsIgnoreCase(defaultAddress);
         type.setText(isSent ? getString(R.string.sent) : getString(R.string.received));
         boolean self = false;
 
@@ -328,7 +328,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         String from = operation.from;
         String supplimentalTxt = "";
 
-        boolean isSent = from.toLowerCase().equals(defaultAddress.toLowerCase());
+        boolean isSent = from.equalsIgnoreCase(defaultAddress);
         String operationName = token != null ? token.getOperationName(transaction, getContext()) : null;
         if (operationName == null) operationName = isSent ? getString(R.string.sent) : getString(R.string.received);
         type.setText(operationName);

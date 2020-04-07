@@ -627,7 +627,7 @@ public class Token implements Parcelable, Comparable<Token>
             }
             else
             {
-                if (transaction.from.equals(tokenWallet))
+                if (transaction.from.equalsIgnoreCase(tokenWallet))
                 {
                     name = ctx.getString(R.string.sent);
                 }

@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -280,15 +281,28 @@ public class WalletsViewModel extends BaseViewModel
     private void getWalletsBalance(Wallet[] wallets)
     {
         ContractResult override = EthereumNetworkRepository.getOverrideToken();
-        NetworkInfo    network  = findDefaultNetworkInteract.getNetworkInfo(override.chainId); //findDefaultNetworkInteract.getNetworkInfo(EthereumNetworkRepository.MAINNET_ID);
+        NetworkInfo    network  = findDefaultNetworkInteract.getNetworkInfo(override.chainId);
 
         disposable = fetchWalletList(wallets)
                 .flatMapIterable(wallet -> wallet) //iterate through each wallet
                 .map(this::addWalletToMap)
-                .flatMap(wallet -> fetchTokensInteract.fetchBaseCurrencyBalance(network, override, wallet, tokensService)) //fetch wallet balance
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::updateWallet, this::onError, this::updateBalances);
+                .observeOn(Schedulers.io())
+                .subscribe(wallet -> {
+                    fetchTokensInteract.fetchStoredToken(network, wallet, override.name) //fetch cached balance
+                    .flatMap(tokenFromCache -> fetchTokensInteract.updateBalance(wallet.address, tokenFromCache)) //update balance
+                    .subscribe(this::updateWallet, error -> onFetchError(wallet, network)).isDisposed();
+                }, this::onError);
+    }
+
+    private void onFetchError(Wallet wallet, NetworkInfo networkInfo)
+    {
+        //leave wallet blank
+        if (walletBalances.containsKey(wallet.address.toLowerCase()))
+        {
+            wallet.zeroWalletBalance(networkInfo);
+            updateBalance.postValue(wallet);
+        }
     }
 
     private void updateWallet(Token token)

@@ -141,10 +141,12 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private void onDefaultWallet(Wallet wallet) {
         defaultWallet.setValue(wallet);
         //get the balance token
-        disposable = fetchTokensInteract.fetchBaseCurrencyBalance(defaultNetwork.getValue(), ethereumNetworkRepository.getBlankOverrideToken(), wallet)
+        Token blank = ethereumNetworkRepository.getBlankOverrideToken(defaultNetwork.getValue());
+        disposable = fetchTokensInteract.fetchStoredToken(defaultNetwork.getValue(), wallet, blank.getAddress())
+                .flatMap(tokenFromCache -> fetchTokensInteract.updateBalance(wallet.address, tokenFromCache))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::updateBalance, this::onError);
+                .subscribe(this::updateBalance, error -> updateBalance(blank));
     }
 
     private void updateBalance(Token token) {

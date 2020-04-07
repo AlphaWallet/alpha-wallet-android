@@ -85,9 +85,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private PagerAdapter pagerAdapter;
     private LinearLayout successOverlay;
     private ImageView successImage;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private HomeReceiver homeReceiver;
-    private AWalletConfirmationDialog cDialog;
     private String buildVersion;
     private final Fragment settingsFragment;
     private final Fragment dappBrowserFragment;
@@ -299,6 +298,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         super.onResume();
         viewModel.prepare();
         viewModel.getWalletName();
+        viewModel.setErrorCallback(this);
         checkRoot();
         successOverlay = findViewById(R.id.layout_success_overlay);
         successImage = findViewById(R.id.success_image);
@@ -521,7 +521,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             int warns = pref.getInt("update_warns", 0) + 1;
             if (warns < 3)
             {
-                cDialog = new AWalletConfirmationDialog(this);
+                AWalletConfirmationDialog cDialog = new AWalletConfirmationDialog(this);
                 cDialog.setTitle(R.string.alphawallet_update);
                 cDialog.setCancelable(true);
                 cDialog.setSmallText("Using an old version of Alphawallet. Please update from the Play Store or Alphawallet website.");
@@ -529,7 +529,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 cDialog.setPrimaryButtonListener(v -> {
                     cDialog.dismiss();
                 });
-                cDialog.show();
+                dialog = cDialog;
+                dialog.show();
             }
             else if (warns > 10)
             {
@@ -552,6 +553,26 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.showAddToken(this, address);
     }
 
+    @Override
+    public void tokenScriptError(String message)
+    {
+        handler.removeCallbacksAndMessages(null); //remove any previous error call, only use final error
+        // This is in a runnable because the error will come from non main thread process
+        handler.postDelayed(() -> {
+            hideDialog();
+            AWalletAlertDialog aDialog = new AWalletAlertDialog(this);
+            aDialog.setTitle(getString(R.string.tokenscript_file_error));
+            aDialog.setMessage(message);
+            aDialog.setIcon(AWalletAlertDialog.ERROR);
+            aDialog.setButtonText(R.string.button_ok);
+            aDialog.setButtonListener(v -> {
+                aDialog.dismiss();
+            });
+            dialog = aDialog;
+            dialog.show();
+        }, 500);
+    }
+
     private void backupWalletFail(String keyBackup)
     {
         //postpone backup until later
@@ -571,7 +592,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         successImage.setImageResource(R.drawable.big_green_tick);
         successOverlay.setVisibility(View.VISIBLE);
 
-        handler = new Handler();
         handler.postDelayed(this, 1000);
     }
 
@@ -587,7 +607,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             successOverlay.setVisibility(View.GONE);
             successOverlay.setAlpha(1.0f);
-            handler = null;
         }
     }
 
@@ -649,33 +668,34 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         //Possibly only show this once per day otherwise too annoying!
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         int asks = pref.getInt("update_asks", 0) + 1;
-        cDialog = new AWalletConfirmationDialog(this);
-        cDialog.setTitle(R.string.new_version_title);
-        cDialog.setSmallText(R.string.new_version);
+        AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
+        dialog.setTitle(R.string.new_version_title);
+        dialog.setSmallText(R.string.new_version);
         String newBuild = "New version: " + build;
-        cDialog.setMediumText(newBuild);
-        cDialog.setPrimaryButtonText(R.string.confirm_update);
-        cDialog.setPrimaryButtonListener(v -> {
+        dialog.setMediumText(newBuild);
+        dialog.setPrimaryButtonText(R.string.confirm_update);
+        dialog.setPrimaryButtonListener(v -> {
             if (checkWritePermission(RC_DOWNLOAD_EXTERNAL_WRITE_PERM))
             {
                 viewModel.downloadAndInstall(build, this);
             }
-            cDialog.dismiss();
+            dialog.dismiss();
         });
         if (asks > 1)
         {
-            cDialog.setSecondaryButtonText(R.string.dialog_not_again);
+            dialog.setSecondaryButtonText(R.string.dialog_not_again);
         }
         else
         {
-            cDialog.setSecondaryButtonText(R.string.dialog_later);
+            dialog.setSecondaryButtonText(R.string.dialog_later);
         }
-        cDialog.setSecondaryButtonListener(v -> {
+        dialog.setSecondaryButtonListener(v -> {
             //only dismiss twice before we stop warning.
             pref.edit().putInt("update_asks", asks).apply();
-            cDialog.dismiss();
+            dialog.dismiss();
         });
-        cDialog.show();
+        this.dialog = dialog;
+        dialog.show();
     }
 
     @Override
@@ -698,8 +718,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
     private void hideDialog()
     {
-        if (cDialog != null && cDialog.isShowing()) {
-            cDialog.dismiss();
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
         }
     }
 

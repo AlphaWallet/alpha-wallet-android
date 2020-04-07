@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Environment;
 
 import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Transaction;
@@ -304,5 +305,10 @@ public class HomeViewModel extends BaseViewModel {
 
     public String getDefaultCurrency(){
         return currencyRepository.getDefaultCurrency();
+    }
+
+    public void setErrorCallback(FragmentMessenger callback)
+    {
+        assetDefinitionService.setErrorCallback(callback);
     }
 }

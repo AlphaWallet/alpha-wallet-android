@@ -555,4 +555,5 @@
     <string name="change_chain_request">Change Chain Request</string>
     <string name="error_zero_balance">Zero Balance Transaction</string>
     <string name="instagram">Instagram</string>
+    <string name="tokenscript_file_error">TokenScript file error</string>
 </resources>

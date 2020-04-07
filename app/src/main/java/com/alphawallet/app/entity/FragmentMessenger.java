@@ -8,4 +8,5 @@ public interface FragmentMessenger
 {
     void TokensReady();
     void AddToken(String address);
+    void tokenScriptError(String message);
 }

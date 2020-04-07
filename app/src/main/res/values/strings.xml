@@ -557,4 +557,5 @@
     <string name="instagram">Instagram</string>
     <string name="settings_locale_currency">Change Currency</string>
     <string name="dialog_title_select_currency">Select FIAT Currency</string>
+    <string name="tokenscript_file_error">TokenScript file error</string>
 </resources>

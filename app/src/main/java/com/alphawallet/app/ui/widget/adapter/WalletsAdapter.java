@@ -39,14 +39,9 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
     @Override
     public BinderViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
         BinderViewHolder binderViewHolder = null;
-        WalletHolder h;
         switch (viewType) {
             case WalletHolder.VIEW_TYPE:
-                h = new WalletHolder(R.layout.item_wallet_manage, parent, this);
-                if (network != null) {
-                    h.setCurrencySymbol(network.symbol);
-                }
-                binderViewHolder = h;
+                binderViewHolder = new WalletHolder(R.layout.item_wallet_manage, parent, this);
             break;
             case TextHolder.VIEW_TYPE:
                 binderViewHolder = new TextHolder(R.layout.item_text_view, parent);

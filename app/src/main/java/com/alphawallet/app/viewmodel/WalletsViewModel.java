@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractResult;
-import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -151,33 +150,28 @@ public class WalletsViewModel extends BaseViewModel
     public void findNetwork()
     {
         progress.postValue(true);
-        disposable = findDefaultNetworkInteract
-                .find()
-                .subscribe(this::onDefaultNetwork, this::onError);
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo)
-    {
-        networkInfo = findDefaultNetworkInteract.getNetworkInfo(EthereumNetworkRepository.MAINNET_ID); //always show mainnet eth in wallet page
+        ContractResult override = EthereumNetworkRepository.getOverrideToken();
+        NetworkInfo networkInfo  = findDefaultNetworkInteract.getNetworkInfo(override.chainId);
         defaultNetwork.postValue(networkInfo);
         currentNetwork = networkInfo;
 
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWalletChanged,
-                        error -> noWalletsError.postValue(true));
+                           error -> noWalletsError.postValue(true));
     }
 
     private void onWallets(Wallet[] items)
     {
         progress.postValue(false);
-        //can we repopulate values from map?
-        if (walletBalances.size() > 0)
+
+        for (Wallet w : items)
         {
-            for (Wallet w : items)
+            w.balanceSymbol = defaultNetwork.getValue().symbol;
+            Wallet mapW = walletBalances.get(w.address);
+            if (mapW != null)
             {
-                Wallet mapW = walletBalances.get(w.address);
-                if (mapW != null) w.balance = mapW.balance;
+                w.balance = mapW.balance;
             }
         }
         wallets.postValue(items);

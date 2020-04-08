@@ -17,6 +17,8 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TransactionsNetworkClientType;
 import okhttp3.OkHttpClient;
 
+import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
+
 public class WalletRepository implements WalletRepositoryType
 {
 	private final PreferenceRepositoryType preferenceRepositoryType;
@@ -143,7 +145,10 @@ public class WalletRepository implements WalletRepositoryType
 		return Single.fromCallable(() -> {
 			try
 			{
-				return new BigDecimal(Web3j.build(new HttpService(networkRepository.getDefaultNetwork().rpcServerUrl, httpClient, false)).ethGetBalance(wallet.address, DefaultBlockParameterName.PENDING).send().getBalance());
+				return new BigDecimal(getWeb3jService(networkRepository.getDefaultNetwork().chainId)
+											  .ethGetBalance(wallet.address, DefaultBlockParameterName.PENDING)
+											  .send()
+											  .getBalance());
 			}
 			catch (IOException e)
 			{

@@ -6,6 +6,8 @@ import android.os.Parcelable;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.KeyService;
 
+import java.math.BigDecimal;
+
 public class Wallet implements Parcelable {
     public final String address;
     public String balance;
@@ -89,5 +91,14 @@ public class Wallet implements Parcelable {
 		int decimals = token.tokenInfo != null ? token.tokenInfo.decimals : 18;
 		balanceSymbol = token.tokenInfo != null ? token.tokenInfo.symbol : "ETH";
 		balance = Token.getScaledValue(token.balance, decimals, false);
+	}
+
+	public void zeroWalletBalance(NetworkInfo networkInfo)
+	{
+		if (balance.equals("-"))
+		{
+			balanceSymbol = networkInfo.symbol;
+			balance = Token.getScaledValue(BigDecimal.ZERO, 18, false);
+		}
 	}
 }

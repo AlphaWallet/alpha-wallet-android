@@ -169,20 +169,14 @@ public class TokensRealmSource implements TokenLocalSource {
     @Override
     public Single<Token> fetchEnabledToken(NetworkInfo networkInfo, Wallet wallet, String address) {
         return Single.fromCallable(() -> {
-            Realm realm = null;
-
-            try {
-                realm = realmManager.getRealmInstance(wallet);
+            try (Realm realm = realmManager.getRealmInstance(wallet))
+            {
                 RealmToken realmItem = realm.where(RealmToken.class)
                         .equalTo("address", databaseKey(networkInfo.chainId, address))
                         .equalTo("chainId", networkInfo.chainId)
                         .findFirst();
 
                 return convertSingle(realmItem, realm, null, wallet);
-            } finally {
-                if (realm != null) {
-                    realm.close();
-                }
             }
         });
     }
@@ -202,7 +196,7 @@ public class TokensRealmSource implements TokenLocalSource {
             {
                 return new Token[0]; //ensure fetch completes
             }
-        }).flatMap(tokens -> attachTickers(tokens, wallet));
+        });
     }
 
     @Override
@@ -269,23 +263,6 @@ public class TokensRealmSource implements TokenLocalSource {
                            : token.ticker.image);
         realmItem.setUpdatedTime(token.ticker.updateTime);
         realmItem.setCurrencySymbol(token.ticker.priceSymbol);
-    }
-
-    private Single<Token[]> attachTickers(Token[] tokens, Wallet wallet)
-    {
-        return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getRealmInstance(wallet))
-            {
-                for (Token t : tokens)
-                {
-                    RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
-                            .equalTo("contract", databaseKey(t))
-                            .findFirst();
-                    t.ticker = convertRealmTicker(realmItem);
-                }
-            }
-            return tokens;
-        });
     }
 
     @Override

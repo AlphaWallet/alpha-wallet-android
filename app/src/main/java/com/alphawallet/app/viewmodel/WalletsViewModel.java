@@ -47,6 +47,7 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 
 public class WalletsViewModel extends BaseViewModel
 {
@@ -228,7 +229,7 @@ public class WalletsViewModel extends BaseViewModel
     private Observable<Wallet> resolveEns(Wallet wallet)
     {
         return Observable.fromCallable(() -> {
-            AWEnsResolver resolver = new AWEnsResolver(getService(EthereumNetworkRepository.MAINNET_ID), gasService);
+            AWEnsResolver resolver = new AWEnsResolver(getWeb3jService(EthereumNetworkRepository.MAINNET_ID), gasService);
             try
             {
                 wallet.ENSname = resolver.reverseResolve(wallet.address);
@@ -248,18 +249,6 @@ public class WalletsViewModel extends BaseViewModel
             }
             return wallet;
         }).subscribeOn(Schedulers.from(executorService));
-    }
-
-    private Web3j getService(int chainId)
-    {
-        OkHttpClient okClient = new OkHttpClient.Builder()
-                .connectTimeout(5, TimeUnit.SECONDS)
-                .readTimeout(5, TimeUnit.SECONDS)
-                .writeTimeout(5, TimeUnit.SECONDS)
-                .retryOnConnectionFailure(false)
-                .build();
-        NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(chainId);
-        return Web3j.build(new HttpService(network.rpcServerUrl, okClient, false));
     }
 
     public void fetchWallets()

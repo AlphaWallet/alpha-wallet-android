@@ -579,4 +579,5 @@
     <string name="dialog_title_select_currency">Select FIAT Currency</string>
     <string name="toast_browser_cache_cleared">Browser cache cleared</string>
     <string name="your_wallets">Your Wallets</string>
+    <string name="action_copy">Copy</string>
 </resources>

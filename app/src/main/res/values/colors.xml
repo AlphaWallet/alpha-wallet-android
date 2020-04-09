@@ -53,6 +53,9 @@
 	<color name="greye9">#e9e9e9</color>
 	<color name="grey75">#757575</color>
 	<color name="greydd">#dddddd</color>
+	<color name="greyf2">#f2f2f2</color>
+
+
 	<color name="onboarding_indicator_unselected">#d8d8d8</color>
 	<color name="onboarding_indicator_selected">#b7b7b7</color>
 	<color name="golden_yellow">#f9d021</color>
@@ -68,7 +71,7 @@
 	<color name="viewfinder_mask">#60000000</color>
 	<color name="viewfinder_laser">#ffcc0000</color>
 	<color name="viewfinder_border">#ffafed44</color>
-	
+
 	<color name="pending">#f5a623</color>
 	<color name="incomplete">#fb6523</color>
 	<color name="mainnet">#2986AF</color>

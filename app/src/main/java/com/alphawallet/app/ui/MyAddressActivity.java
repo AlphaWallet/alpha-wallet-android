@@ -10,7 +10,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,6 +38,7 @@ import com.alphawallet.app.util.QRUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.viewmodel.MyAddressViewModelFactory;
+import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 
 import org.web3j.crypto.Keys;
@@ -51,6 +52,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.Key.WALLET;
 
@@ -69,6 +72,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
 
     private Wallet wallet;
     private String displayAddress;
+    private String displayName;
     private Token token;
     private ImageView qrImageView;
     private TextView titleView;
@@ -85,6 +89,8 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     private int overrideNetwork;
     private FunctionButtonBar functionBar;
     private int screenWidth;
+    private CopyTextView copyAddress;
+    private CopyTextView copyWalletName;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -253,6 +259,9 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         initViews();
         findViewById(R.id.toolbar_title).setVisibility(View.VISIBLE);
 
+        copyWalletName = findViewById(R.id.copy_wallet_name);
+        copyAddress = findViewById(R.id.copy_address);
+
         if (amountInput != null)
         {
             amountInput.onClear();
@@ -261,17 +270,33 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
 
         displayAddress = Keys.toChecksumAddress(wallet.address);
         setTitle(getString(R.string.my_wallet_address));
-        address.setText(displayAddress);
+        copyAddress.setText(displayAddress);
         currentMode = MODE_ADDRESS;
         selectNetworkLayout.setVisibility(View.GONE);
         if (getCurrentFocus() != null) {
             KeyboardUtils.hideKeyboard(getCurrentFocus());
         }
-        address.setVisibility(View.VISIBLE);
+        copyAddress.setVisibility(View.VISIBLE);
         onWindowFocusChanged(true);
-        functionBar.setVisibility(View.VISIBLE);
-        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.copy_wallet_address));
-        functionBar.setupFunctions(this, functions);
+        updateAddressWithENS(wallet.ENSname); //JB: see if there's any cached value to display while we wait for ENS
+
+        //When view changes, this function loads again. It will again try to fetch ENS
+        if(TextUtils.isEmpty(displayName))
+        {
+            viewModel.resolveEns(displayAddress)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(this::updateAddressWithENS, this::printTrace).isDisposed();
+        }
+        else
+        {
+            updateAddressWithENS(displayName);
+        }
+    }
+
+    //This is temporary method to show test ENS name on any error faced to reverse lookup
+    private void printTrace(Throwable throwable) {
+        updateAddressWithENS(wallet.ENSname); // JB: if there's any issue then fall back to cached name
     }
 
     private void showContract()
@@ -289,6 +314,20 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         functionBar.setVisibility(View.VISIBLE);
         List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.copy_contract_address));
         functionBar.setupFunctions(this, functions);
+    }
+
+    private void updateAddressWithENS(String ensName)
+    {
+        if (!TextUtils.isEmpty(ensName))
+        {
+            displayName = ensName;
+            copyWalletName.setVisibility(View.VISIBLE);
+            copyWalletName.setText(ensName);
+        }
+        else
+        {
+            copyWalletName.setVisibility(View.GONE);
+        }
     }
 
     private void selectNetwork() {

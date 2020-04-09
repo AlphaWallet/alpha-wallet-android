@@ -2,13 +2,18 @@ package com.alphawallet.app.viewmodel;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.text.TextUtils;
 
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
+import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.util.AWEnsResolver;
 
 import java.util.concurrent.TimeUnit;
 
@@ -90,5 +95,32 @@ public class MyAddressViewModel extends BaseViewModel {
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(updateToken::postValue, this::onError)).subscribe();
         }
+    }
+
+    public Single<String> resolveEns(String address)
+    {
+        GasService gasService = new GasService(this.ethereumNetworkRepository);
+        return Single.fromCallable(() -> {
+            AWEnsResolver resolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), gasService);
+            String walletENSName = "";
+            try
+            {
+                walletENSName = resolver.reverseResolve(address);
+                if (!TextUtils.isEmpty(walletENSName))
+                {
+                    //check ENS name integrity - it must point to the wallet address
+                    String resolveAddress = resolver.resolve(walletENSName);
+                    if (!resolveAddress.equalsIgnoreCase(address))
+                    {
+                        walletENSName = null;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                walletENSName = null;
+            }
+            return walletENSName;
+        });
     }
 }

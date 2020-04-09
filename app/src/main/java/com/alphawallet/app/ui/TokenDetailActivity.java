@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.TSAction;
 import com.bumptech.glide.Glide;
@@ -248,5 +249,17 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         intent.putExtra(EXTRA_STATE, TRANSFER_TO_ADDRESS.ordinal());
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         startActivity(intent);
+    }
+
+    @Override
+    public void displayTokenSelectionError(TSAction action)
+    {
+        AWalletAlertDialog dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.token_selection);
+        dialog.setMessage(getString(R.string.token_requirement, String.valueOf(action.function.getTokenRequirement())));
+        dialog.setButtonText(R.string.dialog_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
+        dialog.show();
     }
 }

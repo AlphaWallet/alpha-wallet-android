@@ -270,7 +270,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         TSAction action = functions.get(function);
 
-        if (action.function != null)
+        if (action != null && action.function != null) //if no function then it's handled by the token view
         {
             //check params for function.
             //if there's input params, resolve them
@@ -283,13 +283,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                 viewModel.handleFunction(action, tokenId, token, this);
                 return;
             }
-            else if (!resolved && userInputCheckCount > 0)
+            else if (userInputCheckCount > 0)
             {
                 return;
             }
-        }
 
-        tokenScriptError(function);
+            tokenScriptError(function);
+        }
     }
 
     private void resolveTokenIds(TSAction action)
@@ -376,7 +376,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
         else
         {
-            resolved = resolvedUserArgs.containsKey(e.ref);
+            if (!resolvedUserArgs.containsKey(e.ref)) resolved = false; //only mark as not resolved, fix false positive
         }
 
         return resolved;

@@ -246,7 +246,11 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     private boolean hasCorrectTokens(TSAction action) {
         //get selected tokens
-        if (adapter == null) return true;
+        if (adapter == null)
+        {
+            if (action.function != null) return action.function.getTokenRequirement() <= 1; //can't use multi-token with no selection adapter.
+            else return true;
+        }
         List<BigInteger> selected = adapter.getSelectedTokenIds(selection);
         int groupings = adapter.getSelectedGroups();
         if (action.function != null) {

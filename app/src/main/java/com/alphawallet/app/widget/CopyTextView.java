@@ -11,6 +11,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.util.Utils;
+
+import org.web3j.crypto.WalletUtils;
 
 public class CopyTextView extends LinearLayout {
 
@@ -62,7 +65,13 @@ public class CopyTextView extends LinearLayout {
     }
 
     public void setText(CharSequence text) {
-        this.text.setText(text);
+        String breakAddr = text.toString();
+        if (WalletUtils.isValidAddress(breakAddr)) //split string across two lines
+        {
+            breakAddr = breakAddr.substring(0, 22) + " " + breakAddr.substring(22);
+        }
+
+        this.text.setText(breakAddr);
     }
 
     private void copyToClipboard()

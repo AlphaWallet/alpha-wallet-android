@@ -278,7 +278,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         }
         copyAddress.setVisibility(View.VISIBLE);
         onWindowFocusChanged(true);
-        functionBar.setVisibility(View.GONE);
+        updateAddressWithENS(wallet.ENSname); //JB: see if there's any cached value to display while we wait for ENS
 
         //When view changes, this function loads again. It will again try to fetch ENS
         if(TextUtils.isEmpty(displayName))
@@ -296,7 +296,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
 
     //This is temporary method to show test ENS name on any error faced to reverse lookup
     private void printTrace(Throwable throwable) {
-        updateAddressWithENS("Temp-ENS.eth");
+        updateAddressWithENS(wallet.ENSname); // JB: if there's any issue then fall back to cached name
     }
 
     private void showContract()

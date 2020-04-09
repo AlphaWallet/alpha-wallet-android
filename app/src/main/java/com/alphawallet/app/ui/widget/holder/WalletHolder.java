@@ -28,6 +28,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	private final ImageView walletIcon;
 	private final LinearLayout walletInfoLayout;
 	private final TextView walletBalanceText;
+	private final TextView walletBalanceCurrency;
 	private final TextView walletNameText;
 	private final TextView walletAddressSeparator;
 	private final TextView walletAddressText;
@@ -41,6 +42,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		manageWalletBtn = findViewById(R.id.manage_wallet_btn);
 		walletIcon = findViewById(R.id.wallet_icon);
 		walletBalanceText = findViewById(R.id.wallet_balance);
+		walletBalanceCurrency = findViewById(R.id.wallet_currency);
 		walletNameText = findViewById(R.id.wallet_name);
 		walletAddressSeparator = findViewById(R.id.wallet_address_separator);
 		walletAddressText = findViewById(R.id.wallet_address);
@@ -82,7 +84,8 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 
 			walletIcon.setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
 
-			walletBalanceText.setText(String.format("%s %s", wallet.balance, wallet.balanceSymbol));
+			walletBalanceText.setText(wallet.balance);
+			walletBalanceCurrency.setText(wallet.balanceSymbol);
 
 			walletAddressText.setText(Utils.formatAddress(wallet.address));
 

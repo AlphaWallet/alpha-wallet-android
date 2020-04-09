@@ -1,5 +1,7 @@
 package com.alphawallet.app.interact;
 
+import android.text.TextUtils;
+
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -30,6 +32,7 @@ public class FetchTokensInteract {
     }
 
     public Observable<Token> fetchStoredToken(NetworkInfo network, Wallet wallet, String tokenAddress) {
+        if (TextUtils.isEmpty(tokenAddress)) tokenAddress = wallet.address.toLowerCase();
         return tokenRepository.fetchCachedSingleToken(network, wallet.address, tokenAddress)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -105,44 +108,6 @@ public class FetchTokensInteract {
         pair.order = so;
         pair.balance = token.getArrayBalance();
         return pair;
-    }
-
-    public Observable<Token> fetchBaseCurrencyBalance(NetworkInfo info, Token overrideToken, Wallet wallet)
-    {
-        if (overrideToken == null || overrideToken.getInterfaceSpec() == ContractType.ETHEREUM)
-        {
-            return fetchEth(info, wallet);
-        }
-        else
-        {
-            return tokenRepository.fetchActiveTokenBalance(wallet.address, overrideToken)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread());
-        }
-    }
-
-    public Observable<Token> fetchBaseCurrencyBalance(NetworkInfo info, ContractResult overrideToken, Wallet wallet, TokensService service)
-    {
-        Token token;
-        if (overrideToken.type == ContractType.ETHEREUM)
-        {
-            return fetchEth(info, wallet);
-        }
-        else
-        {
-            //fetch an erc20 balance, first get a template token (note that we don't read this token's balance,
-            // but use it to query the balance of the token elsewhere).
-            token = service.getToken(overrideToken.chainId, overrideToken.name);
-        }
-
-        if (token != null)
-        {
-            return tokenRepository.fetchActiveTokenBalance(wallet.address, token).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
-        }
-        else
-        {
-            return Observable.fromCallable(() -> new Token(null, BigDecimal.ZERO, System.currentTimeMillis(), "eth", ContractType.ETHEREUM));
-        }
     }
 
     // Only for sensing ERC721 Ticket

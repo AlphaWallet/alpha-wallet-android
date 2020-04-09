@@ -21,6 +21,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.concurrent.TimeUnit;
 
+import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
+
 /**
  * Created by James on 4/07/2019.
  * Stormbird in Sydney
@@ -69,7 +71,7 @@ public class GasService implements ContractGasProvider
                 return;
             }
 
-            web3j = Web3j.build(new HttpService(networkRepository.getNetworkByChain(currentChainId).rpcServerUrl));
+            web3j = getWeb3jService(currentChainId);
             setCurrentPrice(chainId);
             gasFetchDisposable = Observable.interval(0, FETCH_GAS_PRICE_INTERVAL, TimeUnit.SECONDS)
                     .doOnNext(l -> fetchCurrentGasPrice()).subscribe();

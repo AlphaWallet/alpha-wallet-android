@@ -140,15 +140,10 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 			case R.id.btn_more:
 				Intent intent = new Intent(getContext(), WalletActionsActivity.class);
 				intent.putExtra("wallet", wallet);
-				intent.putExtra("currency", currencySymbol);
+				intent.putExtra("currency", wallet.balanceSymbol);
 				intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 				getContext().startActivity(intent);
 				break;
 		}
 	}
-
-    public void setCurrencySymbol(String symbol)
-    {
-		currencySymbol = symbol;
-    }
 }

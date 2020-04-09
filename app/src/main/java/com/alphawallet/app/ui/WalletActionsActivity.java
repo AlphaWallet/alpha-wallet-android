@@ -42,7 +42,8 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     WalletActionsViewModel viewModel;
 
     private ImageView walletIcon;
-    private TextView walletBalanceText;
+    private TextView walletBalance;
+    private TextView walletBalanceCurrency;
     private TextView walletNameText;
     private TextView walletAddressSeparator;
     private TextView walletAddressText;
@@ -54,7 +55,6 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     private final Handler handler = new Handler();
 
     private Wallet wallet;
-    private String currencySymbol;
     private int walletCount;
     private boolean isNewWallet;
     private Boolean isTaskRunning;
@@ -69,7 +69,6 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
 
         if (getIntent() != null) {
             wallet = (Wallet) getIntent().getExtras().get("wallet");
-            currencySymbol = getIntent().getStringExtra("currency");
             walletCount = getIntent().getIntExtra("walletCount", 0);
             walletCount++;
             isNewWallet = getIntent().getBooleanExtra("isNewWallet", false);
@@ -156,7 +155,8 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
 
     private void initViews() {
         walletIcon = findViewById(R.id.wallet_icon);
-        walletBalanceText = findViewById(R.id.wallet_balance);
+        walletBalance = findViewById(R.id.wallet_balance);
+        walletBalanceCurrency = findViewById(R.id.wallet_currency);
         walletNameText = findViewById(R.id.wallet_name);
         walletAddressSeparator = findViewById(R.id.wallet_address_separator);
         walletAddressText = findViewById(R.id.wallet_address);
@@ -167,7 +167,8 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
 
         walletIcon.setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
 
-        walletBalanceText.setText(String.format("%s %s", wallet.balance, currencySymbol));
+        walletBalance.setText(wallet.balance);
+        walletBalanceCurrency.setText(wallet.balanceSymbol);
 
         if (wallet.ENSname != null && !wallet.ENSname.isEmpty()) {
             walletNameText.setText(wallet.ENSname);

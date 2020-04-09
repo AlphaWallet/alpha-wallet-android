@@ -1,23 +1,29 @@
 package com.alphawallet.app.widget;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ItemClick;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -25,6 +31,8 @@ import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.TSAction;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -46,15 +54,12 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private Button primaryButton;
     private Button secondaryButton;
     private ImageButton moreButton;
+    private final Handler handler = new Handler();
 
     private BottomSheetDialog bottomSheet;
     private ListView moreActionsListView;
-    private List<String> moreActionsList;
-    ArrayAdapter<String> moreActionsAdapter;
-
-    public FunctionButtonBar(Context ctx) {
-        this(ctx, null);
-    }
+    private List<ItemClick> moreActionsList;
+    private FunctionItemAdapter moreActionsAdapter;
 
     public FunctionButtonBar(Context ctx, @Nullable AttributeSet attrs) {
         super(ctx, attrs);
@@ -64,6 +69,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     }
 
     private void initializeViews() {
+
         primaryButton = findViewById(R.id.primary_button);
         secondaryButton = findViewById(R.id.secondary_button);
         moreButton = findViewById(R.id.more_button);
@@ -73,8 +79,8 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         bottomSheet.setCanceledOnTouchOutside(true);
         moreActionsListView = new ListView(getContext());
         moreActionsList = new ArrayList<>();
-        moreActionsAdapter = new ArrayAdapter<>(getContext(),
-                R.layout.item_action, android.R.id.text1, moreActionsList);
+        moreActionsAdapter = new FunctionItemAdapter(getContext(),
+                R.layout.item_action, moreActionsList);
         moreActionsListView.setAdapter(moreActionsAdapter);
         bottomSheet.setContentView(moreActionsListView);
         moreActionsListView.setOnItemClickListener(this);
@@ -86,34 +92,6 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         buttonCount = 0;
         moreActionsList.clear();
         moreActionsAdapter.notifyDataSetChanged();
-    }
-
-    private void addFunction(String resource) {
-        switch (buttonCount) {
-            case 0: {
-                primaryButton.setText(resource);
-                primaryButton.setVisibility(View.VISIBLE);
-                primaryButton.setOnClickListener(this);
-                break;
-            }
-            case 1: {
-                secondaryButton.setText(resource);
-                secondaryButton.setVisibility(View.VISIBLE);
-                secondaryButton.setOnClickListener(this);
-                break;
-            }
-            default: {
-                moreActionsList.add(resource);
-                moreActionsAdapter.notifyDataSetChanged();
-                moreButton.setVisibility(View.VISIBLE);
-                moreButton.setOnClickListener(this);
-            }
-        }
-        buttonCount++;
-    }
-
-    private void addFunction(int resourceId) {
-        addFunction(context.getString(resourceId));
     }
 
     public void setupFunctions(StandardFunctionInterface functionInterface, List<Integer> functionResources) {
@@ -138,7 +116,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
         if (functions != null && functions.size() > 0) {
             for (String function : functions.keySet()) {
-                addFunction(function);
+                addFunction(new ItemClick(function, 0));
             }
         }
 
@@ -198,52 +176,62 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     @Override
     public void onClick(View v) {
-        String action;
         if (v instanceof Button) { // Instance of 'primary' & 'secondary' buttons
-            action = ((Button) v).getText().toString();
-            handleAction(action);
+            Button button = (Button)v;
+            debounceButton(button);
+            handleAction(new ItemClick(button.getText().toString(), v.getId()));
         } else if (v instanceof ImageButton) { // Instance of 'menu' button
             bottomSheet.show();
         }
     }
 
-    private void handleAction(String action) {
-        if (functions != null && functions.containsKey(action)) {
+    private void handleAction(ItemClick action) {
+        if (functions != null && functions.containsKey(action.buttonText)) {
             handleUseClick(action);
         } else {
             handleStandardFunctionClick(action);
         }
     }
 
-    private void handleStandardFunctionClick(String action) {
-        if (action.equals(context.getString(R.string.action_sell))) { //ERC875 only
-            if (isSelectionValid()) callStandardFunctions.sellTicketRouter(selection);
-        } else if (action.equals(context.getString(R.string.action_send))) { //Eth + ERC20
-            callStandardFunctions.showSend();
-        } else if (action.equals(context.getString(R.string.action_receive))) { //Everything
-            callStandardFunctions.showReceive();
-        } else if (action.equals(context.getString(R.string.action_transfer))) { //Any NFT
-            if (isSelectionValid()) callStandardFunctions.showTransferToken(selection);
-        } else if (action.equals(context.getString(R.string.action_use))) { //NFT with Redeem
-            if (isSelectionValid()) callStandardFunctions.selectRedeemTokens(selection);
-        } else {
-            callStandardFunctions.handleClick(action);
+    private void handleStandardFunctionClick(ItemClick action) {
+        switch (action.buttonId)
+        {
+            case R.string.action_sell:      //ERC875 only
+                if (isSelectionValid(action.buttonId)) callStandardFunctions.sellTicketRouter(selection);
+                break;
+            case R.string.action_send:      //Eth + ERC20
+                callStandardFunctions.showSend();
+                break;
+            case R.string.action_receive:   //Everything
+                callStandardFunctions.showReceive();
+                break;
+            case R.string.action_transfer:  //Any NFT
+                if (isSelectionValid(action.buttonId)) callStandardFunctions.showTransferToken(selection);
+                break;
+            case R.string.action_use:    //NFT with Redeem
+                if (isSelectionValid(action.buttonId)) callStandardFunctions.selectRedeemTokens(selection);
+                break;
+            default:
+                callStandardFunctions.handleClick(action.buttonText);
+                break;
         }
     }
 
-    private void handleUseClick(String function) {
-        if (functions != null && functions.containsKey(function)) {
-            TSAction action = functions.get(function);
+    private void handleUseClick(ItemClick function) {
+        if (functions != null && functions.containsKey(function.buttonText)) {
+            TSAction action = functions.get(function.buttonText);
             //ensure we have sufficient tokens for selection
             if (!hasCorrectTokens(action)) {
                 callStandardFunctions.displayTokenSelectionError(action);
             } else {
-                callStandardFunctions.handleTokenScriptFunction(function, selection);
+                List<BigInteger> selected = selection;
+                if (adapter != null) selected = adapter.getSelectedTokenIds(selection);
+                callStandardFunctions.handleTokenScriptFunction(function.buttonText, selected);
             }
         }
     }
 
-    private boolean isSelectionValid() {
+    private boolean isSelectionValid(int buttonId) {
         List<BigInteger> selected = selection;
         if (adapter != null) selected = adapter.getSelectedTokenIds(selection);
         if (token == null || token.checkSelectionValidity(selected)) {
@@ -251,6 +239,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         }
         else {
             displayInvalidSelectionError();
+            flashButton(findViewById(buttonId));
             return false;
         }
     }
@@ -323,13 +312,9 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         Toast.makeText(getContext(), "Invalid token selection", Toast.LENGTH_SHORT).show();
     }
 
-    public void setSelection(List<BigInteger> idList) {
-        selection = idList;
-    }
-
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String action = moreActionsAdapter.getItem(position);
+        ItemClick action = moreActionsAdapter.getItem(position);
         handleAction(action);
         bottomSheet.hide();
     }
@@ -366,5 +351,95 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     public void setSecondaryButtonClickListener(OnClickListener listener) {
         secondaryButton.setOnClickListener(listener);
+    }
+
+    private void debounceButton(final View v)
+    {
+        if (v == null) return;
+
+        v.setEnabled(false);
+        handler.postDelayed(() -> {
+            v.setEnabled(true);
+        }, 500);
+    }
+
+    /**
+     * Indicate token input error
+     *
+     * @param button
+     */
+    private void flashButton(final Button button)
+    {
+        if (button == null) return;
+
+        button.setBackgroundResource(R.drawable.button_round_error);
+        handler.postDelayed(() -> {
+            switch (button.getId())
+            {
+                case R.id.primary_button:
+                    button.setBackgroundResource(R.drawable.selector_round_button);
+                    break;
+                default:
+                case R.id.secondary_button:
+                    button.setBackgroundResource(R.drawable.selector_round_button_secondary);
+                    break;
+            }
+        }, 500);
+    }
+
+    public void setSelection(List<BigInteger> idList)
+    {
+        selection = idList;
+    }
+
+
+    private void addFunction(ItemClick function) {
+        switch (buttonCount) {
+            case 0: {
+                primaryButton.setText(function.buttonText);
+                primaryButton.setId(function.buttonId);
+                primaryButton.setVisibility(View.VISIBLE);
+                primaryButton.setOnClickListener(this);
+                break;
+            }
+            case 1: {
+                secondaryButton.setText(function.buttonText);
+                secondaryButton.setId(function.buttonId);
+                secondaryButton.setVisibility(View.VISIBLE);
+                secondaryButton.setOnClickListener(this);
+                break;
+            }
+            default: {
+                moreActionsList.add(function);
+                moreActionsAdapter.notifyDataSetChanged();
+                moreButton.setVisibility(View.VISIBLE);
+                moreButton.setOnClickListener(this);
+            }
+        }
+        buttonCount++;
+    }
+
+    private void addFunction(String function) {
+        addFunction(new ItemClick(function, 0));
+    }
+
+    private void addFunction(int resourceId) {
+        addFunction(new ItemClick(context.getString(resourceId), resourceId));
+    }
+
+    private static class FunctionItemAdapter extends ArrayAdapter<ItemClick>
+    {
+        public FunctionItemAdapter(Context context, int resource, List<ItemClick> objects) {
+            super(context, resource, 0, objects);
+        }
+
+        @SuppressLint("ViewHolder") @NotNull @Override
+        public View getView(int position, View convertView, @NotNull ViewGroup parent) {
+            ItemClick item = getItem(position);
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            convertView = inflater.inflate(R.layout.item_action, parent, false);
+            ((TextView)convertView.findViewById(android.R.id.text1)).setText(item.buttonText);
+            return convertView;
+        }
     }
 }

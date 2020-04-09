@@ -1,7 +1,6 @@
 package com.alphawallet.app.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -14,14 +13,13 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.ProgressBar;
 
-import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
-import com.alphawallet.app.viewmodel.AssetDisplayViewModel;
-import com.alphawallet.app.viewmodel.AssetDisplayViewModelFactory;
+import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
+import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -34,13 +32,13 @@ import com.alphawallet.token.entity.XMLDsigDescriptor;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.TICKET;
-import static com.alphawallet.app.C.Key.WALLET;
 
 /**
  * Created by James on 22/01/2018.
@@ -68,8 +66,9 @@ import static com.alphawallet.app.C.Key.WALLET;
 public class AssetDisplayActivity extends BaseActivity implements StandardFunctionInterface, PageReadyCallback, Runnable
 {
     @Inject
-    protected AssetDisplayViewModelFactory assetDisplayViewModelFactory;
-    private AssetDisplayViewModel viewModel;
+    protected TokenFunctionViewModelFactory tokenFunctionViewModelFactory;
+    private TokenFunctionViewModel viewModel;
+
     private SystemView systemView;
     private ProgressBar progressView;
     private RecyclerView list;
@@ -88,36 +87,15 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         AndroidInjection.inject(this);
-        setContentView(R.layout.activity_asset_display);
+
+        token = getIntent().getParcelableExtra(TICKET);
 
         super.onCreate(savedInstanceState);
 
+        setContentView(R.layout.activity_asset_display);
         toolbar();
-        getIntents();
-        setupSystemViews();
-        setupViewModel();
-        initView();
 
-        finishReceiver = new FinishReceiver(this);
-    }
-
-    private void getIntents()
-    {
-        token = getIntent().getParcelableExtra(TICKET);
-    }
-
-    private void setupViewModel()
-    {
-        viewModel = ViewModelProviders.of(this, assetDisplayViewModelFactory)
-                .get(AssetDisplayViewModel.class);
-
-        viewModel.pushToast().observe(this, this::displayToast);
-        viewModel.ticket().observe(this, this::onTokenUpdate);
-        viewModel.sig().observe(this, this::onSigData);
-    }
-
-    private void setupSystemViews()
-    {
+        setTitle(token.getShortName());
         systemView = findViewById(R.id.system_view);
         systemView.hide();
         progressView = findViewById(R.id.progress_view);
@@ -125,26 +103,34 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
         systemView.attachSwipeRefreshLayout(refreshLayout);
         refreshLayout.setOnRefreshListener(this::refreshAssets);
-    }
 
-    private void initView()
-    {
         testView = findViewById(R.id.test_web3);
 
         list = findViewById(R.id.listTickets);
         toolbarView = findViewById(R.id.toolbar);
+
+        viewModel = ViewModelProviders.of(this, tokenFunctionViewModelFactory)
+                .get(TokenFunctionViewModel.class);
+
+        viewModel.pushToast().observe(this, this::displayToast);
+        viewModel.tokenUpdate().observe(this, this::onTokenUpdate);
+        viewModel.sig().observe(this, this::onSigData);
+        viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
+        viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
 
         functionBar = findViewById(R.id.layoutButtons);
 
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setHapticFeedbackEnabled(true);
 
+        finishReceiver = new FinishReceiver(this);
         findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE);
         viewModel.checkTokenScriptValidity(token);
-        setTitle(token.getShortName());
 
+        token.iconifiedWebviewHeight = 0;
+        token.nonIconifiedWebviewHeight = 0;
         iconifiedCheck = true;
-        if (token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address) && token.iconifiedWebviewHeight == 0)
+        if (token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
         {
             initWebViewCheck(iconifiedCheck);
             handler.postDelayed(this, 1500);
@@ -187,23 +173,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     {
         super.onResume();
         viewModel.prepare(token);
-    }
-
-    @Override
-    public void onStop()
-    {
-        super.onStop();
-        handler.removeCallbacksAndMessages(null);
-    }
-
-    @Override
-    public void onRestart()
-    {
-        super.onRestart();
-        getIntents();
-        setupSystemViews();
-        setupViewModel();
-        initView();
+        if (functionBar == null) functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter);
     }
 
     @Override
@@ -215,13 +185,10 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
 
     private void onTokenUpdate(Token t)
     {
-        if (adapter != null && token.checkBalanceChange(t))
+        if (adapter != null)
         {
             token = t;
             adapter.setToken(token);
-            RecyclerView list = findViewById(R.id.listTickets);
-            list.setAdapter(null);
-            list.setAdapter(adapter);
         }
     }
 
@@ -257,7 +224,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     @Override
     public void sellTicketRouter(List<BigInteger> selection)
     {
-        viewModel.sellTicketRouter(this, token, token.bigIntListToString(selection, false));
+        viewModel.sellTicketRouter(this, token, selection);
     }
 
     @Override
@@ -281,14 +248,20 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     @Override
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
+        //does the function have a view? If it's transaction only then handle here
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        TSAction action = functions.get(function);
+
         //handle TS function
-        Intent intent = new Intent(this, FunctionActivity.class);
-        intent.putExtra(TICKET, token);
-        intent.putExtra(WALLET, viewModel.defaultWallet().getValue());
-        intent.putExtra(C.EXTRA_STATE, function);
-        intent.putExtra(C.EXTRA_TOKEN_ID, token.bigIntListToString(adapter.getSelectedTokenIds(selection), true));
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        startActivity(intent);
+        if (action != null && action.view == null && action.function != null)
+        {
+            //go straight to function call
+            viewModel.handleFunction(action, selection.get(0), token, this);
+        }
+        else
+        {
+            viewModel.showFunction(this, token, function, selection);
+        }
     }
 
     @Override
@@ -306,7 +279,6 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
                 if (iconifiedCheck)token.iconifiedWebviewHeight = bottom - top;
                 else token.nonIconifiedWebviewHeight = bottom - top;
                 checkVal++;
-                viewModel.setTokenViewDimensions(token);
             }
 
             if (checkVal == 3) addRunCall(0); //received the third webview render update - this is always the final size we want, but sometimes there's only 1 or 2 updates
@@ -345,5 +317,34 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         adapter = new NonFungibleTokenAdapter(functionBar, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
         functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter);
         list.setAdapter(adapter);
+    }
+
+    private void errorInsufficientFunds(Token currency)
+    {
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
+
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.error_insufficient_funds);
+        dialog.setMessage(getString(R.string.current_funds, currency.getCorrectedBalance(currency.tokenInfo.decimals), currency.getSymbol()));
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private void errorInvalidAddress(String address)
+    {
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.error_invalid_address);
+        dialog.setMessage(getString(R.string.invalid_address_explain, address));
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
+        dialog.show();
     }
 }

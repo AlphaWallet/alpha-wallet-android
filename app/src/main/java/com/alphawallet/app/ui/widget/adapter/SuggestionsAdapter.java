@@ -57,7 +57,7 @@ public class SuggestionsAdapter extends RecyclerView.Adapter<SuggestionsAdapter.
         String data = suggestionList.get(i);
         viewHolder.name.setText(data);
 
-        viewHolder.name.setOnClickListener(v -> {
+        viewHolder.itemView.setOnClickListener(v -> {
             String outputWord = data.replaceFirst(suggestion, "");
             onSuggestionClickListener.onSuggestionClick(outputWord);
         });

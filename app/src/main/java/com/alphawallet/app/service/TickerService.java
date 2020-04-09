@@ -218,8 +218,20 @@ public class TickerService implements TickerServiceInterface
     public TokenTicker getTokenTicker(Token token)
     {
         if (token == null) return null;
-        if (token.isEthereum()) return ethTickers.get(token.tokenInfo.chainId);
-        else return erc20Tickers.get(token.getAddress().toLowerCase());
+        TokenTicker serviceTicker;
+        if (token.isEthereum()) serviceTicker = ethTickers.get(token.tokenInfo.chainId);
+        else serviceTicker = erc20Tickers.get(token.getAddress().toLowerCase());
+
+        //Only update the ticker if service ticker is more recent than stored ticker
+        if (serviceTicker != null &&
+                (token.ticker == null || (serviceTicker.updateTime > token.ticker.updateTime)))
+        {
+            return serviceTicker;
+        }
+        else
+        {
+            return token.ticker;
+        }
     }
 
     @Override

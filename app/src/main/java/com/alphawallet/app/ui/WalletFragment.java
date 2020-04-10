@@ -2,11 +2,14 @@ package com.alphawallet.app.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -43,6 +46,7 @@ import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
+import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
 
@@ -118,6 +122,8 @@ public class WalletFragment extends BaseFragment implements
         initTabLayout(view);
 
         viewModel.clearProcess();
+
+        initNotificationView(view);
 
         return view;
     }
@@ -598,5 +604,25 @@ public class WalletFragment extends BaseFragment implements
             viewModel.showAddToken(getContext());
         }
         return super.onMenuItemClick(menuItem);
+    }
+
+    private void initNotificationView(View view) {
+        final String key = "marshmallow_version_support_warning_shown";
+        NotificationView notificationView = view.findViewById(R.id.notification);
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        boolean hasShownWarning = pref.getBoolean(key, false);
+
+        if (!hasShownWarning && android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+            notificationView.setNotificationBackgroundColor(R.color.indigo);
+            notificationView.setTitle(getContext().getString(R.string.title_version_support_warning));
+            notificationView.setMessage(getContext().getString(R.string.message_version_support_warning));
+            notificationView.setPrimaryButtonText(getContext().getString(R.string.hide_notification));
+            notificationView.setPrimaryButtonListener(() -> {
+                notificationView.setVisibility(View.GONE);
+                pref.edit().putBoolean(key, true).apply();
+            });
+        } else {
+            notificationView.setVisibility(View.GONE);
+        }
     }
 }

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    android:layout_weight="0.9"
+    android:animateLayoutChanges="true"
+    android:background="@drawable/background_round_nofill_8dp"
+    android:clickable="true"
+    android:elevation="2dp"
+    android:focusable="true"
+    android:orientation="vertical"
+    android:paddingStart="16dp"
+    android:paddingTop="23dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="25dp">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="@font/font_regular"
+        android:text="Notification"
+        android:textColor="@color/white"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title"
+        android:layout_marginEnd="70dp"
+        android:fontFamily="@font/font_regular"
+        android:text="This is a notification"
+        android:textColor="@color/white"
+        android:textSize="17sp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/message"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_primary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/background_white_4dp"
+            android:fontFamily="@font/font_semibold"
+            android:paddingLeft="17dp"
+            android:paddingRight="17dp"
+            android:text="Primary"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="17sp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btn_secondary"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:fontFamily="@font/font_semibold"
+            android:paddingLeft="17dp"
+            android:paddingRight="17dp"
+            android:text="Secondary"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="17sp"
+            android:visibility="gone" />
+    </LinearLayout>
+
+</RelativeLayout>

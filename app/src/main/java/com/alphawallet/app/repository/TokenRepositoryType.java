@@ -48,7 +48,7 @@ public interface TokenRepositoryType {
     Single<ContractType> determineCommonType(TokenInfo tokenInfo);
     Single<Token[]> addERC20(Wallet wallet, Token[] tokens);
 
-    void updateTokenType(Token token, Wallet wallet, ContractType type);
+    Token updateTokenType(Token token, Wallet wallet, ContractType type);
     Single<Token[]> storeTickers(Wallet wallet, Token[] tokens);
 
     Single<Boolean> fetchIsRedeemed(Token token, BigInteger tokenId);

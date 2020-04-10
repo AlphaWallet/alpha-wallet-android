@@ -109,7 +109,7 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public void updateTokenType(Token token, Wallet wallet, ContractType type)
+    public Token updateTokenType(Token token, Wallet wallet, ContractType type)
     {
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
@@ -128,6 +128,8 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setInterfaceSpec(type.ordinal());
                 realm.commitTransaction();
             }
+
+            return fetchToken(token.tokenInfo.chainId, wallet, token.getAddress());
         }
     }
 

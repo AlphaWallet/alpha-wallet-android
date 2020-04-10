@@ -23,7 +23,7 @@ public interface TokenRepositoryType {
     Observable<Token[]> fetchStored(String walletAddress);
     Observable<Token[]> fetchActiveStoredPlusEth(String walletAddress);
     Observable<Token> fetchActiveSingle(String walletAddress, Token token);
-    Observable<Token> fetchCachedSingleToken(NetworkInfo network, String walletAddress, String tokenAddress);
+    Observable<Token> fetchCachedSingleToken(int chainId, String walletAddress, String tokenAddress);
     Observable<Token> fetchActiveTokenBalance(String walletAddress, Token token);
     Single<ContractResult> getTokenResponse(String address, int chainId, String method);
     Completable setEnable(Wallet wallet, Token token, boolean isEnabled);
@@ -36,6 +36,7 @@ public interface TokenRepositoryType {
     Single<TokenTicker> getTokenTicker(Token token);
     Single<Token> getEthBalance(NetworkInfo network, Wallet wallet);
     Single<BigInteger> fetchLatestBlockNumber(int chainId);
+    Token fetchToken(int chainId, String walletAddress, String address);
 
     Disposable terminateToken(Token token, Wallet wallet, NetworkInfo network);
 

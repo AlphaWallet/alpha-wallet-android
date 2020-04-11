@@ -33,7 +33,7 @@ public class FetchTokensInteract {
 
     public Observable<Token> fetchStoredToken(NetworkInfo network, Wallet wallet, String tokenAddress) {
         if (TextUtils.isEmpty(tokenAddress)) tokenAddress = wallet.address.toLowerCase();
-        return tokenRepository.fetchCachedSingleToken(network, wallet.address, tokenAddress)
+        return tokenRepository.fetchCachedSingleToken(network.chainId, wallet.address, tokenAddress)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
@@ -1055,18 +1056,23 @@ public class Token implements Parcelable, Comparable<Token>
         }
         else
         {
-            activity.findViewById(R.id.layout_legacy).setVisibility(View.VISIBLE);
-            activity.findViewById(R.id.layout_webwrapper).setVisibility(View.GONE);
-
-            TextView amount = activity.findViewById(R.id.amount);
-            TextView name = activity.findViewById(R.id.name);
-
-            String nameStr = getTokenTitle();
-            String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
-
-            name.setText(nameStr);
-            amount.setText(seatCount);
+            showLegacyView(range, activity);
         }
+    }
+
+    private void showLegacyView(TicketRange range, View activity)
+    {
+        activity.findViewById(R.id.layout_legacy).setVisibility(View.VISIBLE);
+        activity.findViewById(R.id.layout_webwrapper).setVisibility(View.GONE);
+
+        TextView amount = activity.findViewById(R.id.amount);
+        TextView name = activity.findViewById(R.id.name);
+
+        String nameStr = getTokenTitle();
+        String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
+
+        name.setText(nameStr);
+        amount.setText(seatCount);
     }
 
     protected void displayTokenscriptView(TicketRange range, AssetDefinitionService assetService, View activity, Context ctx, boolean iconified)
@@ -1090,17 +1096,30 @@ public class Token implements Parcelable, Comparable<Token>
         assetService.resolveAttrs(this, tokenId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(throwable, ctx, assetService, attrs, waitSpinner, tokenView, iconified),
-                           () -> displayTicket(ctx, assetService, attrs, waitSpinner, tokenView, iconified))
+                .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(throwable, waitSpinner, tokenView, range),
+                           () -> displayTicket(ctx, assetService, attrs, waitSpinner, tokenView, iconified, range))
                 .isDisposed();
     }
 
-    private void displayTicket(Context ctx, AssetDefinitionService assetService, StringBuilder attrs, ProgressBar waitSpinner, Web3TokenView tokenView, boolean iconified)
+    /**
+     * Add the decoded and resolved attributes as Token properties to the relevant view
+     *
+     * @param ctx
+     * @param assetService
+     * @param attrs
+     * @param waitSpinner
+     * @param tokenView
+     * @param iconified
+     * @param range
+     */
+    private void displayTicket(Context ctx, AssetDefinitionService assetService, StringBuilder attrs, ProgressBar waitSpinner, Web3TokenView tokenView, boolean iconified, TicketRange range)
     {
-        if (waitSpinner != null) waitSpinner.setVisibility(View.GONE);
         tokenView.setVisibility(View.VISIBLE);
+        String viewName = iconified ? "view-iconified" : "view";
 
-        String view = assetService.getTokenView(tokenInfo.chainId, getAddress(), iconified ? "view-iconified" : "view");
+        String view = assetService.getTokenView(tokenInfo.chainId, getAddress(), viewName);
+        if (waitSpinner != null) waitSpinner.setVisibility(View.GONE);
+        if (TextUtils.isEmpty(view)) view = buildViewError(ctx, range, viewName);
         String style = assetService.getTokenView(tokenInfo.chainId, getAddress(), "style");
         String viewData = tokenView.injectWeb3TokenInit(ctx, view, attrs.toString());
         viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
@@ -1109,12 +1128,41 @@ public class Token implements Parcelable, Comparable<Token>
         tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
     }
 
-    private void onError(Throwable throwable, Context ctx, AssetDefinitionService assetService, StringBuilder attrs, ProgressBar waitSpinner, Web3TokenView tokenView, boolean iconified)
+    /**
+     * Form TokenScript diagnostic message if relevant view not found
+     * @param range
+     * @param viewName
+     * @return
+     */
+    private String buildViewError(Context ctx, TicketRange range, String viewName)
     {
-        throwable.printStackTrace();
-        displayTicket(ctx, assetService, attrs, waitSpinner, tokenView, iconified);
+        String displayData = "<h3><span style=\"color:Green\">x" + range.tokenIds.size() + "</span><span style=\"color:Black\"> " + getTokenTitle() + "</span></h3>";
+        displayData += ("<br /><body>" + ctx.getString(R.string.card_view_not_found_error, viewName) + "</body>");
+        return displayData;
     }
 
+    /**
+     * Display Token amount and diagnostic, rather than a blank card or error
+     *
+     * @param throwable
+     * @param waitSpinner
+     * @param tokenView
+     * @param range
+     */
+    private void onError(Throwable throwable, ProgressBar waitSpinner, Web3TokenView tokenView, TicketRange range)
+    {
+        if (waitSpinner != null) waitSpinner.setVisibility(View.GONE);
+        String displayData = "<h3><span style=\"color:Green\">x" + range.tokenIds.size() + "</span><span style=\"color:Black\"> " + getTokenTitle() + "</span></h3>";
+        if (BuildConfig.DEBUG) displayData += ("<br /><body>" + throwable.getLocalizedMessage() + "</body>");
+        tokenView.loadData(displayData, "text/html", "utf-8");
+    }
+
+    /**
+     * Encode the resolved attribute into the Token properties declaration, eg 'name: "Entry Token",'
+     *
+     * @param attribute
+     * @param attrs StringBuilder holding the token properties as it's being built
+     */
     private void onAttr(TokenScriptResult.Attribute attribute, StringBuilder attrs)
     {
         TokenScriptResult.addPair(attrs, attribute.id, attribute.text);

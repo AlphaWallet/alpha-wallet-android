@@ -1158,10 +1158,10 @@ public class Token implements Parcelable, Comparable<Token>
     }
 
     /**
-     * Encode the resolved attribute as a property for adding into the
+     * Encode the resolved attribute into the Token properties declaration, eg 'name: "Entry Token",'
      *
      * @param attribute
-     * @param attrs
+     * @param attrs StringBuilder holding the token properties as it's being built
      */
     private void onAttr(TokenScriptResult.Attribute attribute, StringBuilder attrs)
     {

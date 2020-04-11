@@ -14,6 +14,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.SparseArray;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
@@ -64,6 +65,7 @@ import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -408,6 +410,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private TokenScriptFile getTokenScriptFile(int chainId, String address)
     {
+        if (address.equalsIgnoreCase(tokensService.getCurrentAddress()))
+        {
+            address = "ethereum";
+        }
+
         if (assetDefinitions.get(chainId) != null && assetDefinitions.get(chainId).containsKey(address))
         {
             return assetDefinitions.get(chainId).get(address);
@@ -487,7 +494,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 {
                     for (int network : holdingContracts.addresses.keySet())
                     {
-                        addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), tokenScriptFile.getAbsolutePath()));
+                        addContractsToNetwork(network,
+                                              networkAddresses(holdingContracts.addresses.get(network), tokenScriptFile.getAbsolutePath()),
+                                              false);
                     }
                     return token;
                 }
@@ -575,10 +584,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             fetchXMLFromServer(correctedAddress)
                     .flatMap(this::cacheSignature)
+                    .map(this::handleFileLoad)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::handleFileLoad, this::onError).isDisposed();
+                    .subscribe(this::loadComplete, this::onError).isDisposed();
         }
+    }
+
+    private void loadComplete(String fileName)
+    {
+        if (BuildConfig.DEBUG) System.out.println("TS LOAD: " + fileName);
     }
 
     private void onError(Throwable throwable)
@@ -601,8 +616,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 xmlInputStream, locale, this);
     }
 
-    private void handleFileLoad(File newFile) throws Exception
+    private String handleFileLoad(File newFile) throws Exception
     {
+        String fileLoad = "";
         if (newFile != null && !newFile.getName().equals("cache") && newFile.canRead())
         {
             addContractAddresses(newFile);
@@ -623,8 +639,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 intent.putExtra(C.EXTRA_TOKENID_LIST, addrs);
                 intent.putExtra(C.EXTRA_CHAIN_ID, chainIds);
                 context.sendBroadcast(intent);
+                fileLoad = newFile.getName();
             }
         }
+
+        return fileLoad;
     }
 
     private Single<File> fetchXMLFromServer(String address)
@@ -713,19 +732,49 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         assetLoadingLock.release();
     }
 
-    private void addContractsToNetwork(Integer network, Map<String, File> newTokenDescriptionAddresses)
+    private void addContractsToNetwork(Integer network, Map<String, File> newTokenDescriptionAddresses, boolean activeUpdate)
     {
         String externalDir = context.getExternalFilesDir("").getAbsolutePath();
         if (assetDefinitions.get(network) == null) assetDefinitions.put(network, new ConcurrentHashMap<>());
+        List<String> updateFiles = getAllNewFiles(newTokenDescriptionAddresses);
         for (String address : newTokenDescriptionAddresses.keySet())
         {
-            if (assetDefinitions.get(network).containsKey(address))
+            if (activeUpdate && assetDefinitions.get(network).containsKey(address))
             {
                 String filename = assetDefinitions.get(network).get(address).getAbsolutePath();
-                if (filename.contains(HomeViewModel.ALPHAWALLET_DIR)
-                    || filename.contains(externalDir)) continue; //don't override if this is a developer added script
+                //remove old file if it's an active update and file is in dev area
+                if (!updateFiles.contains(filename) && filename.contains(HomeViewModel.ALPHAWALLET_DIR)
+                    || filename.contains(externalDir))
+                {
+                    //delete old developer override - could be a different filename which will cause trouble later
+                    removeFile(filename);
+                }
             }
             assetDefinitions.get(network).put(address, new TokenScriptFile(context, newTokenDescriptionAddresses.get(address).getAbsolutePath()));
+        }
+    }
+
+    private List<String> getAllNewFiles(Map<String, File> newTokenAddresses)
+    {
+        List<String> newFiles = new ArrayList<>();
+        for (File f : newTokenAddresses.values())
+        {
+            newFiles.add(f.getAbsolutePath());
+        }
+
+        return newFiles;
+    }
+
+    private void removeFile(String filename)
+    {
+        try
+        {
+            File fileToDelete = new File(filename);
+            fileToDelete.delete();
+        }
+        catch (Exception e)
+        {
+            //ignore error
         }
     }
 
@@ -747,7 +796,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 //some Android versions don't have stream()
                 for (int network : holdingContracts.addresses.keySet())
                 {
-                    addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), asset));
+                    addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), asset), false);
                     XMLDsigDescriptor AWSig = new XMLDsigDescriptor();
                     String hash = tsf.calcMD5();
                     AWSig.result = "pass";
@@ -780,6 +829,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private boolean addContractAddresses(File file) throws Exception
     {
+        return addContractAddresses(file, false);
+    }
+
+    private boolean addContractAddresses(File file, boolean update) throws Exception
+    {
         FileInputStream input = new FileInputStream(file);
         TokenDefinition tokenDef = parseFile(input);
         ContractInfo holdingContracts = tokenDef.contracts.get(tokenDef.holdingToken);
@@ -787,7 +841,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             for (int network : holdingContracts.addresses.keySet())
             {
-                addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), file.getAbsolutePath()));
+                addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), file.getAbsolutePath()), update);
             }
             return true;
         }
@@ -866,9 +920,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         Observable.fromIterable(getScriptsInSecureZone())
                 .concatMap(addr -> fetchXMLFromServer(addr).toObservable())
+                .map(this::handleFileLoad)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::handleFileLoad, this::onError).isDisposed();
+                .subscribe(this::loadComplete, this::onError).isDisposed();
     }
 
     /* Add cached signature if uncached files found. */
@@ -1064,7 +1119,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                 //form filename
                                 TokenScriptFile newTSFile = new TokenScriptFile(context, listenerPath, file);
 
-                                if (addContractAddresses(newTSFile))
+                                if (addContractAddresses(newTSFile, true))
                                 {
                                     notificationService.DisplayNotification("Definition Updated", file, NotificationCompat.PRIORITY_MAX);
                                     cachedDefinition = null;
@@ -1440,8 +1495,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
-        //return definition.resolveAttributes(tokenId, this, cAddr);
-        //resolveAttributes(BigInteger tokenId, AttributeInterface attrIf, ContractAddress cAddr, TokenDefinition td)
+        if (definition == null) return Observable.fromCallable(() -> new TokenScriptResult.Attribute("RAttrs", "", BigInteger.ZERO, ""));
         return tokenscriptUtility.resolveAttributes(token.getWallet(), tokenId, this, cAddr, definition, token.lastTxTime);
     }
 

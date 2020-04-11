@@ -444,6 +444,10 @@ public class TokenDefinition {
             Node node = ll.item(j);
             if (node.getNodeType() != ELEMENT_NODE)
                 continue;
+
+            if (node.getPrefix() != null && node.getPrefix().equalsIgnoreCase("ds"))
+                continue;
+
             Element element = (Element) node;
             switch (node.getLocalName())
             {
@@ -472,9 +476,14 @@ public class TokenDefinition {
                     handleInput(element);
                     holdingToken = contracts.keySet().iterator().next(); //first key value
                     break;
-                default:
-                    System.out.println("Unknown tag while processing Action: " + node.getLocalName());
+                case "output":
+                    //TODO: Not yet handled.
                     break;
+                case "script":
+                    //misplaced script tag
+                    throw new SAXException("Misplaced <script> tag in Action '" + name + "'");
+                default:
+                    throw new SAXException("Unknown tag <" + node.getLocalName() + "> tag in Action '" + name + "'");
             }
         }
 

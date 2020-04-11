@@ -1119,7 +1119,7 @@ public class Token implements Parcelable, Comparable<Token>
 
         String view = assetService.getTokenView(tokenInfo.chainId, getAddress(), viewName);
         if (waitSpinner != null) waitSpinner.setVisibility(View.GONE);
-        if (TextUtils.isEmpty(view)) view = buildViewError(range, viewName);
+        if (TextUtils.isEmpty(view)) view = buildViewError(ctx, range, viewName);
         String style = assetService.getTokenView(tokenInfo.chainId, getAddress(), "style");
         String viewData = tokenView.injectWeb3TokenInit(ctx, view, attrs.toString());
         viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
@@ -1134,10 +1134,10 @@ public class Token implements Parcelable, Comparable<Token>
      * @param viewName
      * @return
      */
-    private String buildViewError(TicketRange range, String viewName)
+    private String buildViewError(Context ctx, TicketRange range, String viewName)
     {
         String displayData = "<h3><span style=\"color:Green\">x" + range.tokenIds.size() + "</span><span style=\"color:Black\"> " + getTokenTitle() + "</span></h3>";
-        displayData += ("<br /><body>" + viewName + " fot found</body>");
+        displayData += ("<br /><body>" + ctx.getString(R.string.card_view_not_found_error, viewName) + "</body>");
         return displayData;
     }
 

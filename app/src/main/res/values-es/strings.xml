@@ -555,4 +555,7 @@
     <string name="change_chain_request">Change Chain Request</string>
     <string name="error_zero_balance">Zero Balance Transaction</string>
     <string name="instagram">Instagram</string>
+    <string name="settings_locale_currency">Change Currency</string>
+    <string name="dialog_title_select_currency">Select FIAT Currency</string>
+    <string name="card_view_not_found_error">%1$s not found</string>
 </resources>

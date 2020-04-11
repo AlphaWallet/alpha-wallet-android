@@ -87,7 +87,7 @@ public class ContractTransactionHolder extends BinderViewHolder<Transaction> imp
             String valueStr,
             long decimals,
             long timestamp) {
-        boolean isSent = from.toLowerCase().equals(defaultAddress);
+        boolean isSent = from.equalsIgnoreCase(defaultAddress);
         type.setText(isSent ? getString(R.string.sent) : getString(R.string.received));
         if (!TextUtils.isEmpty(error)) {
             typeIcon.setImageResource(R.drawable.ic_error_outline_black_24dp);

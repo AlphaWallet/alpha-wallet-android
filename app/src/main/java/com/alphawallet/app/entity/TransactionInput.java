@@ -76,7 +76,8 @@ public class TransactionInput
         return address;
     }
 
-    public String getFirstValue(Context ctx)
+    //With static string as we don't have app context
+    String getFirstValue()
     {
         String value = "0";
         if (miscData.size() > 0)
@@ -84,7 +85,7 @@ public class TransactionInput
             String firstVal = miscData.get(0);
             if (firstVal.equals(ALL))
             {
-                value = ctx.getString(R.string.all);
+                value = "All"; //Can't localise here because no App context.
             }
             else
             {

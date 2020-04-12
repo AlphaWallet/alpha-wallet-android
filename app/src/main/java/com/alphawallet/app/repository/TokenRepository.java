@@ -368,9 +368,9 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public void updateTokenType(Token token, Wallet wallet, ContractType type)
+    public Token updateTokenType(Token token, Wallet wallet, ContractType type)
     {
-        localSource.updateTokenType(token, wallet, type);
+        return localSource.updateTokenType(token, wallet, type);
     }
 
     @Override
@@ -1303,6 +1303,7 @@ public class TokenRepository implements TokenRepositoryType {
             }
             catch (Exception e)
             {
+                e.printStackTrace();
                 //
             }
 

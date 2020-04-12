@@ -41,6 +41,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.WarningData;
+import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.util.TabUtils;
@@ -556,6 +557,10 @@ public class WalletFragment extends BaseFragment implements
             {
                 Token t = ((TokenHolder)viewHolder).token;
                 if (t.isEthereum()) return 0;
+            }
+            else if (viewHolder.getItemViewType() == ManageTokensHolder.VIEW_TYPE)
+            {
+                return 0;
             }
 
             return super.getSwipeDirs(recyclerView, viewHolder);

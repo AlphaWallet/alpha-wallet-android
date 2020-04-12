@@ -65,12 +65,6 @@ public class EtherscanTransaction
             isConstructor = true;
             ContractType type = decoder.getContractType(input);
             ct.decimals = type.ordinal();
-
-            if (type != ContractType.OTHER)
-            {
-                TokensService.setInterfaceSpec(chainId, contractAddress, type);
-            }
-
             input = "Constructor"; //Placeholder - don't consume storage for the constructor
         }
         else

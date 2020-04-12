@@ -5,6 +5,7 @@ import android.util.SparseArray;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -93,8 +94,13 @@ public class TokensService
             tokenMap.put(t.getAddress(), tokenAddr);
         }
 
+        if (updatedSpec(t))
+        {
+            //store new spec in DB
+            t = tokenRepository.updateTokenType(t, new Wallet(currentAddress), t.getInterfaceSpec());
+        }
+
         tokenAddr.put(chainId, t);
-        updatedSpec(t);
     }
 
     public Token getToken(int chainId, String addr)

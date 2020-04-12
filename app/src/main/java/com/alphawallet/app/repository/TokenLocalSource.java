@@ -33,5 +33,5 @@ public interface TokenLocalSource {
     Single<Token[]> saveERC20Tokens(Wallet wallet, Token[] tokens);
     void deleteRealmToken(int chainId, Wallet wallet, String address);
 
-    void updateTokenType(Token token, Wallet wallet, ContractType type);
+    Token updateTokenType(Token token, Wallet wallet, ContractType type);
 }

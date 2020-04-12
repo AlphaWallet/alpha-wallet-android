@@ -132,6 +132,32 @@ public class TransactionRepository implements TransactionRepositoryType {
 				.subscribeOn(Schedulers.io());
 	}
 
+	// Called for constructors from web3 Dapp transaction
+	@Override
+	public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId) {
+		final Web3j web3j = getWeb3jService(chainId);
+		final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
+
+		TransactionData txData = new TransactionData();
+
+		return networkRepository.getLastTransactionNonce(web3j, from.address)
+				.flatMap(nonce -> getRawTransaction(nonce, useGasPrice, gasLimit, BigInteger.ZERO, data))
+				.flatMap(rawTx -> signEncodeRawTransaction(rawTx, from, chainId))
+				.flatMap(signedMessage -> Single.fromCallable( () -> {
+					txData.signature = Numeric.toHexString(signedMessage);
+					EthSendTransaction raw = web3j
+							.ethSendRawTransaction(Numeric.toHexString(signedMessage))
+							.send();
+					if (raw.hasError()) {
+						throw new Exception(raw.getError().getMessage());
+					}
+					txData.txHash = raw.getTransactionHash();
+					return txData;
+				}))
+				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, "", BigInteger.ZERO, useGasPrice, chainId, data))
+				.subscribeOn(Schedulers.io());
+	}
+
 	private BigInteger gasPriceForNode(int chainId, BigInteger gasPrice)
 	{
 		if (EthereumNetworkRepository.hasGasOverride(chainId)) return EthereumNetworkRepository.gasOverrideValue(chainId);
@@ -159,53 +185,6 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 			return txHash;
 		});
-	}
-
-	// Called for constructors
-	@Override
-	public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId) {
-		final Web3j web3j = getWeb3jService(chainId);
-		final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
-
-		return networkRepository.getLastTransactionNonce(web3j, from.address)
-				.flatMap(nonce -> getRawTransaction(nonce, useGasPrice, gasLimit, BigInteger.ZERO, data))
-				.flatMap(rawTx -> signEncodeRawTransaction(rawTx, from, chainId))
-				.flatMap(signedMessage -> Single.fromCallable( () -> {
-					EthSendTransaction raw = web3j
-							.ethSendRawTransaction(Numeric.toHexString(signedMessage))
-							.send();
-					if (raw.hasError()) {
-						throw new Exception(raw.getError().getMessage());
-					}
-					return raw.getTransactionHash();
-				}))
-				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, "", BigInteger.ZERO, useGasPrice, chainId, data))
-				.subscribeOn(Schedulers.io());
-	}
-
-	@Override
-	public Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId) {
-		final Web3j web3j = getWeb3jService(chainId);
-		final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
-
-		TransactionData txData = new TransactionData();
-
-		return networkRepository.getLastTransactionNonce(web3j, from.address)
-				.flatMap(nonce -> getRawTransaction(nonce, useGasPrice, gasLimit, BigInteger.ZERO, data))
-				.flatMap(rawTx -> signEncodeRawTransaction(rawTx, from, chainId))
-				.flatMap(signedMessage -> Single.fromCallable( () -> {
-					txData.signature = Numeric.toHexString(signedMessage);
-					EthSendTransaction raw = web3j
-							.ethSendRawTransaction(Numeric.toHexString(signedMessage))
-							.send();
-					if (raw.hasError()) {
-						throw new Exception(raw.getError().getMessage());
-					}
-					txData.txHash = raw.getTransactionHash();
-					return txData;
-				}))
-				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, "", BigInteger.ZERO, useGasPrice, chainId, data))
-				.subscribeOn(Schedulers.io());
 	}
 
 	private Single<RawTransaction> getRawTransaction(BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, BigInteger value, String data)

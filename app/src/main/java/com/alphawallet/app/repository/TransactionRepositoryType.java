@@ -19,7 +19,6 @@ public interface TransactionRepositoryType {
 	Observable<Transaction[]> fetchCachedTransactions(Wallet wallet, int maxTransactions, List<Integer> networkFilters);
 	Observable<Transaction[]> fetchNetworkTransaction(NetworkInfo network, String tokenAddress, long lastBlock, String userAddress);
 	Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId);
-	Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId);
 	Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId);
 	Single<TransactionData> createTransactionWithSig(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId);
 	Single<SignatureFromKey> getSignature(Wallet wallet, byte[] message, int chainId);

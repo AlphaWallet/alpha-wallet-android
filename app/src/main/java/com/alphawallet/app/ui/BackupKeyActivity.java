@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.res.ResourcesCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -78,6 +79,8 @@ public class BackupKeyActivity extends BaseActivity implements
     private String keystorePassword;
     private FunctionButtonBar functionButtonBar;
 
+    private int screenWidth;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
@@ -92,6 +95,7 @@ public class BackupKeyActivity extends BaseActivity implements
 
         toolbar();
         initViewModel();
+        determineScreenWidth();
 
         switch (type) {
             case UNDEFINED:
@@ -119,6 +123,12 @@ public class BackupKeyActivity extends BaseActivity implements
                 setupUpgradeKey(false);
                 break;
         }
+    }
+
+    private void determineScreenWidth() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        screenWidth = displayMetrics.widthPixels;
     }
 
     private void lockOrientation() {
@@ -490,23 +500,35 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     private TextView generateSeedWordTextView(String word) {
-        int dp4 = Utils.dp2px(this, 4);
-        int dp20 = Utils.dp2px(this, 20);
-        int dp44 = Utils.dp2px(this, 44);
-        FlexboxLayout.LayoutParams params =
-                new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, dp44);
+        int margin = Utils.dp2px(this, 4);
+        int padding;
+        float textSize;
+        int textViewHeight;
 
-        params.setMargins(dp4, dp4, dp4, dp4);
+        if (screenWidth > 800) {
+            textSize = 16.0f;
+            padding = Utils.dp2px(this, 20);
+            textViewHeight = Utils.dp2px(this, 44);
+        } else {
+            textSize = 14.0f;
+            padding = Utils.dp2px(this, 16);
+            textViewHeight = Utils.dp2px(this, 38);
+        }
+
+        FlexboxLayout.LayoutParams params =
+                new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, textViewHeight);
+
+        params.setMargins(margin, margin, margin, margin);
         TextView seedWord = new TextView(this);
         seedWord.setMaxLines(1);
         seedWord.setText(word);
         seedWord.setTypeface(ResourcesCompat.getFont(this, R.font.font_regular));
-        seedWord.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16.0f);
+        seedWord.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
         seedWord.setBackgroundResource(R.drawable.background_seed_word);
         seedWord.setTextColor(getColor(R.color.mine));
         seedWord.setLayoutParams(params);
         seedWord.setGravity(Gravity.CENTER);
-        seedWord.setPadding(dp20, 0, dp20, 0);
+        seedWord.setPadding(padding, 0, padding, 0);
 
         return seedWord;
     }

@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
     android:background="@drawable/background_bottom_border"
-    android:contentInsetEnd="0dp"
-    android:contentInsetLeft="0dp"
-    android:contentInsetRight="0dp"
     android:contentInsetStart="0dp"
+    android:contentInsetLeft="0dp"
+    android:contentInsetEnd="0dp"
+    android:contentInsetRight="0dp"
     android:theme="@style/AppTheme.Toolbar"
     app:contentInsetEnd="0dp"
     app:contentInsetLeft="0dp"
@@ -22,15 +22,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:layout_gravity="center"
         android:ellipsize="end"
         android:fontFamily="@font/font_semibold"
         android:gravity="center"
-        android:paddingLeft="2dp"
-        android:paddingRight="2dp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
         android:singleLine="true"
         android:textColor="@color/toolbar_text_color"
-        android:textSize="20sp"
-        android:visibility="gone" />
+        android:textSize="20sp" />
 
     <RelativeLayout
         android:id="@+id/select_network_layout"
@@ -38,10 +38,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@drawable/background_round_white"
-        android:paddingBottom="5dp"
         android:paddingLeft="10dp"
-        android:paddingRight="10dp"
         android:paddingTop="5dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="5dp"
         android:visibility="gone">
 
         <View

@@ -17,10 +17,12 @@
         android:src="@drawable/ic_settings_wallet_address" />
 
     <LinearLayout
+        android:id="@+id/layout_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginStart="16dp"
+        android:layout_toStartOf="@id/layout_controls"
         android:layout_toEndOf="@id/setting_icon"
         android:orientation="vertical">
 
@@ -47,31 +49,36 @@
             android:visibility="gone" />
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/arrow_right"
+    <LinearLayout
+        android:id="@+id/layout_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="12dp"
-        android:src="@drawable/ic_arrow_right"
-        android:visibility="gone" />
+        android:orientation="horizontal">
 
-    <Switch
-        android:id="@+id/setting_switch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="16dp"
-        android:clickable="false"
-        android:focusable="false"
-        android:theme="@style/SettingsItemSwitchAppearance"
-        android:visibility="gone" />
+        <ImageView
+            android:id="@+id/arrow_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:src="@drawable/ic_arrow_right"
+            android:visibility="gone" />
+
+        <Switch
+            android:id="@+id/setting_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:clickable="false"
+            android:focusable="false"
+            android:theme="@style/SettingsItemSwitchAppearance"
+            android:visibility="gone" />
+    </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/greydd" />
+        android:background="@color/mercury" />
 </RelativeLayout>

@@ -23,8 +23,8 @@
             android:layout_alignParentTop="true"
             android:fontFamily="@font/font_regular"
             android:gravity="center_horizontal"
-            android:paddingStart="50dp"
-            android:paddingEnd="50dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
             android:text="@string/verify_seed_phrase"
             android:textAlignment="center"
             android:textColor="@color/black"
@@ -62,22 +62,30 @@
             android:textSize="14sp"
             android:visibility="invisible" />
 
-        <com.google.android.flexbox.FlexboxLayout
-            android:id="@+id/layout_word_holder"
+        <LinearLayout
+            android:id="@+id/flexbox_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_above="@id/layoutButtons"
             android:layout_below="@id/text_invalid"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="49dp"
-            android:layout_marginEnd="12dp"
-            app:flexDirection="row"
-            app:flexWrap="wrap" />
+            android:gravity="center">
+
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/layout_word_holder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
+                app:flexDirection="row"
+                app:flexWrap="wrap" />
+
+        </LinearLayout>
 
         <com.alphawallet.app.widget.FunctionButtonBar
+            android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:id="@+id/layoutButtons"/>
+            android:layout_alignParentBottom="true" />
 
     </RelativeLayout>
 

@@ -13,4 +13,38 @@
 
     <dimen name="design_bottom_navigation_active_text_size" tools:override="true">12sp</dimen>
 	<dimen name="design_bottom_navigation_text_size" tools:override="true">10sp</dimen>
+
+    <!-- Text Dimens -->
+    <dimen name="sp12">10sp</dimen>
+    <dimen name="sp13">11sp</dimen>
+    <dimen name="sp14">12sp</dimen>
+    <dimen name="sp15">13sp</dimen>
+    <dimen name="sp17">15sp</dimen>
+    <dimen name="sp20">17sp</dimen>
+    <dimen name="sp24">20sp</dimen>
+    <dimen name="sp28">24sp</dimen>
+    <dimen name="sp36">32sp</dimen>
+
+    <!-- Padding/Margin Dimens -->
+    <dimen name="dp5">3dp</dimen>
+    <dimen name="dp6">4dp</dimen>
+    <dimen name="dp7">5dp</dimen>
+    <dimen name="dp8">6dp</dimen>
+    <dimen name="dp9">7dp</dimen>
+    <dimen name="dp10">8dp</dimen>
+    <dimen name="dp11">9dp</dimen>
+    <dimen name="dp12">10dp</dimen>
+    <dimen name="dp13">11dp</dimen>
+    <dimen name="dp14">12dp</dimen>
+    <dimen name="dp15">13dp</dimen>
+    <dimen name="dp16">14dp</dimen>
+    <dimen name="dp17">15dp</dimen>
+    <dimen name="dp18">16dp</dimen>
+    <dimen name="dp19">17dp</dimen>
+    <dimen name="dp20">18dp</dimen>
+    <dimen name="dp21">19dp</dimen>
+    <dimen name="dp22">20dp</dimen>
+    <dimen name="dp23">21dp</dimen>
+    <dimen name="dp24">22dp</dimen>
+    <dimen name="dp25">23dp</dimen>
 </resources>

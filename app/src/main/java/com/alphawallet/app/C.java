@@ -41,7 +41,6 @@ public abstract class C {
     public static final String ARTIS_TAU1_SYMBOL = "ATS";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
-    public static final String ENSCONTRACT = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
 
     public static final String GWEI_UNIT = "Gwei";
 

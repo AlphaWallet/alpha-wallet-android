@@ -23,7 +23,7 @@ public interface TokenRepositoryType {
     Observable<Token[]> fetchStored(String walletAddress);
     Observable<Token[]> fetchActiveStoredPlusEth(String walletAddress);
     Observable<Token> fetchActiveSingle(String walletAddress, Token token);
-    Observable<Token> fetchCachedSingleToken(NetworkInfo network, String walletAddress, String tokenAddress);
+    Observable<Token> fetchCachedSingleToken(int chainId, String walletAddress, String tokenAddress);
     Observable<Token> fetchActiveTokenBalance(String walletAddress, Token token);
     Single<ContractResult> getTokenResponse(String address, int chainId, String method);
     Completable setEnable(Wallet wallet, Token token, boolean isEnabled);
@@ -36,6 +36,7 @@ public interface TokenRepositoryType {
     Single<TokenTicker> getTokenTicker(Token token);
     Single<Token> getEthBalance(NetworkInfo network, Wallet wallet);
     Single<BigInteger> fetchLatestBlockNumber(int chainId);
+    Token fetchToken(int chainId, String walletAddress, String address);
 
     Disposable terminateToken(Token token, Wallet wallet, NetworkInfo network);
 
@@ -47,7 +48,7 @@ public interface TokenRepositoryType {
     Single<ContractType> determineCommonType(TokenInfo tokenInfo);
     Single<Token[]> addERC20(Wallet wallet, Token[] tokens);
 
-    void updateTokenType(Token token, Wallet wallet, ContractType type);
+    Token updateTokenType(Token token, Wallet wallet, ContractType type);
     Single<Token[]> storeTickers(Wallet wallet, Token[] tokens);
 
     Single<Boolean> fetchIsRedeemed(Token token, BigInteger tokenId);

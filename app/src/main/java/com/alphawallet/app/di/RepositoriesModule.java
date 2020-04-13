@@ -123,13 +123,11 @@ public class RepositoriesModule {
     TokenRepositoryType provideTokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenLocalSource tokenLocalSource,
-			GasService gasService,
-			TokensService tokensService) {
+			GasService gasService) {
 	    return new TokenRepository(
 	            ethereumNetworkRepository,
                 tokenLocalSource,
-				gasService,
-				tokensService);
+				gasService);
     }
 
     @Singleton
@@ -146,8 +144,8 @@ public class RepositoriesModule {
 
 	@Singleton
 	@Provides
-	TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository, RealmManager realmManager, OkHttpClient okHttpClient, PreferenceRepositoryType preferenceRepository) {
-		return new TokensService(ethereumNetworkRepository, realmManager, okHttpClient, preferenceRepository);
+	TokensService provideTokensService(EthereumNetworkRepositoryType ethereumNetworkRepository, TokenRepositoryType tokenRepository, OkHttpClient okHttpClient, PreferenceRepositoryType preferenceRepository) {
+		return new TokensService(ethereumNetworkRepository, tokenRepository, okHttpClient, preferenceRepository);
 	}
 
 	@Singleton

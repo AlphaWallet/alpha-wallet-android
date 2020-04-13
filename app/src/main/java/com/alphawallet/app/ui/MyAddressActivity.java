@@ -288,6 +288,9 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
                     .subscribe(this::updateAddressWithENS, this::printTrace).isDisposed();
+            if (ensFetchProgressBar != null) {
+                ensFetchProgressBar.setVisibility(View.VISIBLE);
+            }
         }
         else
         {
@@ -297,6 +300,9 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
 
     //This is temporary method to show test ENS name on any error faced to reverse lookup
     private void printTrace(Throwable throwable) {
+        if (ensFetchProgressBar != null) {
+            ensFetchProgressBar.setVisibility(View.GONE);
+        }
         updateAddressWithENS(wallet.ENSname); // JB: if there's any issue then fall back to cached name
     }
 
@@ -331,9 +337,6 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         else
         {
             copyWalletName.setVisibility(View.GONE);
-            if (ensFetchProgressBar != null) {
-                ensFetchProgressBar.setVisibility(View.VISIBLE);
-            }
         }
     }
 

@@ -22,7 +22,7 @@
         android:maxLines="2"
         android:text="0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4"
         android:textColor="@color/black"
-        android:textSize="@dimen/sp17" />
+        android:textSize="@dimen/sp20" />
 
     <ImageView
         android:id="@+id/img_copy"

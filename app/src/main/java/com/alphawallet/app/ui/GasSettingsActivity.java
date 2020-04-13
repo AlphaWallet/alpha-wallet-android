@@ -26,6 +26,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.viewmodel.GasSettingsViewModel;
 import com.alphawallet.app.viewmodel.GasSettingsViewModelFactory;
+import com.alphawallet.app.widget.GasSliderView;
 
 public class GasSettingsActivity extends BaseActivity {
 
@@ -39,6 +40,7 @@ public class GasSettingsActivity extends BaseActivity {
     private TextView gasPriceInfoText;
     private TextView gasLimitInfoText;
     private Button saveButton;
+    private GasSliderView gasSliderView;
 
     private BigInteger granularity;
 
@@ -60,6 +62,7 @@ public class GasSettingsActivity extends BaseActivity {
         gasPriceInfoText = findViewById(R.id.gas_price_info_text);
         gasLimitInfoText = findViewById(R.id.gas_limit_info_text);
         saveButton = findViewById(R.id.button_save);
+        gasSliderView = findViewById(R.id.gasSliderView);
 
         saveButton.setOnClickListener(v -> {
             Intent intent = new Intent();

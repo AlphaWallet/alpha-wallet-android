@@ -580,4 +580,9 @@
     <string name="toast_browser_cache_cleared">Browser cache cleared</string>
     <string name="your_wallets">Your Wallets</string>
     <string name="action_copy">Copy</string>
+    <string name="speed_gas">Speed (Gas)</string>
+    <string name="slow">Slow</string>
+    <string name="fast">Fast</string>
+    <string name="label_estimated_transaction_time">Estimated Transaction Time</string>
+    <string name="minutes_0">0 min</string>
 </resources>

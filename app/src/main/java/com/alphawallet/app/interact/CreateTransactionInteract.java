@@ -44,24 +44,6 @@ public class CreateTransactionInteract
                                              .observeOn(AndroidSchedulers.mainThread());
     }
 
-    /**
-     *
-     * For constructors
-     *
-     * @param from
-     * @param gasPrice
-     * @param gasLimit
-     * @param data
-     * @param chainId
-     * @return
-     */
-    public Single<String> create(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId)
-    {
-        return transactionRepository.createTransaction(from, gasPrice, gasLimit, data, chainId)
-                                         .subscribeOn(Schedulers.computation())
-                                         .observeOn(AndroidSchedulers.mainThread());
-    }
-
     public Single<TransactionData> createWithSig(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
     {
         return transactionRepository.createTransactionWithSig(from, to, subunitAmount, gasPrice, gasLimit, data, chainId)

@@ -577,8 +577,11 @@
     <string name="instagram">Instagram</string>
     <string name="settings_locale_currency">Change Currency</string>
     <string name="dialog_title_select_currency">Select FIAT Currency</string>
+    <string name="toast_browser_cache_cleared">Browser cache cleared</string>
     <string name="your_wallets">Your Wallets</string>
+    <string name="action_copy">Copy</string>
     <string name="title_version_support_warning">Important Update</string>
     <string name="message_version_support_warning">Starting Version 2.3, AlphaWallet will no longer support devices running on Android 6.0 and below.</string>
     <string name="hide_notification">Hide Notification</string>
+    <string name="card_view_not_found_error">%1$s not found</string>
 </resources>

@@ -163,7 +163,8 @@ public class KeystoreAccountService implements AccountKeystoreService
             {
                 for (File f : contents)
                 {
-                    if (f.getName().contains(cleanedAddr))
+                    String fileName = f.getName().toLowerCase();
+                    if (fileName.contains(cleanedAddr.toLowerCase()))
                     {
                         deleteRecursive(f);
                     }

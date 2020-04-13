@@ -84,12 +84,6 @@ public class QRSelectionTest
             }
 
             @Override
-            public Single<String> createTransaction(Wallet from, BigInteger gasPrice, BigInteger gasLimit, String data, int chainId)
-            {
-                return null;
-            }
-
-            @Override
             public Single<TransactionData> createTransactionWithSig(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
             {
                 return null;

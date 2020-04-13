@@ -130,7 +130,20 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                             .equalTo("hash", transaction.hash)
                             .findFirst();
 
-                    if (realmTx != null && !realmTx.getBlockNumber().equals("0")) continue;
+                    if (realmTx != null)
+                    {
+                        if (realmTx.getBlockNumber().equals("0"))
+                        {
+                            //replacing pending TX
+                            //erase pending tx operations now we have the transaction results
+                            deleteOperations(realmTx);
+                        }
+                        else
+                        {
+                            //already recorded
+                            continue;
+                        }
+                    }
                     if (realmTx == null) realmTx = instance.createObject(RealmTransaction.class, transaction.hash);
 
                     try
@@ -268,6 +281,20 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         }
 
         return retrievedTransactions.toArray(new Transaction[0]);
+    }
+
+    private void deleteOperations(RealmTransaction rawItem)
+    {
+        int len = rawItem.getOperations().size();
+        for (int i = 0; i < len; i++)
+        {
+            RealmTransactionOperation rawOperation = rawItem.getOperations().get(i);
+            if (rawOperation == null)
+            {
+                continue;
+            }
+            rawOperation.deleteFromRealm();
+        }
     }
 
     private Transaction convert(RealmTransaction rawItem) {

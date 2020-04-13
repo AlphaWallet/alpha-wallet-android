@@ -119,9 +119,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
 
         if (date != null) setDate();
 
-        if (transaction.blockNumber != null && transaction.blockNumber.equals("0")) { fillPending(); return; }
-        if (transactionBackground != null) transactionBackground.setBackgroundResource(R.color.white);
-
         boolean txSuccess = (transaction.error != null && transaction.error.equals("0"));
         // If operations include token transfer, display token transfer instead
         TransactionOperation operation = transaction.operations == null
@@ -145,6 +142,20 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         {
             fillERC20(txSuccess, transaction);
         }
+
+        //Handle displaying the transaction item as pending or completed
+        if (transaction.blockNumber != null && transaction.blockNumber.equals("0"))
+        {
+            type.setText(R.string.pending_transaction);
+            transactionBackground.setBackgroundResource(R.drawable.background_pending_transaction);
+            pendingSpinner.setVisibility(View.VISIBLE);
+            typeIcon.setVisibility(View.GONE);
+        }
+        else if (transactionBackground != null)
+        {
+            if (pendingSpinner != null) pendingSpinner.setVisibility(View.GONE);
+            transactionBackground.setBackgroundResource(R.color.white);
+        }
     }
 
     private void setDate()
@@ -154,31 +165,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         calendar.setTime(txDate);
         date.setText(DateFormat.format("dd MMM yyyy", calendar));
-    }
-
-    private void fillPending()
-    {
-        transactionBackground.setBackgroundResource(R.drawable.background_pending_transaction);
-        pendingSpinner.setVisibility(View.VISIBLE);
-        typeIcon.setVisibility(View.GONE);
-        type.setText(R.string.pending_transaction);
-        String symbol = getString(R.string.eth);
-        Token t = tokensService.getToken(transaction.chainId, tokensService.getCurrentAddress());
-        if (t != null) symbol = t.getSymbol();
-
-        String valueStr = getValueStr(transaction.value, true, symbol, 18, transaction.to.equalsIgnoreCase(transaction.from));
-        value.setText(valueStr);
-        value.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
-        value.setVisibility(View.VISIBLE);
-
-        if (transaction.to.length() == 0)
-        {
-            address.setText(R.string.ticket_contract_constructor);
-        }
-        else
-        {
-            address.setText(transaction.to);
-        }
     }
 
     private void fillERC875(boolean txSuccess, Transaction trans, ERC875ContractTransaction ct)

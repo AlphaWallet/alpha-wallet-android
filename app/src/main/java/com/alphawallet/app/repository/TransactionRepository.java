@@ -5,6 +5,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
@@ -128,7 +129,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 					txData.txHash = raw.getTransactionHash();
 					return txData;
 				}))
-				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, toAddress, subunitAmount, useGasPrice, chainId, data != null ? Numeric.toHexString(data) : "0x"))
+				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, toAddress, subunitAmount, useGasPrice, chainId, data != null ? Numeric.toHexString(data) : "0x", ""))
 				.subscribeOn(Schedulers.io());
 	}
 
@@ -154,7 +155,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 					txData.txHash = raw.getTransactionHash();
 					return txData;
 				}))
-				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, "", BigInteger.ZERO, useGasPrice, chainId, data))
+				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, "", BigInteger.ZERO, useGasPrice, chainId, data, C.BURN_ADDRESS))
 				.subscribeOn(Schedulers.io());
 	}
 
@@ -164,11 +165,11 @@ public class TransactionRepository implements TransactionRepositoryType {
 		else return gasPrice;
 	}
 
-	private Single<TransactionData> storeUnconfirmedTransaction(Wallet from, TransactionData txData, String toAddress, BigInteger value, BigInteger gasPrice, int chainId, String data)
+	private Single<TransactionData> storeUnconfirmedTransaction(Wallet from, TransactionData txData, String toAddress, BigInteger value, BigInteger gasPrice, int chainId, String data, String contractAddr)
 	{
 		return Single.fromCallable(() -> {
 			Transaction newTx = new Transaction(txData.txHash, "0", "0", System.currentTimeMillis()/1000, 0, from.address, toAddress, value.toString(10), "0", gasPrice.toString(10), data,
-					"0", chainId, new TransactionOperation[0]);
+					"0", chainId, contractAddr);
 			inDiskCache.putTransaction(from, newTx);
 
 			return txData;
@@ -180,7 +181,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 		return Single.fromCallable(() -> {
 
 			Transaction newTx = new Transaction(txHash, "0", "0", System.currentTimeMillis()/1000, 0, from.address, toAddress, value.toString(10), "0", gasPrice.toString(10), data,
-					"0", chainId, new TransactionOperation[0]);
+					"0", chainId, "");
 			inDiskCache.putTransaction(from, newTx);
 
 			return txHash;

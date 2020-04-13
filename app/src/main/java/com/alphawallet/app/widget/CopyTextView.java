@@ -22,6 +22,7 @@ public class CopyTextView extends LinearLayout {
     private Context context;
     private ImageView copy;
     private TextView text;
+    private LinearLayout layout;
 
     private int textResId;
     private boolean showToast;
@@ -40,7 +41,7 @@ public class CopyTextView extends LinearLayout {
     private void getAttrs(Context context, AttributeSet attrs) {
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs,
-                R.styleable.InputView,
+                R.styleable.CopyTextView,
                 0, 0
         );
 
@@ -53,10 +54,12 @@ public class CopyTextView extends LinearLayout {
     }
 
     private void bindViews() {
+        layout = findViewById(R.id.view_container);
         copy = findViewById(R.id.img_copy);
         text = findViewById(R.id.text);
         text.setText(textResId);
 
+        layout.setOnClickListener(v -> copyToClipboard());
         copy.setOnClickListener(v -> copyToClipboard());
     }
 

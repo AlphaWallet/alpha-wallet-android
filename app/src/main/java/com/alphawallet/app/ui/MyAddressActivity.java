@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -82,7 +83,6 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     private TextView currentNetwork;
     private RelativeLayout selectNetworkLayout;
     private View networkIcon;
-    private RelativeLayout layoutHolder;
     private AmountEntryItem amountInput = null;
     private NetworkInfo networkInfo;
     private int currentMode = MODE_ADDRESS;
@@ -91,6 +91,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     private int screenWidth;
     private CopyTextView copyAddress;
     private CopyTextView copyWalletName;
+    private ProgressBar ensFetchProgressBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -135,10 +136,10 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         address =  findViewById(R.id.address);
         qrImageView = findViewById(R.id.qr_image);
         selectAddress = findViewById(R.id.layout_select_address);
-        layoutHolder = findViewById(R.id.layout_holder);
         networkIcon = findViewById(R.id.network_icon);
         functionBar = findViewById(R.id.layoutButtons);
         qrImageView.setBackgroundResource(R.color.white);
+        ensFetchProgressBar = findViewById(R.id.ens_fetch_progress);
 
         if (viewModel == null) initViewModel();
     }
@@ -166,7 +167,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     public void onResume()
     {
         super.onResume();
-        layoutHolder.setOnClickListener(view -> {
+        findViewById(R.id.layout_holder).setOnClickListener(view -> {
             if (getCurrentFocus() != null)
             {
                 KeyboardUtils.hideKeyboard(getCurrentFocus());
@@ -321,12 +322,18 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         if (!TextUtils.isEmpty(ensName))
         {
             displayName = ensName;
+            if (ensFetchProgressBar != null) {
+                ensFetchProgressBar.setVisibility(View.GONE);
+            }
             copyWalletName.setVisibility(View.VISIBLE);
             copyWalletName.setText(ensName);
         }
         else
         {
             copyWalletName.setVisibility(View.GONE);
+            if (ensFetchProgressBar != null) {
+                ensFetchProgressBar.setVisibility(View.VISIBLE);
+            }
         }
     }
 

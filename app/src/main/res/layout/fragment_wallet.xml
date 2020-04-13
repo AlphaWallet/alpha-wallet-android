@@ -40,6 +40,17 @@
             app:tabTextAppearance="@style/WalletTabTextAppearance"
             app:tabTextColor="@color/dove" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/mercury" />
+
+        <com.alphawallet.app.widget.NotificationView
+            android:id="@+id/notification"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_bottom_border" />
+
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout

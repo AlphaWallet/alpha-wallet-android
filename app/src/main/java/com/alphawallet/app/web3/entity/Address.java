@@ -41,7 +41,7 @@ public class Address implements Parcelable {
 
     @Override
     public boolean equals(Object other) {
-        return other instanceof Address && value.equals(((Address) other).value);
+        return other instanceof Address && value.equalsIgnoreCase(((Address) other).value);
 
     }
 

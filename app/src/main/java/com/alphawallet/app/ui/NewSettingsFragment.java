@@ -3,10 +3,10 @@ package com.alphawallet.app.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,13 +26,13 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
+import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
 
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 
-import static com.alphawallet.app.C.EXTRA_ADDRESS;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 
@@ -62,6 +62,7 @@ public class NewSettingsFragment extends BaseFragment {
     private TextView backupDetail;
     private ImageView backupMenuButton;
     private View backupPopupAnchor;
+    private NotificationView notificationView;
 
     private Wallet wallet;
 
@@ -87,7 +88,20 @@ public class NewSettingsFragment extends BaseFragment {
 
         initBackupWarningViews(view);
 
+        initNotificationView(view);
+
         return view;
+    }
+
+    private void initNotificationView(View view) {
+        notificationView = view.findViewById(R.id.notification);
+        if (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+            notificationView.setNotificationBackgroundColor(R.color.indigo);
+            notificationView.setTitle(getContext().getString(R.string.title_version_support_warning));
+            notificationView.setMessage(getContext().getString(R.string.message_version_support_warning));
+        } else {
+            notificationView.setVisibility(View.GONE);
+        }
     }
 
     private void initBackupWarningViews(View view) {

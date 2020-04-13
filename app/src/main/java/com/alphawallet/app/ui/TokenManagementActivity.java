@@ -42,7 +42,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_token_management);
         toolbar();
-        setTitle(getString(R.string.manage_tokens));
+        setTitle(getString(R.string.add_hide_tokens));
         tokenList = findViewById(R.id.token_list);
         tokenList.setLayoutManager(new LinearLayoutManager(this));
 

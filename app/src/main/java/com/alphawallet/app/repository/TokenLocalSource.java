@@ -18,10 +18,11 @@ public interface TokenLocalSource {
     Single<Token[]> saveTokens(Wallet wallet, Token[] items);
     void updateTokenBalance(NetworkInfo network, Wallet wallet, Token token);
     Token getTokenBalance(NetworkInfo network, Wallet wallet, String address);
+    Token fetchToken(int chainId, Wallet wallet, String address);
     Map<Integer, Token> getTokenBalances(Wallet wallet, String address);
     void setEnable(NetworkInfo network, Wallet wallet, Token token, boolean isEnabled);
 
-    Single<Token> fetchEnabledToken(NetworkInfo networkInfo, Wallet wallet, String address);
+    Single<Token> fetchEnabledToken(int chainId, Wallet wallet, String address);
     Single<Token[]> fetchTokensWithBalance(Wallet wallet);
     Single<Token> saveTicker(Wallet wallet, Token token);
     Single<Token[]> saveTickers(Wallet wallet, Token[] tokens);
@@ -32,5 +33,5 @@ public interface TokenLocalSource {
     Single<Token[]> saveERC20Tokens(Wallet wallet, Token[] tokens);
     void deleteRealmToken(int chainId, Wallet wallet, String address);
 
-    void updateTokenType(Token token, Wallet wallet, ContractType type);
+    Token updateTokenType(Token token, Wallet wallet, ContractType type);
 }

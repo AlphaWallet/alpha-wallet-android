@@ -53,6 +53,7 @@
         <item name="tabIndicatorHeight">3dp</item>
         <item name="tabPaddingStart">25dp</item>
         <item name="tabPaddingEnd">25dp</item>
+        <item name="tabBackground">@color/colorPrimary</item>
         <item name="tabTextAppearance">@style/WalletTabTextAppearance</item>
         <item name="tabSelectedTextColor">@android:color/white</item>
     </style>

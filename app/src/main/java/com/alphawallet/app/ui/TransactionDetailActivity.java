@@ -111,6 +111,9 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         {
             findViewById(R.id.contract_name_title).setVisibility(View.GONE);
             findViewById(R.id.contract_name).setVisibility(View.GONE);
+
+            //no token, did we send? If from == our wallet then we sent this
+            if (transaction.from.equalsIgnoreCase(wallet.address)) operationName = getString(R.string.sent);
         }
 
         if (operationName != null)
@@ -166,7 +169,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
     }
 
     private void setupWalletDetails() {
-        boolean isSent = transaction.from.toLowerCase().equals(wallet.address);
+        boolean isSent = transaction.from.equalsIgnoreCase(wallet.address);
         String rawValue;
         String prefix = "";
 

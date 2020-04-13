@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
@@ -7,61 +8,76 @@
 
     <include layout="@layout/layout_network_switch_toolbar" />
 
-    <RelativeLayout
+    <android.support.constraint.ConstraintLayout
         android:id="@+id/layout_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/background_card">
+        android:animateLayoutChanges="true"
+        android:paddingLeft="@dimen/dp22"
+        android:paddingRight="@dimen/dp22">
 
         <TextView
             android:id="@+id/text_scan"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="@dimen/dp25"
             android:fontFamily="@font/font_regular"
             android:gravity="center"
+            android:paddingTop="@dimen/dp20"
             android:text="@string/scan_qr_label"
-            android:textColor="@color/text_black"
-            android:textSize="16sp" />
-
-        <LinearLayout
-            android:layout_centerInParent="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_gravity="center_horizontal">
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp17"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/qr_image"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="48dp"
-            android:scaleType="fitStart"
-            android:src="@drawable/ic_ethereum" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxHeight="200dp"
+            android:scaleType="center"
+            android:src="@drawable/ic_ethereum"
+            app:layout_constraintBottom_toTopOf="@id/copy_address_layout"
+            app:layout_constraintHeight_max="200dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_scan" />
+
+        <LinearLayout
+            android:id="@+id/copy_address_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:layout_marginBottom="@dimen/dp24"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/qr_image">
+
+            <ProgressBar
+                android:id="@+id/ens_fetch_progress"
+                android:layout_width="@dimen/dp24"
+                android:layout_height="@dimen/dp24"
+                android:layout_marginBottom="24dp"
+                android:indeterminateTint="@color/azure"
+                android:visibility="gone" />
 
             <com.alphawallet.app.widget.CopyTextView
                 android:id="@+id/copy_wallet_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="@dimen/dp24"
+                android:gravity="center_horizontal"
                 android:visibility="gone" />
 
             <com.alphawallet.app.widget.CopyTextView
                 android:id="@+id/copy_address"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginStart="46dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginEnd="46dp"
-                android:layout_marginBottom="50dp" />
-
+                android:gravity="center_horizontal" />
 
         </LinearLayout>
 
-    </RelativeLayout>
+    </android.support.constraint.ConstraintLayout>
 </LinearLayout>

@@ -16,7 +16,7 @@ public class RealmManager {
     private final Map<String, RealmConfiguration> realmConfigurations = new HashMap<>();
 
     public String getRealmInstanceName(Wallet wallet) {
-        return wallet.address + "-db.realm";
+        return wallet.address.toLowerCase() + "-db.realm";
     }
 
     public Realm getRealmInstance(Wallet wallet) {
@@ -63,7 +63,7 @@ public class RealmManager {
 
     public Realm getAuxRealmInstance(String walletAddress)
     {
-        String name = "AuxData-" + walletAddress + "-db.realm";
+        String name = "AuxData-" + walletAddress.toLowerCase() + "-db.realm";
         return getRealmInstance(name);
     }
 }

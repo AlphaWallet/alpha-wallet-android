@@ -1,0 +1,51 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Default screen margins, per the Android Design guidelines. -->
+
+    <dimen name="normal_padding">8dp</dimen>
+	<dimen name="big_padding">16dp</dimen>
+
+    <dimen name="small_margin">4dp</dimen>
+	<dimen name="normal_margin">8dp</dimen>
+	<dimen name="big_margin">16dp</dimen>
+	<dimen name="half_large_margin">32dp</dimen>
+
+    <dimen name="list_group_head">14sp</dimen>
+
+    <dimen name="design_bottom_navigation_active_text_size" tools:override="true">12sp</dimen>
+	<dimen name="design_bottom_navigation_text_size" tools:override="true">10sp</dimen>
+
+    <!-- Text Dimens -->
+    <dimen name="sp12">12sp</dimen>
+    <dimen name="sp13">13sp</dimen>
+    <dimen name="sp14">14sp</dimen>
+    <dimen name="sp15">15sp</dimen>
+    <dimen name="sp17">17sp</dimen>
+    <dimen name="sp20">20sp</dimen>
+    <dimen name="sp24">24sp</dimen>
+    <dimen name="sp28">28sp</dimen>
+    <dimen name="sp36">36sp</dimen>
+
+    <!-- Padding/Margin Dimens -->
+    <dimen name="dp5">5dp</dimen>
+    <dimen name="dp6">6dp</dimen>
+    <dimen name="dp7">7dp</dimen>
+    <dimen name="dp8">8dp</dimen>
+    <dimen name="dp9">9dp</dimen>
+    <dimen name="dp10">10dp</dimen>
+    <dimen name="dp11">11dp</dimen>
+    <dimen name="dp12">12dp</dimen>
+    <dimen name="dp13">13dp</dimen>
+    <dimen name="dp14">14dp</dimen>
+    <dimen name="dp15">15dp</dimen>
+    <dimen name="dp16">16dp</dimen>
+    <dimen name="dp17">17dp</dimen>
+    <dimen name="dp18">18dp</dimen>
+    <dimen name="dp19">19dp</dimen>
+    <dimen name="dp20">20dp</dimen>
+    <dimen name="dp21">21dp</dimen>
+    <dimen name="dp22">22dp</dimen>
+    <dimen name="dp23">23dp</dimen>
+    <dimen name="dp24">24dp</dimen>
+    <dimen name="dp25">25dp</dimen>
+
+</resources>

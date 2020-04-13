@@ -58,7 +58,7 @@
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="@dimen/sp17"
-            android:visibility="visible" />
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/btn_secondary"
@@ -73,7 +73,7 @@
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="@dimen/sp17"
-            android:visibility="visible" />
+            android:visibility="gone" />
     </LinearLayout>
 
 </RelativeLayout>

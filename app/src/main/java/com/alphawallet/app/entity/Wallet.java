@@ -86,11 +86,20 @@ public class Wallet implements Parcelable {
 		parcel.writeString(balanceSymbol);
 	}
 
-	public void setWalletBalance(Token token)
+	public boolean setWalletBalance(Token token)
 	{
 		int decimals = token.tokenInfo != null ? token.tokenInfo.decimals : 18;
 		balanceSymbol = token.tokenInfo != null ? token.tokenInfo.symbol : "ETH";
-		balance = Token.getScaledValue(token.balance, decimals, false);
+		String newBalance = Token.getScaledValue(token.balance, decimals, false);
+		if (newBalance.equals(balance))
+		{
+			return false;
+		}
+		else
+		{
+			balance = newBalance;
+			return true;
+		}
 	}
 
 	public void zeroWalletBalance(NetworkInfo networkInfo)

@@ -6,11 +6,14 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractResult;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.repository.TokenRepositoryType;
+import com.alphawallet.app.repository.entity.RealmToken;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,27 +21,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.realm.Realm;
 import okhttp3.OkHttpClient;
 
 public class TokensService
 {
     private final Map<String, SparseArray<Token>> tokenMap = new ConcurrentHashMap<>();
     private static final Map<String, SparseArray<ContractType>> interfaceSpecMap = new ConcurrentHashMap<>();
-    private String currentAddress = null;
+    private static String currentAddress = null;
     private boolean loaded;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
-    private final RealmManager realmManager;
+    private final TokenRepositoryType tokenRepository;
     private final List<Integer> networkFilter;
     private Token focusToken;
     private final OkHttpClient okHttpClient;
     private int currencyCheckCount;
 
     public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
-                         RealmManager realmManager,
+                         TokenRepositoryType tokenRepository,
                          OkHttpClient client,
                          PreferenceRepositoryType preferenceRepository) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
-        this.realmManager = realmManager;
+        this.tokenRepository = tokenRepository;
         loaded = false;
         networkFilter = new ArrayList<>(10);
         setupFilter();
@@ -55,8 +59,6 @@ public class TokensService
      */
     public Token addToken(Token t)
     {
-        Token e = getToken(t.tokenInfo.chainId, t.tokenInfo.address);
-        if (e != null && e.walletUIUpdateRequired) return t; //ensure tokens marked as requiring UI update complete operation
         if (t.checkTokenWallet(currentAddress))
         {
             if (t.equals(focusToken))
@@ -93,30 +95,32 @@ public class TokensService
             tokenMap.put(t.getAddress(), tokenAddr);
         }
 
-        tokenAddr.put(chainId, t);
-        setSpec(t);
-    }
-
-    private void setSpec(Token t)
-    {
-        SparseArray<ContractType> types = interfaceSpecMap.get(t.getAddress());
-        if (types != null && types.get(t.tokenInfo.chainId, null) != null)
+        if (updatedSpec(t))
         {
-            if (t.getInterfaceSpec() == null || t.getInterfaceSpec() == ContractType.NOT_SET || t.getInterfaceSpec() == ContractType.OTHER)
-            {
-                t.setInterfaceSpec(interfaceSpecMap.get(t.getAddress()).get(t.tokenInfo.chainId));
-            }
+            //store new spec in DB
+            t = tokenRepository.updateTokenType(t, new Wallet(currentAddress), t.getInterfaceSpec());
         }
+
+        tokenAddr.put(chainId, t);
     }
 
     public Token getToken(int chainId, String addr)
     {
-        if (addr != null && tokenMap.containsKey(addr.toLowerCase()))
+        Token token = null;
+        if (addr != null)
         {
-            return tokenMap.get(addr.toLowerCase()).get(chainId, null);
+            if (tokenMap.containsKey(addr.toLowerCase()))
+            {
+                token = tokenMap.get(addr.toLowerCase()).get(chainId, null);
+            }
+
+            if (token == null)
+            {
+                token = tokenRepository.fetchToken(chainId, currentAddress, addr);
+            }
         }
 
-        return null;
+        return token;
     }
 
     public String getTokenName(int chainId, String addr)
@@ -310,25 +314,27 @@ public class TokensService
         networkFilter.addAll(ethereumNetworkRepository.getFilterNetworkList());
     }
 
-    public ContractType getInterfaceSpec(int chainId, String address)
+    private boolean updatedSpec(Token token)
     {
-        SparseArray<ContractType> types = interfaceSpecMap.get(address);
-        ContractType result = types != null ? types.get(chainId) : ContractType.OTHER;
-
-        if (result == ContractType.OTHER && tokenMap.containsKey(address))
+        String normalisedAddr = token.getAddress().toLowerCase();
+        SparseArray<ContractType> types = interfaceSpecMap.get(normalisedAddr);
+        if (types != null)
         {
-            List<Token> tokens = getAllAtAddress(address);
-            for (Token token : tokens)
+            ContractType updatedType = types.get(token.tokenInfo.chainId);
+            if (updatedType != null)
             {
-                if (token.tokenInfo.chainId == chainId && token.getInterfaceSpec() != null)
+                token.setInterfaceSpec(updatedType);
+                //clean up the revise spec map
+                interfaceSpecMap.get(normalisedAddr).delete(token.tokenInfo.chainId);
+                if (interfaceSpecMap.get(normalisedAddr).size() == 0)
                 {
-                    result = token.getInterfaceSpec();
-                    break;
+                    interfaceSpecMap.remove(normalisedAddr);
                 }
+                return true;
             }
         }
 
-        return result;
+        return false;
     }
 
     private List<Token> getAllClass(int chainId, ContractType[] filter)
@@ -477,7 +483,14 @@ public class TokensService
     public String getShortNetworkName(int chainId)
     {
         NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
-        if (info != null) return info.getShortName();
-        else return "";
+        if (info != null)
+            return info.getShortName();
+        else
+            return "";
+    }
+
+    public static String getCurrentWalletAddress()
+    {
+        return currentAddress;
     }
 }

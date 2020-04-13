@@ -170,37 +170,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
                            error -> dAppFunction.DAppError(error, message));
     }
 
-    public void signTransaction(Web3Transaction transaction, DAppFunction dAppFunction, String url)
-    {
-        Message errorMsg = new Message<>("Error executing transaction", url, 0);
-
-        BigInteger addr = Numeric.toBigInt(transaction.recipient.toString());
-
-        if (addr.equals(BigInteger.ZERO)) //constructor
-        {
-            disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), transaction.gasPrice, transaction.gasLimit, transaction.payload, defaultNetwork.getValue().chainId)
-                    .subscribe(hash -> onCreateTransaction(hash, dAppFunction, url),
-                               error -> dAppFunction.DAppError(error, errorMsg));
-
-        }
-        else
-        {
-            byte[] data = Numeric.hexStringToByteArray(transaction.payload);
-            disposable = createTransactionInteract
-                    .create(defaultWallet.getValue(), transaction.recipient.toString(), transaction.value, transaction.gasPrice, transaction.gasLimit, data, defaultNetwork.getValue().chainId)
-                    .subscribe(hash -> onCreateTransaction(hash, dAppFunction, url),
-                               error -> dAppFunction.DAppError(error, errorMsg));
-        }
-    }
-
-    private void onCreateTransaction(String s, DAppFunction dAppFunction, String url)
-    {
-        //pushed transaction
-        Message<String> msg = new Message<>(s, url, 0);
-        dAppFunction.DAppReturn(s.getBytes(), msg);
-    }
-
     public void openConfirmation(Activity context, Web3Transaction transaction, String requesterURL, NetworkInfo networkInfo) throws TransactionTooLargeException
     {
         if (System.currentTimeMillis() > (debounceTime + DEBOUNCE_LIMIT)) //debounce transaction click

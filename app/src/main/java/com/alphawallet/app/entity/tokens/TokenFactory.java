@@ -131,6 +131,7 @@ public class TokenFactory
                 break;
             case ERC721:
             case ERC721_LEGACY:
+            case ERC721_UNDETERMINED:
                 thisToken = new ERC721Token(tokenInfo, new ArrayList<Asset>(), currentTime, networkName, type);
                 break;
             case ETHEREUM:

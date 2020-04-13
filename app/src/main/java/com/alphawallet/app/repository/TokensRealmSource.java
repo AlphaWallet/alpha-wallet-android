@@ -33,6 +33,7 @@ import io.reactivex.Single;
 import io.reactivex.SingleSource;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
+import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -109,13 +110,13 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public void updateTokenType(Token token, Wallet wallet, ContractType type)
+    public Token updateTokenType(Token token, Wallet wallet, ContractType type)
     {
         try (Realm realm = realmManager.getRealmInstance(wallet))
         {
             String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address);
             RealmToken realmToken = realm.where(RealmToken.class)
-                    .equalTo("address", dbKey)
+                    .equalTo("address", dbKey, Case.INSENSITIVE)
                     .findFirst();
 
             if (realmToken == null)
@@ -128,6 +129,8 @@ public class TokensRealmSource implements TokenLocalSource {
                 realmToken.setInterfaceSpec(type.ordinal());
                 realm.commitTransaction();
             }
+
+            return fetchToken(token.tokenInfo.chainId, wallet, token.getAddress());
         }
     }
 
@@ -167,18 +170,22 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Single<Token> fetchEnabledToken(NetworkInfo networkInfo, Wallet wallet, String address) {
-        return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getRealmInstance(wallet))
-            {
-                RealmToken realmItem = realm.where(RealmToken.class)
-                        .equalTo("address", databaseKey(networkInfo.chainId, address))
-                        .equalTo("chainId", networkInfo.chainId)
-                        .findFirst();
+    public Single<Token> fetchEnabledToken(int chainId, Wallet wallet, String address) {
+        return Single.fromCallable(() -> fetchToken(chainId, wallet, address));
+    }
 
-                return convertSingle(realmItem, realm, null, wallet);
-            }
-        });
+    @Override
+    public Token fetchToken(int chainId, Wallet wallet, String address)
+    {
+        try (Realm realm = realmManager.getRealmInstance(wallet))
+        {
+            RealmToken realmItem = realm.where(RealmToken.class)
+                    .equalTo("address", databaseKey(chainId, address))
+                    .equalTo("chainId", chainId)
+                    .findFirst();
+
+            return convertSingle(realmItem, realm, null, wallet);
+        }
     }
 
     @Override

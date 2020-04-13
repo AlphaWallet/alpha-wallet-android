@@ -77,7 +77,6 @@ public class TokenRepository implements TokenRepositoryType {
     private final TokenLocalSource localSource;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final GasService gasService;
-    private final TokensService tokensService;
 
     public static final String INVALID_CONTRACT = "<invalid>";
 
@@ -96,13 +95,11 @@ public class TokenRepository implements TokenRepositoryType {
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenLocalSource localSource,
-            GasService gasService,
-            TokensService tokensService) {
+            GasService gasService) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.localSource = localSource;
         this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
         this.gasService = gasService;
-        this.tokensService = tokensService;
 
         web3jNodeServers = new ConcurrentHashMap<>();
         okClient = new OkHttpClient.Builder()
@@ -248,16 +245,23 @@ public class TokenRepository implements TokenRepositoryType {
     {
         NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
         Wallet wallet = new Wallet(walletAddress);
-        return fetchCachedToken(network, wallet, token.getAddress())
+        return fetchCachedToken(token.tokenInfo.chainId, wallet, token.getAddress())
                .flatMap(t -> updateBalance(network, wallet, t)); // Looking for new tokens
     }
 
     @Override
-    public Observable<Token> fetchCachedSingleToken(NetworkInfo network, String walletAddress, String tokenAddress)
+    public Observable<Token> fetchCachedSingleToken(int chainId, String walletAddress, String tokenAddress)
     {
         Wallet wallet = new Wallet(walletAddress);
-        return fetchCachedToken(network, wallet, tokenAddress)
+        return fetchCachedToken(chainId, wallet, tokenAddress)
                 .toObservable();
+    }
+
+    @Override
+    public Token fetchToken(int chainId, String walletAddress, String address)
+    {
+        Wallet wallet = new Wallet(walletAddress);
+        return localSource.fetchToken(chainId, wallet, address);
     }
 
     /**
@@ -362,9 +366,9 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public void updateTokenType(Token token, Wallet wallet, ContractType type)
+    public Token updateTokenType(Token token, Wallet wallet, ContractType type)
     {
-        localSource.updateTokenType(token, wallet, type);
+        return localSource.updateTokenType(token, wallet, type);
     }
 
     @Override
@@ -580,7 +584,7 @@ public class TokenRepository implements TokenRepositoryType {
     private void updateInService(Token t)
     {
         t.walletUIUpdateRequired = true;
-        tokensService.addToken(t);
+        TokensService.setInterfaceSpec(t.tokenInfo.chainId, t.getAddress(), t.getInterfaceSpec());
     }
 
     /**
@@ -636,15 +640,15 @@ public class TokenRepository implements TokenRepositoryType {
                 .fetchTokensWithBalance(wallet);
     }
 
-    private Single<Token> fetchCachedToken(NetworkInfo network, Wallet wallet, String address)
+    private Single<Token> fetchCachedToken(int chainId, Wallet wallet, String address)
     {
         return localSource
-                .fetchEnabledToken(network, wallet, address);
+                .fetchEnabledToken(chainId, wallet, address);
     }
 
     private BigDecimal updatePending(Token oldToken, BigDecimal pendingBalance)
     {
-        if (!tokensService.getCurrentAddress().equals(oldToken.getWallet()))
+        if (!TokensService.getCurrentWalletAddress().equals(oldToken.getWallet()))
         {
             oldToken.pendingBalance = oldToken.balance;
         }
@@ -1297,6 +1301,7 @@ public class TokenRepository implements TokenRepositoryType {
             }
             catch (Exception e)
             {
+                e.printStackTrace();
                 //
             }
 

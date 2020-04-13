@@ -3,12 +3,10 @@ package com.alphawallet.app.service;
 import android.content.Context;
 import android.util.Log;
 
-import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.google.gson.Gson;
 import io.reactivex.Single;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.opensea.Asset;
@@ -18,10 +16,7 @@ import okhttp3.Request;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -82,7 +77,7 @@ public class OpenseaService {
                     TokenInfo tInfo;
                     ContractType type;
                     Token checkToken = tokensService.getToken(networkId, asset.getAssetContract().getAddress());
-                    if (checkToken != null && checkToken.getInterfaceSpec() == ContractType.ERC721_TICKET)
+                    if (checkToken != null)
                     {
                         tInfo = checkToken.tokenInfo;
                         type = checkToken.getInterfaceSpec();
@@ -90,7 +85,7 @@ public class OpenseaService {
                     else
                     {
                         tInfo = new TokenInfo(asset.getAssetContract().getAddress(), asset.getAssetContract().getName(), asset.getAssetContract().getSymbol(), 0, true, networkId);
-                        type = ContractType.ERC721;
+						type = ContractType.ERC721_UNDETERMINED;
                     }
 
                     token = tf.createToken(tInfo, type, networkName);

@@ -1,7 +1,5 @@
 package com.alphawallet.app.entity;
 
-import android.content.Context;
-import com.alphawallet.app.R;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
@@ -28,7 +26,7 @@ public class TransactionInput
     public List<String> sigData;
     public List<String> miscData;
 
-    private final String ALL = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+    private final String ERC20_APPROVE_ALL = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
     public TransactionInput()
     {
@@ -83,7 +81,7 @@ public class TransactionInput
         if (miscData.size() > 0)
         {
             String firstVal = miscData.get(0);
-            if (firstVal.equals(ALL))
+            if (firstVal.equals(ERC20_APPROVE_ALL))
             {
                 value = "All"; //Can't localise here because no App context.
             }

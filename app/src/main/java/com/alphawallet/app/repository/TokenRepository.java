@@ -1220,8 +1220,7 @@ public class TokenRepository implements TokenRepositoryType {
                     responseValue, function.getOutputParameters());
             if (response.size() == 1)
             {
-                contractLocator.name = (String) response.get(0).getValue();
-                return contractLocator;
+                return new ContractLocator((String) response.get(0).getValue(), chainId);
             }
             else
             {

@@ -95,17 +95,18 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         getPreviousMode();
     }
 
-    private void getPreviousMode() {
+    private void getPreviousMode()
+    {
         Intent intent = getIntent();
         if (token != null && token.isNonFungible())
         {
             showContract();
         }
-        else if (intent != null) {
+        else if (intent != null)
+        {
             int mode = intent.getIntExtra(KEY_MODE, MODE_ADDRESS);
-            if (mode == MODE_POS) {
-                overrideNetwork = intent.getIntExtra(OVERRIDE_DEFAULT, 1);
-                networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(overrideNetwork);
+            if (mode == MODE_POS)
+            {
                 showPointOfSaleMode();
             }
             else
@@ -219,7 +220,8 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         return super.onOptionsItemSelected(item);
     }
 
-    private void showPointOfSaleMode() {
+    private void showPointOfSaleMode()
+    {
         setContentView(R.layout.activity_eip681);
         initViews();
         getInfo();
@@ -230,6 +232,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         findViewById(R.id.toolbar_title).setVisibility(View.GONE);
         setTitle("");
         titleView.setVisibility(View.VISIBLE);
+        networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(overrideNetwork);
         if (token == null) token = viewModel.getEthereumNetworkRepository().getBlankOverrideToken(networkInfo);
         currentMode = MODE_POS;
         address.setVisibility(View.GONE);
@@ -242,9 +245,16 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         amountInput.getValue();
         functionBar.setVisibility(View.GONE);
         selectNetworkLayout.setVisibility(View.VISIBLE);
+
+        if (networkInfo != null)
+        {
+            currentNetwork.setText(networkInfo.name);
+            Utils.setChainColour(networkIcon, networkInfo.chainId);
+        }
     }
 
-    private void showAddress() {
+    private void showAddress()
+    {
         getInfo();
         setContentView(R.layout.activity_my_address);
         initViews();
@@ -302,8 +312,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
                 int networkId = data.getIntExtra(C.EXTRA_CHAIN_ID, -1);
                 NetworkInfo info = viewModel.setNetwork(networkId);
 
-                // restart activity if required
-                if (info != null && (networkInfo == null || networkInfo.chainId != info.chainId))
+                if (info != null)
                 {
                     getInfo();
                     Intent intent = getIntent();
@@ -342,6 +351,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     {
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        overrideNetwork = getIntent().getIntExtra(OVERRIDE_DEFAULT, 1);
     }
 
     @Override

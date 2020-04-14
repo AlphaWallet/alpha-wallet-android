@@ -1,5 +1,6 @@
 package com.alphawallet.app.util;
 
+import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.EthereumProtocolParser;
 import com.alphawallet.app.entity.QrUrlResult;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
@@ -94,6 +95,10 @@ public class QRURLParser {
             String address = extractAddress(url);
             if (address != null) {
                 result = new QrUrlResult(address);
+            }
+            else
+            {
+                result = new QrUrlResult(url, EIP681Type.URL); //resolve to URL
             }
         }
 

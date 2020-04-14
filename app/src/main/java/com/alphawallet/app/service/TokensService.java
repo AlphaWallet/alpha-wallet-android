@@ -3,16 +3,14 @@ package com.alphawallet.app.service;
 import android.util.SparseArray;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenTicker;
-import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
-import com.alphawallet.app.repository.entity.RealmToken;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.realm.Realm;
 import okhttp3.OkHttpClient;
 
 public class TokensService
@@ -260,11 +257,11 @@ public class TokensService
         return changedTokens.toArray(new Token[0]);
     }
 
-    public List<ContractResult> reduceToUnknown(List<ContractResult> contracts)
+    public List<ContractLocator> reduceToUnknown(List<ContractLocator> contracts)
     {
-        List<ContractResult> unknowns = new ArrayList<>();
+        List<ContractLocator> unknowns = new ArrayList<>();
 
-        for (ContractResult r : contracts)
+        for (ContractLocator r : contracts)
         {
             Token check = getToken(r.chainId, r.name.toLowerCase());
             if (check == null)

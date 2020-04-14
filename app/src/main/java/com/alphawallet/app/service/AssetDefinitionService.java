@@ -16,7 +16,7 @@ import android.util.SparseArray;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.opensea.Asset;
@@ -65,7 +65,6 @@ import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -78,7 +77,6 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
@@ -206,9 +204,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         System.out.println("ERROR WHILE PARSING: " + file.getName() + " : " + throwable.getMessage());
     }
 
-    private void fileLoadComplete(Boolean success, File file)
+    private void fileLoadComplete(List<ContractLocator> originContracts, File file)
     {
-        if (!success)
+        if (originContracts.size() > 0)
         {
             //TODO: parse error and add to error list for Token Management page
             System.out.println("File: " + file.getName() + " has no origin token");
@@ -459,6 +457,28 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (contractName.equalsIgnoreCase(tokensService.getCurrentAddress())) contractName = "ethereum";
 
         // hold until asset definitions have finished loading
+        waitForAssets();
+
+        final TokenDefinition assetDef = getDefinition(chainId, contractName.toLowerCase());
+        if (assetDef != null) return Single.fromCallable(() -> assetDef);
+        else if (!contractName.equals("ethereum"))
+        {
+            return fetchXMLFromServer(contractName.toLowerCase())
+                    .map(this::handleDefinitionFile);
+        }
+        else return Single.fromCallable(TokenDefinition::new);
+    }
+
+    public Single<List<ContractLocator>> getAllLoadedScripts()
+    {
+        return Single.fromCallable(() -> {
+            waitForAssets();
+            return getAllOriginContracts();
+        });
+    }
+
+    private void waitForAssets()
+    {
         try
         {
             assetLoadingLock.acquire();
@@ -471,15 +491,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             assetLoadingLock.release();
         }
-
-        final TokenDefinition assetDef = getDefinition(chainId, contractName.toLowerCase());
-        if (assetDef != null) return Single.fromCallable(() -> assetDef);
-        else if (!contractName.equals("ethereum"))
-        {
-            return fetchXMLFromServer(contractName.toLowerCase())
-                    .map(this::handleDefinitionFile);
-        }
-        else return Single.fromCallable(TokenDefinition::new);
     }
 
     private TokenDefinition handleDefinitionFile(File tokenScriptFile)
@@ -622,26 +633,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         String fileLoad = "";
         if (newFile != null && !newFile.getName().equals("cache") && newFile.canRead())
         {
-            addContractAddresses(newFile);
-            TokenDefinition td = getTokenDefinition(newFile);
-            List<ContractResult> tokenContracts = getHoldingContracts(td);
-            if (tokenContracts != null && tokenContracts.size() > 0)
-            {
-                String[] addrs = new String[tokenContracts.size()];
-                int[] chainIds = new int[tokenContracts.size()];
-                int index = 0;
-                for (ContractResult cr : tokenContracts)
-                {
-                    addrs[index] = cr.name;
-                    chainIds[index] = cr.chainId;
-                }
-
-                Intent intent = new Intent(ADDED_TOKEN);
-                intent.putExtra(C.EXTRA_TOKENID_LIST, addrs);
-                intent.putExtra(C.EXTRA_CHAIN_ID, chainIds);
-                context.sendBroadcast(intent);
-                fileLoad = newFile.getName();
-            }
+            List<ContractLocator> originContracts = addContractAddresses(newFile);
+            Intent intent = new Intent(ADDED_TOKEN);
+            intent.putParcelableArrayListExtra(C.EXTRA_TOKENID_LIST, (ArrayList)originContracts);
+            context.sendBroadcast(intent);
+            fileLoad = newFile.getName();
         }
 
         return fileLoad;
@@ -828,12 +824,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return null;
     }
 
-    private boolean addContractAddresses(File file) throws Exception
+    private List<ContractLocator> addContractAddresses(File file) throws Exception
     {
         return addContractAddresses(file, false);
     }
 
-    private boolean addContractAddresses(File file, boolean update) throws Exception
+    private List<ContractLocator> addContractAddresses(File file, boolean update) throws Exception
     {
         FileInputStream input = new FileInputStream(file);
         TokenDefinition tokenDef = parseFile(input);
@@ -844,12 +840,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), file.getAbsolutePath()), update);
             }
-            return true;
+
+            return ContractLocator.fromContractInfo(holdingContracts);
         }
-        else
-        {
-            return false;
-        }
+
+        return new ArrayList<>();
     }
 
     private boolean allowableExtension(File file)
@@ -1126,8 +1121,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                 System.out.println("FILE: " + file);
                                 //form filename
                                 TokenScriptFile newTSFile = new TokenScriptFile(context, listenerPath, file);
+                                List<ContractLocator> originContracts = addContractAddresses(newTSFile, true);
 
-                                if (addContractAddresses(newTSFile, true))
+                                if (originContracts.size() > 0)
                                 {
                                     notificationService.DisplayNotification("Definition Updated", file, NotificationCompat.PRIORITY_MAX);
                                     cachedDefinition = null;
@@ -1135,6 +1131,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                             .subscribeOn(Schedulers.io())
                                             .observeOn(AndroidSchedulers.mainThread())
                                             .subscribe().isDisposed();
+
+                                    Intent intent = new Intent(ADDED_TOKEN);
+                                    intent.putParcelableArrayListExtra(C.EXTRA_TOKENID_LIST, (ArrayList)originContracts);
+                                    context.sendBroadcast(intent);
                                 }
                             }
                         }
@@ -1582,25 +1582,25 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return view.equals(iconifiedView);
     }
 
-    public List<ContractResult> getHoldingContracts(TokenDefinition td)
+    public List<ContractLocator> getHoldingContracts(TokenDefinition td)
     {
-        List<ContractResult> holdingContracts = new ArrayList<>();
+        List<ContractLocator> holdingContracts = new ArrayList<>();
         ContractInfo holdingContractInfo = td.contracts.get(td.holdingToken);
         if (holdingContractInfo == null || holdingContractInfo.addresses.size() == 0) return null;
         for (int chainId : holdingContractInfo.addresses.keySet())
         {
             for (String address : holdingContractInfo.addresses.get(chainId))
             {
-                holdingContracts.add(new ContractResult(address, chainId));
+                holdingContracts.add(new ContractLocator(address, chainId));
             }
         }
 
         return holdingContracts;
     }
 
-    public ContractResult getHoldingContract(String importFileName)
+    public ContractLocator getHoldingContract(String importFileName)
     {
-        ContractResult cr = null;
+        ContractLocator cr = null;
         for (int i = 0; i < assetDefinitions.size(); i++)
         {
             int chainId = assetDefinitions.keyAt(i);
@@ -1610,7 +1610,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 String path = f.getAbsoluteFile().toString();
                 if (path.contains(importFileName))
                 {
-                    cr = new ContractResult(address, chainId);
+                    cr = new ContractLocator(address, chainId);
                     break;
                 }
             }
@@ -1623,5 +1623,25 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public String convertInputValue(AttributeType attr, TokenscriptElement e, String valueFromInput)
     {
         return tokenscriptUtility.convertInputValue(attr, e, valueFromInput);
+    }
+
+
+    private List<ContractLocator> getAllOriginContracts()
+    {
+        List<ContractLocator> originContracts = new ArrayList<>();
+        for (int i = 0; i < assetDefinitions.size(); i++)
+        {
+            int chainId = assetDefinitions.keyAt(i);
+            for (String address : assetDefinitions.get(chainId).keySet())
+            {
+                if (address.equals("ethereum")) continue;
+                if (tokensService.getToken(chainId, address) == null)
+                {
+                    originContracts.add(new ContractLocator(address, chainId));
+                }
+            }
+        }
+
+        return originContracts;
     }
 }

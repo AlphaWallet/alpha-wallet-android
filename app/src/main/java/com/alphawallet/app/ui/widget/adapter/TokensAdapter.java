@@ -6,7 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -41,7 +41,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private int filterType;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
-    private ContractResult scrollToken; // designates a token that should be scrolled to
+    private ContractLocator scrollToken; // designates a token that should be scrolled to
 
     private Context context;
 
@@ -359,7 +359,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         return items.size() > 0 && items.get(0).viewType == WarningHolder.VIEW_TYPE;
     }
 
-    public void setScrollToken(ContractResult importToken)
+    public void setScrollToken(ContractLocator importToken)
     {
         scrollToken = importToken;
     }

@@ -30,7 +30,7 @@ import android.widget.Toast;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupTokenCallback;
-import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
@@ -306,7 +306,7 @@ public class WalletFragment extends BaseFragment implements
     {
         if (importFileName != null)
         {
-            ContractResult importToken = viewModel.getAssetDefinitionService().getHoldingContract(importFileName);
+            ContractLocator importToken = viewModel.getAssetDefinitionService().getHoldingContract(importFileName);
             if (importToken != null) Toast.makeText(getContext(), importToken.name, Toast.LENGTH_LONG).show();
             if (importToken != null) adapter.setScrollToken(importToken);
             importFileName = null;
@@ -425,18 +425,15 @@ public class WalletFragment extends BaseFragment implements
     }
 
     @Override
-    public void addedToken(int[] chainIds, String[] addrs)
+    public void addedToken(List<ContractLocator> tokenContracts)
     {
-        //token was added
-        if (chainIds.length != addrs.length)
-        {
-            System.out.println("Receiver data mismatch");
-            return;
-        }
+        //new tokens found
+        viewModel.newTokensFound(tokenContracts);
 
-        for (int i = 0; i < chainIds.length; i++)
+        //see if these are currently known, if so update them in adapter
+        for (ContractLocator cResult : tokenContracts)
         {
-            Token t = viewModel.getTokenFromService(chainIds[i], addrs[i]);
+            Token t = viewModel.getTokenFromService(cResult.chainId, cResult.name);
             if (t != null) adapter.updateToken(t, false);
         }
     }

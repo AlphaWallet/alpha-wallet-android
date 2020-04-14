@@ -9,10 +9,12 @@ import android.os.TransactionTooLargeException;
 import android.preference.PreferenceManager;
 
 import com.alphawallet.app.entity.Operation;
+import com.alphawallet.app.entity.QrUrlResult;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.ui.SendActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.alphawallet.app.C;
@@ -293,5 +295,23 @@ public class DappBrowserViewModel extends BaseViewModel  {
     public void failedAuthentication(Operation signData)
     {
         keyService.failedAuthentication(signData);
+    }
+
+    public void showSend(Context ctx, QrUrlResult result)
+    {
+        Intent intent = new Intent(ctx, SendActivity.class);
+        boolean sendingTokens = (result.getFunction() != null && result.getFunction().length() > 0);
+        String address = defaultWallet.getValue().address;
+        int decimals = 18;
+
+        intent.putExtra(C.EXTRA_SENDING_TOKENS, sendingTokens);
+        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
+        intent.putExtra(C.EXTRA_SYMBOL, ethereumNetworkRepository.getNetworkByChain(result.chainId).symbol);
+        intent.putExtra(C.EXTRA_DECIMALS, decimals);
+        intent.putExtra(C.Key.WALLET, defaultWallet.getValue());
+        intent.putExtra(C.EXTRA_TOKEN_ID, (Token)null);
+        intent.putExtra(C.EXTRA_AMOUNT, result);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        ctx.startActivity(intent);
     }
 }

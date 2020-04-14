@@ -38,6 +38,7 @@ import com.alphawallet.app.util.Utils;
 
 import dagger.android.AndroidInjection;
 import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.tools.Convert;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -117,11 +118,9 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
         initViews();
         setupAddressEditField();
 
-        if (token.addressMatches(myAddress)) {
-            amountInput = new AmountEntryItem(this, tokenRepository, token);
-        } else {
-            //currently we don't evaluate ERC20 token value. TODO: Should we?
-            amountInput = new AmountEntryItem(this, tokenRepository, token);
+        if (token != null)
+        {
+            amountInput = new AmountEntryItem(this, tokenRepository, token); //ticker is used automatically now
         }
 
         if (result != null)
@@ -390,7 +389,7 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
 
             case PAYMENT:
                 //correct chain and asset type
-                String ethAmount = BalanceUtils.weiToEth(new BigDecimal(result.weiValue)).setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
+                String ethAmount = Convert.getConvertedValue(new BigDecimal(result.weiValue), Convert.Unit.ETHER.getFactor());
                 sendText.setVisibility(View.VISIBLE);
                 sendText.setText(R.string.transfer_request);
                 token = viewModel.getToken(result.chainId, wallet.address);
@@ -414,8 +413,10 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
                     //ERC20 send request
                     token = resultToken;
                     setupTokenContent();
+                    //convert token amount into scaled value
+                    String convertedAmount = Convert.getConvertedValue(result.tokenAmount, token.tokenInfo.decimals);
                     amountInput = new AmountEntryItem(this, tokenRepository, resultToken);
-                    amountInput.setAmountText(result.tokenAmount.toString());
+                    amountInput.setAmountText(convertedAmount);
                     toAddressEditText.setText(result.functionToAddress);
                     sendText.setVisibility(View.VISIBLE);
                     sendText.setText(getString(R.string.token_transfer_request, resultToken.getFullName()));

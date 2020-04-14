@@ -33,9 +33,7 @@ public class TokensReceiver extends BroadcastReceiver
                     tokenInterface.resetTokens();
                     break;
                 case C.ADDED_TOKEN:
-                    String[] addrs = intent.getStringArrayExtra(C.EXTRA_TOKENID_LIST);
-                    int[] chainIds = intent.getIntArrayExtra(C.EXTRA_CHAIN_ID);
-                    tokenInterface.addedToken(chainIds, addrs);
+                    tokenInterface.addedToken(intent.getParcelableArrayListExtra(C.EXTRA_TOKENID_LIST));
                     break;
                 case C.CHANGED_LOCALE:
                     tokenInterface.changedLocale();

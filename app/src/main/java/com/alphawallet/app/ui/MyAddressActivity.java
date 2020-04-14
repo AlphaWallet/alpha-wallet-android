@@ -51,8 +51,6 @@ import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
-import static com.alphawallet.app.C.Key.WALLET;
-
 public class MyAddressActivity extends BaseActivity implements View.OnClickListener, AmountUpdateCallback, StandardFunctionInterface
 {
     public static final String KEY_ADDRESS = "key_address";
@@ -307,8 +305,10 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
                 // restart activity if required
                 if (info != null && (networkInfo == null || networkInfo.chainId != info.chainId))
                 {
+                    getInfo();
                     Intent intent = getIntent();
                     intent.putExtra(KEY_MODE, MODE_POS);
+                    intent.putExtra(C.Key.WALLET, wallet);
                     intent.putExtra(OVERRIDE_DEFAULT, info.chainId);
                     finish();
                     startActivity(intent);
@@ -340,7 +340,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
 
     private void getInfo()
     {
-        wallet = getIntent().getParcelableExtra(WALLET);
+        wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
     }
 

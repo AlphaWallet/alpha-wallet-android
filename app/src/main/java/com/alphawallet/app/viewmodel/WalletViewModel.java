@@ -12,11 +12,9 @@ import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.crashlytics.android.Crashlytics;
 import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.entity.ContractResult;
-import com.alphawallet.app.entity.tokens.ERC721Token;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.AddTokenInteract;
@@ -41,7 +39,6 @@ import com.alphawallet.app.service.TokensService;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -86,7 +83,7 @@ public class WalletViewModel extends BaseViewModel
     private Wallet currentWallet;
     private int backupCheckVal;
 
-    private ConcurrentLinkedQueue<ContractResult> unknownAddresses;
+    private ConcurrentLinkedQueue<ContractLocator> unknownAddresses;
 
     @Nullable
     private Disposable balanceTimerDisposable;
@@ -328,7 +325,7 @@ public class WalletViewModel extends BaseViewModel
 
     private void addUnresolvedContracts()
     {
-        Observable.fromArray(ethereumNetworkRepository.getAllKnownContracts(tokensService.getNetworkFilters()).toArray(new ContractResult[0]))
+        Observable.fromArray(ethereumNetworkRepository.getAllKnownContracts(tokensService.getNetworkFilters()).toArray(new ContractLocator[0]))
                 .filter(result -> tokensService.getToken(result.chainId, result.name) == null)
                 .forEach(r -> unknownAddresses.add(r)).isDisposed();
     }
@@ -478,7 +475,7 @@ public class WalletViewModel extends BaseViewModel
 
     private void checkUnknownAddresses()
     {
-        ContractResult contract = unknownAddresses.poll();
+        ContractLocator contract = unknownAddresses.poll();
 
         if (contract != null)
         {

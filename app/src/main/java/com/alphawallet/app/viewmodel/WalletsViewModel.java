@@ -7,7 +7,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -144,7 +144,7 @@ public class WalletsViewModel extends BaseViewModel
     public void findNetwork()
     {
         progress.postValue(true);
-        ContractResult override = EthereumNetworkRepository.getOverrideToken();
+        ContractLocator override = EthereumNetworkRepository.getOverrideToken();
         NetworkInfo networkInfo  = findDefaultNetworkInteract.getNetworkInfo(override.chainId);
         defaultNetwork.postValue(networkInfo);
         currentNetwork = networkInfo;
@@ -256,7 +256,7 @@ public class WalletsViewModel extends BaseViewModel
      */
     private void getWalletsBalance(Wallet[] wallets)
     {
-        ContractResult override = EthereumNetworkRepository.getOverrideToken();
+        ContractLocator override = EthereumNetworkRepository.getOverrideToken();
         NetworkInfo    network  = findDefaultNetworkInteract.getNetworkInfo(override.chainId);
         walletUpdateCount = wallets.length;
 

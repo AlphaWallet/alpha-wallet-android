@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -34,7 +33,7 @@ public class VisibilityFilter
         return !badToken && filterResult;
     }
 
-    public static void addPriorityTokens(ConcurrentLinkedQueue<ContractResult> unknownAddresses, TokensService tokensService)
+    public static void addPriorityTokens(ConcurrentLinkedQueue<ContractLocator> unknownAddresses, TokensService tokensService)
     {
 
     }

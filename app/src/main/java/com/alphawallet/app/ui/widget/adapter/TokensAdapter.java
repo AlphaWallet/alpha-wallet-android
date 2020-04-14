@@ -22,6 +22,7 @@ import com.alphawallet.app.ui.widget.entity.WarningSortedItem;
 import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
+import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
@@ -44,8 +45,9 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     private ContractResult scrollToken; // designates a token that should be scrolled to
 
     private Context context;
-
     private String walletAddress;
+
+    private boolean gridFlag;
 
     protected final OnTokenClickListener onTokenClickListener;
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<SortedItem>() {
@@ -123,8 +125,14 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
                 TokenHolder tokenHolder = new TokenHolder(R.layout.item_token, parent, assetService);
                 tokenHolder.setOnTokenClickListener(onTokenClickListener);
                 holder = tokenHolder;
+                break;
             }
-            break;
+            case TokenGridHolder.VIEW_TYPE: {
+                TokenGridHolder tokenGridHolder = new TokenGridHolder(R.layout.item_token_grid, parent, assetService);
+                tokenGridHolder.setOnTokenClickListener(onTokenClickListener);
+                holder = tokenGridHolder;
+                break;
+            }
             case ManageTokensHolder.VIEW_TYPE:
                 holder = new ManageTokensHolder(R.layout.layout_manage_tokens, parent);
                 break;
@@ -204,7 +212,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
         if (tokensService != null) tokensService.markTokenUpdated(token);
         if (canDisplayToken(token))
         {
-            items.add(new TokenSortedItem(token, token.getNameWeight()));
+            if (gridFlag) {
+                items.add(new TokenSortedItem(TokenGridHolder.VIEW_TYPE, token, token.getNameWeight()));
+            } else {
+                items.add(new TokenSortedItem(TokenHolder.VIEW_TYPE,token, token.getNameWeight()));
+            }
         }
         else
         {
@@ -337,6 +349,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
     public void setFilterType(int filterType)
     {
         this.filterType = filterType;
+        if (filterType == FILTER_COLLECTIBLES) {
+            gridFlag = true;
+        } else {
+            gridFlag = false;
+        }
         filterAdapterItems();
     }
 

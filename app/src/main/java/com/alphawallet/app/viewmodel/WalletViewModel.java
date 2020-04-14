@@ -221,6 +221,11 @@ public class WalletViewModel extends BaseViewModel
         fetchFromOpensea(ethereumNetworkRepository.getNetworkByChain(MAINNET_ID));
         updateTokenBalances();
         assetDefinitionService.checkTokenscriptEnabledTokens(tokensService);
+        assetDefinitionService.getAllLoadedScripts() //holds for loading complete then returns origin contracts
+                .subscribeOn(Schedulers.single())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::addUnresolvedContracts)
+                .isDisposed();
     }
 
     /**
@@ -315,7 +320,7 @@ public class WalletViewModel extends BaseViewModel
      */
     private void updateTokenBalances()
     {
-        addUnresolvedContracts();
+        addUnresolvedContracts(ethereumNetworkRepository.getAllKnownContracts(tokensService.getNetworkFilters()));
         if (balanceTimerDisposable == null || balanceTimerDisposable.isDisposed())
         {
             balanceTimerDisposable = Observable.interval(0, BALANCE_CHECK_INTERVAL_MILLIS, TimeUnit.MILLISECONDS)
@@ -323,10 +328,10 @@ public class WalletViewModel extends BaseViewModel
         }
     }
 
-    private void addUnresolvedContracts()
+    private void addUnresolvedContracts(List<ContractLocator> contractCandidates)
     {
-        Observable.fromArray(ethereumNetworkRepository.getAllKnownContracts(tokensService.getNetworkFilters()).toArray(new ContractLocator[0]))
-                .filter(result -> tokensService.getToken(result.chainId, result.name) == null)
+        Observable.fromArray(contractCandidates.toArray(new ContractLocator[0]))
+                .filter(result -> (tokensService.getToken(result.chainId, result.name) == null))
                 .forEach(r -> unknownAddresses.add(r)).isDisposed();
     }
 
@@ -648,5 +653,10 @@ public class WalletViewModel extends BaseViewModel
     public void setTokenEnabled(Token token, boolean enabled) {
         changeTokenEnableInteract.setEnable(currentWallet, token, enabled);
         token.tokenInfo.isEnabled = enabled;
+    }
+
+    public void newTokensFound(List<ContractLocator> tokenContracts)
+    {
+        addUnresolvedContracts(tokenContracts);
     }
 }

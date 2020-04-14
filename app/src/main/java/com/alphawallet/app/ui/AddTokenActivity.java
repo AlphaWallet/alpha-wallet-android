@@ -16,6 +16,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
@@ -28,21 +31,22 @@ import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.QRURLParser;
 import com.alphawallet.app.util.Utils;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.inject.Inject;
-import dagger.android.AndroidInjection;
-import com.alphawallet.token.entity.SalesOrderMalformed;
-import com.alphawallet.token.tools.ParseMagicLink;
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-
 import com.alphawallet.app.viewmodel.AddTokenViewModel;
 import com.alphawallet.app.viewmodel.AddTokenViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.InputAddressView;
 import com.alphawallet.app.widget.InputView;
+import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.tools.ParseMagicLink;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
@@ -249,11 +253,9 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     {
         if (result != null)
         {
-            String[] addrs = { result.getAddress() };
-            int[] chainIds = { result.tokenInfo.chainId };
+            ContractLocator cr = new ContractLocator(result.getAddress(), result.tokenInfo.chainId);
             Intent intent = new Intent(ADDED_TOKEN);
-            intent.putExtra(C.EXTRA_TOKENID_LIST, addrs);
-            intent.putExtra(C.EXTRA_CHAIN_ID, chainIds);
+            intent.putParcelableArrayListExtra(C.EXTRA_TOKENID_LIST, new ArrayList<>(Collections.singletonList(cr)));
             sendBroadcast(intent);
             finish();
         }

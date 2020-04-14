@@ -404,18 +404,15 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     }
 
     @Override
-    public void addedToken(int[] chainIds, String[] addrs)
+    public void addedToken(List<ContractLocator> tokenContracts)
     {
-        //token was added
-        if (chainIds.length != addrs.length)
-        {
-            System.out.println("Receiver data mismatch");
-            return;
-        }
+        //new tokens found
+        viewModel.newTokensFound(tokenContracts);
 
-        for (int i = 0; i < chainIds.length; i++)
+        //see if these are currently known, if so update them in adapter
+        for (ContractLocator cResult : tokenContracts)
         {
-            Token t = viewModel.getTokenFromService(chainIds[i], addrs[i]);
+            Token t = viewModel.getTokenFromService(cResult.chainId, cResult.name);
             if (t != null) adapter.updateToken(t, false);
         }
     }

@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
@@ -26,11 +27,11 @@ import com.alphawallet.app.viewmodel.TransactionsViewModelFactory;
 import com.alphawallet.app.widget.EmptyTransactionsView;
 import com.alphawallet.app.widget.SystemView;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
-
-import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 
 public class TransactionsFragment extends Fragment implements View.OnClickListener, TokenInterface
 {
@@ -179,7 +180,7 @@ public class TransactionsFragment extends Fragment implements View.OnClickListen
     }
 
     @Override
-    public void addedToken(int[] chainIds, String[] addrs)
+    public void addedToken(List<ContractLocator> tokenContracts)
     {
 
     }

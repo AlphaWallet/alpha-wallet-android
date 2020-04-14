@@ -219,7 +219,6 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
     private void updateTimings()
     {
         float currentProgress = gasPrice.getValue().floatValue();
-        Log.d("Home","Current Progress : " + currentProgress);
         String estimatedTime = "";
 
         if(gasTransactionResponse != null) {
@@ -238,8 +237,6 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
 
             String resultKey = "" + (int) (smallestFall * 10);
             estimatedTime = convertGasEstimatedTime((int) (priceRange.get(resultKey) * 60));
-
-            Log.d("Home","Smallest Fall : " + resultKey + " Estimated wait : " + estimatedTime);
         }
 
         estimateTimeValue.setText(estimatedTime);
@@ -285,7 +282,6 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
      */
     public Single<GasTransactionResponse> getGasTransactionTime(Long tick)
     {
-        Log.d("Home","Tick : " + tick);
         return Single.fromCallable(() -> {
             try
             {
@@ -295,7 +291,6 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
                         .build();
                 okhttp3.Response response = okHttpClient.newCall(request).execute();
                 String responseStr = response.body().string();
-                Log.d("Home","Response : " + responseStr);
 
                 return new Gson().fromJson(responseStr, GasTransactionResponse.class);
             }
@@ -310,7 +305,7 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
      * This is setter method when price is changed by the slider
      * @param price
      */
-    private void setGasPrice(BigDecimal price) {
+    public void setGasPrice(BigDecimal price) {
         String priceStr = price + " " + C.GWEI_UNIT;
         gasPriceValue.setText(priceStr);
         updateNetworkFee();
@@ -332,6 +327,22 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
         BigDecimal gasPriceInEth = new BigDecimal(BalanceUtils.gweiToWei(gasPrice.getValue().multiply(new BigDecimal(gasLimit.getValue()))));
         String fee = "~" + BalanceUtils.weiToEth(gasPriceInEth).toPlainString() + " " + C.ETH_SYMBOL;
         networkFeeValue.setText(fee);
+    }
+
+    /**
+     * This method is used to get Gas Price
+     * @return BigDecimal Gas Price value selected from Gas Slider
+     */
+    public BigDecimal getGasPrice(){
+        return gasPrice.getValue();
+    }
+
+    /**
+     * This method is used to get Gas Limit
+     * @return BigInteger Gas Limit for now it is constant to 90000
+     */
+    public BigInteger getGasLimit(){
+        return gasLimit.getValue();
     }
 
     /**

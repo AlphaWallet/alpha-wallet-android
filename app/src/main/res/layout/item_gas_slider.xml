@@ -9,10 +9,10 @@
         android:id="@+id/layout_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="16dp"
-        android:paddingTop="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="8dp">
+        android:paddingStart="@dimen/dp16"
+        android:paddingTop="@dimen/dp16"
+        android:paddingEnd="@dimen/dp16"
+        android:paddingBottom="@dimen/dp8">
 
         <TextView
             android:id="@+id/speed_gas"
@@ -21,7 +21,7 @@
             android:fontFamily="@font/font_semibold"
             android:text="@string/speed_gas"
             android:textColor="@color/dove"
-            android:textSize="13sp" />
+            android:textSize="@dimen/sp13" />
 
         <ImageView
             android:id="@+id/img_expand_collapse"
@@ -42,11 +42,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/layout_title"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="@dimen/dp8"
+        android:layout_marginEnd="@dimen/dp8"
         android:max="90"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
+        android:paddingTop="@dimen/dp8"
+        android:paddingBottom="@dimen/dp8"
         android:progress="10"
         android:progressTint="@color/azure"
         android:thumbTint="@color/azure" />
@@ -57,8 +57,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/gas_price_slider1"
         android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:paddingStart="@dimen/dp16"
+        android:paddingEnd="@dimen/dp16">
 
         <TextView
             android:id="@+id/slow"
@@ -67,7 +67,7 @@
             android:fontFamily="@font/font_semibold"
             android:text="@string/slow"
             android:textColor="@color/azure"
-            android:textSize="13sp" />
+            android:textSize="@dimen/sp13" />
 
         <TextView
             android:id="@+id/network_fee_value"
@@ -77,7 +77,7 @@
             android:fontFamily="@font/font_semibold"
             android:gravity="center"
             android:textColor="@color/dove"
-            android:textSize="13sp"
+            android:textSize="@dimen/sp13"
             tools:text="@string/eth_00" />
 
         <TextView
@@ -87,7 +87,7 @@
             android:fontFamily="@font/font_semibold"
             android:text="@string/fast"
             android:textColor="@color/azure"
-            android:textSize="13sp" />
+            android:textSize="@dimen/sp13" />
 
     </LinearLayout>
 
@@ -97,9 +97,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/layout_gas_fee"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginStart="@dimen/dp24"
+        android:layout_marginTop="@dimen/dp16"
+        android:layout_marginEnd="@dimen/dp24"
         android:orientation="vertical">
 
         <TextView
@@ -109,7 +109,7 @@
             android:fontFamily="@font/font_semibold"
             android:text="@string/label_estimated_transaction_time"
             android:textColor="@color/dove"
-            android:textSize="13sp" />
+            android:textSize="@dimen/sp13" />
 
         <TextView
             android:id="@+id/estimated_time_value"
@@ -117,13 +117,13 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/font_semibold"
             android:textColor="@color/mine"
-            android:textSize="17sp"
+            android:textSize="@dimen/sp17"
             android:text="@string/minutes_0" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="@dimen/dp16"
             android:baselineAligned="false"
             android:orientation="horizontal">
 
@@ -140,7 +140,7 @@
                     android:fontFamily="@font/font_semibold"
                     android:text="@string/label_gas_limit"
                     android:textColor="@color/dove"
-                    android:textSize="13sp" />
+                    android:textSize="@dimen/sp13" />
 
                 <TextView
                     android:id="@+id/gas_limit_value"
@@ -148,7 +148,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/font_semibold"
                     android:textColor="@color/mine"
-                    android:textSize="17sp"
+                    android:textSize="@dimen/sp17"
                     android:text="@string/currency_00" />
 
             </LinearLayout>
@@ -166,7 +166,7 @@
                     android:fontFamily="@font/font_semibold"
                     android:text="@string/label_gas_price"
                     android:textColor="@color/dove"
-                    android:textSize="13sp" />
+                    android:textSize="@dimen/sp13" />
 
                 <TextView
                     android:id="@+id/gas_price_value"
@@ -174,7 +174,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/font_semibold"
                     android:textColor="@color/mine"
-                    android:textSize="17sp"
+                    android:textSize="@dimen/sp17"
                     android:text="@string/currency_00" />
 
             </LinearLayout>

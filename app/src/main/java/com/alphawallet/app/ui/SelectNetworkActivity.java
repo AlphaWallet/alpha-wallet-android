@@ -53,7 +53,7 @@ public class SelectNetworkActivity extends BaseActivity implements StandardFunct
         filterButton = findViewById(R.id.filter_button);
         functionBar = findViewById(R.id.layoutButtons);
         toolbar();
-        setTitle(getString(R.string.select_network_filters));
+        setTitle(getString(R.string.select_active_networks));
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(SelectNetworkViewModel.class);

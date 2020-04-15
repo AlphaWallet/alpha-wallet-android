@@ -267,7 +267,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
                 typeIcon.setImageResource(R.drawable.ic_transactions);
                 value.setTextColor(ContextCompat.getColor(getContext(), R.color.warning_dark_red));
             }
-            if (!isSent)
+            else if (!isSent)
             {
                 typeIcon.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
             }

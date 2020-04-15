@@ -49,7 +49,7 @@ public class SelectNetworkActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
         toolbar();
-        setTitle(getString(R.string.select_network_filters));
+        setTitle(getString(R.string.select_active_networks));
 
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(SelectNetworkViewModel.class);

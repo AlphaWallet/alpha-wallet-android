@@ -160,7 +160,7 @@ public class NewSettingsFragment extends BaseFragment {
         selectNetworksSetting =
                 new SettingsItemView.Builder(getContext())
                         .withIcon(R.drawable.ic_settings_networks)
-                        .withTitle(R.string.select_network_filters)
+                        .withTitle(R.string.select_active_networks)
                         .withListener(this::onSelectNetworksSettingClicked)
                         .build();
 

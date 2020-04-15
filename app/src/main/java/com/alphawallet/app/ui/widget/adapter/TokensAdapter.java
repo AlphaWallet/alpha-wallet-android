@@ -325,8 +325,6 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     private void filterAdapterItems()
     {
-        if (filterType == FILTER_ALL) return;
-
         //now filter all the tokens accordingly and refresh display
         List<Token> filterTokens = new ArrayList<>();
 

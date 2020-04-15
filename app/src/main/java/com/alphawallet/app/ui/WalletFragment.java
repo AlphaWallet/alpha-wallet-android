@@ -222,7 +222,7 @@ public class WalletFragment extends BaseFragment implements
         tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.currency));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.collectibles));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.attestations));
+        //tabLayout.addTab(tabLayout.newTab().setText(R.string.attestations));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener()
         {

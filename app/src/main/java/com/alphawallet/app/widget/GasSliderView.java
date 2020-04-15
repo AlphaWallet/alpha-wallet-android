@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.AppCompatSeekBar;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -25,9 +26,11 @@ import com.alphawallet.app.entity.GasTransactionResponse;
 import com.alphawallet.app.util.BalanceUtils;
 import com.google.gson.Gson;
 
+import org.web3j.tx.ChainId;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Map;
+import java.math.RoundingMode;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -48,7 +51,9 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
     /**
      * Duration to call Gas Price API
      */
-    private final int API_CALL_PERIOD = 30;
+    private final int API_CALL_PERIOD = 20;
+
+    private float maxDefaultPrice = 8.0f * 10.0f; //8 Gwei
 
     private Context context;
     private ImageView imgExpandCollapse;
@@ -59,6 +64,10 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
 
     private View layoutValueDetails;
     private AppCompatSeekBar gasPriceSlider;
+
+    private float scaleFactor; //used to convert slider value (0-100) into gas price
+    private float minimumPrice = 4.0f;
+    private boolean isMainNet = true;
 
     /**
      * Below object will identify whether GasSlider detail view is expanded or collapsed
@@ -95,6 +104,8 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
         super(context, attrs);
         this.context = context;
 
+        calculateStaticScaleFactor();
+
         /*
         Below code will attache current view with activity/fragment lifecycle
          */
@@ -106,7 +117,8 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    public void start() {
+    public void start()
+    {
         disposable = Observable.interval(0, API_CALL_PERIOD, TimeUnit.SECONDS, Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
@@ -141,6 +153,7 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
         gasLimit.setValue(BigInteger.valueOf(C.GAS_LIMIT_DEFAULT));
 
         gasPriceSlider.setProgress(gasPrice.getValue().intValue());
+        gasPriceSlider.setMax(100);
 
         imgExpandCollapse.setOnClickListener(v -> expandCollapseView());
 
@@ -155,8 +168,11 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
 
                 For example, progress on seekbar is 150, then expected result is 16.0
                  */
-                BigDecimal scaledProgress = BigDecimal.valueOf(progress / 10.0 + 1);
-                gasPrice.setValue(scaledProgress);
+                BigDecimal scaledGasPrice = BigDecimal.valueOf((progress * scaleFactor) + minimumPrice)
+                        .divide(BigDecimal.TEN) //divide by ten because price from API is x10
+                        .setScale(2, RoundingMode.HALF_DOWN); //to 2 dp
+
+                gasPrice.setValue(scaledGasPrice);
                 updateTimings();
             }
 
@@ -193,12 +209,23 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
     private void updateDetails(GasTransactionResponse response, Long tick) {
         //When interval start, it starts with Tick 0. So at this point, we can initialize the
         //Component with safelow and fastest value to slider
-        if(tick == 0){
-            initializeComponent(response);
-        }
 
         this.gasTransactionResponse = response;
+        calculateScaleFactor();
         updateTimings();
+
+        if(tick == 0 && isMainNet){
+            initializeComponent(response); //init the component after scale factors calculated
+        }
+    }
+
+    private void calculateScaleFactor()
+    {
+        SparseArray<Float> priceRange = gasTransactionResponse.getResult();
+        if (priceRange.size() == 0) return;
+        float topPrice = priceRange.keyAt(priceRange.size() - 1);
+        minimumPrice = priceRange.keyAt(0);
+        scaleFactor = (topPrice - minimumPrice)/100.0f;
     }
 
     /**
@@ -208,8 +235,9 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
      */
     private void initializeComponent(GasTransactionResponse response)
     {
-        float safeLow = response.getSafeLow() - 10;
-        gasPriceSlider.setProgress((int)safeLow);
+        //reverse calculate appropriate progress setting
+        int progress = (int)((response.getSafeLow() - minimumPrice)/scaleFactor);
+        gasPriceSlider.setProgress(progress);
     }
 
     /**
@@ -218,28 +246,32 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
      */
     private void updateTimings()
     {
-        float currentProgress = gasPrice.getValue().floatValue();
-        String estimatedTime = "";
-
         if(gasTransactionResponse != null) {
-            Map<String, Float> priceRange = gasTransactionResponse.getResult();
+            float correctedPrice = gasPrice.getValue().floatValue() * 10.0f;
+            String estimatedTime = "";
+            SparseArray<Float> priceRange = gasTransactionResponse.getResult(); //use SparseArray as you get automatically sorted contents
 
-            Float smallestFall = 0.0f;
+            float minutes = 0;
 
-            for (String key : priceRange.keySet()){
-                Float floatKey = Float.parseFloat(key) / 10.0f;
-                if(currentProgress <= floatKey){
-                    if(smallestFall == 0.0f || floatKey < smallestFall){
-                        smallestFall = floatKey;
-                    }
+            //Extrapolate between adjacent price readings
+            for (int index = 0; index < priceRange.size() - 1; index++)
+            {
+                int lowerBound = priceRange.keyAt(index);
+                int upperBound = priceRange.keyAt(index + 1);
+                if (lowerBound <= correctedPrice && upperBound >= correctedPrice)
+                {
+                    float timeDiff = priceRange.get(lowerBound) - priceRange.get(upperBound);
+                    float extrapolateFactor = (correctedPrice - (float)lowerBound)/(float)(upperBound - lowerBound);
+                    minutes = priceRange.get(lowerBound) - extrapolateFactor * timeDiff;
+                    break;
                 }
             }
 
-            String resultKey = "" + (int) (smallestFall * 10);
-            estimatedTime = convertGasEstimatedTime((int) (priceRange.get(resultKey) * 60));
-        }
+            if (correctedPrice > priceRange.keyAt(priceRange.size() - 1)) minutes = priceRange.valueAt(priceRange.size() - 1);
 
-        estimateTimeValue.setText(estimatedTime);
+            estimatedTime = convertGasEstimatedTime((int)(minutes * 60.0f));
+            estimateTimeValue.setText(estimatedTime);
+        }
     }
 
     /**
@@ -292,11 +324,13 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
                 okhttp3.Response response = okHttpClient.newCall(request).execute();
                 String responseStr = response.body().string();
 
-                return new Gson().fromJson(responseStr, GasTransactionResponse.class);
+                GasTransactionResponse gasResponse = new Gson().fromJson(responseStr, GasTransactionResponse.class);
+                gasResponse.truncatePriceRange();
+                return gasResponse;
             }
             catch (Exception e)
             {
-                return null;
+                return gasTransactionResponse; //return old value if previously fetchd
             }
         });
     }
@@ -305,10 +339,24 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
      * This is setter method when price is changed by the slider
      * @param price
      */
-    public void setGasPrice(BigDecimal price) {
+    private void setGasPrice(BigDecimal price) {
         String priceStr = price + " " + C.GWEI_UNIT;
         gasPriceValue.setText(priceStr);
         updateNetworkFee();
+    }
+
+    public void initGasPrice(BigDecimal price) {
+        String priceStr = price + " " + C.GWEI_UNIT;
+        gasPriceValue.setText(priceStr);
+        updateNetworkFee();
+        if (price.floatValue()*10.0f > maxDefaultPrice)
+        {
+            maxDefaultPrice = price.floatValue() * 15.0f;
+            calculateStaticScaleFactor();
+        }
+
+        int progress = (int)(((price.floatValue() * 10.0f) - minimumPrice)/scaleFactor);
+        gasPriceSlider.setProgress(progress);
     }
 
     /**
@@ -438,4 +486,22 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
 
         }
     };
+
+    /**
+     * Currently, the dynamic price vs time is main net only
+     * @param chainId
+     */
+    public void setChainId(int chainId)
+    {
+        //TODO: Add tx fee in FIAT for network transactions. Requires token or ticker.
+        if (chainId != ChainId.MAINNET)
+        {
+            isMainNet = false;
+        }
+    }
+
+    private void calculateStaticScaleFactor()
+    {
+        scaleFactor = (maxDefaultPrice - minimumPrice)/100.0f; //default scale factor
+    }
 }

@@ -1,5 +1,7 @@
 package com.alphawallet.app.entity;
 
+import android.util.SparseArray;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -55,6 +57,8 @@ public class GasTransactionResponse {
     @Expose
     private Map<String, Float> result;
 
+    private SparseArray<Float> arrayResult;
+
     public Float getFast() {
         return fast;
     }
@@ -99,7 +103,40 @@ public class GasTransactionResponse {
         return fastestWait;
     }
 
-    public Map<String, Float> getResult() {
-        return result;
+    public SparseArray<Float> getResult() {
+        return arrayResult;
+    }
+
+    /**
+     * Prune duplicate prices off the edges of the range and create sorted minimal array of prices
+     */
+    public void truncatePriceRange()
+    {
+        arrayResult = new SparseArray<>();
+        SparseArray<Float> priceSet = new SparseArray<>();
+        for (String price : result.keySet())
+        {
+            priceSet.put(Integer.valueOf(price), result.get(price));
+        }
+
+        for (int index = priceSet.size() - 1; index > 0; index--)
+        {
+            int thisPrice = priceSet.keyAt(index);
+            int nextPrice = priceSet.keyAt(index-1);
+            float thisWaitTime = priceSet.valueAt(index);
+            float nextWaitTime = priceSet.valueAt(index-1);
+            if (thisWaitTime == nextWaitTime)
+            {
+                priceSet.delete(Math.max(thisPrice, nextPrice));
+            }
+        }
+
+        for (int index = 0; index < priceSet.size(); index++)
+        {
+            if (priceSet.valueAt(index) != null)
+            {
+                arrayResult.put(priceSet.keyAt(index), priceSet.valueAt(index));
+            }
+        }
     }
 }

@@ -6,7 +6,9 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.*;
 import android.net.Uri;
 import android.os.Environment;
+import android.text.TextUtils;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
@@ -16,9 +18,13 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.HomeActivity;
+import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.LocaleUtils;
 
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import com.alphawallet.token.entity.MagicLinkData;
@@ -219,14 +225,53 @@ public class HomeViewModel extends BaseViewModel {
 
     public void getWalletName() {
         disposable = fetchWalletsInteract
-                .getWalletName(preferenceRepository.getCurrentWalletAddress())
+                .getWallet(preferenceRepository.getCurrentWalletAddress())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onWalletName, this::onError);
+                .subscribe(this::onWallet, this::onError);
     }
 
-    private void onWalletName(String name) {
-        walletName.postValue(name);
+    private void onWallet(Wallet wallet) {
+        if (TextUtils.isEmpty(wallet.ENSname))
+        {
+            walletName.postValue(wallet.name);
+            //check for ENS name
+            resolveEns(wallet.address)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(walletName::postValue, this::onENSError).isDisposed();
+        }
+        else
+        {
+            walletName.postValue(wallet.ENSname);
+        }
+    }
+
+    private Single<String> resolveEns(String address)
+    {
+        GasService gasService = new GasService(this.ethereumNetworkRepository);
+        return Single.fromCallable(() -> {
+            AWEnsResolver resolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), gasService);
+            String walletENSName = "";
+            try
+            {
+                walletENSName = resolver.reverseResolve(address);
+                if (!TextUtils.isEmpty(walletENSName))
+                {
+                    //check ENS name integrity - it must point to the wallet address
+                    String resolveAddress = resolver.resolve(walletENSName);
+                    if (!resolveAddress.equalsIgnoreCase(address))
+                    {
+                        walletENSName = null;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                walletENSName = null;
+            }
+            return walletENSName;
+        });
     }
 
     public LiveData<String> walletName() {
@@ -303,5 +348,10 @@ public class HomeViewModel extends BaseViewModel {
     public void updateTickers()
     {
         ethereumNetworkRepository.refreshTickers();
+    }
+
+    private void onENSError(Throwable throwable)
+    {
+        if (BuildConfig.DEBUG) throwable.printStackTrace();
     }
 }

@@ -149,13 +149,13 @@ public class NewSettingsFragment extends BaseFragment {
                         .withListener(this::onNotificationsSettingClicked)
                         .build();
 
-        biometricsSetting =
-                new SettingsItemView.Builder(getContext())
-                        .withType(SettingsItemView.Type.TOGGLE)
-                        .withIcon(R.drawable.ic_settings_biometrics)
-                        .withTitle(R.string.title_biometrics)
-                        .withListener(this::onBiometricsSettingClicked)
-                        .build();
+//        biometricsSetting =
+//                new SettingsItemView.Builder(getContext())
+//                        .withType(SettingsItemView.Type.TOGGLE)
+//                        .withIcon(R.drawable.ic_settings_biometrics)
+//                        .withTitle(R.string.title_biometrics)
+//                        .withListener(this::onBiometricsSettingClicked)
+//                        .build();
 
         selectNetworksSetting =
                 new SettingsItemView.Builder(getContext())
@@ -193,7 +193,7 @@ public class NewSettingsFragment extends BaseFragment {
 
         systemSettingsLayout.addView(notificationsSetting, systemIndex++);
 
-        systemSettingsLayout.addView(biometricsSetting, systemIndex++);
+        if (biometricsSetting != null) systemSettingsLayout.addView(biometricsSetting, systemIndex++);
 
         if (EthereumNetworkRepository.showNetworkFilters())
             systemSettingsLayout.addView(selectNetworksSetting, systemIndex++);

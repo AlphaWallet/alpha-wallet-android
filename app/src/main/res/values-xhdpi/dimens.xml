@@ -23,6 +23,7 @@
     <dimen name="sp20">18sp</dimen>
     <dimen name="sp24">22sp</dimen>
     <dimen name="sp28">26sp</dimen>
+    <dimen name="sp32">30sp</dimen>
     <dimen name="sp36">34sp</dimen>
 
     <!-- Padding/Margin Dimens -->
@@ -47,5 +48,8 @@
     <dimen name="dp23">22dp</dimen>
     <dimen name="dp24">23dp</dimen>
     <dimen name="dp25">24dp</dimen>
+
+    <!-- Collectible Grid Item -->
+    <dimen name="grid_icon_height">85dp</dimen>
 
 </resources>

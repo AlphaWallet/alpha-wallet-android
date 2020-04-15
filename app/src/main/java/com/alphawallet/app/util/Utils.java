@@ -7,6 +7,12 @@ import android.util.TypedValue;
 import android.view.View;
 import android.webkit.URLUtil;
 
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
+
+import org.web3j.crypto.WalletUtils;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,16 +22,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-
-import org.web3j.crypto.WalletUtils;
 
 public class Utils {
 
@@ -74,6 +73,60 @@ public class Utils {
         }
 
         return result;
+    }
+
+    private static String getFirstWord(String text) {
+        int index = text.indexOf(' ');
+        if (index > -1) {
+            return text.substring(0, index).trim();
+        } else {
+            return text;
+        }
+    }
+
+    public static String getIconisedText(String text)
+    {
+        String firstWord = getFirstWord(text);
+        switch (firstWord.length()) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                return firstWord.toUpperCase();
+            default:
+                return firstWord.substring(0, 4).toUpperCase();
+        }
+    }
+
+    public static int getChainColour(int chainId)
+    {
+        switch (chainId)
+        {
+            case EthereumNetworkRepository.MAINNET_ID:
+                return R.color.mainnet;
+            case EthereumNetworkRepository.CLASSIC_ID:
+                return R.color.classic;
+            case EthereumNetworkRepository.POA_ID:
+                return R.color.poa;
+            case EthereumNetworkRepository.KOVAN_ID:
+                return R.color.kovan;
+            case EthereumNetworkRepository.ROPSTEN_ID:
+                return R.color.ropsten;
+            case EthereumNetworkRepository.SOKOL_ID:
+                return R.color.sokol;
+            case EthereumNetworkRepository.RINKEBY_ID:
+                return R.color.rinkeby;
+            case EthereumNetworkRepository.GOERLI_ID:
+                return R.color.goerli;
+            case EthereumNetworkRepository.XDAI_ID:
+                return R.color.xdai;
+            case EthereumNetworkRepository.ARTIS_SIGMA1_ID:
+                return R.color.artis_sigma1;
+            case EthereumNetworkRepository.ARTIS_TAU1_ID:
+                return R.color.artis_tau1;
+            default:
+                return R.color.mine;
+        }
     }
 
     public static void setChainColour(View view, int chainId)

@@ -10,6 +10,10 @@ public class TokenSortedItem extends SortedItem<Token> {
         super(TokenHolder.VIEW_TYPE, value, weight);
     }
 
+    public TokenSortedItem(int viewType, Token value, int weight) {
+        super(viewType, value, weight);
+    }
+
     @Override
     public int compare(SortedItem other) {
         return weight - other.weight;

@@ -16,6 +16,7 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
@@ -24,7 +25,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.alphawallet.app.C;
@@ -42,6 +42,7 @@ import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
+import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.util.TabUtils;
@@ -51,7 +52,6 @@ import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +60,6 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 
-import static com.alphawallet.app.C.EXTRA_ADDRESS;
 import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 import static com.alphawallet.app.C.Key.WALLET;
 
@@ -91,6 +90,8 @@ public class WalletFragment extends BaseFragment implements
     private String importFileName;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout refreshLayout;
+    private GridLayoutManager gridLayoutManager;
+    private LinearLayoutManager linearLayoutManager;
 
     private boolean isVisible;
 
@@ -130,9 +131,10 @@ public class WalletFragment extends BaseFragment implements
     }
 
     private void initList() {
+        initLayoutManagers();
         adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), getContext());
         adapter.setHasStableIds(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
         if (recyclerView.getItemAnimator() != null)
             ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
@@ -230,14 +232,17 @@ public class WalletFragment extends BaseFragment implements
                 switch (tab.getPosition())
                 {
                     case 0:
+                        recyclerView.setLayoutManager(linearLayoutManager);
                         adapter.setFilterType(TokensAdapter.FILTER_ALL);
                         viewModel.fetchTokens();
                         break;
                     case 1:
+                        recyclerView.setLayoutManager(linearLayoutManager);
                         adapter.setFilterType(TokensAdapter.FILTER_CURRENCY);
                         viewModel.fetchTokens();
                         break;
                     case 2:
+                        recyclerView.setLayoutManager(gridLayoutManager);
                         adapter.setFilterType(TokensAdapter.FILTER_COLLECTIBLES);
                         viewModel.fetchTokens();
                         break;
@@ -260,6 +265,21 @@ public class WalletFragment extends BaseFragment implements
         });
 
         TabUtils.decorateTabLayout(getContext(), tabLayout);
+    }
+
+    private void initLayoutManagers() {
+        linearLayoutManager = new LinearLayoutManager(getContext());
+
+        gridLayoutManager = new GridLayoutManager(getContext(), 2);
+        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if (adapter.getItemViewType(position) == TokenGridHolder.VIEW_TYPE) {
+                    return 1;
+                }
+                return 2;
+            }
+        });
     }
 
     @Override
@@ -555,7 +575,8 @@ public class WalletFragment extends BaseFragment implements
                 Token t = ((TokenHolder)viewHolder).token;
                 if (t.isEthereum()) return 0;
             }
-            else if (viewHolder.getItemViewType() == ManageTokensHolder.VIEW_TYPE)
+            else if (viewHolder.getItemViewType() == ManageTokensHolder.VIEW_TYPE ||
+                    viewHolder.getItemViewType() == TokenGridHolder.VIEW_TYPE)
             {
                 return 0;
             }

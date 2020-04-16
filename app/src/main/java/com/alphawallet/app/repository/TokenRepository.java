@@ -1294,10 +1294,10 @@ public class TokenRepository implements TokenRepositoryType {
                 else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OLD_ERC721), Boolean.TRUE)) returnType = ContractType.ERC721_LEGACY;
                 else
                 {
+                    Boolean isERC875 = getContractData(network, tokenInfo.address, boolParam("isStormBirdContract"), Boolean.TRUE); //Use old isStormbird as another datum point
                     List<BigInteger> balance875 = checkERC875BalanceArray(new Wallet(ZERO_ADDRESS), tokenInfo, null);
-                    List<BigInteger> balance721 = checkERC721TicketBalanceArray(new Wallet(ZERO_ADDRESS), tokenInfo, null);
                     String      responseValue = callSmartContractFunction(balanceOf(ZERO_ADDRESS), tokenInfo.address, network, new Wallet(ZERO_ADDRESS));
-                    returnType = findContractTypeFromResponse(balance875, balance721, responseValue);
+                    returnType = findContractTypeFromResponse(balance875, responseValue, isERC875);
                 }
             }
             catch (Exception e)
@@ -1310,17 +1310,13 @@ public class TokenRepository implements TokenRepositoryType {
         });
     }
 
-    private ContractType findContractTypeFromResponse(List<BigInteger> balance875, List<BigInteger> balance721Ticket, String balanceResponse) throws Exception
+    private ContractType findContractTypeFromResponse(List<BigInteger> balance875, String balanceResponse, Boolean isERC875) throws Exception
     {
         ContractType returnType = ContractType.OTHER;
 
         int responseLength = balanceResponse.length();
 
-        if (balance721Ticket != null && balance721Ticket.size() > 0)
-        {
-            returnType = ContractType.ERC721_TICKET;
-        }
-        else if (balance875 != null && balance875.size() > 0 && responseLength > 66)
+        if (isERC875 || (balance875 != null && balance875.size() > 0 && responseLength > 66))
         {
             returnType = ContractType.ERC875;
         }

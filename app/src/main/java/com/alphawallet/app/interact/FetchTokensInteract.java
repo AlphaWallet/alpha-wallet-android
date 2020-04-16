@@ -7,6 +7,7 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.OrderContractAddressPair;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
@@ -130,7 +131,8 @@ public class FetchTokensInteract {
                             type = ContractType.ERC721;
                         case ERC721:
                         case ERC721_LEGACY:
-                            t = new ERC721Token(t.tokenInfo, new ArrayList<>(), System.currentTimeMillis(), t.getNetworkName(), type);
+                            List<Asset> erc721Balance = t.getTokenAssets(); //add balance from Opensea
+                            t = new ERC721Token(t.tokenInfo, erc721Balance, System.currentTimeMillis(), t.getNetworkName(), type);
                             tokens[i] = t;
                             break;
                         case ERC721_TICKET:

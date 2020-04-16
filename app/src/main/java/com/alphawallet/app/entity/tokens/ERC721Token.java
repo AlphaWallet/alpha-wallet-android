@@ -58,6 +58,13 @@ public class ERC721Token extends Token implements Parcelable
 
     @Override
     public void addAssetToTokenBalanceAssets(Asset asset) {
+        for (Asset a : tokenBalanceAssets) //don't add the same assets twice (should this be a map?)
+        {
+            if (a.getTokenId().equalsIgnoreCase(asset.getTokenId()))
+            {
+                return;
+            }
+        }
         tokenBalanceAssets.add(asset);
     }
 

@@ -236,7 +236,8 @@ public class HomeViewModel extends BaseViewModel {
         {
             walletName.postValue(wallet.name);
             //check for ENS name
-            resolveEns(wallet.address)
+            new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID))
+                    .resolveEnsName(wallet.address)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
                     .subscribe(walletName::postValue, this::onENSError).isDisposed();
@@ -245,33 +246,6 @@ public class HomeViewModel extends BaseViewModel {
         {
             walletName.postValue(wallet.ENSname);
         }
-    }
-
-    private Single<String> resolveEns(String address)
-    {
-        GasService gasService = new GasService(this.ethereumNetworkRepository);
-        return Single.fromCallable(() -> {
-            AWEnsResolver resolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), gasService);
-            String walletENSName = "";
-            try
-            {
-                walletENSName = resolver.reverseResolve(address);
-                if (!TextUtils.isEmpty(walletENSName))
-                {
-                    //check ENS name integrity - it must point to the wallet address
-                    String resolveAddress = resolver.resolve(walletENSName);
-                    if (!resolveAddress.equalsIgnoreCase(address))
-                    {
-                        walletENSName = null;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                walletENSName = null;
-            }
-            return walletENSName;
-        });
     }
 
     public LiveData<String> walletName() {

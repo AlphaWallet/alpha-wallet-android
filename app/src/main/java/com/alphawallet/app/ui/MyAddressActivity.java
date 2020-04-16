@@ -32,8 +32,10 @@ import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.QRScanning.DisplayUtils;
 import com.alphawallet.app.ui.widget.entity.AmountEntryItem;
+import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRUtils;
 import com.alphawallet.app.util.Utils;
@@ -289,7 +291,8 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
         //When view changes, this function loads again. It will again try to fetch ENS
         if(TextUtils.isEmpty(displayName))
         {
-            viewModel.resolveEns(displayAddress)
+            new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID))
+                    .resolveEnsName(displayAddress)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
                     .subscribe(this::updateAddressWithENS, this::printTrace).isDisposed();

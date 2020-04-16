@@ -1,6 +1,7 @@
 package com.alphawallet.app.service;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.alphawallet.app.entity.tokens.TokenFactory;
@@ -99,7 +100,7 @@ public class OpenseaService {
                     TokenInfo tInfo;
                     ContractType type;
                     Token checkToken = tokensService.getToken(networkId, asset.getAssetContract().getAddress());
-                    if (checkToken != null && (checkToken.isERC721() || checkToken.isERC721Ticket()))
+                    if (checkToken != null && checkClassification(checkToken, asset) && (checkToken.isERC721() || checkToken.isERC721Ticket()))
                     {
                         tInfo = checkToken.tokenInfo;
                         type = checkToken.getInterfaceSpec();
@@ -117,6 +118,14 @@ public class OpenseaService {
                 token.addAssetToTokenBalanceAssets(asset);
             }
         }
+    }
+
+    /**
+     * See if Token has been incorrectly classified as ERC721Ticket
+     */
+    private boolean checkClassification(Token checkToken, Asset asset)
+    {
+        return !checkToken.isERC721Ticket() || asset.getTraits().size() == 0 || TextUtils.isEmpty(asset.getDescription());
     }
 
     private boolean verifyData(String jsonData)

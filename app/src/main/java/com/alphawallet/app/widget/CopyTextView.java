@@ -26,6 +26,7 @@ public class CopyTextView extends LinearLayout {
 
     private int textResId;
     private boolean showToast;
+    private String rawAddress;
 
     public CopyTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -68,6 +69,7 @@ public class CopyTextView extends LinearLayout {
     }
 
     public void setText(CharSequence text) {
+        rawAddress = text.toString();
         String breakAddr = text.toString();
         if (WalletUtils.isValidAddress(breakAddr)) //split string across two lines
         {
@@ -80,7 +82,7 @@ public class CopyTextView extends LinearLayout {
     private void copyToClipboard()
     {
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, text.getText().toString());
+        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, rawAddress);
         if (clipboard != null) {
             clipboard.setPrimaryClip(clip);
         }

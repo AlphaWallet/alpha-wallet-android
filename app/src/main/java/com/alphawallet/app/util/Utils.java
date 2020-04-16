@@ -2,6 +2,7 @@ package com.alphawallet.app.util;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.text.TextUtils;
 import android.util.Patterns;
 import android.util.TypedValue;
 import android.view.View;
@@ -86,6 +87,7 @@ public class Utils {
 
     public static String getIconisedText(String text)
     {
+        if (TextUtils.isEmpty(text)) return "";
         String firstWord = getFirstWord(text);
         switch (firstWord.length()) {
             case 1:

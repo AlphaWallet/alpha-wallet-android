@@ -56,7 +56,7 @@ import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-public class MyAddressActivity extends BaseActivity implements View.OnClickListener, AmountUpdateCallback, StandardFunctionInterface
+public class MyAddressActivity extends BaseActivity implements AmountUpdateCallback
 {
     public static final String KEY_ADDRESS = "key_address";
     public static final String KEY_MODE = "mode";
@@ -85,7 +85,6 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     private NetworkInfo networkInfo;
     private int currentMode = MODE_ADDRESS;
     private int overrideNetwork;
-    private FunctionButtonBar functionBar;
     private int screenWidth;
     private CopyTextView copyAddress;
     private CopyTextView copyWalletName;
@@ -136,7 +135,6 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         qrImageView = findViewById(R.id.qr_image);
         selectAddress = findViewById(R.id.layout_select_address);
         networkIcon = findViewById(R.id.network_icon);
-        functionBar = findViewById(R.id.layoutButtons);
         qrImageView.setBackgroundResource(R.color.white);
         ensFetchProgressBar = findViewById(R.id.ens_fetch_progress);
 
@@ -251,7 +249,6 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
                 viewModel.getTokenRepository(),
                 token);
         amountInput.getValue();
-        functionBar.setVisibility(View.GONE);
         selectNetworkLayout.setVisibility(View.VISIBLE);
 
         if (networkInfo != null)
@@ -326,9 +323,6 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         setTitle(getString(R.string.contract_address));
         address.setText(token.getAddress());
         onWindowFocusChanged(true);
-        functionBar.setVisibility(View.VISIBLE);
-        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.copy_contract_address));
-        functionBar.setupFunctions(this, functions);
     }
 
     private void updateAddressWithENS(String ensName)
@@ -404,11 +398,6 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         overrideNetwork = getIntent().getIntExtra(OVERRIDE_DEFAULT, 1);
     }
 
-    @Override
-    public void onClick(View v) {
-        copyToClipboard();
-    }
-
     private boolean checkWritePermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED;
@@ -442,23 +431,5 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
             }
             qrImageView.setImageBitmap(QRUtils.createQRImage(this, eip681String, screenWidth));
         }
-    }
-
-    @Override
-    public void handleClick(String action)
-    {
-        if (action.equals(getString(R.string.copy_wallet_address)) ||
-        action.equals(getString(R.string.copy_contract_address))) {
-            copyToClipboard();
-        }
-    }
-
-    private void copyToClipboard() {
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, displayAddress);
-        if (clipboard != null) {
-            clipboard.setPrimaryClip(clip);
-        }
-        Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
     }
 }

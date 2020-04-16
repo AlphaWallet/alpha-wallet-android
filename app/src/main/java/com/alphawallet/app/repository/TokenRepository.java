@@ -91,6 +91,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private final Map<Integer, Web3j> web3jNodeServers;
     private final OkHttpClient okClient;
+    private final AWEnsResolver ensResolver;
 
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -102,6 +103,7 @@ public class TokenRepository implements TokenRepositoryType {
         this.gasService = gasService;
 
         web3jNodeServers = new ConcurrentHashMap<>();
+        ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID));
         okClient = new OkHttpClient.Builder()
                 .connectTimeout(5, TimeUnit.SECONDS)
                 .readTimeout(5, TimeUnit.SECONDS)
@@ -380,43 +382,9 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<String> resolveENS(int chainId, String address)
+    public Single<String> resolveENS(int chainId, String ensName)
     {
-        return Single.fromCallable(() -> {
-            String resolvedAddress = resolveAddress(chainId, address);
-            if (!WalletUtils.isValidAddress(resolvedAddress))
-            {
-                resolvedAddress = resolveAddress(MAINNET_ID, address); //try main net
-            }
-
-            if (WalletUtils.isValidAddress(resolvedAddress))
-            {
-                return resolvedAddress;
-            }
-            else
-            {
-                return C.BURN_ADDRESS;
-            }
-        });
-    }
-
-    private String resolveAddress(int chainId, String address)
-    {
-        int useChainId = chainId;
-        if (!EthereumNetworkRepository.hasRealValue(useChainId)) useChainId = MAINNET_ID;
-        Web3j service = getService(useChainId); //resolve ENS on mainnet unless this network has value
-        AWEnsResolver ensResolver = new AWEnsResolver(service, gasService);
-        String resolvedAddress = "";
-        try
-        {
-            resolvedAddress = ensResolver.resolve(address);
-        }
-        catch (Exception e)
-        {
-            return "--";
-        }
-
-        return resolvedAddress;
+        return ensResolver.resolveENSAddress(ensName);
     }
 
     @Override

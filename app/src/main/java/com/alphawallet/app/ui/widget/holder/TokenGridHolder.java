@@ -53,7 +53,7 @@ public class TokenGridHolder extends BinderViewHolder<Token> {
             if (token.isERC721()) {
                 ERC721Token tkn = (ERC721Token) token;
                 List<Asset> assets = tkn.getTokenAssets();
-                if (assets != null) {
+                if (assets != null && assets.size() > 0) {
                     Asset firstAsset = assets.get(0);
                     if (firstAsset != null) {
                         Glide.with(getContext())

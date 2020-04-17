@@ -18,7 +18,7 @@ import android.util.SparseArray;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ActionEventCallback;
-import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Event;
 import com.alphawallet.app.entity.FragmentMessenger;
@@ -79,7 +79,6 @@ import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -660,13 +659,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             addContractAddresses(newFile);
             TokenDefinition td = getTokenDefinition(newFile);
-            List<ContractResult> tokenContracts = getHoldingContracts(td);
+            List<ContractLocator> tokenContracts = getHoldingContracts(td);
             if (tokenContracts != null && tokenContracts.size() > 0)
             {
                 String[] addrs = new String[tokenContracts.size()];
                 int[] chainIds = new int[tokenContracts.size()];
                 int index = 0;
-                for (ContractResult cr : tokenContracts)
+                for (ContractLocator cr : tokenContracts)
                 {
                     addrs[index] = cr.name;
                     chainIds[index] = cr.chainId;
@@ -1870,25 +1869,25 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return view.equals(iconifiedView);
     }
 
-    public List<ContractResult> getHoldingContracts(TokenDefinition td)
+    public List<ContractLocator> getHoldingContracts(TokenDefinition td)
     {
-        List<ContractResult> holdingContracts = new ArrayList<>();
+        List<ContractLocator> holdingContracts = new ArrayList<>();
         ContractInfo holdingContractInfo = td.contracts.get(td.holdingToken);
         if (holdingContractInfo == null || holdingContractInfo.addresses.size() == 0) return null;
         for (int chainId : holdingContractInfo.addresses.keySet())
         {
             for (String address : holdingContractInfo.addresses.get(chainId))
             {
-                holdingContracts.add(new ContractResult(address, chainId));
+                holdingContracts.add(new ContractLocator(address, chainId));
             }
         }
 
         return holdingContracts;
     }
 
-    public ContractResult getHoldingContract(String importFileName)
+    public ContractLocator getHoldingContract(String importFileName)
     {
-        ContractResult cr = null;
+        ContractLocator cr = null;
         for (int i = 0; i < assetDefinitions.size(); i++)
         {
             int chainId = assetDefinitions.keyAt(i);
@@ -1898,7 +1897,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 String path = f.getAbsoluteFile().toString();
                 if (path.contains(importFileName))
                 {
-                    cr = new ContractResult(address, chainId);
+                    cr = new ContractLocator(address, chainId);
                     break;
                 }
             }

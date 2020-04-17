@@ -4,7 +4,7 @@ import android.content.Context;
 import android.view.View;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.service.TickerServiceInterface;
 
@@ -49,14 +49,14 @@ public class EthereumNetworkRepository extends EthereumNetworkBase
      * ContractResult import android (therefore preventing their use
      * in non-Android projects) or introducing a new trivial
      * interface/class */
-    public List<ContractResult> getAllKnownContracts(List<Integer> networkFilters)
+    public List<ContractLocator> getAllKnownContracts(List<Integer> networkFilters)
     {
-        List<ContractResult> knownContracts = new ArrayList<>();
+        List<ContractLocator> knownContracts = new ArrayList<>();
         if (networkFilters.contains(EthereumNetworkRepository.MAINNET_ID)) {
-            knownContracts.addAll(Arrays.asList(ContractResult.fromAddresses(context.getResources().getStringArray(R.array.MainNet), EthereumNetworkRepository.MAINNET_ID)));
+            knownContracts.addAll(Arrays.asList(ContractLocator.fromAddresses(context.getResources().getStringArray(R.array.MainNet), EthereumNetworkRepository.MAINNET_ID)));
         }
         if (networkFilters.contains(EthereumNetworkRepository.XDAI_ID)) {
-            knownContracts.addAll(Arrays.asList(ContractResult.fromAddresses(context.getResources().getStringArray(R.array.xDAI), EthereumNetworkRepository.XDAI_ID)));
+            knownContracts.addAll(Arrays.asList(ContractLocator.fromAddresses(context.getResources().getStringArray(R.array.xDAI), EthereumNetworkRepository.XDAI_ID)));
         }
         return knownContracts;
     }

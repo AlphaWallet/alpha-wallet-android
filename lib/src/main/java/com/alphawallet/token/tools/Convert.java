@@ -39,17 +39,20 @@ public final class Convert {
         METHER("mether", 24),
         GETHER("gether", 27);
 
-        private String name;
-        private BigDecimal weiFactor;
+        private final String name;
+        private final BigDecimal weiFactor;
+        private final int factor;
 
         Unit(String name, int factor) {
             this.name = name;
             this.weiFactor = BigDecimal.TEN.pow(factor);
+            this.factor = factor;
         }
 
         public BigDecimal getWeiFactor() {
             return weiFactor;
         }
+        public int getFactor() { return factor; }
 
         @Override
         public String toString() {
@@ -81,6 +84,14 @@ public final class Convert {
         df.setRoundingMode(RoundingMode.CEILING);
         df.setMaximumFractionDigits(decimals);
         return df.format(ethFiatValue);
+    }
+
+    public static String getConvertedValue(BigDecimal rawValue, int divisor)
+    {
+        BigDecimal convertedValue = rawValue.divide(new BigDecimal(Math.pow(10, divisor)));
+        DecimalFormat df = new DecimalFormat("0.#####");
+        df.setRoundingMode(RoundingMode.HALF_DOWN);
+        return df.format(convertedValue);
     }
 
     public static String getEthStringSzabo(BigInteger szabo)

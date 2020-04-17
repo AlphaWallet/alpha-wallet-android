@@ -5,7 +5,7 @@ package com.alphawallet.app.repository;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
@@ -381,9 +381,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     {
         return (token.ticker != null || token.isEthereum());
     }
-    public static ContractResult getOverrideToken()
+    public static ContractLocator getOverrideToken()
     {
-        return new ContractResult("", EthereumNetworkRepository.MAINNET_ID, ContractType.ETHEREUM);
+        return new ContractLocator("", EthereumNetworkRepository.MAINNET_ID, ContractType.ETHEREUM);
     }
 
     public static boolean isPriorityToken(Token token)

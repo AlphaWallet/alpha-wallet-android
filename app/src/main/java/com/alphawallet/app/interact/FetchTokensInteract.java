@@ -2,7 +2,7 @@ package com.alphawallet.app.interact;
 
 import android.text.TextUtils;
 
-import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.OrderContractAddressPair;
@@ -70,7 +70,7 @@ public class FetchTokensInteract {
         return tokenRepository.fetchLatestBlockNumber(chainId);
     }
 
-    public Observable<ContractResult> getContractResponse(String address, int chainId, String method)
+    public Observable<ContractLocator> getContractResponse(String address, int chainId, String method)
     {
         return tokenRepository.getTokenResponse(address, chainId, method).toObservable();
     }

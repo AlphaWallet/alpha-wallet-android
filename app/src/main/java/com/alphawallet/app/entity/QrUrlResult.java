@@ -42,6 +42,12 @@ public class QrUrlResult implements Parcelable
         defaultParams();
     }
 
+    public QrUrlResult(String data, EIP681Type type)
+    {
+        this.type = type;
+        this.address = data;
+    }
+
     private void defaultParams()
     {
         chainId = 1;
@@ -208,11 +214,6 @@ public class QrUrlResult implements Parcelable
             {
                 type = EIP681Type.OTHER;
             }
-        }
-
-        if (type == EIP681Type.TRANSFER && isEmpty(functionToAddress))
-        {
-            type = EIP681Type.OTHER;
         }
 
         if (type == EIP681Type.FUNCTION_CALL && isEmpty(functionDetail))

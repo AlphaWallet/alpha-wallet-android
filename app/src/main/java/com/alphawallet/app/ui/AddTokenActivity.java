@@ -229,7 +229,6 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                 showProgress(true);
                 //attempt to load the token and store to tokenService
                 viewModel.fetchToken(currentResult.chainId, currentResult.getAddress());
-                return;
             }
             else
             {

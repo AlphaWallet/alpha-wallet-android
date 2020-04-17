@@ -3,7 +3,6 @@ package com.alphawallet.app.ui;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -26,7 +25,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.alphawallet.app.entity.BackupTokenCallback;
-import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.tokens.Token;
@@ -286,7 +285,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     {
         if (importFileName != null)
         {
-            ContractResult importToken = viewModel.getAssetDefinitionService().getHoldingContract(importFileName);
+            ContractLocator importToken = viewModel.getAssetDefinitionService().getHoldingContract(importFileName);
             if (importToken != null) Toast.makeText(getContext(), importToken.name, Toast.LENGTH_LONG).show();
             if (importToken != null) adapter.setScrollToken(importToken);
             importFileName = null;

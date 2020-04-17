@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QrUrlResult;
@@ -18,7 +18,6 @@ import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.SetupTokensInteract;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.ImportTokenActivity;
@@ -279,7 +278,7 @@ public class AddTokenViewModel extends BaseViewModel {
                 .subscribe(this::checkSelectedNetwork, this::onTestError);
     }
 
-    private void checkSelectedNetwork(ContractResult result)
+    private void checkSelectedNetwork(ContractLocator result)
     {
         if (!result.name.equals(TokenRepository.INVALID_CONTRACT))
         {
@@ -310,7 +309,7 @@ public class AddTokenViewModel extends BaseViewModel {
         onError(throwable);
     }
 
-    private void testNetworkResult(ContractResult result)
+    private void testNetworkResult(ContractLocator result)
     {
         if (!foundNetwork && !result.name.equals(TokenRepository.INVALID_CONTRACT))
         {

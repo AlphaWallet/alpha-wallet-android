@@ -70,13 +70,7 @@ public class CopyTextView extends LinearLayout {
 
     public void setText(CharSequence text) {
         rawAddress = text.toString();
-        String breakAddr = text.toString();
-        if (WalletUtils.isValidAddress(breakAddr)) //split string across two lines
-        {
-            breakAddr = breakAddr.substring(0, 22) + " " + breakAddr.substring(22);
-        }
-
-        this.text.setText(breakAddr);
+        this.text.setText(rawAddress);
     }
 
     private void copyToClipboard()

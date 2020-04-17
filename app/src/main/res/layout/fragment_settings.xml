@@ -225,7 +225,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:fontFamily="@font/font_light"
-                        android:text="@string/network"
+                        android:text="@string/select_active_networks"
                         android:textColor="@color/black"
                         android:textSize="20sp" />
 

@@ -12,9 +12,9 @@ import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
@@ -28,22 +28,14 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
 
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.http.HttpService;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.OkHttpClient;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
@@ -76,6 +68,7 @@ public class WalletsViewModel extends BaseViewModel
     private NetworkInfo currentNetwork;
     private Map<String, Wallet> walletBalances = new HashMap<>();
     private final ExecutorService executorService;
+    private int walletUpdateCount;
 
     WalletsViewModel(
             SetDefaultWalletInteract setDefaultWalletInteract,
@@ -265,14 +258,14 @@ public class WalletsViewModel extends BaseViewModel
     {
         ContractResult override = EthereumNetworkRepository.getOverrideToken();
         NetworkInfo    network  = findDefaultNetworkInteract.getNetworkInfo(override.chainId);
+        walletUpdateCount = wallets.length;
 
-        disposable = fetchWalletList(wallets)
-                .flatMapIterable(wallet -> wallet) //iterate through each wallet
+        disposable = Observable.fromArray(wallets)
                 .map(this::addWalletToMap)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .subscribe(wallet -> {
-                    fetchTokensInteract.fetchStoredToken(network, wallet, override.name) //fetch cached balance
+                    fetchTokensInteract.fetchStoredToken(network, wallet, override.name) //fetch cached balance from this wallet's DB
                     .flatMap(tokenFromCache -> fetchTokensInteract.updateBalance(wallet.address, tokenFromCache)) //update balance
                     .subscribe(this::updateWallet, error -> onFetchError(wallet, network)).isDisposed();
                 }, this::onError);
@@ -285,7 +278,9 @@ public class WalletsViewModel extends BaseViewModel
         {
             wallet.zeroWalletBalance(networkInfo);
             updateBalance.postValue(wallet);
+            walletBalances.put(wallet.address.toLowerCase(), wallet);
         }
+        storeWallets();
     }
 
     private void updateWallet(Token token)
@@ -295,40 +290,32 @@ public class WalletsViewModel extends BaseViewModel
             Wallet wallet = walletBalances.get(token.getWallet().toLowerCase());
             if (wallet != null)
             {
-                wallet.setWalletBalance(token);
-                //update wallet balance
-                updateBalance.postValue(wallet);
+                if (wallet.setWalletBalance(token))
+                {
+                    //update wallet balance
+                    updateBalance.postValue(wallet);
+                }
             }
         }
+        storeWallets();
     }
 
-    private void updateBalances()
+    private void storeWallets()
     {
-        progress.postValue(false);
-        if (currentNetwork.isMainNetwork)
+        walletUpdateCount--;
+        if (walletUpdateCount == 0)
         {
-            Wallet[] walletsFromUpdate = walletBalances.values().toArray(new Wallet[0]);
-            storeWallets(walletsFromUpdate);
+            //write wallets to DB
+            disposable = fetchWalletsInteract.storeWallets(walletBalances.values().toArray(new Wallet[0]))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onStored, this::onError);
         }
-    }
-
-    private void storeWallets(Wallet[] wallets)
-    {
-        //write wallets to DB
-        disposable = fetchWalletsInteract.storeWallets(wallets)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onStored, this::onError);
     }
 
     private void onStored(Wallet[] wallets)
     {
         Log.d(TAG, "Stored " + wallets.length + " Wallets");
-    }
-
-    private Observable<List<Wallet>> fetchWalletList(Wallet[] wallets)
-    {
-        return Observable.fromCallable(() -> new ArrayList<>(Arrays.asList(wallets)));
     }
 
     private void onCreateWalletError(Throwable throwable)

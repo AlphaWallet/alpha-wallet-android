@@ -1042,7 +1042,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         txResult.result = selectVal;
 
-        if (txResult.resultTime == 0 || blockTime > txResult.resultTime)
+        if (txResult.resultTime == 0 || blockTime >= txResult.resultTime)
         {
             //store
             txResult.resultTime = blockTime;

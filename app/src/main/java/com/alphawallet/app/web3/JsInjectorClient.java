@@ -208,11 +208,12 @@ public class JsInjectorClient {
     {
         if (style == null) style = "";
         //String injectHeader = "<head><meta name=\"viewport\" content=\"width=device-width, user-scalable=false\" /></head>";
-        String injectHeader = "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no\" /></head>"; //iOS uses these header settings
+        String injectHeader = "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no\" />"; //iOS uses these header settings
         style = "<style type=\"text/css\">\n" + style + ".token-card {\n" +
                 "padding: 0pt;\n" +
                 "margin: 0pt;\n" +
-                "}</style><body>\n";
+                "}</style></head>" +
+                "<body>\n";
         // the opening of the following </div> is in injectWeb3TokenInit();
         return injectHeader + style + view + "</div></body>";
     }

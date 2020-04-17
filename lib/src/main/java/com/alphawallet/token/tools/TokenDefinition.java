@@ -328,6 +328,9 @@ public class TokenDefinition {
                     case "cards":
                         handleCards(element);
                         break;
+                    case "attribute-type": //treat orphaned attribute-types appearing on the root scope as globals
+                        processAttrs(element);
+                        break;
                     default:
                         break;
                 }

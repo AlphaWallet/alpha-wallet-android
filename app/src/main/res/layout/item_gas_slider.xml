@@ -120,10 +120,28 @@
             android:textSize="@dimen/sp17"
             android:text="@string/minutes_0" />
 
+        <android.support.v7.widget.AppCompatSeekBar
+            android:id="@+id/gas_limit_slider"
+            android:visibility="gone"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp8"
+            android:layout_marginEnd="@dimen/dp8"
+            android:paddingTop="@dimen/dp8"
+            android:paddingBottom="@dimen/dp8"
+            android:progress="10"
+            android:progressTint="@color/azure"
+            android:thumbTint="@color/azure" />
+
+        <View
+            android:id="@+id/spacing_view"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/dp16"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp16"
             android:baselineAligned="false"
             android:orientation="horizontal">
 
@@ -132,6 +150,12 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/layout_click_holder"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/gas_limit_text1"
@@ -146,10 +170,12 @@
                     android:id="@+id/gas_limit_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_semibold"
-                    android:textColor="@color/mine"
+                    android:fontFamily="@font/font_bold"
+                    android:textColor="@color/azure"
                     android:textSize="@dimen/sp17"
-                    android:text="@string/currency_00" />
+                    android:text="90000" />
+
+                </LinearLayout>
 
             </LinearLayout>
 

@@ -786,13 +786,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             if (activeUpdate && assetDefinitions.get(network).containsKey(address))
             {
-                String filename = assetDefinitions.get(network).get(address).getAbsolutePath();
+                String newFilename = newTokenDescriptionAddresses.get(address).getAbsolutePath();
+                String existingFilename = assetDefinitions.get(network).get(address).getAbsolutePath();
                 //remove old file if it's an active update and file is in dev area
-                if (!updateFiles.contains(filename) && filename.contains(HomeViewModel.ALPHAWALLET_DIR)
-                    || filename.contains(externalDir))
+                if (!newFilename.equals(existingFilename) && !updateFiles.contains(existingFilename) && (existingFilename.contains(HomeViewModel.ALPHAWALLET_DIR)
+                    || existingFilename.contains(externalDir)))
                 {
                     //delete old developer override - could be a different filename which will cause trouble later
-                    removeFile(filename);
+                    removeFile(existingFilename);
                 }
             }
             assetDefinitions.get(network).put(address, new TokenScriptFile(context, newTokenDescriptionAddresses.get(address).getAbsolutePath()));
@@ -879,11 +880,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private boolean addContractAddresses(File file, boolean update) throws Exception
     {
+        if (file.getAbsolutePath().contains("ENS"))
+        {
+            System.out.println("YOLESS");
+        }
         FileInputStream input = new FileInputStream(file);
         TokenDefinition tokenDef = parseFile(input);
         ContractInfo holdingContracts = tokenDef.contracts.get(tokenDef.holdingToken);
         if (holdingContracts != null)
         {
+            addToEventList(tokenDef, holdingContracts);
             for (int network : holdingContracts.addresses.keySet())
             {
                 addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), file.getAbsolutePath()), update);

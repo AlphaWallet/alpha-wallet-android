@@ -577,6 +577,10 @@ public class WalletViewModel extends BaseViewModel
         if (isVisible) //update at half speed if not visible
         {
             openSeaCheckCounter += 2;
+            if ((openSeaCheckCounter % 2) == 1)
+            {
+                openSeaCheckCounter++;
+            }
         }
         else
         {

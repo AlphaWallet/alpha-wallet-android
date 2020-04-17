@@ -1,5 +1,6 @@
 package com.alphawallet.token.entity;
 
+import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.alphawallet.token.util.DateTime;
 import com.alphawallet.token.util.DateTimeFactory;
@@ -345,6 +346,24 @@ public class AttributeType {
                     //refer to 'AlphaWallet meetup indices' where 'Match' mapping is null but for FIFA is not.
                     //throw new NullPointerException("Key " + data.toString() + " can't be mapped.");
                 }
+
+            case Boolean:
+                if (data.equals(BigInteger.ZERO)) return "FALSE";
+                else return "TRUE";
+
+            case UnsignedInput: //convert to unsigned
+                BigInteger conv = new BigInteger(1, data.toByteArray());
+                return conv.toString();
+
+            case TokenId:
+                return data.toString();
+
+            case Bytes:
+                return Numeric.toHexString(data.toByteArray());
+
+            //e18, e8, e4, e2
+            //return resized data value?
+
             default:
                 throw new NullPointerException("Missing valid 'as' attribute");
         }

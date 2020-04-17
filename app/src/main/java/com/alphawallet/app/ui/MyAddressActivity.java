@@ -306,7 +306,6 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
         }
     }
 
-    //This is temporary method to show test ENS name on any error faced to reverse lookup
     private void printTrace(Throwable throwable) {
         if (ensFetchProgressBar != null) {
             ensFetchProgressBar.setVisibility(View.GONE);
@@ -320,22 +319,25 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
         setContentView(R.layout.activity_contract_address);
         initViews();
         findViewById(R.id.toolbar_title).setVisibility(View.VISIBLE);
+        copyAddress = findViewById(R.id.copy_address);
+        copyAddress.setVisibility(View.VISIBLE);
 
         currentMode = MODE_CONTRACT;
         displayAddress = token.getAddress();
         setTitle(getString(R.string.contract_address));
-        address.setText(token.getAddress());
+        copyAddress.setText(displayAddress);
         onWindowFocusChanged(true);
     }
 
     private void updateAddressWithENS(String ensName)
     {
+        if (ensFetchProgressBar != null) {
+            ensFetchProgressBar.setVisibility(View.GONE);
+        }
+
         if (!TextUtils.isEmpty(ensName))
         {
             displayName = ensName;
-            if (ensFetchProgressBar != null) {
-                ensFetchProgressBar.setVisibility(View.GONE);
-            }
             copyWalletName.setVisibility(View.VISIBLE);
             copyWalletName.setText(ensName);
         }

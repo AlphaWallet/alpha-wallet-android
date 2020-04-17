@@ -5,6 +5,9 @@ import android.animation.LayoutTransition;
 import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -47,6 +50,7 @@ import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
+import com.alphawallet.app.entity.QrUrlResult;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.SignTransactionInterface;
 import com.alphawallet.app.entity.URLLoadInterface;
@@ -65,6 +69,7 @@ import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.util.KeyboardUtils;
+import com.alphawallet.app.util.QRURLParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.DappBrowserViewModel;
 import com.alphawallet.app.viewmodel.DappBrowserViewModelFactory;
@@ -105,6 +110,7 @@ import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
+import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
 public class DappBrowserFragment extends Fragment implements OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
@@ -566,7 +572,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             cancelSearchSession();
         });
         attachFragment(f, SEARCH);
-        toolbar.getMenu().setGroupVisible(R.id.dapp_browser_menu, false);
         currentNetwork.setVisibility(View.GONE);
         next.setVisibility(View.GONE);
         back.setVisibility(View.GONE);
@@ -588,7 +593,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private void cancelSearchSession() {
         detachFragment(SEARCH);
-        toolbar.getMenu().setGroupVisible(R.id.dapp_browser_menu, true);
         currentNetwork.setVisibility(View.VISIBLE);
         next.setVisibility(View.VISIBLE);
         back.setVisibility(View.VISIBLE);
@@ -1229,17 +1233,30 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                     if (data != null)
                     {
                         qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
-                        if (qrCode != null && !checkForMagicLink(qrCode))
+                        if (qrCode == null || checkForMagicLink(qrCode)) return;
+                        QRURLParser parser = QRURLParser.getInstance();
+                        QrUrlResult result = parser.parse(qrCode);
+                        switch (result.type)
                         {
-                            if (Utils.isAddressValid(qrCode))
-                            {
-                                DisplayAddressFound(qrCode, messenger);
-                            }
-                            else
-                            {
-                                //attempt to go to site
+                            case ADDRESS:
+                                //ethereum address was scanned. In dapp browser what do we do? maybe populate an input field with address?
+                                copyToClipboard(result.getAddress());
+                                break;
+                            case PAYMENT:
+                                //EIP681 payment request scanned, should go to send
+                                viewModel.showSend(getContext(), result);
+                                break;
+                            case TRANSFER:
+                                //EIP681 transfer, go to send
+                                viewModel.showSend(getContext(), result);
+                                break;
+                            case FUNCTION_CALL:
+                                //EIP681 function call. TODO: create function call confirmation. For now treat same way as tokenscript function call
+                                break;
+                            case OTHER: //treat as URL
+                            case URL:
                                 loadUrlRemote(qrCode);
-                            }
+                                break;
                         }
                     }
                     break;
@@ -1282,6 +1299,16 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             resultDialog.dismiss();
         });
         resultDialog.show();
+    }
+
+    private void copyToClipboard(String address)
+    {
+        ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, address);
+        if (clipboard != null) {
+            clipboard.setPrimaryClip(clip);
+        }
+        Toast.makeText(getActivity(), R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
     }
 
     private boolean checkForMagicLink(String data)

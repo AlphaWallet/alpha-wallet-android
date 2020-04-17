@@ -398,8 +398,10 @@ public abstract class TokenscriptFunction
                             params.add(new Bytes32(Numeric.toBytesPadded(tokenId, 32)));
                             break;
                         case "value":
-                        default:
                             params.add(new Bytes32(argValueBytes));
+                            break;
+                        default:
+                            params.add(new Bytes32(Numeric.toBytesPadded(argValueBI, 32)));
                             break;
                     }
                     break;

@@ -16,6 +16,7 @@ import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -64,10 +65,13 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
 
     private View layoutValueDetails;
     private AppCompatSeekBar gasPriceSlider;
+    private AppCompatSeekBar gasLimitSlider;
+    private LinearLayout gasLimitClickHolder;
 
     private float scaleFactor; //used to convert slider value (0-100) into gas price
     private float minimumPrice = 4.0f;
     private boolean isMainNet = true;
+    private float gasLimitScaleFactor;
 
     /**
      * Below object will identify whether GasSlider detail view is expanded or collapsed
@@ -84,6 +88,7 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
      * Used to store gas limit
      */
     private MutableLiveData<BigInteger> gasLimit = new MutableLiveData<>();
+    private BigInteger startGasLimit;
 
     /**
      * Used to call API call of Gas Price Range
@@ -103,6 +108,7 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
     public GasSliderView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
+        startGasLimit = BigInteger.valueOf(C.GAS_LIMIT_DEFAULT);
 
         calculateStaticScaleFactor();
 
@@ -145,15 +151,18 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
         estimateTimeValue = findViewById(R.id.estimated_time_value);
         layoutValueDetails = findViewById(R.id.layout_value_details);
         gasPriceSlider = findViewById(R.id.gas_price_slider1);
+        gasLimitSlider = findViewById(R.id.gas_limit_slider);
+        gasLimitClickHolder = findViewById(R.id.layout_click_holder);
 
         gasPrice.observe((FragmentActivity) context, this::setGasPrice);
         gasLimit.observe((FragmentActivity) context, this::setGasLimit);
 
         gasPrice.setValue(BigDecimal.ONE);
-        gasLimit.setValue(BigInteger.valueOf(C.GAS_LIMIT_DEFAULT));
+        gasLimit.setValue(startGasLimit);
 
         gasPriceSlider.setProgress(gasPrice.getValue().intValue());
         gasPriceSlider.setMax(100);
+        gasLimitSlider.setMax(100);
 
         imgExpandCollapse.setOnClickListener(v -> expandCollapseView());
 
@@ -174,6 +183,42 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
 
                 gasPrice.setValue(scaledGasPrice);
                 updateTimings();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        gasLimitClickHolder.setOnClickListener(v -> {
+            if (gasLimitSlider.getVisibility() == View.GONE)
+            {
+                gasLimitSlider.setVisibility(View.VISIBLE);
+                findViewById(R.id.spacing_view).setVisibility(View.GONE);
+            }
+            else
+            {
+                gasLimitSlider.setVisibility(View.GONE);
+                findViewById(R.id.spacing_view).setVisibility(View.VISIBLE);
+            }
+        });
+
+        gasLimitSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser)
+                {
+                    BigDecimal scaledGasLimit = BigDecimal.valueOf((progress * gasLimitScaleFactor) + C.GAS_LIMIT_MIN)
+                            .setScale(2, RoundingMode.HALF_DOWN); //to 2 dp
+
+                    gasLimit.setValue(scaledGasLimit.toBigInteger());
+                }
             }
 
             @Override
@@ -359,12 +404,20 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
         gasPriceSlider.setProgress(progress);
     }
 
+    public void initGasLimit(BigInteger limit)
+    {
+        startGasLimit = limit;
+        gasLimit.setValue(limit);
+    }
+
     /**
      * This is setter method to apply Limit change
      * @param limit
      */
-    public void setGasLimit(BigInteger limit) {
+    private void setGasLimit(BigInteger limit) {
         gasLimitValue.setText(limit.toString());
+        int progress = (int)((float)(limit.longValue() - C.GAS_LIMIT_MIN)/gasLimitScaleFactor);
+        gasLimitSlider.setProgress(progress);
         updateNetworkFee();
     }
 
@@ -503,5 +556,6 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
     private void calculateStaticScaleFactor()
     {
         scaleFactor = (maxDefaultPrice - minimumPrice)/100.0f; //default scale factor
+        gasLimitScaleFactor = (float)(C.GAS_LIMIT_MAX - C.GAS_LIMIT_MIN)/100.0f;
     }
 }

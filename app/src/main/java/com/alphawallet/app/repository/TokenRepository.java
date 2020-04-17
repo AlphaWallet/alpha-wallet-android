@@ -5,7 +5,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SubscribeWrapper;
@@ -1204,28 +1204,27 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<ContractResult> getTokenResponse(String address, int chainId, String method)
+    public Single<ContractLocator> getTokenResponse(String address, int chainId, String method)
     {
         return Single.fromCallable(() -> {
-            ContractResult contractResult = new ContractResult(INVALID_CONTRACT, chainId);
+            ContractLocator contractLocator = new ContractLocator(INVALID_CONTRACT, chainId);
             org.web3j.abi.datatypes.Function function = new Function(method,
                                                                      Arrays.<Type>asList(),
                                                                      Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
 
             Wallet temp = new Wallet(null);
             String responseValue = callCustomNetSmartContractFunction(function, address, temp, chainId);
-            if (responseValue == null) return contractResult;
+            if (responseValue == null) return contractLocator;
 
             List<Type> response = FunctionReturnDecoder.decode(
                     responseValue, function.getOutputParameters());
             if (response.size() == 1)
             {
-                contractResult.name = (String) response.get(0).getValue();
-                return contractResult;
+                return new ContractLocator((String) response.get(0).getValue(), chainId);
             }
             else
             {
-                return contractResult;
+                return contractLocator;
             }
         });
     }

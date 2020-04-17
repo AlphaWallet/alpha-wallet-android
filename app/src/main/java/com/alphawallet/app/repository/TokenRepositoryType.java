@@ -1,6 +1,6 @@
 package com.alphawallet.app.repository;
 
-import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SubscribeWrapper;
@@ -25,7 +25,7 @@ public interface TokenRepositoryType {
     Observable<Token> fetchActiveSingle(String walletAddress, Token token);
     Observable<Token> fetchCachedSingleToken(int chainId, String walletAddress, String tokenAddress);
     Observable<Token> fetchActiveTokenBalance(String walletAddress, Token token);
-    Single<ContractResult> getTokenResponse(String address, int chainId, String method);
+    Single<ContractLocator> getTokenResponse(String address, int chainId, String method);
     Completable setEnable(Wallet wallet, Token token, boolean isEnabled);
     Observable<TokenInfo> update(String address, int chainId);
     Single<TokenInfo[]> update(String[] address, NetworkInfo network);

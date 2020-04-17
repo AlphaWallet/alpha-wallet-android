@@ -7,7 +7,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.ContractResult;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
@@ -637,7 +637,7 @@ public class ImportTokenViewModel extends BaseViewModel
         return networkIds;
     }
 
-    private void testNetworkResult(ContractResult result)
+    private void testNetworkResult(ContractLocator result)
     {
         if (!foundNetwork && !result.name.equals(TokenRepository.INVALID_CONTRACT))
         {
@@ -660,7 +660,7 @@ public class ImportTokenViewModel extends BaseViewModel
         }
     }
 
-    private void tryDefault(ContractResult result, String method)
+    private void tryDefault(ContractLocator result, String method)
     {
         if (result.name.equals(TokenRepository.INVALID_CONTRACT))
         {

@@ -11,6 +11,7 @@ import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.service.TokensService;
@@ -124,6 +125,7 @@ public class FetchTokensInteract {
                 if (t.getInterfaceSpec() == ContractType.ERC721_UNDETERMINED)
                 {
                     ContractType type = tokenRepository.determineCommonType(t.tokenInfo).blockingGet();
+                    TokenInfo tInfo = t.tokenInfo;
                     //upgrade type:
                     switch (type)
                     {
@@ -132,7 +134,8 @@ public class FetchTokensInteract {
                         case ERC721:
                         case ERC721_LEGACY:
                             List<Asset> erc721Balance = t.getTokenAssets(); //add balance from Opensea
-                            t = new ERC721Token(t.tokenInfo, erc721Balance, System.currentTimeMillis(), t.getNetworkName(), type);
+                            if (TextUtils.isEmpty(tInfo.name + tInfo.symbol)) tInfo = new TokenInfo(tInfo.address, " ", " ", tInfo.decimals, tInfo.isEnabled, tInfo.chainId); //ensure we don't keep overwriting this
+                            t = new ERC721Token(tInfo, erc721Balance, System.currentTimeMillis(), t.getNetworkName(), type);
                             tokens[i] = t;
                             break;
                         case ERC721_TICKET:

@@ -121,11 +121,12 @@ public class OpenseaService {
     }
 
     /**
-     * See if Token has been incorrectly classified as ERC721Ticket
+     * See if Token has been incorrectly classified as ERC721Ticket. Some ERC721 have no 'name' function and this is only retrieved from opensea
+     * If name and symbol are empty then re-check the classification; most likely the token was misclassified
      */
     private boolean checkClassification(Token checkToken, Asset asset)
     {
-        return !checkToken.isERC721Ticket() || asset.getTraits().size() == 0 || TextUtils.isEmpty(asset.getDescription());
+        return !TextUtils.isEmpty(checkToken.tokenInfo.name + checkToken.tokenInfo.symbol) && ( !checkToken.isERC721Ticket() || asset.getTraits().size() == 0 || TextUtils.isEmpty(asset.getDescription()) );
     }
 
     private boolean verifyData(String jsonData)

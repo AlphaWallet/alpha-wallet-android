@@ -126,6 +126,8 @@ public class TokensRealmSource implements TokenLocalSource {
             {
                 realm.beginTransaction();
                 realmToken.setInterfaceSpec(type.ordinal());
+                realmToken.setName(token.tokenInfo.name);
+                realmToken.setSymbol(token.tokenInfo.symbol);
                 realm.commitTransaction();
             }
 

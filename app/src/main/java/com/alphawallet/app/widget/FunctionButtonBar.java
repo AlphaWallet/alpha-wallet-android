@@ -125,6 +125,11 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         findViewById(R.id.layoutButtons).setVisibility(View.GONE);
     }
 
+    /**
+     * Use only for TokenScript function list
+     * @param functionInterface
+     * @param functionList
+     */
     public void setupFunctionList(StandardFunctionInterface functionInterface, List<String> functionList) {
         callStandardFunctions = functionInterface;
         if (functions == null) functions = new HashMap<>();

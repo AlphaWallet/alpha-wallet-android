@@ -5,6 +5,7 @@ import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.LocaleRepository;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.viewmodel.AdvancedSettingsViewModelFactory;
 
 import dagger.Module;
@@ -15,11 +16,13 @@ class AdvancedSettingsModule {
     @Provides
     AdvancedSettingsViewModelFactory provideAdvancedSettingsViewModelFactory(
             LocaleRepositoryType localeRepository,
-            CurrencyRepositoryType currencyRepository
+            CurrencyRepositoryType currencyRepository,
+            AssetDefinitionService assetDefinitionService
     ) {
         return new AdvancedSettingsViewModelFactory(
                 localeRepository,
-                currencyRepository);
+                currencyRepository,
+                assetDefinitionService);
     }
 
     @Provides

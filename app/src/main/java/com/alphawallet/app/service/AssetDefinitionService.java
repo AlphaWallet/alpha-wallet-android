@@ -222,7 +222,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         //listen for new files dropped into app external directory
         fileObserverQ = startFileListener(context.getExternalFilesDir("").getAbsolutePath());
+        startAlphaWalletListener();
+    }
 
+    public void startAlphaWalletListener()
+    {
         //listen for new files dropped into AlphaWallet directory, if we have permission
         if (checkReadPermission())
         {
@@ -230,7 +234,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     Environment.getExternalStorageDirectory()
                             + File.separator + HomeViewModel.ALPHAWALLET_DIR);
 
-            fileObserver = startFileListener(alphaWalletDir.getAbsolutePath());
+            if (alphaWalletDir.exists())
+            {
+                fileObserver = startFileListener(alphaWalletDir.getAbsolutePath());
+            }
         }
     }
 
@@ -740,8 +747,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 String filename = assetDefinitions.get(network).get(address).getAbsolutePath();
                 //remove old file if it's an active update and file is in dev area
-                if (!updateFiles.contains(filename) && filename.contains(HomeViewModel.ALPHAWALLET_DIR)
-                    || filename.contains(externalDir))
+                if (!updateFiles.contains(filename) && (filename.contains(HomeViewModel.ALPHAWALLET_DIR)
+                    || filename.contains(externalDir)))
                 {
                     //delete old developer override - could be a different filename which will cause trouble later
                     removeFile(filename);
@@ -1113,6 +1120,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 switch (event)
                 {
                     case CREATE:
+                        //if this file already exists then wait for the modify
+                        File checkFile = new File(listenerPath, file);
+                        if (checkFile.exists() && checkFile.canRead())
+                        {
+                            break;
+                        }
                     case MODIFY:
                         try
                         {

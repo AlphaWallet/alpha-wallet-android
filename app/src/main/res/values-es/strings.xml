@@ -591,4 +591,6 @@
     <string name="fast">Fast</string>
     <string name="label_estimated_transaction_time">Estimated Transaction Time</string>
     <string name="minutes_0">0 min</string>
+    <string name="created_aw_directory">Created AlphaWallet Directory</string>
+    <string name="created_aw_directory_detail">AlphaWallet directory created. Drop scripts into this directory to use your scripts. See tokenscript.org for more details on how to easily create a secure and useful interface to your tokens.</string>
 </resources>

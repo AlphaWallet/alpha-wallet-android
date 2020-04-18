@@ -47,6 +47,8 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 
+import org.web3j.abi.datatypes.Address;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -144,7 +146,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
         defaultWallet.setValue(wallet);
         //get the balance token
         Token blank = ethereumNetworkRepository.getBlankOverrideToken(defaultNetwork.getValue());
-        disposable = fetchTokensInteract.fetchStoredToken(defaultNetwork.getValue(), wallet, blank.getAddress())
+        String address = blank.getAddress().equals(Address.DEFAULT.toString()) ? wallet.address.toLowerCase() : blank.getAddress().toLowerCase();
+        disposable = fetchTokensInteract.fetchStoredToken(defaultNetwork.getValue(), wallet, address)
                 .flatMap(tokenFromCache -> fetchTokensInteract.updateBalance(wallet.address, tokenFromCache))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

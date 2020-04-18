@@ -108,10 +108,6 @@ public class ParseMagicLink
             String linkData = link.substring(offset);
             return getMagicLinkDataFromURL(linkData, chainId);
         }
-        else if (link.length() > 60)
-        {
-            return getMagicLinkDataFromURL(link, 1); //unable to detect domain from URL, use main net
-        }
         else
         {
             throw new SalesOrderMalformed("Invalid link format");

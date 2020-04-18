@@ -19,6 +19,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.viewmodel.AdvancedSettingsViewModel;
 import com.alphawallet.app.viewmodel.AdvancedSettingsViewModelFactory;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SettingsItemView;
 
@@ -203,6 +204,37 @@ public class AdvancedSettingsActivity extends BaseActivity {
                 break;
             }
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode)
+        {
+            case HomeActivity.RC_ASSET_EXTERNAL_WRITE_PERM:
+                if (viewModel.createDirectory())
+                {
+                    LinearLayout advancedSettingsLayout = findViewById(R.id.layout);
+                    advancedSettingsLayout.removeView(tokenScript);
+                    showAlphaWalletDirectoryConfirmation();
+                    //need to set up the listener
+                    viewModel.startFileListeners();
+                }
+                break;
+        }
+    }
+
+    private void showAlphaWalletDirectoryConfirmation() {
+        AWalletAlertDialog cDialog = new AWalletAlertDialog(this);
+        cDialog.setIcon(AWalletAlertDialog.SUCCESS);
+        cDialog.setTitle(getString(R.string.created_aw_directory));
+        cDialog.setMessage(getString(R.string.created_aw_directory_detail));
+        cDialog.setButtonText(R.string.dialog_ok);
+        cDialog.setButtonListener(v -> {
+            cDialog.dismiss();
+        });
+        cDialog.show();
     }
 
     @Override

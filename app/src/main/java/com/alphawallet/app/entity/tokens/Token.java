@@ -46,6 +46,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
+import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
+
 public class Token implements Parcelable, Comparable<Token>
 {
     public final TokenInfo tokenInfo;
@@ -1115,7 +1118,7 @@ public class Token implements Parcelable, Comparable<Token>
     private void displayTicket(Context ctx, AssetDefinitionService assetService, StringBuilder attrs, ProgressBar waitSpinner, Web3TokenView tokenView, boolean iconified, TicketRange range)
     {
         tokenView.setVisibility(View.VISIBLE);
-        String viewName = iconified ? "view-iconified" : "view";
+        String viewName = iconified ? ASSET_SUMMARY_VIEW_NAME : ASSET_DETAIL_VIEW_NAME;
 
         String view = assetService.getTokenView(tokenInfo.chainId, getAddress(), viewName);
         if (waitSpinner != null) waitSpinner.setVisibility(View.GONE);
@@ -1279,5 +1282,10 @@ public class Token implements Parcelable, Comparable<Token>
     public void setHighestPriorityCheck()
     {
         balanceUpdateWeight = 10.0f;
+    }
+
+    public boolean checkBalanceType()
+    {
+        return true;
     }
 }

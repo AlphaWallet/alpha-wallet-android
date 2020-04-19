@@ -96,6 +96,9 @@ import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVE
 
 public class AssetDefinitionService implements ParseResult, AttributeInterface
 {
+    public static final String ASSET_SUMMARY_VIEW_NAME = "view-iconified";
+    public static final String ASSET_DETAIL_VIEW_NAME = "view";
+
     private static final String CERTIFICATE_DB = "CERTIFICATE_CACHE-db.realm";
     private final Context context;
     private final OkHttpClient okHttpClient;
@@ -1590,8 +1593,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public boolean viewsEqual(Token token)
     {
-        String view = getTokenView(token.tokenInfo.chainId, token.tokenInfo.address, "view");
-        String iconifiedView = getTokenView(token.tokenInfo.chainId, token.tokenInfo.address, "view-iconified");
+        String view = getTokenView(token.tokenInfo.chainId, token.tokenInfo.address, ASSET_DETAIL_VIEW_NAME);
+        String iconifiedView = getTokenView(token.tokenInfo.chainId, token.tokenInfo.address, ASSET_SUMMARY_VIEW_NAME);
         return view.equals(iconifiedView);
     }
 

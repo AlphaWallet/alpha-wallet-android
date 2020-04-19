@@ -140,7 +140,7 @@
                 android:background="@color/mercury" />
 
             <RelativeLayout
-                android:id="@+id/layout_tokenscript_standard"
+                android:id="@+id/layout_tokenscript_compatibility"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="@color/alabaster"
@@ -152,19 +152,34 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:fontFamily="@font/font_regular"
-                    android:text="@string/tokenscript_standard"
+                    android:text="@string/tokenscript_compatibility"
                     android:textColor="@color/dove"
                     android:textSize="15sp" />
 
-                <TextView
-                    android:id="@+id/text_tokenscript_standard"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:fontFamily="@font/font_regular"
-                    android:textColor="@color/dove"
-                    android:textSize="13sp" />
+                >
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/font_regular"
+                        android:textColor="@color/dove"
+                        android:text="@string/version"
+                        android:textSize="13sp" />
+
+                <TextView
+                        android:id="@+id/text_tokenscript_compatibility"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/default_gap"
+                        android:fontFamily="@font/font_regular"
+                        android:textColor="@color/dove"
+                        android:textSize="13sp" />
+                </LinearLayout>
             </RelativeLayout>
 
         </LinearLayout>

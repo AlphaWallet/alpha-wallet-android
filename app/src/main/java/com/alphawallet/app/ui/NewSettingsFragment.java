@@ -206,7 +206,7 @@ public class NewSettingsFragment extends BaseFragment {
     private void setInitialSettingsData(View view) {
         TextView appVersionText = view.findViewById(R.id.text_version);
         appVersionText.setText(String.format("%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
-        TextView tokenScriptVersionText = view.findViewById(R.id.text_tokenscript_standard);
+        TextView tokenScriptVersionText = view.findViewById(R.id.text_tokenscript_compatibility);
         tokenScriptVersionText.setText(TOKENSCRIPT_CURRENT_SCHEMA);
 
         notificationsSetting.setToggleState(viewModel.getNotificationState());

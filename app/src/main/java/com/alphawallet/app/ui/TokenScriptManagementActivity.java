@@ -8,9 +8,11 @@ import android.support.v7.widget.RecyclerView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
 import com.alphawallet.app.ui.widget.adapter.TokenScriptManagementAdapter;
+import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.app.viewmodel.TokenScriptManagementViewModel;
 import com.alphawallet.app.viewmodel.TokenScriptManagementViewModelFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -42,10 +44,19 @@ public class TokenScriptManagementActivity extends BaseActivity {
         viewModel = ViewModelProviders.of(this, tokenScriptManagementViewModelFactory)
                 .get(TokenScriptManagementViewModel.class);
 
-        Map<String, TokenScriptFile> tokenFiles = viewModel.getFileList();
-        if (tokenFiles != null)
-        {
-            tokenScriptList.setAdapter(new TokenScriptManagementAdapter(this, tokenFiles));
+        Map<String, TokenScriptFile> allTokenFiles = viewModel.getFileList();
+        Map<String, TokenScriptFile> filteredTokenFiles = new HashMap<>();
+
+        //filter entries for AlphaWallet directory only
+        for(String key : allTokenFiles.keySet()){
+            TokenScriptFile file = allTokenFiles.get(key);
+            if(file.getName() != null
+                    && file.getPath().contains("/")
+                    && file.getPath().contains(HomeViewModel.ALPHAWALLET_DIR)){
+                filteredTokenFiles.put(key, file);
+            }
         }
+
+        tokenScriptList.setAdapter(new TokenScriptManagementAdapter(this, filteredTokenFiles));
     }
 }

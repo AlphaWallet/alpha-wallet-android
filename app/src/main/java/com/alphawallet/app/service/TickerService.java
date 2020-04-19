@@ -314,8 +314,8 @@ public class TickerService implements TickerServiceInterface
                 {
                     cType = ContractType.OTHER; //if we haven't seen this token before mark as needing contract type check
                 }
-                else if (!existingToken.isERC20())
-                {
+                else if (!existingToken.isERC20() && existingToken.getInterfaceSpec() != ContractType.OTHER) //allow tokens still classified as 'OTHER' to be updated.
+                {                                                                                            //we may be able to categorise them later
                     continue;
                 }
 

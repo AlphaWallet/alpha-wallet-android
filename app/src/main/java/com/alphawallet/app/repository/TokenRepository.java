@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
@@ -615,7 +616,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private BigDecimal updatePending(Token oldToken, BigDecimal pendingBalance)
     {
-        if (!TokensService.getCurrentWalletAddress().equals(oldToken.getWallet()))
+        if (!TokensService.getCurrentWalletAddress().equalsIgnoreCase(oldToken.getWallet()))
         {
             oldToken.pendingBalance = oldToken.balance;
         }
@@ -807,9 +808,20 @@ public class TokenRepository implements TokenRepositoryType {
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, network, temp);
 
-        if (TextUtils.isEmpty(responseValue) || responseValue.equals("0x"))
+        if (TextUtils.isEmpty(responseValue))
         {
             throw new Exception("Bad contract value");
+        }
+        else if (responseValue.equals("0x"))
+        {
+            if (type instanceof Boolean)
+            {
+                return (T)Boolean.FALSE;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         List<Type> response = FunctionReturnDecoder.decode(
@@ -1071,7 +1083,7 @@ public class TokenRepository implements TokenRepositoryType {
         catch (InterruptedIOException e)
         {
             //expected to happen when user switches wallets
-            return "";
+            return "0x";
         }
     }
 
@@ -1221,6 +1233,7 @@ public class TokenRepository implements TokenRepositoryType {
             }
             catch (Exception e)
             {
+                if (BuildConfig.DEBUG) e.printStackTrace();
                 // didn't manage to find contract type, pass other
             }
 

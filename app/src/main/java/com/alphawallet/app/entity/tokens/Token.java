@@ -521,7 +521,7 @@ public class Token implements Parcelable, Comparable<Token>
 
     public String getPendingDiff()
     {
-        if (pendingBalance == null || balance.equals(pendingBalance)) return null;
+        if (!isEthereum() || pendingBalance == null || balance.equals(pendingBalance)) return null;
         else
         {
             String prefix = "";

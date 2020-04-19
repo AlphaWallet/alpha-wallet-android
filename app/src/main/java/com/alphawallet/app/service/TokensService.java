@@ -501,4 +501,14 @@ public class TokensService
 
         return classTokens.toArray(new Token[0]);
     }
+
+    public void updateTokenViewSizes(Token updatedToken)
+    {
+        Token cachedToken = getToken(updatedToken.tokenInfo.chainId, updatedToken.getAddress());
+        if (cachedToken != null)
+        {
+            cachedToken.iconifiedWebviewHeight = updatedToken.iconifiedWebviewHeight;
+            cachedToken.nonIconifiedWebviewHeight = updatedToken.nonIconifiedWebviewHeight;
+        }
+    }
 }

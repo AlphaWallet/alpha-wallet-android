@@ -517,7 +517,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     {
                         addContractsToNetwork(network,
                                               networkAddresses(holdingContracts.addresses.get(network), tokenScriptFile.getAbsolutePath()),
-                                              false);
+                                              false, token);
                     }
                     return token;
                 }
@@ -739,7 +739,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         assetLoadingLock.release();
     }
 
-    private void addContractsToNetwork(Integer network, Map<String, File> newTokenDescriptionAddresses, boolean activeUpdate)
+    private void addContractsToNetwork(Integer network, Map<String, File> newTokenDescriptionAddresses, boolean activeUpdate,TokenDefinition tokenDef)
     {
         String externalDir = context.getExternalFilesDir("").getAbsolutePath();
         if (assetDefinitions.get(network) == null) assetDefinitions.put(network, new ConcurrentHashMap<>());
@@ -757,7 +757,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     removeFile(filename);
                 }
             }
-            assetDefinitions.get(network).put(address, new TokenScriptFile(context, newTokenDescriptionAddresses.get(address).getAbsolutePath()));
+            TokenScriptFile tokenFile = new TokenScriptFile(context, newTokenDescriptionAddresses.get(address).getAbsolutePath());
+            tokenFile.setTokenName(tokenDef.getTokenName(1));
+            assetDefinitions.get(network).put(address, tokenFile);
         }
     }
 
@@ -803,7 +805,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 //some Android versions don't have stream()
                 for (int network : holdingContracts.addresses.keySet())
                 {
-                    addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), asset), false);
+                    addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), asset), false, token);
                     XMLDsigDescriptor AWSig = new XMLDsigDescriptor();
                     String hash = tsf.calcMD5();
                     AWSig.result = "pass";
@@ -848,7 +850,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             for (int network : holdingContracts.addresses.keySet())
             {
-                addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), file.getAbsolutePath()), update);
+                addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), file.getAbsolutePath()), update,tokenDef);
             }
 
             return ContractLocator.fromContractInfo(holdingContracts);
@@ -1194,6 +1196,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 }
             }
         }
+    }
+
+    public SparseArray<Map<String, TokenScriptFile>> getAssetDefinitions()
+    {
+        return assetDefinitions;
     }
 
     public Single<XMLDsigDescriptor> getSignatureData(int chainId, String contractAddress)

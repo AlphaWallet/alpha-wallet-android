@@ -20,6 +20,7 @@ public class TokenScriptFile extends File
     private boolean active;
     private boolean resourceFile;
     private String fileName;
+    private String tokenName;
 
     public TokenScriptFile()
     {
@@ -173,5 +174,13 @@ public class TokenScriptFile extends File
             else
                 sigDescriptor.type = SigReturnType.NO_SIGNATURE;
         }
+    }
+
+    public String getTokenName() {
+        return tokenName;
+    }
+
+    public void setTokenName(String tokenName) {
+        this.tokenName = tokenName;
     }
 }

@@ -154,6 +154,7 @@ dependencies {
 
     // Dagger core
     implementation "com.google.dagger:dagger:$project.daggerVersion"
+    implementation 'com.android.support:appcompat-v7:28.0.0'
     annotationProcessor "com.google.dagger:dagger-compiler:$project.daggerVersion"
 
     // Dagger Android

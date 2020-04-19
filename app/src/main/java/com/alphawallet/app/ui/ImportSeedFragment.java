@@ -43,6 +43,7 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
     private Button importButton;
     private Pattern pattern;
     private TextView wordCount;
+    private TextView nonEnglishHint;
     private RecyclerView listSuggestions;
     private List<String> suggestions;
     private SuggestionsAdapter suggestionsAdapter;
@@ -78,6 +79,7 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         importButton = getActivity().findViewById(R.id.import_action);
         wordCount = getActivity().findViewById(R.id.text_word_count);
         listSuggestions = getActivity().findViewById(R.id.list_suggestions);
+        nonEnglishHint = getActivity().findViewById(R.id.text_non_english_hint);
         importButton.setOnClickListener(this);
         seedPhrase.getEditText().addTextChangedListener(this);
         updateButtonState(false);
@@ -96,13 +98,14 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
 
     private void setHintState(boolean enabled){
         String lang = Locale.getDefault().getDisplayLanguage();
+        if (nonEnglishHint == null) return;
         if (enabled && !lang.equalsIgnoreCase("English")) //remove language hint for English locale
         {
-            getActivity().findViewById(R.id.text_non_english_hint).setVisibility(View.VISIBLE);
+            nonEnglishHint.setVisibility(View.VISIBLE);
         }
         else
         {
-            getActivity().findViewById(R.id.text_non_english_hint).setVisibility(View.GONE);
+            nonEnglishHint.setVisibility(View.GONE);
         }
     }
 

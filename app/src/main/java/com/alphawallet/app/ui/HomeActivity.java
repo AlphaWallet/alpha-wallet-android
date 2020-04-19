@@ -84,7 +84,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private PagerAdapter pagerAdapter;
     private LinearLayout successOverlay;
     private ImageView successImage;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private HomeReceiver homeReceiver;
     private AWalletConfirmationDialog cDialog;
     private String buildVersion;
@@ -173,6 +173,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 
+        initViews();
         toolbar();
 
         viewPager = findViewById(R.id.view_pager);
@@ -235,6 +236,17 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
+    private void initViews()
+    {
+        successOverlay = findViewById(R.id.layout_success_overlay);
+        successImage = findViewById(R.id.success_image);
+
+        successOverlay.setOnClickListener(view -> {
+            //dismiss big green tick
+            successOverlay.setVisibility(View.GONE);
+        });
+    }
+
     public void showBackupWalletDialog(boolean walletImported) {
         if (!viewModel.isFindWalletAddressDialogShown())
         {
@@ -288,13 +300,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.prepare();
         viewModel.getWalletName();
         checkRoot();
-        successOverlay = findViewById(R.id.layout_success_overlay);
-        successImage = findViewById(R.id.success_image);
-
-        successOverlay.setOnClickListener(view -> {
-            //dismiss big green tick
-            successOverlay.setVisibility(View.GONE);
-        });
+        initViews();
 
         //check clipboard
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -532,10 +538,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         ((NewSettingsFragment)settingsFragment).backupSeedSuccess();
         ((WalletFragment)walletFragment).storeWalletBackupTime(keyBackup);
         removeSettingsBadgeKey(C.KEY_NEEDS_BACKUP);
-        successImage.setImageResource(R.drawable.big_green_tick);
-        successOverlay.setVisibility(View.VISIBLE);
-
-        handler = new Handler();
+        if (successImage != null) successImage.setImageResource(R.drawable.big_green_tick);
+        if (successOverlay != null) successOverlay.setVisibility(View.VISIBLE);
         handler.postDelayed(this, 1000);
     }
 
@@ -551,7 +555,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             successOverlay.setVisibility(View.GONE);
             successOverlay.setAlpha(1.0f);
-            handler = null;
         }
     }
 

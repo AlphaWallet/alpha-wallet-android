@@ -121,13 +121,16 @@ public class FetchTokensInteract {
             for (int i = 0; i < tokens.length; i++)
             {
                 Token t = tokens[i];
-                if (t.getInterfaceSpec() == ContractType.ERC721_UNDETERMINED)
+                if (t.getInterfaceSpec() == ContractType.ERC721_UNDETERMINED || !t.checkBalanceType()) //balance type appears to be wrong
                 {
                     ContractType type = tokenRepository.determineCommonType(t.tokenInfo).blockingGet();
                     TokenInfo tInfo = t.tokenInfo;
                     //upgrade type:
                     switch (type)
                     {
+                        case OTHER:
+                            //couldn't determine the type, try again next time
+                            continue;
                         default:
                             type = ContractType.ERC721;
                         case ERC721:

@@ -480,4 +480,25 @@ public class TokensService
     {
         return currentAddress;
     }
+
+    /**
+     * Get all tokens of type. This exists mainly because we can't trust the balance returned for ERC721 Ticket from opensea
+     *
+     * @param filterTypes
+     * @return
+     */
+    public Token[] getAllTokens(ContractType[] filterTypes)
+    {
+        List<ContractType> filterList = Arrays.asList(filterTypes);
+        List<Token> classTokens = new ArrayList<>();
+        for (Token t : getAllTokens())
+        {
+            if (filterList.contains(t.getInterfaceSpec()))
+            {
+                classTokens.add(t);
+            }
+        }
+
+        return classTokens.toArray(new Token[0]);
+    }
 }

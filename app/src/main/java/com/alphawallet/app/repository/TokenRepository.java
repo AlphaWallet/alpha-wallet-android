@@ -1,11 +1,14 @@
 package com.alphawallet.app.repository;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -19,8 +22,10 @@ import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
+import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.MagicLinkData;
+import com.alphawallet.token.tools.Convert;
 
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
@@ -78,7 +83,8 @@ public class TokenRepository implements TokenRepositoryType {
     private static final String TAG = "TRT";
     private final TokenLocalSource localSource;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
-    private final GasService gasService;
+    private final OkHttpClient okClient;
+    private final Context context;
 
     public static final String INVALID_CONTRACT = "<invalid>";
 
@@ -92,26 +98,21 @@ public class TokenRepository implements TokenRepositoryType {
     private static final int CONTRACT_BALANCE_NULL = -2;
 
     private final Map<Integer, Web3j> web3jNodeServers;
-    private final OkHttpClient okClient;
     private final AWEnsResolver ensResolver;
 
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenLocalSource localSource,
-            GasService gasService) {
+            OkHttpClient okClient,
+            Context context) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.localSource = localSource;
         this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
-        this.gasService = gasService;
+        this.okClient = okClient;
+        this.context = context;
 
         web3jNodeServers = new ConcurrentHashMap<>();
         ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID));
-        okClient = new OkHttpClient.Builder()
-                .connectTimeout(5, TimeUnit.SECONDS)
-                .readTimeout(5, TimeUnit.SECONDS)
-                .writeTimeout(5, TimeUnit.SECONDS)
-                .retryOnConnectionFailure(false)
-                .build();
     }
 
     private void buildWeb3jClient(NetworkInfo networkInfo)
@@ -458,7 +459,7 @@ public class TokenRepository implements TokenRepositoryType {
                         balanceChanged = token.checkBalanceChange(balance);
                         break;
                     case OTHER:
-                        //TODO: periodic re-check of contract, may have sufficient data in future to determine token type
+                        //This token has its interface checked in the flow elsewhere
                         break;
                     default:
                         break;
@@ -467,7 +468,7 @@ public class TokenRepository implements TokenRepositoryType {
                 //check if we need an update
                 if (balanceChanged)
                 {
-                    Log.d(TAG, "Token balance changed! " + tInfo.name);
+                    if (BuildConfig.DEBUG) Log.d(TAG, "Token balance changed! " + tInfo.name);
                     Token updated = tFactory.createToken(tInfo, balance, balanceArray, System.currentTimeMillis(), interfaceSpec, network.getShortName(), token.lastBlockCheck);
                     localSource.updateTokenBalance(network, wallet, updated);
                     updated.setTokenWallet(wallet.address);
@@ -615,7 +616,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private BigDecimal updatePending(Token oldToken, BigDecimal pendingBalance)
     {
-        if (!TokensService.getCurrentWalletAddress().equals(oldToken.getWallet()))
+        if (!TokensService.getCurrentWalletAddress().equalsIgnoreCase(oldToken.getWallet()))
         {
             oldToken.pendingBalance = oldToken.balance;
         }
@@ -643,7 +644,7 @@ public class TokenRepository implements TokenRepositoryType {
 
                     if (!balance.equals(oldToken.balance))
                     {
-                        Log.d(TAG, "Tx Update requested for: " + oldToken.getFullName());
+                        if (BuildConfig.DEBUG) Log.d(TAG, "Tx Update requested for: " + oldToken.getFullName());
                         TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true,
                                                        network.chainId);
                         Token eth = new Token(info, balance, System.currentTimeMillis(), network.getShortName(), ContractType.ETHEREUM);
@@ -807,9 +808,20 @@ public class TokenRepository implements TokenRepositoryType {
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, network, temp);
 
-        if (TextUtils.isEmpty(responseValue) || responseValue.equals("0x"))
+        if (TextUtils.isEmpty(responseValue))
         {
             throw new Exception("Bad contract value");
+        }
+        else if (responseValue.equals("0x"))
+        {
+            if (type instanceof Boolean)
+            {
+                return (T)Boolean.FALSE;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         List<Type> response = FunctionReturnDecoder.decode(
@@ -1071,7 +1083,7 @@ public class TokenRepository implements TokenRepositoryType {
         catch (InterruptedIOException e)
         {
             //expected to happen when user switches wallets
-            return "";
+            return "0x";
         }
     }
 
@@ -1221,6 +1233,7 @@ public class TokenRepository implements TokenRepositoryType {
             }
             catch (Exception e)
             {
+                if (BuildConfig.DEBUG) e.printStackTrace();
                 // didn't manage to find contract type, pass other
             }
 
@@ -1286,9 +1299,9 @@ public class TokenRepository implements TokenRepositoryType {
     public static Web3j getWeb3jService(int chainId)
     {
         OkHttpClient okClient = new OkHttpClient.Builder()
-                .connectTimeout(5, TimeUnit.SECONDS)
-                .readTimeout(5, TimeUnit.SECONDS)
-                .writeTimeout(5, TimeUnit.SECONDS)
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(false)
                 .build();
         HttpService publicNodeService = new HttpService(EthereumNetworkRepository.getNodeURLByNetworkId(chainId), okClient, false);

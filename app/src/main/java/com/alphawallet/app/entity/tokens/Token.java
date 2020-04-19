@@ -51,6 +51,10 @@ import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_V
 
 public class Token implements Parcelable, Comparable<Token>
 {
+    private final static int TOKEN_BALANCE_PRECISION = 4;
+    private final static int TOKEN_BALANCE_FOCUS_PRECISION = 5;
+    private final static float FOCUS_TOKEN_WEIGHT = 2.1f; //Magic update weighting to ensure focus token is regularly updated
+
     public final TokenInfo tokenInfo;
     public BigDecimal balance;
     public BigDecimal pendingBalance;
@@ -272,7 +276,8 @@ public class Token implements Parcelable, Comparable<Token>
 
     public void setupContent(TokenHolder holder, AssetDefinitionService definition)
     {
-        BigDecimal ethBalance = getCorrectedBalance(4);
+        int precision = isFocusToken() ? TOKEN_BALANCE_FOCUS_PRECISION : TOKEN_BALANCE_PRECISION;
+        BigDecimal ethBalance = getCorrectedBalance(precision);
         String     value      = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
         if (ethBalance.compareTo(BigDecimal.ZERO) == 0 && balance.compareTo(BigDecimal.ZERO) > 0)
         {
@@ -516,7 +521,8 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean checkBalanceChange(Token token)
     {
-        return token != null && (!getFullBalance().equals(token.getFullBalance()) || !getFullName().equals(token.getFullName()));
+        if (token != null && tokenInfo.decimals != token.tokenInfo.decimals) return true;
+        else return token != null && (!getFullBalance().equals(token.getFullBalance()) || !getFullName().equals(token.getFullName()));
     }
 
     public String getPendingDiff()
@@ -925,12 +931,17 @@ public class Token implements Parcelable, Comparable<Token>
     {
         if (focus)
         {
-            balanceUpdateWeight = 2.0f;
+            balanceUpdateWeight = FOCUS_TOKEN_WEIGHT;
         }
         else
         {
             balanceUpdateWeight = calculateBalanceUpdateWeight();
         }
+    }
+
+    public boolean isFocusToken()
+    {
+        return balanceUpdateWeight == FOCUS_TOKEN_WEIGHT;
     }
 
     public boolean balanceIncrease(Token token)

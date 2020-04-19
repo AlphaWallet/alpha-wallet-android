@@ -15,6 +15,7 @@ import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.token.tools.Convert;
 import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
@@ -314,7 +315,7 @@ public class TickerService implements TickerServiceInterface
                 {
                     cType = ContractType.OTHER; //if we haven't seen this token before mark as needing contract type check
                 }
-                else if (!existingToken.isERC20() && existingToken.getInterfaceSpec() != ContractType.OTHER) //allow tokens still classified as 'OTHER' to be updated.
+                else if (existingToken.isFocusToken() || !existingToken.isERC20() && existingToken.getInterfaceSpec() != ContractType.OTHER) //allow tokens still classified as 'OTHER' to be updated.
                 {                                                                                            //we may be able to categorise them later
                     continue;
                 }

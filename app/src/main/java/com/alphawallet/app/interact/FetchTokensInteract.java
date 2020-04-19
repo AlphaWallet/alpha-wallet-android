@@ -25,6 +25,7 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class FetchTokensInteract {
@@ -58,6 +59,11 @@ public class FetchTokensInteract {
         return tokenRepository.storeTickers(wallet, tokens)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Disposable updateBlockRead(Token token, Wallet wallet)
+    {
+        return tokenRepository.updateBlockRead(token, wallet);
     }
 
     public Observable<Token> fetchEth(NetworkInfo network, Wallet wallet)

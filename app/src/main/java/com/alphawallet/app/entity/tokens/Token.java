@@ -112,6 +112,8 @@ public class Token implements Parcelable, Comparable<Token>
             hasTokenScript = oldToken.hasTokenScript;
             hasDebugTokenscript = oldToken.hasDebugTokenscript;
             lastTxTime = oldToken.lastTxTime;
+            iconifiedWebviewHeight = oldToken.iconifiedWebviewHeight;
+            nonIconifiedWebviewHeight = oldToken.nonIconifiedWebviewHeight;
         }
         refreshCheck = false;
     }

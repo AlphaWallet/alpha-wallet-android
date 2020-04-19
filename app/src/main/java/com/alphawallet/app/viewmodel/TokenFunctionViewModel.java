@@ -454,4 +454,9 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         return openseaService;
     }
+
+    public void updateTokenScriptViewSize(Token token)
+    {
+        tokensService.updateTokenViewSizes(token);
+    }
 }

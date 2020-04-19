@@ -81,8 +81,7 @@ public class OpenseaService {
             return foundTokens.values().toArray(new Token[0]);
         });
     }
-
-
+    
     private void processOpenseaTokens(Map<String, Token> foundTokens, JSONArray assets, String address, int networkId, String networkName) throws Exception
     {
         TokenFactory tf = new TokenFactory();
@@ -126,7 +125,9 @@ public class OpenseaService {
      */
     private boolean checkClassification(Token checkToken, Asset asset)
     {
-        return !TextUtils.isEmpty(checkToken.tokenInfo.name + checkToken.tokenInfo.symbol) && ( !checkToken.isERC721Ticket() || asset.getTraits().size() == 0 || TextUtils.isEmpty(asset.getDescription()) );
+        if (TextUtils.isEmpty(checkToken.tokenInfo.name + checkToken.tokenInfo.symbol)) return false; //empty token name; suspicious
+        if (checkToken.isERC721() && asset.getTraits().size() == 0 && TextUtils.isEmpty(asset.getDescription())) return false; //ERC721 with no traits or description; could be erc721 ticket
+        return !checkToken.isERC721Ticket() || asset.getTraits().size() == 0 || TextUtils.isEmpty(asset.getDescription()); //ERC721Ticket with traits or description
     }
 
     private boolean verifyData(String jsonData)

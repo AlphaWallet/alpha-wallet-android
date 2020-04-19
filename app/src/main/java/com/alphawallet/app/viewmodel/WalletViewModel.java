@@ -244,8 +244,8 @@ public class WalletViewModel extends BaseViewModel
     private void gotOpenseaTokens(int chainId, Token[] openSeaTokens)
     {
         ContractType[] filterTypes = { ContractType.ERC721, ContractType.ERC721_LEGACY, ContractType.ERC721_TICKET, ContractType.ERC721_UNDETERMINED };
-        List<Token> erc721Tokens = tokensService.getChangedTokenBalance(chainId, openSeaTokens, filterTypes); //zeroiseBalanceOfSpentTokens(chainId, openSeaTokens, ERC721Token.class);
-        tokens.postValue(openSeaTokens);
+        List<Token> erc721Tokens = tokensService.getChangedTokenBalance(chainId, openSeaTokens, filterTypes);
+        tokens.postValue(tokensService.getAllTokens(filterTypes)); //update ERC721 types using balances from appropriate source. ERC721 Ticket balance fetch from opensea is usually wrong
 
         if (erc721Tokens.size() > 0)
         {

@@ -332,4 +332,21 @@ public class ERC721Token extends Token implements Parcelable
         if (!currentState.equalsIgnoreCase(getFullBalance())) return true;
         return false;
     }
+
+    /**
+     * Returns false if the Asset balance appears to be entries with only TokenId - indicating an ERC721Ticket
+     * @return
+     */
+    @Override
+    public boolean checkBalanceType()
+    {
+        boolean onlyHasTokenId = true;
+        //if elements contain asset with only assetId then most likely this is a ticket.
+        for (Asset a : tokenBalanceAssets)
+        {
+            if (!a.hasIdOnly()) onlyHasTokenId = false;
+        }
+
+        return tokenBalanceAssets.size() == 0 || !onlyHasTokenId;
+    }
 }

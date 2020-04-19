@@ -523,7 +523,7 @@
     <string name="fail_sign">无法签署兑换消息</string>
     <string name="hint_contract_type">通证类型</string>
     <string name="reddit">Reddit</string>
-    <string name="tokenscript_standard">TokenScript 标准</string>
+    <string name="tokenscript_compatibility">TokenScript 标准兼容性</string>
     <string name="version">版本</string>
     <string name="debug_script">TokenScript 调试</string>
     <string name="unsigned_script">不信任</string>

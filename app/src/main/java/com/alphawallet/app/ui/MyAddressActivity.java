@@ -401,6 +401,12 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
         overrideNetwork = getIntent().getIntExtra(OVERRIDE_DEFAULT, 1);
+
+        if (wallet == null)
+        {
+            //have no address. Can only quit the activity
+            finish();
+        }
     }
 
     private boolean checkWritePermission() {

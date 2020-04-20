@@ -345,7 +345,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                     break;
             }
 
-            if (f != null) showFragment(f, tag);
+            if (f != null && !f.isAdded()) showFragment(f, tag);
         }
     }
 
@@ -816,7 +816,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 }
             });
             dialog.setOnRejectListener(v -> {
-                web3.onSignCancel(message);
+                if (web3 != null) web3.onSignCancel(message);
                 dialog.dismiss();
             });
             dialog.show();

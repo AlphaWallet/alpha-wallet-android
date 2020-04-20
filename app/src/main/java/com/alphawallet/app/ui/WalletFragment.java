@@ -117,8 +117,6 @@ public class WalletFragment extends BaseFragment implements
 
         isVisible = true;
 
-        setImportToken();
-
         initList();
 
         initTabLayout(view);
@@ -126,6 +124,8 @@ public class WalletFragment extends BaseFragment implements
         viewModel.clearProcess();
 
         initNotificationView(view);
+
+        setImportToken();
 
         return view;
     }
@@ -328,7 +328,7 @@ public class WalletFragment extends BaseFragment implements
         {
             ContractLocator importToken = viewModel.getAssetDefinitionService().getHoldingContract(importFileName);
             if (importToken != null) Toast.makeText(getContext(), importToken.name, Toast.LENGTH_LONG).show();
-            if (importToken != null) adapter.setScrollToken(importToken);
+            if (importToken != null && adapter != null) adapter.setScrollToken(importToken);
             importFileName = null;
         }
     }

@@ -1,9 +1,6 @@
 package com.alphawallet.app.di;
 
-import dagger.Module;
-import dagger.Provides;
-
-import com.alphawallet.app.interact.AddTokenInteract;
+import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -17,6 +14,9 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.Erc20DetailViewModelFactory;
 
+import dagger.Module;
+import dagger.Provides;
+
 @Module
 class Erc20DetailModule {
     @Provides
@@ -27,14 +27,14 @@ class Erc20DetailModule {
                                                                    TransactionDetailRouter transactionDetailRouter,
                                                                    AssetDefinitionService assetDefinitionService,
                                                                    TokensService tokensService,
-                                                                   AddTokenInteract addTokenInteract) {
+                                                                   FetchTokensInteract fetchTokensInteract) {
         return new Erc20DetailViewModelFactory(myAddressRouter,
                 fetchTransactionsInteract,
                 findDefaultNetworkInteract,
                 genericWalletInteract,
                 transactionDetailRouter,
                 assetDefinitionService,
-                tokensService, addTokenInteract);
+                tokensService, fetchTokensInteract);
     }
 
     @Provides
@@ -65,8 +65,7 @@ class Erc20DetailModule {
     }
 
     @Provides
-    AddTokenInteract provideAddTokenInteract(
-            TokenRepositoryType tokenRepository) {
-        return new AddTokenInteract(tokenRepository);
+    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
+        return new FetchTokensInteract(tokenRepository);
     }
 }

@@ -29,7 +29,7 @@ public class TokensService
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokenRepositoryType tokenRepository;
     private final List<Integer> networkFilter;
-    private Token focusToken;
+    private ContractLocator focusToken;
     private final OkHttpClient okHttpClient;
     private int currencyCheckCount;
 
@@ -57,10 +57,9 @@ public class TokensService
     {
         if (t.checkTokenWallet(currentAddress))
         {
-            if (t.equals(focusToken))
+            if (focusToken != null && focusToken.equals(t))
             {
-                t.balanceUpdateWeight = focusToken.balanceUpdateWeight;
-                focusToken = t;
+                t.setFocus(true);
             }
 
             if (!t.isEthereum()) t.ticker = ethereumNetworkRepository.getTokenTicker(t);
@@ -394,14 +393,17 @@ public class TokensService
 
     public void setFocusToken(Token token)
     {
-        focusToken = token;
-        focusToken.setFocus(true);
-        addToken(focusToken);
+        focusToken = new ContractLocator(token.getAddress(), token.tokenInfo.chainId);
+        addToken(token);
     }
 
     public void clearFocusToken()
     {
-        if (focusToken != null) focusToken.setFocus(false);
+        if (focusToken != null)
+        {
+            Token fToken = getToken(focusToken.chainId, focusToken.name);
+            if (fToken != null) fToken.setFocus(false);
+        }
         focusToken = null;
     }
 

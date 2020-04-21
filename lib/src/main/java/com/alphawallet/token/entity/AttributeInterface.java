@@ -12,5 +12,7 @@ public interface AttributeInterface
     TransactionResult storeAuxData(TransactionResult tResult);
     boolean resolveOptimisedAttr(ContractAddress contract, AttributeType attr, TransactionResult transactionResult);
 
+    TokenScriptResult.Attribute getAttrResult(String attr);
+
     String getWalletAddr();
 }

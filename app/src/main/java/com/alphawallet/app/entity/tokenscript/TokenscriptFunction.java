@@ -624,7 +624,12 @@ public abstract class TokenscriptFunction
 
     private void resolveReference(String walletAddress, MethodArg arg, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
     {
-        if (definition != null && definition.attributeTypes.containsKey(arg.element.ref))
+        TokenScriptResult.Attribute attrRes = attrIf.getAttrResult(arg.element.ref);
+        if (attrRes != null) //TODO: Remove! This is in the fetchAttrResult
+        {
+            arg.element.value = attrRes.text;
+        }
+        else if (definition != null && definition.attributeTypes.containsKey(arg.element.ref))
         {
             arg.element.value = fetchAttrResult(walletAddress, definition.attributeTypes.get(arg.element.ref), tokenId, null, definition, attrIf, 0).blockingSingle().text;
         }
@@ -656,6 +661,10 @@ public abstract class TokenscriptFunction
     public Observable<TokenScriptResult.Attribute> fetchAttrResult(String walletAddress, AttributeType attr, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf, long transactionUpdate)
     {
         if (attr == null) return Observable.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));
+        else if (attrIf.getAttrResult(attr.id) != null)
+        {
+            return Observable.fromCallable(() -> attrIf.getAttrResult(attr.id));
+        }
         else if (attr.event != null)
         {
             //retrieve events from DB
@@ -694,8 +703,15 @@ public abstract class TokenscriptFunction
         return Observable.fromCallable(() -> {
             try
             {
-                BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
-                return new TokenScriptResult.Attribute(attr.id, attr.name, val, attr.getSyntaxVal(attr.toString(val)), attr.userInput);
+                if (attr.userInput)
+                {
+                    return new TokenScriptResult.Attribute(attr.id, attr.name, BigInteger.ZERO, "", true);
+                }
+                else
+                {
+                    BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
+                    return new TokenScriptResult.Attribute(attr.id, attr.name, val, attr.getSyntaxVal(attr.toString(val)));
+                }
             }
             catch (Exception e)
             {

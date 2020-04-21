@@ -140,6 +140,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private boolean requireEventSend = false;
     private final Semaphore eventConnection;
     private FragmentMessenger homeMessenger;
+    private final Map<String, TokenScriptResult.Attribute> resultMap = new ConcurrentHashMap<>(); //Build result map for function parse
 
     private final TokenscriptFunction tokenscriptUtility;
     private final EventUtils eventUtils;
@@ -329,6 +330,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return optimised;
+    }
+
+    @Override
+    public TokenScriptResult.Attribute getAttrResult(String attr)
+    {
+        return resultMap.get(attr);
     }
 
     @Override
@@ -1801,13 +1808,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         definition.context = new TokenscriptContext();
         definition.context.cAddr = cAddr;
         definition.context.attrInterface = this;
+        resultMap.clear();
 
         List<AttributeType> attrList = new ArrayList<>(definition.attributeTypes.values());
         if (extraAttrs != null) attrList.addAll(extraAttrs);
 
         return Observable.fromIterable(attrList)
                 .flatMap(attr -> tokenscriptUtility.fetchAttrResult(token.getWallet(), attr, tokenId,
-                                                                    cAddr, definition, this, token.lastTxTime));
+                                                                    cAddr, definition, this, token.lastTxTime))
+                .map(attrResult -> { resultMap.put(attrResult.id, attrResult); return attrResult; });
     }
 
     public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, List<BigInteger> tokenIds, List<AttributeType> extraAttrs)

@@ -89,6 +89,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private String functionEffect;
     private Map<String, String> args = new HashMap<>();
     private Map<String, Boolean> resolvedUserArgs = new HashMap<>();
+    private List<String> userInputArgs = new ArrayList<>();
     private StringBuilder attrs;
     private AWalletAlertDialog alertDialog;
     private Message<String> messageToSign;
@@ -229,6 +230,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         {
             hasUserInputInAttrs = true;
             System.out.println("ATTR/FA DON'T ADD: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
+            userInputArgs.add(attribute.id);
         }
     }
 
@@ -540,12 +542,30 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void onPageRendered(WebView view)
     {
+        CalcJsValueCallback cb = new CalcJsValueCallback()
+        {
+            @Override
+            public void calculationCompleted(String value, String result, String method)
+            {
+                System.out.println("ATTR/FA: Pass2: " + value + " : " + result);
+            }
+
+            @Override
+            public void unresolvedSymbolError(String value)
+            {
+                System.out.println("ATTR/FA: Pass2: ERROR: " + value);
+            }
+        };
+
         if (hasUserInputInAttrs && parsePass == 1)
         {
             parsePass++;
             System.out.println("ATTR/FA: PASS 2!");
-            //try to extract user input values
-            sdfsdf
+            //try to extract user input values now we have access
+            for (String attr : userInputArgs)
+            {
+                getCalculatedValue(cb, attr);
+            }
         }
         if (!reloaded) tokenView.reload();
         reloaded = true;
@@ -699,5 +719,51 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     public void enterKeyPressed()
     {
         KeyboardUtils.hideKeyboard(getCurrentFocus());
+    }
+
+
+    private interface CalcJsValueCallback
+    {
+        void calculationCompleted(String value, String result, String method);
+        void unresolvedSymbolError(String value);
+    }
+
+    private void getCalculatedValue(CalcJsValueCallback callback, String value)
+    {
+        tokenView.evaluateJavascript(
+                "(function() { var x = document.getElementById(\"" + value + "\");\n" +
+                        "            return x.value; })();",
+                html -> {
+                    StringBuilder sb = new StringBuilder();
+                    for (char ch : html.toCharArray()) if (ch!='\"') sb.append(ch);
+                    if (!html.equals("null"))
+                    {
+                        callback.calculationCompleted(value, sb.toString(), actionMethod);
+                    }
+                    else
+                    {
+                        getValueFromInnerHTML(callback, value); //the input wasn't in the .value field, try innerHTML before failing
+                    }
+                }
+                                    );
+    }
+
+    private void getValueFromInnerHTML(CalcJsValueCallback callback, String value)
+    {
+        tokenView.evaluateJavascript(
+                "(function() { var x = document.getElementById(\"" + value + "\");\n" +
+                        "            return x.innerHTML; })();",
+                html -> {
+                    StringBuilder sb = new StringBuilder();
+                    for (char ch : html.toCharArray()) if (ch!='\"') sb.append(ch);
+                    if (!html.equals("null"))
+                    {
+                        callback.calculationCompleted(value, sb.toString(), actionMethod);
+                    }
+                    else
+                    {
+                        callback.unresolvedSymbolError(value);
+                    }
+                });
     }
 }

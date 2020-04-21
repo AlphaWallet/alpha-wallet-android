@@ -1261,6 +1261,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public boolean hasDefinition(int chainId, String address)
     {
+        if (address.equalsIgnoreCase(tokensService.getCurrentAddress()))
+        {
+            address = "ethereum";
+        }
         return assetDefinitions.get(chainId) != null && assetDefinitions.get(chainId).containsKey(address);
     }
 
@@ -1340,6 +1344,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 switch (event)
                 {
                     case CREATE:
+                        //if this file already exists then wait for the modify
+                        File checkFile = new File(listenerPath, file);
+                        if (checkFile.exists() && checkFile.canRead())
+                        {
+                            break;
+                        }
                     case MODIFY:
                         try
                         {

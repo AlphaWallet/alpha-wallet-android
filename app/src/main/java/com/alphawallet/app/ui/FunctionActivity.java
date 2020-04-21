@@ -96,6 +96,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private Handler handler;
     private boolean reloaded;
     private boolean isClosing;
+    private boolean hasUserInputInAttrs;
+    private int parsePass;
     private int userInputCheckCount;
 
     private void initViews() {
@@ -151,6 +153,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         try
         {
+            hasUserInputInAttrs = false;
+            parsePass = 1;
             attrs = viewModel.getAssetDefinitionService().getTokenAttrs(token, tokenId, 1);
             //add extra tokenIds if required
             addMultipleTokenIds(attrs);
@@ -215,7 +219,17 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void onAttr(TokenScriptResult.Attribute attribute)
     {
-        TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
+        //is the attr incomplete?
+        if (!attribute.userInput)
+        {
+            System.out.println("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
+            TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
+        }
+        else
+        {
+            hasUserInputInAttrs = true;
+            System.out.println("ATTR/FA DON'T ADD: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
+        }
     }
 
     private void fillEmpty()
@@ -526,6 +540,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void onPageRendered(WebView view)
     {
+        if (hasUserInputInAttrs && parsePass == 1)
+        {
+            parsePass++;
+            System.out.println("ATTR/FA: PASS 2!");
+            //try to extract user input values
+            sdfsdf
+        }
         if (!reloaded) tokenView.reload();
         reloaded = true;
     }

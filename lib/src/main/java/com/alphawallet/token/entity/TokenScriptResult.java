@@ -18,13 +18,21 @@ public class TokenScriptResult
         public String name;
         public String text;
         public final BigInteger value;
-        public Map<BigInteger, String> tokenIdText;
-        public Map<BigInteger, BigInteger> tokenIdValue;
+        public final boolean userInput;
         public Attribute(String attributeId, String name, BigInteger value, String text) {
             this.id = attributeId;
             this.name = name;
             this.text = text;
             this.value = value;
+            this.userInput = false;
+        }
+
+        public Attribute(String attributeId, String name, BigInteger value, String text, boolean userInput) {
+            this.id = attributeId;
+            this.name = name;
+            this.text = text;
+            this.value = value;
+            this.userInput = userInput;
         }
     }
 

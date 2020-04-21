@@ -60,8 +60,8 @@ public class WalletsActivity extends BaseActivity implements
     private AWalletAlertDialog aDialog;
     private WalletsAdapter adapter;
     private Handler handler;
+    private Wallet selectedWallet;
 
-    private boolean walletChange = false;
     private boolean requiresHomeRefresh;
     private NetworkInfo networkInfo;
     private String dialogError;
@@ -291,11 +291,12 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     private void onChangeDefaultWallet(Wallet wallet) {
-        if (walletChange) {
-            walletChange = false;
+        if (selectedWallet != null && !wallet.sameAddress(selectedWallet.address))
+        {
             sendBroadcast(new Intent(C.RESET_WALLET));
         }
 
+        selectedWallet = wallet;
         adapter.setDefaultWallet(wallet);
         if (requiresHomeRefresh)
         {
@@ -339,7 +340,6 @@ public class WalletsActivity extends BaseActivity implements
     private void onSetWalletDefault(Wallet wallet) {
         requiresHomeRefresh = true;
         viewModel.setDefaultWallet(wallet);
-        walletChange = true;
     }
 
     private void hideDialog() {

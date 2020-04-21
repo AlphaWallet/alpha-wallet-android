@@ -428,7 +428,7 @@ public class WalletFragment extends BaseFragment implements
         //first abort the current operation
         viewModel.clearProcess();
         adapter.clear();
-        viewModel.fetchTokens();
+        viewModel.reloadTokens();
     }
 
     @Override

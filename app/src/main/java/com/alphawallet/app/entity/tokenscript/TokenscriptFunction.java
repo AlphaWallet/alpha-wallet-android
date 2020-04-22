@@ -1,5 +1,7 @@
 package com.alphawallet.app.entity.tokenscript;
 
+import android.text.TextUtils;
+
 import io.reactivex.Observable;
 
 import com.alphawallet.app.entity.tokens.Token;
@@ -42,6 +44,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,8 +60,12 @@ public abstract class TokenscriptFunction
 {
     public static final String TOKENSCRIPT_CONVERSION_ERROR = "<error>";
 
+    private final Map<String, AttributeType> localAttrs = new ConcurrentHashMap<>();
+    private final Map<String, TokenScriptResult.Attribute> resultMap = new ConcurrentHashMap<>(); //Build result map for function parse
+
     public Function generateTransactionFunction(String walletAddress, BigInteger tokenId, TokenDefinition definition, FunctionDefinition function, AttributeInterface attrIf)
     {
+        boolean valueNotFound = false;
         //pre-parse tokenId.
         if (tokenId.bitCount() > 256) tokenId = tokenId.or(BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE)); //truncate tokenId too large
         if (walletAddress == null) walletAddress = ZERO_ADDRESS;
@@ -67,6 +75,12 @@ public abstract class TokenscriptFunction
         for (MethodArg arg : function.parameters)
         {
             resolveReference(walletAddress, arg, tokenId, definition, attrIf);
+            if (arg.element.value == null || valueNotFound)
+            {
+                valueNotFound = true;
+                params = null;
+                continue;
+            }
             //get arg.element.value in the form of BigInteger if appropriate
             byte[] argValueBytes = convertArgToBytes(arg.element.value);
             BigInteger argValueBI = new BigInteger(1, argValueBytes);
@@ -501,7 +515,7 @@ public abstract class TokenscriptFunction
             }
             else
             {
-                result.resultTime = 0;
+                result.resultTime = lastTransactionTime == -1 ? -1 : 0;
             }
         }
         catch (Exception e)
@@ -577,6 +591,7 @@ public abstract class TokenscriptFunction
     {
         return Observable.fromCallable(() -> {
             ContractAddress useAddress;
+            long txUpdateTime = lastTransactionTime;
             if (override == null) // contract not specified - is not holder contract
             {
                 //determine address using definition context
@@ -589,10 +604,20 @@ public abstract class TokenscriptFunction
             TransactionResult transactionResult = new TransactionResult(useAddress.chainId, useAddress.address, tokenId, attr);
             org.web3j.abi.datatypes.Function transaction = generateTransactionFunction(walletAddress, tokenId, definition, attr.function, attrIf);
 
-            //now push the transaction
-            String result = callSmartContractFunction(TokenRepository.getWeb3jService(useAddress.chainId), transaction, useAddress.address, ZERO_ADDRESS);
+            String result;
+            if (transaction.getInputParameters() == null)
+            {
+                //couldn't validate all the input param values
+                result = "";
+                txUpdateTime = -1;
+            }
+            else
+            {
+                //now push the transaction
+                result = callSmartContractFunction(TokenRepository.getWeb3jService(useAddress.chainId), transaction, useAddress.address, ZERO_ADDRESS);
+            }
 
-            handleTransactionResult(transactionResult, transaction, result, attr.function, lastTransactionTime);
+            handleTransactionResult(transactionResult, transaction, result, attr.function, txUpdateTime);
             return transactionResult;
         });
     }
@@ -624,14 +649,28 @@ public abstract class TokenscriptFunction
 
     private void resolveReference(String walletAddress, MethodArg arg, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
     {
-        TokenScriptResult.Attribute attrRes = attrIf.getAttrResult(arg.element.ref);
+        TokenScriptResult.Attribute attrRes = resultMap.get(arg.element.ref);
         if (attrRes != null) //TODO: Remove! This is in the fetchAttrResult
         {
             arg.element.value = attrRes.text;
         }
         else if (definition != null && definition.attributeTypes.containsKey(arg.element.ref))
         {
-            arg.element.value = fetchAttrResult(walletAddress, definition.attributeTypes.get(arg.element.ref), tokenId, null, definition, attrIf, 0).blockingSingle().text;
+            AttributeType attr = definition.attributeTypes.get(arg.element.ref);
+            if (attr.userInput && TextUtils.isEmpty(arg.element.value))
+            {
+                arg.element.value = null;
+            }
+            else
+            {
+                arg.element.value = fetchAttrResult(walletAddress, definition.attributeTypes.get(arg.element.ref), tokenId, null, definition, attrIf).blockingSingle().text;
+            }
+        }
+        else if (localAttrs.containsKey(arg.element.ref))
+        {
+            AttributeType attr = localAttrs.get(arg.element.ref);
+            if (attr.userInput) arg.element.value = null; //if resolved then it'll be found above
+            else arg.element.value = fetchAttrResult(walletAddress, attr, tokenId, null, definition, attrIf).blockingSingle().text;
         }
     }
 
@@ -655,15 +694,15 @@ public abstract class TokenscriptFunction
      * @param cAddr
      * @param td
      * @param attrIf
-     * @param transactionUpdate
      * @return
      */
-    public Observable<TokenScriptResult.Attribute> fetchAttrResult(String walletAddress, AttributeType attr, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf, long transactionUpdate)
+    public Observable<TokenScriptResult.Attribute> fetchAttrResult(String walletAddress, AttributeType attr, BigInteger tokenId, ContractAddress cAddr,
+                                                                   TokenDefinition td, AttributeInterface attrIf)
     {
         if (attr == null) return Observable.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));
-        else if (attrIf.getAttrResult(attr.id) != null)
+        else if (resultMap.get(attr.id) != null)
         {
-            return Observable.fromCallable(() -> attrIf.getAttrResult(attr.id));
+            return Observable.fromCallable(() -> resultMap.get(attr.id));
         }
         else if (attr.event != null)
         {
@@ -682,15 +721,16 @@ public abstract class TokenscriptFunction
             ContractAddress useAddress;
             if (cAddr == null) useAddress = new ContractAddress(attr.function);
             else useAddress = new ContractAddress(attr.function, cAddr.chainId, cAddr.address);
+            long lastTxUpdate = attrIf.getLastTokenUpdate(useAddress.chainId, useAddress.address);
             TransactionResult cachedResult = attrIf.getFunctionResult(useAddress, attr, tokenId); //Needs to allow for multiple tokenIds
-            if (cAddr != null && !useAddress.address.equalsIgnoreCase(cAddr.address)) transactionUpdate = 0; //If calling a function which isn't the main tokenscript function retrieve from contract call not cache
-            if (!attr.isVolatile() && (attrIf.resolveOptimisedAttr(useAddress, attr, cachedResult) || !cachedResult.needsUpdating(transactionUpdate))) //can we use wallet's known data or cached value?
+            if (cAddr != null && !useAddress.address.equalsIgnoreCase(cAddr.address)) lastTxUpdate = 0; //If calling a function which isn't the main tokenscript function retrieve from contract call not cache
+            if (!attr.isVolatile() && (attrIf.resolveOptimisedAttr(useAddress, attr, cachedResult) || !cachedResult.needsUpdating(lastTxUpdate))) //can we use wallet's known data or cached value?
             {
                 return resultFromDatabase(cachedResult, attr);
             }
             else  //if cached value is invalid or if value is dynamic
             {
-                return fetchResultFromEthereum(walletAddress, useAddress, attr, tokenId, td, attrIf, transactionUpdate)       // Fetch function result from blockchain
+                return fetchResultFromEthereum(walletAddress, useAddress, attr, tokenId, td, attrIf, lastTxUpdate)       // Fetch function result from blockchain
                         .map(result -> restoreFromDBIfRequired(result, cachedResult))  // If network unavailable restore value from cache
                         .map(attrIf::storeAuxData)                                     // store new data
                         .map(result -> parseFunctionResult(result, attr));    // write returned data into attribute
@@ -819,5 +859,29 @@ public abstract class TokenscriptFunction
         }
 
         return convertedValue;
+    }
+
+    public void buildAttrMap(List<AttributeType> attrs)
+    {
+        localAttrs.clear();
+        for (AttributeType attr : attrs)
+        {
+            localAttrs.put(attr.id, attr);
+        }
+    }
+
+    public TokenScriptResult.Attribute addParseResultIfValid(TokenScriptResult.Attribute attrResult)
+    {
+        if (!TextUtils.isEmpty(attrResult.text))
+        {
+            resultMap.put(attrResult.id, attrResult);
+        }
+        return attrResult;
+    }
+
+    public void clearParseMaps()
+    {
+        localAttrs.clear();
+        resultMap.clear();
     }
 }

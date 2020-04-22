@@ -13,6 +13,7 @@ import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DAppFunction;
@@ -95,11 +96,10 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private Message<String> messageToSign;
     private FunctionButtonBar functionBar;
     private Handler handler;
-    private boolean reloaded;
-    private boolean isClosing;
     private boolean hasUserInputInAttrs;
     private int parsePass;
     private int userInputCheckCount;
+    private int resolveInputCheckCount;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
@@ -123,8 +123,9 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
         viewModel.getCurrentWallet();
         tokenView.setKeyboardListenerCallback(this);
-        reloaded = false;
 
+        parsePass = 1;
+        viewModel.getAssetDefinitionService().clearResultMap();
         getAttrs();
     }
 
@@ -132,8 +133,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         try
         {
-            waitSpinner.setVisibility(View.GONE);
-            tokenView.setVisibility(View.VISIBLE);
             Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
             TSAction action = functions.get(actionMethod);
             String magicValues = viewModel.getAssetDefinitionService().getMagicValuesForInjection(token.tokenInfo.chainId);
@@ -155,7 +154,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         try
         {
             hasUserInputInAttrs = false;
-            parsePass = 1;
             attrs = viewModel.getAssetDefinitionService().getTokenAttrs(token, tokenId, 1);
             //add extra tokenIds if required
             addMultipleTokenIds(attrs);
@@ -223,13 +221,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         //is the attr incomplete?
         if (!attribute.userInput)
         {
-            System.out.println("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
+            if (BuildConfig.DEBUG) System.out.println("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
             TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
         }
         else
         {
             hasUserInputInAttrs = true;
-            System.out.println("ATTR/FA DON'T ADD: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
+            if (BuildConfig.DEBUG) System.out.println("ATTR/FA: DON'T ADD: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
             userInputArgs.add(attribute.id);
         }
     }
@@ -253,7 +251,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
         progressView.hide();
-        isClosing = false;
 
         //expose the webview and remove the token 'card' background
         findViewById(R.id.layout_webwrapper).setBackgroundResource(R.drawable.background_card);
@@ -493,7 +490,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void functionSuccess()
     {
-        isClosing = true;
         if (handler == null) handler = new Handler();
         LinearLayout successOverlay = findViewById(R.id.layout_success_overlay);
         if (successOverlay != null) successOverlay.setVisibility(View.VISIBLE);
@@ -530,7 +526,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void functionFailed()
     {
-        System.out.println("FAIL");
+        if (BuildConfig.DEBUG) System.out.println("ATTR/FA: FAIL: " + actionMethod);
     }
 
     @Override
@@ -542,33 +538,68 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void onPageRendered(WebView view)
     {
+        resolveInputCheckCount = 0;
+
         CalcJsValueCallback cb = new CalcJsValueCallback()
         {
             @Override
             public void calculationCompleted(String value, String result, String method)
             {
-                System.out.println("ATTR/FA: Pass2: " + value + " : " + result);
+                if (BuildConfig.DEBUG) System.out.println("ATTR/FA: Pass2: " + value + " : " + result);
+                args.put(value, result);
+                resolveInputCheckCount--;
+                checkAllResolvedArgs();
             }
 
             @Override
             public void unresolvedSymbolError(String value)
             {
-                System.out.println("ATTR/FA: Pass2: ERROR: " + value);
+                if (BuildConfig.DEBUG) System.out.println("ATTR/FA: Pass2: ERROR: " + value);
+                resolveInputCheckCount--;
+                checkAllResolvedArgs();
             }
         };
 
-        if (hasUserInputInAttrs && parsePass == 1)
+        if (parsePass == 1)
         {
-            parsePass++;
-            System.out.println("ATTR/FA: PASS 2!");
-            //try to extract user input values now we have access
-            for (String attr : userInputArgs)
+            if (hasUserInputInAttrs) //has more work to do
             {
-                getCalculatedValue(cb, attr);
+                parsePass++;
+                if (BuildConfig.DEBUG) System.out.println("ATTR/FA: PASS 2!");
+                resolveInputCheckCount = userInputArgs.size();
+                //try to extract user input values now we have access
+                for (String attr : userInputArgs)
+                {
+                    getCalculatedValue(cb, attr);
+                }
+            }
+            else
+            {
+                tokenView.reload();
+                parsePass++;
             }
         }
-        if (!reloaded) tokenView.reload();
-        reloaded = true;
+        else if (parsePass == 2)
+        {
+            viewModel.getAssetDefinitionService().clearResultMap();
+            waitSpinner.setVisibility(View.GONE);
+            tokenView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void checkAllResolvedArgs()
+    {
+        if (resolveInputCheckCount > 0 || args.size() == 0) return;
+
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        TSAction action = functions.get(actionMethod);
+        List<AttributeType> localAttrs = (action != null && action.attributeTypes != null) ? new ArrayList<>(action.attributeTypes.values()) : null;
+
+        //see if any functions depend on these args
+        viewModel.getAssetDefinitionService().addResults(token, localAttrs, args);
+
+        //re-render page with function results
+        getAttrs();
     }
 
     @Override
@@ -601,11 +632,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         String prefix = DappBrowserFragment.PERSONAL_MESSAGE_PREFIX + message.length();
         byte[] msgHash = (prefix + message).getBytes();
         String msgBytes = Numeric.toHexString(msgHash);
-        System.out.println(msgBytes);
+        if (BuildConfig.DEBUG) System.out.println(msgBytes);
 
         byte[] equivHash = Hash.sha3(msgHash);
         String hashBytes = Numeric.toHexString(equivHash);
-        System.out.println(hashBytes);
+        if (BuildConfig.DEBUG) System.out.println(hashBytes);
 
         byte[] signatureBytes = Numeric.hexStringToByteArray(sig);
         Sign.SignatureData sd = sigFromByteArray(signatureBytes);
@@ -615,7 +646,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         {
             BigInteger recoveredKey = Sign.signedMessageToKey(msgHash, sd);
             addressRecovered = "0x" + Keys.getAddress(recoveredKey);
-            System.out.println("Recovered: " + addressRecovered);
+            if (BuildConfig.DEBUG) System.out.println("Recovered: " + addressRecovered);
         }
         catch (SignatureException e)
         {
@@ -701,7 +732,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
-        isClosing = false;
         args.clear();
         //run the onConfirm JS and await callback
         tokenView.TScallToJS(function, "onConfirm" + "('sig')", this);
@@ -744,8 +774,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                     {
                         getValueFromInnerHTML(callback, value); //the input wasn't in the .value field, try innerHTML before failing
                     }
-                }
-                                    );
+                });
     }
 
     private void getValueFromInnerHTML(CalcJsValueCallback callback, String value)

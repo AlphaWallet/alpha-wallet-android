@@ -140,7 +140,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private boolean requireEventSend = false;
     private final Semaphore eventConnection;
     private FragmentMessenger homeMessenger;
-    private final Map<String, TokenScriptResult.Attribute> resultMap = new ConcurrentHashMap<>(); //Build result map for function parse
 
     private final TokenscriptFunction tokenscriptUtility;
     private final EventUtils eventUtils;
@@ -333,15 +332,54 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     }
 
     @Override
-    public TokenScriptResult.Attribute getAttrResult(String attr)
-    {
-        return resultMap.get(attr);
-    }
-
-    @Override
     public String getWalletAddr()
     {
         return tokensService.getCurrentAddress();
+    }
+
+    @Override
+    public long getLastTokenUpdate(int chainId, String address)
+    {
+        long txUpdateTime = 0;
+        Token token = tokensService.getToken(chainId, address);
+        if (token != null)
+        {
+            txUpdateTime = token.lastTxUpdate;
+        }
+
+        return txUpdateTime;
+    };
+
+    public void addResults(Token token, List<AttributeType> localAttrs, Map<String, String> resultsFromPreParse)
+    {
+        //get all attrs:
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+
+        List<AttributeType> attrList = new ArrayList<>(definition.attributeTypes.values());
+        if (localAttrs != null) attrList.addAll(localAttrs);
+
+        for (String key : resultsFromPreParse.keySet())
+        {
+            AttributeType attr = getTypeFromList(key, attrList);
+            if (attr != null)
+            {
+                TokenscriptElement e = new TokenscriptElement();
+                e.ref = key;
+                String convertedInputValue = convertInputValue(attr, e, resultsFromPreParse.get(key));
+                TokenScriptResult.Attribute attrResult = new TokenScriptResult.Attribute(attr.id, attr.name, BigInteger.ZERO, convertedInputValue);
+                tokenscriptUtility.addParseResultIfValid(attrResult);
+            }
+        }
+    }
+
+    private AttributeType getTypeFromList(String key, List<AttributeType> attrList)
+    {
+        for (AttributeType attr : attrList)
+        {
+            if (attr.id.equals(key)) return attr;
+        }
+
+        return null;
     }
 
     /**
@@ -887,10 +925,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private boolean addContractAddresses(File file, boolean update) throws Exception
     {
-        if (file.getAbsolutePath().contains("ENS"))
-        {
-            System.out.println("YOLESS");
-        }
         FileInputStream input = new FileInputStream(file);
         TokenDefinition tokenDef = parseFile(input);
         ContractInfo holdingContracts = tokenDef.contracts.get(tokenDef.holdingToken);
@@ -1475,7 +1509,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                 Observable.fromIterable(token.getNonZeroArrayBalance())
                                         .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
                                         .filter(txResult -> txResult.needsUpdating(token.lastTxTime))
-                                        .concatMap(result -> tokenscriptUtility.fetchAttrResult(token.getWallet(), td.attributeTypes.get(attr.id), result.tokenId, cAddr, td, this, token.lastTxTime))
+                                        .concatMap(result -> tokenscriptUtility.fetchAttrResult(token.getWallet(), td.attributeTypes.get(attr.id), result.tokenId, cAddr, td, this))
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe();
@@ -1486,7 +1520,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             TransactionResult tr = getFunctionResult(cAddr, attr, BigInteger.ZERO);
                             if (tr.needsUpdating(token.lastTxTime))
                             {
-                                tokenscriptUtility.fetchAttrResult(token.getWallet(), td.attributeTypes.get(attr.id), tr.tokenId, cAddr, td, this, token.lastTxTime)
+                                tokenscriptUtility.fetchAttrResult(token.getWallet(), td.attributeTypes.get(attr.id), tr.tokenId, cAddr, td, this)
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe();
@@ -1603,7 +1637,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     public void onStart()
                     {
                         if (tokensService.getCurrentAddress() == null || !WalletUtils.isValidAddress(tokensService.getCurrentAddress())) return;
-                        if (tResult.result == null) return;
+                        if (tResult.result == null || tResult.resultTime < 0) return;
                         realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress());
                         ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
                         String databaseKey = functionKey(cAddr, tResult.tokenId, tResult.attrId);
@@ -1799,6 +1833,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return sb.toString();
     }
 
+    public void clearResultMap()
+    {
+        tokenscriptUtility.clearParseMaps();
+    }
+
     public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, BigInteger tokenId, List<AttributeType> extraAttrs)
     {
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
@@ -1808,15 +1847,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         definition.context = new TokenscriptContext();
         definition.context.cAddr = cAddr;
         definition.context.attrInterface = this;
-        resultMap.clear();
 
         List<AttributeType> attrList = new ArrayList<>(definition.attributeTypes.values());
         if (extraAttrs != null) attrList.addAll(extraAttrs);
 
+        tokenscriptUtility.buildAttrMap(attrList);
+
         return Observable.fromIterable(attrList)
                 .flatMap(attr -> tokenscriptUtility.fetchAttrResult(token.getWallet(), attr, tokenId,
-                                                                    cAddr, definition, this, token.lastTxTime))
-                .map(attrResult -> { resultMap.put(attrResult.id, attrResult); return attrResult; });
+                                                                    cAddr, definition, this))
+                .map(tokenscriptUtility::addParseResultIfValid);
     }
 
     public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, List<BigInteger> tokenIds, List<AttributeType> extraAttrs)
@@ -1955,7 +1995,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (attributeType == null) attributeType = td.attributeTypes.get(arg.ref); // now try globals
         if (attributeType != null)
         {
-            arg.value = tokenscriptUtility.fetchAttrResult(tokensService.getCurrentAddress(), attributeType, tokenId, null, td, this, 0).blockingSingle().text;
+            arg.value = tokenscriptUtility.fetchAttrResult(tokensService.getCurrentAddress(), attributeType, tokenId, null, td, this).blockingSingle().text;
         }
     }
 

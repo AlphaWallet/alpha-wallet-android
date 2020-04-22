@@ -365,7 +365,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 TokenscriptElement e = new TokenscriptElement();
                 e.ref = key;
-                String convertedInputValue = convertInputValue(attr, e, resultsFromPreParse.get(key));
+                String convertedInputValue = convertInputValue(attr, resultsFromPreParse.get(key));
                 TokenScriptResult.Attribute attrResult = new TokenScriptResult.Attribute(attr.id, attr.name, BigInteger.ZERO, convertedInputValue);
                 tokenscriptUtility.addParseResultIfValid(attrResult);
             }
@@ -1972,9 +1972,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return cr;
     }
 
-    public String convertInputValue(AttributeType attr, TokenscriptElement e, String valueFromInput)
+    public String convertInputValue(AttributeType attr, String valueFromInput)
     {
-        return tokenscriptUtility.convertInputValue(attr, e, valueFromInput);
+        return tokenscriptUtility.convertInputValue(attr, valueFromInput);
     }
 
     public void setEventCallback(ActionEventCallback callback)

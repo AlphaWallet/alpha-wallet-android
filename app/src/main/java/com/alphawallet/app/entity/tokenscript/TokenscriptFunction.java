@@ -650,11 +650,11 @@ public abstract class TokenscriptFunction
     private void resolveReference(String walletAddress, MethodArg arg, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
     {
         TokenScriptResult.Attribute attrRes = resultMap.get(arg.element.ref);
-        if (attrRes != null) //TODO: Remove! This is in the fetchAttrResult
+        if (attrRes != null) //resolve from result map
         {
             arg.element.value = attrRes.text;
         }
-        else if (definition != null && definition.attributeTypes.containsKey(arg.element.ref))
+        else if (definition != null && definition.attributeTypes.containsKey(arg.element.ref)) //resolve from attribute
         {
             AttributeType attr = definition.attributeTypes.get(arg.element.ref);
             if (attr.userInput && TextUtils.isEmpty(arg.element.value))
@@ -666,7 +666,7 @@ public abstract class TokenscriptFunction
                 arg.element.value = fetchAttrResult(walletAddress, definition.attributeTypes.get(arg.element.ref), tokenId, null, definition, attrIf).blockingSingle().text;
             }
         }
-        else if (localAttrs.containsKey(arg.element.ref))
+        else if (localAttrs.containsKey(arg.element.ref)) //wasn't able to resolve, attempt to resolve from local attributes or mark null if unresolved user input
         {
             AttributeType attr = localAttrs.get(arg.element.ref);
             if (attr.userInput) arg.element.value = null; //if resolved then it'll be found above
@@ -782,7 +782,7 @@ public abstract class TokenscriptFunction
         return result;
     }
 
-    public String convertInputValue(AttributeType attr, TokenscriptElement e, String valueFromInput)
+    public String convertInputValue(AttributeType attr, String valueFromInput)
     {
         String convertedValue = "";
         try
@@ -797,10 +797,8 @@ public abstract class TokenscriptFunction
                     inputBytes = TokenscriptFunction.convertArgToBytes(Utils.isolateNumeric(valueFromInput)); //convert cleaned user input
                     BigInteger unsignedValue = new BigInteger(inputBytes);
                     convertedValue = unsignedValue.toString();
-                    e.value = unsignedValue.toString();
                     break;
                 case UTF8:
-                    e.value = valueFromInput;
                     convertedValue = valueFromInput;
                     break;
                 case Bytes:
@@ -809,46 +807,43 @@ public abstract class TokenscriptFunction
                     if (inputBytes.length <= 32)
                     {
                         BigInteger val = new BigInteger(1, inputBytes).and(attr.bitmask).shiftRight(attr.bitshift);
-                        e.value = val.toString(16);
+                        convertedValue = val.toString(16);
                     }
                     else
                     {
-                        e.value = com.alphawallet.token.tools.Numeric.toHexString(inputBytes);
+                        convertedValue = com.alphawallet.token.tools.Numeric.toHexString(inputBytes);
                     }
-                    convertedValue = e.value;
                     break;
                 case e18:
-                    e.value = BalanceUtils.EthToWei(valueFromInput);
-                    convertedValue = e.value;
+                    convertedValue = BalanceUtils.EthToWei(valueFromInput);
                     break;
                 case e8:
-                    e.value = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("100000000"));
-                    convertedValue = e.value;
+                    convertedValue = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("100000000"));
                     break;
                 case e4:
-                    e.value = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("1000"));
-                    convertedValue = e.value;
+                    convertedValue = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("1000"));
                     break;
                 case e2:
-                    e.value = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("100"));
-                    convertedValue = e.value;
+                    convertedValue = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("100"));
                     break;
                 case Mapping:
                     //makes no sense as input
+                    convertedValue = TOKENSCRIPT_CONVERSION_ERROR + "Mapping in user input params: " + attr.id;
                     break;
                 case Boolean:
                     //attempt to decode
                     if (valueFromInput.equalsIgnoreCase("true") || valueFromInput.equals("1"))
                     {
-                        e.value = "TRUE";
+                        convertedValue = "TRUE";
                     }
                     else
                     {
-                        e.value = "FALSE";
+                        convertedValue = "FALSE";
                     }
-                    convertedValue = e.value;
                     break;
                 case TokenId:
+                    //Shouldn't get here - tokenId should have been handled before.
+                    convertedValue = TOKENSCRIPT_CONVERSION_ERROR + "Token ID in user input params: " + attr.id;
                     break;
             }
         }

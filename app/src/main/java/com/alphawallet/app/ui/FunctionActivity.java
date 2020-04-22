@@ -87,9 +87,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private Web3TokenView tokenView;
     private ProgressBar waitSpinner;
     private SignMessageDialog dialog;
-    private String functionEffect;
     private Map<String, String> args = new HashMap<>();
-    private Map<String, Boolean> resolvedUserArgs = new HashMap<>();
     private List<String> userInputArgs = new ArrayList<>();
     private StringBuilder attrs;
     private AWalletAlertDialog alertDialog;
@@ -98,8 +96,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private Handler handler;
     private boolean hasUserInputInAttrs;
     private int parsePass;
-    private int userInputCheckCount;
     private int resolveInputCheckCount;
+    private TSAction action;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
@@ -286,31 +284,85 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private void completeTokenScriptFunction(String function)
     {
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
-        TSAction action = functions.get(function);
+        action = functions.get(function);
 
         if (action != null && action.function != null) //if no function then it's handled by the token view
         {
-            //check params for function.
-            //if there's input params, resolve them
-            boolean resolved = checkNativeTransaction(action, true);
-            resolved = checkFunctionArgs(action, resolved);
-            resolveTokenIds(action);
-
-            if (resolved && userInputCheckCount == 0)
-            {
-                viewModel.handleFunction(action, tokenId, token, this);
-                return;
-            }
-            else if (userInputCheckCount > 0)
-            {
-                return;
-            }
-
-            tokenScriptError(function);
+            resolveTokenIds();
+            resolveUserInput();
         }
     }
 
-    private void resolveTokenIds(TSAction action)
+    private void resolveUserInput()
+    {
+        resolveInputCheckCount = 0;
+        CalcJsValueCallback cb = new CalcJsValueCallback()
+        {
+            @Override
+            public void calculationCompleted(String value, String result, TokenscriptElement e, AttributeType attr)
+            {
+                if (BuildConfig.DEBUG) System.out.println("ATTR/FA: Resolve " + value + " : " + result);
+                //need to find attr
+                e.value = viewModel.getAssetDefinitionService().convertInputValue(attr, result);
+
+                if (e.value.startsWith(TOKENSCRIPT_CONVERSION_ERROR)) //handle parse error
+                {
+                    String message = e.value.substring(TOKENSCRIPT_CONVERSION_ERROR.length());
+                    tokenScriptError(message);
+                }
+                else
+                {
+                    resolveInputCheckCount--;
+                    completeAction();
+                }
+            }
+
+            @Override
+            public void unresolvedSymbolError(String value)
+            {
+                if (BuildConfig.DEBUG) System.out.println("ATTR/FA: Resolve: ERROR: " + value);
+                tokenScriptError(value);
+            }
+        };
+
+        //fetch any user-input params needed for native transaction
+        if (action.function.tx != null)
+        {
+            for (TokenscriptElement e : action.function.tx.args.values())
+            {
+                checkTokenScriptElement(cb, action, e);
+            }
+        }
+
+        //fetch user-input params for transaction
+        for (MethodArg arg : action.function.parameters)
+        {
+            checkTokenScriptElement(cb, action, arg.element);
+        }
+    }
+
+    private void checkTokenScriptElement(CalcJsValueCallback cb, TSAction action, TokenscriptElement e)
+    {
+        if (e.ref != null && e.ref.length() > 0 && action.attributeTypes != null)
+        {
+            AttributeType attr = action.attributeTypes.get(e.ref);
+            if (attr != null && attr.userInput)
+            {
+                resolveInputCheckCount++;
+                evaluateJavaScript(cb, e.ref, e, attr);
+            }
+        }
+    }
+
+    private void completeAction()
+    {
+        if (resolveInputCheckCount == 0)
+        {
+            viewModel.handleFunction(action, tokenId, token, this);
+        }
+    }
+
+    private void resolveTokenIds()
     {
         for (MethodArg arg : action.function.parameters)
         {
@@ -322,82 +374,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
     }
 
-    private boolean checkNativeTransaction(TSAction action, boolean resolved)
-    {
-        FunctionDefinition function = action.function;
-        if (function.tx == null) return true;
-        for (TokenscriptElement e : function.tx.args.values())
-        {
-            resolved = checkTokenScriptElement(action, e, resolved);
-        }
-
-        return resolved;
-    }
-
-    private boolean checkFunctionArgs(TSAction action, boolean resolved)
-    {
-        for (MethodArg arg : action.function.parameters)
-        {
-            resolved = checkTokenScriptElement(action, arg.element, resolved);
-        }
-
-        return resolved;
-    }
-
     @Override
     public void onDestroy()
     {
         super.onDestroy();
         viewModel.stopGasSettingsFetch();
-    }
-
-    private boolean checkTokenScriptElement(TSAction action, TokenscriptElement e, boolean resolved)
-    {
-        if (e.ref != null && e.ref.length() > 0 && action.attributeTypes != null)
-        {
-            AttributeType attr = action.attributeTypes.get(e.ref);
-            if (attr == null) return true;
-            if (attr.userInput)
-            {
-                return getUserInput(attr, e, resolved);
-            }
-        }
-
-        return resolved;
-    }
-
-    private boolean getUserInput(AttributeType attr, TokenscriptElement e, boolean resolved)
-    {
-        String valueFromInput = args.get(e.ref);
-        if (valueFromInput == null)
-        {
-            userInputCheckCount++;
-            //fetch mapping
-            args.put(e.ref, "__searching"); // indicate search TokenScript rendered page for user input
-            getInput(e.ref);
-            resolved = false;
-        }
-        else if (!valueFromInput.equals("__searching") && !resolvedUserArgs.containsKey(e.ref))
-        {
-            resolvedUserArgs.put(e.ref, true);
-            userInputCheckCount--;
-
-            String convertedInputValue = viewModel.getAssetDefinitionService().convertInputValue(attr, e, valueFromInput);
-            args.put(e.ref, convertedInputValue);
-
-            if (convertedInputValue.startsWith(TOKENSCRIPT_CONVERSION_ERROR)) //handle parse error
-            {
-                String message = convertedInputValue.substring(TOKENSCRIPT_CONVERSION_ERROR.length());
-                tokenScriptError(message);
-                resolved = false;
-            }
-        }
-        else
-        {
-            if (!resolvedUserArgs.containsKey(e.ref)) resolved = false; //only mark as not resolved, fix false positive
-        }
-
-        return resolved;
     }
 
     private void errorInvalidAddress(String address)
@@ -434,50 +415,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         alertDialog.setButtonText(R.string.button_ok);
         alertDialog.setButtonListener(v ->alertDialog.dismiss());
         alertDialog.show();
-    }
-
-    private void getInput(String value)
-    {
-        tokenView.evaluateJavascript(
-                "(function() { var x = document.getElementById(\"" + value + "\");\n" +
-                        "            return x.value; })();",
-                html -> {
-                    StringBuilder sb = new StringBuilder();
-                    for (char ch : html.toCharArray()) if (ch!='\"') sb.append(ch);
-                    if (!html.equals("null"))
-                    {
-                        args.put(value, sb.toString());
-                        completeTokenScriptFunction(actionMethod);
-                    }
-                    else
-                    {
-                        getValueFromInnerHTML(value); //the input wasn't in the .value field, try innerHTML before failing
-                    }
-                }
-        );
-    }
-
-    private void getValueFromInnerHTML(String value)
-    {
-        tokenView.evaluateJavascript(
-                "(function() { var x = document.getElementById(\"" + value + "\");\n" +
-                        "            return x.innerHTML; })();",
-                html -> {
-                    StringBuilder sb = new StringBuilder();
-                    for (char ch : html.toCharArray()) if (ch!='\"') sb.append(ch);
-                    if (!html.equals("null"))
-                    {
-                        args.put(value, sb.toString());
-                        completeTokenScriptFunction(actionMethod);
-                    }
-                    else
-                    {
-                        //display error, basic script error reporting
-                        String attrDetails = actionMethod + " (" + value + ")";
-                        String details = getString(R.string.tokenscript_element_not_present, attrDetails);
-                        tokenScriptError(details);
-                    }
-                });
     }
 
     @Override
@@ -543,7 +480,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         CalcJsValueCallback cb = new CalcJsValueCallback()
         {
             @Override
-            public void calculationCompleted(String value, String result, String method)
+            public void calculationCompleted(String value, String result, TokenscriptElement e, AttributeType attr)
             {
                 if (BuildConfig.DEBUG) System.out.println("ATTR/FA: Pass2: " + value + " : " + result);
                 args.put(value, result);
@@ -565,12 +502,12 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             if (hasUserInputInAttrs) //has more work to do
             {
                 parsePass++;
-                if (BuildConfig.DEBUG) System.out.println("ATTR/FA: PASS 2!");
+                if (BuildConfig.DEBUG) System.out.println("ATTR/FA: PASS 2");
                 resolveInputCheckCount = userInputArgs.size();
                 //try to extract user input values now we have access
                 for (String attr : userInputArgs)
                 {
-                    getCalculatedValue(cb, attr);
+                    evaluateJavaScript(cb, attr, null, null);
                 }
             }
             else
@@ -581,7 +518,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
         else if (parsePass == 2)
         {
-            viewModel.getAssetDefinitionService().clearResultMap();
+            viewModel.getAssetDefinitionService().clearResultMap(); //clean up results before display
             waitSpinner.setVisibility(View.GONE);
             tokenView.setVisibility(View.VISIBLE);
         }
@@ -740,8 +677,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void callToJSComplete(String function, String result)
     {
-        userInputCheckCount = 0;
-        resolvedUserArgs.clear();
         completeTokenScriptFunction(function);
     }
 
@@ -752,13 +687,16 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
 
+    /**
+     * JavaScript methods to obtain values from within the rendered view
+     */
     private interface CalcJsValueCallback
     {
-        void calculationCompleted(String value, String result, String method);
+        void calculationCompleted(String value, String result, TokenscriptElement e, AttributeType attr);
         void unresolvedSymbolError(String value);
     }
 
-    private void getCalculatedValue(CalcJsValueCallback callback, String value)
+    private void evaluateJavaScript(CalcJsValueCallback callback, String value, TokenscriptElement e, AttributeType attr)
     {
         tokenView.evaluateJavascript(
                 "(function() { var x = document.getElementById(\"" + value + "\");\n" +
@@ -768,16 +706,16 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                     for (char ch : html.toCharArray()) if (ch!='\"') sb.append(ch);
                     if (!html.equals("null"))
                     {
-                        callback.calculationCompleted(value, sb.toString(), actionMethod);
+                        callback.calculationCompleted(value, sb.toString(), e, attr);
                     }
                     else
                     {
-                        getValueFromInnerHTML(callback, value); //the input wasn't in the .value field, try innerHTML before failing
+                        getValueFromInnerHTML(callback, value, e, attr); //the input wasn't in the .value field, try innerHTML before failing
                     }
                 });
     }
 
-    private void getValueFromInnerHTML(CalcJsValueCallback callback, String value)
+    private void getValueFromInnerHTML(CalcJsValueCallback callback, String value, TokenscriptElement e, AttributeType attr)
     {
         tokenView.evaluateJavascript(
                 "(function() { var x = document.getElementById(\"" + value + "\");\n" +
@@ -787,7 +725,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                     for (char ch : html.toCharArray()) if (ch!='\"') sb.append(ch);
                     if (!html.equals("null"))
                     {
-                        callback.calculationCompleted(value, sb.toString(), actionMethod);
+                        callback.calculationCompleted(value, sb.toString(), e, attr);
                     }
                     else
                     {

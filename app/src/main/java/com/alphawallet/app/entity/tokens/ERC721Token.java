@@ -58,6 +58,13 @@ public class ERC721Token extends Token implements Parcelable
 
     @Override
     public void addAssetToTokenBalanceAssets(Asset asset) {
+        for (Asset a : tokenBalanceAssets) //don't add the same assets twice (should this be a map?)
+        {
+            if (a.getTokenId().equalsIgnoreCase(asset.getTokenId()))
+            {
+                return;
+            }
+        }
         tokenBalanceAssets.add(asset);
     }
 
@@ -324,5 +331,22 @@ public class ERC721Token extends Token implements Parcelable
         if (currentState == null) return true;
         if (!currentState.equalsIgnoreCase(getFullBalance())) return true;
         return false;
+    }
+
+    /**
+     * Returns false if the Asset balance appears to be entries with only TokenId - indicating an ERC721Ticket
+     * @return
+     */
+    @Override
+    public boolean checkBalanceType()
+    {
+        boolean onlyHasTokenId = true;
+        //if elements contain asset with only assetId then most likely this is a ticket.
+        for (Asset a : tokenBalanceAssets)
+        {
+            if (!a.hasIdOnly()) onlyHasTokenId = false;
+        }
+
+        return tokenBalanceAssets.size() == 0 || !onlyHasTokenId;
     }
 }

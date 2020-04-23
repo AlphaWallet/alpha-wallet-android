@@ -1303,4 +1303,9 @@ public class Token implements Parcelable, Comparable<Token>
     {
         balanceUpdateWeight = 10.0f;
     }
+
+    public boolean checkBalanceType()
+    {
+        return true;
+    }
 }

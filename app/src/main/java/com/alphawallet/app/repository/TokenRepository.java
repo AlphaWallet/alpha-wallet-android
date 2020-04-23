@@ -2,6 +2,7 @@ package com.alphawallet.app.repository;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.BuildConfig;
 import android.util.Log;
 
 import com.alphawallet.app.C;
@@ -1300,8 +1301,8 @@ public class TokenRepository implements TokenRepositoryType {
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                //
+                if (BuildConfig.DEBUG) e.printStackTrace();
+                // didn't manage to find contract type, pass other
             }
 
             return returnType;

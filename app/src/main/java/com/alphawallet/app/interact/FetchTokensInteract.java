@@ -7,9 +7,11 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.OrderContractAddressPair;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.service.TokensService;
@@ -120,17 +122,23 @@ public class FetchTokensInteract {
             for (int i = 0; i < tokens.length; i++)
             {
                 Token t = tokens[i];
-                if (t.getInterfaceSpec() == ContractType.ERC721_UNDETERMINED)
+                if (t.getInterfaceSpec() == ContractType.ERC721_UNDETERMINED || !t.checkBalanceType()) //balance type appears to be wrong
                 {
                     ContractType type = tokenRepository.determineCommonType(t.tokenInfo).blockingGet();
+                    TokenInfo tInfo = t.tokenInfo;
                     //upgrade type:
                     switch (type)
                     {
+                        case OTHER:
+                            //couldn't determine the type, try again next time
+                            continue;
                         default:
                             type = ContractType.ERC721;
                         case ERC721:
                         case ERC721_LEGACY:
-                            t = new ERC721Token(t.tokenInfo, new ArrayList<>(), System.currentTimeMillis(), t.getNetworkName(), type);
+                            List<Asset> erc721Balance = t.getTokenAssets(); //add balance from Opensea
+                            if (TextUtils.isEmpty(tInfo.name + tInfo.symbol)) tInfo = new TokenInfo(tInfo.address, " ", " ", tInfo.decimals, tInfo.isEnabled, tInfo.chainId); //ensure we don't keep overwriting this
+                            t = new ERC721Token(tInfo, erc721Balance, System.currentTimeMillis(), t.getNetworkName(), type);
                             tokens[i] = t;
                             break;
                         case ERC721_TICKET:

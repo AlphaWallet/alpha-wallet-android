@@ -3,6 +3,7 @@ package com.alphawallet.app.entity.opensea;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.alphawallet.app.util.Utils;
 import com.google.gson.annotations.Expose;
@@ -223,5 +224,13 @@ public class Asset implements Parcelable {
             }
         }
         return null;
+    }
+
+    public boolean hasIdOnly()
+    {
+        return  !TextUtils.isEmpty(tokenId)
+                 && TextUtils.isEmpty(name)
+                 && TextUtils.isEmpty(description)
+                 && (traits == null || traits.size() == 0);
     }
 }

@@ -3,7 +3,12 @@ package com.alphawallet.app.entity;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
+import com.alphawallet.app.C;
+import com.alphawallet.app.entity.tokens.Token;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -127,21 +132,87 @@ public class TransactionContract implements Parcelable {
 
     public String getOperationName(Context ctx)
     {
-        String result = null;
+        int operationId = getOperationId();
+        if (operationId > -1)
+        {
+            return ctx.getString(TransactionLookup.typeToName(TransactionType.values()[operationId]));
+        }
+        else
+        {
+            return name;
+        }
+    }
+
+    private int getOperationId()
+    {
+        int operationId = -1;
         if (name != null && name.length() > 0 && name.charAt(0) == '*')
         {
-            int operationType = Integer.parseInt(name.substring(1));
-            result = ctx.getString(TransactionLookup.typeToName(TransactionType.values()[operationType]));
+            operationId = Integer.parseInt(name.substring(1));
         }
-        else if (name != null && name.length() > 0)
-        {
-            result = name;
-        }
-        return result;
+
+        return operationId;
     }
 
     public String getIndicesSize()
     {
         return "0";
+    }
+
+    /**
+     * Most likely ERC20 contract transaction result
+     *
+     * @param token
+     * @param operation
+     * @return
+     */
+    public String getOperationResult(Token token, TransactionOperation operation, Transaction tx)
+    {
+        try
+        {
+            if (operation.value == null || operation.value.length() > 0 && Character.isDigit(operation.value.charAt(0)))
+            {
+                BigDecimal value = new BigDecimal(operation.value);
+                //appears to be a number; try to produce number with prefix
+                return tx.getPrefix(token) + " " + Token.getScaledValue(value, token.tokenInfo.decimals);
+            }
+            else
+            {
+                return operation.value;
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            return operation.value;
+        }
+    }
+
+    public int getOperationImage(Token token, Transaction tx)
+    {
+        return token.ethereumTxImage(tx);
+    }
+
+    String getSupplimentalInfo(Transaction tx, String walletAddress, String networkName)
+    {
+        String supplimentalTxt;
+        //is this sending or receiving value?
+        if (tx.value.equals("0") || (!TextUtils.isEmpty(tx.value) && (new BigDecimal(tx.value).compareTo(BigDecimal.ZERO) == 0)))
+        {
+            supplimentalTxt = "";
+        }
+        else
+        {
+            //simple heuristic: if value is attached to a transaction from the user, then it's outgoing
+            if (tx.from.equalsIgnoreCase(walletAddress))
+            {
+                supplimentalTxt = "-" + Token.getScaledValue(tx.value, C.ETHER_DECIMALS) + " " + networkName;
+            }
+            else
+            {
+                supplimentalTxt = "+" + Token.getScaledValue(tx.value, C.ETHER_DECIMALS) + " " + networkName;
+            }
+        }
+
+        return supplimentalTxt;
     }
 }

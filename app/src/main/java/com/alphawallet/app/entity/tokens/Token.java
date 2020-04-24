@@ -15,7 +15,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.interact.SetupTokensInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -625,34 +624,23 @@ public class Token implements Parcelable, Comparable<Token>
 
     public String getOperationName(Transaction transaction, Context ctx)
     {
-        String name = null;
-        try
+        String name;
+        if (isEthereum())
         {
-            if (transaction.blockNumber != null && transaction.blockNumber.equals("0"))
+            if (transaction.from.equalsIgnoreCase(tokenWallet))
             {
-                name = ctx.getString(R.string.status_pending);
-            }
-            else if (transaction.operations != null && transaction.operations.length > 0)
-            {
-                TransactionOperation operation = transaction.operations[0];
-                name = operation.getOperationName(ctx);
+                name = ctx.getString(R.string.sent);
             }
             else
             {
-                if (transaction.from.equalsIgnoreCase(tokenWallet))
-                {
-                    name = ctx.getString(R.string.sent);
-                }
-                else
-                {
-                    name = ctx.getString(R.string.received);
-                }
+                name = ctx.getString(R.string.received);
             }
         }
-        catch (NumberFormatException e)
+        else
         {
-            //Silent fail, number was invalid just display default
+            name = transaction.getOperationName(ctx);
         }
+
 
         return name;
     }
@@ -662,25 +650,17 @@ public class Token implements Parcelable, Comparable<Token>
         return getScaledValue(balance, tokenInfo.decimals);
     }
 
-    public static String getScaledValue(BigDecimal value, long decimals) { return getScaledValue(value, decimals, false); }
-
-    public static String getScaledValue(BigDecimal value, long decimals, boolean stripZeros)
+    public static String getScaledValue(BigDecimal value, long decimals)
     {
         value = value.divide(new BigDecimal(Math.pow(10, decimals)));
         int scale = 4;
         if (value.equals(BigDecimal.ZERO))
         {
-            if (stripZeros) return "0";
-            else return "0.0000";
+            return "0.0000";
         }
         if (value.abs().compareTo(BigDecimal.valueOf(0.0001)) < 0)
         {
-            if (stripZeros) return "~0.00";
-            else return "0.0000";
-        }
-        else if (stripZeros)
-        {
-            return value.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
+            return "0.0000";
         }
         else
         {
@@ -738,6 +718,30 @@ public class Token implements Parcelable, Comparable<Token>
         }
 
         return idList;
+    }
+
+    /**
+     * Fetch the base native value attached to this transaction
+     * @param transaction
+     * @return
+     */
+    public String getTransactionValue(Transaction transaction)
+    {
+        if (transaction.error.equals("1")) return "";
+        else if (transaction.value.equals("0")) return "0";
+        return transaction.getPrefix(this) + " " + getScaledValue(transaction.value, tokenInfo.decimals);
+    }
+
+    /**
+     * Fetch the Token value of this transaction eg +20 DAI, or if a native chain transaction then return the value
+     *
+     * @param transaction
+     * @return
+     */
+    public String getTransactionResultValue(Transaction transaction)
+    {
+        String txResultValue = isEthereum() ? getTransactionValue(transaction) : transaction.getOperationResult(this);
+        return txResultValue + " " + getSymbol();
     }
 
     public String getTransactionValue(Transaction transaction, Context context)
@@ -1300,5 +1304,37 @@ public class Token implements Parcelable, Comparable<Token>
     public boolean checkBalanceType()
     {
         return true;
+    }
+
+    public String getTransactionDestination(Transaction transaction)
+    {
+        if (isEthereum()) return transaction.to;
+        else return transaction.getContract(this);
+    }
+
+    /**
+     * Return image representing tx to self, tx received or tx sent
+     * @param tx
+     * @return
+     */
+    public int ethereumTxImage(Transaction tx)
+    {
+        return tx.from.equalsIgnoreCase(tokenWallet) ? (tx.to.equals(tx.from) ? R.drawable.ic_transactions : R.drawable.ic_arrow_upward_black_24dp)
+                                                     : R.drawable.ic_arrow_downward_black_24dp;
+    }
+
+    public int getTxImage(Transaction transaction)
+    {
+        int asset;
+        if (isEthereum())
+        {
+            asset = ethereumTxImage(transaction);
+        }
+        else
+        {
+            asset = transaction.getOperationImage(this);
+        }
+
+        return asset;
     }
 }

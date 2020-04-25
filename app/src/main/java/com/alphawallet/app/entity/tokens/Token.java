@@ -1301,6 +1301,28 @@ public class Token implements Parcelable, Comparable<Token>
         balanceUpdateWeight = 10.0f;
     }
 
+    public BigDecimal getTxValue(Transaction transaction)
+    {
+        BigDecimal returnValue = BigDecimal.ZERO;
+        try
+        {
+            if (isEthereum())
+            {
+                returnValue = new BigDecimal(transaction.value);
+            }
+            else
+            {
+                returnValue = transaction.getRawValue();
+            }
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return returnValue;
+    }
+
     public boolean checkBalanceType()
     {
         return true;

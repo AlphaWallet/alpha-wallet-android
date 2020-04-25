@@ -15,6 +15,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
@@ -568,4 +569,17 @@ public class Transaction implements Parcelable {
 		else if (isSent) return "-";
 		else return "+";
 	}
+
+    public BigDecimal getRawValue() throws Exception
+    {
+		if (operations == null || operations.length == 0)
+		{
+			return new BigDecimal(value);
+		}
+		else
+		{
+			TransactionOperation operation = operations[0];
+			return operation.getRawValue();
+		}
+    }
 }

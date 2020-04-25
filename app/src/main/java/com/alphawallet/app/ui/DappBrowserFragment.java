@@ -727,16 +727,21 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                     Intent intent;
                     switch (prefixCheck[0])
                     {
-                        case "tel":
+                        case C.DAPP_PREFIX_TELEPHONE:
                             intent = new Intent(Intent.ACTION_DIAL);
                             intent.setData(Uri.parse(url));
                             startActivity(Intent.createChooser(intent, "Call " + prefixCheck[1]));
                             return true;
-                        case "mailto":
+                        case C.DAPP_PREFIX_MAILTO:
                             intent = new Intent(Intent.ACTION_SENDTO);
                             intent.setData(Uri.parse(url));
                             startActivity(Intent.createChooser(intent, "Email: " + prefixCheck[1]));
                             return true;
+                        case C.DAPP_PREFIX_ALPHAWALLET:
+                            if(prefixCheck[1].equals(C.DAPP_SUFFIX_RECEIVE)) {
+                                viewModel.showMyAddress(getContext());
+                                return true;
+                            }
                         default:
                             break;
                     }

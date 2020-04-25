@@ -161,6 +161,10 @@ public abstract class C {
     public static final String DAPP_BROWSER_HISTORY = "DAPP_BROWSER_HISTORY";
     public static final String DAPP_BROWSER_BOOKMARKS = "dappBrowserBookmarks";
     public static final String DAPP_DEFAULT_URL = "https://www.stateofthedapps.com/";
+    public static final String DAPP_PREFIX_TELEPHONE = "tel";
+    public static final String DAPP_PREFIX_MAILTO = "mailto";
+    public static final String DAPP_PREFIX_ALPHAWALLET = "alphawallet";
+    public static final String DAPP_SUFFIX_RECEIVE = "receive";
 
     public static final String ENS_SCAN_BLOCK = "ens_check_block";
     public static final String ENS_HISTORY = "ensHistory";

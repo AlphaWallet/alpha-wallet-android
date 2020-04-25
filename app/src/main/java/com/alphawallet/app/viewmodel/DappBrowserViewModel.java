@@ -14,6 +14,7 @@ import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -52,6 +53,8 @@ import org.web3j.abi.datatypes.Address;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.alphawallet.app.C.Key.WALLET;
 
 public class DappBrowserViewModel extends BaseViewModel  {
     private static final long DEBOUNCE_LIMIT = 5L * 1000L; //5 seconds debounce time
@@ -315,6 +318,13 @@ public class DappBrowserViewModel extends BaseViewModel  {
         intent.putExtra(C.EXTRA_TOKEN_ID, (Token)null);
         intent.putExtra(C.EXTRA_AMOUNT, result);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        ctx.startActivity(intent);
+    }
+
+    public void showMyAddress(Context ctx)
+    {
+        Intent intent = new Intent(ctx, MyAddressActivity.class);
+        intent.putExtra(WALLET, defaultWallet.getValue());
         ctx.startActivity(intent);
     }
 }

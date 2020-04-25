@@ -98,4 +98,16 @@ public class TransactionOperation implements Parcelable {
     {
         return Token.getScaledValue(value, decimals);
     }
+
+    String getOperationResult(Token token, Transaction tx)
+    {
+        if (contract != null)
+        {
+            return contract.getOperationResult(token, this, tx);
+        }
+        else
+        {
+            return token.getTransactionValue(tx);
+        }
+    }
 }

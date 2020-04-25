@@ -90,7 +90,7 @@ public class Wallet implements Parcelable {
 	{
 		int decimals = token.tokenInfo != null ? token.tokenInfo.decimals : 18;
 		balanceSymbol = token.tokenInfo != null ? token.tokenInfo.symbol : "ETH";
-		String newBalance = Token.getScaledValue(token.balance, decimals, false);
+		String newBalance = Token.getScaledValue(token.balance, decimals);
 		if (newBalance.equals(balance))
 		{
 			return false;
@@ -107,7 +107,7 @@ public class Wallet implements Parcelable {
 		if (balance.equals("-"))
 		{
 			balanceSymbol = networkInfo.symbol;
-			balance = Token.getScaledValue(BigDecimal.ZERO, 18, false);
+			balance = Token.getScaledValue(BigDecimal.ZERO, 18);
 		}
 	}
 }

@@ -12,18 +12,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.alphawallet.app.ui.widget.OnSetWatchWalletListener;
-import com.alphawallet.app.util.Utils;
-
 import com.alphawallet.app.R;
-
+import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.ui.widget.OnSetWatchWalletListener;
+import com.alphawallet.app.util.AWEnsResolver;
+import com.alphawallet.app.util.EnsResolver;
+import com.alphawallet.app.util.KeyboardUtils;
+import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.LayoutCallbackListener;
 import com.alphawallet.app.widget.PasswordInputView;
 
-import org.web3j.abi.datatypes.Address;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by James on 26/07/2019.
@@ -39,6 +44,8 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
     private Button importButton;
     private OnSetWatchWalletListener onSetWatchWalletListener = dummyWatchWalletListener;
     private Pattern pattern;
+    private AWEnsResolver ensResolver;
+    private AWalletAlertDialog dialog;
 
     public static SetWatchWalletFragment create()
     {
@@ -92,8 +99,12 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
 
     private void handleWatchAddress(View view)
     {
+        if (watchAddress == null && getActivity() == null) return;
+        if (watchAddress != null) watchAddress = getActivity().findViewById(R.id.input_watch_address);
+
         watchAddress.setError(null);
         String value = watchAddress.getText().toString();
+        KeyboardUtils.hideKeyboard(view);
 
         if (!TextUtils.isEmpty(value))
         {
@@ -104,7 +115,8 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
             }
             else
             {
-                watchAddress.setError(getString(R.string.ethereum_address_hint));
+                //try to resolve ENS
+                getENSAddress(value);
                 return;
             }
         }
@@ -148,12 +160,16 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
         String value = watchAddress.getText().toString();
         value = value.replaceAll("\\s+", "");
         final Matcher matcher = pattern.matcher(value);
-        if (matcher.find())
+        if (EnsResolver.isValidEnsName(value))
+        {
+            updateButtonState(true);
+        }
+        else if (matcher.find())
         {
             updateButtonState(false);
             watchAddress.setError(getString(R.string.ethereum_address_hint));
         }
-        else if (Utils.isAddressValid(value))
+        else if (Utils.isAddressValid(value) || EnsResolver.isValidEnsName(value))
         {
             updateButtonState(true);
         }
@@ -166,19 +182,39 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
 
     public void setAddress(String address)
     {
-        if (address == null) return;
+        if (address == null || getActivity() == null) return;
+        watchAddress = getActivity().findViewById(R.id.input_watch_address);
+        watchAddress.getEditText().setText(address);
+    }
 
-        try
+    private void getENSAddress(String name)
+    {
+        ensProgress();
+        if (ensResolver == null)
+            ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID));
+        ensResolver.resolveENSAddress(name)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::fetchedENSAddress, this::onENSFail).isDisposed();
+    }
+
+    private void fetchedENSAddress(String address)
+    {
+        dialog.dismiss();
+        if (!TextUtils.isEmpty(address))
         {
-            if (Utils.isAddressValid(address))
-            {
-                watchAddress.getEditText().setText(address);
-            }
+            onSetWatchWalletListener.onWatchWallet(address);
         }
-        catch (Exception e)
+        else
         {
-            e.printStackTrace();
+            watchAddress.setError(getString(R.string.ethereum_address_hint));
         }
+    }
+
+    private void onENSFail(Throwable throwable)
+    {
+        dialog.dismiss();
+        watchAddress.setError(getString(R.string.ethereum_address_hint));
     }
 
     @Override
@@ -197,5 +233,15 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
     public void onInputDoneClick(View view)
     {
         handleWatchAddress(view);
+    }
+
+    private void ensProgress()
+    {
+        dialog = new AWalletAlertDialog(getActivity());
+        dialog.setTitle(R.string.title_dialog_check_ens);
+        dialog.setProgressMode();
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.show();
     }
 }

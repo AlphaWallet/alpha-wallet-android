@@ -281,7 +281,7 @@ public abstract class TokenscriptFunction
                     params.add(new Utf8String(arg.element.value));
                     break;
                 case "bytes":
-                    params.add(new BytesType(Numeric.hexStringToByteArray(arg.element.value), "bytes"));
+                    params.add(new Bytes32(Numeric.hexStringToByteArray(arg.element.value)));
                     break;
                 case "bytes1":
                     params.add(new Bytes1(Numeric.hexStringToByteArray(arg.element.value)));

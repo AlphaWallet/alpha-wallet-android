@@ -223,30 +223,14 @@ public class KeystoreAccountService implements AccountKeystoreService
                     dataStr
                     );
 
-            //TODO: Remove this branch once web3j 4.5.0 is released which upgrades chainId from 1 byte to 8 bytes to handle chainId > 255
-            if (chainId > 255)
-            {
-                //old code to be removed
-                byte[] signData = TransactionEncoder.encode(rtx);
-                returnSig = keyService.signData(signer, signData);
-                sigData = sigFromByteArray(returnSig.signature);
+            byte[] signData = TransactionEncoder.encode(rtx, chainId);
+            returnSig = keyService.signData(signer, signData);
+            sigData = sigFromByteArray(returnSig.signature);
+            if (sigData == null) {
+                returnSig.sigType = SignatureReturnType.KEY_CIPHER_ERROR;
+                returnSig.failMessage = "Incorrect signature length"; //should never see this message
             }
-            else
-            {
-                //This is the code to use once web3j 4.5.0 is released and the project is upgraded to use it.
-                //TODO: remove this line
-                byte chainIdByte = (byte) (chainId & 0xFF);
-
-                byte[] signData = TransactionEncoder.encode(rtx, chainIdByte); //TODO: pass in chainId directly
-                returnSig = keyService.signData(signer, signData);
-                sigData = sigFromByteArray(returnSig.signature);
-                if (sigData == null) {
-                    returnSig.sigType = SignatureReturnType.KEY_CIPHER_ERROR;
-                    returnSig.failMessage = "Incorrect signature length"; //should never see this message
-                }
-                else sigData = TransactionEncoder.createEip155SignatureData(sigData, chainIdByte); //TODO: pass in chainId directly
-            }
-
+            else sigData = TransactionEncoder.createEip155SignatureData(sigData, chainId);
             returnSig.signature = encode(rtx, sigData);
             return returnSig;
         })
@@ -436,7 +420,7 @@ public class KeystoreAccountService implements AccountKeystoreService
         {
             System.arraycopy(signature.getR(), 0, sigBytes, 0, 32);
             System.arraycopy(signature.getS(), 0, sigBytes, 32, 32);
-            sigBytes[64] = signature.getV();
+            System.arraycopy(signature.getV(), 0, sigBytes, 64, 1);
         }
         catch (IndexOutOfBoundsException e)
         {

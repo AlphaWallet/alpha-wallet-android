@@ -2,25 +2,11 @@ package com.alphawallet.app.util;
 
 import android.text.TextUtils;
 
-import org.web3j.crypto.WalletUtils;
-import org.web3j.ens.Contracts;
-import org.web3j.ens.EnsResolutionException;
-import org.web3j.ens.EnsResolver;
-import org.web3j.ens.NameHash;
-import org.web3j.ens.contracts.generated.ENS;
-import org.web3j.ens.contracts.generated.PublicResolver;
+import com.alphawallet.app.entity.Wallet;
+
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.response.EthBlock;
-import org.web3j.protocol.core.methods.response.EthSyncing;
-import org.web3j.protocol.core.methods.response.NetVersion;
-import org.web3j.tx.ClientTransactionManager;
-import org.web3j.tx.TransactionManager;
-import org.web3j.utils.Numeric;
 
 import io.reactivex.Single;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.service.GasService;
 
 /**
  * Created by James on 29/05/2019.
@@ -110,10 +96,5 @@ public class AWEnsResolver extends EnsResolver
             }
             return address;
         });
-    }
-
-    public static boolean isValidEnsName(String input) {
-        return input != null // will be set to null on new Contract creation
-                && (input.contains(".") || !WalletUtils.isValidAddress(input));
     }
 }

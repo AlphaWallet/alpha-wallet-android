@@ -25,7 +25,11 @@ import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Date;
 
 import javax.inject.Inject;
@@ -180,19 +184,32 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
 
         if (token != null)
         {
-            rawValue = token.getTransactionValue(transaction, getApplicationContext());
+            BigDecimal rawTxValue = token.getTxValue(transaction);
+            rawValue = getScaledValue(rawTxValue, token.tokenInfo.decimals);
+            rawValue = rawValue + " " + token.getSymbol();
             isSent = token.getIsSent(transaction);
         }
         else
         {
-            rawValue = Token.getScaledValue(transaction.value, 18);
-            prefix = (isSent ? "-" : "+");
+            BigDecimal txValue = new BigDecimal(transaction.value);
+            rawValue = getScaledValue(txValue, 18);
         }
+
+        prefix = (isSent ? "-" : "+");
 
         amount.setTextColor(ContextCompat.getColor(this, isSent ? R.color.red : R.color.green));
         rawValue =  prefix + rawValue;
 
         amount.setText(rawValue);
+    }
+
+    public String getScaledValue(BigDecimal value, long decimals)
+    {
+        NumberFormat formatter = new DecimalFormat("0.00######");
+        formatter.setRoundingMode(RoundingMode.DOWN);
+
+        value = value.divide(new BigDecimal(Math.pow(10, decimals)));
+        return formatter.format(value);
     }
 
     private String localiseUnixTime(long timeStampInSec)

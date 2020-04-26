@@ -5,10 +5,9 @@ import com.alphawallet.app.entity.EthereumProtocolParser;
 import com.alphawallet.app.entity.QrUrlResult;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 
-import java.util.regex.Matcher;
+import java.net.URL;
 import java.util.regex.Pattern;
 
-import static com.alphawallet.app.entity.EthereumProtocolParser.ADDRESS_LENGTH;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
 /**
@@ -41,28 +40,34 @@ public class QRURLParser {
 
     private QRURLParser() { }
 
-    private static String extractAddress(String str) {
+    private static String extractAddress(String str)
+    {
         String address;
-        try {
-            if (!isValidAddress(str))
-            {
-                Matcher matcher = findAddress.matcher(str);
-                if (matcher.find())
-                {
-                    str = matcher.group(1) + matcher.group(2);
-                }
-            }
-
+        try
+        {
             if (isValidAddress(str))
             {
-                address = str.substring(0, ADDRESS_LENGTH);
+                return str;
+            }
+
+            String[] split = str.split("[/&@?=]");
+            address = split.length > 0 ? split[0] : null;
+
+            //is it a valid ethereum Address?
+            if (address == null || isValidAddress(address))
+                return address;
+
+            if (couldBeENS(address))
+            {
+                return address;
             }
             else
             {
-                String[] split = str.split("[/&@?=]");
-                address = split.length > 0 ? split[0] : null;
+                address = "";
             }
-        } catch (StringIndexOutOfBoundsException ex) {
+        }
+        catch (StringIndexOutOfBoundsException ex)
+        {
             return null;
         }
 
@@ -98,7 +103,16 @@ public class QRURLParser {
             }
             else
             {
-                result = new QrUrlResult(url, EIP681Type.URL); //resolve to URL
+                try
+                {
+                    //looks like a URL?
+                    new URL(url);
+                    result = new QrUrlResult(url, EIP681Type.URL); //resolve to URL
+                }
+                catch (Exception e)
+                {
+                    result = new QrUrlResult(url, EIP681Type.OTHER);
+                }
             }
         }
 
@@ -109,10 +123,29 @@ public class QRURLParser {
 
         QrUrlResult result = parse(url);
 
-        if (result == null) {
+        if (result == null || result.type == EIP681Type.OTHER) {
             return null;
         }
 
         return result.getAddress();
+    }
+
+    private static boolean couldBeENS(String address)
+    {
+        String[] split = address.split("[.]");
+        if (split.length > 1)
+        {
+            String extension = split[split.length - 1];
+            switch (extension)
+            {
+                case "eth":
+                case "xyz":
+                    return true;
+                default:
+                    break;
+            }
+        }
+
+        return false;
     }
 }

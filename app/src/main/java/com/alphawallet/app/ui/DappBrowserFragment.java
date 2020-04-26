@@ -1288,9 +1288,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                             case FUNCTION_CALL:
                                 //EIP681 function call. TODO: create function call confirmation. For now treat same way as tokenscript function call
                                 break;
-                            case OTHER: //treat as URL
                             case URL:
                                 loadUrlRemote(qrCode);
+                                break;
+                            case OTHER:
+                                qrCode = null;
                                 break;
                         }
                     }

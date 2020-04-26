@@ -175,10 +175,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
                 chainName.setVisibility(View.GONE);
             }
         }
-        else
-        {
-            chainName.setVisibility(View.GONE);
-        }
     }
 
     private Token getOperationToken()

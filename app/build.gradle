@@ -101,7 +101,7 @@ project.ext {
     okhttpVersion = "4.0.0"
     picassoVersion = "2.71828"
     supportVersion = "28.0.0"
-    web3jVersion = "4.2.1-android"
+    web3jVersion = "4.5.17"
     gsonVersion = "2.8.5"
     rxJavaVersion = "2.2.10"
     rxAndroidVersion = "2.1.1"

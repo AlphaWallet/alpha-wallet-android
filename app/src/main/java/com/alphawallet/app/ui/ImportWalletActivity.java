@@ -19,6 +19,7 @@ import android.view.View;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ImportWalletCallback;
 import com.alphawallet.app.entity.Operation;
@@ -414,7 +415,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
                     QRURLParser parser = QRURLParser.getInstance();
                     QrUrlResult result = parser.parse(barcode);
                     String extracted_address = null;
-                    if (result != null && result.getProtocol().equals("address"))
+                    if (result != null && result.type == EIP681Type.ADDRESS)
                     {
                         extracted_address = result.getAddress();
                         if (currentPage == ImportType.WATCH_FORM_INDEX)

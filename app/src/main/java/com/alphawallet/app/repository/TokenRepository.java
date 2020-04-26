@@ -7,8 +7,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -19,13 +17,10 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
-import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
-import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.MagicLinkData;
-import com.alphawallet.token.tools.Convert;
 
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
@@ -44,7 +39,6 @@ import org.web3j.abi.datatypes.generated.Bytes4;
 import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
-import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
@@ -56,6 +50,7 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -74,8 +69,6 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
-import static com.alphawallet.app.repository.EthereumNetworkRepository.MAINNET_ID;
-import static org.web3j.crypto.WalletUtils.isValidAddress;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TokenRepository implements TokenRepositoryType {
@@ -1080,7 +1073,7 @@ public class TokenRepository implements TokenRepositoryType {
 
             return response.getValue();
         }
-        catch (InterruptedIOException e)
+        catch (InterruptedIOException|UnknownHostException e)
         {
             //expected to happen when user switches wallets
             return "0x";

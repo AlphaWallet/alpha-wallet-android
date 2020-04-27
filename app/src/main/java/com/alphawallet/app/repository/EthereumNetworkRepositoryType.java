@@ -42,6 +42,7 @@ public interface EthereumNetworkRepositoryType {
 
 	void refreshTickers();
 	boolean checkTickers();
+	boolean shouldUseBackupNode();
 
 	List<ContractLocator> getAllKnownContracts(List<Integer> networkFilters);
 	Single<Token[]> getBlankOverrideTokens(Wallet wallet);

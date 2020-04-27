@@ -91,7 +91,7 @@ public class TokenRepository implements TokenRepositoryType {
     private static final int CONTRACT_BALANCE_NULL = -2;
 
     private final Map<Integer, Web3j> web3jNodeServers;
-    private final AWEnsResolver ensResolver;
+    private AWEnsResolver ensResolver;
 
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -105,12 +105,12 @@ public class TokenRepository implements TokenRepositoryType {
         this.context = context;
 
         web3jNodeServers = new ConcurrentHashMap<>();
-        ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID));
     }
 
     private void buildWeb3jClient(NetworkInfo networkInfo)
     {
-        HttpService publicNodeService = new HttpService(networkInfo.rpcServerUrl, okClient, false);
+        String rpcServerUrl = ethereumNetworkRepository.shouldUseBackupNode() ? networkInfo.backupNodeUrl : networkInfo.rpcServerUrl;
+        HttpService publicNodeService = new HttpService(rpcServerUrl, okClient, false);
         EthereumNetworkRepository.addRequiredCredentials(networkInfo.chainId, publicNodeService);
         web3jNodeServers.put(networkInfo.chainId, Web3j.build(publicNodeService));
     }
@@ -380,6 +380,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<String> resolveENS(int chainId, String ensName)
     {
+        if (ensResolver == null) ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID));
         return ensResolver.resolveENSAddress(ensName);
     }
 

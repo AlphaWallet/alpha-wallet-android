@@ -673,7 +673,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private void setupWeb3() {
         web3.setActivity(getActivity());
         web3.setChainId(networkInfo.chainId);
-        web3.setRpcUrl(networkInfo.rpcServerUrl);
+        web3.setRpcUrl(viewModel.shouldUseBackupNode() ? networkInfo.backupNodeUrl : networkInfo.rpcServerUrl);
         web3.setWalletAddress(new Address(wallet.address));
 
         web3.setWebChromeClient(new WebChromeClient() {

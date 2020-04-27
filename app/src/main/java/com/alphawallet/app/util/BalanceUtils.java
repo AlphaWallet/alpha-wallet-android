@@ -5,6 +5,8 @@ import org.web3j.utils.Convert;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 public class BalanceUtils {
     private static String weiInEth  = "1000000000000000000";
@@ -75,5 +77,13 @@ public class BalanceUtils {
     {
         for (char ch : value.toCharArray()) if (!(Character.isDigit(ch) || ch == '.')) return false;
         return true;
+    }
+
+    public static String getScaledValueWithLimit(BigDecimal value, long decimals)
+    {
+        NumberFormat formatter = new DecimalFormat("0.00#######");
+        formatter.setRoundingMode(RoundingMode.DOWN);
+        value = value.divide(new BigDecimal(Math.pow(10, decimals)), 10, RoundingMode.HALF_DOWN);
+        return formatter.format(value);
     }
 }

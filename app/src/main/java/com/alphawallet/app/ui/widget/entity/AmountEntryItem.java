@@ -6,24 +6,28 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.*;
+import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.AmountUpdateCallback;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.util.BalanceUtils;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import com.alphawallet.app.R;
-import com.alphawallet.app.entity.AmountUpdateCallback;
-import com.alphawallet.app.repository.TokenRepositoryType;
-import com.alphawallet.app.entity.tokens.Token;
-
-import java.util.concurrent.TimeUnit;
-
-import static com.alphawallet.token.tools.Convert.getEthString;
 
 /**
  * Created by James on 25/02/2019.
@@ -216,16 +220,17 @@ public class AmountEntryItem
 
     private String ethEquivalent(String amountStr) throws NumberFormatException
     {
-        String result = "0";
-
-        if (amountStr.length() > 0) {
-            double equivalent = 0.0;
-            double amount = Double.parseDouble(amountStr);
-            equivalent = amount / currentEthPrice;
-            result = getEthString(equivalent, decimals);
+        try
+        {
+            BigDecimal fiatAmount = new BigDecimal(amountStr);
+            BigDecimal conversion = BigDecimal.valueOf(currentEthPrice);
+            fiatAmount = fiatAmount.divide(conversion, 10, RoundingMode.HALF_DOWN);
+            return BalanceUtils.getScaledValueWithLimit(fiatAmount, 0);
         }
-
-        return result;
+        catch (Exception e)
+        {
+            return "0";
+        }
     }
 
     public void setAmount(String value)

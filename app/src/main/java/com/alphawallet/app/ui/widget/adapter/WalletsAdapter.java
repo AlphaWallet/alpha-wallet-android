@@ -69,6 +69,8 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
                 wallet = wallets.get(position);
                 holder.bind(wallet.address);
                 break;
+            default:
+                break;
         }
     }
 

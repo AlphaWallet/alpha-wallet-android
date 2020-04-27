@@ -159,7 +159,14 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return items.get(position).viewType;
+        if (position < items.size())
+        {
+            return items.get(position).viewType;
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     @Override

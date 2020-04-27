@@ -41,7 +41,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     /* constructing URLs from BuildConfig. In the below area you will see hardcoded key like da3717...
        These hardcoded keys are fallbacks used by AlphaWallet forks.
      */
-    public static final String BACKUP_INFURA_KEY = "da3717f25f824cc1baa32d812386d93f";
+    public static final String BACKUP_INFURA_KEY = BuildConfig.InfuraAPI;
     public static final String MAINNET_FALLBACK_RPC_URL = "https://mainnet.infura.io/v3/" + BuildConfig.InfuraAPI;
     public static final String MAINNET_RPC_URL = !BuildConfig.AmberdataAPI.startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + BuildConfig.AmberdataAPI : MAINNET_FALLBACK_RPC_URL;
     public static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
@@ -78,6 +78,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String GOERLI_BLOCKSCOUT = "eth/goerli";
 
     final Map<Integer, NetworkInfo> networkMap;
+    protected static boolean useBackupNode = false;
 
     final NetworkInfo[] NETWORKS;
     static final NetworkInfo[] DEFAULT_NETWORKS = new NetworkInfo[] {
@@ -316,7 +317,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         switch (networkId)
         {
             case MAINNET_ID:
-                return MAINNET_RPC_URL;
+                if (useBackupNode) return MAINNET_FALLBACK_RPC_URL;
+                else return MAINNET_RPC_URL;
             case KOVAN_ID:
                 return KOVAN_RPC_URL;
             case ROPSTEN_ID:
@@ -476,5 +478,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public Token getBlankOverrideToken()
     {
         return null;
+    }
+
+    public boolean shouldUseBackupNode()
+    {
+        return useBackupNode;
     }
 }

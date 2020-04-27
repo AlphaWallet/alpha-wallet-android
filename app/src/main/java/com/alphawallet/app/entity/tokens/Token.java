@@ -138,6 +138,7 @@ public class Token implements Parcelable, Comparable<Token>
         nonIconifiedWebviewHeight = in.readInt();
         iconifiedWebviewHeight = in.readInt();
         nameWeight = in.readInt();
+        ticker = in.readParcelable(TokenTicker.class.getClassLoader());
 
         balanceChanged = false;
         if (readType <= ContractType.CREATION.ordinal())
@@ -209,6 +210,7 @@ public class Token implements Parcelable, Comparable<Token>
         dest.writeInt(nonIconifiedWebviewHeight);
         dest.writeInt(iconifiedWebviewHeight);
         dest.writeInt(nameWeight);
+        dest.writeParcelable(ticker, flags);
     }
 
     public void setRealmBalance(RealmToken realmToken)

@@ -112,7 +112,7 @@ public class ScriptTool implements AttributeInterface
 
         if (tokenScriptFile != null)
         {
-            dumpTokenScriptFile();
+            dumpTokenInfo();
         }
     }
 
@@ -122,7 +122,7 @@ public class ScriptTool implements AttributeInterface
         System.out.println("scripttool -tokenscript <TokenScript File> -address <Ethereum address>");
     }
 
-    private void dumpTokenScriptFile()
+    private void dumpTokenInfo()
     {
         try
         {
@@ -152,42 +152,14 @@ public class ScriptTool implements AttributeInterface
             }
 
             System.out.println();
-            System.out.println("Attributes:");
-            System.out.println("-----------");
 
             for (Integer chainId : holdingContract.addresses.keySet())
             {
                 for (String addr : holdingContract.addresses.get(chainId))
                 {
                     System.out.println("Contract: " + addr + " ChainID: " + chainId + " Type: " + holdingContract.contractInterface);
-                    ContractAddress    cAddr     = new ContractAddress(chainId, addr);
-                    StringBuilder      tokenData = new StringBuilder();
-                    TransactionHandler txHandler = new TransactionHandler(chainId);
-                    List<BigInteger>   balanceArray = null;
 
-                    String tokenName = txHandler.getNameOnly(addr);
-                    String symbol = txHandler.getSymbolOnly(addr);
-                    String nameWithSymbol = tokenName + "(" + symbol + ")";
-
-                    System.out.println("Contract Name (Eth): " + nameWithSymbol);
-
-                    if (holdingContract.contractInterface != null && holdingContract.contractInterface.equalsIgnoreCase("ERC875"))
-                    {
-                        //fetch balance array
-                        balanceArray = fetchArrayBalance(addr, userAddress, txHandler);
-                    }
-
-                    if (balanceArray == null || balanceArray.size() == 0){
-                        balanceArray = new ArrayList<>();
-                        balanceArray.add(BigInteger.ZERO);
-                    }
-
-                    tokenscriptFunction.resolveAttributes(userAddress.toString(), balanceArray.get(0), this, cAddr, definition)
-                            .forEach(attr -> TokenScriptResult.addPair(tokenData, attr.id, attr.text))
-                            .isDisposed();
-
-                    System.out.println();
-                    System.out.println(tokenData.toString());
+                    System.out.println("{\n" + tokenAttributesToJson(holdingContract, new ContractAddress(chainId, addr), definition) + "\n}");
                 }
             }
         }
@@ -198,6 +170,38 @@ public class ScriptTool implements AttributeInterface
         }
 
         Runtime.getRuntime().exit(0);
+    }
+
+    private String tokenAttributesToJson(ContractInfo holdingContract, ContractAddress cAddr, TokenDefinition definition) throws java.lang.Exception {
+        StringBuilder      tokenData = new StringBuilder();
+        TransactionHandler txHandler = new TransactionHandler(cAddr.chainId);
+        List<BigInteger>   balanceArray = null;
+
+        String tokenName = txHandler.getNameOnly(cAddr.address);
+        String symbol = txHandler.getSymbolOnly(cAddr.address);
+        String nameWithSymbol = tokenName + "(" + symbol + ")";
+
+        System.out.println("Contract Name (Eth): " + nameWithSymbol);
+
+        System.out.println("JSON dictionary for token attributes:");
+        System.out.println("-----------");
+
+        if (holdingContract.contractInterface != null && holdingContract.contractInterface.equalsIgnoreCase("ERC875"))
+        {
+            //fetch balance array
+            balanceArray = fetchArrayBalance(cAddr.address, userAddress, txHandler);
+        }
+
+        if (balanceArray == null || balanceArray.size() == 0){
+            balanceArray = new ArrayList<>();
+            balanceArray.add(BigInteger.ZERO);
+        }
+
+        tokenscriptFunction.resolveAttributes(userAddress.toString(), balanceArray.get(0), this, cAddr, definition)
+                .forEach(attr -> TokenScriptResult.addPair(tokenData, "\"" + attr.id + "\"", attr.text))
+                .isDisposed();
+
+        return tokenData.toString() + "\"ownerAddress\": \"" + userAddress + "\"";
     }
 
     private boolean checkValidity(TokenDefinition definition)

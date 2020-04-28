@@ -2,7 +2,8 @@ package com.alphawallet.app.repository;
 
 import android.util.Log;
 
-import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmERC721Asset;
 import com.alphawallet.app.repository.entity.RealmERC721Token;
@@ -11,23 +12,19 @@ import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransactionOperation;
 import com.alphawallet.app.repository.entity.RealmWalletData;
+import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.RealmManager;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
-import io.realm.RealmObject;
 import io.realm.RealmResults;
 import io.realm.Sort;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.service.AWRealmMigration;
-import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.service.RealmManager;
 
 /**
  * Created by James on 8/11/2018.

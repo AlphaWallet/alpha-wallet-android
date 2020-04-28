@@ -18,11 +18,13 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
@@ -153,7 +155,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         try
         {
             assetLoadingLock.acquire(); // acquire the semaphore here to prevent attributes from being fetched until loading is complete
-                                        // See flow above for details
+            // See flow above for details
         }
         catch (InterruptedException e)
         {
@@ -170,17 +172,17 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         Observable.fromIterable(getCanonicalizedAssets())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::addContractAssets, error -> { onError(error); parseAllFileScripts(); },
-                           this::parseAllFileScripts).isDisposed();
+                        this::parseAllFileScripts).isDisposed();
     }
 
     private void parseAllFileScripts()
     {
         final File[] files = buildFileList(); //build an ordered list of files that need parsing
-                                        //1. Signed files downloaded from server.
-                                        //2. Files placed in the Android OS external directory (Android/data/<App Package Name>/files)
-                                        //3. Files placed in the /AlphaWallet directory.
-                                        //Depending on the order placed, files can be overridden. A file downloaded from the server is
-                                        //overridden by a script for the same token placed in the /AlphaWallet directory.
+        //1. Signed files downloaded from server.
+        //2. Files placed in the Android OS external directory (Android/data/<App Package Name>/files)
+        //3. Files placed in the /AlphaWallet directory.
+        //Depending on the order placed, files can be overridden. A file downloaded from the server is
+        //overridden by a script for the same token placed in the /AlphaWallet directory.
 
         Observable.fromArray(files)
                 .filter(File::isFile)
@@ -192,7 +194,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     cacheSignature(file)
                             .map(this::addContractAddresses)
                             .subscribe(success -> fileLoadComplete(success, file),
-                                       error -> handleFileLoadError(error, file))
+                                    error -> handleFileLoadError(error, file))
                             .isDisposed();
                 } );
 
@@ -315,6 +317,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     /**
      * Fetch attributes from local storage; not using contract lookup
+     *
      * @param token
      * @param tokenId
      * @return
@@ -487,6 +490,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
+    public Single<List<TokenLocator>> getTokenLocators()
+    {
+        return Single.fromCallable(() ->
+        {
+            waitForAssets();
+            return getAllTokenDefinitions();
+        });
+    }
+
     private void waitForAssets()
     {
         try
@@ -516,8 +528,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     for (int network : holdingContracts.addresses.keySet())
                     {
                         addContractsToNetwork(network,
-                                              networkAddresses(holdingContracts.addresses.get(network), tokenScriptFile.getAbsolutePath()),
-                                              false, token);
+                                networkAddresses(holdingContracts.addresses.get(network), tokenScriptFile.getAbsolutePath()),
+                                false);
                     }
                     return token;
                 }
@@ -570,6 +582,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     /**
      * Get the issuer name given the contract address
      * Note: this is optimised so as we don't need to keep loading in definitions as the user scrolls
+     *
      * @param token
      * @return
      */
@@ -739,27 +752,25 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         assetLoadingLock.release();
     }
 
-    private void addContractsToNetwork(Integer network, Map<String, File> newTokenDescriptionAddresses, boolean activeUpdate,TokenDefinition tokenDef)
+    private void addContractsToNetwork(Integer network, Map<String, File> newTokenDescriptionAddresses, boolean activeUpdate)
     {
         String externalDir = context.getExternalFilesDir("").getAbsolutePath();
-        if (assetDefinitions.get(network) == null) assetDefinitions.put(network, new ConcurrentHashMap<>());
+        if (assetDefinitions.get(network) == null)
+            assetDefinitions.put(network, new ConcurrentHashMap<>());
         List<String> updateFiles = getAllNewFiles(newTokenDescriptionAddresses);
-        for (String address : newTokenDescriptionAddresses.keySet())
-        {
+        for (String address : newTokenDescriptionAddresses.keySet()) {
             if (activeUpdate && assetDefinitions.get(network).containsKey(address))
             {
                 String filename = assetDefinitions.get(network).get(address).getAbsolutePath();
                 //remove old file if it's an active update and file is in dev area
                 if (!updateFiles.contains(filename) && (filename.contains(HomeViewModel.ALPHAWALLET_DIR)
-                    || filename.contains(externalDir)))
+                        || filename.contains(externalDir)))
                 {
                     //delete old developer override - could be a different filename which will cause trouble later
                     removeFile(filename);
                 }
             }
-            TokenScriptFile tokenFile = new TokenScriptFile(context, newTokenDescriptionAddresses.get(address).getAbsolutePath());
-            tokenFile.setTokenName(tokenDef.getTokenName(1));
-            assetDefinitions.get(network).put(address, tokenFile);
+            assetDefinitions.get(network).put(address, new TokenScriptFile(context, newTokenDescriptionAddresses.get(address).getAbsolutePath()));
         }
     }
 
@@ -800,12 +811,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             TokenDefinition token = parseFile(input);
             TokenScriptFile tsf = new TokenScriptFile(context, asset);
             ContractInfo holdingContracts = token.contracts.get(token.holdingToken);
-            if (holdingContracts != null)
-            {
+            if (holdingContracts != null) {
                 //some Android versions don't have stream()
-                for (int network : holdingContracts.addresses.keySet())
-                {
-                    addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), asset), false, token);
+                for (int network : holdingContracts.addresses.keySet()) {
+                    addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), asset), false);
                     XMLDsigDescriptor AWSig = new XMLDsigDescriptor();
                     String hash = tsf.calcMD5();
                     AWSig.result = "pass";
@@ -846,11 +855,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         FileInputStream input = new FileInputStream(file);
         TokenDefinition tokenDef = parseFile(input);
         ContractInfo holdingContracts = tokenDef.contracts.get(tokenDef.holdingToken);
-        if (holdingContracts != null)
-        {
-            for (int network : holdingContracts.addresses.keySet())
-            {
-                addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), file.getAbsolutePath()), update,tokenDef);
+        if (holdingContracts != null) {
+            for (int network : holdingContracts.addresses.keySet()) {
+                addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), file.getAbsolutePath()), update);
             }
 
             return ContractLocator.fromContractInfo(holdingContracts);
@@ -1198,11 +1205,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    public SparseArray<Map<String, TokenScriptFile>> getAssetDefinitions()
-    {
-        return assetDefinitions;
-    }
-
     public Single<XMLDsigDescriptor> getSignatureData(int chainId, String contractAddress)
     {
         return Single.fromCallable(() -> {
@@ -1258,13 +1260,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         if (cInfo.contractInterface != null)
                         {
                             checkCorrectInterface(token, cInfo.contractInterface);
-                                Observable.fromIterable(token.getNonZeroArrayBalance())
-                                        .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
-                                        .filter(txResult -> txResult.needsUpdating(token.lastTxTime))
-                                        .concatMap(result -> tokenscriptUtility.fetchAttrResult(token.getWallet(), attr.id, result.tokenId, cAddr, td, this, token.lastTxTime))
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe();
+                            Observable.fromIterable(token.getNonZeroArrayBalance())
+                                    .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
+                                    .filter(txResult -> txResult.needsUpdating(token.lastTxTime))
+                                    .concatMap(result -> tokenscriptUtility.fetchAttrResult(token.getWallet(), attr.id, result.tokenId, cAddr, td, this, token.lastTxTime))
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe();
                         }
                         else
                         {
@@ -1298,8 +1300,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             case "erc20":
                 cType = ContractType.ERC20;
                 break;
-                // note: ERC721 and ERC721Ticket are contracts with different interfaces which are handled in different ways but we describe them
-                // as the same within the tokenscript.
+            // note: ERC721 and ERC721Ticket are contracts with different interfaces which are handled in different ways but we describe them
+            // as the same within the tokenscript.
             case "erc721":
                 if (token.isERC721() || token.isERC721Ticket()) return;
                 cType = ContractType.ERC721;
@@ -1648,6 +1650,29 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return tokenscriptUtility.convertInputValue(attr, e, valueFromInput);
     }
 
+    private List<TokenLocator> getAllTokenDefinitions()
+    {
+        List<TokenLocator> tokenLocators = new ArrayList<>();
+        for (int i = 0; i < assetDefinitions.size(); i++)
+        {
+            int chainId = assetDefinitions.keyAt(i);
+            Map<String, TokenScriptFile> assetDefinition = assetDefinitions.get(chainId);
+            for (String address : assetDefinition.keySet())
+            {
+                if (address.equals("ethereum")) continue;
+                Token token = tokensService.getToken(chainId, address);
+                TokenInfo tokenInfo = token.tokenInfo;
+
+                // TODO: 28-04-2020  Decide which token name we want to use
+                // tokenLocators.add(new TokenLocator(tokenInfo.name, chainId, ContractType.NOT_SET, assetDefinition.get(address).getName(), address));
+
+                TokenDefinition definition = getTokenDefinition(assetDefinition.get(address));
+                String tokenName = definition.getTokenName(1);
+                tokenLocators.add(new TokenLocator(tokenName, chainId, ContractType.NOT_SET, assetDefinition.get(address).getName(), address));
+            }
+        }
+        return tokenLocators;
+    }
 
     private List<ContractLocator> getAllOriginContracts()
     {

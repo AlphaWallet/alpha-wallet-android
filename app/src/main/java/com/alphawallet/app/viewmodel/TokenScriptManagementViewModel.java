@@ -1,40 +1,38 @@
 package com.alphawallet.app.viewmodel;
 
-import android.util.SparseArray;
+import android.arch.lifecycle.MutableLiveData;
 
-import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
+import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TokensService;
 
-import java.util.Map;
+import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class TokenScriptManagementViewModel extends BaseViewModel {
 
     private final AssetDefinitionService assetDefinitionService;
+    private MutableLiveData<List<TokenLocator>> tokenLocatorsLiveData;
 
     public TokenScriptManagementViewModel(AssetDefinitionService assetDefinitionService) {
         this.assetDefinitionService = assetDefinitionService;
+
+        tokenLocatorsLiveData = new MutableLiveData<>();
+
+        assetDefinitionService.getTokenLocators() //holds for loading complete then returns origin contracts
+                .subscribeOn(Schedulers.single())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::addUnresolvedTokens)
+                .isDisposed();
     }
 
-    public Map<String, TokenScriptFile> getFileList() {
+    private void addUnresolvedTokens(List<TokenLocator> tokenLocators) {
+        tokenLocatorsLiveData.setValue(tokenLocators);
+    }
 
-        Map<String, TokenScriptFile> tokenFiles = null;
-        SparseArray<Map<String, TokenScriptFile>> fileList = assetDefinitionService.getAssetDefinitions();
-        if (fileList != null && fileList.size() > 0) {
-            tokenFiles = fileList.valueAt(0);
-            for (int i = 1; i < fileList.size(); i++) {
-                Map<String, TokenScriptFile> tokens = fileList.valueAt(i);
-                boolean isValid = true;
-                for (TokenScriptFile file : tokens.values()) {
-                    if (!file.isValidTokenScript()) {
-                        isValid = false;
-                        break;
-                    }
-                }
-                if (isValid) {
-                    tokenFiles.putAll(tokens);
-                }
-            }
-        }
-        return tokenFiles;
+    public MutableLiveData<List<TokenLocator>> getTokenLocatorsLiveData() {
+        return tokenLocatorsLiveData;
     }
 }

@@ -9,47 +9,40 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
+import com.alphawallet.app.entity.TokenLocator;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScriptManagementAdapter.TokenHolder> {
 
     private Context context;
     private LayoutInflater inflater;
-    private Map<String, TokenScriptFile> values;
-    private List<String> keyValues;
+    private List<TokenLocator> tokenLocators;
 
-    public TokenScriptManagementAdapter(Context context, Map<String, TokenScriptFile> values) {
+    public TokenScriptManagementAdapter(Context context, List<TokenLocator> tokenLocators) {
         this.context = context;
-        this.values = values;
+        this.tokenLocators = tokenLocators;
         inflater = LayoutInflater.from(context);
-        keyValues = new ArrayList<>(values.keySet());
     }
 
     @Override
-    public TokenHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i)
-    {
-        return new TokenHolder(inflater.inflate(R.layout.item_tokenscript_management,viewGroup,false));
+    public TokenHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        return new TokenHolder(inflater.inflate(R.layout.item_tokenscript_management, viewGroup, false));
     }
 
     @Override
     public void onBindViewHolder(@NonNull TokenHolder tokenHolder, int pos) {
 
-        String tokenAddress = keyValues.get(pos);
+        TokenLocator tokenLocator = tokenLocators.get(pos);
 
-        TokenScriptFile tokenFile = values.get(tokenAddress);
-
-        tokenHolder.txtToken.setText(tokenFile.getTokenName());
-        tokenHolder.txtTokenAddress.setText(tokenAddress);
-        tokenHolder.txtTokenFile.setText(values.get(tokenAddress).getName());
+        tokenHolder.txtToken.setText(tokenLocator.name);
+        tokenHolder.txtTokenAddress.setText(tokenLocator.getAddress());
+        tokenHolder.txtTokenFile.setText(tokenLocator.getFileName());
     }
 
     @Override
     public int getItemCount() {
-        return values.size();
+        return tokenLocators.size();
     }
 
     class TokenHolder extends RecyclerView.ViewHolder {

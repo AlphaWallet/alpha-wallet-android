@@ -545,7 +545,7 @@
     <string name="zero_balance_tokens_are_switched_off">Token balance for this token is empty and will not show unless you switch on empty token balances. Continue?</string>
     <string name="dialog_switch_zero_balance_tokens_on">Switch On</string>
     <string name="cannot_read_encrypt_file">Wallet can not read encrypted key; re-import required.</string>
-    <string name="authentication_error">Authenitcation to unlock key not provided or timed out. Please try again.</string>
+    <string name="authentication_error">Authentication to unlock key not provided or timed out. Please try again.</string>
     <string name="device_security_changed">Since this key was created the mobile device security has changed and the OS has invalidated the key. Please re-import your key.</string>
     <string name="fingerprint_authentication_failed">Fingerprint authentication failed</string>
     <string name="action_snackbar_undo">UNDO</string>
@@ -594,4 +594,5 @@
     <string name="created_aw_directory">Created AlphaWallet Directory</string>
     <string name="created_aw_directory_detail">AlphaWallet directory created. Drop scripts into this directory to use your scripts. See tokenscript.org for more details on how to easily create a secure and useful interface to your tokens.</string>
     <string name="title_no_need_to_watch">Already Watching</string>
+    <string name="error_while_signing_transaction">Error occurred while signing transaction. Please re-import the key for this wallet.</string>
 </resources>

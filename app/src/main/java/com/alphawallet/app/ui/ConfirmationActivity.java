@@ -551,9 +551,29 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
-        else viewModel.failedAuthentication(SIGN_DATA);
+        if (gotAuth)
+        {
+            viewModel.completeAuthentication(SIGN_DATA);
+        }
+        else
+        {
+            //fail authentication
+            securityError();
+        }
         //got authorisation, continue with transaction
         if (gotAuth) finaliseTransaction();
+    }
+
+    private void securityError() {
+        hideDialog();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.key_error);
+        dialog.setMessage(getString(R.string.error_while_signing_transaction));
+        dialog.setButtonText(R.string.ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
     }
 }

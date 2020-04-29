@@ -584,4 +584,6 @@
     <string name="created_aw_directory_detail">AlphaWallet directory created. Drop scripts into this directory to use your scripts. See tokenscript.org for more details on how to easily create a secure and useful interface to your tokens.</string>
     <string name="title_no_need_to_watch">Already Watching</string>
     <string name="error_while_signing_transaction">Error occurred while signing transaction. Please re-import the key for this wallet.</string>
+    <string name="error_not_whitelisted">Page Not Whitelisted</string>
+    <string name="explain_not_whitelisted">TokenScript attempting to redirect to non-whitelisted page %1$s. If you are the owner of this site please submit PR to AlphaWallet repo to add page for whitelisting.</string>
 </resources>

@@ -653,7 +653,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             List<DApp> myDapps = DappBrowserUtils.getDappsList(getApplicationContext());
             for (DApp thisDapp : myDapps)
             {
-                if (url.contains(thisDapp.getUrl()))
+                //must start with the whitelisted URL, to avoid simply adding the URL as a param
+                if (url.startsWith(thisDapp.getUrl()))
                 {
                     openInDappBrowser(url);
                     return true;

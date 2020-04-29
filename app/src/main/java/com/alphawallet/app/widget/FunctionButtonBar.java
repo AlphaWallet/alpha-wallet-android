@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -114,9 +115,14 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
         if (!token.isNonFungible()) addStandardTokenFunctions(token);
 
-        if (functions != null && functions.size() > 0) {
-            for (String function : functions.keySet()) {
-                addFunction(new ItemClick(function, 0));
+        if (functions != null && functions.size() > 0)
+        {
+            SparseArray<String> actions = new SparseArray<>();
+            for (String actionName : functions.keySet()) actions.put(functions.get(actionName).order, actionName);
+
+            for (int i = 0; i < actions.size(); i++)
+            {
+                addFunction(new ItemClick(actions.get(i), 0));
             }
         }
 

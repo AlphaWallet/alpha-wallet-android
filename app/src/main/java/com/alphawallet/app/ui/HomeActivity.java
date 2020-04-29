@@ -3,8 +3,16 @@ package com.alphawallet.app.ui;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.arch.lifecycle.*;
-import android.content.*;
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleObserver;
+import android.arch.lifecycle.OnLifecycleEvent;
+import android.arch.lifecycle.ProcessLifecycleOwner;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
@@ -22,21 +30,17 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.alphawallet.app.entity.VisibilityFilter;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.service.NotificationService;
-import com.github.florent37.tutoshowcase.TutoShowcase;
+import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
@@ -45,16 +49,12 @@ import com.alphawallet.app.entity.HomeReceiver;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.ui.widget.entity.ScrollControlViewPager;
 import com.alphawallet.app.util.RootUtil;
-
-import dagger.android.AndroidInjection;
-import com.alphawallet.token.tools.ParseMagicLink;
-import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-
 import com.alphawallet.app.viewmodel.BaseNavigationActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.app.viewmodel.HomeViewModelFactory;
@@ -62,16 +62,23 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.DepositView;
 import com.alphawallet.app.widget.SignTransactionDialog;
-import com.alphawallet.app.widget.SystemView;
+import com.alphawallet.token.tools.ParseMagicLink;
+import com.github.florent37.tutoshowcase.TutoShowcase;
 
 import org.web3j.crypto.WalletUtils;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.lang.reflect.Method;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+
 import static com.alphawallet.app.C.CHANGED_LOCALE;
-import static com.alphawallet.app.widget.AWalletBottomNavigationView.*;
+import static com.alphawallet.app.widget.AWalletBottomNavigationView.DAPP_BROWSER;
+import static com.alphawallet.app.widget.AWalletBottomNavigationView.SETTINGS;
+import static com.alphawallet.app.widget.AWalletBottomNavigationView.TRANSACTIONS;
+import static com.alphawallet.app.widget.AWalletBottomNavigationView.WALLET;
 
 public class HomeActivity extends BaseNavigationActivity implements View.OnClickListener, HomeCommsInterface, FragmentMessenger, Runnable, SignAuthenticationCallback
 {
@@ -223,6 +230,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             bundle.putString("url", url);
             dappBrowserFragment.setArguments(bundle);
             showPage(DAPP_BROWSER);
+            //remove navbar if running as pure browser. clicking back will send you back to the Action/click that took you there
+            hideNavBar();
         }
 
         viewModel.cleanDatabases(this);
@@ -922,7 +931,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void onBackPressed() {
         //Check if current page is WALLET or not
-        if(viewPager.getCurrentItem() != WALLET)
+        if(viewPager.getCurrentItem() != WALLET && isNavBarVisible())
         {
             showPage(WALLET);
         }

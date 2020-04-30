@@ -26,7 +26,6 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
     private final OnSetWalletDefaultListener onSetWalletDefaultListener;
     private ArrayList<Wallet> wallets;
     private Wallet defaultWallet = null;
-    private NetworkInfo network;
     private final Context context;
 
     public WalletsAdapter(Context ctx,
@@ -92,11 +91,6 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
             case TEXT_MARKER:
                 return TextHolder.VIEW_TYPE;
         }
-    }
-
-    public void setNetwork(NetworkInfo network) {
-        this.network = network;
-        notifyDataSetChanged();
     }
 
     public void setDefaultWallet(Wallet wallet) {

@@ -25,6 +25,7 @@ import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
+import com.alphawallet.app.web3.OnSetValuesListener;
 import com.alphawallet.app.web3.OnSignPersonalMessageListener;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.Address;
@@ -73,7 +74,9 @@ import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.TOKENSC
  * Stormbird in Singapore
  */
 public class FunctionActivity extends BaseActivity implements FunctionCallback,
-                                                              PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback, StandardFunctionInterface, TokenScriptRenderCallback, WebCompletionCallback
+                                                              PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback,
+                                                              StandardFunctionInterface, TokenScriptRenderCallback, WebCompletionCallback,
+                                                              OnSetValuesListener
 {
     @Inject
     protected TokenFunctionViewModelFactory viewModelFactory;
@@ -116,6 +119,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenView.setRpcUrl(token.tokenInfo.chainId);
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSignPersonalMessageListener(this);
+        tokenView.setOnSetValuesListener(this);
         tokenView.setVisibility(View.GONE);
         waitSpinner.setVisibility(View.VISIBLE);
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
@@ -686,6 +690,12 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         KeyboardUtils.hideKeyboard(getCurrentFocus());
     }
 
+    @Override
+    public void setValues(String ref)
+    {
+        //called when a value updates
+        System.out.println(ref + " " );
+    }
 
     /**
      * JavaScript methods to obtain values from within the rendered view

@@ -34,12 +34,7 @@ web3 = {
     },
     action: {
         setProps: function (msgParams) {
-            var dump = '';
-            for (var key in msgParams)
-            {
-              	dump += (key + " " + msgParams[key]);
-            }
-            changeListener.setValues(dump);
+            changeListener.setValues(JSON.stringify(msgParams));
         }
     }
 }

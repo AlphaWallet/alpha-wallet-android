@@ -32,6 +32,7 @@ import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
 import java.math.BigInteger;
+import java.util.Map;
 
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ERROR;
 
@@ -249,9 +250,9 @@ public class Web3TokenView extends WebView
 
     private final OnSetValuesListener innerOnSetValuesListener = new OnSetValuesListener() {
         @Override
-        public void setValues(String ref)
+        public void setValues(Map<String, String> updates)
         {
-            System.out.println("YOLESS");
+            onSetValuesListener.setValues(updates);
         }
     };
 

@@ -6,6 +6,7 @@ package com.alphawallet.token.entity;
  */
 public class TokenscriptElement
 {
+    public String localRef;
     public String ref;
     public String value;
 

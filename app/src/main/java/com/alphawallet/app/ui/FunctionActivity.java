@@ -90,14 +90,12 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private Web3TokenView tokenView;
     private ProgressBar waitSpinner;
     private SignMessageDialog dialog;
-    private Map<String, String> args = new HashMap<>();
-    private List<String> userInputArgs = new ArrayList<>();
+    private final Map<String, String> args = new HashMap<>();
     private StringBuilder attrs;
     private AWalletAlertDialog alertDialog;
     private Message<String> messageToSign;
     private FunctionButtonBar functionBar;
     private Handler handler;
-    private boolean hasUserInputInAttrs;
     private int parsePass;
     private int resolveInputCheckCount;
     private TSAction action;
@@ -128,6 +126,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
         parsePass = 1;
         viewModel.getAssetDefinitionService().clearResultMap();
+        args.clear();
         getAttrs();
     }
 
@@ -155,7 +154,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         try
         {
-            hasUserInputInAttrs = false;
             attrs = viewModel.getAssetDefinitionService().getTokenAttrs(token, tokenId, 1);
             //add extra tokenIds if required
             addMultipleTokenIds(attrs);
@@ -221,17 +219,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private void onAttr(TokenScriptResult.Attribute attribute)
     {
         //is the attr incomplete?
-        if (!attribute.userInput)
-        {
-            if (BuildConfig.DEBUG) System.out.println("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
-            TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
-        }
-        else
-        {
-            hasUserInputInAttrs = true;
-            if (BuildConfig.DEBUG) System.out.println("ATTR/FA: DON'T ADD: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
-            userInputArgs.add(attribute.id);
-        }
+        if (BuildConfig.DEBUG) System.out.println("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
+        TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
     }
 
     private void fillEmpty()
@@ -363,6 +352,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         if (resolveInputCheckCount == 0)
         {
             viewModel.handleFunction(action, tokenId, token, this);
+            viewModel.getAssetDefinitionService().clearResultMap();
         }
     }
 
@@ -383,6 +373,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         super.onDestroy();
         viewModel.stopGasSettingsFetch();
+        viewModel.getAssetDefinitionService().clearResultMap();
     }
 
     private void errorInvalidAddress(String address)
@@ -479,68 +470,14 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void onPageRendered(WebView view)
     {
-        resolveInputCheckCount = 0;
-
-        CalcJsValueCallback cb = new CalcJsValueCallback()
-        {
-            @Override
-            public void calculationCompleted(String value, String result, TokenscriptElement e, AttributeType attr)
-            {
-                if (BuildConfig.DEBUG) System.out.println("ATTR/FA: Pass2: " + value + " : " + result);
-                args.put(value, result);
-                resolveInputCheckCount--;
-                checkAllResolvedArgs();
-            }
-
-            @Override
-            public void unresolvedSymbolError(String value)
-            {
-                if (BuildConfig.DEBUG) System.out.println("ATTR/FA: Pass2: ERROR: " + value);
-                resolveInputCheckCount--;
-                checkAllResolvedArgs();
-            }
-        };
-
         if (parsePass == 1)
         {
-            if (hasUserInputInAttrs) //has more work to do
-            {
-                parsePass++;
-                if (BuildConfig.DEBUG) System.out.println("ATTR/FA: PASS 2");
-                resolveInputCheckCount = userInputArgs.size();
-                //try to extract user input values now we have access
-                for (String attr : userInputArgs)
-                {
-                    evaluateJavaScript(cb, attr, null, null);
-                }
-            }
-            else
-            {
-                tokenView.reload();
-                parsePass++;
-            }
-        }
-        else if (parsePass == 2)
-        {
-            viewModel.getAssetDefinitionService().clearResultMap(); //clean up results before display
+            tokenView.reload();
             waitSpinner.setVisibility(View.GONE);
             tokenView.setVisibility(View.VISIBLE);
         }
-    }
 
-    private void checkAllResolvedArgs()
-    {
-        if (resolveInputCheckCount > 0 || args.size() == 0) return;
-
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
-        TSAction action = functions.get(actionMethod);
-        List<AttributeType> localAttrs = (action != null && action.attributeTypes != null) ? new ArrayList<>(action.attributeTypes.values()) : null;
-
-        //see if any functions depend on these args
-        viewModel.getAssetDefinitionService().addResults(token, localAttrs, args);
-
-        //re-render page with function results
-        getAttrs();
+        parsePass++;
     }
 
     @Override
@@ -691,10 +628,23 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void setValues(String ref)
+    public void setValues(Map<String, String> updates)
     {
-        //called when a value updates
-        System.out.println(ref + " " );
+        boolean newValues = false;
+        //called when values update
+        for (String key : updates.keySet())
+        {
+            String value = updates.get(key);
+            String old = args.put(key, updates.get(key));
+            if (!value.equals(old)) newValues = true;
+        }
+
+        if (newValues)
+        {
+            viewModel.getAssetDefinitionService().addLocalRefs(args);
+            //rebuild the view
+            getAttrs();
+        }
     }
 
     /**

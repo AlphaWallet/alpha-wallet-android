@@ -2,26 +2,23 @@ package com.alphawallet.app.entity.tokenscript;
 
 import android.text.TextUtils;
 
-import io.reactivex.Observable;
-
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.token.entity.*;
+import com.alphawallet.token.entity.AttributeInterface;
+import com.alphawallet.token.entity.AttributeType;
+import com.alphawallet.token.entity.ContractAddress;
+import com.alphawallet.token.entity.FunctionDefinition;
+import com.alphawallet.token.entity.MethodArg;
+import com.alphawallet.token.entity.TokenScriptResult;
+import com.alphawallet.token.entity.TransactionResult;
 import com.alphawallet.token.tools.TokenDefinition;
 
-import io.reactivex.Single;
-
-import org.web3j.abi.EventEncoder;
-import org.web3j.abi.EventValues;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.TypeEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.BytesType;
-import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Int;
 import org.web3j.abi.datatypes.Type;
@@ -29,13 +26,8 @@ import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.*;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.request.EthFilter;
-import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.core.methods.response.EthLog;
-import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -46,11 +38,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import io.reactivex.Observable;
 
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
-import static org.web3j.tx.Contract.staticExtractEventParameters;
 
 /**
  * Created by James on 13/06/2019.
@@ -62,6 +53,7 @@ public abstract class TokenscriptFunction
 
     private final Map<String, AttributeType> localAttrs = new ConcurrentHashMap<>();
     private final Map<String, TokenScriptResult.Attribute> resultMap = new ConcurrentHashMap<>(); //Build result map for function parse
+    private final Map<String, String> refTags = new ConcurrentHashMap<>();
 
     public Function generateTransactionFunction(String walletAddress, BigInteger tokenId, TokenDefinition definition, FunctionDefinition function, AttributeInterface attrIf)
     {
@@ -74,354 +66,367 @@ public abstract class TokenscriptFunction
         List<TypeReference<?>> returnTypes = new ArrayList<TypeReference<?>>();
         for (MethodArg arg : function.parameters)
         {
-            resolveReference(walletAddress, arg, tokenId, definition, attrIf);
-            if (arg.element.value == null || valueNotFound)
+            String value = resolveReference(walletAddress, arg, tokenId, definition, attrIf);
+            //get arg.element.value in the form of BigInteger if appropriate
+            byte[] argValueBytes = null;
+            BigInteger argValueBI = null;
+
+            if (valueNotFound)
             {
-                valueNotFound = true;
                 params = null;
                 continue;
             }
-            //get arg.element.value in the form of BigInteger if appropriate
-            byte[] argValueBytes = convertArgToBytes(arg.element.value);
-            BigInteger argValueBI = new BigInteger(1, argValueBytes);
-
-            switch (arg.parameterType)
+            if (value != null)
             {
-                case "int":
-                    params.add(new Int(argValueBI));
-                    break;
-                case "int8":
-                    params.add(new Int8(argValueBI));
-                    break;
-                case "int16":
-                    params.add(new Int16(argValueBI));
-                    break;
-                case "int24":
-                    params.add(new Int24(argValueBI));
-                    break;
-                case "int32":
-                    params.add(new Int32(argValueBI));
-                    break;
-                case "int40":
-                    params.add(new Int40(argValueBI));
-                    break;
-                case "int48":
-                    params.add(new Int48(argValueBI));
-                    break;
-                case "int56":
-                    params.add(new Int56(argValueBI));
-                    break;
-                case "int64":
-                    params.add(new Int64(argValueBI));
-                    break;
-                case "int72":
-                    params.add(new Int72(argValueBI));
-                    break;
-                case "int80":
-                    params.add(new Int80(argValueBI));
-                    break;
-                case "int88":
-                    params.add(new Int88(argValueBI));
-                    break;
-                case "int96":
-                    params.add(new Int96(argValueBI));
-                    break;
-                case "int104":
-                    params.add(new Int104(argValueBI));
-                    break;
-                case "int112":
-                    params.add(new Int112(argValueBI));
-                    break;
-                case "int120":
-                    params.add(new Int120(argValueBI));
-                    break;
-                case "int128":
-                    params.add(new Int128(argValueBI));
-                    break;
-                case "int136":
-                    params.add(new Int136(argValueBI));
-                    break;
-                case "int144":
-                    params.add(new Int144(argValueBI));
-                    break;
-                case "int152":
-                    params.add(new Int152(argValueBI));
-                    break;
-                case "int160":
-                    params.add(new Int160(argValueBI));
-                    break;
-                case "int168":
-                    params.add(new Int168(argValueBI));
-                    break;
-                case "int176":
-                    params.add(new Int176(argValueBI));
-                    break;
-                case "int184":
-                    params.add(new Int184(argValueBI));
-                    break;
-                case "int192":
-                    params.add(new Int192(argValueBI));
-                    break;
-                case "int200":
-                    params.add(new Int200(argValueBI));
-                    break;
-                case "int208":
-                    params.add(new Int208(argValueBI));
-                    break;
-                case "int216":
-                    params.add(new Int216(argValueBI));
-                    break;
-                case "int224":
-                    params.add(new Int224(argValueBI));
-                    break;
-                case "int232":
-                    params.add(new Int232(argValueBI));
-                    break;
-                case "int240":
-                    params.add(new Int240(argValueBI));
-                    break;
-                case "int248":
-                    params.add(new Int248(argValueBI));
-                    break;
-                case "int256":
-                    params.add(new Int256(argValueBI));
-                    break;
-                case "uint":
-                    params.add(new Uint(argValueBI));
-                    break;
-                case "uint8":
-                    params.add(new Uint8(argValueBI));
-                    break;
-                case "uint16":
-                    params.add(new Uint16(argValueBI));
-                    break;
-                case "uint24":
-                    params.add(new Uint24(argValueBI));
-                    break;
-                case "uint32":
-                    params.add(new Uint32(argValueBI));
-                    break;
-                case "uint40":
-                    params.add(new Uint40(argValueBI));
-                    break;
-                case "uint48":
-                    params.add(new Uint48(argValueBI));
-                    break;
-                case "uint56":
-                    params.add(new Uint56(argValueBI));
-                    break;
-                case "uint64":
-                    params.add(new Uint64(argValueBI));
-                    break;
-                case "uint72":
-                    params.add(new Uint72(argValueBI));
-                    break;
-                case "uint80":
-                    params.add(new Uint80(argValueBI));
-                    break;
-                case "uint88":
-                    params.add(new Uint88(argValueBI));
-                    break;
-                case "uint96":
-                    params.add(new Uint96(argValueBI));
-                    break;
-                case "uint104":
-                    params.add(new Uint104(argValueBI));
-                    break;
-                case "uint112":
-                    params.add(new Uint112(argValueBI));
-                    break;
-                case "uint120":
-                    params.add(new Uint120(argValueBI));
-                    break;
-                case "uint128":
-                    params.add(new Uint128(argValueBI));
-                    break;
-                case "uint136":
-                    params.add(new Uint136(argValueBI));
-                    break;
-                case "uint144":
-                    params.add(new Uint144(argValueBI));
-                    break;
-                case "uint152":
-                    params.add(new Uint152(argValueBI));
-                    break;
-                case "uint160":
-                    params.add(new Uint160(argValueBI));
-                    break;
-                case "uint168":
-                    params.add(new Uint168(argValueBI));
-                    break;
-                case "uint176":
-                    params.add(new Uint176(argValueBI));
-                    break;
-                case "uint184":
-                    params.add(new Uint184(argValueBI));
-                    break;
-                case "uint192":
-                    params.add(new Uint192(argValueBI));
-                    break;
-                case "uint200":
-                    params.add(new Uint200(argValueBI));
-                    break;
-                case "uint208":
-                    params.add(new Uint208(argValueBI));
-                    break;
-                case "uint216":
-                    params.add(new Uint216(argValueBI));
-                    break;
-                case "uint224":
-                    params.add(new Uint224(argValueBI));
-                    break;
-                case "uint232":
-                    params.add(new Uint232(argValueBI));
-                    break;
-                case "uint240":
-                    params.add(new Uint240(argValueBI));
-                    break;
-                case "uint248":
-                    params.add(new Uint248(argValueBI));
-                    break;
-                case "uint256":
-                    switch (arg.element.ref)
-                    {
-                        case "tokenId":
-                            params.add(new Uint256(tokenId));
-                            break;
-                        case "value":
-                        default:
-                            params.add(new Uint256(argValueBI));
-                            break;
-                    }
-                    break;
-                case "address":
-                    switch (arg.element.ref)
-                    {
-                        case "ownerAddress":
-                            params.add(new Address(walletAddress));
-                            break;
-                        case "value":
-                        default:
-                            params.add(new Address(Numeric.toHexString(argValueBytes)));
-                            break;
-                    }
-                    break;
-                case "string":
-                    params.add(new Utf8String(arg.element.value));
-                    break;
-                case "bytes":
-                    params.add(new BytesType(argValueBytes, "bytes"));
-                    break;
-                case "bytes1":
-                    params.add(new Bytes1(argValueBytes));
-                    break;
-                case "bytes2":
-                    params.add(new Bytes2(argValueBytes));
-                    break;
-                case "bytes3":
-                    params.add(new Bytes3(argValueBytes));
-                    break;
-                case "bytes4":
-                    params.add(new Bytes4(argValueBytes));
-                    break;
-                case "bytes5":
-                    params.add(new Bytes5(argValueBytes));
-                    break;
-                case "bytes6":
-                    params.add(new Bytes6(argValueBytes));
-                    break;
-                case "bytes7":
-                    params.add(new Bytes7(argValueBytes));
-                    break;
-                case "bytes8":
-                    params.add(new Bytes8(argValueBytes));
-                    break;
-                case "bytes9":
-                    params.add(new Bytes9(argValueBytes));
-                    break;
-                case "bytes10":
-                    params.add(new Bytes10(argValueBytes));
-                    break;
-                case "bytes11":
-                    params.add(new Bytes11(argValueBytes));
-                    break;
-                case "bytes12":
-                    params.add(new Bytes12(argValueBytes));
-                    break;
-                case "bytes13":
-                    params.add(new Bytes13(argValueBytes));
-                    break;
-                case "bytes14":
-                    params.add(new Bytes14(argValueBytes));
-                    break;
-                case "bytes15":
-                    params.add(new Bytes15(argValueBytes));
-                    break;
-                case "bytes16":
-                    params.add(new Bytes16(argValueBytes));
-                    break;
-                case "bytes17":
-                    params.add(new Bytes17(argValueBytes));
-                    break;
-                case "bytes18":
-                    params.add(new Bytes18(argValueBytes));
-                    break;
-                case "bytes19":
-                    params.add(new Bytes19(argValueBytes));
-                    break;
-                case "bytes20":
-                    params.add(new Bytes20(argValueBytes));
-                    break;
-                case "bytes21":
-                    params.add(new Bytes21(argValueBytes));
-                    break;
-                case "bytes22":
-                    params.add(new Bytes22(argValueBytes));
-                    break;
-                case "bytes23":
-                    params.add(new Bytes23(argValueBytes));
-                    break;
-                case "bytes24":
-                    params.add(new Bytes24(argValueBytes));
-                    break;
-                case "bytes25":
-                    params.add(new Bytes25(argValueBytes));
-                    break;
-                case "bytes26":
-                    params.add(new Bytes26(argValueBytes));
-                    break;
-                case "bytes27":
-                    params.add(new Bytes27(argValueBytes));
-                    break;
-                case "bytes28":
-                    params.add(new Bytes28(argValueBytes));
-                    break;
-                case "bytes29":
-                    params.add(new Bytes29(argValueBytes));
-                    break;
-                case "bytes30":
-                    params.add(new Bytes30(argValueBytes));
-                    break;
-                case "bytes31":
-                    params.add(new Bytes31(argValueBytes));
-                    break;
-                case "bytes32": //sometimes tokenId can be passed as bytes32
-                    switch (arg.element.ref)
-                    {
-                        case "tokenId":
-                            params.add(new Bytes32(Numeric.toBytesPadded(tokenId, 32)));
-                            break;
-                        case "value":
-                            params.add(new Bytes32(argValueBytes));
-                            break;
-                        default:
-                            params.add(new Bytes32(Numeric.toBytesPadded(argValueBI, 32)));
-                            break;
-                    }
-                    break;
-                default:
-                    System.out.println("NOT IMPLEMENTED: " + arg.parameterType);
-                    break;
+                argValueBytes = convertArgToBytes(value);
+                argValueBI = new BigInteger(1, argValueBytes);
+            }
+
+            try
+            {
+                switch (arg.parameterType)
+                {
+                    case "int":
+                        params.add(new Int(argValueBI));
+                        break;
+                    case "int8":
+                        params.add(new Int8(argValueBI));
+                        break;
+                    case "int16":
+                        params.add(new Int16(argValueBI));
+                        break;
+                    case "int24":
+                        params.add(new Int24(argValueBI));
+                        break;
+                    case "int32":
+                        params.add(new Int32(argValueBI));
+                        break;
+                    case "int40":
+                        params.add(new Int40(argValueBI));
+                        break;
+                    case "int48":
+                        params.add(new Int48(argValueBI));
+                        break;
+                    case "int56":
+                        params.add(new Int56(argValueBI));
+                        break;
+                    case "int64":
+                        params.add(new Int64(argValueBI));
+                        break;
+                    case "int72":
+                        params.add(new Int72(argValueBI));
+                        break;
+                    case "int80":
+                        params.add(new Int80(argValueBI));
+                        break;
+                    case "int88":
+                        params.add(new Int88(argValueBI));
+                        break;
+                    case "int96":
+                        params.add(new Int96(argValueBI));
+                        break;
+                    case "int104":
+                        params.add(new Int104(argValueBI));
+                        break;
+                    case "int112":
+                        params.add(new Int112(argValueBI));
+                        break;
+                    case "int120":
+                        params.add(new Int120(argValueBI));
+                        break;
+                    case "int128":
+                        params.add(new Int128(argValueBI));
+                        break;
+                    case "int136":
+                        params.add(new Int136(argValueBI));
+                        break;
+                    case "int144":
+                        params.add(new Int144(argValueBI));
+                        break;
+                    case "int152":
+                        params.add(new Int152(argValueBI));
+                        break;
+                    case "int160":
+                        params.add(new Int160(argValueBI));
+                        break;
+                    case "int168":
+                        params.add(new Int168(argValueBI));
+                        break;
+                    case "int176":
+                        params.add(new Int176(argValueBI));
+                        break;
+                    case "int184":
+                        params.add(new Int184(argValueBI));
+                        break;
+                    case "int192":
+                        params.add(new Int192(argValueBI));
+                        break;
+                    case "int200":
+                        params.add(new Int200(argValueBI));
+                        break;
+                    case "int208":
+                        params.add(new Int208(argValueBI));
+                        break;
+                    case "int216":
+                        params.add(new Int216(argValueBI));
+                        break;
+                    case "int224":
+                        params.add(new Int224(argValueBI));
+                        break;
+                    case "int232":
+                        params.add(new Int232(argValueBI));
+                        break;
+                    case "int240":
+                        params.add(new Int240(argValueBI));
+                        break;
+                    case "int248":
+                        params.add(new Int248(argValueBI));
+                        break;
+                    case "int256":
+                        params.add(new Int256(argValueBI));
+                        break;
+                    case "uint":
+                        params.add(new Uint(argValueBI));
+                        break;
+                    case "uint8":
+                        params.add(new Uint8(argValueBI));
+                        break;
+                    case "uint16":
+                        params.add(new Uint16(argValueBI));
+                        break;
+                    case "uint24":
+                        params.add(new Uint24(argValueBI));
+                        break;
+                    case "uint32":
+                        params.add(new Uint32(argValueBI));
+                        break;
+                    case "uint40":
+                        params.add(new Uint40(argValueBI));
+                        break;
+                    case "uint48":
+                        params.add(new Uint48(argValueBI));
+                        break;
+                    case "uint56":
+                        params.add(new Uint56(argValueBI));
+                        break;
+                    case "uint64":
+                        params.add(new Uint64(argValueBI));
+                        break;
+                    case "uint72":
+                        params.add(new Uint72(argValueBI));
+                        break;
+                    case "uint80":
+                        params.add(new Uint80(argValueBI));
+                        break;
+                    case "uint88":
+                        params.add(new Uint88(argValueBI));
+                        break;
+                    case "uint96":
+                        params.add(new Uint96(argValueBI));
+                        break;
+                    case "uint104":
+                        params.add(new Uint104(argValueBI));
+                        break;
+                    case "uint112":
+                        params.add(new Uint112(argValueBI));
+                        break;
+                    case "uint120":
+                        params.add(new Uint120(argValueBI));
+                        break;
+                    case "uint128":
+                        params.add(new Uint128(argValueBI));
+                        break;
+                    case "uint136":
+                        params.add(new Uint136(argValueBI));
+                        break;
+                    case "uint144":
+                        params.add(new Uint144(argValueBI));
+                        break;
+                    case "uint152":
+                        params.add(new Uint152(argValueBI));
+                        break;
+                    case "uint160":
+                        params.add(new Uint160(argValueBI));
+                        break;
+                    case "uint168":
+                        params.add(new Uint168(argValueBI));
+                        break;
+                    case "uint176":
+                        params.add(new Uint176(argValueBI));
+                        break;
+                    case "uint184":
+                        params.add(new Uint184(argValueBI));
+                        break;
+                    case "uint192":
+                        params.add(new Uint192(argValueBI));
+                        break;
+                    case "uint200":
+                        params.add(new Uint200(argValueBI));
+                        break;
+                    case "uint208":
+                        params.add(new Uint208(argValueBI));
+                        break;
+                    case "uint216":
+                        params.add(new Uint216(argValueBI));
+                        break;
+                    case "uint224":
+                        params.add(new Uint224(argValueBI));
+                        break;
+                    case "uint232":
+                        params.add(new Uint232(argValueBI));
+                        break;
+                    case "uint240":
+                        params.add(new Uint240(argValueBI));
+                        break;
+                    case "uint248":
+                        params.add(new Uint248(argValueBI));
+                        break;
+                    case "uint256":
+                        switch (arg.element.ref)
+                        {
+                            case "tokenId":
+                                params.add(new Uint256(tokenId));
+                                break;
+                            case "value":
+                            default:
+                                params.add(new Uint256(argValueBI));
+                                break;
+                        }
+                        break;
+                    case "address":
+                        switch (arg.element.ref)
+                        {
+                            case "ownerAddress":
+                                params.add(new Address(walletAddress));
+                                break;
+                            case "value":
+                            default:
+                                params.add(new Address(Numeric.toHexString(argValueBytes)));
+                                break;
+                        }
+                        break;
+                    case "string":
+                        params.add(new Utf8String(arg.element.value));
+                        break;
+                    case "bytes":
+                        params.add(new BytesType(argValueBytes, "bytes"));
+                        break;
+                    case "bytes1":
+                        params.add(new Bytes1(argValueBytes));
+                        break;
+                    case "bytes2":
+                        params.add(new Bytes2(argValueBytes));
+                        break;
+                    case "bytes3":
+                        params.add(new Bytes3(argValueBytes));
+                        break;
+                    case "bytes4":
+                        params.add(new Bytes4(argValueBytes));
+                        break;
+                    case "bytes5":
+                        params.add(new Bytes5(argValueBytes));
+                        break;
+                    case "bytes6":
+                        params.add(new Bytes6(argValueBytes));
+                        break;
+                    case "bytes7":
+                        params.add(new Bytes7(argValueBytes));
+                        break;
+                    case "bytes8":
+                        params.add(new Bytes8(argValueBytes));
+                        break;
+                    case "bytes9":
+                        params.add(new Bytes9(argValueBytes));
+                        break;
+                    case "bytes10":
+                        params.add(new Bytes10(argValueBytes));
+                        break;
+                    case "bytes11":
+                        params.add(new Bytes11(argValueBytes));
+                        break;
+                    case "bytes12":
+                        params.add(new Bytes12(argValueBytes));
+                        break;
+                    case "bytes13":
+                        params.add(new Bytes13(argValueBytes));
+                        break;
+                    case "bytes14":
+                        params.add(new Bytes14(argValueBytes));
+                        break;
+                    case "bytes15":
+                        params.add(new Bytes15(argValueBytes));
+                        break;
+                    case "bytes16":
+                        params.add(new Bytes16(argValueBytes));
+                        break;
+                    case "bytes17":
+                        params.add(new Bytes17(argValueBytes));
+                        break;
+                    case "bytes18":
+                        params.add(new Bytes18(argValueBytes));
+                        break;
+                    case "bytes19":
+                        params.add(new Bytes19(argValueBytes));
+                        break;
+                    case "bytes20":
+                        params.add(new Bytes20(argValueBytes));
+                        break;
+                    case "bytes21":
+                        params.add(new Bytes21(argValueBytes));
+                        break;
+                    case "bytes22":
+                        params.add(new Bytes22(argValueBytes));
+                        break;
+                    case "bytes23":
+                        params.add(new Bytes23(argValueBytes));
+                        break;
+                    case "bytes24":
+                        params.add(new Bytes24(argValueBytes));
+                        break;
+                    case "bytes25":
+                        params.add(new Bytes25(argValueBytes));
+                        break;
+                    case "bytes26":
+                        params.add(new Bytes26(argValueBytes));
+                        break;
+                    case "bytes27":
+                        params.add(new Bytes27(argValueBytes));
+                        break;
+                    case "bytes28":
+                        params.add(new Bytes28(argValueBytes));
+                        break;
+                    case "bytes29":
+                        params.add(new Bytes29(argValueBytes));
+                        break;
+                    case "bytes30":
+                        params.add(new Bytes30(argValueBytes));
+                        break;
+                    case "bytes31":
+                        params.add(new Bytes31(argValueBytes));
+                        break;
+                    case "bytes32": //sometimes tokenId can be passed as bytes32
+                        switch (arg.element.ref)
+                        {
+                            case "tokenId":
+                                params.add(new Bytes32(Numeric.toBytesPadded(tokenId, 32)));
+                                break;
+                            case "value":
+                                params.add(new Bytes32(argValueBytes));
+                                break;
+                            default:
+                                params.add(new Bytes32(Numeric.toBytesPadded(argValueBI, 32)));
+                                break;
+                        }
+                        break;
+                    default:
+                        System.out.println("NOT IMPLEMENTED: " + arg.parameterType);
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                //attempting to use unformed value
+                valueNotFound = true;
             }
         }
         switch (function.syntax)
@@ -647,31 +652,53 @@ public abstract class TokenscriptFunction
         }
     }
 
-    private void resolveReference(String walletAddress, MethodArg arg, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
+    private String resolveReference(String walletAddress, MethodArg arg, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
     {
         TokenScriptResult.Attribute attrRes = resultMap.get(arg.element.ref);
-        if (attrRes != null) //resolve from result map
+        if (!TextUtils.isEmpty(arg.element.value))
         {
-            arg.element.value = attrRes.text;
+            return arg.element.value;
+        }
+        else if (attrRes != null) //resolve from result map
+        {
+            return attrRes.text;
         }
         else if (definition != null && definition.attributeTypes.containsKey(arg.element.ref)) //resolve from attribute
         {
             AttributeType attr = definition.attributeTypes.get(arg.element.ref);
-            if (attr.userInput && TextUtils.isEmpty(arg.element.value))
-            {
-                arg.element.value = null;
-            }
-            else
-            {
-                arg.element.value = fetchAttrResult(walletAddress, definition.attributeTypes.get(arg.element.ref), tokenId, null, definition, attrIf).blockingSingle().text;
-            }
+            return fetchArgValue(arg, attr, walletAddress, tokenId, definition, attrIf);
         }
         else if (localAttrs.containsKey(arg.element.ref)) //wasn't able to resolve, attempt to resolve from local attributes or mark null if unresolved user input
         {
             AttributeType attr = localAttrs.get(arg.element.ref);
-            if (attr.userInput) arg.element.value = null; //if resolved then it'll be found above
-            else arg.element.value = fetchAttrResult(walletAddress, attr, tokenId, null, definition, attrIf).blockingSingle().text;
+            return fetchArgValue(arg, attr, walletAddress, tokenId, definition, attrIf);
         }
+        else if (!TextUtils.isEmpty(arg.element.localRef) && refTags.containsKey(arg.element.localRef))
+        {
+            return refTags.get(arg.element.localRef);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private String fetchArgValue(MethodArg arg, AttributeType attr, String walletAddress, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
+    {
+        if (attr.userInput)
+        {
+            if (!TextUtils.isEmpty(arg.element.value)) return arg.element.value; //nullify user input if value is not set
+        }
+        else if (!TextUtils.isEmpty(arg.element.value))
+        {
+            return arg.element.value;
+        }
+        else
+        {
+            return fetchAttrResult(walletAddress, attr, tokenId, null, definition, attrIf).blockingSingle().text;
+        }
+
+        return null;
     }
 
     /**
@@ -874,9 +901,15 @@ public abstract class TokenscriptFunction
         return attrResult;
     }
 
+    public void addLocalRefs(Map<String, String> refs)
+    {
+        refTags.putAll(refs);
+    }
+
     public void clearParseMaps()
     {
         localAttrs.clear();
         resultMap.clear();
+        refTags.clear();
     }
 }

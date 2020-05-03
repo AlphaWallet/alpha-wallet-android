@@ -73,9 +73,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -370,6 +373,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 tokenscriptUtility.addParseResultIfValid(attrResult);
             }
         }
+    }
+
+    public void addLocalRefs(Map<String, String> refs)
+    {
+        tokenscriptUtility.addLocalRefs(refs);
     }
 
     private AttributeType getTypeFromList(String key, List<AttributeType> attrList)
@@ -1769,12 +1777,19 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         Asset tokenAsset = erc721Token.getAssetForToken(tokenId.toString());
         if(tokenAsset == null) return;
-        TokenScriptResult.addPair(attrs, "background_colour", tokenAsset.getBackgroundColor());
-        TokenScriptResult.addPair(attrs, "image_preview_url", tokenAsset.getImagePreviewUrl());
-        TokenScriptResult.addPair(attrs, "description", tokenAsset.getDescription());
-        TokenScriptResult.addPair(attrs, "external_link", tokenAsset.getExternalLink());
-        TokenScriptResult.addPair(attrs, "background_colour", tokenAsset.getBackgroundColor());
-        TokenScriptResult.addPair(attrs, "traits", tokenAsset.getTraits());
+
+        try
+        {
+            if (tokenAsset.getBackgroundColor() != null) TokenScriptResult.addPair(attrs, "background_colour", URLEncoder.encode(tokenAsset.getBackgroundColor(), "utf-8"));
+            if (tokenAsset.getImagePreviewUrl() != null) TokenScriptResult.addPair(attrs, "image_preview_url", URLEncoder.encode(tokenAsset.getImagePreviewUrl(), "utf-8"));
+            if (tokenAsset.getDescription() != null) TokenScriptResult.addPair(attrs, "description", URLEncoder.encode(tokenAsset.getDescription(), "utf-8"));
+            if (tokenAsset.getExternalLink() != null) TokenScriptResult.addPair(attrs, "external_link", URLEncoder.encode(tokenAsset.getExternalLink(), "utf-8"));
+            if (tokenAsset.getTraits() != null) TokenScriptResult.addPair(attrs, "traits", tokenAsset.getTraits());
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            //
+        }
     }
 
     public StringBuilder getTokenAttrs(Token token, BigInteger tokenId, int count)
@@ -1787,7 +1802,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             name = definition.getTokenName(1);
         }
-
         TokenScriptResult.addPair(attrs, "name", name);
         TokenScriptResult.addPair(attrs, "symbol", token.getSymbol());
         TokenScriptResult.addPair(attrs, "_count", String.valueOf(count));

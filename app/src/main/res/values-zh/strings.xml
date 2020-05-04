@@ -185,6 +185,8 @@
     <string name="help_question3">怎样才能拿到法币?</string>
     <string name="help_question4">助记词是做什么的?</string>
     <string name="help_question5">怎样把以太币转到AlphaWallet内?</string>
+    <string name="help_question6">What is TokenScript?</string>
+    <string name="tokenscript_explaination">tokenscript_explaination.html</string>
     <string name="twenty_four_hours">24小时</string>
     <string name="appreciation">升值</string>
     <string name="eth_per_ticket">%1s/门票</string>

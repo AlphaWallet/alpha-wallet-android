@@ -52,6 +52,9 @@ public class HelpHolder extends BinderViewHolder<HelpItem> implements View.OnCli
         if (helpItem.getResource() > 0) rawResource = helpItem.getResource();
         else answerText.setText(helpItem.getAnswer());
 
+        answerLayout.setVisibility(View.GONE);
+        webView.setVisibility(View.GONE);
+
         LinearLayout container = findViewById(R.id.item_help);
 
         container.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);

@@ -195,6 +195,8 @@
     <string name="help_question3">How do I get my money?</string>
     <string name="help_question4">What is a Seed Phrase?</string>
     <string name="help_question5">How do I transfer ETH into my wallet?</string>
+    <string name="help_question6">What is TokenScript?</string>
+    <string name="tokenscript_explaination">tokenscript_explaination.html</string>
     <string name="twenty_four_hours">24 hours</string>
     <string name="appreciation">Appreciation</string>
     <string name="eth_per_ticket">%1s/Ticket</string>

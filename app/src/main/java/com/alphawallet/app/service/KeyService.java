@@ -76,7 +76,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     //Return values for requesting security upgrade of key
     public enum UpgradeKeyResult
     {
-        REQUESTING_SECURITY, NO_SCREENLOCK, ALREADY_LOCKED, ERROR
+        REQUESTING_SECURITY, NO_SCREENLOCK, ALREADY_LOCKED, ERROR, SUCCESSFULLY_UPGRADED
     }
 
     //Check performed at service start to determine API strength
@@ -98,6 +98,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     private CreateWalletCallbackInterface callbackInterface;
     private ImportWalletCallback importCallback;
     private SignAuthenticationCallback signCallback;
+    private boolean requireAuthentication = false;
 
     private static SecurityStatus securityStatus = SecurityStatus.NOT_CHECKED;
 
@@ -265,6 +266,11 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         }
     }
 
+    public void setRequireAuthentication()
+    {
+        requireAuthentication = true;
+    }
+
     /**
      * Upgrade key security
      *
@@ -275,19 +281,20 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
      *
      * @param wallet
      * @param callingActivity
-     * @param callback
      * @return
      */
-    public UpgradeKeyResult upgradeKeySecurity(Wallet wallet, Activity callingActivity, SignAuthenticationCallback callback)
+    public UpgradeKeyResult upgradeKeySecurity(Wallet wallet, Activity callingActivity)
     {
-        signCallback = callback;
+        signCallback = null;
         activity = callingActivity;
         currentWallet = wallet;
         //first check we have ability to generate the key
         if (!deviceIsLocked())
             return UpgradeKeyResult.NO_SCREENLOCK;
 
-        //request authentication
+        return upgradeKey();
+
+        /*//request authentication
         switch (wallet.type)
         {
             case KEYSTORE:
@@ -301,7 +308,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 break;
         }
 
-        return UpgradeKeyResult.ERROR;
+        return UpgradeKeyResult.ERROR;*/
     }
 
     /**
@@ -551,7 +558,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
      * Reached after authentication has been provided
      * @return
      */
-    private void upgradeKey()
+    private UpgradeKeyResult upgradeKey()
     {
         try
         {
@@ -570,16 +577,16 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                     break;
             }
 
-            if (secretData == null) return;
+            if (secretData == null) return UpgradeKeyResult.ERROR;
 
             boolean keyStored = storeEncryptedBytes(secretData.getBytes(), true, currentWallet.address);
             if (keyStored)
             {
-                signCallback.CreatedKey(currentWallet.address);
+                return UpgradeKeyResult.SUCCESSFULLY_UPGRADED;
             }
             else
             {
-                signCallback.CreatedKey(ZERO_ADDRESS);
+                return UpgradeKeyResult.ERROR;
             }
         }
         catch (ServiceErrorException e)
@@ -587,12 +594,12 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             //Legacy keystore error
             if (!BuildConfig.DEBUG) Crashlytics.logException(e);
             e.printStackTrace();
-            signCallback.CreatedKey(ZERO_ADDRESS);
+            return UpgradeKeyResult.ERROR;
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            signCallback.CreatedKey(ZERO_ADDRESS);
+            return UpgradeKeyResult.ERROR;
         }
     }
 
@@ -773,7 +780,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             default:
                 dialogTitle = context.getString(R.string.unlock_private_key);
                 //unlock may be optional here
-                if ((currentWallet.authLevel == TEE_NO_AUTHENTICATION || currentWallet.authLevel == STRONGBOX_NO_AUTHENTICATION)
+                if (!requireAuthentication && (currentWallet.authLevel == TEE_NO_AUTHENTICATION || currentWallet.authLevel == STRONGBOX_NO_AUTHENTICATION)
                         && !requiresUnlock() && signCallback != null)
                 {
                     signCallback.GotAuthorisation(true);
@@ -792,6 +799,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         });
         signDialog.show();
         signDialog.getFingerprintAuthorisation(this);
+        requireAuthentication = false;
     }
 
     @Override

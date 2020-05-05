@@ -145,14 +145,20 @@ public class BackupKeyViewModel extends BaseViewModel {
     }
 
 
-    public KeyService.UpgradeKeyResult upgradeKeySecurity(Wallet wallet, Activity activity, SignAuthenticationCallback callback)
+    public KeyService.UpgradeKeyResult upgradeKeySecurity(Wallet wallet, Activity activity)
     {
-        return keyService.upgradeKeySecurity(wallet, activity, callback);
+        return keyService.upgradeKeySecurity(wallet, activity);
     }
 
     public void getPasswordForKeystore(Wallet wallet, Activity activity, CreateWalletCallbackInterface callback)
     {
         keyService.getPassword(wallet, activity, callback);
+    }
+
+    public void getAuthentication(Wallet wallet, Activity activity, SignAuthenticationCallback callback)
+    {
+        keyService.setRequireAuthentication(); // require authentication for any action involving the keystore
+        keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 
     public void getSeedPhrase(Wallet wallet, Activity activity, CreateWalletCallbackInterface callback)

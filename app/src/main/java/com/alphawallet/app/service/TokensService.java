@@ -42,7 +42,7 @@ public class TokensService
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenRepository = tokenRepository;
         loaded = false;
-        networkFilter = new ArrayList<>(10);
+        networkFilter = new ArrayList<>();
         setupFilter();
         focusToken = null;
         okHttpClient = client;
@@ -388,7 +388,15 @@ public class TokensService
     private Token checkCurrencies()
     {
         if (currencyCheckCount >= networkFilter.size()) return null;
-        int chainId = networkFilter.get(currencyCheckCount);
+        int chainId;
+        try
+        {
+            chainId = networkFilter.get(currencyCheckCount);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            return null;
+        }
         currencyCheckCount++;
         return getToken(chainId, currentAddress);
     }

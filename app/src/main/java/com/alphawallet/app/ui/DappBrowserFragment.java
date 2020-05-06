@@ -216,12 +216,15 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         homePressed = false;
         if (currentFragment == null) currentFragment = BROWSER_HOME;
         attachFragment(currentFragment);
-        if (web3 == null && getActivity() != null) //trigger reload
+        if ((web3 == null || viewModel == null) && getActivity() != null) //trigger reload
         {
-            web3.setWebLoadCallback(this);
             ((HomeActivity)getActivity()).ResetDappBrowser();
         }
-        if (viewModel != null) viewModel.resetDebounce();
+        else
+        {
+            web3.setWebLoadCallback(this);
+            if (viewModel != null) viewModel.resetDebounce();
+        }
     }
 
     @Nullable

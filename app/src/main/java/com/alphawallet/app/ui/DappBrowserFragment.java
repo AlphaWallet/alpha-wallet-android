@@ -190,6 +190,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private byte[] messageBytes;
     private DAppFunction dAppFunction;
     private SignType signType;
+    private volatile boolean canSign = true;
 
     private enum SignType
     {
@@ -223,7 +224,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         else
         {
             web3.setWebLoadCallback(this);
-            if (viewModel != null) viewModel.resetDebounce();
         }
     }
 
@@ -908,7 +908,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             if ((transaction.recipient.equals(Address.EMPTY) && transaction.payload != null) // Constructor
                     || (!transaction.recipient.equals(Address.EMPTY) && (transaction.payload != null || transaction.value != null))) // Raw or Function TX
             {
-                viewModel.openConfirmation(getActivity(), transaction, url, networkInfo);
+                if (canSign)
+                {
+                    viewModel.openConfirmation(getActivity(), transaction, url, networkInfo);
+                    canSign = false;
+                    handler.postDelayed(() -> canSign = true, 3000); //debounce 3 seconds to avoid multiple signing issues
+                }
             }
             else
             {

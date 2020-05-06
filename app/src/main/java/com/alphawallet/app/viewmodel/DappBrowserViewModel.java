@@ -57,7 +57,6 @@ import java.util.List;
 import static com.alphawallet.app.C.Key.WALLET;
 
 public class DappBrowserViewModel extends BaseViewModel  {
-    private static final long DEBOUNCE_LIMIT = 5L * 1000L; //5 seconds debounce time
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
@@ -74,7 +73,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final KeyService keyService;
 
     private ArrayList<String> bookmarks;
-    private long debounceTime = 0;
 
     DappBrowserViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -180,16 +178,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public void openConfirmation(Activity context, Web3Transaction transaction, String requesterURL, NetworkInfo networkInfo) throws TransactionTooLargeException
     {
-        if (System.currentTimeMillis() > (debounceTime + DEBOUNCE_LIMIT)) //debounce transaction click
-        {
-            debounceTime = System.currentTimeMillis();
-            confirmationRouter.open(context, transaction, networkInfo.name, requesterURL, networkInfo.chainId);
-        }
-    }
-
-    public void resetDebounce()
-    {
-        debounceTime = 0;
+        confirmationRouter.open(context, transaction, networkInfo.name, requesterURL, networkInfo.chainId);
     }
 
     private ArrayList<String> getBrowserBookmarksFromPrefs(Context context) {

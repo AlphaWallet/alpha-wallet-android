@@ -347,7 +347,7 @@ public class TokenDefinition {
                 Element card = (Element) node;
                 switch (card.getLocalName())
                 {
-                    case "token-card":
+                    case "token":
                         processTokenCardElements(card);
                         break;
                     case "action":

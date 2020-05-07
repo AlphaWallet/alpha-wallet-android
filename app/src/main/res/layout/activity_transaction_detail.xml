@@ -252,7 +252,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:linksClickable="true"
-                android:text="@string/action_more_details" />
+                android:text="@string/action_open_etherscan" />
         </LinearLayout>
     </ScrollView>
 </FrameLayout>

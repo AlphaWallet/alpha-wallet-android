@@ -580,13 +580,22 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         //viewModel.upgradeWallet(keyAddress);
     }
 
-    public void ResetDappBrowser()
+    /**
+     * On restarting the wallet, all fragments check they have their viewModels
+     * If they do not, then the onResume override will call this resetFragment method for that fragment
+     * Which rebuilds the view and repopulates all the view members required for operation
+     *
+     * @param fragmentId
+     */
+    public void resetFragment(int fragmentId)
     {
+        Fragment fragment = getFragment(fragmentId);
+
         getSupportFragmentManager()
-                    .beginTransaction()
-                    .detach(dappBrowserFragment)
-                    .attach(dappBrowserFragment)
-                    .commit();
+                .beginTransaction()
+                .detach(fragment)
+                .attach(fragment)
+                .commit();
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
@@ -596,23 +605,28 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         @Override
         public Fragment getItem(int position) {
-            switch (position) {
-                case DAPP_BROWSER:
-                    return dappBrowserFragment;
-                case WALLET:
-                    return walletFragment;
-                case SETTINGS:
-                    return settingsFragment;
-                case TRANSACTIONS:
-                    return transactionsFragment;
-                default:
-                    return walletFragment;
-            }
+            return getFragment(position);
         }
 
         @Override
         public int getCount() {
             return 4;
+        }
+    }
+
+    private Fragment getFragment(int item)
+    {
+        switch (item) {
+            case DAPP_BROWSER:
+                return dappBrowserFragment;
+            case WALLET:
+                return walletFragment;
+            case SETTINGS:
+                return settingsFragment;
+            case TRANSACTIONS:
+                return transactionsFragment;
+            default:
+                return walletFragment;
         }
     }
 

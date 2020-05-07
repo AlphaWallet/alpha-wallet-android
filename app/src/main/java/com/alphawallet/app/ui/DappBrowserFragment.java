@@ -85,6 +85,7 @@ import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.AWalletBottomNavigationView;
 import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.entity.SalesOrderMalformed;
@@ -219,7 +220,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         attachFragment(currentFragment);
         if ((web3 == null || viewModel == null) && getActivity() != null) //trigger reload
         {
-            ((HomeActivity)getActivity()).ResetDappBrowser();
+            ((HomeActivity)getActivity()).resetFragment(AWalletBottomNavigationView.DAPP_BROWSER);
         }
         else
         {

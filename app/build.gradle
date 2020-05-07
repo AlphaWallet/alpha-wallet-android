@@ -68,8 +68,8 @@ android {
     productFlavors {
 	awallet {
 		dimension "targetting"
-        versionCode 84
-        versionName "2.20.0"
+        versionCode 102
+        versionName "2.23.4"
 	}
     }
     buildTypes {
@@ -101,7 +101,7 @@ project.ext {
     okhttpVersion = "4.0.0"
     picassoVersion = "2.71828"
     supportVersion = "28.0.0"
-    web3jVersion = "4.2.1-android"
+    web3jVersion = "4.5.17"
     gsonVersion = "2.8.5"
     rxJavaVersion = "2.2.10"
     rxAndroidVersion = "2.1.1"
@@ -185,6 +185,9 @@ dependencies {
     implementation 'com.trustwallet.walletcore:walletcore:0.12.8'
 
     implementation 'com.github.florent37:tutoshowcase:1.0.1'
+
+    // Do not upgrade unless we have migrated to AndroidX
+    implementation 'com.google.android:flexbox:1.0.0'
 
     // PW
     implementation fileTree(include: ['*.jar'], dir: 'libs')

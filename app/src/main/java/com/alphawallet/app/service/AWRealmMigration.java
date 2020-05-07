@@ -43,4 +43,16 @@ public class AWRealmMigration implements RealmMigration
             oldVersion++;
         }
     }
+
+    @Override
+    public int hashCode()
+    {
+        return AWRealmMigration.class.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object object)
+    {
+        return object instanceof AWRealmMigration;
+    }
 }

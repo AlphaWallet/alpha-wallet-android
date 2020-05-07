@@ -36,6 +36,7 @@ import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.ERC721Token;
@@ -55,6 +56,7 @@ import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
+import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
@@ -64,7 +66,9 @@ import org.web3j.abi.datatypes.Address;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -85,7 +89,7 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
  * Created by James on 21/02/2018.
  */
 
-public class TransferTicketDetailActivity extends BaseActivity implements Runnable, ItemClickListener, OnTokenClickListener
+public class TransferTicketDetailActivity extends BaseActivity implements Runnable, ItemClickListener, OnTokenClickListener, StandardFunctionInterface
 {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
     private static final int SEND_INTENT_REQUEST_CODE = 2;
@@ -96,6 +100,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private SystemView systemView;
     private ProgressView progressView;
     private AWalletAlertDialog dialog;
+    private FunctionButtonBar functionBar;
 
     private FinishReceiver finishReceiver;
 
@@ -185,6 +190,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         pickTicketQuantity = findViewById(R.id.layout_ticket_quantity);
         pickTransferMethod = findViewById(R.id.layout_choose_method);
         pickExpiryDate = findViewById(R.id.layout_date_picker);
+        functionBar = findViewById(R.id.layoutButtons);
 
         setupAddressEditField();
 
@@ -232,10 +238,8 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         buttonLinkPick = findViewById(R.id.layout_link_pick);
         buttonTransferPick = findViewById(R.id.layout_transfer_now);
 
-        Button nextAction = findViewById(R.id.button_next);
-        nextAction.setOnClickListener((View v) -> {
-            viewModel.openTransferState(this, token, token.bigIntListToString(selection, false), getNextState());
-        });
+        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_next)));
+        functionBar.revealButtons();
 
         qrImageView = findViewById(R.id.img_scan_qr);
         qrImageView.setOnClickListener(view -> {
@@ -816,6 +820,12 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     public void onItemClick(String url)
     {
         ensHandler.handleHistoryItemClick(url);
+    }
+
+    @Override
+    public void handleClick(String action)
+    {
+        viewModel.openTransferState(this, token, token.bigIntListToString(selection, false), getNextState());
     }
 }
 

@@ -107,21 +107,22 @@ public class MagicLinkParcel implements Parcelable
             BigInteger expiry = BigInteger.valueOf(order.expiry);
             //convert to signature representation
             Sign.SignatureData sellerSig = CryptoFunctions.sigFromByteArray(order.signature);
+            int v = (new BigInteger(sellerSig.getV())).intValue();
 
             switch (order.contractType)
             {
                 case spawnable:
-                    data = TokenRepository.createSpawnPassTo(token, expiry, order.tokenIds, sellerSig.getV(), sellerSig.getR(), sellerSig.getS(), recipient);
+                    data = TokenRepository.createSpawnPassTo(token, expiry, order.tokenIds, v, sellerSig.getR(), sellerSig.getS(), recipient);
                     break;
                 case currencyLink:
                     // for testing only, we would be using an intermediate server
-                    data = TokenRepository.createDropCurrency(order, sellerSig.getV(), sellerSig.getR(), sellerSig.getS(), recipient);
+                    data = TokenRepository.createDropCurrency(order, v, sellerSig.getR(), sellerSig.getS(), recipient);
                     break;
                 default:
                     for (int ticketIndex : order.indices) {
                         tokenElements.add(BigInteger.valueOf(ticketIndex));
                     }
-                    data = TokenRepository.createTrade(token, expiry, tokenElements, sellerSig.getV(), sellerSig.getR(), sellerSig.getS());
+                    data = TokenRepository.createTrade(token, expiry, tokenElements, v, sellerSig.getR(), sellerSig.getS());
                     break;
             }
         }

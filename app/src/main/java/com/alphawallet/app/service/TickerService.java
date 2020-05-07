@@ -15,6 +15,7 @@ import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.token.tools.Convert;
 import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
@@ -303,17 +304,26 @@ public class TickerService implements TickerServiceInterface
 
             for (int i = 0; i < tokens.length(); i++)
             {
+                ContractType cType = ContractType.ERC20;
                 JSONObject t          = (JSONObject) tokens.get(i);
                 String     balanceStr = t.getString("amount");
                 if (balanceStr.length() == 0 || balanceStr.equals("0")) continue;
                 String decimalsStr   = t.getString("decimals");
                 int    decimals      = (decimalsStr.length() > 0) ? Integer.parseInt(decimalsStr) : 0;
                 Token  existingToken = tokensService.getToken(network.chainId, t.getString("address"));
-                if (decimals == 0 || (existingToken != null && !existingToken.isERC20())) continue;
+                if (existingToken == null)
+                {
+                    cType = ContractType.OTHER; //if we haven't seen this token before mark as needing contract type check
+                }
+                else if (existingToken.isFocusToken() || !existingToken.isERC20() && existingToken.getInterfaceSpec() != ContractType.OTHER) //allow tokens still classified as 'OTHER' to be updated.
+                {                                                                                            //we may be able to categorise them later
+                    continue;
+                }
+
                 TokenInfo info = new TokenInfo(t.getString("address"), t.getString("name"), t.getString("symbol"), decimals, true, network.chainId);
                 //now create token with balance info, only for ERC20 for now
                 BigDecimal balance  = new BigDecimal(balanceStr);
-                Token      newToken = tf.createToken(info, balance, null, System.currentTimeMillis(), ContractType.ERC20, network.getShortName(), System.currentTimeMillis());
+                Token      newToken = tf.createToken(info, balance, null, System.currentTimeMillis(), cType, network.getShortName(), System.currentTimeMillis());
                 newToken.setTokenWallet(currentAddress);
                 if (existingToken != null) //TODO: after token module refactor this won't be necessary.
                 {

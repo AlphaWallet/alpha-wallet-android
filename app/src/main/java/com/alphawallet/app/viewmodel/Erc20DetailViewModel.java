@@ -14,6 +14,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
@@ -49,7 +50,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final TransactionDetailRouter transactionDetailRouter;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
-    private final AddTokenInteract addTokenInteract;
+    private final FetchTokensInteract fetchTokensInteract;
 
     private int transactionFetchCount;
 
@@ -66,7 +67,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
                                 TransactionDetailRouter transactionDetailRouter,
                                 AssetDefinitionService assetDefinitionService,
                                 TokensService tokensService,
-                                AddTokenInteract addTokenInteract) {
+                                FetchTokensInteract fetchTokensInteract) {
         this.myAddressRouter = myAddressRouter;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
@@ -74,7 +75,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
         this.transactionDetailRouter = transactionDetailRouter;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
-        this.addTokenInteract = addTokenInteract;
+        this.fetchTokensInteract = fetchTokensInteract;
         transactionFetchCount = 0;
     }
 
@@ -102,6 +103,19 @@ public class Erc20DetailViewModel extends BaseViewModel {
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onUpdateTransactions, this::onError);
+
+        //fetch current balance
+        fetchTokensInteract.updateBalance(wallet.getValue().address, token)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onUpdateToken, this::onError)
+                .isDisposed();
+    }
+
+    private void onUpdateToken(Token updatedToken)
+    {
+        tokensService.addToken(updatedToken);
+        token.postValue(updatedToken);
     }
 
     public void fetchNetworkTransactions(Token token, int historyCount) {
@@ -136,7 +150,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
             //now store the update
             token.lastBlockCheck = lastTxBlockNumber;
-            addTokenInteract.updateBlockRead(token, defaultWallet().getValue());
+            fetchTokensInteract.updateBlockRead(token, defaultWallet().getValue());
         }
 
         return transactions;

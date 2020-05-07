@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -63,7 +64,7 @@ public class TransactionsViewModel extends BaseViewModel
 
     private final ConcurrentLinkedQueue<UnknownToken> unknownTokens;
 
-    private Map<String, Transaction> txMap = new HashMap<>();
+    private final Map<String, Transaction> txMap = new ConcurrentHashMap<>();
     private boolean parseTransactions;
 
     TransactionsViewModel(

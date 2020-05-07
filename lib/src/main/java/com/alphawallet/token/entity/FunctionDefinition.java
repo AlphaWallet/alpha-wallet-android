@@ -32,6 +32,8 @@ public class FunctionDefinition
             if (arg.isTokenId()) count++;
         }
 
+        if (count == 0) count = 1;
+
         return count;
     }
 }

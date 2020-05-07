@@ -6,6 +6,8 @@ import android.os.Parcelable;
 
 import com.alphawallet.app.entity.tokens.Token;
 
+import java.math.BigDecimal;
+
 /* weiwu: I think this is what intended:
    a transaction is a single unit of logic or work, sometimes made up of multiple operations.
  */
@@ -97,5 +99,22 @@ public class TransactionOperation implements Parcelable {
     public String getValue(int decimals)
     {
         return Token.getScaledValue(value, decimals);
+    }
+
+    String getOperationResult(Token token, Transaction tx)
+    {
+        if (contract != null)
+        {
+            return contract.getOperationResult(token, this, tx);
+        }
+        else
+        {
+            return token.getTransactionValue(tx);
+        }
+    }
+
+    public BigDecimal getRawValue() throws Exception
+    {
+        return new BigDecimal(value);
     }
 }

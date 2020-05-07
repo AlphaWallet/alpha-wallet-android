@@ -1,17 +1,21 @@
 package com.alphawallet.app.entity;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.google.gson.annotations.SerializedName;
+import com.alphawallet.app.entity.tokens.Token;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
@@ -445,4 +449,137 @@ public class Transaction implements Parcelable {
 			}
 		}
 	}
+
+	/**
+	 * Fetch result of transaction operation.
+	 * This is very much a WIP
+	 * @param token
+	 * @return
+	 */
+	public String getOperationResult(Token token)
+	{
+		if (operations == null || operations.length == 0)
+			return token.getTransactionValue(this);
+		if (error.equals("1")) return "";
+
+		//TODO: Handle multiple operation transactions
+		TransactionOperation operation = operations[0];
+
+		return operation.getOperationResult(token, this);
+	}
+
+	public String getOperationTokenAddress()
+	{
+		TransactionOperation operation = operations == null
+												 || operations.length == 0 ? null : operations[0];
+
+		if (operation == null || operation.contract == null)
+		{
+			return "";
+		}
+		else
+		{
+			return operation.contract.address;
+		}
+	}
+
+	public String getOperationName(Context ctx)
+	{
+		String txName = null;
+		try
+		{
+			if (blockNumber != null && blockNumber.equals("0"))
+			{
+				txName = ctx.getString(R.string.status_pending);
+			}
+			else if (operations != null && operations.length > 0)
+			{
+				TransactionOperation operation = operations[0];
+				txName = operation.getOperationName(ctx);
+			}
+		}
+		catch (NumberFormatException e)
+		{
+			//Silent fail, number was invalid just display default
+		}
+
+		return txName;
+	}
+
+	public String getContract(Token token)
+	{
+		TransactionOperation operation = operations == null
+												 || operations.length == 0 ? null : operations[0];
+
+		if (operation == null || operation.contract == null)
+		{
+			return token.getAddress();
+		}
+		else
+		{
+			return token.getFullName();
+		}
+	}
+
+	public int getOperationImage(Token token)
+	{
+		TransactionOperation operation = operations == null
+												 || operations.length == 0 ? null : operations[0];
+
+		if (operation == null || operation.contract == null)
+		{
+			return from.equalsIgnoreCase(token.getWallet()) ? R.drawable.ic_arrow_downward_black_24dp : R.drawable.ic_arrow_upward_black_24dp;
+		}
+		else
+		{
+			return operation.contract.getOperationImage(token, this);
+		}
+	}
+
+	/**
+	 * Supplimental info in this case is the intrinsic root value attached to a contract call
+	 * EG: Calling cryptokitties ERC721 'breedWithAuto' function requires you to call the function and also attach a small amount of ETH
+	 * for the 'breeding fee'. That fee is later released to the caller of the 'birth' function.
+	 * Supplimental info for these transaction would appear as -0.031 for the 'breedWithAuto' and +0.031 on the 'birth' call
+	 * However it's not that simple - the 'breeding fee' will be in the value attached to the transaction, however the 'midwife' reward appears
+	 * as an internal transaction, so won't be in the 'value' property.
+	 *
+	 * @return
+	 */
+	public String getSupplementalInfo(String walletAddress, String networkName)
+	{
+		TransactionOperation operation = operations == null
+												 || operations.length == 0 ? null : operations[0];
+
+		if (operation == null || operation.contract == null)
+		{
+			return "";
+		}
+		else
+		{
+			return operation.contract.getSupplimentalInfo(this, walletAddress, networkName);
+		}
+	}
+
+	public String getPrefix(Token token)
+	{
+		boolean isSent = token.getIsSent(this);
+		boolean isSelf = from.equalsIgnoreCase(to);
+		if (isSelf) return "";
+		else if (isSent) return "-";
+		else return "+";
+	}
+
+    public BigDecimal getRawValue() throws Exception
+    {
+		if (operations == null || operations.length == 0)
+		{
+			return new BigDecimal(value);
+		}
+		else
+		{
+			TransactionOperation operation = operations[0];
+			return operation.getRawValue();
+		}
+    }
 }

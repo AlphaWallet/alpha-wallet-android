@@ -5,11 +5,6 @@ import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
@@ -18,14 +13,19 @@ import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.TextHolder;
 import com.alphawallet.app.ui.widget.holder.WalletHolder;
+
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> implements WalletClickCallback
 {
     private final OnSetWalletDefaultListener onSetWalletDefaultListener;
     private ArrayList<Wallet> wallets;
     private Wallet defaultWallet = null;
-    private NetworkInfo network;
     private final Context context;
 
     public WalletsAdapter(Context ctx,
@@ -68,6 +68,8 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
                 wallet = wallets.get(position);
                 holder.bind(wallet.address);
                 break;
+            default:
+                break;
         }
     }
 
@@ -91,11 +93,6 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
         }
     }
 
-    public void setNetwork(NetworkInfo network) {
-        this.network = network;
-        notifyDataSetChanged();
-    }
-
     public void setDefaultWallet(Wallet wallet) {
         this.defaultWallet = wallet;
         notifyDataSetChanged();
@@ -107,6 +104,10 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
         boolean hasWatchWallet = false;
         if (wallets != null)
         {
+            Wallet yourWallets = new Wallet(context.getString(R.string.your_wallets));
+            yourWallets.type = WalletType.TEXT_MARKER;
+            this.wallets.add(yourWallets);
+
             //Add HD Wallets
             for (Wallet w : wallets)
             {

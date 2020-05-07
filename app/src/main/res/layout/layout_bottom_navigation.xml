@@ -1,151 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="?android:attr/actionBarSize"
-    android:orientation="vertical">
+    android:background="@drawable/background_bottom_navigation"
+    android:elevation="0dp"
+    android:orientation="vertical"
+    app:elevation="0dp">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:paddingBottom="2dp"
-        android:background="@color/greydd"
-        android:orientation="vertical"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@color/white">
-
-    <LinearLayout
-        android:id="@+id/wallet_tab"
-        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:paddingTop="5dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="1"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
-
-        <ImageView
-            android:id="@+id/nav_wallet"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_wallet" />
-
-        <TextView
-            android:id="@+id/nav_wallet_text"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center_horizontal"
-            android:lineSpacingExtra="8sp"
-            android:text="@string/wallet_label"
-            android:textColor="#8a000000"
-            android:textSize="12sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/transactions_tab"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="1"
-        android:paddingTop="5dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
-
-        <ImageView
-            android:id="@+id/nav_transactions"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_transactions" />
-
-        <TextView
-            android:id="@+id/nav_transactions_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:lineSpacingExtra="8sp"
-            android:text="@string/tx_label"
-            android:textColor="#8a000000"
-            android:textSize="12sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/browser_tab"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="1"
-        android:paddingTop="5dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
-
-        <ImageView
-            android:id="@+id/nav_browser"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_browser" />
-
-        <TextView
-            android:id="@+id/nav_browser_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:lineSpacingExtra="8sp"
-            android:text="@string/browser_label"
-            android:textColor="#8a000000"
-            android:textSize="12sp" />
-    </LinearLayout>
-
-    <RelativeLayout
-        android:id="@+id/settings_tab"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="1"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
-
-        <ImageView
-            android:id="@+id/nav_settings"
-            android:layout_marginTop="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:src="@drawable/ic_settings" />
-
-        <TextView
-            android:id="@+id/nav_settings_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/nav_settings"
-            android:layout_centerHorizontal="true"
-            android:lineSpacingExtra="8sp"
-            android:text="@string/settings_label"
-            android:textColor="#8a000000"
-            android:textSize="12sp" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
         <LinearLayout
-            android:id="@+id/spacer"
-            android:layout_width="2dp"
-            android:layout_height="10dp"
-            android:layout_centerInParent="true"
-            android:background="#00000000"
-            android:orientation="horizontal"/>
-
-        <TextView
-            android:id="@+id/settings_badge"
-            android:layout_width="19dp"
-            android:layout_height="19dp"
-            android:layout_toStartOf="@id/spacer"
-            android:background="@drawable/background_round_warning_red"
-            android:fontFamily="@font/font_semibold"
+            android:id="@+id/wallet_tab"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="1"
             android:gravity="center"
-            android:paddingBottom="2dp"
-            android:textColor="@color/white"
-            android:textSize="12sp"
-            android:visibility="gone" />
-    </RelativeLayout>
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/nav_wallet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_tab_wallet" />
+
+            <TextView
+                android:id="@+id/nav_wallet_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_semibold"
+                android:text="@string/wallet_label"
+                android:textColor="@color/dove"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/transactions_tab"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/nav_transactions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_tab_activity" />
+
+            <TextView
+                android:id="@+id/nav_transactions_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_semibold"
+                android:text="@string/tx_label"
+                android:textColor="@color/dove"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/browser_tab"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/nav_browser"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_tab_browser" />
+
+            <TextView
+                android:id="@+id/nav_browser_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_semibold"
+                android:text="@string/browser_label"
+                android:textColor="@color/dove"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/settings_tab"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/nav_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/ic_tab_settings" />
+
+            <TextView
+                android:id="@+id/nav_settings_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/nav_settings"
+                android:layout_centerHorizontal="true"
+                android:fontFamily="@font/font_semibold"
+                android:lineSpacingExtra="8sp"
+                android:text="@string/settings_label"
+                android:textColor="@color/dove"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:id="@+id/spacer"
+                android:layout_width="2dp"
+                android:layout_height="10dp"
+                android:layout_centerInParent="true"
+                android:background="#00000000"
+                android:orientation="horizontal" />
+
+            <TextView
+                android:id="@+id/settings_badge"
+                android:layout_width="19dp"
+                android:layout_height="19dp"
+                android:layout_toStartOf="@id/spacer"
+                android:background="@drawable/background_round_warning_red"
+                android:fontFamily="@font/font_semibold"
+                android:gravity="center"
+                android:paddingBottom="2dp"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:visibility="gone" />
+        </RelativeLayout>
 
     </LinearLayout>
 

@@ -2,6 +2,7 @@ package com.alphawallet.app.entity.tokenscript;
 
 import io.reactivex.Observable;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.util.BalanceUtils;
@@ -280,7 +281,7 @@ public abstract class TokenscriptFunction
                     params.add(new Utf8String(arg.element.value));
                     break;
                 case "bytes":
-                    params.add(new BytesType(Numeric.hexStringToByteArray(arg.element.value), "bytes"));
+                    params.add(new Bytes32(Numeric.hexStringToByteArray(arg.element.value)));
                     break;
                 case "bytes1":
                     params.add(new Bytes1(Numeric.hexStringToByteArray(arg.element.value)));
@@ -687,6 +688,7 @@ public abstract class TokenscriptFunction
             try
             {
                 BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
+                if (BuildConfig.DEBUG) System.out.println("ATTR: " + attr.name + " : " + attr.id + " : " + attr.getSyntaxVal(attr.toString(val)));
                 return new TokenScriptResult.Attribute(attr.id, attr.name, val, attr.getSyntaxVal(attr.toString(val)));
             }
             catch (Exception e)

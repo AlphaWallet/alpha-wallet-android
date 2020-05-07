@@ -2,25 +2,30 @@ package com.alphawallet.app.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
+import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
@@ -86,7 +91,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private Web3TokenView tokenView;
     private ProgressBar waitSpinner;
     private SignMessageDialog dialog;
-    private String functionEffect;
     private Map<String, String> args = new HashMap<>();
     private Map<String, Boolean> resolvedUserArgs = new HashMap<>();
     private StringBuilder attrs;
@@ -95,7 +99,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private FunctionButtonBar functionBar;
     private Handler handler;
     private boolean reloaded;
-    private boolean isClosing;
     private int userInputCheckCount;
 
     private void initViews() {
@@ -123,6 +126,15 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         reloaded = false;
 
         getAttrs();
+
+        tokenView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url)
+            {
+                if (handleMapClick(url)) return true; //handle specific map click
+                else return handleURLClick(url);      //otherwise handle an attempt to visit a URL from TokenScript. If URL isn't in the approved DAPP list then fail
+            }
+        });
     }
 
     private void displayFunction(String tokenAttrs)
@@ -232,7 +244,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
         progressView.hide();
-        isClosing = false;
 
         //expose the webview and remove the token 'card' background
         findViewById(R.id.layout_webwrapper).setBackgroundResource(R.drawable.background_card);
@@ -240,7 +251,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
         initViews();
         toolbar();
-        setTitle(getString(R.string.token_function));
+        setTitle(actionMethod);
         setupFunctions();
     }
 
@@ -472,7 +483,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void functionSuccess()
     {
-        isClosing = true;
         if (handler == null) handler = new Handler();
         LinearLayout successOverlay = findViewById(R.id.layout_success_overlay);
         if (successOverlay != null) successOverlay.setVisibility(View.VISIBLE);
@@ -615,6 +625,76 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         else handler.post(progressOff);
     }
 
+    private void urlNotWhiteListed(String url)
+    {
+        hideDialog();
+        alertDialog = new AWalletAlertDialog(this);
+        alertDialog.setIcon(AWalletAlertDialog.ERROR);
+        alertDialog.setTitle(R.string.error_not_whitelisted);
+        alertDialog.setMessage(getString(R.string.explain_not_whitelisted, url));
+        alertDialog.setButtonText(R.string.button_ok);
+        alertDialog.setButtonListener(v ->alertDialog.dismiss());
+        alertDialog.show();
+    }
+
+    private void openInDappBrowser(String url)
+    {
+        Intent intent = new Intent(FunctionActivity.this, HomeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra("url", url);
+        startActivity(intent);
+    }
+
+    private boolean handleURLClick(String url)
+    {
+        if (!TextUtils.isEmpty(url))
+        {
+            //try one of the whitelisted URL's and open in dapp browser
+            List<DApp> myDapps = DappBrowserUtils.getDappsList(getApplicationContext());
+            for (DApp thisDapp : myDapps)
+            {
+                //must start with the whitelisted URL, to avoid simply adding the URL as a param
+                if (url.startsWith(thisDapp.getUrl()))
+                {
+                    openInDappBrowser(url);
+                    return true;
+                }
+            }
+
+            //not whitelisted
+            urlNotWhiteListed(url);
+        }
+
+        return true;
+    }
+
+    private boolean handleMapClick(String url)
+    {
+        if (!TextUtils.isEmpty(url))
+        {
+            int index = url.indexOf(C.DAPP_PREFIX_MAPS);
+            if (index > 0)
+            {
+                index += C.DAPP_PREFIX_MAPS.length();
+                if (index < url.length())
+                {
+                    String geoCoords = url.substring(index);
+                    Uri gmmIntentUri = Uri.parse("geo:My+Location?q=" + geoCoords);
+
+                    //pass the location to the intent
+                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                                               gmmIntentUri);
+                    startActivity(intent);
+                    //finish this activity
+                    functionSuccess();
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
@@ -655,7 +735,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
-        isClosing = false;
         args.clear();
         //run the onConfirm JS and await callback
         tokenView.TScallToJS(function, "onConfirm" + "('sig')", this);

@@ -21,6 +21,7 @@ import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.SetDefaultWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportWalletRouter;
 import com.alphawallet.app.service.GasService;
@@ -30,15 +31,12 @@ import com.alphawallet.app.util.AWEnsResolver;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
-import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 
 public class WalletsViewModel extends BaseViewModel
 {
@@ -55,6 +53,7 @@ public class WalletsViewModel extends BaseViewModel
     private final ImportWalletRouter importWalletRouter;
     private final HomeRouter homeRouter;
     private final TokensService tokensService;
+    private final AWEnsResolver ensResolver;
 
     private final MutableLiveData<Wallet[]> wallets = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -62,12 +61,10 @@ public class WalletsViewModel extends BaseViewModel
     private final MutableLiveData<ErrorEnvelope> createWalletError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> noWalletsError = new MutableLiveData<>();
     private final MutableLiveData<Wallet> updateBalance = new MutableLiveData<>();
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> updateENSName = new MutableLiveData<>();
 
     private NetworkInfo currentNetwork;
     private Map<String, Wallet> walletBalances = new HashMap<>();
-    private final ExecutorService executorService;
     private int walletUpdateCount;
 
     WalletsViewModel(
@@ -93,17 +90,12 @@ public class WalletsViewModel extends BaseViewModel
         this.gasService = gasService;
         this.tokensService = tokensService;
 
-        executorService = Executors.newFixedThreadPool(10);
+        ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID));
     }
 
     public LiveData<Wallet[]> wallets()
     {
         return wallets;
-    }
-
-    public LiveData<NetworkInfo> defaultNetwork()
-    {
-        return defaultNetwork;
     }
 
     public LiveData<Wallet> defaultWallet()
@@ -145,9 +137,7 @@ public class WalletsViewModel extends BaseViewModel
     {
         progress.postValue(true);
         ContractLocator override = EthereumNetworkRepository.getOverrideToken();
-        NetworkInfo networkInfo  = findDefaultNetworkInteract.getNetworkInfo(override.chainId);
-        defaultNetwork.postValue(networkInfo);
-        currentNetwork = networkInfo;
+        currentNetwork = findDefaultNetworkInteract.getNetworkInfo(override.chainId);
 
         disposable = genericWalletInteract
                 .find()
@@ -161,7 +151,7 @@ public class WalletsViewModel extends BaseViewModel
 
         for (Wallet w : items)
         {
-            w.balanceSymbol = defaultNetwork.getValue().symbol;
+            w.balanceSymbol = currentNetwork.symbol;
             Wallet mapW = walletBalances.get(w.address);
             if (mapW != null)
             {
@@ -196,7 +186,7 @@ public class WalletsViewModel extends BaseViewModel
         //check names first
         disposable = fetchWalletsInteract.fetch().toObservable()
                 .flatMap(Observable::fromArray)
-                .flatMap(this::resolveEns)
+                .flatMap(wallet -> ensResolver.resolveWalletEns(wallet).toObservable())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::updateOnName, this::onError, () -> progress.postValue(false));
@@ -211,31 +201,6 @@ public class WalletsViewModel extends BaseViewModel
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(updateENSName::postValue, this::onError);
         }
-    }
-
-    private Observable<Wallet> resolveEns(Wallet wallet)
-    {
-        return Observable.fromCallable(() -> {
-            AWEnsResolver resolver = new AWEnsResolver(getWeb3jService(EthereumNetworkRepository.MAINNET_ID), gasService);
-            try
-            {
-                wallet.ENSname = resolver.reverseResolve(wallet.address);
-                if (wallet.ENSname != null && wallet.ENSname.length() > 0)
-                {
-                    //check ENS name integrity - it must point to the wallet address
-                    String resolveAddress = resolver.resolve(wallet.ENSname);
-                    if (!resolveAddress.equalsIgnoreCase(wallet.address))
-                    {
-                        wallet.ENSname = null;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                //ignore
-            }
-            return wallet;
-        }).subscribeOn(Schedulers.from(executorService));
     }
 
     public void fetchWallets()

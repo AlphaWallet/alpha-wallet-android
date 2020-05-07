@@ -1,138 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.alphawallet.app.widget.FunctionButtonBar xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/layoutButtons"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_alignParentBottom="true"
-    android:visibility="visible"
-    android:orientation="vertical">
+    android:background="@color/colorPrimary"
+    android:orientation="horizontal"
+    android:paddingStart="12dp"
+    android:paddingTop="12dp"
+    android:paddingEnd="12dp"
+    android:paddingBottom="12dp"
+    android:visibility="visible">
 
-    <LinearLayout
-        android:id="@+id/buttons_aux"
-        android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:layout_gravity="center"
-        android:background="@color/button_colour"
-        android:layout_marginBottom="1dp"
-        android:visibility="gone"
-        android:orientation="horizontal">
+    <Button
+        android:id="@+id/primary_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_weight="0.5"
+        android:background="@drawable/selector_round_button"
+        android:ellipsize="end"
+        android:fontFamily="@font/font_semibold"
+        android:lines="1"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:text="Primary"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="17sp"
+        android:visibility="gone" />
 
-        <Button
-            android:id="@+id/button_action1"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp"
-            android:text="@string/action_use"
-            android:visibility="gone"
-            android:textAllCaps="false"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
+    <Button
+        android:id="@+id/secondary_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_weight="0.5"
+        android:background="@drawable/selector_round_button_secondary"
+        android:ellipsize="end"
+        android:fontFamily="@font/font_semibold"
+        android:lines="1"
+        android:text="Secondary"
+        android:textAllCaps="false"
+        android:textColor="@drawable/selector_button_text_secondary"
+        android:textSize="17sp"
+        android:visibility="gone" />
 
-        <include layout="@layout/button_divider" />
-
-        <Button
-            android:id="@+id/button_action2"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp"
-            android:text="@string/action_sell"
-            android:textAllCaps="false"
-            android:visibility="gone"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
-
-        <include layout="@layout/button_divider" />
-
-        <Button
-            android:id="@+id/button_action3"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp"
-            android:text="@string/action_transfer"
-            android:textAllCaps="false"
-            android:visibility="gone"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:layout_gravity="center"
-        android:background="@color/button_colour"
-        android:visibility="gone"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/button_use"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp"
-            android:text="@string/action_use"
-            android:textAllCaps="false"
-            android:textColor="@color/button_text_color"
-            android:visibility="gone"
-            android:textSize="20sp" />
-
-        <include layout="@layout/button_divider" />
-
-        <Button
-            android:id="@+id/button_sell"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp"
-            android:text="@string/action_sell"
-            android:textAllCaps="false"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
-
-        <include layout="@layout/button_divider" />
-
-        <Button
-            android:id="@+id/button_transfer"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/selector_button"
-            android:fontFamily="@font/font_regular"
-            android:gravity="center"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp"
-            android:text="@string/action_transfer"
-            android:textAllCaps="false"
-            android:textColor="@color/button_text_color"
-            android:textSize="20sp" />
-    </LinearLayout>
-</com.alphawallet.app.widget.FunctionButtonBar>
+    <ImageButton
+        android:id="@+id/more_button"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_weight="0.2"
+        android:background="@drawable/selector_round_button_secondary"
+        android:drawableTint="@color/azure"
+        android:gravity="center"
+        android:src="@drawable/ic_menu_azure"
+        android:tint="@drawable/selector_button_text_secondary"
+        android:visibility="gone" />
+</LinearLayout>

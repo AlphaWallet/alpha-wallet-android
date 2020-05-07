@@ -18,6 +18,7 @@ public class HomeReceiver extends BroadcastReceiver
         ctx.registerReceiver(this, new IntentFilter(C.RESET_TOOLBAR));
         ctx.registerReceiver(this, new IntentFilter(C.REQUEST_NOTIFICATION_ACCESS));
         ctx.registerReceiver(this, new IntentFilter(C.BACKUP_WALLET_SUCCESS));
+        ctx.registerReceiver(this, new IntentFilter(C.CHANGE_CURRENCY));
         this.homeCommsInterface = homeCommsInterface;
     }
 
@@ -40,6 +41,9 @@ public class HomeReceiver extends BroadcastReceiver
             case C.BACKUP_WALLET_SUCCESS:
                 String keyAddress = bundle.getString("Key");
                 homeCommsInterface.backupSuccess(keyAddress);
+                break;
+            case C.CHANGE_CURRENCY:
+                homeCommsInterface.changeCurrency();
                 break;
             default:
                 break;

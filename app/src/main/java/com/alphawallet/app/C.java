@@ -105,6 +105,8 @@ public abstract class C {
             "com.stormbird.wallet.REQUEST_NOTIFICATION";
     public static final String BACKUP_WALLET_SUCCESS =
             "com.stormbird.wallet.BACKUP_SUCCESS";
+    public static final String CHANGE_CURRENCY =
+            "com.stormbird.wallet.CHANGE_CURRENCY";
 
     public static final String COINBASE_WIDGET_CODE = "88d6141a-ff60-536c-841c-8f830adaacfd";
     public static final String SHAPESHIFT_KEY = "c4097b033e02163da6114fbbc1bf15155e759ddfd8352c88c55e7fef162e901a800e7eaecf836062a0c075b2b881054e0b9aa2324be7bc3694578493faf59af4";
@@ -120,6 +122,7 @@ public abstract class C {
     public static final String DEFAULT_GAS_LIMIT_FOR_END_CONTRACT = "200000"; //TODO: determine appropriate gas limit for contract destruct
     public static final long GAS_PER_BYTE = 310; //from experimentation
     public static final long GAS_LIMIT_MIN = 21000L;
+    public static final long GAS_LIMIT_DEFAULT = 90000L;
     public static final long GAS_LIMIT_MAX = 900000L;
     public static final long GAS_PRICE_MIN = 1000000000L;
     public static final long NETWORK_FEE_MAX = 90000000000000000L;
@@ -162,6 +165,7 @@ public abstract class C {
     public static final String DAPP_PREFIX_MAILTO = "mailto";
     public static final String DAPP_PREFIX_ALPHAWALLET = "alphawallet";
     public static final String DAPP_SUFFIX_RECEIVE = "receive";
+    public static final String DAPP_PREFIX_MAPS = "maps.google.com/maps?daddr=";
 
     public static final String ENS_SCAN_BLOCK = "ens_check_block";
     public static final String ENS_HISTORY = "ensHistory";

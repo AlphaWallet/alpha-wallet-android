@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
@@ -8,44 +9,52 @@
 
     <include layout="@layout/layout_network_switch_toolbar" />
 
-    <RelativeLayout
+    <android.support.constraint.ConstraintLayout
         android:id="@+id/layout_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/background_card"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp">
+        android:animateLayoutChanges="true"
+        android:paddingLeft="@dimen/dp22"
+        android:paddingRight="@dimen/dp22">
 
         <TextView
             android:id="@+id/text_scan"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp25"
             android:fontFamily="@font/font_regular"
-            android:layout_marginTop="20dp"
-            android:layout_alignParentTop="true"
             android:gravity="center"
+            android:paddingTop="@dimen/dp20"
             android:text="@string/scan_qr_label"
-            android:textColor="@color/text_black"
-            android:textSize="16sp" />
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp17"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
             android:id="@+id/contract_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_below="@id/text_scan"
-            android:layout_marginTop="20dp"
-            android:orientation="horizontal">
+            android:layout_centerVertical="true"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="@dimen/dp20"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_scan">
 
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/ic_ethereum"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Contract Address"
-            android:textSize="16sp"/>
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_ethereum" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Contract Address"
+                android:textSize="@dimen/sp15" />
 
         </LinearLayout>
 
@@ -53,29 +62,34 @@
             android:id="@+id/qr_image"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/contract_info"
-            android:layout_above="@id/address"
-            android:layout_centerInParent="true"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="30dp"
-            android:src="@drawable/ic_ethereum" />
+            android:maxHeight="200dp"
+            android:scaleType="center"
+            android:src="@drawable/ic_ethereum"
+            app:layout_constraintBottom_toTopOf="@id/copy_address_layout"
+            app:layout_constraintHeight_max="200dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/contract_info" />
 
-        <TextView
-            android:id="@+id/address"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/copy_address_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@id/layoutButtons"
-            android:layout_gravity="center_horizontal"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="20dp"
-            android:layout_marginTop="5dp"
-            android:background="@drawable/background_round_grey"
-            android:fontFamily="@font/font_semibold"
-            android:gravity="center"
-            android:padding="15dp"
-            android:textSize="13sp" />
+            android:layout_marginBottom="@dimen/dp24"
+            android:animateLayoutChanges="true"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/qr_image">
 
-        <include layout="@layout/layout_function_buttons" />
+            <com.alphawallet.app.widget.CopyTextView
+                android:id="@+id/copy_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal" />
 
-    </RelativeLayout>
+        </LinearLayout>
+
+    </android.support.constraint.ConstraintLayout>
 </LinearLayout>

@@ -10,12 +10,14 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,13 +32,16 @@ import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.QRScanning.DisplayUtils;
 import com.alphawallet.app.ui.widget.entity.AmountEntryItem;
+import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.viewmodel.MyAddressViewModelFactory;
+import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 
 import org.web3j.crypto.Keys;
@@ -50,8 +55,10 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
-public class MyAddressActivity extends BaseActivity implements View.OnClickListener, AmountUpdateCallback, StandardFunctionInterface
+public class MyAddressActivity extends BaseActivity implements AmountUpdateCallback
 {
     public static final String KEY_ADDRESS = "key_address";
     public static final String KEY_MODE = "mode";
@@ -66,6 +73,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
 
     private Wallet wallet;
     private String displayAddress;
+    private String displayName;
     private Token token;
     private ImageView qrImageView;
     private TextView titleView;
@@ -75,13 +83,14 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     private TextView currentNetwork;
     private RelativeLayout selectNetworkLayout;
     private View networkIcon;
-    private RelativeLayout layoutHolder;
     private AmountEntryItem amountInput = null;
     private NetworkInfo networkInfo;
     private int currentMode = MODE_ADDRESS;
     private int overrideNetwork;
-    private FunctionButtonBar functionBar;
     private int screenWidth;
+    private CopyTextView copyAddress;
+    private CopyTextView copyWalletName;
+    private ProgressBar ensFetchProgressBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -127,10 +136,9 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         address =  findViewById(R.id.address);
         qrImageView = findViewById(R.id.qr_image);
         selectAddress = findViewById(R.id.layout_select_address);
-        layoutHolder = findViewById(R.id.layout_holder);
         networkIcon = findViewById(R.id.network_icon);
-        functionBar = findViewById(R.id.layoutButtons);
         qrImageView.setBackgroundResource(R.color.white);
+        ensFetchProgressBar = findViewById(R.id.ens_fetch_progress);
 
         if (viewModel == null) initViewModel();
     }
@@ -158,7 +166,7 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
     public void onResume()
     {
         super.onResume();
-        layoutHolder.setOnClickListener(view -> {
+        findViewById(R.id.layout_holder).setOnClickListener(view -> {
             if (getCurrentFocus() != null)
             {
                 KeyboardUtils.hideKeyboard(getCurrentFocus());
@@ -243,7 +251,6 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
                 viewModel.getTokenRepository(),
                 token);
         amountInput.getValue();
-        functionBar.setVisibility(View.GONE);
         selectNetworkLayout.setVisibility(View.VISIBLE);
 
         if (networkInfo != null)
@@ -260,6 +267,9 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         initViews();
         findViewById(R.id.toolbar_title).setVisibility(View.VISIBLE);
 
+        copyWalletName = findViewById(R.id.copy_wallet_name);
+        copyAddress = findViewById(R.id.copy_address);
+
         if (amountInput != null)
         {
             amountInput.onClear();
@@ -268,17 +278,39 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
 
         displayAddress = Keys.toChecksumAddress(wallet.address);
         setTitle(getString(R.string.my_wallet_address));
-        address.setText(displayAddress);
+        copyAddress.setText(displayAddress);
         currentMode = MODE_ADDRESS;
         selectNetworkLayout.setVisibility(View.GONE);
         if (getCurrentFocus() != null) {
             KeyboardUtils.hideKeyboard(getCurrentFocus());
         }
-        address.setVisibility(View.VISIBLE);
+        copyAddress.setVisibility(View.VISIBLE);
         onWindowFocusChanged(true);
-        functionBar.setVisibility(View.VISIBLE);
-        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.copy_wallet_address));
-        functionBar.setupFunctions(this, functions);
+        updateAddressWithENS(wallet.ENSname); //JB: see if there's any cached value to display while we wait for ENS
+
+        //When view changes, this function loads again. It will again try to fetch ENS
+        if(TextUtils.isEmpty(displayName))
+        {
+            new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID))
+                    .resolveEnsName(displayAddress)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(this::updateAddressWithENS, this::printTrace).isDisposed();
+            if (ensFetchProgressBar != null) {
+                ensFetchProgressBar.setVisibility(View.VISIBLE);
+            }
+        }
+        else
+        {
+            updateAddressWithENS(displayName);
+        }
+    }
+
+    private void printTrace(Throwable throwable) {
+        if (ensFetchProgressBar != null) {
+            ensFetchProgressBar.setVisibility(View.GONE);
+        }
+        updateAddressWithENS(wallet.ENSname); // JB: if there's any issue then fall back to cached name
     }
 
     private void showContract()
@@ -287,15 +319,32 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         setContentView(R.layout.activity_contract_address);
         initViews();
         findViewById(R.id.toolbar_title).setVisibility(View.VISIBLE);
+        copyAddress = findViewById(R.id.copy_address);
+        copyAddress.setVisibility(View.VISIBLE);
 
         currentMode = MODE_CONTRACT;
         displayAddress = token.getAddress();
         setTitle(getString(R.string.contract_address));
-        address.setText(token.getAddress());
+        copyAddress.setText(displayAddress);
         onWindowFocusChanged(true);
-        functionBar.setVisibility(View.VISIBLE);
-        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.copy_contract_address));
-        functionBar.setupFunctions(this, functions);
+    }
+
+    private void updateAddressWithENS(String ensName)
+    {
+        if (ensFetchProgressBar != null) {
+            ensFetchProgressBar.setVisibility(View.GONE);
+        }
+
+        if (!TextUtils.isEmpty(ensName))
+        {
+            displayName = ensName;
+            copyWalletName.setVisibility(View.VISIBLE);
+            copyWalletName.setText(ensName);
+        }
+        else
+        {
+            copyWalletName.setVisibility(View.GONE);
+        }
     }
 
     private void selectNetwork() {
@@ -352,16 +401,12 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
         overrideNetwork = getIntent().getIntExtra(OVERRIDE_DEFAULT, 1);
-    }
 
-    @Override
-    public void onClick(View v) {
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, displayAddress);
-        if (clipboard != null) {
-            clipboard.setPrimaryClip(clip);
+        if (wallet == null)
+        {
+            //have no address. Can only quit the activity
+            finish();
         }
-        Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
     }
 
     private boolean checkWritePermission() {
@@ -396,25 +441,6 @@ public class MyAddressActivity extends BaseActivity implements View.OnClickListe
                 return;
             }
             qrImageView.setImageBitmap(QRUtils.createQRImage(this, eip681String, screenWidth));
-        }
-    }
-
-    @Override
-    public void handleClick(int view)
-    {
-        switch (view)
-        {
-            case R.string.copy_wallet_address:
-            case R.string.copy_contract_address:
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText(KEY_ADDRESS, displayAddress);
-                if (clipboard != null) {
-                    clipboard.setPrimaryClip(clip);
-                }
-                Toast.makeText(this, R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show();
-                break;
-            default:
-                break;
         }
     }
 }

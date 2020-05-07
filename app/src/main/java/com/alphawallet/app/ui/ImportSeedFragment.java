@@ -43,6 +43,7 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
     private Button importButton;
     private Pattern pattern;
     private TextView wordCount;
+    private TextView nonEnglishHint;
     private RecyclerView listSuggestions;
     private List<String> suggestions;
     private SuggestionsAdapter suggestionsAdapter;
@@ -78,12 +79,14 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         importButton = getActivity().findViewById(R.id.import_action);
         wordCount = getActivity().findViewById(R.id.text_word_count);
         listSuggestions = getActivity().findViewById(R.id.list_suggestions);
+        nonEnglishHint = getActivity().findViewById(R.id.text_non_english_hint);
         importButton.setOnClickListener(this);
         seedPhrase.getEditText().addTextChangedListener(this);
         updateButtonState(false);
         pattern = Pattern.compile(validator, Pattern.MULTILINE);
+        wordCount.setVisibility(View.VISIBLE);
 
-        seedPhrase.setLayoutListener(getActivity(), this, getActivity().findViewById(R.id.bottom_marker));
+        seedPhrase.setLayoutListener(getActivity(), this);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
         listSuggestions.setLayoutManager(linearLayoutManager);
@@ -95,13 +98,14 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
 
     private void setHintState(boolean enabled){
         String lang = Locale.getDefault().getDisplayLanguage();
+        if (nonEnglishHint == null) return;
         if (enabled && !lang.equalsIgnoreCase("English")) //remove language hint for English locale
         {
-            getActivity().findViewById(R.id.text_non_english_hint).setVisibility(View.VISIBLE);
+            nonEnglishHint.setVisibility(View.VISIBLE);
         }
         else
         {
-            getActivity().findViewById(R.id.text_non_english_hint).setVisibility(View.GONE);
+            nonEnglishHint.setVisibility(View.GONE);
         }
     }
 
@@ -176,18 +180,15 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         final Matcher matcher = pattern.matcher(value);
         if (matcher.find())
         {
-            updateButtonState(false);
             seedPhrase.setError("Seed phrase can only contain words");
             wordCount.setVisibility(View.GONE);
         }
         else if (value.length() > 5)
         {
-            updateButtonState(true);
             wordCount.setVisibility(View.VISIBLE);
         }
         else
         {
-            updateButtonState(false);
             wordCount.setVisibility(View.VISIBLE);
         }
 
@@ -198,11 +199,14 @@ public class ImportSeedFragment extends Fragment implements View.OnClickListener
         if(words == maxWordCount) {
             wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.nasty_green));
             wordCount.setTypeface(boldTypeface);
+            updateButtonState(true);
         }else if(words == (maxWordCount -1)){
             wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.colorPrimaryDark));
             wordCount.setTypeface(normalTypeface);
+            updateButtonState(false);
         }else if(words > maxWordCount){
             wordCount.setTextColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.dark_seed_danger));
+            updateButtonState(false);
         }
 
         //get last word from the text

@@ -2,13 +2,18 @@ package com.alphawallet.app.viewmodel;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.text.TextUtils;
 
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
+import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.util.AWEnsResolver;
 
 import java.util.concurrent.TimeUnit;
 

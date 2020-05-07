@@ -6,4 +6,5 @@ public interface HomeCommsInterface
     void resetToolbar();
     void requestNotificationPermission();
     void backupSuccess(String keyAddress);
+    void changeCurrency();
 }

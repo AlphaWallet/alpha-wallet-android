@@ -62,7 +62,7 @@ public class ImportPrivateKeyFragment extends Fragment implements View.OnClickLi
         updateButtonState(false);
         pattern = Pattern.compile(validator, Pattern.MULTILINE);
 
-        privateKey.setLayoutListener(getActivity(), this, getActivity().findViewById(R.id.bottom_marker_pk));
+        privateKey.setLayoutListener(getActivity(), this);
     }
 
     @Override

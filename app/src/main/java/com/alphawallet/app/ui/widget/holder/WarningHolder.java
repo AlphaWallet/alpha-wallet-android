@@ -3,6 +3,7 @@ package com.alphawallet.app.ui.widget.holder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +11,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
@@ -26,7 +26,7 @@ public class WarningHolder extends BinderViewHolder<WarningData>
     public static final int VIEW_TYPE = 1015;
     private final TextView title;
     private final TextView detail;
-    private final RelativeLayout layoutBackground;
+    private final LinearLayout layoutBackground;
     private final ImageView menuButton;
     private final Button backupButton;
     private final View popupAnchor;
@@ -36,7 +36,7 @@ public class WarningHolder extends BinderViewHolder<WarningData>
     {
         title.setText(data.title);
         detail.setText(data.detail);
-        layoutBackground.setBackgroundColor(data.colour);
+        layoutBackground.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), data.colour));
         backupButton.setText(data.buttonText);
         backupButton.setBackgroundColor(data.buttonColour);
         backupButton.setOnClickListener(v -> { data.callback.BackupClick(data.wallet); });
@@ -62,7 +62,7 @@ public class WarningHolder extends BinderViewHolder<WarningData>
         super(res_id, parent);
         title = findViewById(R.id.text_title);
         detail = findViewById(R.id.text_detail);
-        layoutBackground = findViewById(R.id.layout_backup_text);
+        layoutBackground = findViewById(R.id.layout_item_warning);
         backupButton = findViewById(R.id.button_backup);
         menuButton = findViewById(R.id.btn_menu);
         popupAnchor = findViewById(R.id.popup_anchor);

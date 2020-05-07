@@ -495,8 +495,13 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     {
         try
         {
+            /*
+            While checking 0.00 value which is passed while using Fiat currency,
+            BigDecimal.ZERO fails to send accurate value.
+            Using .doubleValue(), converts to actual amount and compare without scale.
+             */
             BigDecimal amount = new BigDecimal(balance);
-            return amount.equals(BigDecimal.ZERO);
+            return BigDecimal.ZERO.doubleValue() == amount.doubleValue();
         }
         catch (Exception e)
         {

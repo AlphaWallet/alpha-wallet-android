@@ -79,7 +79,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     private NonFungibleTokenAdapter adapter;
     private AWalletAlertDialog dialog;
     private Web3TokenView testView;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private boolean iconifiedCheck;
     private int checkVal;
 
@@ -103,10 +103,9 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
         systemView.attachSwipeRefreshLayout(refreshLayout);
         refreshLayout.setOnRefreshListener(this::refreshAssets);
-        handler = new Handler();
 
         testView = findViewById(R.id.test_web3);
-        
+
         list = findViewById(R.id.listTickets);
         toolbarView = findViewById(R.id.toolbar);
 
@@ -128,10 +127,8 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE);
         viewModel.checkTokenScriptValidity(token);
 
-        token.iconifiedWebviewHeight = 0;
-        token.nonIconifiedWebviewHeight = 0;
         iconifiedCheck = true;
-        if (token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
+        if (token.iconifiedWebviewHeight == 0 && token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
         {
             initWebViewCheck(iconifiedCheck);
             handler.postDelayed(this, 1500);
@@ -277,9 +274,10 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         testView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
             if (token != null)
             {
-                if (iconifiedCheck)token.iconifiedWebviewHeight = bottom - top;
+                if (iconifiedCheck) token.iconifiedWebviewHeight = bottom - top;
                 else token.nonIconifiedWebviewHeight = bottom - top;
                 checkVal++;
+                viewModel.updateTokenScriptViewSize(token);
             }
 
             if (checkVal == 3) addRunCall(0); //received the third webview render update - this is always the final size we want, but sometimes there's only 1 or 2 updates

@@ -573,7 +573,7 @@
     <string name="title_clear_browser_cache">Clear Browser Caches</string>
     <string name="title_tokenscript">TokenScript</string>
     <string name="title_change_language">Change Language</string>
-    <string name="add_hide_tokens">Add / Hide Tokens</string>
+    <string name="add_hide_tokens">Show / Hide Tokens</string>
     <string name="instagram">Instagram</string>
     <string name="settings_locale_currency">Change Currency</string>
     <string name="dialog_title_select_currency">Select FIAT Currency</string>

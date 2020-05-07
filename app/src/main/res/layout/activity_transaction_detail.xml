@@ -240,7 +240,7 @@
                 android:paddingBottom="10dp"
                 android:paddingLeft="50dp"
                 android:paddingRight="50dp"
-                android:textColor="@color/white"
+                android:textColor="@color/colorAccent"
                 android:textAllCaps="false"
                 android:fontFamily="@font/font_regular"
                 android:textSize="20sp"

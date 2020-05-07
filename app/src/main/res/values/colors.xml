@@ -2,7 +2,7 @@
 <resources>
 	<color name="colorPrimary">#FFFFFF</color>
 	<color name="colorPrimaryDark">#707070</color>
-	<color name="colorAccent">#54C1E3</color>
+	<color name="colorAccent">#007FED</color>
 	<color name="colorPrimaryLight">#AA54C1E3</color>
 	<color name="colorTheme">#FFFFFF</color>
 	<color name="colorHighlight">@color/azure</color>

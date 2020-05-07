@@ -32,6 +32,7 @@ import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
 import java.math.BigInteger;
+import java.util.Map;
 
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ERROR;
 
@@ -57,6 +58,8 @@ public class Web3TokenView extends WebView
 
     @Nullable
     private OnSignPersonalMessageListener onSignPersonalMessageListener;
+    @Nullable
+    private OnSetValuesListener onSetValuesListener;
 
     public Web3TokenView(@NonNull Context context) {
         super(context);
@@ -105,6 +108,10 @@ public class Web3TokenView extends WebView
                 innerOnSignMessageListener,
                 innerOnSignPersonalMessageListener,
                 innerOnSignTypedMessageListener), "alpha");
+
+        addJavascriptInterface(new ValueCallbackJSInterface(
+                this,
+                innerOnSetValuesListener), "changeListener");
 
         super.setWebViewClient(tokenScriptClient);
 
@@ -209,6 +216,10 @@ public class Web3TokenView extends WebView
         this.onSignPersonalMessageListener = onSignPersonalMessageListener;
     }
 
+    public void setOnSetValuesListener(@Nullable OnSetValuesListener onSetValuesListener) {
+        this.onSetValuesListener = onSetValuesListener;
+    }
+
     private final OnSignTransactionListener innerOnSignTransactionListener = new OnSignTransactionListener() {
         @Override
         public void onSignTransaction(Web3Transaction transaction, String url) {
@@ -234,6 +245,14 @@ public class Web3TokenView extends WebView
         @Override
         public void onSignTypedMessage(Message<TypedData[]> message) {
 
+        }
+    };
+
+    private final OnSetValuesListener innerOnSetValuesListener = new OnSetValuesListener() {
+        @Override
+        public void setValues(Map<String, String> updates)
+        {
+            onSetValuesListener.setValues(updates);
         }
     };
 

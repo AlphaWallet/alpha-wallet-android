@@ -165,7 +165,8 @@ public abstract class EventUtils
 
         if (ev.readBlock != null && ev.readBlock.compareTo(BigInteger.ZERO) > 0)
         {
-            startBlock = DefaultBlockParameter.valueOf(ev.readBlock);
+            //TODO: ADD this back in if all is good
+            //startBlock = DefaultBlockParameter.valueOf(ev.readBlock);
         }
 
         final org.web3j.protocol.core.methods.request.EthFilter filter =

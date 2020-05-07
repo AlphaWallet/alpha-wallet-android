@@ -948,9 +948,9 @@ public class TokenDefinition {
         TokenscriptElement tse = new TokenscriptElement();
         tse.ref = input.getAttribute("ref");
         tse.value = input.getTextContent();
-
-        return tse;
-    }
+        tse.localRef = input.getAttribute("local-ref");
+        return tse;    
+}
 
     private void processDataInputs(FunctionDefinition fd, Element input)
     {

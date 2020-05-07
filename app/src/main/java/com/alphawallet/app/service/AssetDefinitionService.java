@@ -73,9 +73,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -335,6 +338,56 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public String getWalletAddr()
     {
         return tokensService.getCurrentAddress();
+    }
+
+    @Override
+    public long getLastTokenUpdate(int chainId, String address)
+    {
+        long txUpdateTime = 0;
+        Token token = tokensService.getToken(chainId, address);
+        if (token != null)
+        {
+            txUpdateTime = token.lastTxUpdate;
+        }
+
+        return txUpdateTime;
+    };
+
+    public void addResults(Token token, List<AttributeType> localAttrs, Map<String, String> resultsFromPreParse)
+    {
+        //get all attrs:
+        TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
+
+        List<AttributeType> attrList = new ArrayList<>(definition.attributeTypes.values());
+        if (localAttrs != null) attrList.addAll(localAttrs);
+
+        for (String key : resultsFromPreParse.keySet())
+        {
+            AttributeType attr = getTypeFromList(key, attrList);
+            if (attr != null)
+            {
+                TokenscriptElement e = new TokenscriptElement();
+                e.ref = key;
+                String convertedInputValue = convertInputValue(attr, resultsFromPreParse.get(key));
+                TokenScriptResult.Attribute attrResult = new TokenScriptResult.Attribute(attr.id, attr.name, BigInteger.ZERO, convertedInputValue);
+                tokenscriptUtility.addParseResultIfValid(attrResult);
+            }
+        }
+    }
+
+    public void addLocalRefs(Map<String, String> refs)
+    {
+        tokenscriptUtility.addLocalRefs(refs);
+    }
+
+    private AttributeType getTypeFromList(String key, List<AttributeType> attrList)
+    {
+        for (AttributeType attr : attrList)
+        {
+            if (attr.id.equals(key)) return attr;
+        }
+
+        return null;
     }
 
     /**
@@ -880,10 +933,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private boolean addContractAddresses(File file, boolean update) throws Exception
     {
-        if (file.getAbsolutePath().contains("ENS"))
-        {
-            System.out.println("YOLESS");
-        }
         FileInputStream input = new FileInputStream(file);
         TokenDefinition tokenDef = parseFile(input);
         ContractInfo holdingContracts = tokenDef.contracts.get(tokenDef.holdingToken);
@@ -1042,7 +1091,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         txResult.result = selectVal;
 
-        if (txResult.resultTime == 0 || blockTime > txResult.resultTime)
+        if (txResult.resultTime == 0 || blockTime >= txResult.resultTime)
         {
             //store
             txResult.resultTime = blockTime;
@@ -1261,6 +1310,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public boolean hasDefinition(int chainId, String address)
     {
+        if (address.equalsIgnoreCase(tokensService.getCurrentAddress()))
+        {
+            address = "ethereum";
+        }
         return assetDefinitions.get(chainId) != null && assetDefinitions.get(chainId).containsKey(address);
     }
 
@@ -1340,6 +1393,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 switch (event)
                 {
                     case CREATE:
+                        //if this file already exists then wait for the modify
+                        File checkFile = new File(listenerPath, file);
+                        if (checkFile.exists() && checkFile.canRead())
+                        {
+                            break;
+                        }
                     case MODIFY:
                         try
                         {
@@ -1458,7 +1517,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                 Observable.fromIterable(token.getNonZeroArrayBalance())
                                         .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
                                         .filter(txResult -> txResult.needsUpdating(token.lastTxTime))
-                                        .concatMap(result -> tokenscriptUtility.fetchAttrResult(token.getWallet(), td.attributeTypes.get(attr.id), result.tokenId, cAddr, td, this, token.lastTxTime))
+                                        .concatMap(result -> tokenscriptUtility.fetchAttrResult(token.getWallet(), td.attributeTypes.get(attr.id), result.tokenId, cAddr, td, this))
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe();
@@ -1469,7 +1528,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             TransactionResult tr = getFunctionResult(cAddr, attr, BigInteger.ZERO);
                             if (tr.needsUpdating(token.lastTxTime))
                             {
-                                tokenscriptUtility.fetchAttrResult(token.getWallet(), td.attributeTypes.get(attr.id), tr.tokenId, cAddr, td, this, token.lastTxTime)
+                                tokenscriptUtility.fetchAttrResult(token.getWallet(), td.attributeTypes.get(attr.id), tr.tokenId, cAddr, td, this)
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe();
@@ -1586,7 +1645,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     public void onStart()
                     {
                         if (tokensService.getCurrentAddress() == null || !WalletUtils.isValidAddress(tokensService.getCurrentAddress())) return;
-                        if (tResult.result == null) return;
+                        if (tResult.result == null || tResult.resultTime < 0) return;
                         realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress());
                         ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
                         String databaseKey = functionKey(cAddr, tResult.tokenId, tResult.attrId);
@@ -1718,12 +1777,19 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         Asset tokenAsset = erc721Token.getAssetForToken(tokenId.toString());
         if(tokenAsset == null) return;
-        TokenScriptResult.addPair(attrs, "background_colour", tokenAsset.getBackgroundColor());
-        TokenScriptResult.addPair(attrs, "image_preview_url", tokenAsset.getImagePreviewUrl());
-        TokenScriptResult.addPair(attrs, "description", tokenAsset.getDescription());
-        TokenScriptResult.addPair(attrs, "external_link", tokenAsset.getExternalLink());
-        TokenScriptResult.addPair(attrs, "background_colour", tokenAsset.getBackgroundColor());
-        TokenScriptResult.addPair(attrs, "traits", tokenAsset.getTraits());
+
+        try
+        {
+            if (tokenAsset.getBackgroundColor() != null) TokenScriptResult.addPair(attrs, "background_colour", URLEncoder.encode(tokenAsset.getBackgroundColor(), "utf-8"));
+            if (tokenAsset.getImagePreviewUrl() != null) TokenScriptResult.addPair(attrs, "image_preview_url", URLEncoder.encode(tokenAsset.getImagePreviewUrl(), "utf-8"));
+            if (tokenAsset.getDescription() != null) TokenScriptResult.addPair(attrs, "description", URLEncoder.encode(tokenAsset.getDescription(), "utf-8"));
+            if (tokenAsset.getExternalLink() != null) TokenScriptResult.addPair(attrs, "external_link", URLEncoder.encode(tokenAsset.getExternalLink(), "utf-8"));
+            if (tokenAsset.getTraits() != null) TokenScriptResult.addPair(attrs, "traits", tokenAsset.getTraits());
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            //
+        }
     }
 
     public StringBuilder getTokenAttrs(Token token, BigInteger tokenId, int count)
@@ -1736,7 +1802,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             name = definition.getTokenName(1);
         }
-
         TokenScriptResult.addPair(attrs, "name", name);
         TokenScriptResult.addPair(attrs, "symbol", token.getSymbol());
         TokenScriptResult.addPair(attrs, "_count", String.valueOf(count));
@@ -1782,6 +1847,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return sb.toString();
     }
 
+    public void clearResultMap()
+    {
+        tokenscriptUtility.clearParseMaps();
+    }
+
     public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, BigInteger tokenId, List<AttributeType> extraAttrs)
     {
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
@@ -1795,9 +1865,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         List<AttributeType> attrList = new ArrayList<>(definition.attributeTypes.values());
         if (extraAttrs != null) attrList.addAll(extraAttrs);
 
+        tokenscriptUtility.buildAttrMap(attrList);
+
         return Observable.fromIterable(attrList)
                 .flatMap(attr -> tokenscriptUtility.fetchAttrResult(token.getWallet(), attr, tokenId,
-                                                                    cAddr, definition, this, token.lastTxTime));
+                                                                    cAddr, definition, this))
+                .map(tokenscriptUtility::addParseResultIfValid);
     }
 
     public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, List<BigInteger> tokenIds, List<AttributeType> extraAttrs)
@@ -1913,9 +1986,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return cr;
     }
 
-    public String convertInputValue(AttributeType attr, TokenscriptElement e, String valueFromInput)
+    public String convertInputValue(AttributeType attr, String valueFromInput)
     {
-        return tokenscriptUtility.convertInputValue(attr, e, valueFromInput);
+        return tokenscriptUtility.convertInputValue(attr, valueFromInput);
     }
 
     public void setEventCallback(ActionEventCallback callback)
@@ -1936,7 +2009,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (attributeType == null) attributeType = td.attributeTypes.get(arg.ref); // now try globals
         if (attributeType != null)
         {
-            arg.value = tokenscriptUtility.fetchAttrResult(tokensService.getCurrentAddress(), attributeType, tokenId, null, td, this, 0).blockingSingle().text;
+            arg.value = tokenscriptUtility.fetchAttrResult(tokensService.getCurrentAddress(), attributeType, tokenId, null, td, this).blockingSingle().text;
         }
     }
 

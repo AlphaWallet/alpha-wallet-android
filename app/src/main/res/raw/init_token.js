@@ -31,6 +31,11 @@ web3 = {
         dataChanged: (tokens, test) => {
             console.log('web3.tokens.data changed.')
         }
+    },
+    action: {
+        setProps: function (msgParams) {
+            changeListener.setValues(JSON.stringify(msgParams));
+        }
     }
 }
 

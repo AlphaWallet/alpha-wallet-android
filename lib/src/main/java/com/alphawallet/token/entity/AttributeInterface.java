@@ -13,4 +13,6 @@ public interface AttributeInterface
     boolean resolveOptimisedAttr(ContractAddress contract, AttributeType attr, TransactionResult transactionResult);
 
     String getWalletAddr();
+
+    default long getLastTokenUpdate(int chainId, String address) { return 0; };
 }

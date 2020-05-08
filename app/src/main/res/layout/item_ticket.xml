@@ -3,121 +3,121 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_holding_view"
-    android:orientation="vertical"
-    android:layout_height="wrap_content"
-    android:background="@color/greyffive"
-    android:paddingTop="6dp"
-    android:paddingBottom="6dp"
-    android:layout_width="match_parent">
-
-<RelativeLayout
-    android:id="@+id/layout_select_ticket"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="6dp"
-    android:paddingEnd="6dp"
-    android:background="@color/white"
-    android:minHeight="100dp"
-    android:animateLayoutChanges="false">
+    android:background="@color/greyffive"
+    android:orientation="vertical"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp">
 
-    <ProgressBar
-        android:id="@+id/progress_element"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:indeterminateTint="@color/tealish"
-        android:visibility="gone"/>
-
-    <LinearLayout
-        android:id="@+id/total_wrapper"
+    <RelativeLayout
+        android:id="@+id/layout_select_ticket"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:orientation="horizontal">
+        android:animateLayoutChanges="false"
+        android:background="@color/white"
+        android:minHeight="100dp"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp">
 
-        <android.support.v7.widget.AppCompatRadioButton
-            android:id="@+id/radioBox"
+        <ProgressBar
+            android:id="@+id/progress_element"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="1dp"
-            android:layout_marginEnd="10dp"
-            android:background="@drawable/selector_radio_check"
-            android:checked="false"
-            android:visibility="gone"
-            app:buttonTint="@color/transparent" />
+            android:layout_centerInParent="true"
+            android:indeterminateTint="@color/tealish"
+            android:visibility="gone" />
 
         <LinearLayout
-            android:id="@+id/layout_webwrapper"
+            android:id="@+id/total_wrapper"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:gravity="center"
-            android:visibility="gone"
+            android:layout_centerHorizontal="true"
+            android:orientation="horizontal">
+
+            <android.support.v7.widget.AppCompatRadioButton
+                android:id="@+id/radioBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="1dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/selector_radio_check"
+                android:checked="false"
+                android:visibility="gone"
+                app:buttonTint="@color/transparent" />
+
+            <LinearLayout
+                android:id="@+id/layout_webwrapper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="6dp"
+                android:background="@color/white"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.alphawallet.app.web3.Web3TokenView
+                    android:id="@+id/web3_tokenview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="200dp">
+
+                </com.alphawallet.app.web3.Web3TokenView>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_legacy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:elevation="1dp"
+                android:minHeight="100dp"
+                android:orientation="horizontal"
+                android:paddingLeft="20dp"
+                android:paddingTop="15dp"
+                android:paddingRight="20dp"
+                android:paddingBottom="20dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/amount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:fontFamily="@font/font_bold"
+                    android:text=""
+                    android:textColor="@color/green"
+                    android:textSize="21sp" />
+
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/font_light"
+                    android:text="@string/NA"
+                    android:textColor="@color/text_black"
+                    android:textSize="21sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/click_layer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignTop="@id/total_wrapper"
+            android:layout_alignBottom="@id/total_wrapper"
+            android:background="@color/transparent"
+            android:clickable="true"
+            android:focusable="true"
             android:orientation="vertical"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="6dp">
-
-            <com.alphawallet.app.web3.Web3TokenView
-                android:id="@+id/web3_tokenview"
-                android:layout_width="wrap_content"
-                android:minHeight="200dp"
-                android:layout_height="wrap_content">
-
-            </com.alphawallet.app.web3.Web3TokenView>
+            android:visibility="gone">
 
         </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/layout_legacy"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:elevation="1dp"
-        android:minHeight="100dp"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        android:paddingBottom="20dp"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:paddingTop="15dp">
-
-            <TextView
-                android:id="@+id/amount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
-                android:fontFamily="@font/font_bold"
-                android:text=""
-                android:textColor="@color/green"
-                android:textSize="21sp" />
-
-            <TextView
-                android:id="@+id/name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_light"
-                android:text="@string/NA"
-                android:textColor="@color/text_black"
-                android:textSize="21sp" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/click_layer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignTop="@id/total_wrapper"
-        android:layout_alignBottom="@id/total_wrapper"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="gone"
-        android:orientation="vertical"
-        android:background="@color/transparent">
-
-    </LinearLayout>
-
-</RelativeLayout>
+    </RelativeLayout>
 </LinearLayout>

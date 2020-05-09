@@ -9,29 +9,24 @@ import android.support.annotation.Nullable;
 import android.text.format.DateUtils;
 
 import com.alphawallet.app.entity.CurrencyItem;
-import com.alphawallet.app.repository.CurrencyRepositoryType;
-import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
-import com.alphawallet.app.repository.LocaleRepositoryType;
-import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.util.LocaleUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import io.reactivex.Single;
-import com.alphawallet.app.entity.LocaleItem;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.GetDefaultWalletBalance;
-import com.alphawallet.app.router.HelpRouter;
-import com.alphawallet.app.router.HomeRouter;
+import com.alphawallet.app.repository.CurrencyRepositoryType;
+import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.LocaleRepositoryType;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.ManageWalletsRouter;
 import com.alphawallet.app.router.MyAddressRouter;
-import io.reactivex.disposables.Disposable;
 import com.alphawallet.app.service.TokensService;
+
+import java.util.ArrayList;
+import java.util.Map;
+
+import io.reactivex.Single;
+import io.reactivex.disposables.Disposable;
 
 public class NewSettingsViewModel extends BaseViewModel {
     private static final long GET_BALANCE_INTERVAL = 10 * DateUtils.SECOND_IN_MILLIS;
@@ -43,10 +38,8 @@ public class NewSettingsViewModel extends BaseViewModel {
     private final GenericWalletInteract genericWalletInteract;
     private final GetDefaultWalletBalance getDefaultWalletBalance;
     private final MyAddressRouter myAddressRouter;
-    private final HelpRouter helpRouter;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final ManageWalletsRouter manageWalletsRouter;
-    private final HomeRouter homeRouter;
     private final PreferenceRepositoryType preferenceRepository;
     private final LocaleRepositoryType localeRepository;
     private final TokensService tokensService;
@@ -62,10 +55,8 @@ public class NewSettingsViewModel extends BaseViewModel {
             GenericWalletInteract genericWalletInteract,
             GetDefaultWalletBalance getDefaultWalletBalance,
             MyAddressRouter myAddressRouter,
-            HelpRouter helpRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             ManageWalletsRouter manageWalletsRouter,
-            HomeRouter homeRouter,
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             TokensService tokensService,
@@ -73,18 +64,12 @@ public class NewSettingsViewModel extends BaseViewModel {
         this.genericWalletInteract = genericWalletInteract;
         this.getDefaultWalletBalance = getDefaultWalletBalance;
         this.myAddressRouter = myAddressRouter;
-        this.helpRouter = helpRouter;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.manageWalletsRouter = manageWalletsRouter;
-        this.homeRouter = homeRouter;
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.tokensService = tokensService;
         this.currencyRepository = currencyRepository;
-    }
-
-    public void showHome(Context context, boolean clearStack) {
-        homeRouter.open(context, clearStack);
     }
 
     public void showManageWallets(Context context, boolean clearStack) {
@@ -108,39 +93,6 @@ public class NewSettingsViewModel extends BaseViewModel {
     public void setNotificationState(boolean notificationState)
     {
         preferenceRepository.setNotificationState(notificationState);
-    }
-
-    public String getDefaultLocale() {
-        return localeRepository.getDefaultLocale();
-    }
-
-    public NetworkInfo[] getNetworkList() {
-        return ethereumNetworkRepository.getAvailableNetworkList();
-    }
-
-    public String getFilterNetworkList() {
-        List<Integer> networkIds = ethereumNetworkRepository.getFilterNetworkList();
-        StringBuilder sb = new StringBuilder();
-        boolean firstValue = true;
-        for (int networkId : networkIds)
-        {
-            if (!firstValue) sb.append(",");
-            sb.append(networkId);
-            firstValue = false;
-        }
-        return sb.toString();
-    }
-
-    public void setFilterNetworks(Integer[] selectedItems)
-    {
-        int[] selectedIds = new int[selectedItems.length];
-        int index = 0;
-        for (Integer selectedId : selectedItems)
-        {
-            selectedIds[index++] = selectedId;
-        }
-        ethereumNetworkRepository.setFilterNetworkList(selectedIds);
-        tokensService.setupFilter();
     }
 
     @Override
@@ -195,22 +147,7 @@ public class NewSettingsViewModel extends BaseViewModel {
         myAddressRouter.open(context, defaultWallet.getValue());
     }
 
-    public void showHelp(Context context) {
-        helpRouter.open(context);
-    }
-
     private final Runnable startGetBalanceTask = this::getBalance;
-
-    public ArrayList<LocaleItem> getLocaleList(Context context) {
-        return localeRepository.getLocaleList(context);
-    }
-
-    public void setLocale(Context activity)
-    {
-        //get the current locale
-        String currentLocale = localeRepository.getDefaultLocale();
-        LocaleUtils.setLocale(activity, currentLocale);
-    }
 
     public Single<String> setIsDismissed(String walletAddr, boolean isDismissed)
     {

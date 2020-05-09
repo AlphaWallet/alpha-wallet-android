@@ -263,6 +263,14 @@
             android:windowSoftInputMode="stateHidden|adjustResize" />
 
         <activity
+            android:name=".ui.SupportSettingsActivity"
+            android:label="Support Settings" />
+
+        <activity
+            android:name=".ui.AdvancedSettingsActivity"
+            android:label="Advanced Settings" />
+
+        <activity
             android:name=".ui.StaticViewer"
             android:label="View Text" />
     </application>

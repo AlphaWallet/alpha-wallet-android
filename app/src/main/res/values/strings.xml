@@ -24,7 +24,7 @@
     <string name="empty" />
     <string name="try_again">Try again</string>
     <string name="already_have_account">Already have a wallet?</string>
-    <string name="action_create_new_account">Create new wallet</string>
+    <string name="action_create_new_account">Create a New Wallet</string>
     <string name="unknown_error">An error has occurred.</string>
     <string name="no_tokens">No tokens found.</string>
 
@@ -65,7 +65,8 @@
     <string name="action_share">Share</string>
     <string name="action_more_details">More details</string>
     <string name="action_add_wallet">Add wallet</string>
-
+    <string name="action_add_token">Add Token</string>
+    <string name="action_open_etherscan">View in Etherscan</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_localeth">LocalEthereum</string>
     <string name="action_changelly">Changelly (Buy with Credit card)</string>
@@ -437,7 +438,7 @@
     <string name="authentication_failed">Authentication Failed</string>
     <string name="backup_seed_phrase">Back up your wallet with seed phrase</string>
     <string name="backup_seed_phrase_detail">Making a backup is very simple and safe: just write down 12 words and keep them in a safe place, offline.</string>
-    <string name="action_back_up_my_wallet">back up my wallet</string>
+    <string name="action_back_up_my_wallet">Back up my wallet</string>
     <string name="write_down_seed_phrase">Write down seed phrase\non paper</string>
     <string name="wrote_down_seed_phrase">OK, I wrote this down</string>
     <string name="verify_seed_phrase">Verify Seed Phrase</string>
@@ -482,17 +483,17 @@
     <string name="create_a_new_wallet">Create a new Wallet</string>
     <string name="watch">WATCH</string>
     <string name="already_have_a_wallet">I already have a wallet:</string>
-    <string name="watch_wallet">Watch Wallet</string>
+    <string name="watch_wallet">Watch-only Wallets</string>
     <string name="suggestion_address">Enter Ethereum Address</string>
     <string name="ethereum_address_hint">Ethereum Address: 0x then 40 characters of 0–9 a-f A-F</string>
-    <string name="action_watch_account">Watch an account</string>
+    <string name="action_watch_account">Watch Wallet</string>
     <string name="receive_payment">Receive Payment</string>
     <string name="title_back_up_your_wallet">Back up your Wallet</string>
     <string name="nudge_user_to_backup_wallet">Your funds will be at risk if you do not back up before using your wallet.</string>
     <string name="action_close">Close</string>
     <string name="back_up_this_wallet">Back up this Wallet</string>
     <string name="not_locked">Not Locked</string>
-    <string name="back_up_now">Back up Now!</string>
+    <string name="back_up_now">Back up now!</string>
     <string name="key_secure">100% Secure</string>
     <string name="lock_key_upgrade">Lock your seed phrase to increase security</string>
     <string name="upgrade_key_security_detail">AlphaWallet security is being upgraded to the best achievable. Lock your seed phrase with biometrics.</string>
@@ -508,7 +509,7 @@
     <string name="import_error">Import Error, Try re-import again.</string>
     <string name="watch_exists">Wallet %1$s already full wallet - no need to watch</string>
     <string name="welcome_to_alphawallet">Welcome to AlphaWallet</string>
-    <string name="lock_seed_phrase">LOCK SEED PHRASE</string>
+    <string name="lock_seed_phrase">Lock Seed Phrase</string>
     <string name="no_key">No Key found</string>
     <string name="pending_transaction">Pending Transaction ...</string>
     <string name="title_enable_debug">Local Scripts Not Enabled</string>
@@ -534,7 +535,7 @@
     <string name="fail_sign">Failed to sign redeem message</string>
     <string name="hint_contract_type">Token Type</string>
     <string name="reddit">Reddit</string>
-    <string name="tokenscript_standard">TokenScript Standard</string>
+    <string name="tokenscript_compatibility">TokenScript Compatibiity</string>
     <string name="version">Version</string>
     <string name="debug_script">TokenScript debug</string>
     <string name="unsigned_script">untrusted</string>
@@ -545,7 +546,7 @@
     <string name="zero_balance_tokens_are_switched_off">Token balance for this token is empty and will not show unless you switch on empty token balances. Continue?</string>
     <string name="dialog_switch_zero_balance_tokens_on">Switch On</string>
     <string name="cannot_read_encrypt_file">Wallet can not read encrypted key; re-import required.</string>
-    <string name="authentication_error">Authenitcation to unlock key not provided or timed out. Please try again.</string>
+    <string name="authentication_error">Authentication to unlock key not provided or timed out. Please try again.</string>
     <string name="device_security_changed">Since this key was created the mobile device security has changed and the OS has invalidated the key. Please re-import your key.</string>
     <string name="fingerprint_authentication_failed">Fingerprint authentication failed</string>
     <string name="action_snackbar_undo">UNDO</string>
@@ -554,9 +555,48 @@
     <string name="change_chain_message">QR code requests a different chain. Proceed?</string>
     <string name="change_chain_request">Change Chain Request</string>
     <string name="error_zero_balance">Zero Balance Transaction</string>
+    <string name="attestations">Attestations</string>
+    <string name="favourites">Favourites</string>
+    <string name="support">Support</string>
+    <string name="system">System</string>
+
+    <!-- Settings -->
+    <string name="title_show_wallet_address">Show My Wallet Address</string>
+    <string name="title_change_add_wallet">Change / Add Wallet</string>
+    <string name="title_back_up_wallet">Back Up This Wallet</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_biometrics">Passcode / Touch ID</string>
+    <string name="title_advanced">Advanced</string>
+    <string name="title_support">Support</string>
+    <string name="title_blog">Blog</string>
+    <string name="title_faq">FAQ</string>
+    <string name="title_console">Console</string>
+    <string name="title_clear_browser_cache">Clear Browser Caches</string>
+    <string name="title_tokenscript">TokenScript</string>
+    <string name="title_change_language">Change Language</string>
+    <string name="add_hide_tokens">Show / Hide Tokens</string>
     <string name="instagram">Instagram</string>
     <string name="settings_locale_currency">Change Currency</string>
     <string name="dialog_title_select_currency">Select FIAT Currency</string>
     <string name="tokenscript_file_error">TokenScript file error</string>
+    <string name="toast_browser_cache_cleared">Browser cache cleared</string>
+    <string name="your_wallets">Your Wallets</string>
+    <string name="action_copy">Copy</string>
+    <string name="title_version_support_warning">Important Update</string>
+    <string name="message_version_support_warning">Starting Version 2.3, AlphaWallet will no longer support devices running on Android 6.0 and below.</string>
+    <string name="hide_notification">Hide Notification</string>
     <string name="card_view_not_found_error">%1$s not found</string>
+
+    <!-- Gas Slider -->
+    <string name="speed_gas">Speed (Gas)</string>
+    <string name="slow">Slow</string>
+    <string name="fast">Fast</string>
+    <string name="label_estimated_transaction_time">Estimated Transaction Time</string>
+    <string name="minutes_0">0 min</string>
+    <string name="created_aw_directory">Created AlphaWallet Directory</string>
+    <string name="created_aw_directory_detail">AlphaWallet directory created. Drop scripts into this directory to use your scripts. See tokenscript.org for more details on how to easily create a secure and useful interface to your tokens.</string>
+    <string name="title_no_need_to_watch">Already Watching</string>
+    <string name="error_while_signing_transaction">Error occurred while signing transaction. Please re-import the key for this wallet.</string>
+    <string name="error_not_whitelisted">Page Not Whitelisted</string>
+    <string name="explain_not_whitelisted">TokenScript attempting to redirect to non-whitelisted page %1$s. If you are the owner of this site please submit PR to AlphaWallet repo to add page for whitelisting.</string>
 </resources>

@@ -2,8 +2,8 @@ package com.alphawallet.app.ui.widget.entity;
 
 public class NetworkItem {
     private String name;
-    private boolean isSelected;
     private int chainId;
+    private boolean isSelected;
 
     public NetworkItem(String name, int chainId, boolean isSelected) {
         this.name = name;

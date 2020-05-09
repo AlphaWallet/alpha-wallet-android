@@ -46,6 +46,8 @@ import com.alphawallet.token.entity.XMLDsigDescriptor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -194,8 +196,8 @@ public class TokenFunctionViewModel extends BaseViewModel
         intent.putExtra(C.Key.TICKET, token);
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_STATE, method);
-        BigInteger firstId = tokenIds != null ? tokenIds.get(0) : BigInteger.ZERO;
-        intent.putExtra(C.EXTRA_TOKEN_ID, firstId.toString(16));
+        if (tokenIds == null) tokenIds = new ArrayList<>(Collections.singletonList(BigInteger.ZERO));
+        intent.putExtra(C.EXTRA_TOKEN_ID, token.bigIntListToString(tokenIds, true));
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
     }
@@ -456,5 +458,10 @@ public class TokenFunctionViewModel extends BaseViewModel
     public OpenseaService getOpenseaService()
     {
         return openseaService;
+    }
+
+    public void updateTokenScriptViewSize(Token token)
+    {
+        tokensService.updateTokenViewSizes(token);
     }
 }

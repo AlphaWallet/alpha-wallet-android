@@ -28,7 +28,6 @@ public interface TokenRepositoryType {
     Single<ContractLocator> getTokenResponse(String address, int chainId, String method);
     Completable setEnable(Wallet wallet, Token token, boolean isEnabled);
     Observable<TokenInfo> update(String address, int chainId);
-    Single<TokenInfo[]> update(String[] address, NetworkInfo network);
     Disposable memPoolListener(int chainId, SubscribeWrapper wrapper); //only listen to transactions relating to this address
     Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
     Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType interfaceSpec);
@@ -44,7 +43,6 @@ public interface TokenRepositoryType {
     Single<String> resolveENS(int chainId, String address);
 
     Disposable updateBlockRead(Token token, Wallet wallet);
-    Single<String> resolveProxyAddress(TokenInfo tokenInfo);
     Single<ContractType> determineCommonType(TokenInfo tokenInfo);
     Single<Token[]> addERC20(Wallet wallet, Token[] tokens);
 

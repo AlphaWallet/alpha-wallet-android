@@ -1,11 +1,12 @@
 package com.alphawallet.app.repository;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.BuildConfig;
+import android.text.TextUtils;
 import android.util.Log;
 
-import com.alphawallet.app.C;
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -16,7 +17,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
-import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.AWHttpService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.Utils;
@@ -39,17 +40,17 @@ import org.web3j.abi.datatypes.generated.Bytes4;
 import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
-import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -68,8 +69,6 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
-import static com.alphawallet.app.repository.EthereumNetworkRepository.MAINNET_ID;
-import static org.web3j.crypto.WalletUtils.isValidAddress;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 public class TokenRepository implements TokenRepositoryType {
@@ -77,7 +76,8 @@ public class TokenRepository implements TokenRepositoryType {
     private static final String TAG = "TRT";
     private final TokenLocalSource localSource;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
-    private final GasService gasService;
+    private final OkHttpClient okClient;
+    private final Context context;
 
     public static final String INVALID_CONTRACT = "<invalid>";
 
@@ -91,29 +91,27 @@ public class TokenRepository implements TokenRepositoryType {
     private static final int CONTRACT_BALANCE_NULL = -2;
 
     private final Map<Integer, Web3j> web3jNodeServers;
-    private final OkHttpClient okClient;
+    private AWEnsResolver ensResolver;
 
     public TokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenLocalSource localSource,
-            GasService gasService) {
+            OkHttpClient okClient,
+            Context context) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.localSource = localSource;
         this.ethereumNetworkRepository.addOnChangeDefaultNetwork(this::buildWeb3jClient);
-        this.gasService = gasService;
+        this.okClient = okClient;
+        this.context = context;
 
         web3jNodeServers = new ConcurrentHashMap<>();
-        okClient = new OkHttpClient.Builder()
-                .connectTimeout(5, TimeUnit.SECONDS)
-                .readTimeout(5, TimeUnit.SECONDS)
-                .writeTimeout(5, TimeUnit.SECONDS)
-                .retryOnConnectionFailure(false)
-                .build();
     }
 
     private void buildWeb3jClient(NetworkInfo networkInfo)
     {
-        HttpService publicNodeService = new HttpService(networkInfo.rpcServerUrl, okClient, false);
+        String rpcServerUrl = ethereumNetworkRepository.shouldUseBackupNode() ? networkInfo.backupNodeUrl : networkInfo.rpcServerUrl;
+        String rpcSecondary = ethereumNetworkRepository.shouldUseBackupNode() ? networkInfo.rpcServerUrl : networkInfo.backupNodeUrl;
+        AWHttpService publicNodeService = new AWHttpService(rpcServerUrl, rpcSecondary, okClient, false);
         EthereumNetworkRepository.addRequiredCredentials(networkInfo.chainId, publicNodeService);
         web3jNodeServers.put(networkInfo.chainId, Web3j.build(publicNodeService));
     }
@@ -379,43 +377,10 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<String> resolveENS(int chainId, String address)
+    public Single<String> resolveENS(int chainId, String ensName)
     {
-        return Single.fromCallable(() -> {
-            String resolvedAddress = resolveAddress(chainId, address);
-            if (!WalletUtils.isValidAddress(resolvedAddress))
-            {
-                resolvedAddress = resolveAddress(MAINNET_ID, address); //try main net
-            }
-
-            if (WalletUtils.isValidAddress(resolvedAddress))
-            {
-                return resolvedAddress;
-            }
-            else
-            {
-                return C.BURN_ADDRESS;
-            }
-        });
-    }
-
-    private String resolveAddress(int chainId, String address)
-    {
-        int useChainId = chainId;
-        if (!EthereumNetworkRepository.hasRealValue(useChainId)) useChainId = MAINNET_ID;
-        Web3j service = getService(useChainId); //resolve ENS on mainnet unless this network has value
-        AWEnsResolver ensResolver = new AWEnsResolver(service, gasService);
-        String resolvedAddress = "";
-        try
-        {
-            resolvedAddress = ensResolver.resolve(address);
-        }
-        catch (Exception e)
-        {
-            return "--";
-        }
-
-        return resolvedAddress;
+        if (ensResolver == null) ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID));
+        return ensResolver.resolveENSAddress(ensName);
     }
 
     @Override
@@ -434,12 +399,6 @@ public class TokenRepository implements TokenRepositoryType {
     public Disposable terminateToken(Token token, Wallet wallet, NetworkInfo network)
     {
         return localSource.setTokenTerminated(token, network, wallet);
-    }
-
-    @Override
-    public Single<TokenInfo[]> update(String[] address, NetworkInfo network)
-    {
-        return setupTokensFromLocal(address, network);
     }
 
     /**
@@ -493,7 +452,7 @@ public class TokenRepository implements TokenRepositoryType {
                         balanceChanged = token.checkBalanceChange(balance);
                         break;
                     case OTHER:
-                        //TODO: periodic re-check of contract, may have sufficient data in future to determine token type
+                        //This token has its interface checked in the flow elsewhere
                         break;
                     default:
                         break;
@@ -502,7 +461,7 @@ public class TokenRepository implements TokenRepositoryType {
                 //check if we need an update
                 if (balanceChanged)
                 {
-                    Log.d(TAG, "Token balance changed! " + tInfo.name);
+                    if (BuildConfig.DEBUG) Log.d(TAG, "Token balance changed! " + tInfo.name);
                     Token updated = tFactory.createToken(tInfo, balance, balanceArray, System.currentTimeMillis(), interfaceSpec, network.getShortName(), token.lastBlockCheck);
                     localSource.updateTokenBalance(network, wallet, updated);
                     updated.setTokenWallet(wallet.address);
@@ -543,7 +502,7 @@ public class TokenRepository implements TokenRepositoryType {
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
             String responseValue = callSmartContractFunction(function, tokenInfo.address, network, wallet);
 
-            if (token != null && responseValue == null)
+            if (token != null && TextUtils.isEmpty(responseValue))
             {
                 balance = token.balance;
             }
@@ -576,7 +535,8 @@ public class TokenRepository implements TokenRepositoryType {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            //use previous balance if appropriate
+            if (token != null) balance = token.balance;
         }
 
         return balance;
@@ -649,7 +609,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private BigDecimal updatePending(Token oldToken, BigDecimal pendingBalance)
     {
-        if (!TokensService.getCurrentWalletAddress().equals(oldToken.getWallet()))
+        if (!TokensService.getCurrentWalletAddress().equalsIgnoreCase(oldToken.getWallet()))
         {
             oldToken.pendingBalance = oldToken.balance;
         }
@@ -677,7 +637,7 @@ public class TokenRepository implements TokenRepositoryType {
 
                     if (!balance.equals(oldToken.balance))
                     {
-                        Log.d(TAG, "Tx Update requested for: " + oldToken.getFullName());
+                        if (BuildConfig.DEBUG) Log.d(TAG, "Tx Update requested for: " + oldToken.getFullName());
                         TokenInfo info = new TokenInfo(wallet.address, network.name, network.symbol, 18, true,
                                                        network.chainId);
                         Token eth = new Token(info, balance, System.currentTimeMillis(), network.getShortName(), ContractType.ETHEREUM);
@@ -841,7 +801,11 @@ public class TokenRepository implements TokenRepositoryType {
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, network, temp);
 
-        if (responseValue == null || responseValue.equals("0x"))
+        if (TextUtils.isEmpty(responseValue))
+        {
+            throw new Exception("Bad contract value");
+        }
+        else if (responseValue.equals("0x"))
         {
             if (type instanceof Boolean)
             {
@@ -928,7 +892,7 @@ public class TokenRepository implements TokenRepositoryType {
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, network ,temp);
 
-        if (responseValue == null) return null;
+        if (TextUtils.isEmpty(responseValue)) return null;
 
         List<Type> response = FunctionReturnDecoder.decode(
                 responseValue, function.getOutputParameters());
@@ -949,7 +913,7 @@ public class TokenRepository implements TokenRepositoryType {
         org.web3j.abi.datatypes.Function function = decimalsOf();
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, network, temp);
-        if (responseValue == null) return 18;
+        if (TextUtils.isEmpty(responseValue)) return 18;
 
         List<Type> response = FunctionReturnDecoder.decode(
                 responseValue, function.getOutputParameters());
@@ -1097,25 +1061,22 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private String callSmartContractFunction(
-            Function function, String contractAddress, NetworkInfo network, Wallet wallet) throws Exception {
-        String encodedFunction = FunctionEncoder.encode(function);
-
+            Function function, String contractAddress, NetworkInfo network, Wallet wallet) throws Exception
+    {
         try
         {
+            String encodedFunction = FunctionEncoder.encode(function);
+
             org.web3j.protocol.core.methods.request.Transaction transaction
                     = createEthCallTransaction(wallet.address, contractAddress, encodedFunction);
             EthCall response = getService(network.chainId).ethCall(transaction, DefaultBlockParameterName.LATEST).send();
 
             return response.getValue();
         }
-        catch (IOException e) //this call is expected to be interrupted when user switches network or wallet
+        catch (InterruptedIOException|UnknownHostException e)
         {
-            return null;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return null;
+            //expected to happen when user switches wallets
+            return "0x";
         }
     }
 
@@ -1228,52 +1189,16 @@ public class TokenRepository implements TokenRepositoryType {
         });
     }
 
-    private Single<TokenInfo> setupTokensFromLocal(String address, int chainId)
+    private Single<TokenInfo> setupTokensFromLocal(String address, int chainId) //pass exception up the chain
     {
         return Single.fromCallable(() -> {
-            try
-            {
-                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
-                return new TokenInfo(
-                        address,
-                        getName(address, network),
-                        getContractData(network, address, stringParam("symbol"), ""),
-                        getDecimals(address, network),
-                        true, chainId);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-                return null;
-            }
-        });
-    }
-
-    private Single<TokenInfo[]> setupTokensFromLocal(String[] addresses, NetworkInfo network)
-    {
-        return Single.fromCallable(() -> {
-            List<TokenInfo> tokenList = new ArrayList<>();
-            try
-            {
-                for (String address : addresses)
-                {
-                    String name = getName(address, network);
-                    TokenInfo result = new TokenInfo(
-                            address,
-                            name,
-                            getContractData(network, address, stringParam("symbol"), ""),
-                            getDecimals(address, network),
-                            true, ethereumNetworkRepository.getDefaultNetwork().chainId);
-
-                    tokenList.add(result);
-                }
-                return tokenList.toArray(new TokenInfo[tokenList.size()]);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-                return tokenList.toArray(new TokenInfo[tokenList.size()]);
-            }
+            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(chainId);
+            return new TokenInfo(
+                    address,
+                    getName(address, network),
+                    getContractData(network, address, stringParam("symbol"), ""),
+                    getDecimals(address, network),
+                    true, chainId);
         });
     }
 
@@ -1284,7 +1209,7 @@ public class TokenRepository implements TokenRepositoryType {
             ContractType returnType = ContractType.OTHER;
             try
             {
-                //could be either ERC721 or ERC20
+                //could be ERC721, ERC721T, ERC875 or ERC20
                 //try some interface values
                 NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
                 if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_BALANCES_721_TICKET), Boolean.TRUE)) returnType = ContractType.ERC721_TICKET;
@@ -1331,41 +1256,8 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<Boolean> fetchIsRedeemed(Token token, BigInteger tokenId)
     {
         return Single.fromCallable(() -> {
-            boolean result = false;
-            try
-            {
-                NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
-                result = getContractData(networkInfo, token.tokenInfo.address, redeemed(tokenId), Boolean.TRUE);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-
-            return result;
-        });
-    }
-
-    @Override
-    public Single<String> resolveProxyAddress(TokenInfo tokenInfo)
-    {
-        return Single.fromCallable(() -> {
-            String contractAddress = tokenInfo.address;
-            try
-            {
-                NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
-                String received = getContractData(networkInfo, tokenInfo.address, addrParam("implementation"), "");
-                if (received != null && isValidAddress(received) && !received.equals(ZERO_ADDRESS))
-                {
-                    contractAddress = received;
-                }
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-
-            return contractAddress;
+            NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
+            return getContractData(networkInfo, token.tokenInfo.address, redeemed(tokenId), Boolean.TRUE);
         });
     }
 
@@ -1400,12 +1292,12 @@ public class TokenRepository implements TokenRepositoryType {
     public static Web3j getWeb3jService(int chainId)
     {
         OkHttpClient okClient = new OkHttpClient.Builder()
-                .connectTimeout(5, TimeUnit.SECONDS)
-                .readTimeout(5, TimeUnit.SECONDS)
-                .writeTimeout(5, TimeUnit.SECONDS)
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(false)
                 .build();
-        HttpService publicNodeService = new HttpService(EthereumNetworkRepository.getNodeURLByNetworkId(chainId), okClient, false);
+        AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId(chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), okClient, false);
         EthereumNetworkRepository.addRequiredCredentials(chainId, publicNodeService);
         return Web3j.build(publicNodeService);
     }

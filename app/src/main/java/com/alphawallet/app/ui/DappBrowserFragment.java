@@ -23,6 +23,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -54,6 +55,7 @@ import com.alphawallet.app.entity.QrUrlResult;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.SignTransactionInterface;
 import com.alphawallet.app.entity.URLLoadInterface;
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -83,6 +85,7 @@ import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.AWalletBottomNavigationView;
 import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.entity.SalesOrderMalformed;
@@ -170,6 +173,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private ImageView back;
     private ImageView next;
     private ImageView clear;
+    private ImageView refresh;
     private TextView currentNetwork;
     private ImageView currentNetworkCircle;
     private LinearLayout currentNetworkClicker;
@@ -187,6 +191,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private byte[] messageBytes;
     private DAppFunction dAppFunction;
     private SignType signType;
+    private volatile boolean canSign = true;
 
     private enum SignType
     {
@@ -213,19 +218,22 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         homePressed = false;
         if (currentFragment == null) currentFragment = BROWSER_HOME;
         attachFragment(currentFragment);
-        if (web3 == null && getActivity() != null) //trigger reload
+        if ((web3 == null || viewModel == null) && getActivity() != null) //trigger reload
+        {
+            ((HomeActivity)getActivity()).resetFragment(AWalletBottomNavigationView.DAPP_BROWSER);
+        }
+        else
         {
             web3.setWebLoadCallback(this);
-            ((HomeActivity)getActivity()).ResetDappBrowser();
         }
-        if (viewModel != null) viewModel.resetDebounce();
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         AndroidSupportInjection.inject(this);
-        View view = inflater.inflate(R.layout.fragment_webview, container, false);
+        int webViewID = VisibilityFilter.minimiseBrowserURLBar() ? R.layout.fragment_webview_compact : R.layout.fragment_webview;
+        View view = inflater.inflate(webViewID, container, false);
         initViewModel();
         initView(view);
         setupAddressBar();
@@ -341,7 +349,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                     break;
             }
 
-            if (f != null) showFragment(f, tag);
+            if (f != null && !f.isAdded()) showFragment(f, tag);
         }
     }
 
@@ -378,11 +386,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             web3.clearHistory();
             web3.stopLoading();
-        }
 
-        if (EthereumNetworkRepository.defaultDapp() != null)
-        {
-            loadUrl(EthereumNetworkRepository.defaultDapp());
+            if (EthereumNetworkRepository.defaultDapp() != null)
+            {
+                loadUrl(EthereumNetworkRepository.defaultDapp());
+            }
         }
 
         //blank forward / backward arrows
@@ -435,6 +443,38 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         super.onDestroy();
     }
 
+    private void setupMenu(View baseView)
+    {
+        refresh = baseView.findViewById(R.id.refresh);
+        final MenuItem reload = toolbar.getMenu().findItem(R.id.action_reload);
+        final MenuItem share = toolbar.getMenu().findItem(R.id.action_share);
+        final MenuItem scan = toolbar.getMenu().findItem(R.id.action_scan);
+        final MenuItem add = toolbar.getMenu().findItem(R.id.action_add_to_my_dapps);
+
+        if (reload != null) reload.setOnMenuItemClickListener(menuItem -> {
+            reloadPage();
+            return true;
+        });
+        if (share != null) share.setOnMenuItemClickListener(menuItem -> {
+            if (web3.getUrl() != null && currentFragment != null && currentFragment.equals(DAPP_BROWSER)) {
+                if (getContext() != null) viewModel.share(getContext(), web3.getUrl());
+            }
+            else
+            {
+                displayNothingToShare();
+            }
+            return true;
+        });
+        if (scan != null) scan.setOnMenuItemClickListener(menuItem -> {
+            viewModel.startScan(getActivity());
+            return true;
+        });
+        if (add != null) add.setOnMenuItemClickListener(menuItem -> {
+            viewModel.addToMyDapps(getContext(), currentWebpageTitle, urlTv.getText().toString());
+            return true;
+        });
+    }
+
     private void initView(View view) {
         web3 = view.findViewById(R.id.web3view);
         progressBar = view.findViewById(R.id.progressBar);
@@ -442,36 +482,25 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setRefreshInterface(this);
         toolbar = view.findViewById(R.id.address_bar);
-        toolbar.inflateMenu(R.menu.menu_bookmarks);
-        toolbar.getMenu().findItem(R.id.action_reload)
-                .setOnMenuItemClickListener(menuItem -> {
-                    reloadPage();
-                    return true;
-                });
-        toolbar.getMenu().findItem(R.id.action_share)
-                .setOnMenuItemClickListener(menuItem -> {
-                    if (web3.getUrl() != null && currentFragment != null && currentFragment.equals(DAPP_BROWSER)) {
-                        if (getContext() != null) viewModel.share(getContext(), web3.getUrl());
-                    }
-                    else
-                    {
-                        displayNothingToShare();
-                    }
-                    return true;
-                });
-        toolbar.getMenu().findItem(R.id.action_scan)
-                .setOnMenuItemClickListener(menuItem -> {
-                    viewModel.startScan(getActivity());
-                    return true;
-                });
-        toolbar.getMenu().findItem(R.id.action_add_to_my_dapps)
-                .setOnMenuItemClickListener(menuItem -> {
-                    viewModel.addToMyDapps(getContext(), currentWebpageTitle, urlTv.getText().toString());
-                    return true;
-                });
+        if (VisibilityFilter.minimiseBrowserURLBar())
+        {
+            toolbar.inflateMenu(R.menu.menu_scan);
+        }
+        else if (EthereumNetworkRepository.defaultDapp() != null)
+        {
+            toolbar.inflateMenu(R.menu.menu_defaultdapp);
+        }
+        else
+        {
+            toolbar.inflateMenu(R.menu.menu_bookmarks);
+        }
+        refresh = view.findViewById(R.id.refresh);
+        setupMenu(view);
 
         RelativeLayout layout = view.findViewById(R.id.address_bar_layout);
         layout.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+
+        refresh.setOnClickListener(v -> reloadPage());
 
         back = view.findViewById(R.id.back);
         back.setOnClickListener(v -> goToPreviousPage());
@@ -593,11 +622,15 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
 
     private void cancelSearchSession() {
         detachFragment(SEARCH);
-        currentNetwork.setVisibility(View.VISIBLE);
-        next.setVisibility(View.VISIBLE);
-        back.setVisibility(View.VISIBLE);
-        clear.setVisibility(View.GONE);
-        urlTv.dismissDropDown();
+        if (toolbar != null)
+        {
+            toolbar.getMenu().setGroupVisible(R.id.dapp_browser_menu, true);
+            currentNetwork.setVisibility(View.VISIBLE);
+            next.setVisibility(View.VISIBLE);
+            back.setVisibility(View.VISIBLE);
+            clear.setVisibility(View.GONE);
+            urlTv.dismissDropDown();
+        }
         KeyboardUtils.hideKeyboard(urlTv);
         setBackForwardButtons();
     }
@@ -648,7 +681,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private void setupWeb3() {
         web3.setActivity(getActivity());
         web3.setChainId(networkInfo.chainId);
-        web3.setRpcUrl(networkInfo.rpcServerUrl);
+        web3.setRpcUrl(viewModel.shouldUseBackupNode() ? networkInfo.backupNodeUrl : networkInfo.rpcServerUrl);
         web3.setWalletAddress(new Address(wallet.address));
 
         web3.setWebChromeClient(new WebChromeClient() {
@@ -657,6 +690,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 if (newProgress == 100) {
                     progressBar.setVisibility(View.GONE);
                     swipeRefreshLayout.setRefreshing(false);
+                    refresh.setEnabled(true);
                 } else {
                     progressBar.setVisibility(View.VISIBLE);
                     progressBar.setProgress(newProgress);
@@ -701,16 +735,21 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                     Intent intent;
                     switch (prefixCheck[0])
                     {
-                        case "tel":
+                        case C.DAPP_PREFIX_TELEPHONE:
                             intent = new Intent(Intent.ACTION_DIAL);
                             intent.setData(Uri.parse(url));
                             startActivity(Intent.createChooser(intent, "Call " + prefixCheck[1]));
                             return true;
-                        case "mailto":
+                        case C.DAPP_PREFIX_MAILTO:
                             intent = new Intent(Intent.ACTION_SENDTO);
                             intent.setData(Uri.parse(url));
                             startActivity(Intent.createChooser(intent, "Email: " + prefixCheck[1]));
                             return true;
+                        case C.DAPP_PREFIX_ALPHAWALLET:
+                            if(prefixCheck[1].equals(C.DAPP_SUFFIX_RECEIVE)) {
+                                viewModel.showMyAddress(getContext());
+                                return true;
+                            }
                         default:
                             break;
                     }
@@ -790,7 +829,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 }
             });
             dialog.setOnRejectListener(v -> {
-                web3.onSignCancel(message);
+                if (web3 != null) web3.onSignCancel(message);
                 dialog.dismiss();
             });
             dialog.show();
@@ -874,7 +913,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             if ((transaction.recipient.equals(Address.EMPTY) && transaction.payload != null) // Constructor
                     || (!transaction.recipient.equals(Address.EMPTY) && (transaction.payload != null || transaction.value != null))) // Raw or Function TX
             {
-                viewModel.openConfirmation(getActivity(), transaction, url, networkInfo);
+                if (canSign)
+                {
+                    viewModel.openConfirmation(getActivity(), transaction, url, networkInfo);
+                    canSign = false;
+                    handler.postDelayed(() -> canSign = true, 3000); //debounce 3 seconds to avoid multiple signing issues
+                }
             }
             else
             {
@@ -1163,7 +1207,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     public void reloadPage() {
-        web3.reload();
+        if (currentFragment.equals(DAPP_BROWSER))
+        {
+            refresh.setEnabled(false);
+            web3.reload();
+        }
     }
 
     @Override
@@ -1253,9 +1301,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                             case FUNCTION_CALL:
                                 //EIP681 function call. TODO: create function call confirmation. For now treat same way as tokenscript function call
                                 break;
-                            case OTHER: //treat as URL
                             case URL:
                                 loadUrlRemote(qrCode);
+                                break;
+                            case OTHER:
+                                qrCode = null;
                                 break;
                         }
                     }

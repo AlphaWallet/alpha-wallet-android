@@ -1,28 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="green">#2fbb4f</color>
-	<color name="red">#f7506c</color>
-	<color name="white">#FFFFFFFF</color>
-	<color name="black">#313849</color>
-
 	<color name="colorPrimary">#FFFFFF</color>
-	<!--<color name="colorPrimaryDark">#1E76CE</color>-->
 	<color name="colorPrimaryDark">#707070</color>
 	<color name="colorAccent">#54C1E3</color>
 	<color name="colorPrimaryLight">#AA54C1E3</color>
 	<color name="colorTheme">#FFFFFF</color>
-    <!--<color name="title">#89000000</color>-->
-	<color name="secondary_text">#40000000</color>
-	<color name="toolbar_text_color">@color/colorPrimaryDark</color>
+	<color name="colorHighlight">@color/azure</color>
 
+	<color name="secondary_text">#40000000</color>
+	<color name="toolbar_text_color">@color/black</color>
 	<color name="bottom_dialog_title">#89000000</color>
 	<color name="bottom_dialog_item">#dd000000</color>
-
     <color name="semitransparentWhite">#AAFFFFFF</color>
-
 	<color name="white20">#32FFFFFF</color>
 	<color name="translucentWhite">#80FFFFFF</color>
-
     <color name="transparent">#00000000</color>
     <color name="item_icon_tint">#89000000</color>
 	<color name="blur">#80000000</color>
@@ -33,8 +24,6 @@
 	<color name="button_colour">#69c800</color>
 	<color name="button_pressed_colour">#b4cd99</color>
 	<color name="button_disabled_colour">#b4cd99</color>
-
-
 	<color name="semi_dark_grey">#707070</color>
 	<color name="text_black">#2f2f2f</color>
 	<color name="text_dark_gray">#4a4a4a</color>
@@ -45,7 +34,6 @@
 	<color name="button_disabled">#b4cd99</color>
 	<color name="greyf6">#f6f6f6</color>
 	<color name="greyaa">#2a2a2a</color>
-	<color name="greyee">#eeeeee</color>
 	<color name="greye5">#e5e5e5</color>
 	<color name="greyc2">#c2c2c2</color>
 	<color name="greyf9">#f9f9f9</color>
@@ -65,6 +53,7 @@
 	<color name="greye9">#e9e9e9</color>
 	<color name="grey75">#757575</color>
 	<color name="greydd">#dddddd</color>
+	<color name="greyf2">#f2f2f2</color>
 
 
 	<color name="onboarding_indicator_unselected">#d8d8d8</color>
@@ -79,7 +68,6 @@
 	<color name="nasty_green">#75b943</color>
 	<color name="inactive_green">#d7ebc8</color>
 	<color name="material_green">#009688</color>
-
 	<color name="viewfinder_mask">#60000000</color>
 	<color name="viewfinder_laser">#ffcc0000</color>
 	<color name="viewfinder_border">#ffafed44</color>
@@ -98,6 +86,33 @@
 	<color name="artis_sigma1">#53A271</color>
 	<color name="artis_tau1">#F97599</color>
 
+	<!-- Fiji Colour Pallette -->
+	<color name="black">#000000</color>
+	<color name="mine">#2f2f2f</color>
+	<color name="dove">#727272</color>
+	<color name="dusty">#999999</color>
+	<color name="silver">#c2c2c2</color>
+	<color name="mike">#dddddd</color>
+	<color name="alto">#e0e0e0</color>
+	<color name="mercury">#e9e9e9</color>
+	<color name="concrete">#f2f2f2</color>
+	<color name="alabaster">#fbfbfb</color>
+	<color name="white">#ffffff</color>
+	<color name="solitude">#e6f3ff</color>
+	<color name="azure">#007fed</color>
+	<color name="azure_hover">#1993fd</color>
+	<color name="cerulean">#00bfff</color>
+	<color name="green">#75b943</color>
+	<color name="green_disabled">#7775b943</color>
+	<color name="green_hover">#87cf52</color>
+	<color name="emerald">#53d76b</color>
+	<color name="danger">#ff3b30</color>
+	<color name="radical">#fc3159</color>
+	<color name="pumpkin">#fd9426</color>
+	<color name="indigo">#595ad5</color>
+	<!-- End Fiji Colour Pallette -->
+
+	<color name="red">#f7506c</color>
 	<color name="water_blue">#1899c2</color>
 	<color name="bluish">#2784af</color>
 	<color name="dark_sky_blue">#54c1e3</color>

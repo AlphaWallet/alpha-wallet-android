@@ -43,6 +43,7 @@ import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
@@ -420,14 +421,15 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         {
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
-            SecretKey secretKey = (SecretKey) keyStore.getKey(currentWallet.address, null);
-            String encryptedHDKeyPath = getFilePath(context, currentWallet.address);
+            String matchingAddr = findMatchingAddrInKeyStore(currentWallet.address);
+            SecretKey secretKey = (SecretKey) keyStore.getKey(matchingAddr, null);
+            String encryptedHDKeyPath = getFilePath(context, matchingAddr);
             if (!new File(encryptedHDKeyPath).exists() || secretKey == null)
             {
                 signCallback.GotAuthorisation(false);
                 return;
             }
-            byte[] iv = readBytesFromFile(getFilePath(context, currentWallet.address + "iv"));
+            byte[] iv = readBytesFromFile(getFilePath(context, matchingAddr + "iv"));
             Cipher outCipher = Cipher.getInstance(CIPHER_ALGORITHM);
             final GCMParameterSpec spec = new GCMParameterSpec(128, iv);
             outCipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
@@ -460,19 +462,20 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         {
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
-            if (!keyStore.containsAlias(currentWallet.address))
+            String matchingAddr = findMatchingAddrInKeyStore(currentWallet.address);
+            if (!keyStore.containsAlias(matchingAddr))
             {
                 throw new KeyServiceException("Key not found in keystore. Re-import key.");
             }
 
             //create a stream to the encrypted bytes
-            FileInputStream encryptedHDKeyBytes = new FileInputStream(getFilePath(context, currentWallet.address));
-            SecretKey secretKey = (SecretKey) keyStore.getKey(currentWallet.address, null);
-            boolean ivExists = new File(getFilePath(context, currentWallet.address + "iv")).exists();
+            FileInputStream encryptedHDKeyBytes = new FileInputStream(getFilePath(context, matchingAddr));
+            SecretKey secretKey = (SecretKey) keyStore.getKey(matchingAddr, null);
+            boolean ivExists = new File(getFilePath(context, matchingAddr + "iv")).exists();
             byte[] iv = null;
 
             if (ivExists)
-                iv = readBytesFromFile(getFilePath(context, currentWallet.address + "iv"));
+                iv = readBytesFromFile(getFilePath(context, matchingAddr + "iv"));
             if (iv == null || iv.length == 0)
             {
                 throw new KeyServiceException(context.getString(R.string.cannot_read_encrypt_file));
@@ -569,7 +572,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
             if (secretData == null) return;
 
-            boolean keyStored = storeEncryptedBytes(secretData.getBytes(), true, currentWallet.address.toLowerCase());
+            boolean keyStored = storeEncryptedBytes(secretData.getBytes(), true, currentWallet.address);
             if (keyStored)
             {
                 signCallback.CreatedKey(currentWallet.address);
@@ -1099,9 +1102,59 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         return bytes;
     }
 
-    public synchronized static String getFilePath(Context context, String fileName)
+    /**
+     * Finds matching key in keystore regardless of case
+     *
+     * @param keyAddress
+     * @return
+     */
+    private String findMatchingAddrInKeyStore(String keyAddress)
     {
-        return new File(context.getFilesDir(), fileName).getAbsolutePath();
+        try
+        {
+            KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
+            keyStore.load(null);
+            Enumeration<String> keys = keyStore.aliases();
+
+            while (keys.hasMoreElements())
+            {
+                String thisKey = keys.nextElement();
+                if (keyAddress.equalsIgnoreCase(thisKey))
+                {
+                    return thisKey;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            if (BuildConfig.DEBUG) e.printStackTrace();
+        }
+
+        return keyAddress;
+    }
+
+    synchronized static String getFilePath(Context context, String fileName)
+    {
+        //check for matching file
+        File check = new File(context.getFilesDir(), fileName);
+        if (check.exists())
+        {
+            return check.getAbsolutePath(); //quick return
+        }
+        else
+        {
+            //find matching file, ignoring case
+            File[] files = context.getFilesDir().listFiles();
+            for (File checkFile : files)
+            {
+                if (checkFile.getName().equalsIgnoreCase(fileName))
+                {
+                    return checkFile.getAbsolutePath();
+                }
+            }
+        }
+
+        return check.getAbsolutePath(); //Should never get here
     }
 
     private boolean writeBytesToFile(String path, byte[] data)
@@ -1191,14 +1244,15 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
      * Delete all traces of the key in Android keystore, encrypted bytes and iv file in private data area
      * @param keyAddress
      */
-    public synchronized void deleteKey(String keyAddress)
+    synchronized void deleteKey(String keyAddress)
     {
         try {
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
             keyStore.load(null);
-            if (keyStore.containsAlias(keyAddress)) keyStore.deleteEntry(keyAddress);
-            File encryptedKeyBytes = new File(getFilePath(context, keyAddress));
-            File encryptedBytesFileIV = new File(getFilePath(context, keyAddress + "iv"));
+            String matchingAddr = findMatchingAddrInKeyStore(keyAddress);
+            if (keyStore.containsAlias(matchingAddr)) keyStore.deleteEntry(matchingAddr);
+            File encryptedKeyBytes = new File(getFilePath(context, matchingAddr));
+            File encryptedBytesFileIV = new File(getFilePath(context, matchingAddr + "iv"));
             if (encryptedKeyBytes.exists()) encryptedKeyBytes.delete();
             if (encryptedBytesFileIV.exists()) encryptedBytesFileIV.delete();
         } catch (Exception e) {
@@ -1284,7 +1338,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         return hasChanges;
     }
 
-    public static boolean hasStrongbox()
+    static boolean hasStrongbox()
     {
         return securityStatus == SecurityStatus.HAS_STRONGBOX;
     }

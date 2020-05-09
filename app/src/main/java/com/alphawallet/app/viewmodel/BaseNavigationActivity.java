@@ -1,9 +1,9 @@
 package com.alphawallet.app.viewmodel;
 
-import com.alphawallet.app.ui.BaseActivity;
+import android.view.View;
 
 import com.alphawallet.app.R;
-
+import com.alphawallet.app.ui.BaseActivity;
 import com.alphawallet.app.widget.AWalletBottomNavigationView;
 
 public class BaseNavigationActivity extends BaseActivity implements AWalletBottomNavigationView.OnBottomNavigationItemSelectedListener {
@@ -44,4 +44,8 @@ public class BaseNavigationActivity extends BaseActivity implements AWalletBotto
     {
         nav.hideBrowserTab();
     }
+
+    public void hideNavBar() { nav.setVisibility(View.GONE); }
+
+    public boolean isNavBarVisible() { return nav.getVisibility() == View.VISIBLE; }
 }

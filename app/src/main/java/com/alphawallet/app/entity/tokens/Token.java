@@ -15,7 +15,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.interact.SetupTokensInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -47,9 +46,15 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ERROR;
+import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
+import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
 
 public class Token implements Parcelable, Comparable<Token>
 {
+    private final static int TOKEN_BALANCE_PRECISION = 4;
+    private final static int TOKEN_BALANCE_FOCUS_PRECISION = 5;
+    private final static float FOCUS_TOKEN_WEIGHT = 2.1f; //Magic update weighting to ensure focus token is regularly updated
+
     public final TokenInfo tokenInfo;
     public BigDecimal balance;
     public BigDecimal pendingBalance;
@@ -109,6 +114,8 @@ public class Token implements Parcelable, Comparable<Token>
             balanceChanged = oldToken.balanceChanged;
             hasTokenScript = oldToken.hasTokenScript;
             lastTxTime = oldToken.lastTxTime;
+            iconifiedWebviewHeight = oldToken.iconifiedWebviewHeight;
+            nonIconifiedWebviewHeight = oldToken.nonIconifiedWebviewHeight;
         }
         refreshCheck = false;
     }
@@ -129,6 +136,7 @@ public class Token implements Parcelable, Comparable<Token>
         nonIconifiedWebviewHeight = in.readInt();
         iconifiedWebviewHeight = in.readInt();
         nameWeight = in.readInt();
+        ticker = in.readParcelable(TokenTicker.class.getClassLoader());
 
         balanceChanged = false;
         if (readType <= ContractType.CREATION.ordinal())
@@ -216,6 +224,7 @@ public class Token implements Parcelable, Comparable<Token>
         dest.writeInt(nonIconifiedWebviewHeight);
         dest.writeInt(iconifiedWebviewHeight);
         dest.writeInt(nameWeight);
+        dest.writeParcelable(ticker, flags);
     }
 
     public void setRealmBalance(RealmToken realmToken)
@@ -284,7 +293,8 @@ public class Token implements Parcelable, Comparable<Token>
 
     public void setupContent(TokenHolder holder, AssetDefinitionService definition)
     {
-        BigDecimal ethBalance = getCorrectedBalance(4);
+        int precision = isFocusToken() ? TOKEN_BALANCE_FOCUS_PRECISION : TOKEN_BALANCE_PRECISION;
+        BigDecimal ethBalance = getCorrectedBalance(precision);
         String     value      = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
         if (ethBalance.compareTo(BigDecimal.ZERO) == 0 && balance.compareTo(BigDecimal.ZERO) > 0)
         {
@@ -528,12 +538,13 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean checkBalanceChange(Token token)
     {
-        return token != null && (!getFullBalance().equals(token.getFullBalance()) || !getFullName().equals(token.getFullName()));
+        if (token != null && tokenInfo.decimals != token.tokenInfo.decimals) return true;
+        else return token != null && (!getFullBalance().equals(token.getFullBalance()) || !getFullName().equals(token.getFullName()));
     }
 
     public String getPendingDiff()
     {
-        if (pendingBalance == null || balance.equals(pendingBalance)) return null;
+        if (!isEthereum() || pendingBalance == null || balance.equals(pendingBalance)) return null;
         else
         {
             String prefix = "";
@@ -629,34 +640,23 @@ public class Token implements Parcelable, Comparable<Token>
 
     public String getOperationName(Transaction transaction, Context ctx)
     {
-        String name = null;
-        try
+        String name;
+        if (isEthereum())
         {
-            if (transaction.blockNumber != null && transaction.blockNumber.equals("0"))
+            if (transaction.from.equalsIgnoreCase(tokenWallet))
             {
-                name = ctx.getString(R.string.status_pending);
-            }
-            else if (transaction.operations != null && transaction.operations.length > 0)
-            {
-                TransactionOperation operation = transaction.operations[0];
-                name = operation.getOperationName(ctx);
+                name = ctx.getString(R.string.sent);
             }
             else
             {
-                if (transaction.from.equalsIgnoreCase(tokenWallet))
-                {
-                    name = ctx.getString(R.string.sent);
-                }
-                else
-                {
-                    name = ctx.getString(R.string.received);
-                }
+                name = ctx.getString(R.string.received);
             }
         }
-        catch (NumberFormatException e)
+        else
         {
-            //Silent fail, number was invalid just display default
+            name = transaction.getOperationName(ctx);
         }
+
 
         return name;
     }
@@ -666,25 +666,17 @@ public class Token implements Parcelable, Comparable<Token>
         return getScaledValue(balance, tokenInfo.decimals);
     }
 
-    public static String getScaledValue(BigDecimal value, long decimals) { return getScaledValue(value, decimals, false); }
-
-    public static String getScaledValue(BigDecimal value, long decimals, boolean stripZeros)
+    public static String getScaledValue(BigDecimal value, long decimals)
     {
         value = value.divide(new BigDecimal(Math.pow(10, decimals)));
         int scale = 4;
         if (value.equals(BigDecimal.ZERO))
         {
-            if (stripZeros) return "0";
-            else return "0.0000";
+            return "0.0000";
         }
         if (value.abs().compareTo(BigDecimal.valueOf(0.0001)) < 0)
         {
-            if (stripZeros) return "~0.00";
-            else return "0.0000";
-        }
-        else if (stripZeros)
-        {
-            return value.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros().toPlainString();
+            return "0.0000";
         }
         else
         {
@@ -742,6 +734,30 @@ public class Token implements Parcelable, Comparable<Token>
         }
 
         return idList;
+    }
+
+    /**
+     * Fetch the base native value attached to this transaction
+     * @param transaction
+     * @return
+     */
+    public String getTransactionValue(Transaction transaction)
+    {
+        if (transaction.error.equals("1")) return "";
+        else if (transaction.value.equals("0")) return "0";
+        return transaction.getPrefix(this) + " " + getScaledValue(transaction.value, tokenInfo.decimals);
+    }
+
+    /**
+     * Fetch the Token value of this transaction eg +20 DAI, or if a native chain transaction then return the value
+     *
+     * @param transaction
+     * @return
+     */
+    public String getTransactionResultValue(Transaction transaction)
+    {
+        String txResultValue = isEthereum() ? getTransactionValue(transaction) : transaction.getOperationResult(this);
+        return txResultValue + " " + getSymbol();
     }
 
     public String getTransactionValue(Transaction transaction, Context context)
@@ -937,12 +953,17 @@ public class Token implements Parcelable, Comparable<Token>
     {
         if (focus)
         {
-            balanceUpdateWeight = 2.0f;
+            balanceUpdateWeight = FOCUS_TOKEN_WEIGHT;
         }
         else
         {
             balanceUpdateWeight = calculateBalanceUpdateWeight();
         }
+    }
+
+    public boolean isFocusToken()
+    {
+        return balanceUpdateWeight == FOCUS_TOKEN_WEIGHT;
     }
 
     public boolean balanceIncrease(Token token)
@@ -1131,7 +1152,7 @@ public class Token implements Parcelable, Comparable<Token>
                                Web3TokenView tokenView, boolean iconified, TicketRange range)
     {
         tokenView.setVisibility(View.VISIBLE);
-        String viewName = iconified ? "item-view" : "view";
+        String viewName = iconified ? ASSET_SUMMARY_VIEW_NAME : ASSET_DETAIL_VIEW_NAME;
 
         String view = assetService.getTokenView(tokenInfo.chainId, getAddress(), viewName);
         if (waitSpinner != null) waitSpinner.setVisibility(View.GONE);
@@ -1304,8 +1325,62 @@ public class Token implements Parcelable, Comparable<Token>
         balanceUpdateWeight = 10.0f;
     }
 
+    public BigDecimal getTxValue(Transaction transaction)
+    {
+        BigDecimal returnValue = BigDecimal.ZERO;
+        try
+        {
+            if (isEthereum())
+            {
+                returnValue = new BigDecimal(transaction.value);
+            }
+            else
+            {
+                returnValue = transaction.getRawValue();
+            }
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return returnValue;
+    }
+
     public boolean checkBalanceType()
     {
         return true;
+    }
+
+    public String getTransactionDestination(Transaction transaction)
+    {
+        if (isEthereum()) return transaction.to;
+        else return transaction.getContract(this);
+    }
+
+    /**
+     * Return image representing tx to self, tx received or tx sent
+     * @param tx
+     * @return
+     */
+    public int ethereumTxImage(Transaction tx)
+    {
+        return tx.from.equalsIgnoreCase(tokenWallet) ? (tx.to.equals(tx.from) ? R.drawable.ic_transactions : R.drawable.ic_arrow_upward_black_24dp)
+                                                     : R.drawable.ic_arrow_downward_black_24dp;
+    }
+
+    public int getTxImage(Transaction transaction)
+    {
+        int asset;
+        if (isEthereum())
+        {
+            asset = ethereumTxImage(transaction);
+        }
+        else
+        {
+            asset = transaction.getOperationImage(this);
+        }
+
+        return asset;
     }
 }

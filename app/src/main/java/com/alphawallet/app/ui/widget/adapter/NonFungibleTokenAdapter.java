@@ -46,6 +46,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
+import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
+
 /**
  * Created by James on 9/02/2018.
  */
@@ -129,7 +132,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         int holderType = TokenIdSortedItem.VIEW_TYPE;
         assetCount = tokenIds.size();
 
-        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), "view"))
+        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_DETAIL_VIEW_NAME))
         {
             holderType = AssetInstanceSortedItem.VIEW_TYPE;
         }
@@ -151,6 +154,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
         items.add(new TokenBalanceSortedItem(t));
         assetCount = t.getTicketCount();
         int holderType = t.isERC721() ? OpenseaHolder.VIEW_TYPE : AssetInstanceScriptHolder.VIEW_TYPE;
+
+        //TokenScript view for ERC721 overrides OpenSea display
+        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
         addRanges(t, holderType);
         items.endBatchedUpdates();
     }

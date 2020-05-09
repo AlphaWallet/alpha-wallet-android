@@ -6,11 +6,12 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.*;
 import android.net.Uri;
 import android.os.Environment;
+import android.text.TextUtils;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -18,9 +19,13 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.HomeActivity;
+import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.LocaleUtils;
 
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import com.alphawallet.token.entity.MagicLinkData;
@@ -221,14 +226,27 @@ public class HomeViewModel extends BaseViewModel {
 
     public void getWalletName() {
         disposable = fetchWalletsInteract
-                .getWalletName(preferenceRepository.getCurrentWalletAddress())
+                .getWallet(preferenceRepository.getCurrentWalletAddress())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onWalletName, this::onError);
+                .subscribe(this::onWallet, this::onError);
     }
 
-    private void onWalletName(String name) {
-        walletName.postValue(name);
+    private void onWallet(Wallet wallet) {
+        if (TextUtils.isEmpty(wallet.ENSname))
+        {
+            walletName.postValue(wallet.name);
+            //check for ENS name
+            new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID))
+                    .resolveEnsName(wallet.address)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(walletName::postValue, this::onENSError).isDisposed();
+        }
+        else
+        {
+            walletName.postValue(wallet.ENSname);
+        }
     }
 
     public LiveData<String> walletName() {
@@ -298,13 +316,18 @@ public class HomeViewModel extends BaseViewModel {
         preferenceRepository.setFindWalletAddressDialogShown(isShown);
     }
 
-    public void updateCurrency(String currencyCode){
-        currencyRepository.setDefaultCurrency(currencyCode);
+    public String getDefaultCurrency(){
+        return currencyRepository.getDefaultCurrency();
+    }
+
+    public void updateTickers()
+    {
         ethereumNetworkRepository.refreshTickers();
     }
 
-    public String getDefaultCurrency(){
-        return currencyRepository.getDefaultCurrency();
+    private void onENSError(Throwable throwable)
+    {
+        if (BuildConfig.DEBUG) throwable.printStackTrace();
     }
 
     public void setErrorCallback(FragmentMessenger callback)

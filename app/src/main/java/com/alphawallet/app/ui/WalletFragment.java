@@ -2,18 +2,21 @@ package com.alphawallet.app.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
@@ -24,34 +27,39 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupTokenCallback;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.VisibilityFilter;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInterface;
 import com.alphawallet.app.entity.tokens.TokensReceiver;
-import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.WarningData;
+import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
+import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.util.TabUtils;
-
-import dagger.android.support.AndroidSupportInjection;
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
-import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
+import com.alphawallet.app.widget.AWalletBottomNavigationView;
+import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
 
-import javax.inject.Inject;
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import dagger.android.support.AndroidSupportInjection;
 
 import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 import static com.alphawallet.app.C.Key.WALLET;
@@ -60,7 +68,12 @@ import static com.alphawallet.app.C.Key.WALLET;
  * Created by justindeguzman on 2/28/18.
  */
 
-public class WalletFragment extends Fragment implements OnTokenClickListener, View.OnClickListener, TokenInterface, Runnable, BackupTokenCallback
+public class WalletFragment extends BaseFragment implements
+        OnTokenClickListener,
+        View.OnClickListener,
+        TokenInterface,
+        Runnable,
+        BackupTokenCallback
 {
     private static final String TAG = "WFRAG";
 
@@ -74,9 +87,12 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     private ProgressView progressView;
     private TokensAdapter adapter;
     private View selectedToken;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private String importFileName;
-    private RecyclerView listView;
+    private RecyclerView recyclerView;
+    private SwipeRefreshLayout refreshLayout;
+    private GridLayoutManager gridLayoutManager;
+    private LinearLayoutManager linearLayoutManager;
 
     private boolean isVisible;
 
@@ -85,25 +101,57 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
         AndroidSupportInjection.inject(this);
+
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
 
-        SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
-        systemView = view.findViewById(R.id.system_view);
-        progressView = view.findViewById(R.id.progress_view);
-        progressView.hide();
-        systemView.hide();
+        if (VisibilityFilter.canAddTokens()) {
+            toolbar(view, R.menu.menu_add, this::onMenuItemClick);
+        } else {
+            toolbar(view);
+        }
 
-        listView = view.findViewById(R.id.list);
+        initViews(view);
 
-        systemView.attachRecyclerView(listView);
-        systemView.attachSwipeRefreshLayout(refreshLayout);
+        initViewModel();
 
+        tokenReceiver = new TokensReceiver(getActivity(), this);
+
+        isVisible = true;
+
+        initList();
+
+        initTabLayout(view);
+
+        viewModel.clearProcess();
+
+        initNotificationView(view);
+
+        setImportToken();
+
+        return view;
+    }
+
+    private void initList() {
+        initLayoutManagers();
+        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), getContext());
+        adapter.setHasStableIds(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(adapter);
+        if (recyclerView.getItemAnimator() != null)
+            ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeCallback(adapter));
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+
+        refreshLayout.setOnRefreshListener(this::refreshList);
+    }
+
+    private void initViewModel() {
         viewModel = ViewModelProviders.of(this, walletViewModelFactory)
                 .get(WalletViewModel.class);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.error().observe(this, this::onError);
         viewModel.tokens().observe(this, this::onTokens);
-        viewModel.total().observe(this, this::onTotal);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.currentWalletBalance().observe(this, this::onBalanceChanged);
         viewModel.refreshTokens().observe(this, this::refreshTokens);
@@ -111,38 +159,32 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         viewModel.tokensReady().observe(this, this::tokensReady);
         viewModel.backupEvent().observe(this, this::backupEvent);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+    }
 
-        adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), getContext());
-        adapter.setHasStableIds(true);
-        listView.setLayoutManager(new LinearLayoutManager(getContext()));
-        listView.setAdapter(adapter);
-        if (listView.getItemAnimator() != null)
-            ((SimpleItemAnimator) listView.getItemAnimator()).setSupportsChangeAnimations(false);
+    private void initViews(View view) {
+        refreshLayout = view.findViewById(R.id.refresh_layout);
+        systemView = view.findViewById(R.id.system_view);
+        progressView = view.findViewById(R.id.progress_view);
+        recyclerView = view.findViewById(R.id.list);
 
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeCallback(adapter));
-        itemTouchHelper.attachToRecyclerView(listView);
+        progressView.hide();
+        systemView.hide();
 
-        refreshLayout.setOnRefreshListener(this::refreshList);
-
-        tokenReceiver = new TokensReceiver(getActivity(), this);
-
-        initTabLayout(view);
-
-        isVisible = true;
-
-        setImportToken();
-
-        viewModel.clearProcess();
-        return view;
+        systemView.attachRecyclerView(recyclerView);
+        systemView.attachSwipeRefreshLayout(refreshLayout);
     }
 
     private void onDefaultWallet(Wallet wallet)
     {
+        if (VisibilityFilter.showManageTokens()) {
+            adapter.setWalletAddress(wallet.address);
+        }
+
         //Do we display new user backup popup?
-        ((HomeActivity)getActivity()).showBackupWalletDialog(wallet.lastBackupTime > 0);
+        ((HomeActivity) getActivity()).showBackupWalletDialog(wallet.lastBackupTime > 0);
     }
 
-    public void refreshList()
+    private void refreshList()
     {
         adapter.clear();
         viewModel.reloadTokens();
@@ -170,75 +212,75 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         adapter.updateToken(token, false);
     }
 
-    private void initTabLayout(View view) {
+    private void initTabLayout(View view)
+    {
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
         if (VisibilityFilter.hideTabBar())
         {
-            hideTabBar(view);
+            tabLayout.setVisibility(View.GONE);
+            return;
         }
-        else
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.currency));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.collectibles));
+        //tabLayout.addTab(tabLayout.newTab().setText(R.string.attestations));
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener()
         {
-            tabLayout.addTab(tabLayout.newTab().setText(R.string.all));
-            tabLayout.addTab(tabLayout.newTab().setText(R.string.currency));
-            tabLayout.addTab(tabLayout.newTab().setText(R.string.collectibles));
-
-            tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener()
+            @Override
+            public void onTabSelected(TabLayout.Tab tab)
             {
-                @Override
-                public void onTabSelected(TabLayout.Tab tab)
+                switch (tab.getPosition())
                 {
-                    switch (tab.getPosition())
-                    {
-                        case 0:
-                            adapter.setFilterType(TokensAdapter.FILTER_ALL);
-                            viewModel.fetchTokens();
-                            break;
-                        case 1:
-                            adapter.setFilterType(TokensAdapter.FILTER_CURRENCY);
-                            viewModel.fetchTokens();
-                            break;
-                        case 2:
-                            adapter.setFilterType(TokensAdapter.FILTER_COLLECTIBLES);
-                            viewModel.fetchTokens();
-                            break;
-                        default:
-                            break;
-                    }
+                    case 0:
+                        recyclerView.setLayoutManager(linearLayoutManager);
+                        adapter.setFilterType(TokensAdapter.FILTER_ALL);
+                        viewModel.fetchTokens();
+                        break;
+                    case 1:
+                        recyclerView.setLayoutManager(linearLayoutManager);
+                        adapter.setFilterType(TokensAdapter.FILTER_CURRENCY);
+                        viewModel.fetchTokens();
+                        break;
+                    case 2:
+                        recyclerView.setLayoutManager(gridLayoutManager);
+                        adapter.setFilterType(TokensAdapter.FILTER_COLLECTIBLES);
+                        viewModel.fetchTokens();
+                        break;
+                    case 3: // TODO: Filter Attestations
+                        break;
+                    default:
+                        break;
                 }
+            }
 
-                @Override
-                public void onTabUnselected(TabLayout.Tab tab)
-                {
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab)
+            {
+            }
 
-                }
+            @Override
+            public void onTabReselected(TabLayout.Tab tab)
+            {
+            }
+        });
 
-                @Override
-                public void onTabReselected(TabLayout.Tab tab)
-                {
-
-                }
-            });
-        }
-
-        TabUtils.changeTabsFont(getContext(), tabLayout);
+        TabUtils.decorateTabLayout(getContext(), tabLayout);
     }
 
-    private void onTotal(BigDecimal totalInCurrency) {
-//        adapter.setTotal(totalInCurrency);
-    }
+    private void initLayoutManagers() {
+        linearLayoutManager = new LinearLayoutManager(getContext());
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_add: {
-                viewModel.showAddToken(getActivity());
+        gridLayoutManager = new GridLayoutManager(getContext(), 2);
+        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if (adapter.getItemViewType(position) == TokenGridHolder.VIEW_TYPE) {
+                    return 1;
+                }
+                return 2;
             }
-            break;
-            case android.R.id.home: {
-                break;
-            }
-        }
-        return super.onOptionsItemSelected(item);
+        });
     }
 
     @Override
@@ -261,11 +303,16 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     @Override
     public void onResume() {
         super.onResume();
-        if (handler == null) handler = new Handler();
         selectedToken = null;
-        viewModel.setVisibility(isVisible);
-        viewModel.prepare();
-        listView = getActivity().findViewById(R.id.list);
+        if (viewModel == null)
+        {
+            ((HomeActivity)getActivity()).resetFragment(AWalletBottomNavigationView.WALLET);
+        }
+        else
+        {
+            viewModel.setVisibility(isVisible);
+            viewModel.prepare();
+        }
     }
 
     private void onTokens(Token[] tokens)
@@ -287,7 +334,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         {
             ContractLocator importToken = viewModel.getAssetDefinitionService().getHoldingContract(importFileName);
             if (importToken != null) Toast.makeText(getContext(), importToken.name, Toast.LENGTH_LONG).show();
-            if (importToken != null) adapter.setScrollToken(importToken);
+            if (importToken != null && adapter != null) adapter.setScrollToken(importToken);
             importFileName = null;
         }
     }
@@ -298,9 +345,9 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     private void checkScrollPosition()
     {
         int scrollPos = adapter.getScrollPosition();
-        if (scrollPos > 0 && listView != null)
+        if (scrollPos > 0 && recyclerView != null)
         {
-            ((LinearLayoutManager)listView.getLayoutManager()).scrollToPositionWithOffset(scrollPos, 0);
+            ((LinearLayoutManager) recyclerView.getLayoutManager()).scrollToPositionWithOffset(scrollPos, 0);
         }
     }
 
@@ -318,8 +365,8 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 wData.title = getString(R.string.time_to_backup_wallet);
                 wData.detail = getString(R.string.recommend_monthly_backup);
                 wData.buttonText = getString(R.string.back_up_wallet_action, viewModel.getWalletAddr().substring(0, 5));
-                wData.colour = ContextCompat.getColor(getContext(), R.color.slate_grey);
-                wData.buttonColour = ContextCompat.getColor(getContext(), R.color.backup_grey);
+                wData.colour = R.color.slate_grey;
+                wData.buttonColour = R.color.backup_grey;
                 wData.wallet = viewModel.getWallet();
                 adapter.addWarning(wData);
                 break;
@@ -328,8 +375,8 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 wData.title = getString(R.string.wallet_not_backed_up);
                 wData.detail = getString(R.string.not_backed_up_detail);
                 wData.buttonText = getString(R.string.back_up_wallet_action, viewModel.getWalletAddr().substring(0, 5));
-                wData.colour = ContextCompat.getColor(getContext(), R.color.warning_red);
-                wData.buttonColour = ContextCompat.getColor(getContext(), R.color.warning_dark_red);
+                wData.colour = R.color.warning_red;
+                wData.buttonColour = R.color.warning_dark_red;
                 wData.wallet = viewModel.getWallet();
                 adapter.addWarning(wData);
                 break;
@@ -387,7 +434,7 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         //first abort the current operation
         viewModel.clearProcess();
         adapter.clear();
-        viewModel.fetchTokens();
+        viewModel.reloadTokens();
     }
 
     @Override
@@ -404,18 +451,15 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
     }
 
     @Override
-    public void addedToken(int[] chainIds, String[] addrs)
+    public void addedToken(List<ContractLocator> tokenContracts)
     {
-        //token was added
-        if (chainIds.length != addrs.length)
-        {
-            System.out.println("Receiver data mismatch");
-            return;
-        }
+        //new tokens found
+        viewModel.newTokensFound(tokenContracts);
 
-        for (int i = 0; i < chainIds.length; i++)
+        //see if these are currently known, if so update them in adapter
+        for (ContractLocator cResult : tokenContracts)
         {
-            Token t = viewModel.getTokenFromService(chainIds[i], addrs[i]);
+            Token t = viewModel.getTokenFromService(cResult.chainId, cResult.name);
             if (t != null) adapter.updateToken(t, false);
         }
     }
@@ -537,6 +581,11 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
                 Token t = ((TokenHolder)viewHolder).token;
                 if (t.isEthereum()) return 0;
             }
+            else if (viewHolder.getItemViewType() == ManageTokensHolder.VIEW_TYPE ||
+                    viewHolder.getItemViewType() == TokenGridHolder.VIEW_TYPE)
+            {
+                return 0;
+            }
 
             return super.getSwipeDirs(recyclerView, viewHolder);
         }
@@ -578,8 +627,31 @@ public class WalletFragment extends Fragment implements OnTokenClickListener, Vi
         return viewModel.getWallet();
     }
 
-    public void hideTabBar(View view)
-    {
-        view.findViewById(R.id.tab_layout).setVisibility(View.GONE);
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        if (menuItem.getItemId() == R.id.action_add) {
+            viewModel.showAddToken(getContext());
+        }
+        return super.onMenuItemClick(menuItem);
+    }
+
+    private void initNotificationView(View view) {
+        final String key = "marshmallow_version_support_warning_shown";
+        NotificationView notificationView = view.findViewById(R.id.notification);
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        boolean hasShownWarning = pref.getBoolean(key, false);
+
+        if (!hasShownWarning && android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+            notificationView.setNotificationBackgroundColor(R.color.indigo);
+            notificationView.setTitle(getContext().getString(R.string.title_version_support_warning));
+            notificationView.setMessage(getContext().getString(R.string.message_version_support_warning));
+            notificationView.setPrimaryButtonText(getContext().getString(R.string.hide_notification));
+            notificationView.setPrimaryButtonListener(() -> {
+                notificationView.setVisibility(View.GONE);
+                pref.edit().putBoolean(key, true).apply();
+            });
+        } else {
+            notificationView.setVisibility(View.GONE);
+        }
     }
 }

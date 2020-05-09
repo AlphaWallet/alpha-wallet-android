@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <declare-styleable name="SettingsItemView">
+        <attr name="settingIcon" format="integer" />
+        <attr name="settingTitle" format="integer" />
+        <attr name="settingSubtitle" format="integer" />
+        <attr name="settingType" format="string" />
+    </declare-styleable>
+    <declare-styleable name="NotificationView">
+        <attr name="backgroundColor" format="integer" />
+        <attr name="textColor" format="integer" />
+    </declare-styleable>
     <declare-styleable name="InputAddressView" />
     <declare-styleable name="InputView">
         <attr name="label" format="integer" />
@@ -8,6 +18,10 @@
         <attr name="inputType" format="string" />
         <attr name="minHeight" format="integer" />
         <attr name="innerPadding" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="CopyTextView">
+        <attr name="text" format="string" />
+        <attr name="showToast" format="boolean" />
     </declare-styleable>
     <declare-styleable name="BarcodeScannerView">
         <attr name="shouldScaleToFill" format="boolean" />

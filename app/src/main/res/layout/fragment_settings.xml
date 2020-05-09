@@ -1,854 +1,187 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settings_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:orientation="vertical">
 
-    <View
-        android:id="@+id/top_bar"
-        android:layout_alignParentTop="true"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/onboarding_indicator_unselected"/>
+    <include layout="@layout/layout_simple_toolbar" />
 
     <ScrollView
-        android:layout_below="@id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginBottom="?actionBarSize">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="15dp">
+            android:orientation="vertical">
+
+            <com.alphawallet.app.widget.NotificationView
+                android:id="@+id/notification"
+                android:layout_width="match_parent"
+                android:background="@drawable/background_bottom_border"
+                android:layout_height="wrap_content" />
 
             <include layout="@layout/item_warning" />
 
-            <LinearLayout
-                android:id="@+id/layout_wallet_address"
+            <View
+                android:id="@+id/warning_separator"
                 android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:background="@drawable/selector_settings_item"
-                android:clickable="true"
-                android:focusable="true">
+                android:layout_height="1dp"
+                android:background="@color/mercury"
+                android:visibility="gone" />
 
-                <RelativeLayout
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="10dp">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_centerInParent="true"
-                        android:src="@drawable/ic_qr_code" />
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/settings_my_wallet_address"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:id="@+id/wallets_subtext"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_light"
-                        android:lines="1"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:layout_marginRight="10dp"
-                        android:text="@string/unknown_balance_without_symbol"
-                        android:textColor="@color/black"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_manage_wallets"
+            <TextView
                 android:layout_width="match_parent"
-                android:layout_height="71dp"
-                android:orientation="vertical"
-                android:background="@drawable/selector_settings_item">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:background="@color/greye5"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="20dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:paddingStart="5dp"
-                        android:paddingEnd="5dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginEnd="10dp"
-                        android:src="@drawable/ic_change_wallet" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/toolbar_title_wallets"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_backup_wallet"
-                android:layout_width="match_parent"
-                android:layout_height="71dp"
-                android:orientation="vertical"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="@drawable/selector_settings_item">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:background="@color/greye5"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="70dp">
-
-                <RelativeLayout
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="10dp">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_centerInParent="true"
-                        android:src="@drawable/ic_backup_vector" />
-                </RelativeLayout>
-
-                <TextView
-                    android:id="@+id/backup_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:fontFamily="@font/font_light"
-                    android:text="@string/back_up_this_wallet"
-                    android:textColor="@color/black"
-                    android:textSize="20sp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="10dp"
-                    android:layout_gravity="center_vertical|right"
-                    android:gravity="center_horizontal">
-
-                    <ImageView
-                        android:id="@+id/image_backup_status"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical|right"
-                        android:src="@drawable/ic_green_bar"/>
-
-                    <TextView
-                        android:id="@+id/text_backup_status"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAllCaps="true"
-                        android:text="100% Secure"
-                        android:textSize="10sp"
-                        android:textColor="@color/greyc2"
-                        android:layout_gravity="center_horizontal"/>
-
-                </LinearLayout>
-
-            </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_switch_network"
-                android:layout_width="match_parent"
-                android:layout_height="71dp"
-                android:orientation="vertical"
-                android:background="@drawable/selector_settings_item">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:background="@color/greye5"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="20dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:paddingStart="5dp"
-                        android:paddingEnd="5dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginEnd="10dp"
-                        android:src="@drawable/ic_network_2" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/select_active_networks"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_token_management"
-                android:layout_width="match_parent"
-                android:layout_height="71dp"
-                android:orientation="vertical"
-                android:background="@drawable/selector_settings_item">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:background="@color/greye5"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="20dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:paddingStart="5dp"
-                        android:paddingEnd="5dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginEnd="10dp"
-                        android:src="@drawable/ic_password_show" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/manage_tokens"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                </LinearLayout>
-            </LinearLayout>
+                android:layout_height="50dp"
+                android:background="@color/alabaster"
+                android:fontFamily="@font/font_semibold"
+                android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/wallet_label"
+                android:textAllCaps="true"
+                android:textColor="@color/dove"
+                android:textSize="15sp" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:background="@color/greye5"/>
+                android:background="@color/mercury" />
 
             <LinearLayout
-                android:id="@+id/layout_locale_lang"
+                android:id="@+id/layout_settings_wallet"
                 android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:background="@drawable/selector_settings_item">
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
 
-                <RelativeLayout
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="10dp">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_centerInParent="true"
-                        android:src="@drawable/ic_language" />
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/settings_locale_lang"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:id="@+id/locale_lang_subtext"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/unknown_balance_without_symbol"
-                        android:textColor="@color/black"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@color/alabaster"
+                android:fontFamily="@font/font_semibold"
+                android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/system"
+                android:textAllCaps="true"
+                android:textColor="@color/dove"
+                android:textSize="15sp" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:background="@color/greye5"/>
+                android:background="@color/mercury" />
 
             <LinearLayout
-                android:id="@+id/layout_locale_currency"
+                android:id="@+id/layout_settings_system"
                 android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:background="@drawable/selector_settings_item">
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
 
-                <RelativeLayout
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="10dp">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_centerInParent="true"
-                        android:src="@drawable/ic_currency" />
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/settings_locale_currency"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:id="@+id/locale_currency_subtext"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/unknown_balance_without_symbol"
-                        android:textColor="@color/black"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@color/alabaster"
+                android:fontFamily="@font/font_semibold"
+                android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/support"
+                android:textAllCaps="true"
+                android:textColor="@color/dove"
+                android:textSize="15sp" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:background="@color/greye5"/>
+                android:background="@color/mercury" />
 
             <LinearLayout
-                android:id="@+id/layout_notification_settings"
+                android:id="@+id/layout_settings_support"
                 android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:background="@drawable/selector_settings_item">
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
 
-                <RelativeLayout
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="10dp">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_centerInParent="true"
-                        android:src="@drawable/ic_notifications" />
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/settings_notification"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                    <Switch
-                        android:id="@+id/switch_notifications"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:clickable="false"
-                        android:layout_marginEnd="10dp"
-                        android:text="" />
-
-                </RelativeLayout>
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:background="@color/greye5"/>
-
-            <LinearLayout
-                android:id="@+id/layout_help_faq"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:background="@drawable/selector_settings_item">
-
-                <RelativeLayout
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="10dp">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_centerInParent="true"
-                        android:src="@drawable/ic_help" />
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/toolbar_header_help"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                </RelativeLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_telegram"
-                android:layout_width="match_parent"
-                android:layout_height="71dp"
-                android:orientation="vertical"
-                android:background="@drawable/selector_settings_item">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:background="@color/greye5"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="20dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:paddingStart="5dp"
-                        android:paddingEnd="5dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginEnd="10dp"
-                        android:src="@drawable/ic_telegram" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/telegram"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_twitter"
-                android:layout_width="match_parent"
-                android:layout_height="71dp"
-                android:orientation="vertical"
-                android:background="@drawable/selector_settings_item">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:background="@color/greye5"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="20dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:paddingStart="5dp"
-                        android:paddingEnd="5dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginEnd="10dp"
-                        android:src="@drawable/ic_twitter" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/twitter"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_linkedin"
-                android:layout_width="match_parent"
-                android:layout_height="71dp"
-                android:orientation="vertical"
-                android:background="@drawable/selector_settings_item">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:background="@color/greye5"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="20dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:paddingStart="5dp"
-                        android:paddingEnd="5dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginEnd="10dp"
-                        android:src="@drawable/ic_linkedin" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/linkedin"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                </LinearLayout>
-            </LinearLayout>
-
-
-            <LinearLayout
-                android:id="@+id/layout_instagram"
-                android:layout_width="match_parent"
-                android:layout_height="71dp"
-                android:orientation="vertical"
-                android:visibility="gone"
-                android:background="@drawable/selector_settings_item">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:background="@color/greye5"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="20dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:paddingStart="5dp"
-                        android:paddingEnd="5dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginEnd="10dp"
-                        android:src="@drawable/ic_instagram" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/instagram"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_reddit"
-                android:layout_width="match_parent"
-                android:layout_height="71dp"
-                android:orientation="vertical"
-                android:background="@drawable/selector_settings_item">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:background="@color/greye5"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="20dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:paddingStart="5dp"
-                        android:paddingEnd="5dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginEnd="10dp"
-                        android:src="@drawable/ic_reddit" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/reddit"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_facebook"
-                android:layout_width="match_parent"
-                android:layout_height="71dp"
-                android:orientation="vertical"
-                android:background="@drawable/selector_settings_item">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:background="@color/greye5"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="20dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:minWidth="40dp"
-                        android:layout_marginEnd="10dp"
-                        android:src="@drawable/ic_facebook" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/facebook"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                </LinearLayout>
-            </LinearLayout>
-
-
-            <LinearLayout
-                android:id="@+id/layout_xml_override"
-                android:layout_width="match_parent"
-                android:layout_height="71dp"
-                android:orientation="vertical"
-                android:visibility="gone"
-                android:background="@drawable/selector_settings_item">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:background="@color/greye5"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="20dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:paddingStart="5dp"
-                        android:paddingEnd="5dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginEnd="10dp"
-                        android:src="@drawable/ic_xml" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/enable_xml_override_dir"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-
-                </LinearLayout>
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:background="@color/greye5"/>
-
-            <LinearLayout
+            <RelativeLayout
                 android:id="@+id/layout_version"
                 android:layout_width="match_parent"
-                android:layout_height="71dp"
-                android:orientation="vertical"
-                android:background="@drawable/selector_settings_item">
+                android:layout_height="50dp"
+                android:background="@color/alabaster"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp">
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="30dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="@font/font_regular"
+                    android:text="@string/version"
+                    android:textColor="@color/dove"
+                    android:textSize="15sp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/version"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
+                <TextView
+                    android:id="@+id/text_version"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="@font/font_regular"
+                    android:textColor="@color/dove"
+                    android:textSize="13sp" />
 
-                    <TextView
-                        android:id="@+id/text_version"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginEnd="20dp"
-                        android:fontFamily="@font/font_light"
-                        android:text=""
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-                </RelativeLayout>
+            </RelativeLayout>
 
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_tokenscript"
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="71dp"
-                android:orientation="vertical"
-                android:background="@drawable/selector_settings_item">
+                android:layout_height="1dp"
+                android:background="@color/mercury" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:background="@color/greye5"/>
+            <RelativeLayout
+                android:id="@+id/layout_tokenscript_compatibility"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@color/alabaster"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp">
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="30dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="@font/font_regular"
+                    android:text="@string/tokenscript_compatibility"
+                    android:textColor="@color/dove"
+                    android:textSize="15sp" />
 
-                    <TextView
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                >
+
+                <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:fontFamily="@font/font_light"
-                        android:text="@string/tokenscript_standard"
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
+                        android:fontFamily="@font/font_regular"
+                        android:textColor="@color/dove"
+                        android:text="@string/version"
+                        android:textSize="13sp" />
 
-                    <TextView
-                        android:id="@+id/text_tokenscript_standard"
+                <TextView
+                        android:id="@+id/text_tokenscript_compatibility"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginEnd="20dp"
-                        android:fontFamily="@font/font_light"
-                        android:text=""
-                        android:textColor="@color/black"
-                        android:textSize="20sp" />
-                </RelativeLayout>
-
-            </LinearLayout>
+                        android:layout_marginLeft="@dimen/default_gap"
+                        android:fontFamily="@font/font_regular"
+                        android:textColor="@color/dove"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </RelativeLayout>
 
         </LinearLayout>
     </ScrollView>
-</RelativeLayout>
+</LinearLayout>

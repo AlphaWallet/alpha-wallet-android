@@ -5,11 +5,14 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
+import com.alphawallet.app.entity.tokens.Token;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.alphawallet.app.C.ETHER_DECIMALS;
 import static com.alphawallet.app.entity.TransactionOperation.ERC875_CONTRACT_TYPE;
 
 /**
@@ -320,5 +323,48 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         {
             return "0";
         }
+    }
+
+    @Override
+    public String getOperationResult(Token token, TransactionOperation operation, Transaction tx)
+    {
+        return Token.getScaledValue(operation.value, 0);
+    }
+
+    public int getOperationImage(Token token, Transaction tx)
+    {
+        switch (type)
+        {
+            case 1:
+            case 2:
+                return R.drawable.ic_arrow_downward_black_24dp;
+            case -1:
+                return R.drawable.ic_arrow_upward_black_24dp;
+            case -2:
+            case -3:
+                //Contract creation
+                return R.drawable.ic_ethereum;
+            default:
+                return R.drawable.ic_error_outline_black_24dp;
+        }
+    }
+
+    @Override
+    String getSupplimentalInfo(Transaction tx, String walletAddress, String networkName)
+    {
+        String supplimentalTxt = "";
+        switch (operation)
+        {
+            case MAGICLINK_SALE: //we received ether from magiclink sale
+                supplimentalTxt = "+" + Token.getScaledValue(tx.value, ETHER_DECIMALS) + " " + networkName;
+                break;
+            case MAGICLINK_PURCHASE: //we purchased a ticket from a magiclink
+                supplimentalTxt = "-" + Token.getScaledValue(tx.value, ETHER_DECIMALS) + " " + networkName;
+                break;
+            default:
+                break;
+        }
+
+        return supplimentalTxt;
     }
 }

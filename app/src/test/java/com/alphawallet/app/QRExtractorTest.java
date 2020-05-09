@@ -138,7 +138,7 @@ public class QRExtractorTest {
 
         // Too many ':'
         result = parser.parse("something:coin:0x0000000000000000000000000000000000000XyZ?k1=v1&k2=v2");
-        assertTrue(result == null);
+        assertTrue(result.type == EIP681Type.OTHER);
 
         //Test EIP681
         result = parser.parse("ethereum:0xfb6916095ca1df60bb79Ce92ce3ea74c37c5d359?value=2.014e18");
@@ -171,5 +171,16 @@ public class QRExtractorTest {
         assertTrue(result.getGasPrice().equals(BigInteger.valueOf(700000)));
         assertTrue(result.getGasLimit().equals(BigInteger.valueOf(27500)));
         assertTrue(new BigInteger("1000",10).equals(result.getValue()));
+
+        result = parser.parse("www.duckduckgo.com"); //should't parse URL without protocol
+        assertTrue(result.type == EIP681Type.OTHER);
+
+        result = parser.parse("https://www.alphawallet.com");
+        System.out.println(result.getAddress());
+        assertTrue(result.type == EIP681Type.URL);
+
+        result = parser.parse("http://www.alphawallet.com");
+        System.out.println(result.getAddress());
+        assertTrue(result.type == EIP681Type.URL);
     }
 }

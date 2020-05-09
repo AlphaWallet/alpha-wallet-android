@@ -14,45 +14,46 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ConfirmationType;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.GasSettings;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.util.BalanceUtils;
-import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.web3.entity.Web3Transaction;
-
-import dagger.android.AndroidInjection;
-import com.alphawallet.token.tools.Numeric;
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.HomeRouter;
+import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.ConfirmationViewModel;
 import com.alphawallet.app.viewmodel.ConfirmationViewModelFactory;
 import com.alphawallet.app.viewmodel.GasSettingsViewModel;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
+import com.alphawallet.token.tools.Numeric;
+
 import org.web3j.utils.Convert;
 
-import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import static com.alphawallet.token.tools.Convert.getEthString;
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+
 import static com.alphawallet.app.C.ETH_SYMBOL;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.ConfirmationType.ETH;
 import static com.alphawallet.app.entity.ConfirmationType.WEB3TRANSACTION;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.token.tools.Convert.getEthString;
 
 public class ConfirmationActivity extends BaseActivity implements SignAuthenticationCallback
 {
@@ -161,7 +162,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
         switch (confirmationType) {
             case ETH:
-                amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString();
+                amountString = "-" + BalanceUtils.getScaledValueWithLimit(amount, decimals);
                 symbolText.setText(symbol);
                 transactionBytes = null;
                 break;
@@ -169,7 +170,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 contractAddrText.setVisibility(View.VISIBLE);
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 contractAddrText.setText(contractAddress);
-                amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString();
+                amountString = "-" + BalanceUtils.getScaledValueWithLimit(amount, decimals);
                 symbolText.setText(symbol);
                 transactionBytes = TokenRepository.createTokenTransferData(to, amount.toBigInteger());
                 break;
@@ -250,7 +251,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 transactionBytes = viewModel.getERC721TransferBytes(to, contractAddress, amountStr, chainId);
                 break;
             default:
-                amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString();
+                amountString = "-" + BalanceUtils.getScaledValueWithLimit(amount, decimals);
                 symbolText.setText(symbol);
                 transactionBytes = null;
                 break;
@@ -553,9 +554,29 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     @Override
     public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
-        else viewModel.failedAuthentication(SIGN_DATA);
+        if (gotAuth)
+        {
+            viewModel.completeAuthentication(SIGN_DATA);
+        }
+        else
+        {
+            //fail authentication
+            securityError();
+        }
         //got authorisation, continue with transaction
         if (gotAuth) finaliseTransaction();
+    }
+
+    private void securityError() {
+        hideDialog();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.key_error);
+        dialog.setMessage(getString(R.string.error_while_signing_transaction));
+        dialog.setButtonText(R.string.ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
     }
 }

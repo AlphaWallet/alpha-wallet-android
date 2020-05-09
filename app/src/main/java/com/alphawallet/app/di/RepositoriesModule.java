@@ -123,11 +123,13 @@ public class RepositoriesModule {
     TokenRepositoryType provideTokenRepository(
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             TokenLocalSource tokenLocalSource,
-			GasService gasService) {
+			OkHttpClient httpClient,
+			Context context) {
 	    return new TokenRepository(
 	            ethereumNetworkRepository,
-                tokenLocalSource,
-				gasService);
+				tokenLocalSource,
+				httpClient,
+				context);
     }
 
     @Singleton

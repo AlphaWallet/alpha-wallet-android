@@ -1,8 +1,8 @@
-# TokenScript is useful for a supernode
+# TokenScript utilities
 
-Currently util module is a demonstration that TokenScript can be used for a supernode's data abstraction layer.
+This (in-development) module provides command-line utilities for using TokenScript.
 
-A supernode is an Ethereum node that not only service clients enquires about blockchain data, but also enquires about token data.
+Currently, util has a demonstration to extract token data from a smart contract. It shows, for example, that TokenScript can be used as a supernode's data extraction layer. (A supernode is an Ethereum node that not only service clients enquire about blockchain data, but also enquires about token data.)
 
 TokenScript can serve as a data abstraction layer, help a supernode to catch and index token data.
 
@@ -17,7 +17,7 @@ TokenScript can serve as a data abstraction layer, help a supernode to catch and
 
 # Run a demonstration
 
-To see how TokenScript extracts TokenData, first download a tokenscript
+To see how TokenScript extracts TokenData, first, download a tokenscript
 
     $ curl -O http://repo.tokenscript.org/aw.app/2019/10/fifa.tsml
     
@@ -55,7 +55,7 @@ countryB: "KSA",
 ````
 Means that this token is for the match Russia vs Saudi Arabia.
 
-Note that this is unlike Token Registries where all ICO projects list their tokens. The token here represents a specific ticket (it has a unique-ID which is `1`) and has to be indexed for search by a supernode's database. If someone wish to purchase a ticket of Russia vs Saudi Arabia this ticket can then in turn be retrieved.
+Note that this is unlike Token Registries where all ICO projects list their tokens. The token here represents a specific ticket (it has a unique-ID which is `1`) and has to be indexed for search by a supernode's database. If someone wishes to purchase a ticket of Russia vs Saudi Arabia, this ticket can then, in turn, be retrieved.
 
 Each token attribute may be sourced from several origins.
 

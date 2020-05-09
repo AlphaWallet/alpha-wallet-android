@@ -2,14 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item
-        android:id="@+id/action_bookmarks"
-        android:icon="@drawable/ic_dapp_view_bookmarks"
-        android:orderInCategory="5"
-        android:title="@string/action_view_bookmarks"
-        android:visible="false"
-        app:showAsAction="withText" />
-
     <group android:id="@+id/dapp_browser_menu">
         <item
             android:id="@+id/action_add_to_my_dapps"

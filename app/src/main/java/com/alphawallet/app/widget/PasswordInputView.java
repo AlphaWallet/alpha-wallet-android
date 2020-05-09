@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.text.InputType;
 import android.text.method.HideReturnsTransformationMethod;
@@ -28,6 +29,8 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
 {
     private final Context context;
 
+    private final int KEYBOARD_SIZE = 300;
+
     private final TextView label;
     private final TextView error;
     private final EditText editText;
@@ -42,7 +45,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
     private String imeOptions;
     private Activity activity;
     private LayoutCallbackListener callbackListener;
-    private View bottomMarker;
+    private int previousMarkerLocation;
 
     public PasswordInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -56,6 +59,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
         editText = findViewById(R.id.edit_text);
         instruction = findViewById(R.id.instruction);
         togglePassword = findViewById(R.id.toggle_password);
+        findViewById(R.id.text_word_count).setVisibility(View.GONE);
 
         setViews();
         setImeOptions();
@@ -64,14 +68,13 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
         setLines();
     }
 
-    public void setLayoutListener(Activity a, LayoutCallbackListener callback, View bm)
+    public void setLayoutListener(Activity a, LayoutCallbackListener callback)
     {
         activity = a;
         callbackListener = callback;
+        previousMarkerLocation = 0;
         getViewTreeObserver().addOnGlobalLayoutListener(screenLayoutListener);
         getEditText().setOnEditorActionListener(this);
-
-        bottomMarker = bm;
     }
 
     public EditText getEditText()
@@ -149,6 +152,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
                 }
             }
         }
+        editText.setTypeface(Typeface.DEFAULT);
     }
 
     private void setImeOptions() {
@@ -235,7 +239,7 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
         @Override
         public void onGlobalLayout()
         {
-            if (activity == null || callbackListener == null || bottomMarker == null) return;
+            if (activity == null || callbackListener == null) return;
 
             int contentViewBottom = activity.getWindow()
                     .findViewById(Window.ID_ANDROID_CONTENT)
@@ -243,18 +247,16 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
 
             if (contentViewBottom == 0) return;
 
-            int[] location = new int[2];
-            bottomMarker.getLocationOnScreen(location);
-            int actionLocation = location[1];
-
-            if (actionLocation < (contentViewBottom - 200))
+            if (contentViewBottom < (previousMarkerLocation - KEYBOARD_SIZE))
             {
                 callbackListener.onLayoutShrunk();
             }
-            else
+            else if (previousMarkerLocation > 0 && (contentViewBottom > previousMarkerLocation + KEYBOARD_SIZE))
             {
                 callbackListener.onLayoutExpand();
             }
+
+            previousMarkerLocation = contentViewBottom;
         }
     };
 

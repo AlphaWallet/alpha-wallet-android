@@ -32,6 +32,7 @@ public class TokenDefinition {
     public String nameSpace;
     public TokenscriptContext context;
     public String holdingToken;
+    private int actionCount;
 
     public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2020/03";
     public static final String TOKENSCRIPT_REPO_SERVER = "https://repo.tokenscript.org/";
@@ -280,6 +281,7 @@ public class TokenDefinition {
         determineNamespace(xml, result);
 
         NodeList nList = xml.getElementsByTagNameNS(nameSpace, "token");
+        actionCount = 0;
 
         if (nList.getLength() == 0 || nameSpace == null)
         {
@@ -469,9 +471,11 @@ public class TokenDefinition {
         String name = null;
         NodeList ll = action.getChildNodes();
         TSAction tsAction = new TSAction();
+        tsAction.order = actionCount;
         tsAction.type = action.getAttribute("type");
         tsAction.exclude = "";
         tsAction.style = null;
+        actionCount++;
         for (int j = 0; j < ll.getLength(); j++)
         {
             Node node = ll.item(j);

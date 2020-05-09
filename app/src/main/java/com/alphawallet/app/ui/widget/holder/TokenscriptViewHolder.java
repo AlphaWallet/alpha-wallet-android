@@ -31,6 +31,8 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.TokenFunctionActivity;
 
 import static com.alphawallet.app.C.Key.TICKET;
+import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
+import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
 
 /**
  * Created by James on 31/05/2019.
@@ -96,7 +98,7 @@ public class TokenscriptViewHolder extends BinderViewHolder<TicketRange> impleme
         waitSpinner.setVisibility(View.GONE);
         tokenView.setVisibility(View.VISIBLE);
 
-        String viewType = iconified ? "item-view" : "view";
+        String viewType = iconified ? ASSET_SUMMARY_VIEW_NAME : ASSET_DETAIL_VIEW_NAME;
         String view = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), viewType);
         String style = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
         String viewData = tokenView.injectWeb3TokenInit(getContext(), view, tokenAttrs, data.tokenIds.get(0));

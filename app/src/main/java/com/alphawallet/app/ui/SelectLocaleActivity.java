@@ -1,86 +1,77 @@
 package com.alphawallet.app.ui;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.LocaleItem;
-import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.app.ui.widget.divider.ListDivider;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-public class SelectLocaleActivity extends BaseActivity implements StandardFunctionInterface
-{
-    private ListView listView;
+public class SelectLocaleActivity extends BaseActivity {
+    private RecyclerView recyclerView;
     private CustomAdapter adapter;
-    private FunctionButtonBar functionBar;
+    private String currentLocale;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_list);
+        toolbar();
+        setTitle(getString(R.string.settings_locale_lang));
 
-        String currentLocale = getIntent().getStringExtra(C.EXTRA_LOCALE);
+        currentLocale = getIntent().getStringExtra(C.EXTRA_LOCALE);
+
         ArrayList<LocaleItem> localeItems = getIntent().getParcelableArrayListExtra(C.EXTRA_STATE);
 
-        setContentView(R.layout.dialog_awallet_list);
-        listView = findViewById(R.id.dialog_list);
-        functionBar = findViewById(R.id.layoutButtons);
-        toolbar();
-        setTitle(getString(R.string.dialog_title_select_locale));
-
-        adapter = new CustomAdapter(this, localeItems, currentLocale);
-        listView.setAdapter(adapter);
-
-        List<Integer> functions = new ArrayList<>(Collections.singletonList(R.string.action_confirm));
-        functionBar.setupFunctions(this, functions);
+        if (localeItems != null) {
+            recyclerView = findViewById(R.id.list);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            adapter = new CustomAdapter(localeItems, currentLocale);
+            recyclerView.setAdapter(adapter);
+            recyclerView.addItemDecoration(new ListDivider(this));
+        }
     }
 
-    @Override
-    public void handleClick(int view)
-    {
+    private void setLocale(String id) {
         Intent intent = new Intent();
-        String item = adapter.getSelectedItemId();
-        intent.putExtra(C.EXTRA_LOCALE, item);
+        intent.putExtra(C.EXTRA_LOCALE, id);
         setResult(RESULT_OK, intent);
         finish();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                handleClick(0);
-                break;
-            }
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public class CustomAdapter extends ArrayAdapter<LocaleItem>
-    {
-        private ArrayList<LocaleItem> dataSet;
-        private String selectedItem;
-        private String selectedItemId;
-
-        private void setSelectedItem(String selectedItem) {
-            this.selectedItem = selectedItem;
+    @Override
+    public void onBackPressed() {
+        String id = adapter.getSelectedItemId();
+        if (id != null && !id.equals(currentLocale)) {
+            setLocale(id);
+        } else {
+            super.onBackPressed();
         }
+    }
+
+    public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {
+        private ArrayList<LocaleItem> dataSet;
+        private String selectedItemId;
 
         private void setSelectedItemId(String selectedItemId) {
             this.selectedItemId = selectedItemId;
@@ -90,18 +81,28 @@ public class SelectLocaleActivity extends BaseActivity implements StandardFuncti
             return this.selectedItemId;
         }
 
-        private String getSelectedItem() {
-            return this.selectedItem;
+        @Override
+        public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View itemView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_simple_radio, parent, false);
+
+            return new CustomViewHolder(itemView);
         }
 
-        private class ViewHolder {
+        class CustomViewHolder extends RecyclerView.ViewHolder {
             ImageView checkbox;
             TextView name;
-            LinearLayout itemLayout;
+            View itemLayout;
+
+            CustomViewHolder(View view) {
+                super(view);
+                checkbox = view.findViewById(R.id.checkbox);
+                name = view.findViewById(R.id.name);
+                itemLayout = view.findViewById(R.id.layout_list_item);
+            }
         }
 
-        private CustomAdapter(Context ctx, ArrayList<LocaleItem> data, String selectedItemId) {
-            super(ctx, R.layout.item_dialog_list, data);
+        private CustomAdapter(ArrayList<LocaleItem> data, String selectedItemId) {
             this.dataSet = data;
             this.selectedItemId = selectedItemId;
 
@@ -112,46 +113,25 @@ public class SelectLocaleActivity extends BaseActivity implements StandardFuncti
             }
         }
 
-        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent)
-        {
-            LocaleItem item = getItem(position);
-            final ViewHolder viewHolder;
-            View view = convertView;
-
-            if (view == null) {
-                viewHolder = new ViewHolder();
-                LayoutInflater inflater = LayoutInflater.from(getContext());
-                view = inflater.inflate(R.layout.item_dialog_list, null);
-                view.setTag(viewHolder);
-                viewHolder.name = view.findViewById(R.id.name);
-                viewHolder.checkbox = view.findViewById(R.id.checkbox);
-                viewHolder.itemLayout = view.findViewById(R.id.layout_list_item);
-            } else {
-                viewHolder = (ViewHolder) view.getTag();
-            }
-
-            if (item != null) {
-                viewHolder.name.setText(item.getName());
-                viewHolder.itemLayout.setOnClickListener(v -> {
-                    for (int i = 0; i < dataSet.size(); i++) {
-                        dataSet.get(i).setSelected(false);
-                    }
-                    dataSet.get(position).setSelected(true);
-                    setSelectedItem(dataSet.get(position).getName());
-                    setSelectedItemId(dataSet.get(position).getCode());
-                    notifyDataSetChanged();
-                });
-
-                if (item.isSelected()) {
-                    viewHolder.checkbox.setImageResource(R.drawable.ic_checkbox_active);
-                } else {
-                    viewHolder.checkbox.setImageResource(R.drawable.ic_checkbox);
+        public void onBindViewHolder(CustomViewHolder holder, int position) {
+            LocaleItem item = dataSet.get(position);
+            holder.name.setText(item.getName());
+            holder.itemLayout.setOnClickListener(v -> {
+                for (int i = 0; i < dataSet.size(); i++) {
+                    dataSet.get(i).setSelected(false);
                 }
-            }
+                dataSet.get(position).setSelected(true);
+                setSelectedItemId(dataSet.get(position).getCode());
+                notifyDataSetChanged();
+            });
 
-            return view;
+            holder.checkbox.setSelected(item.isSelected());
+        }
+
+        @Override
+        public int getItemCount() {
+            return dataSet.size();
         }
     }
 }

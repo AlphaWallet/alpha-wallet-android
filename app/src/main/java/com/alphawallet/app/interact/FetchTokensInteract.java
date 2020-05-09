@@ -25,6 +25,7 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class FetchTokensInteract {
@@ -60,6 +61,11 @@ public class FetchTokensInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    public Disposable updateBlockRead(Token token, Wallet wallet)
+    {
+        return tokenRepository.updateBlockRead(token, wallet);
+    }
+
     public Observable<Token> fetchEth(NetworkInfo network, Wallet wallet)
     {
         return tokenRepository.getEthBalance(network, wallet).toObservable()
@@ -93,9 +99,8 @@ public class FetchTokensInteract {
 
     public Observable<Token> updateBalance(String address, Token token)
     {
-        if (token == null) return Observable.fromCallable(() -> {
-            return new Token(null, BigDecimal.ZERO, 0, "", ContractType.NOT_SET);
-        });
+        if (token == null) return Observable.fromCallable(()
+                                      -> new Token(null, BigDecimal.ZERO, 0, "", ContractType.NOT_SET));
         return tokenRepository.fetchActiveTokenBalance(address, token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());

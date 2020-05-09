@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
@@ -22,13 +21,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="20dp"
-            android:fontFamily="@font/font_light"
+            android:fontFamily="@font/font_regular"
             android:gravity="center_horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
             android:text="@string/verify_seed_phrase"
+            android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="28sp" />
 
@@ -39,12 +37,12 @@
             android:layout_below="@id/text_title"
             android:layout_gravity="center_horizontal"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="47dp"
             android:layout_marginEnd="16dp"
             android:background="@drawable/background_verify_window"
             android:minHeight="110dp"
-            android:padding="14dp"
-            android:textColor="@color/greyaa"
+            android:padding="15dp"
+            android:textColor="@color/dove"
             android:textSize="18sp" />
 
         <TextView
@@ -54,53 +52,40 @@
             android:layout_below="@id/text_verify"
             android:layout_gravity="center_horizontal"
             android:layout_marginStart="16dp"
+            android:layout_marginTop="5dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="10dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
             android:text="@string/invalid_phrase"
-            android:textColor="@color/dark_seed_danger"
+            android:textColor="@color/danger"
             android:textSize="14sp"
             android:visibility="invisible" />
 
         <LinearLayout
-            android:id="@+id/large_spacer"
+            android:id="@+id/flexbox_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_above="@id/layoutButtons"
             android:layout_below="@id/text_invalid"
-            android:orientation="vertical">
+            android:gravity="center">
 
-            <ImageView
-                android:id="@+id/spacer_image"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:src="@color/transparent"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/layout_center_holder"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/large_spacer"
-            android:orientation="vertical">
-
-            <LinearLayout
+            <com.google.android.flexbox.FlexboxLayout
                 android:id="@+id/layout_word_holder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:orientation="vertical" />
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
+                app:flexDirection="row"
+                app:flexWrap="wrap" />
 
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/button_holder"
+        <com.alphawallet.app.widget.FunctionButtonBar
+            android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:orientation="vertical">
-
-            <include layout="@layout/item_bottom_buttons" />
-        </LinearLayout>
+            android:layout_alignParentBottom="true" />
 
     </RelativeLayout>
 

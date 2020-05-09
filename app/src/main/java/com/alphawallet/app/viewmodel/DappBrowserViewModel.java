@@ -14,6 +14,7 @@ import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -47,12 +48,15 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 
+import org.web3j.abi.datatypes.Address;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.alphawallet.app.C.Key.WALLET;
+
 public class DappBrowserViewModel extends BaseViewModel  {
-    private static final long DEBOUNCE_LIMIT = 5L * 1000L; //5 seconds debounce time
     private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
@@ -69,7 +73,6 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final KeyService keyService;
 
     private ArrayList<String> bookmarks;
-    private long debounceTime = 0;
 
     DappBrowserViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -144,7 +147,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
         defaultWallet.setValue(wallet);
         //get the balance token
         Token blank = ethereumNetworkRepository.getBlankOverrideToken(defaultNetwork.getValue());
-        disposable = fetchTokensInteract.fetchStoredToken(defaultNetwork.getValue(), wallet, blank.getAddress())
+        String address = blank.getAddress().equals(Address.DEFAULT.toString()) ? wallet.address.toLowerCase() : blank.getAddress().toLowerCase();
+        disposable = fetchTokensInteract.fetchStoredToken(defaultNetwork.getValue(), wallet, address)
                 .flatMap(tokenFromCache -> fetchTokensInteract.updateBalance(wallet.address, tokenFromCache))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -174,16 +178,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
 
     public void openConfirmation(Activity context, Web3Transaction transaction, String requesterURL, NetworkInfo networkInfo) throws TransactionTooLargeException
     {
-        if (System.currentTimeMillis() > (debounceTime + DEBOUNCE_LIMIT)) //debounce transaction click
-        {
-            debounceTime = System.currentTimeMillis();
-            confirmationRouter.open(context, transaction, networkInfo.name, requesterURL, networkInfo.chainId);
-        }
-    }
-
-    public void resetDebounce()
-    {
-        debounceTime = 0;
+        confirmationRouter.open(context, transaction, networkInfo.name, requesterURL, networkInfo.chainId);
     }
 
     private ArrayList<String> getBrowserBookmarksFromPrefs(Context context) {
@@ -313,5 +308,17 @@ public class DappBrowserViewModel extends BaseViewModel  {
         intent.putExtra(C.EXTRA_AMOUNT, result);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
+    }
+
+    public void showMyAddress(Context ctx)
+    {
+        Intent intent = new Intent(ctx, MyAddressActivity.class);
+        intent.putExtra(WALLET, defaultWallet.getValue());
+        ctx.startActivity(intent);
+    }
+
+    public boolean shouldUseBackupNode()
+    {
+        return ethereumNetworkRepository.shouldUseBackupNode();
     }
 }

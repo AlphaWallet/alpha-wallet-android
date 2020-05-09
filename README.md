@@ -28,3 +28,6 @@ For Android:
 
 For iOS:
 <https://github.com/AlphaWallet/alpha-wallet-ios/blob/master/AlphaWallet/Browser/ViewModel/Dapps.swift>
+
+## Build your own mobile blockchain app
+white label blockchain wallet

@@ -65,7 +65,8 @@
     <string name="action_share">Share</string>
     <string name="action_more_details">More details</string>
     <string name="action_add_wallet">Add wallet</string>
-
+    <string name="action_add_token">Añadir Token</string>
+    <string name="action_open_etherscan">Verlo en Etherscan</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_localeth">LocalEthereum</string>
     <string name="action_changelly">Changelly</string>
@@ -534,7 +535,7 @@
     <string name="fail_sign">Failed to sign redeem message</string>
     <string name="hint_contract_type">Token Type</string>
     <string name="reddit">Reddit</string>
-    <string name="tokenscript_standard">TokenScript Standard</string>
+    <string name="tokenscript_compatibility">Compatibilidad de TokenScript</string>
     <string name="version">Version</string>
     <string name="debug_script">TokenScript depurar</string>
     <string name="unsigned_script">no confiable</string>
@@ -554,9 +555,48 @@
     <string name="change_chain_message">QR code requests a different chain. Proceed?</string>
     <string name="change_chain_request">Change Chain Request</string>
     <string name="error_zero_balance">Zero Balance Transaction</string>
+    <string name="attestations">Attestations</string>
+    <string name="favourites">Favourites</string>
+    <string name="support">Support</string>
+    <string name="system">System</string>
+
+    <!-- Settings -->
+    <string name="title_show_wallet_address">Show My Wallet Address</string>
+    <string name="title_change_add_wallet">Change / Add Wallet</string>
+    <string name="title_back_up_wallet">Back Up This Wallet</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_biometrics">Passcode / Touch ID</string>
+    <string name="title_advanced">Advanced</string>
+    <string name="title_support">Support</string>
+    <string name="title_blog">Blog</string>
+    <string name="title_faq">FAQ</string>
+    <string name="title_console">Console</string>
+    <string name="title_clear_browser_cache">Clear Browser Caches</string>
+    <string name="title_tokenscript">TokenScript</string>
+    <string name="title_change_language">Change Language</string>
+    <string name="add_hide_tokens">Mostrar / Ocultar Tokens</string>
     <string name="instagram">Instagram</string>
     <string name="tokenscript_file_error">TokenScript file error</string>
     <string name="settings_locale_currency">Change Currency</string>
     <string name="dialog_title_select_currency">Select FIAT Currency</string>
+    <string name="toast_browser_cache_cleared">Browser cache cleared</string>
+    <string name="your_wallets">Your Wallets</string>
+    <string name="action_copy">Copy</string>
+    <string name="title_version_support_warning">Important Update</string>
+    <string name="message_version_support_warning">Starting Version 2.3, AlphaWallet will no longer support devices running on Android 6.0 and below.</string>
+    <string name="hide_notification">Hide Notification</string>
     <string name="card_view_not_found_error">%1$s not found</string>
+
+    <!-- Gas Slider -->
+    <string name="speed_gas">Speed (Gas)</string>
+    <string name="slow">Slow</string>
+    <string name="fast">Fast</string>
+    <string name="label_estimated_transaction_time">Estimated Transaction Time</string>
+    <string name="minutes_0">0 min</string>
+    <string name="created_aw_directory">Created AlphaWallet Directory</string>
+    <string name="created_aw_directory_detail">AlphaWallet directory created. Drop scripts into this directory to use your scripts. See tokenscript.org for more details on how to easily create a secure and useful interface to your tokens.</string>
+    <string name="title_no_need_to_watch">Already Watching</string>
+    <string name="error_while_signing_transaction">Error occurred while signing transaction. Please re-import the key for this wallet.</string>
+    <string name="error_not_whitelisted">Page Not Whitelisted</string>
+    <string name="explain_not_whitelisted">TokenScript attempting to redirect to non-whitelisted page %1$s. If you are the owner of this site please submit PR to AlphaWallet repo to add page for whitelisting.</string>
 </resources>

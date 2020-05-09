@@ -74,9 +74,7 @@ public class FetchTransactionsInteract {
                         .subscribe(actualType -> TokensService.setInterfaceSpec(tokenInfo.chainId, tokenInfo.address, actualType)).isDisposed();
                 return Single.fromCallable(() -> type);
             default:
-                //Token wasn't any of the easily determinable ones, use constructor to analyse
-                return tokenRepository.resolveProxyAddress(tokenInfo) //resolve proxy address to find base constructor and analyse
-                        .flatMap(address -> transactionRepository.queryInterfaceSpec(address, tokenInfo));
+                return Single.fromCallable(() -> type); //take no further action: possible that this is not a valid token
         }
     }
 

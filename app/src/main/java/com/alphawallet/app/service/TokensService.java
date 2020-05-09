@@ -9,6 +9,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
@@ -30,7 +31,7 @@ public class TokensService
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokenRepositoryType tokenRepository;
     private final List<Integer> networkFilter;
-    private Token focusToken;
+    private ContractLocator focusToken;
     private final OkHttpClient okHttpClient;
     private int currencyCheckCount;
 
@@ -41,7 +42,7 @@ public class TokensService
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenRepository = tokenRepository;
         loaded = false;
-        networkFilter = new ArrayList<>(10);
+        networkFilter = new ArrayList<>();
         setupFilter();
         focusToken = null;
         okHttpClient = client;
@@ -58,10 +59,9 @@ public class TokensService
     {
         if (t.checkTokenWallet(currentAddress))
         {
-            if (t.equals(focusToken))
+            if (focusToken != null && focusToken.equals(t))
             {
-                t.balanceUpdateWeight = focusToken.balanceUpdateWeight;
-                focusToken = t;
+                t.setFocus(true);
             }
 
             if (!t.isEthereum()) t.ticker = ethereumNetworkRepository.getTokenTicker(t);
@@ -388,21 +388,32 @@ public class TokensService
     private Token checkCurrencies()
     {
         if (currencyCheckCount >= networkFilter.size()) return null;
-        int chainId = networkFilter.get(currencyCheckCount);
+        int chainId;
+        try
+        {
+            chainId = networkFilter.get(currencyCheckCount);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            return null;
+        }
         currencyCheckCount++;
         return getToken(chainId, currentAddress);
     }
 
     public void setFocusToken(Token token)
     {
-        focusToken = token;
-        focusToken.setFocus(true);
-        addToken(focusToken);
+        focusToken = new ContractLocator(token.getAddress(), token.tokenInfo.chainId);
+        addToken(token);
     }
 
     public void clearFocusToken()
     {
-        if (focusToken != null) focusToken.setFocus(false);
+        if (focusToken != null)
+        {
+            Token fToken = getToken(focusToken.chainId, focusToken.name);
+            if (fToken != null) fToken.setFocus(false);
+        }
         focusToken = null;
     }
 
@@ -489,5 +500,43 @@ public class TokensService
     public static String getCurrentWalletAddress()
     {
         return currentAddress;
+    }
+
+    /**
+     * Get all tokens of type. This exists mainly because we can't trust the balance returned for ERC721 Ticket from opensea
+     *
+     * @param filterTypes
+     * @return
+     */
+    public Token[] getAllTokens(ContractType[] filterTypes)
+    {
+        List<ContractType> filterList = Arrays.asList(filterTypes);
+        List<Token> classTokens = new ArrayList<>();
+        for (Token t : getAllTokens())
+        {
+            if (filterList.contains(t.getInterfaceSpec()))
+            {
+                classTokens.add(t);
+            }
+        }
+
+        return classTokens.toArray(new Token[0]);
+    }
+
+    public void updateTokenViewSizes(Token updatedToken)
+    {
+        Token cachedToken = getToken(updatedToken.tokenInfo.chainId, updatedToken.getAddress());
+        if (cachedToken != null)
+        {
+            cachedToken.iconifiedWebviewHeight = updatedToken.iconifiedWebviewHeight;
+            cachedToken.nonIconifiedWebviewHeight = updatedToken.nonIconifiedWebviewHeight;
+        }
+    }
+
+    public String getNetworkName(int chainId)
+    {
+        NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        if (info != null) return info.getShortName();
+        else return "";
     }
 }

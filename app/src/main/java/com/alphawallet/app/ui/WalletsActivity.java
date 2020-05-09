@@ -85,18 +85,21 @@ public class WalletsActivity extends BaseActivity implements
 
     private void initViewModel()
     {
-        if (viewModel != null) return;
-        viewModel = ViewModelProviders.of(this, walletsViewModelFactory)
-                .get(WalletsViewModel.class);
-        viewModel.error().observe(this, this::onError);
-        viewModel.progress().observe(this, systemView::showProgress);
-        viewModel.wallets().observe(this, this::onFetchWallet);
-        viewModel.defaultWallet().observe(this, this::onChangeDefaultWallet);
-        viewModel.createdWallet().observe(this, this::onCreatedWallet);
-        viewModel.createWalletError().observe(this, this::onCreateWalletError);
-        viewModel.updateBalance().observe(this, this::onUpdatedBalance);
-        viewModel.updateENSName().observe(this, this::updateWalletName);
-        viewModel.noWalletsError().observe(this, this::noWallets);
+        if (viewModel == null)
+        {
+            viewModel = ViewModelProviders.of(this, walletsViewModelFactory)
+                    .get(WalletsViewModel.class);
+            viewModel.error().observe(this, this::onError);
+            viewModel.progress().observe(this, systemView::showProgress);
+            viewModel.wallets().observe(this, this::onFetchWallet);
+            viewModel.defaultWallet().observe(this, this::onChangeDefaultWallet);
+            viewModel.createdWallet().observe(this, this::onCreatedWallet);
+            viewModel.createWalletError().observe(this, this::onCreateWalletError);
+            viewModel.updateBalance().observe(this, this::onUpdatedBalance);
+            viewModel.updateENSName().observe(this, this::updateWalletName);
+            viewModel.noWalletsError().observe(this, this::noWallets);
+        }
+
         viewModel.findNetwork();
     }
 

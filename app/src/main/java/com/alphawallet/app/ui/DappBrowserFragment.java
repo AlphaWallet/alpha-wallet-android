@@ -486,6 +486,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         {
             toolbar.inflateMenu(R.menu.menu_scan);
         }
+        else if (EthereumNetworkRepository.defaultDapp() != null)
+        {
+            toolbar.inflateMenu(R.menu.menu_defaultdapp);
+        }
         else
         {
             toolbar.inflateMenu(R.menu.menu_bookmarks);

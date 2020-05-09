@@ -65,6 +65,7 @@
     <string name="action_share">Share</string>
     <string name="action_more_details">More details</string>
     <string name="action_add_wallet">Add wallet</string>
+    <string name="action_add_token">Añadir Token</string>
     <string name="action_open_etherscan">Verlo en Etherscan</string>
     <string name="action_coinbase">Coinbase</string>
     <string name="action_localeth">LocalEthereum</string>

@@ -201,13 +201,13 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_qr, menu);
+        getMenuInflater().inflate(R.menu.menu_show_contract, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_qr) {
+        if (item.getItemId() == R.id.action_show_contract) {
             viewModel.showContractInfo(this, token);
         }
         return super.onOptionsItemSelected(item);

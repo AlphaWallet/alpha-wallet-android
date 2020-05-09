@@ -31,6 +31,7 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.QRScanning.DisplayUtils;
@@ -240,6 +241,7 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
         findViewById(R.id.toolbar_title).setVisibility(View.GONE);
         setTitle("");
         titleView.setVisibility(View.VISIBLE);
+        displayAddress = Keys.toChecksumAddress(wallet.address);
         networkInfo = viewModel.getEthereumNetworkRepository().getNetworkByChain(overrideNetwork);
         if (token == null) token = viewModel.getEthereumNetworkRepository().getBlankOverrideToken(networkInfo);
         currentMode = MODE_POS;
@@ -400,7 +402,8 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
     {
         wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-        overrideNetwork = getIntent().getIntExtra(OVERRIDE_DEFAULT, 1);
+        int fallBackChainId = token != null ? token.tokenInfo.chainId : EthereumNetworkBase.MAINNET_ID;
+        overrideNetwork = getIntent().getIntExtra(OVERRIDE_DEFAULT, fallBackChainId);
 
         if (wallet == null)
         {

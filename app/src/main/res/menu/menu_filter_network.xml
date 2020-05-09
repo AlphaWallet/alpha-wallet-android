@@ -7,7 +7,7 @@
         android:id="@+id/action_filter"
         android:icon="@drawable/ic_network_2"
         android:orderInCategory="20"
-        android:title="@string/action_add_wallet"
+        android:title="@string/select_active_networks"
         app:showAsAction="always"
         />
 </menu>

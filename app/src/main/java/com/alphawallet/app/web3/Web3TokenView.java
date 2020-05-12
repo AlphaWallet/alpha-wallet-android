@@ -135,7 +135,7 @@ public class Web3TokenView extends WebView
     }
 
     public void setRpcUrl(@NonNull int chainId) {
-        jsInjectorClient.setRpcUrl(EthereumNetworkRepository.getNodeURLByNetworkId(chainId));
+        jsInjectorClient.setRpcUrl(EthereumNetworkRepository.getDefaultNodeURL(chainId));
     }
 
     public void onSignPersonalMessageSuccessful(Message message, String signHex) {

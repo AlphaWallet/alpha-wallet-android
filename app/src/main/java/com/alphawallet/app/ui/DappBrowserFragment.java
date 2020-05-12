@@ -58,6 +58,7 @@ import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.OnDappClickListener;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
@@ -681,7 +682,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private void setupWeb3() {
         web3.setActivity(getActivity());
         web3.setChainId(networkInfo.chainId);
-        web3.setRpcUrl(viewModel.shouldUseBackupNode() ? networkInfo.backupNodeUrl : networkInfo.rpcServerUrl);
+        web3.setRpcUrl(EthereumNetworkBase.getDefaultNodeURL(networkInfo.chainId));
         web3.setWalletAddress(new Address(wallet.address));
 
         web3.setWebChromeClient(new WebChromeClient() {

@@ -131,7 +131,7 @@ class SpawnableLinkGenerator {
         {
             System.arraycopy(signature.getR(), 0, sigBytes, 0, 32);
             System.arraycopy(signature.getS(), 0, sigBytes, 32, 32);
-            sigBytes[64] = signature.getV();
+            System.arraycopy(signature.getV(), 0, sigBytes, 64, 1);
         }
         catch (IndexOutOfBoundsException e)
         {

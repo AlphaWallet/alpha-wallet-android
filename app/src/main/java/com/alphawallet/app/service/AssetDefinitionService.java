@@ -1595,7 +1595,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         String view = getTokenView(token.tokenInfo.chainId, token.tokenInfo.address, ASSET_DETAIL_VIEW_NAME);
         String iconifiedView = getTokenView(token.tokenInfo.chainId, token.tokenInfo.address, ASSET_SUMMARY_VIEW_NAME);
-        return view.equals(iconifiedView);
+        if (view == null || iconifiedView == null) return false;
+        else return view.equals(iconifiedView);
     }
 
     public List<ContractLocator> getHoldingContracts(TokenDefinition td)

@@ -386,6 +386,29 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
+    /**
+     * This is used so as not to leak API credentials to web3; XInfuraAPI is the backup API key checked into github
+     * @param networkId
+     * @return
+     */
+    public static String getDefaultNodeURL(int networkId) {
+        switch (networkId)
+        {
+            case MAINNET_ID:
+                return "https://mainnet.infura.io/v3/" + BuildConfig.XInfuraAPI;
+            case KOVAN_ID:
+                return "https://kovan.infura.io/v3/" + BuildConfig.XInfuraAPI;
+            case ROPSTEN_ID:
+                return "https://ropsten.infura.io/v3/" + BuildConfig.XInfuraAPI;
+            case RINKEBY_ID:
+                return "https://rinkeby.infura.io/v3/" + BuildConfig.XInfuraAPI;
+            case GOERLI_ID:
+                return "https://goerli.infura.io/v3/" + BuildConfig.XInfuraAPI;
+            default:
+                return getSecondaryNodeURL(networkId);
+        }
+    }
+
     public static String getMagicLinkDomainFromNetworkId(int networkId)
     {
         return MagicLinkInfo.getMagicLinkDomainFromNetworkId(networkId);

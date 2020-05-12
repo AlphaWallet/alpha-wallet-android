@@ -27,7 +27,7 @@ targetCompatibility = 1.8
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
-    implementation('org.web3j:core:4.2.0')
+    implementation('org.web3j:core:4.5.17')
 
 
     // https://mvnrepository.com/artifact/com.github.cliftonlabs/json-simple

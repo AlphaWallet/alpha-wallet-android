@@ -113,7 +113,7 @@ public class UniversalLinkTypeTest
         try {
             System.arraycopy(sigData.getR(), 0, sig, 0, 32);
             System.arraycopy(sigData.getS(), 0, sig, 32, 32);
-            sig[64] = sigData.getV();//[0];
+            System.arraycopy(sigData.getV(), 0, sig, 64, 1);
         } catch (IndexOutOfBoundsException e) {
             throw new SalesOrderMalformed("Signature shorter than expected 256");
         }

@@ -97,7 +97,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private AWalletAlertDialog alertDialog;
     private Message<String> messageToSign;
     private FunctionButtonBar functionBar;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private boolean reloaded;
     private int userInputCheckCount;
 
@@ -126,15 +126,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         reloaded = false;
 
         getAttrs();
-
-        tokenView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url)
-            {
-                if (handleMapClick(url)) return true; //handle specific map click
-                else return handleURLClick(url);      //otherwise handle an attempt to visit a URL from TokenScript. If URL isn't in the approved DAPP list then fail
-            }
-        });
     }
 
     private void displayFunction(String tokenAttrs)
@@ -483,7 +474,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void functionSuccess()
     {
-        if (handler == null) handler = new Handler();
         LinearLayout successOverlay = findViewById(R.id.layout_success_overlay);
         if (successOverlay != null) successOverlay.setVisibility(View.VISIBLE);
         handler.postDelayed(closer, 1000);
@@ -533,6 +523,15 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         if (!reloaded) tokenView.reload();
         reloaded = true;
+    }
+
+    @Override
+    public boolean overridePageLoad(WebView view, String url)
+    {
+        if (handleMapClick(url))
+            return true;                     //handle specific map click
+        else
+            return handleURLClick(url);      //otherwise handle an attempt to visit a URL from TokenScript. If URL isn't in the approved DAPP list then fail
     }
 
     @Override
@@ -620,7 +619,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     protected void showProgressSpinner(boolean show)
     {
-        if (handler == null) handler = new Handler();
         if (show) handler.post(progress);
         else handler.post(progressOff);
     }

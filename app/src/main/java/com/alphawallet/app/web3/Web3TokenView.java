@@ -279,6 +279,19 @@ public class Web3TokenView extends WebView
         }
 
         @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url)
+        {
+            if (assetHolder != null)
+            {
+                return assetHolder.overridePageLoad(view, url);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        @Override
         public void onUnhandledKeyEvent(WebView view, KeyEvent event) {
             if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
             {

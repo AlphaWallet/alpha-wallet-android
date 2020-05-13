@@ -336,9 +336,12 @@ public class WalletViewModel extends BaseViewModel
 
     private void addUnresolvedContracts(List<ContractLocator> contractCandidates)
     {
-        Observable.fromArray(contractCandidates.toArray(new ContractLocator[0]))
-                .filter(result -> (tokensService.getToken(result.chainId, result.name) == null))
-                .forEach(r -> unknownAddresses.add(r)).isDisposed();
+        if (contractCandidates != null && contractCandidates.size() > 0)
+        {
+            Observable.fromArray(contractCandidates.toArray(new ContractLocator[0]))
+                    .filter(result -> (tokensService.getToken(result.chainId, result.name) == null))
+                    .forEach(r -> unknownAddresses.add(r)).isDisposed();
+        }
     }
 
     private void checkBalances()

@@ -1,20 +1,24 @@
 package com.alphawallet.app.entity.tokenscript;
 
-import io.reactivex.Observable;
-
 import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.util.BalanceUtils;
-import com.alphawallet.token.entity.*;
+import com.alphawallet.app.web3j.FunctionEncoder;
+import com.alphawallet.app.web3j.FunctionReturnDecoder;
+import com.alphawallet.app.web3j.TypeReference;
+import com.alphawallet.app.web3j.datatypes.Function;
+import com.alphawallet.token.entity.AttributeInterface;
+import com.alphawallet.token.entity.AttributeType;
+import com.alphawallet.token.entity.ContractAddress;
+import com.alphawallet.token.entity.FunctionDefinition;
+import com.alphawallet.token.entity.MethodArg;
+import com.alphawallet.token.entity.TokenScriptResult;
+import com.alphawallet.token.entity.TokenscriptContext;
+import com.alphawallet.token.entity.TokenscriptElement;
+import com.alphawallet.token.entity.TransactionResult;
 import com.alphawallet.token.tools.TokenDefinition;
-import okhttp3.OkHttpClient;
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.TypeReference;
+
 import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.BytesType;
-import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Int;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
@@ -23,7 +27,6 @@ import org.web3j.abi.datatypes.generated.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -32,7 +35,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Observable;
 
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
@@ -561,7 +565,7 @@ public abstract class TokenscriptFunction
                 useAddress = override;
             }
             TransactionResult transactionResult = new TransactionResult(useAddress.chainId, useAddress.address, tokenId, attr);
-            org.web3j.abi.datatypes.Function transaction = generateTransactionFunction(walletAddress, tokenId, definition, attr.function, attrIf);
+            Function transaction = generateTransactionFunction(walletAddress, tokenId, definition, attr.function, attrIf);
 
             //now push the transaction
             String result = callSmartContractFunction(TokenRepository.getWeb3jService(useAddress.chainId), transaction, useAddress.address, ZERO_ADDRESS);

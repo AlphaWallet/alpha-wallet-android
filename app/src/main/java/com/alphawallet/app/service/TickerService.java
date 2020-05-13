@@ -15,17 +15,16 @@ import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.TokenRepository;
-import com.alphawallet.token.tools.Convert;
+import com.alphawallet.app.web3j.FunctionEncoder;
+import com.alphawallet.app.web3j.FunctionReturnDecoder;
+import com.alphawallet.app.web3j.TypeReference;
+import com.alphawallet.app.web3j.datatypes.Function;
 import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
@@ -558,7 +557,7 @@ public class TickerService implements TickerServiceInterface
 
     private double getUSDPrice() throws Exception {
         Web3j web3j = TokenRepository.getWeb3jService(MAINNET_ID);
-        org.web3j.abi.datatypes.Function function = read();
+        Function function = read();
         String responseValue = callSmartContractFunction(web3j, function, MEDIANIZER);
 
         BigDecimal usdRaw = BigDecimal.ZERO;
@@ -577,8 +576,8 @@ public class TickerService implements TickerServiceInterface
         return usdRaw.doubleValue();
     }
 
-    private static org.web3j.abi.datatypes.Function read() {
-        return new org.web3j.abi.datatypes.Function(
+    private static Function read() {
+        return new Function(
                 "read",
                 Arrays.<Type>asList(),
                 Collections.singletonList(new TypeReference<Uint256>() {}));

@@ -7,6 +7,7 @@ import com.alphawallet.app.entity.Wallet;
 import org.web3j.protocol.Web3j;
 
 import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by James on 29/05/2019.
@@ -24,34 +25,11 @@ public class AWEnsResolver extends EnsResolver
         this(web3j, DEFAULT_SYNC_THRESHOLD);
     }
 
-    public Single<Wallet> resolveWalletEns(Wallet wallet)
-    {
-        return Single.fromCallable(() -> {
-            try
-            {
-                wallet.ENSname = reverseResolve(wallet.address);
-                if (wallet.ENSname != null && wallet.ENSname.length() > 0)
-                {
-                    //check ENS name integrity - it must point to the wallet address
-                    String resolveAddress = resolve(wallet.ENSname);
-                    if (!resolveAddress.equalsIgnoreCase(wallet.address))
-                    {
-                        wallet.ENSname = null;
-                    }
-                }
-                else
-                {
-                    wallet.ENSname = null;
-                }
-            }
-            catch (Exception e)
-            {
-                wallet.ENSname = null;
-            }
-            return wallet;
-        });
-    }
-
+    /**
+     * Given an address, find any corresponding ENS name (eg fredblogs.eth)
+     * @param address Ethereum address
+     * @return ENS name or empty string
+     */
     public Single<String> resolveEnsName(String address)
     {
         return Single.fromCallable(() -> {
@@ -81,6 +59,11 @@ public class AWEnsResolver extends EnsResolver
         });
     }
 
+    /**
+     * Given an ENS Name (eg fredblogs.eth), find corresponding Ethereum address
+     * @param ensName ensName to be resolved to address
+     * @return Ethereum address or empty string
+     */
     public Single<String> resolveENSAddress(String ensName)
     {
         return Single.fromCallable(() -> {

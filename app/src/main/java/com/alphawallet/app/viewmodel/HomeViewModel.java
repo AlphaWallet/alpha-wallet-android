@@ -235,17 +235,18 @@ public class HomeViewModel extends BaseViewModel {
         if (TextUtils.isEmpty(wallet.ENSname))
         {
             walletName.postValue(wallet.name);
-            //check for ENS name
-            new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID))
-                    .resolveEnsName(wallet.address)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(walletName::postValue, this::onENSError).isDisposed();
         }
         else
         {
             walletName.postValue(wallet.ENSname);
         }
+
+        //check for ENS name (could have changed)
+        new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID))
+                .resolveEnsName(wallet.address)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(walletName::postValue, this::onENSError).isDisposed();
     }
 
     public LiveData<String> walletName() {

@@ -130,6 +130,8 @@ public class TokenDefinition {
                 return As.e18;
             case "e8":
                 return As.e8;
+            case "e6":
+                return As.e6;
             case "e4":
                 return As.e4;
             case "e2":

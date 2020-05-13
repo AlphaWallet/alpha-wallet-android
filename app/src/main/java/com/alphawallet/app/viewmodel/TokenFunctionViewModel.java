@@ -377,10 +377,7 @@ public class TokenFunctionViewModel extends BaseViewModel
             {
                 TokenscriptElement arg = action.function.tx.args.get("value");
                 //resolve reference
-                assetDefinitionService.resolveReference(token, action, arg, tokenId);
-                //this is very specific but 'value' is a specifically handled param
-                value = arg.value;
-
+                value = assetDefinitionService.resolveReference(token, action, arg, tokenId);
                 Token currency = getCurrency(token.tokenInfo.chainId);
                 functionEffect = getCorrectedBalance(value, 18) + " " + currency.getSymbol() + " to " + action.function.method;
             }

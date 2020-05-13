@@ -100,7 +100,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private AWalletAlertDialog alertDialog;
     private Message<String> messageToSign;
     private FunctionButtonBar functionBar;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private int parsePass;
     private int resolveInputCheckCount;
     private TSAction action;
@@ -133,15 +133,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         viewModel.getAssetDefinitionService().clearResultMap();
         args.clear();
         getAttrs();
-
-        tokenView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url)
-            {
-                if (handleMapClick(url)) return true; //handle specific map click
-                else return handleURLClick(url);      //otherwise handle an attempt to visit a URL from TokenScript. If URL isn't in the approved DAPP list then fail
-            }
-        });
     }
 
     private void displayFunction(String tokenAttrs)
@@ -151,9 +142,10 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
             TSAction action = functions.get(actionMethod);
             String magicValues = viewModel.getAssetDefinitionService().getMagicValuesForInjection(token.tokenInfo.chainId);
-            String injectedView = tokenView.injectWeb3TokenInit(this, action.view, tokenAttrs, tokenId);
+
+            String injectedView = tokenView.injectWeb3TokenInit(this, action.view.tokenView, tokenAttrs, tokenId);
             injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
-            injectedView = tokenView.injectStyleAndWrapper(injectedView, action.style);
+            injectedView = tokenView.injectStyleAndWrapper(injectedView, action.style + "\n" + action.view.style);
 
             String base64 = Base64.encodeToString(injectedView.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
             tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
@@ -346,6 +338,9 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         {
             checkTokenScriptElement(cb, action, arg.element);
         }
+
+        //check if action can be completed
+        completeAction();
     }
 
     private void checkTokenScriptElement(CalcJsValueCallback cb, TSAction action, TokenscriptElement e)
@@ -436,7 +431,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void functionSuccess()
     {
-        if (handler == null) handler = new Handler();
         LinearLayout successOverlay = findViewById(R.id.layout_success_overlay);
         if (successOverlay != null) successOverlay.setVisibility(View.VISIBLE);
         handler.postDelayed(closer, 1000);
@@ -492,6 +486,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
 
         parsePass++;
+    }
+
+    @Override
+    public boolean overridePageLoad(WebView view, String url)
+    {
+        if (handleMapClick(url)) return true; //handle specific map click
+        else return handleURLClick(url);      //otherwise handle an attempt to visit a URL from TokenScript. If URL isn't in the approved DAPP list then fail
     }
 
     @Override
@@ -579,7 +580,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     protected void showProgressSpinner(boolean show)
     {
-        if (handler == null) handler = new Handler();
         if (show) handler.post(progress);
         else handler.post(progressOff);
     }

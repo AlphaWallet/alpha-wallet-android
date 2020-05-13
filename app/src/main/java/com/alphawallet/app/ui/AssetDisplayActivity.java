@@ -126,8 +126,10 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         finishReceiver = new FinishReceiver(this);
         findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE);
         viewModel.checkTokenScriptValidity(token);
+        token.clearResultMap();
 
         iconifiedCheck = true;
+
         if (token.iconifiedWebviewHeight == 0 && token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
         {
             initWebViewCheck(iconifiedCheck);
@@ -249,6 +251,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         //does the function have a view? If it's transaction only then handle here
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         TSAction action = functions.get(function);
+        token.clearResultMap();
 
         //handle TS function
         if (action != null && action.view == null && action.function != null)

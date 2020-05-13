@@ -3,15 +3,18 @@ package com.alphawallet.app.entity.tokenscript;
 import android.text.TextUtils;
 
 import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.token.entity.As;
 import com.alphawallet.token.entity.AttributeInterface;
 import com.alphawallet.token.entity.AttributeType;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
 import com.alphawallet.token.entity.TokenScriptResult;
+import com.alphawallet.token.entity.TokenscriptElement;
 import com.alphawallet.token.entity.TransactionResult;
 import com.alphawallet.token.tools.TokenDefinition;
 
@@ -28,6 +31,7 @@ import org.web3j.abi.datatypes.generated.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.utils.Bytes;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -52,21 +56,19 @@ public abstract class TokenscriptFunction
     public static final String TOKENSCRIPT_CONVERSION_ERROR = "<error>";
 
     private final Map<String, AttributeType> localAttrs = new ConcurrentHashMap<>();
-    private final Map<String, TokenScriptResult.Attribute> resultMap = new ConcurrentHashMap<>(); //Build result map for function parse
     private final Map<String, String> refTags = new ConcurrentHashMap<>();
 
-    public Function generateTransactionFunction(String walletAddress, BigInteger tokenId, TokenDefinition definition, FunctionDefinition function, AttributeInterface attrIf)
+    public Function generateTransactionFunction(Token token, BigInteger tokenId, TokenDefinition definition, FunctionDefinition function, AttributeInterface attrIf)
     {
         boolean valueNotFound = false;
         //pre-parse tokenId.
         if (tokenId.bitCount() > 256) tokenId = tokenId.or(BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE)); //truncate tokenId too large
-        if (walletAddress == null) walletAddress = ZERO_ADDRESS;
 
         List<Type> params = new ArrayList<Type>();
         List<TypeReference<?>> returnTypes = new ArrayList<TypeReference<?>>();
         for (MethodArg arg : function.parameters)
         {
-            String value = resolveReference(walletAddress, arg, tokenId, definition, attrIf);
+            String value = resolveReference(token, arg.element, tokenId, definition, attrIf);
             //get arg.element.value in the form of BigInteger if appropriate
             byte[] argValueBytes = null;
             BigInteger argValueBI = null;
@@ -76,7 +78,7 @@ public abstract class TokenscriptFunction
                 params = null;
                 continue;
             }
-            if (value != null)
+            if (value != null && !arg.parameterType.equals("string"))
             {
                 argValueBytes = convertArgToBytes(value);
                 argValueBI = new BigInteger(1, argValueBytes);
@@ -297,7 +299,7 @@ public abstract class TokenscriptFunction
                         switch (arg.element.ref)
                         {
                             case "ownerAddress":
-                                params.add(new Address(walletAddress));
+                                params.add(new Address(token.getWallet()));
                                 break;
                             case "value":
                             default:
@@ -306,10 +308,10 @@ public abstract class TokenscriptFunction
                         }
                         break;
                     case "string":
-                        params.add(new Utf8String(arg.element.value));
+                        params.add(new Utf8String(value));
                         break;
                     case "bytes":
-                        params.add(new Bytes32(Numeric.hexStringToByteArray(arg.element.value)));
+                        params.add(new Bytes32(Numeric.hexStringToByteArray(value)));
                         break;
                     case "bytes1":
                         params.add(new Bytes1(argValueBytes));
@@ -429,21 +431,24 @@ public abstract class TokenscriptFunction
                 valueNotFound = true;
             }
         }
-        switch (function.syntax)
+        switch (function.as)
         {
-            //not used as of now
-            case Boolean:
-            case Integer:
-            case NumericString:
-                returnTypes.add(new TypeReference<Uint256>()
-                {
-                });
+            case UTF8:
+                returnTypes.add(new TypeReference<Utf8String>() {});
                 break;
-            case IA5String:
-            case DirectoryString:
-                returnTypes.add(new TypeReference<Utf8String>()
-                {
-                });
+            case Signed:
+            case Unsigned:
+            case UnsignedInput:
+            case TokenId:
+                returnTypes.add(new TypeReference<Uint256>() {});
+                break;
+            case Address:
+                returnTypes.add(new TypeReference<Address>() {});
+                break;
+            case Mapping:
+            case Boolean:
+            default:
+                returnTypes.add(new TypeReference<Bytes32>() {});
                 break;
         }
 
@@ -466,7 +471,6 @@ public abstract class TokenscriptFunction
                 }
                 catch (NumberFormatException e)
                 {
-                    e.printStackTrace();
                     value = new BigInteger(inputValue, 16);
                 }
 
@@ -488,33 +492,72 @@ public abstract class TokenscriptFunction
         return argBytes;
     }
 
-    private void handleTransactionResult(TransactionResult result, Function function, String responseValue, FunctionDefinition fd, long lastTransactionTime)
+    private String handleTransactionResult(TransactionResult result, Function function, String responseValue, AttributeType attr, long lastTransactionTime)
     {
+        String transResult = null;
         try
         {
-            //try to interpret the value
+            //try to interpret the value. For now, just use the raw return value - this is more reliable until we need to interpret arrays
             List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
             if (response.size() > 0)
             {
                 result.resultTime = lastTransactionTime;
                 Type val = response.get(0);
-                switch (fd.syntax)
+
+                BigInteger value;
+                byte[] bytes = Bytes.trimLeadingZeroes(Numeric.hexStringToByteArray(responseValue));
+                String hexBytes = Numeric.toHexString(bytes);
+
+                switch (attr.syntax)
                 {
                     case Boolean:
-                        BigDecimal value = new BigDecimal(((Uint256) val).getValue());
-                        result.result = value.equals(BigDecimal.ZERO) ? "FALSE" : "TRUE";
+                        value = Numeric.toBigInt(hexBytes);
+                        transResult = value.equals(BigDecimal.ZERO) ? "FALSE" : "TRUE";
                         break;
                     case Integer:
+                        value = Numeric.toBigInt(hexBytes);
+                        transResult = value.toString();
+                        break;
+                    case BitString:
                     case NumericString:
-                        result.result = new BigDecimal(((Uint256) val).getValue()).toString();
+                        if (val.getTypeAsString().equals("string"))
+                        {
+                            transResult = (String)val.getValue();
+                            if (responseValue.length() > 2 && transResult.length() == 0)
+                            {
+                                transResult = checkBytesString(responseValue);
+                            }
+                        }
+                        else
+                        {
+                            //should be a decimal string
+                            value = Numeric.toBigInt(hexBytes);
+                            transResult = value.toString();
+                        }
                         break;
                     case IA5String:
                     case DirectoryString:
-                        result.result = (String) response.get(0).getValue();
-                        if (responseValue.length() > 2 && result.result.length() == 0)
+                    case GeneralizedTime:
+                    case CountryString:
+                        if (val.getTypeAsString().equals("string"))
                         {
-                            result.result = checkBytesString(responseValue);
+                            transResult = (String)val.getValue();
+                            if (responseValue.length() > 2 && transResult.length() == 0)
+                            {
+                                transResult = checkBytesString(responseValue);
+                            }
                         }
+                        else if (val.getTypeAsString().equals("address"))
+                        {
+                            transResult = (String)val.getValue();
+                        }
+                        else
+                        {
+                            transResult = hexBytes;
+                        }
+                        break;
+                    default:
+                        transResult = hexBytes;
                         break;
                 }
             }
@@ -527,6 +570,8 @@ public abstract class TokenscriptFunction
         {
             e.printStackTrace();
         }
+
+        return transResult;
     }
 
     private String checkBytesString(String responseValue) throws Exception
@@ -559,7 +604,7 @@ public abstract class TokenscriptFunction
         String res = attr.getSyntaxVal(transactionResult.result);
         BigInteger val = transactionResult.tokenId; //?
 
-        if (attr.syntax == TokenDefinition.Syntax.NumericString)
+        if (attr.syntax == TokenDefinition.Syntax.NumericString && attr.as != As.Address)
         {
             if (transactionResult.result == null)
             {
@@ -591,7 +636,7 @@ public abstract class TokenscriptFunction
      * @param definition
      * @return
      */
-    public Observable<TransactionResult> fetchResultFromEthereum(String walletAddress, ContractAddress override, AttributeType attr,
+    public Observable<TransactionResult> fetchResultFromEthereum(Token token, ContractAddress override, AttributeType attr,
                                                                  BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf, long lastTransactionTime)
     {
         return Observable.fromCallable(() -> {
@@ -607,7 +652,7 @@ public abstract class TokenscriptFunction
                 useAddress = override;
             }
             TransactionResult transactionResult = new TransactionResult(useAddress.chainId, useAddress.address, tokenId, attr);
-            org.web3j.abi.datatypes.Function transaction = generateTransactionFunction(walletAddress, tokenId, definition, attr.function, attrIf);
+            org.web3j.abi.datatypes.Function transaction = generateTransactionFunction(token, tokenId, definition, attr.function, attrIf);
 
             String result;
             if (transaction.getInputParameters() == null)
@@ -622,7 +667,7 @@ public abstract class TokenscriptFunction
                 result = callSmartContractFunction(TokenRepository.getWeb3jService(useAddress.chainId), transaction, useAddress.address, ZERO_ADDRESS);
             }
 
-            handleTransactionResult(transactionResult, transaction, result, attr.function, txUpdateTime);
+            transactionResult.result = handleTransactionResult(transactionResult, transaction, result, attr, txUpdateTime);
             return transactionResult;
         });
     }
@@ -652,30 +697,35 @@ public abstract class TokenscriptFunction
         }
     }
 
-    private String resolveReference(String walletAddress, MethodArg arg, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
+    public String resolveReference(Token token, TokenscriptElement element, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
     {
-        TokenScriptResult.Attribute attrRes = resultMap.get(arg.element.ref);
-        if (!TextUtils.isEmpty(arg.element.value))
+        TokenScriptResult.Attribute attrRes = token.getAttributeResult(element.ref, tokenId);
+        if (!TextUtils.isEmpty(element.value))
         {
-            return arg.element.value;
+            return element.value;
         }
         else if (attrRes != null) //resolve from result map
         {
             return attrRes.text;
         }
-        else if (definition != null && definition.attributeTypes.containsKey(arg.element.ref)) //resolve from attribute
+        else if (definition != null && definition.attributeTypes.containsKey(element.ref)) //resolve from attribute
         {
-            AttributeType attr = definition.attributeTypes.get(arg.element.ref);
-            return fetchArgValue(arg, attr, walletAddress, tokenId, definition, attrIf);
+            AttributeType attr = definition.attributeTypes.get(element.ref);
+            return fetchArgValue(token, element, attr, tokenId, definition, attrIf);
         }
-        else if (localAttrs.containsKey(arg.element.ref)) //wasn't able to resolve, attempt to resolve from local attributes or mark null if unresolved user input
+        else if (localAttrs.containsKey(element.ref)) //wasn't able to resolve, attempt to resolve from local attributes or mark null if unresolved user input
         {
-            AttributeType attr = localAttrs.get(arg.element.ref);
-            return fetchArgValue(arg, attr, walletAddress, tokenId, definition, attrIf);
+            AttributeType attr = localAttrs.get(element.ref);
+            return fetchArgValue(token, element, attr, tokenId, definition, attrIf);
         }
-        else if (!TextUtils.isEmpty(arg.element.localRef) && refTags.containsKey(arg.element.localRef))
+        else if (localAttrs.containsKey(element.localRef))
         {
-            return refTags.get(arg.element.localRef);
+            AttributeType attr = localAttrs.get(element.localRef);
+            return fetchArgValue(token, element, attr, tokenId, definition, attrIf);
+        }
+        else if (!TextUtils.isEmpty(element.localRef) && refTags.containsKey(element.localRef))
+        {
+            return refTags.get(element.localRef);
         }
         else
         {
@@ -683,19 +733,19 @@ public abstract class TokenscriptFunction
         }
     }
 
-    private String fetchArgValue(MethodArg arg, AttributeType attr, String walletAddress, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
+    private String fetchArgValue(Token token, TokenscriptElement element, AttributeType attr, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
     {
         if (attr.userInput)
         {
-            if (!TextUtils.isEmpty(arg.element.value)) return arg.element.value; //nullify user input if value is not set
+            if (!TextUtils.isEmpty(element.value)) return element.value; //nullify user input if value is not set
         }
-        else if (!TextUtils.isEmpty(arg.element.value))
+        else if (!TextUtils.isEmpty(element.value))
         {
-            return arg.element.value;
+            return element.value;
         }
         else
         {
-            return fetchAttrResult(walletAddress, attr, tokenId, null, definition, attrIf).blockingSingle().text;
+            return fetchAttrResult(token, attr, tokenId, null, definition, attrIf).blockingSingle().text;
         }
 
         return null;
@@ -715,7 +765,7 @@ public abstract class TokenscriptFunction
      *       It may not be possible to always safely cache these values; even with an event handler we have to interpret those events and invalidate
      *       any cached results. However if we're tracking the referenced contract as a token then it should be safe
      *
-     * @param walletAddress
+     * @param token
      * @param attr
      * @param tokenId
      * @param cAddr
@@ -723,13 +773,13 @@ public abstract class TokenscriptFunction
      * @param attrIf
      * @return
      */
-    public Observable<TokenScriptResult.Attribute> fetchAttrResult(String walletAddress, AttributeType attr, BigInteger tokenId, ContractAddress cAddr,
+    public Observable<TokenScriptResult.Attribute> fetchAttrResult(Token token, AttributeType attr, BigInteger tokenId, ContractAddress cAddr,
                                                                    TokenDefinition td, AttributeInterface attrIf)
     {
         if (attr == null) return Observable.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));
-        else if (resultMap.get(attr.id) != null)
+        else if (token.getAttributeResult(attr.id, tokenId) != null)
         {
-            return Observable.fromCallable(() -> resultMap.get(attr.id));
+            return Observable.fromCallable(() -> token.getAttributeResult(attr.id, tokenId));
         }
         else if (attr.event != null)
         {
@@ -757,7 +807,8 @@ public abstract class TokenscriptFunction
             }
             else  //if cached value is invalid or if value is dynamic
             {
-                return fetchResultFromEthereum(walletAddress, useAddress, attr, tokenId, td, attrIf, lastTxUpdate)       // Fetch function result from blockchain
+                return fetchResultFromEthereum(token, useAddress, attr, tokenId, td, attrIf, lastTxUpdate)       // Fetch function result from blockchain
+                        .map(transactionResult -> addParseResultIfValid(token, tokenId, attr, transactionResult))// only cache live transaction result
                         .map(result -> restoreFromDBIfRequired(result, cachedResult))  // If network unavailable restore value from cache
                         .map(attrIf::storeAuxData)                                     // store new data
                         .map(result -> parseFunctionResult(result, attr));    // write returned data into attribute
@@ -896,13 +947,22 @@ public abstract class TokenscriptFunction
         }
     }
 
-    public TokenScriptResult.Attribute addParseResultIfValid(TokenScriptResult.Attribute attrResult)
+    public TokenScriptResult.Attribute addParseResultIfValid(Token token, BigInteger tokenId, TokenScriptResult.Attribute attrResult)
     {
         if (!TextUtils.isEmpty(attrResult.text))
         {
-            resultMap.put(attrResult.id, attrResult);
+            token.setAttributeResult(tokenId, attrResult);
         }
         return attrResult;
+    }
+
+    private TransactionResult addParseResultIfValid(Token token, BigInteger tokenId, AttributeType attr, TransactionResult result)
+    {
+        if (!TextUtils.isEmpty(result.result))
+        {
+            token.setAttributeResult(tokenId, parseFunctionResult(result, attr));
+        }
+        return result;
     }
 
     public void addLocalRefs(Map<String, String> refs)
@@ -913,7 +973,6 @@ public abstract class TokenscriptFunction
     public void clearParseMaps()
     {
         localAttrs.clear();
-        resultMap.clear();
         refTags.clear();
     }
 }

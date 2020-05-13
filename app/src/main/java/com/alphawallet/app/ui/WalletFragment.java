@@ -168,7 +168,7 @@ public class WalletFragment extends BaseFragment implements
         recyclerView = view.findViewById(R.id.list);
 
         progressView.hide();
-        systemView.hide();
+        systemView.showProgress(true);
 
         systemView.attachRecyclerView(recyclerView);
         systemView.attachSwipeRefreshLayout(refreshLayout);

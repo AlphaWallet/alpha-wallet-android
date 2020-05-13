@@ -21,18 +21,15 @@ import com.alphawallet.app.service.AWHttpService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.web3j.FunctionEncoder;
+import com.alphawallet.app.web3j.FunctionReturnDecoder;
+import com.alphawallet.app.web3j.TypeReference;
+import com.alphawallet.app.web3j.datatypes.Function;
 import com.alphawallet.token.entity.MagicLinkData;
 
-import org.web3j.abi.EventEncoder;
-import org.web3j.abi.EventValues;
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.DynamicArray;
-import org.web3j.abi.datatypes.Event;
-import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
@@ -41,76 +38,12 @@ import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.Web3jService;
-import org.web3j.protocol.core.BatchRequest;
-import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.JsonRpc2_0Web3j;
-import org.web3j.protocol.core.Request;
-import org.web3j.protocol.core.methods.request.ShhFilter;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.DbGetHex;
-import org.web3j.protocol.core.methods.response.DbGetString;
-import org.web3j.protocol.core.methods.response.DbPutHex;
-import org.web3j.protocol.core.methods.response.DbPutString;
-import org.web3j.protocol.core.methods.response.EthAccounts;
-import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.core.methods.response.EthChainId;
-import org.web3j.protocol.core.methods.response.EthCoinbase;
-import org.web3j.protocol.core.methods.response.EthCompileLLL;
-import org.web3j.protocol.core.methods.response.EthCompileSerpent;
-import org.web3j.protocol.core.methods.response.EthCompileSolidity;
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
-import org.web3j.protocol.core.methods.response.EthFilter;
-import org.web3j.protocol.core.methods.response.EthGasPrice;
-import org.web3j.protocol.core.methods.response.EthGetBalance;
-import org.web3j.protocol.core.methods.response.EthGetBlockTransactionCountByHash;
-import org.web3j.protocol.core.methods.response.EthGetBlockTransactionCountByNumber;
-import org.web3j.protocol.core.methods.response.EthGetCode;
-import org.web3j.protocol.core.methods.response.EthGetCompilers;
-import org.web3j.protocol.core.methods.response.EthGetStorageAt;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
-import org.web3j.protocol.core.methods.response.EthGetUncleCountByBlockHash;
-import org.web3j.protocol.core.methods.response.EthGetUncleCountByBlockNumber;
-import org.web3j.protocol.core.methods.response.EthGetWork;
-import org.web3j.protocol.core.methods.response.EthHashrate;
-import org.web3j.protocol.core.methods.response.EthLog;
-import org.web3j.protocol.core.methods.response.EthMining;
-import org.web3j.protocol.core.methods.response.EthProtocolVersion;
-import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.core.methods.response.EthSign;
-import org.web3j.protocol.core.methods.response.EthSubmitHashrate;
-import org.web3j.protocol.core.methods.response.EthSubmitWork;
-import org.web3j.protocol.core.methods.response.EthSyncing;
-import org.web3j.protocol.core.methods.response.EthTransaction;
-import org.web3j.protocol.core.methods.response.EthUninstallFilter;
-import org.web3j.protocol.core.methods.response.NetListening;
-import org.web3j.protocol.core.methods.response.NetPeerCount;
-import org.web3j.protocol.core.methods.response.NetVersion;
-import org.web3j.protocol.core.methods.response.ShhAddToGroup;
-import org.web3j.protocol.core.methods.response.ShhHasIdentity;
-import org.web3j.protocol.core.methods.response.ShhMessages;
-import org.web3j.protocol.core.methods.response.ShhNewFilter;
-import org.web3j.protocol.core.methods.response.ShhNewGroup;
-import org.web3j.protocol.core.methods.response.ShhNewIdentity;
-import org.web3j.protocol.core.methods.response.ShhPost;
-import org.web3j.protocol.core.methods.response.ShhUninstallFilter;
-import org.web3j.protocol.core.methods.response.ShhVersion;
-import org.web3j.protocol.core.methods.response.Web3ClientVersion;
-import org.web3j.protocol.core.methods.response.Web3Sha3;
-import org.web3j.protocol.core.methods.response.admin.AdminNodeInfo;
-import org.web3j.protocol.core.methods.response.admin.AdminPeers;
-import org.web3j.protocol.exceptions.ClientConnectionException;
-import org.web3j.protocol.http.HttpService;
-import org.web3j.protocol.websocket.events.LogNotification;
-import org.web3j.protocol.websocket.events.NewHeadsNotification;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -125,16 +58,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Completable;
-import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.SingleTransformer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.Headers;
 import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -808,7 +737,7 @@ public class TokenRepository implements TokenRepositoryType {
         result.add(BigInteger.valueOf(NODE_COMMS_ERROR));
         try
         {
-            org.web3j.abi.datatypes.Function function = balanceOfArray(wallet.address);
+            Function function = balanceOfArray(wallet.address);
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
             List<Type> indices = callSmartContractFunctionArray(function, tokenInfo.address, network, wallet);
             if (indices != null)
@@ -834,7 +763,7 @@ public class TokenRepository implements TokenRepositoryType {
         result.add(BigInteger.valueOf(NODE_COMMS_ERROR));
         try
         {
-            org.web3j.abi.datatypes.Function function = erc721TicketBalanceArray(wallet.address);
+            Function function = erc721TicketBalanceArray(wallet.address);
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
             List<Type> tokenIds = callSmartContractFunctionArray(function, tokenInfo.address, network, wallet);
             if (tokenIds != null)
@@ -866,7 +795,7 @@ public class TokenRepository implements TokenRepositoryType {
         });
     }
 
-    private <T> T getContractData(NetworkInfo network, String address, org.web3j.abi.datatypes.Function function, T type) throws Exception
+    private <T> T getContractData(NetworkInfo network, String address, Function function, T type) throws Exception
     {
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, network, temp);
@@ -958,7 +887,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private String getName(String address, NetworkInfo network) throws Exception {
-        org.web3j.abi.datatypes.Function function = nameOf();
+        Function function = nameOf();
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, network ,temp);
 
@@ -980,7 +909,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private int getDecimals(String address, NetworkInfo network) throws Exception {
         if (EthereumNetworkRepository.decimalOverride(address, network.chainId) > 0) return EthereumNetworkRepository.decimalOverride(address, network.chainId);
-        org.web3j.abi.datatypes.Function function = decimalsOf();
+        Function function = decimalsOf();
         Wallet temp = new Wallet(null);
         String responseValue = callSmartContractFunction(function, address, network, temp);
         if (TextUtils.isEmpty(responseValue)) return 18;
@@ -994,91 +923,91 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private static org.web3j.abi.datatypes.Function balanceOf(String owner) {
-        return new org.web3j.abi.datatypes.Function(
+    private static Function balanceOf(String owner) {
+        return new Function(
                 "balanceOf",
                 Collections.singletonList(new Address(owner)),
                 Collections.singletonList(new TypeReference<Uint256>() {}));
     }
 
-    private static org.web3j.abi.datatypes.Function balanceOfArray(String owner) {
-        return new org.web3j.abi.datatypes.Function(
+    private static Function balanceOfArray(String owner) {
+        return new Function(
                 "balanceOf",
                 Collections.singletonList(new Address(owner)),
                 Collections.singletonList(new TypeReference<DynamicArray<Uint256>>() {}));
     }
 
-    private static org.web3j.abi.datatypes.Function erc721TicketBalanceArray(String owner) {
-        return new org.web3j.abi.datatypes.Function(
+    private static Function erc721TicketBalanceArray(String owner) {
+        return new Function(
                 "getBalances",
                 Collections.singletonList(new Address(owner)),
                 Collections.singletonList(new TypeReference<DynamicArray<Uint256>>() {}));
     }
 
-    private static org.web3j.abi.datatypes.Function nameOf() {
+    private static Function nameOf() {
         return new Function("name",
                 Arrays.<Type>asList(),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
     }
 
-    private static org.web3j.abi.datatypes.Function supportsInterface(BigInteger value) {
-        return new org.web3j.abi.datatypes.Function(
+    private static Function supportsInterface(BigInteger value) {
+        return new Function(
                 "supportsInterface",
                 Arrays.<Type>asList(new Bytes4(Numeric.toBytesPadded(value, 4))),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
     }
 
-    private static org.web3j.abi.datatypes.Function stringParam(String param) {
+    private static Function stringParam(String param) {
         return new Function(param,
                 Arrays.<Type>asList(),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
     }
 
-    private static org.web3j.abi.datatypes.Function boolParam(String param) {
+    private static Function boolParam(String param) {
         return new Function(param,
                 Arrays.<Type>asList(),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
     }
 
-    private static org.web3j.abi.datatypes.Function stringParam(String param, BigInteger value) {
+    private static Function stringParam(String param, BigInteger value) {
         return new Function(param,
                             Arrays.asList(new Uint256(value)),
                             Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
     }
 
-    private static org.web3j.abi.datatypes.Function intParam(String param, BigInteger value) {
+    private static Function intParam(String param, BigInteger value) {
         return new Function(param,
                             Arrays.asList(new Uint256(value)),
                             Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
     }
 
-    private static org.web3j.abi.datatypes.Function intParam(String param) {
+    private static Function intParam(String param) {
         return new Function(param,
                 Arrays.<Type>asList(),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint>() {}));
     }
 
-    private static org.web3j.abi.datatypes.Function symbolOf() {
+    private static Function symbolOf() {
         return new Function("symbol",
                 Arrays.<Type>asList(),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
     }
 
-    private static org.web3j.abi.datatypes.Function decimalsOf() {
+    private static Function decimalsOf() {
         return new Function("decimals",
                 Arrays.<Type>asList(),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {}));
     }
 
-    private static org.web3j.abi.datatypes.Function addrParam(String param) {
+    private static Function addrParam(String param) {
         return new Function(param,
                             Arrays.<Type>asList(),
                             Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
     }
 
-    private org.web3j.abi.datatypes.Function addressFunction(String method, byte[] resultHash)
+    private Function addressFunction(String method, byte[] resultHash)
     {
-        return new org.web3j.abi.datatypes.Function(
+        return new Function(
                 method,
                 Collections.singletonList(new org.web3j.abi.datatypes.generated.Bytes32(resultHash)),
                 Collections.singletonList(new TypeReference<Address>() {}));
@@ -1093,7 +1022,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     private List callSmartContractFunctionArray(
-            org.web3j.abi.datatypes.Function function, String contractAddress, NetworkInfo network, Wallet wallet)
+            Function function, String contractAddress, NetworkInfo network, Wallet wallet)
     {
         try
         {
@@ -1238,7 +1167,7 @@ public class TokenRepository implements TokenRepositoryType {
     {
         return Single.fromCallable(() -> {
             ContractLocator contractLocator = new ContractLocator(INVALID_CONTRACT, chainId);
-            org.web3j.abi.datatypes.Function function = new Function(method,
+            Function function = new Function(method,
                                                                      Arrays.<Type>asList(),
                                                                      Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
 
@@ -1329,28 +1258,6 @@ public class TokenRepository implements TokenRepositoryType {
             NetworkInfo networkInfo = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
             return getContractData(networkInfo, token.tokenInfo.address, redeemed(tokenId), Boolean.TRUE);
         });
-    }
-
-    protected EventValues extractEventParameters(
-            Event event, org.web3j.protocol.core.methods.response.Log log) {
-
-        List<String> topics = log.getTopics();
-        String encodedEventSignature = EventEncoder.encode(event);
-        if (!topics.get(0).equals(encodedEventSignature)) {
-            return null;
-        }
-
-        List<Type> indexedValues = new ArrayList<>();
-        List<Type> nonIndexedValues = FunctionReturnDecoder.decode(
-                log.getData(), event.getNonIndexedParameters());
-
-        List<TypeReference<Type>> indexedParameters = event.getIndexedParameters();
-        for (int i = 0; i < indexedParameters.size(); i++) {
-            Type value = FunctionReturnDecoder.decodeIndexedValue(
-                    topics.get(i + 1), indexedParameters.get(i));
-            indexedValues.add(value);
-        }
-        return new EventValues(indexedValues, nonIndexedValues);
     }
 
     @Override

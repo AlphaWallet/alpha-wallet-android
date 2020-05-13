@@ -18,7 +18,7 @@ import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 
 import org.web3j.abi.datatypes.DynamicArray;
-import org.web3j.abi.datatypes.Function;
+import com.alphawallet.app.web3j.datatypes.Function;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;

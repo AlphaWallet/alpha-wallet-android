@@ -1203,41 +1203,59 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<ContractType> determineCommonType(TokenInfo tokenInfo)
     {
         return Single.fromCallable(() -> {
-            ContractType returnType = ContractType.OTHER;
+            ContractType returnType;
+
+            //could be ERC721, ERC721T, ERC875 or ERC20
+            //try some interface values
+            NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
             try
             {
-                //could be ERC721, ERC721T, ERC875 or ERC20
-                //try some interface values
-                NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
-                if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_BALANCES_721_TICKET), Boolean.TRUE)) returnType = ContractType.ERC721_TICKET;
-                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OFFICIAL_ERC721), Boolean.TRUE)) returnType = ContractType.ERC721;
-                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_CRYPTOKITTIES), Boolean.TRUE)) returnType = ContractType.ERC721_LEGACY;
-                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OLD_ERC721), Boolean.TRUE)) returnType = ContractType.ERC721_LEGACY;
+                if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_BALANCES_721_TICKET), Boolean.TRUE))
+                    returnType = ContractType.ERC721_TICKET;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OFFICIAL_ERC721), Boolean.TRUE))
+                    returnType = ContractType.ERC721;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_CRYPTOKITTIES), Boolean.TRUE))
+                    returnType = ContractType.ERC721_LEGACY;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OLD_ERC721), Boolean.TRUE))
+                    returnType = ContractType.ERC721_LEGACY;
                 else
-                {
-                    Boolean isERC875 = getContractData(network, tokenInfo.address, boolParam("isStormBirdContract"), Boolean.TRUE); //Use old isStormbird as another datum point
-                    List<BigInteger> balance875 = checkERC875BalanceArray(new Wallet(ZERO_ADDRESS), tokenInfo, null);
-                    String      responseValue = callSmartContractFunction(balanceOf(ZERO_ADDRESS), tokenInfo.address, network, new Wallet(ZERO_ADDRESS));
-                    returnType = findContractTypeFromResponse(balance875, responseValue, isERC875);
-                }
+                    returnType = ContractType.OTHER;
             }
             catch (Exception e)
             {
-                if (BuildConfig.DEBUG) e.printStackTrace();
-                // didn't manage to find contract type, pass other
+                returnType = ContractType.OTHER;
+            }
+
+            if (returnType == ContractType.OTHER)
+            {
+                Boolean isERC875;
+                String      responseValue;
+
+                try
+                {
+                    isERC875 = getContractData(network, tokenInfo.address, boolParam("isStormBirdContract"), Boolean.TRUE); //Use old isStormbird as another datum point
+                }
+                catch (Exception e) { isERC875 = false; }
+                try
+                {
+                    responseValue = callSmartContractFunction(balanceOf(ZERO_ADDRESS), tokenInfo.address, network, new Wallet(ZERO_ADDRESS));
+                }
+                catch (Exception e) { responseValue = ""; }
+
+                returnType = findContractTypeFromResponse(responseValue, isERC875);
             }
 
             return returnType;
         });
     }
 
-    private ContractType findContractTypeFromResponse(List<BigInteger> balance875, String balanceResponse, Boolean isERC875) throws Exception
+    private ContractType findContractTypeFromResponse(String balanceResponse, Boolean isERC875) throws Exception
     {
         ContractType returnType = ContractType.OTHER;
 
         int responseLength = balanceResponse.length();
 
-        if (isERC875 || (balance875 != null && balance875.size() > 0 && responseLength > 66))
+        if (isERC875 || (responseLength > 66))
         {
             returnType = ContractType.ERC875;
         }

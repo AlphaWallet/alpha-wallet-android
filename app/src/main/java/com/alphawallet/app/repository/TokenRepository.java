@@ -106,9 +106,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private void buildWeb3jClient(NetworkInfo networkInfo)
     {
-        String rpcServerUrl = ethereumNetworkRepository.shouldUseBackupNode() ? networkInfo.backupNodeUrl : networkInfo.rpcServerUrl;
-        String rpcSecondary = ethereumNetworkRepository.shouldUseBackupNode() ? networkInfo.rpcServerUrl : networkInfo.backupNodeUrl;
-        AWHttpService publicNodeService = new AWHttpService(rpcServerUrl, rpcSecondary, okClient, false);
+        AWHttpService publicNodeService = new AWHttpService(networkInfo.backupNodeUrl, networkInfo.rpcServerUrl, okClient, false);
         EthereumNetworkRepository.addRequiredCredentials(networkInfo.chainId, publicNodeService);
         web3jNodeServers.put(networkInfo.chainId, Web3j.build(publicNodeService));
     }

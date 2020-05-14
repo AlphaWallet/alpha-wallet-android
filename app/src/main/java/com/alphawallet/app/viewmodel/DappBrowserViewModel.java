@@ -316,9 +316,4 @@ public class DappBrowserViewModel extends BaseViewModel  {
         intent.putExtra(WALLET, defaultWallet.getValue());
         ctx.startActivity(intent);
     }
-
-    public boolean shouldUseBackupNode()
-    {
-        return ethereumNetworkRepository.shouldUseBackupNode();
-    }
 }

@@ -73,8 +73,8 @@ android {
     productFlavors {
 	awallet {
 		dimension "targetting"
-        versionCode 106
-        versionName "2.23.8"
+        versionCode 107
+        versionName "2.23.9"
 	}
     }
     buildTypes {
@@ -106,7 +106,7 @@ project.ext {
     okhttpVersion = "4.0.0"
     picassoVersion = "2.71828"
     supportVersion = "28.0.0"
-    web3jVersion = "4.5.17"
+    web3jVersion = "4.2.1-android"
     gsonVersion = "2.8.5"
     rxJavaVersion = "2.2.10"
     rxAndroidVersion = "2.1.1"

@@ -47,6 +47,7 @@ public class EnsResolver {
 
     public static final long DEFAULT_SYNC_THRESHOLD = 1000 * 60 * 3;
     public static final String REVERSE_NAME_SUFFIX = ".addr.reverse";
+    public static final String RESOLVER = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
 
     private final Web3j web3j;
     private final int addressLength;
@@ -132,7 +133,7 @@ public class EnsResolver {
     public String reverseResolve(String address)
     {
         String name = null;
-        if (WalletUtils.isValidAddress(address, addressLength))
+        if (WalletUtils.isValidAddress(address))
         {
             String reverseName = Numeric.cleanHexPrefix(address) + REVERSE_NAME_SUFFIX;
             try
@@ -162,11 +163,9 @@ public class EnsResolver {
     }
 
     private String lookupResolver(String ensName) throws Exception {
-        NetVersion netVersion = web3j.netVersion().send();
-        String registryContract = Contracts.resolveRegistryContract(netVersion.getNetVersion());
         byte[] nameHash = NameHash.nameHashAsBytes(ensName);
         Function resolver = getResolver(nameHash);
-        return getContractData(EthereumNetworkBase.MAINNET_ID, registryContract, resolver);
+        return getContractData(EthereumNetworkBase.MAINNET_ID, RESOLVER, resolver);
     }
 
     private Function getResolver(byte[] nameHash)
@@ -260,6 +259,6 @@ public class EnsResolver {
 
     public static boolean isValidEnsName(String input, int addressLength) {
         return input != null // will be set to null on new Contract creation
-                && (input.contains(".") || !WalletUtils.isValidAddress(input, addressLength));
+                && (input.contains(".") || !WalletUtils.isValidAddress(input));
     }
 }

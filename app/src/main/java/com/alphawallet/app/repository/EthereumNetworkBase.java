@@ -90,7 +90,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String GOERLI_BLOCKSCOUT = "eth/goerli";
 
     final Map<Integer, NetworkInfo> networkMap;
-    protected static boolean useBackupNode = false;
 
     final NetworkInfo[] NETWORKS;
     static final NetworkInfo[] DEFAULT_NETWORKS = new NetworkInfo[] {
@@ -359,8 +358,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         switch (networkId)
         {
             case MAINNET_ID:
-                if (useBackupNode) return MAINNET_FALLBACK_RPC_URL;
-                else return MAINNET_RPC_URL;
+                return MAINNET_RPC_URL;
             case KOVAN_ID:
                 return KOVAN_RPC_URL;
             case ROPSTEN_ID:
@@ -543,10 +541,5 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public Token getBlankOverrideToken()
     {
         return null;
-    }
-
-    public boolean shouldUseBackupNode()
-    {
-        return useBackupNode;
     }
 }

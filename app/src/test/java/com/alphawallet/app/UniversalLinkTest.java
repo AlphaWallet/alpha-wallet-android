@@ -183,7 +183,8 @@ public class UniversalLinkTest
         try {
             System.arraycopy(sigData.getR(), 0, sig, 0, 32);
             System.arraycopy(sigData.getS(), 0, sig, 32, 32);
-            System.arraycopy(sigData.getV(), 0, sig, 64, 1);
+            sig[64] = sigData.getV();
+            //System.arraycopy(sigData.getV(), 0, sig, 64, 1); //web3j 4.5
         } catch (IndexOutOfBoundsException e) {
             throw new SalesOrderMalformed("Signature shorter than expected 256");
         }

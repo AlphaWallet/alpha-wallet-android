@@ -107,7 +107,8 @@ public class MagicLinkParcel implements Parcelable
             BigInteger expiry = BigInteger.valueOf(order.expiry);
             //convert to signature representation
             Sign.SignatureData sellerSig = CryptoFunctions.sigFromByteArray(order.signature);
-            int v = (new BigInteger(sellerSig.getV())).intValue();
+            int v = sellerSig.getV();
+            //int v = (new BigInteger(sellerSig.getV())).intValue(); //web3j 4.5
 
             switch (order.contractType)
             {

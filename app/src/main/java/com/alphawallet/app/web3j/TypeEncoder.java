@@ -62,7 +62,8 @@ public class TypeEncoder {
     }
 
     static String encodeAddress(Address address) {
-        return encodeNumeric(address.toUint());
+        return encodeNumeric(address.toUint160());
+        //return encodeNumeric(address.toUint()); //web3j 4.5
     }
 
     static String encodeNumeric(NumericType numericType) {

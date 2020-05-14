@@ -187,7 +187,8 @@ public class AlphaWalletService
         {
             args.put("r", Numeric.toHexString(sigData.getR()));
             args.put("s", Numeric.toHexString(sigData.getS()));
-            args.put("v", Numeric.toHexString(sigData.getV()));
+            args.put("v", Integer.toHexString(sigData.getV()));
+            //args.put("v", Numeric.toHexString(sigData.getV()));  //web3j 4.5
         }
     }
 

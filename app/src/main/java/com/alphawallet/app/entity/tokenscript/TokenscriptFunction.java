@@ -848,6 +848,9 @@ public abstract class TokenscriptFunction
                 case e8:
                     convertedValue = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("100000000"));
                     break;
+                case e6:
+                    convertedValue = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("1000000"));
+                    break;
                 case e4:
                     convertedValue = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("1000"));
                     break;

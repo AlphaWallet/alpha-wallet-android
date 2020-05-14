@@ -30,3 +30,6 @@ For iOS:
 
 ## Build your own mobile blockchain app
 white label blockchain wallet
+
+## License
+AlphaWallet Android is available under the MIT license. Free for commercial and non-commercial use.

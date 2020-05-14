@@ -76,6 +76,11 @@ public class WalletFragment extends BaseFragment implements
         BackupTokenCallback
 {
     private static final String TAG = "WFRAG";
+    private static final int TAB_ALL = 0;
+    private static final int TAB_CURRENCY = 1;
+    private static final int TAB_COLLECTIBLES = 2;
+    private static final int TAB_ATTESTATIONS = 3;
+
 
     @Inject
     WalletViewModelFactory walletViewModelFactory;
@@ -91,10 +96,8 @@ public class WalletFragment extends BaseFragment implements
     private String importFileName;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout refreshLayout;
-    private GridLayoutManager gridLayoutManager;
-    private LinearLayoutManager linearLayoutManager;
-
     private boolean isVisible;
+    private int currentTabPos = -1;
 
     @Nullable
     @Override
@@ -132,10 +135,9 @@ public class WalletFragment extends BaseFragment implements
     }
 
     private void initList() {
-        initLayoutManagers();
         adapter = new TokensAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), getContext());
         adapter.setHasStableIds(true);
-        recyclerView.setLayoutManager(linearLayoutManager);
+        setLinearLayoutManager(TAB_ALL);
         recyclerView.setAdapter(adapter);
         if (recyclerView.getItemAnimator() != null)
             ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
@@ -232,22 +234,22 @@ public class WalletFragment extends BaseFragment implements
             {
                 switch (tab.getPosition())
                 {
-                    case 0:
-                        recyclerView.setLayoutManager(linearLayoutManager);
+                    case TAB_ALL:
+                        setLinearLayoutManager(tab.getPosition());
                         adapter.setFilterType(TokensAdapter.FILTER_ALL);
                         viewModel.fetchTokens();
                         break;
-                    case 1:
-                        recyclerView.setLayoutManager(linearLayoutManager);
+                    case TAB_CURRENCY:
+                        setLinearLayoutManager(tab.getPosition());
                         adapter.setFilterType(TokensAdapter.FILTER_CURRENCY);
                         viewModel.fetchTokens();
                         break;
-                    case 2:
-                        recyclerView.setLayoutManager(gridLayoutManager);
+                    case TAB_COLLECTIBLES:
+                        setGridLayoutManager(tab.getPosition());
                         adapter.setFilterType(TokensAdapter.FILTER_COLLECTIBLES);
                         viewModel.fetchTokens();
                         break;
-                    case 3: // TODO: Filter Attestations
+                    case TAB_ATTESTATIONS: // TODO: Filter Attestations
                         break;
                     default:
                         break;
@@ -268,19 +270,32 @@ public class WalletFragment extends BaseFragment implements
         TabUtils.decorateTabLayout(getContext(), tabLayout);
     }
 
-    private void initLayoutManagers() {
-        linearLayoutManager = new LinearLayoutManager(getContext());
-
-        gridLayoutManager = new GridLayoutManager(getContext(), 2);
-        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+    private void setGridLayoutManager(int tab)
+    {
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
+        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup()
+        {
             @Override
-            public int getSpanSize(int position) {
-                if (adapter.getItemViewType(position) == TokenGridHolder.VIEW_TYPE) {
+            public int getSpanSize(int position)
+            {
+                if (adapter.getItemViewType(position) == TokenGridHolder.VIEW_TYPE)
+                {
                     return 1;
                 }
                 return 2;
             }
         });
+        recyclerView.setLayoutManager(gridLayoutManager);
+        currentTabPos = tab;
+    }
+
+    private void setLinearLayoutManager(int tab)
+    {
+        if (currentTabPos != TAB_ALL && currentTabPos != TAB_CURRENCY)
+        {
+            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        }
+        currentTabPos = tab;
     }
 
     @Override
@@ -303,6 +318,7 @@ public class WalletFragment extends BaseFragment implements
     @Override
     public void onResume() {
         super.onResume();
+        currentTabPos = -1;
         selectedToken = null;
         if (viewModel == null)
         {

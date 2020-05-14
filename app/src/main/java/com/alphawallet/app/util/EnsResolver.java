@@ -7,12 +7,12 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.TokenRepository;
-import com.alphawallet.app.web3j.FunctionEncoder;
-import com.alphawallet.app.web3j.FunctionReturnDecoder;
-import com.alphawallet.app.web3j.TypeReference;
-import com.alphawallet.app.web3j.datatypes.Function;
 
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.crypto.Keys;

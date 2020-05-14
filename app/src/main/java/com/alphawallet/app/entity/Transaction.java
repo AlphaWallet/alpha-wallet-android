@@ -93,6 +93,7 @@ public class Transaction implements Parcelable {
 
 		if (!TextUtils.isEmpty(contractAddress)) //must be a constructor
 		{
+			if (decoder == null) decoder = new TransactionDecoder(); //initialise decoder on demand
 			to = contractAddress;
 			//add a constructor here
 			operations = generateERC875Op();

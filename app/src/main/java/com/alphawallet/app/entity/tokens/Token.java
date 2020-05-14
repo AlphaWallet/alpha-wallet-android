@@ -23,11 +23,11 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.app.web3.Web3TokenView;
-import com.alphawallet.app.web3j.datatypes.Function;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.tools.TokenDefinition;
 
+import org.web3j.abi.datatypes.Function;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;

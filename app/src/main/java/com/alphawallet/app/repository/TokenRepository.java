@@ -21,15 +21,15 @@ import com.alphawallet.app.service.AWHttpService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.web3j.FunctionEncoder;
-import com.alphawallet.app.web3j.FunctionReturnDecoder;
-import com.alphawallet.app.web3j.TypeReference;
-import com.alphawallet.app.web3j.datatypes.Function;
 import com.alphawallet.token.entity.MagicLinkData;
 
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
@@ -106,7 +106,7 @@ public class TokenRepository implements TokenRepositoryType {
 
     private void buildWeb3jClient(NetworkInfo networkInfo)
     {
-        AWHttpService publicNodeService = new AWHttpService(networkInfo.backupNodeUrl, networkInfo.rpcServerUrl, okClient, false);
+        AWHttpService publicNodeService = new AWHttpService(networkInfo.rpcServerUrl, networkInfo.backupNodeUrl, okClient, false);
         EthereumNetworkRepository.addRequiredCredentials(networkInfo.chainId, publicNodeService);
         web3jNodeServers.put(networkInfo.chainId, Web3j.build(publicNodeService));
     }

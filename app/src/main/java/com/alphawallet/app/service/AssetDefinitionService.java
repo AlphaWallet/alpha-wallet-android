@@ -32,7 +32,6 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmCertificateData;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.viewmodel.HomeViewModel;
-import com.alphawallet.app.web3j.FunctionEncoder;
 import com.alphawallet.token.entity.AttributeInterface;
 import com.alphawallet.token.entity.AttributeType;
 import com.alphawallet.token.entity.ContractAddress;
@@ -48,7 +47,8 @@ import com.alphawallet.token.entity.TransactionResult;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.TokenDefinition;
 
-import com.alphawallet.app.web3j.datatypes.Function;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.datatypes.Function;
 import org.web3j.crypto.WalletUtils;
 import org.xml.sax.SAXException;
 

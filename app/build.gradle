@@ -36,7 +36,7 @@ android {
     }
     defaultConfig {
         applicationId "io.stormbird.wallet"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 29
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         def CoinmarketCapAPI = "CoinmarketCapAPI"
@@ -73,8 +73,8 @@ android {
     productFlavors {
 	awallet {
 		dimension "targetting"
-        versionCode 106
-        versionName "2.23.8"
+        versionCode 108
+        versionName "2.30.0"
 	}
     }
     buildTypes {

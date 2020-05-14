@@ -12,7 +12,7 @@ AlphaWallet and TokenScript have been used by tokenisation projects like FIFA an
 ⭐ Star us on GitHub — it helps!
 
 
-[<img src="https://alphawallet.com/wp-content/uploads/2020/03/aw_coverphoto-comp.jpg" width="347" height="434">](https://alphawallet.com/)
+[<img src="https://github.com/AlphaWallet/TokenScript-Examples/blob/master/1.jpg">](https://alphawallet.com/)
 
 
 ## Getting Started

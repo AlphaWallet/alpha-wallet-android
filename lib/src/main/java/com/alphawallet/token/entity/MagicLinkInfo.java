@@ -29,8 +29,8 @@ public class MagicLinkInfo
     private static final String kovanEtherscan = "https://kovan.etherscan.io/";
     private static final String ropstenEtherscan = "https://ropsten.etherscan.io/";
     private static final String rinkebyEtherscan = "https://rinkeby.etherscan.io/";
-    private static final String poaEtherscan = "https://poaexplorer.com/";
-    private static final String sokolEtherscan = "https://sokol-explorer.poa.network/account/";
+    private static final String poaEtherscan = "https://blockscout.com/poa/core/";
+    private static final String sokolEtherscan = "https://blockscout.com/poa/sokol/";
     private static final String xDaiEtherscan = "https://blockscout.com/poa/dai/";
     private static final String goerliEtherscan = "https://goerli.etherscan.io/";
     private static final String artisSigma1Etherscan = "https://explorer.sigma1.artis.network/";

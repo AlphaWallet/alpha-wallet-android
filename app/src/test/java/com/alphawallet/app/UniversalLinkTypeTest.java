@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class UniversalLinkTypeTest
 {
-    private static ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
+    private static ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), null);
 
     /**
      * these values give the key format, ie

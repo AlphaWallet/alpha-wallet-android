@@ -46,24 +46,31 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
        If you wish your node to be the fallback, tried in case the primary times out then add/replace in ..._FALLBACK_RPC_URL list
      */
 
+    static {
+        System.loadLibrary("keys");
+    }
+
+    public static native String getAmberDataKey();
+    public static native String getInfuraKey();
+
     //Fallback nodes: these nodes are used if there's no Amberdata key, and also as a fallback in case the primary node times out while attempting a call
-    public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/" + BuildConfig.InfuraAPI;
-    public static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/" + BuildConfig.InfuraAPI;
+    public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/" + getInfuraKey();
+    public static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/" + getInfuraKey();
 
     //Note that AlphaWallet now uses a double node configuration. See class AWHttpService comment 'try primary node'.
     //If you supply a main RPC and secondary it will try the secondary if the primary node times out after 10 seconds.
     //See the declaration of NetworkInfo - it has a member backupNodeUrl. Put your secondary node here.
 
-    public static final String BACKUP_INFURA_KEY = BuildConfig.InfuraAPI;
-    public static final String MAINNET_FALLBACK_RPC_URL = !BuildConfig.AmberdataAPI.startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + BuildConfig.AmberdataAPI : MAINNET_RPC_URL;
+    public static final String BACKUP_INFURA_KEY = BuildConfig.XInfuraAPI;
+    public static final String MAINNET_FALLBACK_RPC_URL = !getAmberDataKey().startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + getAmberDataKey() : MAINNET_RPC_URL;
     public static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
     public static final String XDAI_RPC_URL = "https://dai.poa.network";
     public static final String POA_RPC_URL = "https://core.poa.network/";
-    public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/" + BuildConfig.InfuraAPI;
-    public static final String RINKEBY_FALLBACK_RPC_URL = !BuildConfig.AmberdataAPI.startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + BuildConfig.AmberdataAPI + "&x-amberdata-blockchain-id=1b3f7a72b3e99c13" : RINKEBY_RPC_URL;
-    public static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/" + BuildConfig.InfuraAPI;
+    public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/" + getInfuraKey();
+    public static final String RINKEBY_FALLBACK_RPC_URL = !getAmberDataKey().startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + getAmberDataKey() + "&x-amberdata-blockchain-id=1b3f7a72b3e99c13" : RINKEBY_RPC_URL;
+    public static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/" + getInfuraKey();
     public static final String SOKOL_RPC_URL = "https://sokol.poa.network";
-    public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/" + BuildConfig.InfuraAPI;
+    public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/" + getInfuraKey();
     public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
     public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
 

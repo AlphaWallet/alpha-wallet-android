@@ -280,7 +280,7 @@ public class AddTokenViewModel extends BaseViewModel {
 
     private void checkSelectedNetwork(ContractLocator result)
     {
-        if (!result.name.equals(TokenRepository.INVALID_CONTRACT))
+        if (!result.address.equals(TokenRepository.INVALID_CONTRACT))
         {
             foundNetwork = true;
             switchNetwork.postValue(result.chainId);
@@ -311,7 +311,7 @@ public class AddTokenViewModel extends BaseViewModel {
 
     private void testNetworkResult(ContractLocator result)
     {
-        if (!foundNetwork && !result.name.equals(TokenRepository.INVALID_CONTRACT))
+        if (!foundNetwork && !result.address.equals(TokenRepository.INVALID_CONTRACT))
         {
             foundNetwork = true;
             if (scanNetworksDisposable != null && !scanNetworksDisposable.isDisposed()) scanNetworksDisposable.dispose(); //stop scanning

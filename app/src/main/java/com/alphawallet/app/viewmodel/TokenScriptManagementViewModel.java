@@ -14,14 +14,13 @@ import io.reactivex.schedulers.Schedulers;
 public class TokenScriptManagementViewModel extends BaseViewModel {
 
     private final AssetDefinitionService assetDefinitionService;
-    private MutableLiveData<List<TokenLocator>> tokenLocatorsLiveData;
+    private final MutableLiveData<List<TokenLocator>> tokenLocatorsLiveData;
 
     public TokenScriptManagementViewModel(AssetDefinitionService assetDefinitionService) {
         this.assetDefinitionService = assetDefinitionService;
-
         tokenLocatorsLiveData = new MutableLiveData<>();
 
-        assetDefinitionService.getTokenLocators() //holds for loading complete then returns origin contracts
+        assetDefinitionService.getAllTokenDefinitions() //holds for loading complete then returns origin contracts
                 .subscribeOn(Schedulers.single())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::addUnresolvedTokens)
@@ -34,5 +33,10 @@ public class TokenScriptManagementViewModel extends BaseViewModel {
 
     public MutableLiveData<List<TokenLocator>> getTokenLocatorsLiveData() {
         return tokenLocatorsLiveData;
+    }
+
+    public AssetDefinitionService getAssetService()
+    {
+        return assetDefinitionService;
     }
 }

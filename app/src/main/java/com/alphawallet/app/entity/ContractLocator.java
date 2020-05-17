@@ -15,34 +15,34 @@ import java.util.List;
  */
 public class ContractLocator implements Parcelable
 {
-    public final String name;
+    public final String address;
     public final int chainId;
     private final ContractType type;
 
     public ContractLocator(String n, int chain)
     {
-        name = n;
+        address = n;
         chainId = chain;
         type = ContractType.NOT_SET;
     }
 
     public ContractLocator(String n, int chain, ContractType t)
     {
-        name = n;
+        address = n;
         chainId = chain;
         type = t;
     }
 
     protected ContractLocator(Parcel in)
     {
-        this.name = in.readString();
+        this.address = in.readString();
         this.chainId = in.readInt();
         this.type = ContractType.values()[in.readInt()];
     }
 
     public boolean equals(Token token)
     {
-        return (token != null && name != null && name.equalsIgnoreCase(token.getAddress()) && chainId == token.tokenInfo.chainId);
+        return (token != null && address != null && address.equalsIgnoreCase(token.getAddress()) && chainId == token.tokenInfo.chainId);
     }
 
     /* replace this with a one-liner use of stream when we up our minSdkVersion to 24 */
@@ -90,7 +90,7 @@ public class ContractLocator implements Parcelable
     @Override
     public void writeToParcel(Parcel dest, int flags)
     {
-        dest.writeString(name);
+        dest.writeString(address);
         dest.writeInt(chainId);
         dest.writeInt(type.ordinal());
     }

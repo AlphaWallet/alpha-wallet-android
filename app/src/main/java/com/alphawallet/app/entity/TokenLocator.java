@@ -1,24 +1,29 @@
 package com.alphawallet.app.entity;
 
-public class TokenLocator extends ContractLocator {
-    private String fileName;
-    private String address;
+import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
+import com.alphawallet.token.entity.ContractInfo;
 
-    public TokenLocator(String name, int chainId, ContractType type, String fileName,String address) {
-        super(name, chainId, type);
-        this.fileName = fileName;
-        this.address = address;
+public class TokenLocator extends ContractInfo
+{
+    private final TokenScriptFile tokenScriptFile;
+    private final String name;
+
+    public TokenLocator(String name, ContractInfo origins, TokenScriptFile file) {
+        super(origins.contractInterface, origins.addresses);
+        this.name = name;
+        this.tokenScriptFile = file;
     }
 
     public String getFileName() {
-        return fileName;
+        return tokenScriptFile.getName();
+    }
+    public String getFullFileName() { return tokenScriptFile.getAbsolutePath(); }
+
+    public ContractInfo getContracts() {
+        return this;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
+    public boolean isDebug() { return tokenScriptFile.isDebug(); }
 
-    public String getAddress() {
-        return address;
-    }
+    public String getDefinitionName() { return name; }
 }

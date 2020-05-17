@@ -68,6 +68,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -490,15 +491,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         });
     }
 
-    public Single<List<TokenLocator>> getTokenLocators()
-    {
-        return Single.fromCallable(() ->
-        {
-            waitForAssets();
-            return getAllTokenDefinitions();
-        });
-    }
-
     private void waitForAssets()
     {
         try
@@ -558,6 +550,18 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             tokenTypeName.get(chainId).get(address).put(count, td.getTokenName(count));
             return td.getTokenName(count);
         }
+    }
+
+    public String getTokenNameFromService(int chainId, String address)
+    {
+        Token token = tokensService.getToken(chainId, address);
+        if (token != null) return token.getFullName();
+        else return "";
+    }
+
+    public Token getTokenFromService(int chainId, String address)
+    {
+        return tokensService.getToken(chainId, address);
     }
 
     /**
@@ -1650,28 +1654,44 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return tokenscriptUtility.convertInputValue(attr, e, valueFromInput);
     }
 
-    private List<TokenLocator> getAllTokenDefinitions()
+    /**
+     * Using a file search method rather than the pre-parsed method.
+     * This lets us catch bad tokenscripts and report on errors.
+     *
+     * @return List of Tokenscripts with details
+     */
+    public Single<List<TokenLocator>> getAllTokenDefinitions()
     {
-        List<TokenLocator> tokenLocators = new ArrayList<>();
-        for (int i = 0; i < assetDefinitions.size(); i++)
-        {
-            int chainId = assetDefinitions.keyAt(i);
-            Map<String, TokenScriptFile> assetDefinition = assetDefinitions.get(chainId);
-            for (String address : assetDefinition.keySet())
-            {
-                if (address.equals("ethereum")) continue;
-                Token token = tokensService.getToken(chainId, address);
-                TokenInfo tokenInfo = token.tokenInfo;
+        return Single.fromCallable(() -> {
+            final File[] files = buildFileList();
+            List<TokenLocator> tokenLocators = new ArrayList<>();
 
-                // TODO: 28-04-2020  Decide which token name we want to use
-                // tokenLocators.add(new TokenLocator(tokenInfo.name, chainId, ContractType.NOT_SET, assetDefinition.get(address).getName(), address));
+            Observable.fromArray(files)
+                    .filter(File::isFile)
+                    .filter(this::allowableExtension)
+                    .filter(File::canRead)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .blockingForEach(file -> {
+                        try
+                        {
+                            FileInputStream input = new FileInputStream(file);
+                            TokenDefinition tokenDef = parseFile(input);
+                            ContractInfo origins = tokenDef.contracts.get(tokenDef.holdingToken);
+                            if (origins.addresses.size() > 0)
+                            {
+                                TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
+                                tokenLocators.add(new TokenLocator(tokenDef.getTokenName(1), origins, tsf));
+                            }
+                        } // TODO: Catch specific tokenscript parse errors to report tokenscript errors.
+                        catch (Exception e)
+                        {
+                            // don't add to list
+                        }
+                    });
 
-                TokenDefinition definition = getTokenDefinition(assetDefinition.get(address));
-                String tokenName = definition.getTokenName(1);
-                tokenLocators.add(new TokenLocator(tokenName, chainId, ContractType.NOT_SET, assetDefinition.get(address).getName(), address));
-            }
-        }
-        return tokenLocators;
+            return tokenLocators;
+        });
     }
 
     private List<ContractLocator> getAllOriginContracts()

@@ -95,7 +95,7 @@ public class AdvancedSettingsActivity extends BaseActivity {
 
         //TODO Change Icon
         tokenScriptManagement = new SettingsItemView.Builder(this)
-                .withIcon(R.drawable.ic_settings_language)
+                .withIcon(R.drawable.ic_settings_tokenscript_manage)
                 .withTitle(R.string.tokenscript_management)
                 .withListener(this::onTokenScriptManagementClicked)
                 .build();

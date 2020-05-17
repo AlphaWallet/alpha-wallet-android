@@ -5,18 +5,46 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/token_name"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/dp16"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="@dimen/dp16"
-        android:fontFamily="@font/font_regular"
         android:gravity="center_vertical"
-        android:textColor="@color/black"
-        android:textSize="17sp"
-        tools:text="Setting Title" />
+        android:layout_marginTop="4dp">
+
+        <TextView
+            android:id="@+id/token_definition_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/dp16"
+            android:fontFamily="@font/font_regular"
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp17"
+            tools:text="Setting Title" />
+
+        <TextView
+            android:id="@+id/token_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/token_definition_name"
+            android:layout_toEndOf="@id/token_definition_name"
+            android:layout_marginStart="@dimen/dp10"
+            android:fontFamily="@font/font_regular"
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp15"
+            tools:text="" />
+
+        <ImageView
+            android:id="@+id/image_lock"
+            android:layout_alignParentEnd="true"
+            android:layout_width="@dimen/dp25"
+            android:layout_height="@dimen/dp25"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:src="@mipmap/ic_locked"/>
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/token_file"
@@ -32,20 +60,42 @@
         android:textSize="14sp"
         tools:text="Setting Title" />
 
-    <TextView
-        android:id="@+id/token_address"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/dp16"
-        android:layout_marginEnd="@dimen/dp16"
-        android:layout_marginBottom="8dp"
-        android:ellipsize="end"
-        android:fontFamily="@font/font_light"
-        android:lines="1"
-        android:maxLines="1"
-        android:text="Setting Subtitle"
-        android:textColor="@color/dove"
-        android:textSize="12sp" />
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/token_address"
+            android:layout_alignParentStart="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/dp16"
+            android:layout_marginBottom="8dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/font_light"
+            android:lines="1"
+            android:maxLines="1"
+            android:text="Setting Subtitle"
+            android:textColor="@color/black"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/text_chain_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="2dp"
+            android:background="@drawable/background_status_pending"
+            android:fontFamily="@font/font_bold"
+            android:padding="2dp"
+            android:text="@string/action_clear"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+    </RelativeLayout>
 
     <View
         android:layout_width="match_parent"

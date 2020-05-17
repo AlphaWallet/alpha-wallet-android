@@ -39,7 +39,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
-import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 
 public class WalletsViewModel extends BaseViewModel
 {
@@ -243,7 +242,7 @@ public class WalletsViewModel extends BaseViewModel
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .subscribe(wallet -> {
-                    fetchTokensInteract.fetchStoredToken(network, wallet, override.name) //fetch cached balance from this wallet's DB
+                    fetchTokensInteract.fetchStoredToken(network, wallet, override.address) //fetch cached balance from this wallet's DB
                     .flatMap(tokenFromCache -> fetchTokensInteract.updateBalance(wallet.address, tokenFromCache)) //update balance
                     .subscribe(this::updateWallet, error -> onFetchError(wallet, network)).isDisposed();
                 }, this::onError);

@@ -85,6 +85,7 @@ import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.AWalletBottomNavigationView;
 import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.entity.SalesOrderMalformed;
@@ -190,6 +191,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private byte[] messageBytes;
     private DAppFunction dAppFunction;
     private SignType signType;
+    private volatile boolean canSign = true;
 
     private enum SignType
     {
@@ -216,12 +218,14 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         homePressed = false;
         if (currentFragment == null) currentFragment = BROWSER_HOME;
         attachFragment(currentFragment);
-        if (web3 == null && getActivity() != null) //trigger reload
+        if ((web3 == null || viewModel == null) && getActivity() != null) //trigger reload
+        {
+            ((HomeActivity)getActivity()).resetFragment(AWalletBottomNavigationView.DAPP_BROWSER);
+        }
+        else
         {
             web3.setWebLoadCallback(this);
-            ((HomeActivity)getActivity()).ResetDappBrowser();
         }
-        if (viewModel != null) viewModel.resetDebounce();
     }
 
     @Nullable
@@ -905,7 +909,12 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             if ((transaction.recipient.equals(Address.EMPTY) && transaction.payload != null) // Constructor
                     || (!transaction.recipient.equals(Address.EMPTY) && (transaction.payload != null || transaction.value != null))) // Raw or Function TX
             {
-                viewModel.openConfirmation(getActivity(), transaction, url, networkInfo);
+                if (canSign)
+                {
+                    viewModel.openConfirmation(getActivity(), transaction, url, networkInfo);
+                    canSign = false;
+                    handler.postDelayed(() -> canSign = true, 3000); //debounce 3 seconds to avoid multiple signing issues
+                }
             }
             else
             {

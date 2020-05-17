@@ -59,11 +59,10 @@ public class WalletsActivity extends BaseActivity implements
     private Dialog dialog;
     private AWalletAlertDialog aDialog;
     private WalletsAdapter adapter;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private Wallet selectedWallet;
 
     private boolean requiresHomeRefresh;
-    private NetworkInfo networkInfo;
     private String dialogError;
 
     @Override
@@ -75,14 +74,20 @@ public class WalletsActivity extends BaseActivity implements
         setTitle(getString(R.string.title_change_add_wallet));
         initViews();
         requiresHomeRefresh = false;
+        initViewModel();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        initViewModel();
+    }
+
+    private void initViewModel()
+    {
+        if (viewModel != null) return;
         viewModel = ViewModelProviders.of(this, walletsViewModelFactory)
                 .get(WalletsViewModel.class);
-        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.error().observe(this, this::onError);
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.wallets().observe(this, this::onFetchWallet);
@@ -93,8 +98,6 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.updateENSName().observe(this, this::updateWalletName);
         viewModel.noWalletsError().observe(this, this::noWallets);
         viewModel.findNetwork();
-
-        if (handler == null) handler = new Handler();
     }
 
     protected Activity getThisActivity()
@@ -127,11 +130,6 @@ public class WalletsActivity extends BaseActivity implements
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
         refreshLayout.setOnRefreshListener(this::onSwipeRefresh);
-    }
-
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        this.networkInfo = networkInfo;
-        adapter.setNetwork(networkInfo);
     }
 
     private void onSwipeRefresh() {
@@ -170,7 +168,6 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     public void onDestroy() {
         super.onDestroy();
-        handler = null;
     }
 
     @Override
@@ -208,6 +205,7 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        initViewModel();
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
@@ -324,9 +322,7 @@ public class WalletsActivity extends BaseActivity implements
     {
         Intent intent = new Intent(this, WalletActionsActivity.class);
         intent.putExtra("wallet", wallet);
-        if (networkInfo != null) {
-            intent.putExtra("currency", networkInfo.symbol);
-        }
+        intent.putExtra("currency", viewModel.getNetwork().symbol);
         intent.putExtra("walletCount", adapter.getItemCount());
         intent.putExtra("isNewWallet", true);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);

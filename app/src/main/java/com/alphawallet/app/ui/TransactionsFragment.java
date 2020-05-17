@@ -23,6 +23,7 @@ import com.alphawallet.app.ui.widget.adapter.RecycleViewDivider;
 import com.alphawallet.app.ui.widget.adapter.TransactionsAdapter;
 import com.alphawallet.app.viewmodel.TransactionsViewModel;
 import com.alphawallet.app.viewmodel.TransactionsViewModelFactory;
+import com.alphawallet.app.widget.AWalletBottomNavigationView;
 import com.alphawallet.app.widget.EmptyTransactionsView;
 import com.alphawallet.app.widget.SystemView;
 
@@ -55,6 +56,29 @@ public class TransactionsFragment extends BaseFragment implements View.OnClickLi
         View view = inflater.inflate(R.layout.fragment_transactions, container, false);
         toolbar(view);
         setToolbarTitle(R.string.toolbar_header_transactions);
+        initViewModel(view);
+
+        return view;
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.try_again: {
+                viewModel.prepare();
+            }
+            break;
+        }
+    }
+
+    private void onTransactionClick(View view, Transaction transaction) {
+        viewModel.showDetails(view.getContext(), transaction);
+    }
+
+    private void initViewModel(View view)
+    {
+        if (viewModel != null) return;
+
         viewModel = ViewModelProviders.of(this, transactionsViewModelFactory)
                 .get(TransactionsViewModel.class);
 
@@ -86,29 +110,20 @@ public class TransactionsFragment extends BaseFragment implements View.OnClickLi
         adapter.clear();
 
         tokenReceiver = new TokensReceiver(getActivity(), this);
-
-        return view;
-    }
-
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.try_again: {
-                viewModel.prepare();
-            }
-            break;
-        }
-    }
-
-    private void onTransactionClick(View view, Transaction transaction) {
-        viewModel.showDetails(view.getContext(), transaction);
     }
 
     @SuppressLint("RestrictedApi")
     @Override
     public void onResume() {
         super.onResume();
-        viewModel.prepare();
+        if (viewModel == null)
+        {
+            ((HomeActivity)getActivity()).resetFragment(AWalletBottomNavigationView.TRANSACTIONS);
+        }
+        else
+        {
+            viewModel.prepare();
+        }
     }
 
     @Override
@@ -158,8 +173,9 @@ public class TransactionsFragment extends BaseFragment implements View.OnClickLi
 
     }
 
-    private void showEmptyTx(boolean show) {
-        if (show)
+    private void showEmptyTx(boolean show)
+    {
+        if (show && adapter.getItemCount() == 0)
         {
             EmptyTransactionsView emptyView = new EmptyTransactionsView(getContext(), this);
             systemView.showEmpty(emptyView);

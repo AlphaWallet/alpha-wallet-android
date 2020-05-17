@@ -20,18 +20,23 @@ public class DappBrowserUtils {
     private static final String DAPPS_LIST_FILENAME = "dapps_list.json";
 
     public static void saveToPrefs(Context context, List<DApp> myDapps) {
-        //don't store custom dapps
-        List<DApp> primaryDapps = getPrimarySites(context);
-        Map<String, DApp> dappMap = new HashMap<>();
-        for (DApp d : myDapps) dappMap.put(d.getUrl(), d);
-        for (DApp d : primaryDapps) dappMap.remove(d.getUrl());
+        if (context != null)
+        {
+            //don't store custom dapps
+            List<DApp> primaryDapps = getPrimarySites(context);
+            Map<String, DApp> dappMap = new HashMap<>();
+            for (DApp d : myDapps)
+                dappMap.put(d.getUrl(), d);
+            for (DApp d : primaryDapps)
+                dappMap.remove(d.getUrl());
 
-        String myDappsJson = new Gson().toJson(dappMap.values());
-        PreferenceManager
-                .getDefaultSharedPreferences(context)
-                .edit()
-                .putString("my_dapps", myDappsJson)
-                .apply();
+            String myDappsJson = new Gson().toJson(dappMap.values());
+            PreferenceManager
+                    .getDefaultSharedPreferences(context)
+                    .edit()
+                    .putString("my_dapps", myDappsJson)
+                    .apply();
+        }
     }
 
     private static List<DApp> getPrimarySites(Context context)
@@ -58,6 +63,7 @@ public class DappBrowserUtils {
     }
 
     public static List<DApp> getMyDapps(Context context) {
+        if (context == null) return new ArrayList<>();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String myDappsJson = prefs.getString("my_dapps", "");
 
@@ -72,6 +78,7 @@ public class DappBrowserUtils {
     }
 
     public static List<DApp> getBrowserHistory(Context context) {
+        if (context == null) return new ArrayList<>();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String historyJson = prefs.getString(C.DAPP_BROWSER_HISTORY, "");
 
@@ -86,11 +93,14 @@ public class DappBrowserUtils {
     }
 
     public static void clearHistory(Context context) {
-        PreferenceManager
-                .getDefaultSharedPreferences(context)
-                .edit()
-                .putString(C.DAPP_BROWSER_HISTORY, "")
-                .apply();
+        if (context != null)
+        {
+            PreferenceManager
+                    .getDefaultSharedPreferences(context)
+                    .edit()
+                    .putString(C.DAPP_BROWSER_HISTORY, "")
+                    .apply();
+        }
     }
 
     public static void addToHistory(Context context, DApp dapp) {
@@ -127,11 +137,14 @@ public class DappBrowserUtils {
     }
 
     private static void saveHistory(Context context, List<DApp> history) {
-        String myDappsJson = new Gson().toJson(history);
-        PreferenceManager
-                .getDefaultSharedPreferences(context)
-                .edit()
-                .putString(C.DAPP_BROWSER_HISTORY, myDappsJson)
-                .apply();
+        if (context != null)
+        {
+            String myDappsJson = new Gson().toJson(history);
+            PreferenceManager
+                    .getDefaultSharedPreferences(context)
+                    .edit()
+                    .putString(C.DAPP_BROWSER_HISTORY, myDappsJson)
+                    .apply();
+        }
     }
 }

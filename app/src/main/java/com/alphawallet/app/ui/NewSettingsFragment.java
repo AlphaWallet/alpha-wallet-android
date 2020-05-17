@@ -26,6 +26,7 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
+import com.alphawallet.app.widget.AWalletBottomNavigationView;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
 
@@ -276,7 +277,14 @@ public class NewSettingsFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        viewModel.prepare();
+        if (viewModel == null)
+        {
+            ((HomeActivity)getActivity()).resetFragment(AWalletBottomNavigationView.SETTINGS);
+        }
+        else
+        {
+            viewModel.prepare();
+        }
     }
 
     public void backupSeedSuccess() {

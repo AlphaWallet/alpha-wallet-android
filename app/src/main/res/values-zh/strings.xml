@@ -562,7 +562,7 @@
     <string name="title_clear_browser_cache">Clear Browser Caches</string>
     <string name="title_tokenscript">TokenScript</string>
     <string name="title_change_language">Change Language</string>
-    <string name="add_hide_tokens">Add / Hide Tokens</string>
+    <string name="add_hide_tokens">Show / Hide Tokens</string>
     <string name="instagram">Instagram</string>
     <string name="settings_locale_currency">Change Currency</string>
     <string name="dialog_title_select_currency">Select FIAT Currency</string>
@@ -586,4 +586,6 @@
     <string name="title_no_need_to_watch">Already Watching</string>
     <string name="error_while_signing_transaction">Error occurred while signing transaction. Please re-import the key for this wallet.</string>
     <string name="token_spec">%1$s (%2$s)</string>
+    <string name="error_not_whitelisted">Page Not Whitelisted</string>
+    <string name="explain_not_whitelisted">TokenScript attempting to redirect to non-whitelisted page %1$s. If you are the owner of this site please submit PR to AlphaWallet repo to add page for whitelisting.</string>
 </resources>

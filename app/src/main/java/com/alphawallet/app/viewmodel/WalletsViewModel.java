@@ -31,8 +31,6 @@ import com.alphawallet.app.util.AWEnsResolver;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -63,12 +61,10 @@ public class WalletsViewModel extends BaseViewModel
     private final MutableLiveData<ErrorEnvelope> createWalletError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> noWalletsError = new MutableLiveData<>();
     private final MutableLiveData<Wallet> updateBalance = new MutableLiveData<>();
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
     private final MutableLiveData<Wallet> updateENSName = new MutableLiveData<>();
 
     private NetworkInfo currentNetwork;
     private Map<String, Wallet> walletBalances = new HashMap<>();
-    private final ExecutorService executorService;
     private int walletUpdateCount;
 
     WalletsViewModel(
@@ -94,18 +90,12 @@ public class WalletsViewModel extends BaseViewModel
         this.gasService = gasService;
         this.tokensService = tokensService;
 
-        executorService = Executors.newFixedThreadPool(10);
         ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID));
     }
 
     public LiveData<Wallet[]> wallets()
     {
         return wallets;
-    }
-
-    public LiveData<NetworkInfo> defaultNetwork()
-    {
-        return defaultNetwork;
     }
 
     public LiveData<Wallet> defaultWallet()
@@ -147,9 +137,7 @@ public class WalletsViewModel extends BaseViewModel
     {
         progress.postValue(true);
         ContractLocator override = EthereumNetworkRepository.getOverrideToken();
-        NetworkInfo networkInfo  = findDefaultNetworkInteract.getNetworkInfo(override.chainId);
-        defaultNetwork.postValue(networkInfo);
-        currentNetwork = networkInfo;
+        currentNetwork = findDefaultNetworkInteract.getNetworkInfo(override.chainId);
 
         disposable = genericWalletInteract
                 .find()
@@ -163,7 +151,7 @@ public class WalletsViewModel extends BaseViewModel
 
         for (Wallet w : items)
         {
-            w.balanceSymbol = defaultNetwork.getValue().symbol;
+            w.balanceSymbol = currentNetwork.symbol;
             Wallet mapW = walletBalances.get(w.address);
             if (mapW != null)
             {

@@ -48,6 +48,7 @@ import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.viewmodel.WalletViewModelFactory;
+import com.alphawallet.app.widget.AWalletBottomNavigationView;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
@@ -86,7 +87,7 @@ public class WalletFragment extends BaseFragment implements
     private ProgressView progressView;
     private TokensAdapter adapter;
     private View selectedToken;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private String importFileName;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout refreshLayout;
@@ -302,11 +303,16 @@ public class WalletFragment extends BaseFragment implements
     @Override
     public void onResume() {
         super.onResume();
-        if (handler == null) handler = new Handler();
         selectedToken = null;
-        viewModel.setVisibility(isVisible);
-        viewModel.prepare();
-        recyclerView = getActivity().findViewById(R.id.list);
+        if (viewModel == null)
+        {
+            ((HomeActivity)getActivity()).resetFragment(AWalletBottomNavigationView.WALLET);
+        }
+        else
+        {
+            viewModel.setVisibility(isVisible);
+            viewModel.prepare();
+        }
     }
 
     private void onTokens(Token[] tokens)

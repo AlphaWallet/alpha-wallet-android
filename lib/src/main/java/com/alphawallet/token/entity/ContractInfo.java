@@ -10,6 +10,17 @@ import java.util.Map;
  */
 public class ContractInfo
 {
-    public String contractInterface = null;
-    public Map<Integer, List<String>> addresses = new HashMap<>();
+    public final String contractInterface;
+    public final Map<Integer, List<String>> addresses = new HashMap<>();
+
+    public ContractInfo(String contractType, Map<Integer, List<String>> addresses)
+    {
+        this.contractInterface = contractType;
+        this.addresses.putAll(addresses);
+    }
+
+    public ContractInfo(String contractType)
+    {
+        this.contractInterface = contractType;
+    }
 }

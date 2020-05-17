@@ -639,7 +639,7 @@ public class ImportTokenViewModel extends BaseViewModel
 
     private void testNetworkResult(ContractLocator result)
     {
-        if (!foundNetwork && !result.name.equals(TokenRepository.INVALID_CONTRACT))
+        if (!foundNetwork && !result.address.equals(TokenRepository.INVALID_CONTRACT))
         {
             foundNetwork = true;
             switchNetwork(result.chainId);
@@ -662,7 +662,7 @@ public class ImportTokenViewModel extends BaseViewModel
 
     private void tryDefault(ContractLocator result, String method)
     {
-        if (result.name.equals(TokenRepository.INVALID_CONTRACT))
+        if (result.address.equals(TokenRepository.INVALID_CONTRACT))
         {
             testNetworks(method);
         }

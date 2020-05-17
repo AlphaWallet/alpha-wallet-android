@@ -575,6 +575,7 @@
     <string name="message_version_support_warning">Starting Version 2.3, AlphaWallet will no longer support devices running on Android 6.0 and below.</string>
     <string name="hide_notification">Hide Notification</string>
     <string name="card_view_not_found_error">%1$s not found</string>
+    <string name="tokenscript_management">Tokenscript Management</string>
 
     <!-- Gas Slider -->
     <string name="speed_gas">Speed (Gas)</string>
@@ -588,4 +589,5 @@
     <string name="error_while_signing_transaction">Error occurred while signing transaction. Please re-import the key for this wallet.</string>
     <string name="error_not_whitelisted">Page Not Whitelisted</string>
     <string name="explain_not_whitelisted">TokenScript attempting to redirect to non-whitelisted page %1$s. If you are the owner of this site please submit PR to AlphaWallet repo to add page for whitelisting.</string>
+    <string name="token_spec">%1$s (%2$s)</string>
 </resources>

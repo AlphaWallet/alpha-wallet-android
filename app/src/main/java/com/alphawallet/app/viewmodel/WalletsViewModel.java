@@ -234,7 +234,7 @@ public class WalletsViewModel extends BaseViewModel
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .subscribe(wallet -> {
-                    fetchTokensInteract.fetchStoredToken(network, wallet, override.name) //fetch cached balance from this wallet's DB
+                    fetchTokensInteract.fetchStoredToken(network, wallet, override.address) //fetch cached balance from this wallet's DB
                     .flatMap(tokenFromCache -> fetchTokensInteract.updateBalance(wallet.address, tokenFromCache)) //update balance
                     .subscribe(this::updateWallet, error -> onFetchError(wallet, network)).isDisposed();
                 }, this::onError);

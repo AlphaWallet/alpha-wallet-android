@@ -18,7 +18,7 @@
         android:required="false" />
 
     <application
-        android:name="com.alphawallet.app.App"
+        android:name=".App"
         android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
@@ -213,7 +213,7 @@
             android:label="@string/token_function" />
 
         <activity
-            android:name="com.alphawallet.app.ui.FunctionActivity"
+            android:name=".ui.FunctionActivity"
             android:label="@string/token_function" />
 
         <!--<service android:name="AlphaWalletFirebaseMessagingService">-->
@@ -273,6 +273,10 @@
         <activity
             android:name=".ui.StaticViewer"
             android:label="View Text" />
+
+        <activity android:name=".ui.TokenScriptManagementActivity"
+            android:label="@string/tokenscript_management"/>
+
     </application>
 
 </manifest>

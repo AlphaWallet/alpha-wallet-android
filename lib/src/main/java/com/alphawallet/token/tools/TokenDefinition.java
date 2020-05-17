@@ -507,8 +507,6 @@ public class TokenDefinition {
 
     private void handleInput(Element element) throws Exception
     {
-        ContractInfo ci = new ContractInfo();
-
         for(Node n=element.getFirstChild(); n!=null; n=n.getNextSibling())
         {
             if (n.getNodeType() != ELEMENT_NODE) continue;
@@ -520,12 +518,12 @@ public class TokenDefinition {
                     Element tokenSpec = getFirstChildElement(tokenType);
                     if (tokenSpec != null)
                     {
-                        ci.contractInterface = tokenSpec.getLocalName();
                         switch (tokenSpec.getLocalName())
                         {
                             case "ethereum":
                                 String chainIdStr = tokenSpec.getAttribute("network");
                                 int chainId = Integer.parseInt(chainIdStr);
+                                ContractInfo ci = new ContractInfo(tokenSpec.getLocalName());
                                 ci.addresses.put(chainId, new ArrayList<>(Arrays.asList(ci.contractInterface)));
                                 contracts.put(name, ci);
                                 break;
@@ -707,9 +705,8 @@ public class TokenDefinition {
     private void handleAddresses(Element contract)
     {
         NodeList nList = contract.getElementsByTagNameNS(nameSpace, "address");
-        ContractInfo info = new ContractInfo();
+        ContractInfo info = new ContractInfo(contract.getAttribute("interface"));
         String name = contract.getAttribute("name");
-        info.contractInterface = contract.getAttribute("interface");
         contracts.put(name, info);
 
         for (int addrIndex = 0; addrIndex < nList.getLength(); addrIndex++)

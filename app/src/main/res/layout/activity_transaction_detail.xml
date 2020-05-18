@@ -1,4 +1,5 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -15,16 +16,16 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:paddingLeft="15dp"
-            android:paddingRight="15dp"
-            android:orientation="vertical">
+            android:paddingRight="15dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="20dp"
                 android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
                 android:fontFamily="@font/font_light"
                 android:gravity="center"
                 android:text="@string/title_transaction_details"
@@ -37,13 +38,13 @@
 
                 <ProgressBar
                     android:id="@+id/pending_spinner"
-                    android:visibility="gone"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:indeterminateTint="@color/colorPrimaryDark"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:contentDescription="@string/empty"/>
+                    android:contentDescription="@string/empty"
+                    android:indeterminateTint="@color/colorPrimaryDark"
+                    android:visibility="gone" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -51,28 +52,28 @@
                     android:layout_centerHorizontal="true"
                     android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/transaction_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_semibold"
-                    android:layout_marginEnd="10dp"
-                    android:textSize="18sp" />
+                    <TextView
+                        android:id="@+id/transaction_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:fontFamily="@font/font_semibold"
+                        android:textSize="18sp" />
 
-                <TextView
-                    android:id="@+id/amount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_bold"
-                    android:textSize="18sp" />
+                    <TextView
+                        android:id="@+id/amount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/font_bold"
+                        android:textSize="18sp" />
                 </LinearLayout>
 
                 <TextView
                     android:id="@+id/text_chain_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
                     android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
                     android:background="@drawable/background_status_pending"
                     android:fontFamily="@font/font_bold"
                     android:padding="2dp"
@@ -86,17 +87,55 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/font_regular"
+                android:text="@string/subtitle_transaction_hash_num"
+                android:textSize="13sp" />
+
+            <com.alphawallet.app.widget.CopyTextView
+                android:id="@+id/txn_hash"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/small_margin"
+                android:layout_marginBottom="@dimen/normal_margin"
+                android:background="@color/white"
+                android:paddingEnd="@dimen/dp16"
+                android:paddingBottom="@dimen/dp5"
+                app:gravity="start"
+                app:textColor="@color/mine" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
+                android:text="@string/subtitle_network"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/network"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_regular"
+                android:layout_marginTop="@dimen/small_margin"
+                android:layout_marginBottom="@dimen/normal_margin"
+                android:drawableLeft="@drawable/ic_coin_eth_small"
+                android:drawablePadding="@dimen/dp5"
+                android:textSize="17sp"
+                android:text="@string/ethereum" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/font_semibold"
+                android:text="@string/subtitle_from"
                 android:textAllCaps="true"
-                android:textSize="12sp"
-                android:text="@string/subtitle_from" />
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/from"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/normal_margin"
                 android:layout_marginTop="@dimen/small_margin"
+                android:layout_marginBottom="@dimen/normal_margin"
                 android:fontFamily="@font/font_regular"
                 android:textIsSelectable="true"
                 android:textSize="14sp"
@@ -106,19 +145,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
+                android:text="@string/subtitle_to"
                 android:textAllCaps="true"
-                android:textSize="12sp"
-                android:text="@string/subtitle_to" />
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/to"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/normal_margin"
                 android:layout_marginTop="@dimen/small_margin"
+                android:layout_marginBottom="@dimen/normal_margin"
                 android:fontFamily="@font/font_regular"
-                android:textSize="14sp"
                 android:textIsSelectable="true"
+                android:textSize="14sp"
                 tools:text="0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF" />
 
             <TextView
@@ -126,16 +165,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
+                android:text="@string/hint_contract_name"
                 android:textAllCaps="true"
-                android:textSize="12sp"
-                android:text="@string/hint_contract_name" />
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/contract_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/normal_margin"
                 android:layout_marginTop="@dimen/small_margin"
+                android:layout_marginBottom="@dimen/normal_margin"
                 android:fontFamily="@font/font_regular"
                 android:textSize="14sp"
                 tools:text="" />
@@ -145,16 +184,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
+                android:text="@string/subtitle_gas_fee"
                 android:textAllCaps="true"
-                android:textSize="12sp"
-                android:text="@string/subtitle_gas_fee" />
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/gas_fee"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/normal_margin"
                 android:layout_marginTop="@dimen/small_margin"
+                android:layout_marginBottom="@dimen/normal_margin"
                 android:fontFamily="@font/font_regular"
                 android:textSize="14sp"
                 tools:text="0.000044" />
@@ -164,52 +203,35 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
+                android:text="@string/confirmations"
                 android:textAllCaps="true"
-                android:textSize="12sp"
-                android:text="@string/confirmations" />
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/confirmations"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/normal_margin"
                 android:layout_marginTop="@dimen/small_margin"
+                android:layout_marginBottom="@dimen/normal_margin"
                 android:fontFamily="@font/font_regular"
                 android:textSize="14sp"
                 tools:text="0" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:textAllCaps="true"
-                android:textSize="12sp"
-                android:text="@string/subtitle_transaction_num" />
-
-            <TextView
-                android:id="@+id/txn_hash"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/normal_margin"
-                android:layout_marginTop="@dimen/small_margin"
-                android:fontFamily="@font/font_regular"
-                android:textSize="14sp"
-                tools:text="0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
+                android:text="@string/subtitle_transaction_time"
                 android:textAllCaps="true"
-                android:textSize="12sp"
-                android:text="@string/subtitle_transaction_time" />
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/txn_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/normal_margin"
                 android:layout_marginTop="@dimen/small_margin"
+                android:layout_marginBottom="@dimen/normal_margin"
                 android:fontFamily="@font/font_regular"
                 android:textSize="14sp"
                 tools:text="September 4, 2017 at 2:32:12 PM" />
@@ -218,16 +240,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/font_semibold"
+                android:text="@string/subtitle_block_num"
                 android:textAllCaps="true"
-                android:textSize="12sp"
-                android:text="@string/subtitle_block_num" />
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/block_number"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/normal_margin"
                 android:layout_marginTop="@dimen/small_margin"
+                android:layout_marginBottom="@dimen/normal_margin"
                 android:fontFamily="@font/font_regular"
                 android:textSize="14sp"
                 tools:text="4238793" />
@@ -235,24 +257,24 @@
             <Button
                 android:id="@+id/more_detail"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:background="@drawable/background_round_primary"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
-                android:paddingLeft="50dp"
-                android:paddingRight="50dp"
-                android:textColor="@color/white"
-                android:textAllCaps="false"
-                android:fontFamily="@font/font_regular"
-                android:textSize="20sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="@dimen/big_margin"
                 android:autoLink="web"
+                android:background="@drawable/background_round_primary"
                 android:clickable="true"
                 android:focusable="true"
+                android:fontFamily="@font/font_regular"
                 android:linksClickable="true"
-                android:text="@string/action_open_etherscan" />
+                android:paddingLeft="50dp"
+                android:paddingTop="10dp"
+                android:paddingRight="50dp"
+                android:paddingBottom="10dp"
+                android:text="@string/action_open_etherscan"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
         </LinearLayout>
     </ScrollView>
 </FrameLayout>

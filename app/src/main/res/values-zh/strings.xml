@@ -52,6 +52,7 @@
     <string name="subtitle_to">接收地址</string>
     <string name="subtitle_gas_fee">燃料费用</string>
     <string name="subtitle_transaction_num">交易 #</string>
+    <string name="subtitle_transaction_hash_num">Transaction Hash#</string>
     <string name="subtitle_transaction_time">交易时间</string>
     <string name="subtitle_block_num">区块 #</string>
     <!-- Actions -->

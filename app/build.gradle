@@ -39,30 +39,11 @@ android {
         minSdkVersion 24
         targetSdkVersion 29
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        def CoinmarketCapAPI = "CoinmarketCapAPI"
-        def AmberdataAPI = "AmberdataAPI"
-        def InfuraAPI = "InfuraAPI"
         def XInfuraAPI = "XInfuraAPI"
-        def COINMARKET_CAP_KEY = "\"ea2d0a6b-7e77-4015-bccf-4877e5c5b882\""
-        def AMBERDATA_API_KEY = "\"obtain-api-key-from-amberdata-io\"";
+        //Put your Infura key here
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\"";
-        def INFURA_API_KEY;
-        if (project.hasProperty("infuraAPI")) {
-            INFURA_API_KEY = infuraAPI
-        } else {
-            INFURA_API_KEY = DEFAULT_INFURA_API_KEY;
-        }
-        if (project.hasProperty("coinmarketcapAPI")) {
-            COINMARKET_CAP_KEY = coinmarketcapAPI
-        }
-        if (project.hasProperty("amberdataAPI")) {
-            AMBERDATA_API_KEY = amberdataAPI
-        }
 
         buildConfigField 'int', 'DB_VERSION', '7'
-        buildConfigField "String", CoinmarketCapAPI, COINMARKET_CAP_KEY
-        buildConfigField "String", AmberdataAPI, AMBERDATA_API_KEY
-        buildConfigField "String", InfuraAPI, INFURA_API_KEY
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
 
         ndk {
@@ -98,6 +79,11 @@ android {
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_8
         sourceCompatibility JavaVersion.VERSION_1_8
+    }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+        }
     }
 }
 

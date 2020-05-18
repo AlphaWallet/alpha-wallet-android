@@ -1,8 +1,19 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><ts:action xmlns:ts="http://tokenscript.org/2020/03/tokenscript" xmlns:asnx="urn:ietf:params:xml:ns:asnx" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://tokenscript.org/2020/03/tokenscript http://tokenscript.org/2020/03/tokenscript.xsd">
-    <ts:name>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><ts:card xmlns:ts="http://tokenscript.org/2020/06/tokenscript" xmlns:asnx="urn:ietf:params:xml:ns:asnx" xmlns:ethereum="urn:ethereum:constantinople" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="action" xsi:schemaLocation="http://tokenscript.org/2020/06/tokenscript http://tokenscript.org/2020/03/tokenscript.xsd">
+    <ts:label>
         <ts:string xml:lang="en">Convert to DAI</ts:string>
         <ts:string xml:lang="zh">將xDAI轉爲DAI</ts:string>
-    </ts:name>
+    </ts:label>
+    <ts:attribute-type name="amount" syntax="1.3.6.1.4.1.1466.115.121.1.36">
+        <ts:label>
+            <ts:string xml:lang="en">Amount</ts:string>
+            <ts:string xml:lang="zh">代幣金額</ts:string>
+        </ts:label>
+        <ts:origins>
+            <!-- e18 is a hard coded multiplier.
+            rationale for hardcoding: avoiding over-design  -->
+            <ts:user-entry as="e18"/>
+        </ts:origins>
+    </ts:attribute-type>
     <!-- because this action has xdai as input, it should be listed as
          an action under XDAI's token view. -->
     <ts:input>
@@ -20,39 +31,31 @@
             </ts:contract>
         </ts:token>
     </ts:output>
-    <ts:attribute-type id="amount" syntax="1.3.6.1.4.1.1466.115.121.1.36">
-        <ts:name>
-            <ts:string xml:lang="en">Amount</ts:string>
-            <ts:string xml:lang="zh">代幣金額</ts:string>
-        </ts:name>
-        <ts:origins>
-            <!-- e18 is a hard coded multiplier.
-            rationale for hardcoding: avoiding over-design  -->
-            <ts:user-entry as="e18"/>
-        </ts:origins>
-    </ts:attribute-type>
-    <!-- if the user tries to use this action when having little xdai
-         balance, either by clicking this action under the XDAI's
-         token view, or by clicking "create" token and choosing DAI,
-         the following message shows. -->
-    <!-- The exclusion rule here is excluded out to reduce the scope of schema-2019-05
-    <ts:exclude>
-        <ts:selection>
-            <ts:token filter="balance<=1000000000"/>
+    <!-- this selection prevents the user to use the action when
+         having little xdai balance.
+
+         This section is commented out since we don't know of
+         selection should be placed inside <action> - the alternative
+         design being that it is inside <token>. With this, it isn't
+         apparent that the filters are applicable to the input token:
+
+        <ts:selection id="low_balance" filter="!(balance>1000000000)">
+            <ts:denial>
+                <ts:string xml:lang="en">Not enough balance.</ts:string>
+            </ts:denial>
         </ts:selection>
-        <ts:message>
-            <ts:string xml:lang="en">Not enough balance.</ts:string>
-        </ts:message>
-    </exclude>
+
+         to make it work, first uncomment, then add
+         exclude="low_balance" to the root element.
     -->
     <ts:transaction>
-        <ts:ethereum>
-            <ts:to>0x7301CFA0e1756B71869E93d4e4Dca5c7d0eb0AA6</ts:to>
-            <ts:value ref="amount"/>
-        </ts:ethereum>
+        <ethereum:transfer>
+            <ethereum:to>0x7301CFA0e1756B71869E93d4e4Dca5c7d0eb0AA6</ethereum:to>
+            <ethereum:ether ref="amount"/>
+        </ethereum:transfer>
     </ts:transaction>
-    <ts:view xml:lang="en">
-        <xhtml:style type="text/css">h3 { color: #111; font-family: 'Open Sans', sans-serif; font-size: 20px; font-weight: 300; line-height: 32px; }
+    <ts:view xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+        <style type="text/css">h3 { color: #111; font-family: 'Open Sans', sans-serif; font-size: 20px; font-weight: 300; line-height: 32px; }
 
             #inputBox {
             text-align: center;
@@ -149,8 +152,8 @@
             font-size: 12px;
             font-weight: 500;
             margin-top: 6px;
-            }</xhtml:style>
-        <xhtml:script type="text/javascript">//
+            }</style>
+        <script type="text/javascript">//
             class Token {
 
             constructor(tokenInstance) {
@@ -173,11 +176,11 @@
 
             web3.tokens.dataChanged = (oldTokens, updatedTokens, tokenCardId) =&gt; {
             const currentTokenInstance = updatedTokens.currentInstance;
-            document.getElementById(tokenCardId).getElementsByClassName("contents")[0].innerHTML = new Token(currentTokenInstance).render()
+            document.getElementById(tokenCardId).innerHTML = new Token(currentTokenInstance).render();
             };
 
             //
-        </xhtml:script>
+        </script>
     </ts:view>
     <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
         <ds:SignedInfo>
@@ -189,15 +192,15 @@
                     <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
                 </ds:Transforms>
                 <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-                <ds:DigestValue>DCbXQHT37APgeOClGpixUUmaHIVIG4WnFKHcT64hjVE=</ds:DigestValue>
+                <ds:DigestValue>wvq+ZMKlljAzgQYNAsCMatiDDicn4l1uj5yJKMhlfeE=</ds:DigestValue>
             </ds:Reference>
         </ds:SignedInfo>
         <ds:SignatureValue>
-            OUh7xnEm+E46AwIz0JXezl/ja6wKLcXcfNyowNe97hjHrAG4U/6T3WLT/i03zpXZgkNQ7csqutyP
-            vvEEf1UgKpG4X7DwYSSjfepRlGwj6bUdeqaL7fymClnQwMuLBRM+xKAlQwiULOHslISBpN+L6m6Z
-            CiAvJ8djavkIzXFVqJLDyCjdvLJ9sxDh0hIm04vlrTCOM5HCmWNA2D/gR74cp8g10JyT0mZXxNA7
-            1BrFkNf7XZL8MNzgs7G9nMyYI5csgC/uBEvWp6+gisLpYyI0Ah18fKx3eyaFOsE279zWrd8ExH/C
-            c4aI6iLkQuLMIkWhKeEI4hAs63NB64HcAvODwA==
+            gPFjTUGyZt1s1msP1eWvp+FsMa1a6a9zZNtNuSbZ/+yvObTz5WuN7kD+FuucpsoGUoA1UmYqU4IP
+            4kfnzHroMdBn7Y8MR9mQqDon3xjE8uMbyHC7qtah9E2uwJmZlfhjdGwUxlAye1j+rHa74LNeH7ql
+            at0nCyUN8Z0YVLq3QQ1fcxPeKVC1ryKtkg6QJB+qd5ZavXdMaUOfwf/roWIo73emGkuHtC2zNN2K
+            40qoVyyPEZ4GM8GmQS8yltMWkfjK0+RCEfZO/ert4BK5xa7SVk7JJshVo9fYNa26alSxgHghmA6/
+            qHXlVf0WMf4qkXk5iu3XV+xlY/32JdVRvYjunA==
         </ds:SignatureValue>
         <ds:KeyInfo>
             <ds:KeyName>AlphaWallet</ds:KeyName>
@@ -265,4 +268,4 @@
                 </ds:X509Certificate>
             </ds:X509Data>
         </ds:KeyInfo>
-    </ds:Signature></ts:action>
+    </ds:Signature></ts:card>

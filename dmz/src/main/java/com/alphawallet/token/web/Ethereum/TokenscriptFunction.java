@@ -573,7 +573,7 @@ public abstract class TokenscriptFunction
             }
             val = new BigInteger(res, 16);
         }
-        return new TokenScriptResult.Attribute(attr.id, attr.name, val, res);
+        return new TokenScriptResult.Attribute(attr.name, attr.label, val, res);
     }
 
     public static final String ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -700,11 +700,11 @@ public abstract class TokenscriptFunction
             try
             {
                 BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
-                return new TokenScriptResult.Attribute(attr.id, attr.name, val, attr.getSyntaxVal(attr.toString(val)));
+                return new TokenScriptResult.Attribute(attr.name, attr.label, val, attr.getSyntaxVal(attr.toString(val)));
             }
             catch (Exception e)
             {
-                return new TokenScriptResult.Attribute(attr.id, attr.name, tokenId, "unsupported encoding");
+                return new TokenScriptResult.Attribute(attr.name, attr.label, tokenId, "unsupported encoding");
             }
         });
     }

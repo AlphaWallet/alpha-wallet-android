@@ -32,8 +32,8 @@ public class AttributeType {
 
     //default the bitmask to 32 bytes represented
     public BigInteger bitmask = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);    // TODO: BigInteger !== BitInt. Test edge conditions.
-    public String name;  // TODO: should be polyglot because user change change language in the run
-    public String id;
+    public String label;  // TODO: should be polyglot because user change change language in the run
+    public String name;
     public int bitshift = 0;
     public TokenDefinition.Syntax syntax;
     public As as;
@@ -46,8 +46,9 @@ public class AttributeType {
     public AttributeType(Element attr, TokenDefinition def)
     {
         definition = def;
-        id = attr.getAttribute("id");
-        name = id; //set name to id if not specified
+        //schema 2020/06 id is now name; name is now label
+        name = attr.getAttribute("name");
+        label = name; //set label to name if not specified
         as = As.Unsigned; //default value
 
         if(attr.getAttribute("syntax") != null) {
@@ -66,8 +67,8 @@ public class AttributeType {
                     case "origins":
                         handleOrigins(origin);
                         break;
-                    case "name":
-                        name = definition.getLocalisedString(origin, "string");
+                    case "label":
+                        this.label = definition.getLocalisedString(origin, "string");
                         break;
                     case "mapping":
                         populate(origin);
@@ -129,15 +130,15 @@ public class AttributeType {
                         if (resolve.hasAttribute("event"))
                         {
                             event = definition.parseEvent(resolve, syntax);
-                            event.attributeId = id;
+                            event.attributeId = name;
                         }
                         else if (resolve.hasAttribute("function"))
                         {
                             function = definition.parseFunction(resolve, syntax);
                         }
                         //drop through (no break)
-                    case "token-id":
-                        //this value is obtained from the token id
+                    case "token-name":
+                        //this value is obtained from the token name
                         setAs(definition.parseAs(resolve));
                         populate(resolve); //check for mappings
                         if (function != null) function.as = definition.parseAs(resolve);

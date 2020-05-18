@@ -623,7 +623,7 @@ public abstract class TokenscriptFunction
                 val = BigInteger.ZERO;
             }
         }
-        return new TokenScriptResult.Attribute(attr.id, attr.name, val, res);
+        return new TokenScriptResult.Attribute(attr.name, attr.label, val, res);
     }
 
     public static final String ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -776,10 +776,13 @@ public abstract class TokenscriptFunction
     public Observable<TokenScriptResult.Attribute> fetchAttrResult(Token token, AttributeType attr, BigInteger tokenId, ContractAddress cAddr,
                                                                    TokenDefinition td, AttributeInterface attrIf)
     {
-        if (attr == null) return Observable.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));
-        else if (token.getAttributeResult(attr.id, tokenId) != null)
+        if (attr == null)
         {
-            return Observable.fromCallable(() -> token.getAttributeResult(attr.id, tokenId));
+            return Observable.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));
+        }
+        else if (token.getAttributeResult(attr.name, tokenId) != null)
+        {
+            return Observable.fromCallable(() -> token.getAttributeResult(attr.name, tokenId));
         }
         else if (attr.event != null)
         {
@@ -823,18 +826,18 @@ public abstract class TokenscriptFunction
             {
                 if (attr.userInput)
                 {
-                    return new TokenScriptResult.Attribute(attr.id, attr.name, BigInteger.ZERO, "", true);
+                    return new TokenScriptResult.Attribute(attr.name, attr.label, BigInteger.ZERO, "", true);
                 }
                 else
                 {
                     BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
-                    if (BuildConfig.DEBUG) System.out.println("ATTR: " + attr.name + " : " + attr.id + " : " + attr.getSyntaxVal(attr.toString(val)));
-                    return new TokenScriptResult.Attribute(attr.id, attr.name, val, attr.getSyntaxVal(attr.toString(val)));
+                    if (BuildConfig.DEBUG) System.out.println("ATTR: " + attr.label + " : " + attr.name + " : " + attr.getSyntaxVal(attr.toString(val)));
+                    return new TokenScriptResult.Attribute(attr.name, attr.label, val, attr.getSyntaxVal(attr.toString(val)));
                 }
             }
             catch (Exception e)
             {
-                return new TokenScriptResult.Attribute(attr.id, attr.name, tokenId, "unsupported encoding");
+                return new TokenScriptResult.Attribute(attr.name, attr.label, tokenId, "unsupported encoding");
             }
         });
     }
@@ -910,7 +913,7 @@ public abstract class TokenscriptFunction
                     break;
                 case Mapping:
                     //makes no sense as input
-                    convertedValue = TOKENSCRIPT_CONVERSION_ERROR + "Mapping in user input params: " + attr.id;
+                    convertedValue = TOKENSCRIPT_CONVERSION_ERROR + "Mapping in user input params: " + attr.name;
                     break;
                 case Boolean:
                     //attempt to decode
@@ -925,7 +928,7 @@ public abstract class TokenscriptFunction
                     break;
                 case TokenId:
                     //Shouldn't get here - tokenId should have been handled before.
-                    convertedValue = TOKENSCRIPT_CONVERSION_ERROR + "Token ID in user input params: " + attr.id;
+                    convertedValue = TOKENSCRIPT_CONVERSION_ERROR + "Token ID in user input params: " + attr.name;
                     break;
             }
         }
@@ -943,7 +946,7 @@ public abstract class TokenscriptFunction
         localAttrs.clear();
         for (AttributeType attr : attrs)
         {
-            localAttrs.put(attr.id, attr);
+            localAttrs.put(attr.name, attr);
         }
     }
 

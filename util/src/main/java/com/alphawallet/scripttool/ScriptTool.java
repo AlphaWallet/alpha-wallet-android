@@ -233,7 +233,7 @@ public class ScriptTool implements AttributeInterface
     public TransactionResult getFunctionResult(ContractAddress contract, AttributeType attr,
                                                BigInteger tokenId)
     {
-        String addressFunctionKey = contract.address + "-" + attr.id;
+        String addressFunctionKey = contract.address + "-" + attr.name;
         TransactionResult tr = new TransactionResult(contract.chainId, contract.address, tokenId, attr);
         //existing entry in map?
         if (transactionResults.containsKey(contract.chainId))

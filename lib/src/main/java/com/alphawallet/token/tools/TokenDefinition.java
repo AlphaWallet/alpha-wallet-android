@@ -622,7 +622,7 @@ public class TokenDefinition {
         Element tx = getFirstChildElement(element);
         switch (tx.getLocalName())
         {
-            case "ethereum":
+            case "ethereum:transaction":
                 tsAction.function = parseFunction(tx, Syntax.IA5String);
                 tsAction.function.as = parseAs(tx);
                 break;

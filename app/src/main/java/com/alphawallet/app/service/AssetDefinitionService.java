@@ -299,7 +299,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             File[] files = context.getFilesDir().listFiles();
             if (files != null) fileList.addAll(Arrays.asList(files)); //first add files in app internal area - these are downloaded from the server
             files = context.getExternalFilesDir("").listFiles();
-            if (files != null) fileList.addAll(Arrays.asList(files)); //now add files in the app's external directory; /Android/data/[app-id]/files. These override internal
+            if (files != null) fileList.addAll(Arrays.asList(files)); //now add files in the app's external directory; /Android/data/[app-name]/files. These override internal
 
             if (checkReadPermission())
             {
@@ -376,7 +376,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         for (AttributeType attr : attrList)
         {
-            if (attr.id.equals(key)) return attr;
+            if (attr.name.equals(key)) return attr;
         }
 
         return null;
@@ -416,7 +416,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             }
             else if (attrtype.event != null)
             {
-                result = new TokenScriptResult.Attribute(attrtype.id, attrtype.name, tokenId, "unsupported encoding");
+                result = new TokenScriptResult.Attribute(attrtype.name, attrtype.label, tokenId, "unsupported encoding");
             }
             else if (attrtype.function != null)
             {
@@ -427,12 +427,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             else
             {
                 BigInteger val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
-                result = new TokenScriptResult.Attribute(attrtype.id, attrtype.name, attrtype.processValue(val), attrtype.getSyntaxVal(attrtype.toString(val)));
+                result = new TokenScriptResult.Attribute(attrtype.name, attrtype.label, attrtype.processValue(val), attrtype.getSyntaxVal(attrtype.toString(val)));
             }
         }
         catch (Exception e)
         {
-            result = new TokenScriptResult.Attribute(attrtype.id, attrtype.name, tokenId, "unsupported encoding");
+            result = new TokenScriptResult.Attribute(attrtype.name, attrtype.label, tokenId, "unsupported encoding");
         }
 
         return result;
@@ -657,7 +657,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     }
 
     /**
-     * Get the issuer name given the contract address
+     * Get the issuer label given the contract address
      * Note: this is optimised so as we don't need to keep loading in definitions as the user scrolls
      *
      * @param token
@@ -1680,7 +1680,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             Observable.fromIterable(token.getNonZeroArrayBalance())
                                     .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
                                     .filter(txResult -> txResult.needsUpdating(token.lastTxTime))
-                                    .concatMap(result -> tokenscriptUtility.fetchAttrResult(token, td.attributeTypes.get(attr.id), result.tokenId, cAddr, td, this, false))
+                                    .concatMap(result -> tokenscriptUtility.fetchAttrResult(token, td.attributeTypes.get(attr.name), result.tokenId, cAddr, td, this, false))
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribe();
@@ -1691,7 +1691,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             TransactionResult tr = getFunctionResult(cAddr, attr, BigInteger.ZERO);
                             if (tr.needsUpdating(token.lastTxTime))
                             {
-                                tokenscriptUtility.fetchAttrResult(token, td.attributeTypes.get(attr.id), tr.tokenId, cAddr, td, this, false)
+                                tokenscriptUtility.fetchAttrResult(token, td.attributeTypes.get(attr.name), tr.tokenId, cAddr, td, this, false)
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe();
@@ -1774,7 +1774,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public TransactionResult getFunctionResult(ContractAddress contract, AttributeType attr, BigInteger tokenId)
     {
         TransactionResult tr = new TransactionResult(contract.chainId, contract.address, tokenId, attr);
-        String dataBaseKey = functionKey(contract, tokenId, attr.id);
+        String dataBaseKey = functionKey(contract, tokenId, attr.name);
         try (Realm realm = realmManager.getAuxRealmInstance(tokensService.getCurrentAddress()))
         {
             RealmAuxData realmToken = realm.where(RealmAuxData.class)
@@ -1965,7 +1965,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             name = definition.getTokenName(1);
         }
-        TokenScriptResult.addPair(attrs, "name", name);
+        TokenScriptResult.addPair(attrs, "label", name);
         TokenScriptResult.addPair(attrs, "symbol", token.getSymbol());
         TokenScriptResult.addPair(attrs, "_count", String.valueOf(count));
         TokenScriptResult.addPair(attrs, "contractAddress", token.tokenInfo.address);

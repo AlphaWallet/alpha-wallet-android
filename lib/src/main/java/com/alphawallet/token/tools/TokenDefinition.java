@@ -35,7 +35,7 @@ public class TokenDefinition {
     public String holdingToken;
     private int actionCount;
 
-    public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2020/03";
+    public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2020/06";
     public static final String TOKENSCRIPT_REPO_SERVER = "https://repo.tokenscript.org/";
 
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";

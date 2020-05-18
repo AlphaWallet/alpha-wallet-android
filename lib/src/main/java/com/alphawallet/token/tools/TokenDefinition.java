@@ -666,7 +666,7 @@ public class TokenDefinition {
         Element tx = getFirstChildElement(element);
         switch (tx.getLocalName())
         {
-            case "transaction":
+            case "ethereum:transaction":
                 if (tx.getPrefix().equals("ethereum"))
                 {
                     tsAction.function = parseFunction(tx, Syntax.IA5String);

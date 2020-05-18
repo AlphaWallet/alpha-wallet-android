@@ -166,16 +166,12 @@ public class AttributeType {
 
                 switch (node.getLocalName())
                 {
-                    case "ethereum":
-                        if (resolve.hasAttribute("event"))
-                        {
-                            event = definition.parseEvent(resolve, syntax);
-                            event.attributeId = name;
-                        }
-                        else if (resolve.hasAttribute("function"))
-                        {
-                            function = definition.parseFunction(resolve, syntax);
-                        }
+                    case "ethereum:call":
+                    case "ethereum:transaction":
+                        function = definition.parseFunction(resolve, syntax);
+                    case "ethereum:event":
+                        event = definition.parseEvent(resolve, syntax);
+                        event.attributeId = name;
                         //drop through (no break)
                     case "token-name":
                         //this value is obtained from the token name

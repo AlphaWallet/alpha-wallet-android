@@ -22,6 +22,7 @@ import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModel;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
+import com.alphawallet.app.widget.CopyTextView;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -80,7 +81,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         amount = findViewById(R.id.amount);
         ((TextView) findViewById(R.id.from)).setText(transaction.from);
         ((TextView) findViewById(R.id.to)).setText(transaction.to);
-        ((TextView) findViewById(R.id.txn_hash)).setText(transaction.hash);
+        ((CopyTextView) findViewById(R.id.txn_hash)).setText(transaction.hash);
         ((TextView) findViewById(R.id.txn_time)).setText(localiseUnixTime(transaction.timeStamp));
 
         ((TextView) findViewById(R.id.block_number)).setText(blockNumber);

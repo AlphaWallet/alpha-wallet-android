@@ -58,6 +58,7 @@
     <string name="subtitle_to">To</string>
     <string name="subtitle_gas_fee">Gas Fee</string>
     <string name="subtitle_transaction_num">Transaction #</string>
+    <string name="subtitle_transaction_hash_num">Transaction Hash #</string>
     <string name="subtitle_transaction_time">Transaction Time</string>
     <string name="subtitle_block_num">Block #</string>
 
@@ -584,6 +585,7 @@
     <string name="message_version_support_warning">Starting Version 2.3, AlphaWallet will no longer support devices running on Android 6.0 and below.</string>
     <string name="hide_notification">Hide Notification</string>
     <string name="card_view_not_found_error">%1$s not found</string>
+    <string name="subtitle_network">Network</string>
 
     <!-- Gas Slider -->
     <string name="speed_gas">Speed (Gas)</string>

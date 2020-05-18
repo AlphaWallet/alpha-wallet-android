@@ -5,15 +5,13 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.util.Utils;
-
-import org.web3j.crypto.WalletUtils;
 
 public class CopyTextView extends LinearLayout {
 
@@ -25,6 +23,9 @@ public class CopyTextView extends LinearLayout {
     private LinearLayout layout;
 
     private int textResId;
+    private int textColor;
+    private int gravity;
+    private String font;
     private boolean showToast;
     private String rawAddress;
 
@@ -47,7 +48,9 @@ public class CopyTextView extends LinearLayout {
         );
 
         try {
-            textResId = a.getResourceId(R.styleable.CopyTextView_text, R.string.empty);
+            textResId = a.getResourceId(R.styleable.CopyTextView_text, R.string.action_add_wallet);
+            textColor = a.getColor(R.styleable.CopyTextView_textColor, -1);
+            gravity = a.getInt(R.styleable.CopyTextView_gravity, Gravity.NO_GRAVITY);
             showToast = a.getBoolean(R.styleable.CopyTextView_showToast, true);
         } finally {
             a.recycle();
@@ -59,6 +62,8 @@ public class CopyTextView extends LinearLayout {
         copy = findViewById(R.id.img_copy);
         text = findViewById(R.id.text);
         text.setText(textResId);
+        text.setTextColor(textColor);
+        text.setGravity(gravity);
 
         layout.setOnClickListener(v -> copyToClipboard());
         copy.setOnClickListener(v -> copyToClipboard());

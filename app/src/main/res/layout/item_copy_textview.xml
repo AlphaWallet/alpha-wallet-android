@@ -1,27 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/view_container"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/background_round_grey_5dp"
-    android:orientation="horizontal"
-    android:paddingStart="@dimen/dp22"
-    android:paddingTop="@dimen/dp11"
-    android:paddingEnd="@dimen/dp16"
-    android:paddingBottom="@dimen/dp11">
+    android:orientation="horizontal">
 
     <TextView
         android:id="@+id/text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
         android:layout_weight="1"
-        android:fontFamily="@font/font_semibold"
-        android:gravity="center"
+        android:fontFamily="@font/font_regular"
         android:maxWidth="180dp"
         android:maxLines="2"
         android:text="0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4"
-        android:textColor="@color/black"
         android:textSize="@dimen/sp20" />
 
     <ImageView

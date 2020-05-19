@@ -82,6 +82,13 @@ public class TickerService implements TickerServiceInterface
     private static String currentCurrencySymbolTxt;
     private static String currentCurrencySymbol;
 
+    public static native String getCMCKey();
+    public static native String getAmberDataKey();
+
+    static {
+        System.loadLibrary("keys");
+    }
+
     public TickerService(OkHttpClient httpClient, Gson gson, Context ctx)
     {
         this.httpClient = httpClient;
@@ -127,7 +134,7 @@ public class TickerService implements TickerServiceInterface
     {
         ethTickers.put(ARTIS_SIGMA1_ID, artisTicker);
         ethTickers.put(ARTIS_TAU1_ID, artisTicker);
-        final String keyAPI = BuildConfig.CoinmarketCapAPI;
+        final String keyAPI = getCMCKey();
         return Single.fromCallable(() -> {
             try
             {
@@ -261,7 +268,7 @@ public class TickerService implements TickerServiceInterface
         String netName = "ethereum-mainnet";
         if (info.chainId != MAINNET_ID) return Single.fromCallable(() -> { return new Token[0]; });
         List<Token> tokenList = new ArrayList<>();
-        final String keyAPI = BuildConfig.AmberdataAPI;
+        final String keyAPI = getAmberDataKey();
         return Single.fromCallable(() -> {
             try
             {
@@ -349,7 +356,7 @@ public class TickerService implements TickerServiceInterface
                 Request request = new Request.Builder()
                         .url("https://web3api.io/api/v2/tokens/rankings?type=erc20")
                         .get()
-                        .addHeader("x-api-key", BuildConfig.AmberdataAPI)
+                        .addHeader("x-api-key", getAmberDataKey())
                         .build();
 
                 okhttp3.Response response = httpClient.newCall(request)
@@ -426,7 +433,7 @@ public class TickerService implements TickerServiceInterface
 
     private Single<Map<Integer, TokenTicker>> fetchAmberData(Map<Integer, TokenTicker> tickers)
     {
-        final String keyAPI = BuildConfig.AmberdataAPI;
+        final String keyAPI = getAmberDataKey();
         return Single.fromCallable(() -> {
             try
             {

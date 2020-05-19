@@ -157,6 +157,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
 
         //TokenScript view for ERC721 overrides OpenSea display
         if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
+
         addRanges(t, holderType);
         items.endBatchedUpdates();
     }

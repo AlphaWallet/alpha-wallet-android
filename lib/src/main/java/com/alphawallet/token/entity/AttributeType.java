@@ -9,6 +9,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,6 +26,10 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
  */
 
 public class AttributeType {
+    private static final int ADDRESS_SIZE = 160;
+    private static final int ADDRESS_LENGTH_IN_HEX = ADDRESS_SIZE >> 2;
+    private static final int ADDRESS_LENGTH_IN_BYTES = ADDRESS_SIZE >> 3;
+
     //default the bitmask to 32 bytes represented
     public BigInteger bitmask = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);    // TODO: BigInteger !== BitInt. Test edge conditions.
     public String name;  // TODO: should be polyglot because user change change language in the run
@@ -234,7 +239,7 @@ public class AttributeType {
                 {
                     return "0";
                 }
-                else if (data.startsWith("0x"))
+                else if (data.startsWith("0x") && this.as != As.Address) //Address is a special case where we want the leading 0x
                 {
                     data = data.substring(2);
                 }
@@ -361,11 +366,29 @@ public class AttributeType {
             case Bytes:
                 return Numeric.toHexString(data.toByteArray());
 
+            case Address:
+                return parseEthereumAddress(data);
+
             //e18, e8, e4, e2
             //return resized data value?
 
             default:
                 throw new NullPointerException("Missing valid 'as' attribute");
+        }
+    }
+
+    private String parseEthereumAddress(BigInteger data)
+    {
+        byte[] padded = Numeric.toBytesPadded(data, ADDRESS_LENGTH_IN_BYTES);
+        String addr = Numeric.toHexString(padded);
+
+        if (Numeric.cleanHexPrefix(addr).length() == ADDRESS_LENGTH_IN_HEX)
+        {
+            return addr;
+        }
+        else
+        {
+            return "<Invalid Address: addr>";
         }
     }
 

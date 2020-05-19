@@ -28,8 +28,9 @@ import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
-import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -102,16 +103,10 @@ public class Web3TokenView extends WebView
         clearCache(true);
         showingError = false;
 
-        addJavascriptInterface(new SignCallbackJSInterface(
+        addJavascriptInterface(new TokenScriptCallbackInterface(
                 this,
-                innerOnSignTransactionListener,
-                innerOnSignMessageListener,
                 innerOnSignPersonalMessageListener,
-                innerOnSignTypedMessageListener), "alpha");
-
-        addJavascriptInterface(new ValueCallbackJSInterface(
-                this,
-                innerOnSetValuesListener), "changeListener");
+                innerOnSetValuesListener), "alpha");
 
         super.setWebViewClient(tokenScriptClient);
 
@@ -176,7 +171,7 @@ public class Web3TokenView extends WebView
         jsInjectorClient.setRpcUrl(EthereumNetworkRepository.getNodeURLByNetworkId(chainId));
     }
 
-    public void onSignPersonalMessageSuccessful(Message message, String signHex) {
+    public void onSignPersonalMessageSuccessful(@NotNull Message message, String signHex) {
         long callbackId = message.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
     }
@@ -241,22 +236,15 @@ public class Web3TokenView extends WebView
         }
     };
 
-    private final OnSignTypedMessageListener innerOnSignTypedMessageListener = new OnSignTypedMessageListener() {
-        @Override
-        public void onSignTypedMessage(Message<TypedData[]> message) {
-
-        }
-    };
-
     private final OnSetValuesListener innerOnSetValuesListener = new OnSetValuesListener() {
         @Override
         public void setValues(Map<String, String> updates)
         {
-            onSetValuesListener.setValues(updates);
+            if (onSetValuesListener != null) onSetValuesListener.setValues(updates);
         }
     };
 
-    public void onSignCancel(Message message) {
+    public void onSignCancel(@NotNull Message message) {
         long callbackId = message.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
     }
@@ -329,12 +317,21 @@ public class Web3TokenView extends WebView
         }
 
         @Override
-        public void onUnhandledKeyEvent(WebView view, KeyEvent event) {
+        public void onUnhandledKeyEvent(WebView view, KeyEvent event)
+        {
             if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
             {
-                if (keyPressCallback != null) keyPressCallback.enterKeyPressed();
+                if (keyPressCallback != null)
+                    keyPressCallback.enterKeyPressed();
             }
             super.onUnhandledKeyEvent(view, event);
+        }
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url)
+        {
+            if (assetHolder != null) return assetHolder.overridePageLoad(view, url);
+            else return false;
         }
 
         @Override

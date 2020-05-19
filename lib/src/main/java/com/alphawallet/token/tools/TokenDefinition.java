@@ -24,10 +24,11 @@ public class TokenDefinition {
     protected Locale locale;
 
     public Map<String, ContractInfo> contracts = new HashMap<>();
-    public Map<String, Map<String, String>> attributeSets = new HashMap<>(); //TODO: add language, in case user changes language during operation - see Weiwu's comment further down
+    //public Map<String, Map<String, String>> attributeSets = new HashMap<>(); //TODO: add language, in case user changes language during operation - see Weiwu's comment further down
     public Map<String, TSAction> actions = new HashMap<>();
     private Map<String, String> names = new HashMap<>(); // store plural etc for token name
     private Map<String, Module> moduleLookup = null; //used to protect against name collision
+    private TSTokenViewHolder tokenViews = new TSTokenViewHolder();
 
     public String nameSpace;
     public TokenscriptContext context;
@@ -51,7 +52,7 @@ public class TokenDefinition {
      - each contract <feature> normally should invoke new code modules
        e.g. when a new decentralised protocol is introduced, a new
        class to handle the protocol needs to be introduced, which owns
-       it own way of specifying implementation, like marketeQueueAPI.
+       it own way of specifying implementation, like marketQueueAPI.
 
      - tokenName is going to be selectable through filters -
        that is, it's allowed that token names are different in the
@@ -60,7 +61,7 @@ public class TokenDefinition {
      - each token definition XML file can incorporate multiple
        contracts, each with different network IDs.
 
-     - each XML file can be signed mulitple times, with multiple
+     - each XML file can be signed multiple times, with multiple
        <KeyName>.
     */
     protected String keyName = null;
@@ -121,6 +122,7 @@ public class TokenDefinition {
         switch(resolve.getAttribute("as").toLowerCase()) {
             case "signed":
                 return As.Signed;
+            case "string":
             case "utf8":
             case "": //no type specified, return string
                 return As.UTF8;
@@ -140,6 +142,8 @@ public class TokenDefinition {
                 return As.Boolean;
             case "mapping":
                 return As.Mapping;
+            case "address":
+                return As.Address;
             default: // "unsigned"
                 return As.Unsigned;
         }
@@ -362,7 +366,7 @@ public class TokenDefinition {
         }
     }
 
-    private void processTokenCardElements(Element card)
+    /*private void processTokenCardElements(Element card)
     {
         Map<String, Map<String, String>> attributeSet = new HashMap<>();
         for(Node node=card.getFirstChild(); node!=null; node=node.getNextSibling())
@@ -385,6 +389,45 @@ public class TokenDefinition {
                 localisedAttributes.put(attr, getLocalisedEntry(attrEntry));
             }
             attributeSets.put("cards", localisedAttributes);
+        }
+    }*/
+
+    private void processTokenCardElements(Element card) throws Exception
+    {
+        NodeList ll = card.getChildNodes();
+
+        for (int j = 0; j < ll.getLength(); j++)
+        {
+            Node node = ll.item(j);
+            if (node.getNodeType() != ELEMENT_NODE)
+                continue;
+
+            if (node.getPrefix() != null && node.getPrefix().equalsIgnoreCase("ds"))
+                continue;
+
+            Element element = (Element) node;
+            switch (node.getLocalName())
+            {
+                case "attribute-type":
+                    AttributeType attr = new AttributeType(element, this);
+                    tokenViews.localAttributeTypes.put(attr.id, attr);
+                    break;
+                case "view": //TODO: Localisation
+                case "item-view":
+                    TSTokenView v = new TSTokenView(element);
+                    tokenViews.views.put(node.getLocalName(), v);
+                    break;
+                case "view-iconified":
+                    throw new SAXException("Deprecated <view-iconified> used in <ts:token>. Replace with <item-view>");
+                case "style":
+                    tokenViews.globalStyle = getHTMLContent(element);
+                    break;
+                case "script":
+                    //misplaced script tag
+                    throw new SAXException("Misplaced <script> tag in <ts:token>");
+                default:
+                    throw new SAXException("Unknown tag <" + node.getLocalName() + "> tag in tokens");
+            }
         }
     }
 
@@ -476,7 +519,6 @@ public class TokenDefinition {
         tsAction.order = actionCount;
         tsAction.type = action.getAttribute("type");
         tsAction.exclude = "";
-        tsAction.style = null;
         actionCount++;
         for (int j = 0; j < ll.getLength(); j++)
         {
@@ -506,7 +548,7 @@ public class TokenDefinition {
                     tsAction.exclude = element.getAttribute("selection");
                     break;
                 case "view": //localised?
-                    tsAction.view = getHTMLContent(element);
+                    tsAction.view = new TSTokenView(element); //getHTMLContent(element);
                     break;
                 case "style":
                     tsAction.style = getHTMLContent(element);
@@ -1001,44 +1043,38 @@ public class TokenDefinition {
     }
 
     /**
+     * Legacy interface for AppSiteController
      * Check for 'cards' attribute set
      * @param tag
      * @return
      */
     public String getCardData(String tag)
     {
-        String view = null;
-        Map<String, String> appearanceSet = attributeSets.get("cards");
-        if (appearanceSet != null)
-        {
-            view = appearanceSet.get(tag);
-            if (view == null) view = checkLegacyCards(tag, appearanceSet);
-        }
+        TSTokenView view = tokenViews.views.get("view");
 
-        return view != null ? view : "";
+        if (tag.equals("view")) return view.tokenView;
+        else if (tag.equals("style")) return view.style;
+        else return null;
     }
 
-    private String checkLegacyCards(String tag, Map<String, String> appearanceSet)
+    public boolean hasTokenView()
     {
-        String legacyWarningMessage = null;
+        return tokenViews.views.size() > 0;
+    }
 
-        switch (tag)
-        {
-            case "item-view":
-                if (appearanceSet.containsKey("view-iconified"))
-                {
-                    legacyWarningMessage = LEGACY_WARNING_TEMPLATE.replace("${ERR1}", "view-iconified")
-                                                                  .replace("${ERR2}", tag) + "<br/>See <a href=\"http://tokenscript.org/2020/03/tokenscript\">http://tokenscript.org/2020/03/tokenscript</a>";
-                }
-                break;
-            //add instances here when any view name is deprecated
-            default:
-                break;
-        }
+    public String getTokenView(String viewTag)
+    {
+        return tokenViews.getView(viewTag);
+    }
 
-        if (legacyWarningMessage != null) legacyWarningMessage += "</html>"; //close error message
+    public String getTokenViewStyle(String viewTag)
+    {
+        return tokenViews.getViewStyle(viewTag);
+    }
 
-        return legacyWarningMessage;
+    public Map<String, AttributeType> getTokenViewLocalAttributes()
+    {
+        return tokenViews.localAttributeTypes;
     }
 
     public Map<String, TSAction> getActions()

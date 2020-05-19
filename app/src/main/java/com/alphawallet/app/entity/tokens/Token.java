@@ -76,6 +76,8 @@ public class Token implements Parcelable, Comparable<Token>
     public int nonIconifiedWebviewHeight;
     private int nameWeight;
 
+    private final Map<BigInteger, Map<String, TokenScriptResult.Attribute>> resultMap = new ConcurrentHashMap<>(); //Build result map for function parse, per tokenId
+
     public String getNetworkName() { return shortNetworkName; }
 
     public TokenTicker ticker;
@@ -101,6 +103,7 @@ public class Token implements Parcelable, Comparable<Token>
         hasTokenScript = false;
         refreshCheck = false;
         nameWeight = calculateTokenNameWeight();
+        resultMap.clear();
     }
 
     public void transferPreviousData(Token oldToken)
@@ -1129,7 +1132,7 @@ public class Token implements Parcelable, Comparable<Token>
 
         final StringBuilder attrs = assetService.getTokenAttrs(this, tokenId, range.tokenIds.size());
 
-        assetService.resolveAttrs(this, tokenId, null) //Can a view have local attributes?
+        assetService.resolveAttrs(this, tokenId, assetService.getTokenViewLocalAttributes(tokenInfo.chainId, tokenInfo.address))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(throwable, waitSpinner, tokenView, range),
@@ -1157,7 +1160,7 @@ public class Token implements Parcelable, Comparable<Token>
         String view = assetService.getTokenView(tokenInfo.chainId, getAddress(), viewName);
         if (waitSpinner != null) waitSpinner.setVisibility(View.GONE);
         if (TextUtils.isEmpty(view)) view = buildViewError(ctx, range, viewName);
-        String style = assetService.getTokenView(tokenInfo.chainId, getAddress(), "style");
+        String style = assetService.getTokenViewStyle(tokenInfo.chainId, getAddress(), viewName);
         String viewData = tokenView.injectWeb3TokenInit(ctx, view, attrs.toString(), range.tokenIds.get(0));
         viewData = tokenView.injectStyleAndWrapper(viewData, style); //style injected last so it comes first
 
@@ -1382,5 +1385,34 @@ public class Token implements Parcelable, Comparable<Token>
         }
 
         return asset;
+    }
+
+    public TokenScriptResult.Attribute getAttributeResult(String attrId, BigInteger tokenId)
+    {
+        if (resultMap.containsKey(tokenId))
+        {
+            return resultMap.get(tokenId).get(attrId);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void setAttributeResult(BigInteger tokenId, TokenScriptResult.Attribute attrResult)
+    {
+        Map<String, TokenScriptResult.Attribute> resultSet = resultMap.get(tokenId);
+        if (resultSet == null)
+        {
+            resultSet = new ConcurrentHashMap<>();
+            resultMap.put(tokenId, resultSet);
+        }
+
+        resultSet.put(attrResult.id, attrResult);
+    }
+
+    public void clearResultMap()
+    {
+        resultMap.clear();
     }
 }

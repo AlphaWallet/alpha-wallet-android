@@ -14,6 +14,7 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
+import com.alphawallet.app.web3.OnSetValuesListener;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -24,6 +25,7 @@ import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
 
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +39,7 @@ import static com.alphawallet.app.C.Key.TICKET;
  * Created by James on 2/04/2019.
  * Stormbird in Singapore
  */
-public class TokenFunctionActivity extends BaseActivity implements StandardFunctionInterface, PageReadyCallback
+public class TokenFunctionActivity extends BaseActivity implements StandardFunctionInterface, PageReadyCallback, OnSetValuesListener
 {
     @Inject
     protected TokenFunctionViewModelFactory tokenFunctionViewModelFactory;
@@ -47,6 +49,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private Token token;
     private List<BigInteger> idList = null;
     private FunctionButtonBar functionBar;
+    private final Map<String, String> args = new HashMap<>();
     private boolean reloaded;
     private AWalletAlertDialog dialog;
 
@@ -62,6 +65,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
         token.displayTicketHolder(data, frameLayout, viewModel.getAssetDefinitionService(), this, false);
         tokenView.setOnReadyCallback(this);
+        tokenView.setOnSetValuesListener(this);
         functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null);
         functionBar.revealButtons();
         functionBar.setSelection(idList);
@@ -210,5 +214,28 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
+    }
+
+    @Override
+    public void setValues(Map<String, String> updates)
+    {
+        boolean newValues = false;
+        TicketRange data = new TicketRange(idList, token.tokenInfo.address, false);
+        RelativeLayout frameLayout = findViewById(R.id.layout_select_ticket);
+
+        //called when values update
+        for (String key : updates.keySet())
+        {
+            String value = updates.get(key);
+            String old = args.put(key, updates.get(key));
+            if (!value.equals(old)) newValues = true;
+        }
+
+        if (newValues)
+        {
+            viewModel.getAssetDefinitionService().addLocalRefs(args);
+            //rebuild the view
+            token.displayTicketHolder(data, frameLayout, viewModel.getAssetDefinitionService(), this, false);
+        }
     }
 }

@@ -34,7 +34,7 @@ web3 = {
     },
     action: {
         setProps: function (msgParams) {
-            changeListener.setValues(JSON.stringify(msgParams));
+            alpha.setValues(JSON.stringify(msgParams));
         }
     }
 }

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_holding_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/greyffive"
@@ -60,64 +59,28 @@
 
                 <com.alphawallet.app.web3.Web3TokenView
                     android:id="@+id/web3_tokenview"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="200dp">
 
                 </com.alphawallet.app.web3.Web3TokenView>
 
             </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_legacy"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/white"
-                android:elevation="1dp"
-                android:minHeight="100dp"
-                android:orientation="horizontal"
-                android:paddingLeft="20dp"
-                android:paddingTop="15dp"
-                android:paddingRight="20dp"
-                android:paddingBottom="20dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/amount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="5dp"
-                    android:fontFamily="@font/font_bold"
-                    android:text=""
-                    android:textColor="@color/green"
-                    android:textSize="21sp" />
-
-                <TextView
-                    android:id="@+id/name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/font_light"
-                    android:text="@string/NA"
-                    android:textColor="@color/text_black"
-                    android:textSize="21sp" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/click_layer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignTop="@id/total_wrapper"
-            android:layout_alignBottom="@id/total_wrapper"
-            android:background="@color/transparent"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical"
-            android:visibility="gone">
-
         </LinearLayout>
 
     </RelativeLayout>
-</LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/click_layer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/layout_select_ticket"
+        android:layout_alignBottom="@id/layout_select_ticket"
+        android:background="@color/transparent"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+    </LinearLayout>
+</RelativeLayout>

@@ -83,7 +83,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     public BinderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         BinderViewHolder holder = null;
         switch (viewType) {
-            case TicketHolder.VIEW_TYPE:
+            case TicketHolder.VIEW_TYPE: //Ticket holder now deprecated //TODO: remove
                 holder = new TicketHolder(R.layout.item_ticket, parent, token, assetService);
                 holder.setOnTokenClickListener(onTokenClickListener);
                 break;
@@ -129,17 +129,11 @@ public class NonFungibleTokenAdapter extends TokensAdapter {
     {
         items.beginBatchedUpdates();
         items.clear();
-        int holderType = TokenIdSortedItem.VIEW_TYPE;
         assetCount = tokenIds.size();
+        int holderType = t.isERC721() ? OpenseaHolder.VIEW_TYPE : AssetInstanceScriptHolder.VIEW_TYPE;
 
-        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_DETAIL_VIEW_NAME))
-        {
-            holderType = AssetInstanceSortedItem.VIEW_TYPE;
-        }
-        else if (t.isERC721())
-        {
-            holderType = OpenseaHolder.VIEW_TYPE;
-        }
+        //TokenScript view for ERC721 overrides OpenSea display
+        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
 
         List<TicketRangeElement> sortedList = generateSortedList(assetService, token, tokenIds); //generate sorted list
         addSortedItems(sortedList, t, holderType); //insert sorted items into view

@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -27,6 +28,8 @@ import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.viewmodel.ImportTokenViewModel;
 import com.alphawallet.app.viewmodel.ImportTokenViewModelFactory;
+import com.alphawallet.app.web3.Web3TokenView;
+import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.CertifiedToolbarView;
@@ -54,7 +57,7 @@ import static org.web3j.crypto.WalletUtils.isValidAddress;
  * Created by James on 9/03/2018.
  */
 
-public class ImportTokenActivity extends BaseActivity implements View.OnClickListener, SignAuthenticationCallback
+public class ImportTokenActivity extends BaseActivity implements View.OnClickListener, SignAuthenticationCallback, PageReadyCallback
 {
     @Inject
     protected ImportTokenViewModelFactory importTokenViewModelFactory;
@@ -66,6 +69,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     private AWalletAlertDialog aDialog;
     private AWalletConfirmationDialog cDialog;
     private CertifiedToolbarView toolbarView;
+    private Web3TokenView tokenView;
+    private LinearLayout webWrapper;
 
     private TextView priceETH;
     private TextView priceUSD;
@@ -95,6 +100,8 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         priceUSD = findViewById(R.id.textImportPriceUSD);
         priceUSDLabel = findViewById(R.id.fiat_price_txt);
         toolbarView = findViewById(R.id.toolbar);
+        tokenView = findViewById(R.id.web3_tokenview);
+        webWrapper = findViewById(R.id.layout_webwrapper);
         priceETH.setVisibility(View.GONE);
         priceUSD.setVisibility(View.GONE);
         priceUSDLabel.setVisibility(View.GONE);
@@ -359,14 +366,16 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         {
             case spawnable:
                 importTickets.setText(R.string.action_import);
-                if (token != null) token.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
+                if (token != null) 
+                    tokenView.displayTicketHolder(token, ticketRange, viewModel.getAssetDefinitionService());
                 break;
             case currencyLink:
                 importTickets.setText(R.string.action_import);
                 break;
             default:
                 importTxt.setText(R.string.ticket_import_valid);
-                if (token != null) token.displayTicketHolder(ticketRange, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
+                if (token != null) 
+                    tokenView.displayTicketHolder(token, ticketRange, viewModel.getAssetDefinitionService());
                 break;
         }
     }
@@ -647,5 +656,17 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         else viewModel.failedAuthentication(SIGN_DATA);
         viewModel.performImport();
         onProgress(true);
+    }
+
+    @Override
+    public void onPageLoaded(WebView view)
+    {
+
+    }
+
+    @Override
+    public void onPageRendered(WebView view)
+    {
+        webWrapper.setVisibility(View.VISIBLE);
     }
 }

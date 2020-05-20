@@ -1,0 +1,24 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "James-Sangalli",
+      "name": "James Sangalli",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/16630514?v=4",
+      "profile": "https://www.alphawallet.com",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "alpha-wallet-android",
+  "projectOwner": "AlphaWallet",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}

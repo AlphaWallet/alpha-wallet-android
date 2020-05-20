@@ -156,26 +156,16 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    public void setupContent(TokenHolder tokenHolder, AssetDefinitionService asset)
+    public int getContractType()
     {
-        tokenHolder.balanceCurrency.setText("--");
-        tokenHolder.textAppreciation.setText("--");
-
-        tokenHolder.contractType.setVisibility(View.VISIBLE);
-        tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
-        tokenHolder.layoutValueDetails.setVisibility(View.GONE);
         if (contractType == ContractType.ERC875_LEGACY)
         {
-            tokenHolder.contractType.setText(R.string.erc875legacy);
+            return R.string.erc875legacy;
         }
         else
         {
-            tokenHolder.contractType.setText(R.string.erc875);
+            return R.string.erc875;
         }
-
-        String composite = getTicketCount() + " " + getFullName(asset, getTicketCount());
-
-        tokenHolder.balanceEth.setText(composite);
     }
 
     @Override

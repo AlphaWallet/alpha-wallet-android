@@ -34,6 +34,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -147,9 +148,26 @@ public class Token implements Parcelable, Comparable<Token>
         }
     }
 
-    public String getStringBalance() {
-        BigDecimal correctedBalance = getCorrectedBalance(4);
-        return correctedBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : correctedBalance.toPlainString();
+    public String getStringBalance()
+    {
+        String value;
+        BigDecimal ethBalance = getCorrectedBalance(18);
+        if (ethBalance.equals(BigDecimal.ZERO)) //zero balance
+        {
+            value = "0";
+        }
+        else if (ethBalance.compareTo(BigDecimal.valueOf(0.000001)) < 0) //very low balance
+        {
+            value = "~0.00";
+        }
+        else //otherwise display in standard pattern to 4 dp
+        {
+            DecimalFormat df = new DecimalFormat("###,###,###,##0.####");
+            df.setRoundingMode(RoundingMode.HALF_DOWN);
+            value = df.format(ethBalance);
+        }
+
+        return value;
     }
 
     public boolean hasPositiveBalance() {
@@ -272,80 +290,21 @@ public class Token implements Parcelable, Comparable<Token>
     {
         if (balance == null || balance.equals(BigDecimal.ZERO)) return BigDecimal.ZERO;
         BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
-        BigDecimal ethBalance = tokenInfo.decimals > 0
-                ? balance.divide(decimalDivisor) : balance;
-        return ethBalance.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros();
+        return tokenInfo.decimals > 0
+               ? balance.divide(decimalDivisor, scale, RoundingMode.DOWN).stripTrailingZeros() : balance;
     }
 
-    public void setupContent(TokenHolder holder, AssetDefinitionService definition)
+    public int getContractType()
     {
-        int precision = isFocusToken() ? TOKEN_BALANCE_FOCUS_PRECISION : TOKEN_BALANCE_PRECISION;
-        BigDecimal ethBalance = getCorrectedBalance(precision);
-        String     value      = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
-        if (ethBalance.compareTo(BigDecimal.ZERO) == 0 && balance.compareTo(BigDecimal.ZERO) > 0)
+        switch (contractType)
         {
-            ethBalance = balance.divide(new BigDecimal(Math.pow(10, tokenInfo.decimals)));
-            //fractional value. How to represent?
-            value = getMinimalString(ethBalance.toPlainString());
-            if (ethBalance.compareTo(BigDecimal.valueOf(0.000001)) < 0)
-            {
-                value = holder.getString(R.string.dust_value);
-            }
+            case ERC20:
+                return R.string.erc20;
+            case ETHEREUM:
+                return 0; //don't display 'ethereum' as contract type
+            default:
+                return 0;
         }
-
-        holder.balanceEth.setText(value);
-
-        if (isEthereum())
-        {
-            holder.textAppreciationSub.setText(R.string.appreciation);
-            holder.text24HoursSub.setText(R.string.twenty_four_hours);
-            holder.contractType.setVisibility(View.GONE);
-            holder.contractSeparator.setVisibility(View.GONE);
-            holder.layoutValueDetails.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            holder.contractType.setVisibility(View.VISIBLE);
-            holder.contractSeparator.setVisibility(View.VISIBLE);
-            holder.contractType.setText(R.string.erc20);
-            holder.layoutValueDetails.setVisibility(View.GONE);
-        }
-
-        addTokenName(holder, definition);
-
-        //populate ticker if we have it
-        if (ticker != null)
-        {
-            holder.layoutValueDetails.setVisibility(View.VISIBLE);
-            holder.textAppreciationSub.setText(R.string.appreciation);
-            holder.fillCurrency(ethBalance, ticker);
-            holder.text24HoursSub.setText(R.string.twenty_four_hours);
-            holder.currencyLabel.setText(ticker.priceSymbol);
-        }
-        else if (isEthereum())
-        {
-            holder.layoutValueDetails.setVisibility(View.VISIBLE);
-            holder.animateTextWhileWaiting();
-            holder.emptyTicker();
-        }
-        else
-        {
-            holder.layoutValueDetails.setVisibility(View.GONE);
-        }
-
-        holder.balanceEth.setVisibility(View.VISIBLE);
-    }
-
-    void addTokenName(TokenHolder holder, AssetDefinitionService definitionService)
-    {
-        String balance = holder.balanceEth.getText().toString();
-        String symbolStr = tokenInfo.symbol != null ? tokenInfo.symbol.toUpperCase() : "";
-        String nameTxt = TextUtils.isEmpty(tokenInfo.name)
-                         ? symbolStr
-                         : getFullName(definitionService, getTicketCount());
-
-        String composite = balance + " " + nameTxt;
-        holder.balanceEth.setText(composite);
     }
 
     public List<Asset> getTokenAssets() {
@@ -355,26 +314,6 @@ public class Token implements Parcelable, Comparable<Token>
     public List<BigInteger> ticketIdStringToIndexList(String userList)
     {
         return null;
-    }
-
-    private String getMinimalString(String value)
-    {
-        StringBuilder sb = new StringBuilder();
-        for (char c : value.toCharArray())
-        {
-            switch (c)
-            {
-                case '.':
-                case '0':
-                    sb.append(c);
-                    break;
-                default:
-                    sb.append(c);
-                    return sb.toString();
-            }
-        }
-
-        return sb.toString();
     }
 
     /**

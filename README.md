@@ -31,7 +31,7 @@ AlphaWallet's focus is to provide an interface to interact with Ethereum Tokens 
 
 - [Bartercard Qoin](https://play.google.com/store/apps/details?id=com.qoin.wallet&hl=en)
 - [FIFA and UEFA’s blockchain tickets](https://apps.apple.com/au/app/shankai/id1492559481)
-- [Karma’s Car Ownership portal](https://github.com/AlphaWallet/TokenScript-Examples/tree/master/examples/Karma)
+- [Car Ownership portal](https://github.com/AlphaWallet/TokenScript-Examples/tree/master/examples/Karma)
 
 ### Full TokenScript Support
 

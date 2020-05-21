@@ -153,7 +153,7 @@ public class WalletsViewModel extends BaseViewModel
         for (Wallet w : items)
         {
             w.balanceSymbol = currentNetwork.symbol;
-            Wallet mapW = walletBalances.get(w.address);
+            Wallet mapW = walletBalances.get(w.address.toLowerCase());
             if (mapW != null)
             {
                 w.balance = mapW.balance;

@@ -80,7 +80,6 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     private NonFungibleTokenAdapter adapter;
     private AWalletAlertDialog dialog;
     private Web3TokenView testView;
-    private LinearLayout webWrapper;
     private final Handler handler = new Handler();
     private boolean iconifiedCheck;
     private int checkVal;
@@ -101,7 +100,6 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         systemView = findViewById(R.id.system_view);
         systemView.hide();
         progressView = findViewById(R.id.progress_view);
-        webWrapper = findViewById(R.id.layout_webwrapper);
         progressView.setVisibility(View.VISIBLE);
         SwipeRefreshLayout refreshLayout = findViewById(R.id.refresh_layout);
         systemView.attachSwipeRefreshLayout(refreshLayout);
@@ -274,7 +272,6 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     @Override
     public void onPageRendered(WebView view)
     {
-        webWrapper.setVisibility(View.VISIBLE);
         testView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
             if (token != null)
             {

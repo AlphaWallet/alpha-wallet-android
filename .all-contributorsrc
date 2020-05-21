@@ -15,6 +15,15 @@
       ]
     },
     {
+      "login": "hboon",
+      "name": "Hwee-Boon Yar",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/56189?v=4",
+      "profile": "http://hboon.com",
+      "contributions": [
+        "ideas"
+      ]
+    },
+    {
       "login": "AW-STJ",
       "name": "AW-STJ",
       "avatar_url": "https://avatars1.githubusercontent.com/u/61957841?v=4",
@@ -23,7 +32,8 @@
         "projectManagement"
       ]
     },
-    {      "login": "tomekalphawallet",
+    { 
+      "login": "tomekalphawallet",
       "name": "Tomek Nowak",
       "avatar_url": "https://avatars1.githubusercontent.com/u/51817359?v=4",
       "profile": "https://github.com/tomekalphawallet",

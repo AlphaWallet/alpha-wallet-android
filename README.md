@@ -114,6 +114,8 @@ Thank you to all the contributors! You are awesome.
   <tr>
     <td align="center"><a href="https://www.alphawallet.com"><img src="https://avatars0.githubusercontent.com/u/16630514?v=4" width="100px;" alt=""/><br /><sub><b>James Sangalli</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=James-Sangalli" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/tomekalphawallet"><img src="https://avatars1.githubusercontent.com/u/51817359?v=4" width="100px;" alt=""/><br /><sub><b>Tomek Nowak</b></sub></a><br /><a href="#design-tomekalphawallet" title="Design">🎨</a></td>
+    <td align="center"><a href="https://github.com/colourful-land"><img src="https://avatars3.githubusercontent.com/u/548435?v=4" width="100px;" alt=""/><br /><sub><b>Weiwu Zhang</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=colourful-land" title="Code">💻</a></td>
+    <td align="center"><a href="https://multisender.app"><img src="https://avatars3.githubusercontent.com/u/9360827?v=4" width="100px;" alt=""/><br /><sub><b>Roman Storm</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/issues?q=author%3Arstormsf" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

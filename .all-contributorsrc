@@ -13,6 +13,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "rstormsf",
+      "name": "Roman Storm",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/9360827?v=4",
+      "profile": "https://multisender.app",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -22,6 +22,42 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "AW-STJ",
+      "name": "AW-STJ",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/61957841?v=4",
+      "profile": "https://github.com/AW-STJ",
+      "contributions": [
+        "projectManagement"
+      ]
+    },
+    { 
+      "login": "tomekalphawallet",
+      "name": "Tomek Nowak",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/51817359?v=4",
+      "profile": "https://github.com/tomekalphawallet",
+      "contributions": [
+        "design"
+      ]
+    },
+    {
+      "login": "colourful-land",
+      "name": "Weiwu Zhang",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/548435?v=4",
+      "profile": "https://github.com/colourful-land",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "rstormsf",
+      "name": "Roman Storm",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/9360827?v=4",
+      "profile": "https://multisender.app",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -5,12 +5,12 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.inputmethod.BaseInputConnection;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputConnection;
+import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -20,16 +20,30 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.token.entity.TicketRange;
+import com.alphawallet.token.entity.TokenScriptResult;
+import com.alphawallet.token.tools.TokenDefinition;
+
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
+import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
+import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
 
 /**
  * Created by James on 3/04/2019.
@@ -299,5 +313,135 @@ public class Web3TokenView extends WebView
             }
             super.onUnhandledKeyEvent(view, event);
         }
+    }
+
+
+
+    // Rendering
+    public void displayTicketHolder(Token token, TicketRange range, AssetDefinitionService assetService) {
+        displayTicketHolder(token, range, assetService, false);
+    }
+
+    /**
+     * This is a single method that populates any instance of graphic ticket anywhere
+     *
+     * @param range
+     * @param assetService
+     */
+    public void displayTicketHolder(Token token, TicketRange range, AssetDefinitionService assetService, boolean iconified)
+    {
+        //need to wait until the assetDefinitionService has finished loading assets
+        assetService.getAssetDefinitionASync(token.tokenInfo.chainId, token.tokenInfo.address)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(td -> renderTicketHolder(token, td, range, assetService, iconified), this::loadingError).isDisposed();
+    }
+
+    private void loadingError(Throwable e)
+    {
+        e.printStackTrace();
+    }
+
+    private void renderTicketHolder(Token token, TokenDefinition td, TicketRange range, AssetDefinitionService assetService, boolean iconified)
+    {
+        if (td != null && td.holdingToken != null)
+        {
+            //use webview
+            renderTokenscriptView(token, range, assetService, iconified);
+        }
+        else
+        {
+            showLegacyView(token, range);
+        }
+    }
+
+    private void showLegacyView(Token token, TicketRange range)
+    {
+        setVisibility(View.VISIBLE);
+        String displayData = "<!DOCTYPE html>\n" +
+                "<html><style>" +
+                "h4 { display: inline; color: green; font: 20px Helvetica, Sans-Serif; padding: 6px; font-weight: bold;}\n" +
+                "h5 { display: inline; color: black; font: 18px Helvetica, Sans-Serif; font-weight: normal;}\n" +
+                "</style>" +
+                "<body>" +
+                "<div><h4><span>x" + range.tokenIds.size() + "</span></h4>" +
+                "<h5><span>" + token.getFullName() + "</span></h5></div>\n" +
+                "</body></html>";
+
+        loadData(displayData, "text/html", "utf-8");
+    }
+
+    public void renderTokenscriptView(Token token, TicketRange range, AssetDefinitionService assetService, boolean iconified)
+    {
+        BigInteger tokenId = range.tokenIds.get(0);
+
+        final StringBuilder attrs = assetService.getTokenAttrs(token, tokenId, range.tokenIds.size());
+
+        assetService.resolveAttrs(token, tokenId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(token, throwable, range),
+                           () -> displayTicket(token, assetService, attrs, iconified, range))
+                .isDisposed();
+    }
+
+    /**
+     * Add the decoded and resolved attributes as Token properties to the relevant view
+     *
+     * @param assetService
+     * @param attrs
+     * @param iconified
+     * @param range
+     */
+    private void displayTicket(Token token, AssetDefinitionService assetService, StringBuilder attrs, boolean iconified, TicketRange range)
+    {
+        setVisibility(View.VISIBLE);
+        String viewName = iconified ? ASSET_SUMMARY_VIEW_NAME : ASSET_DETAIL_VIEW_NAME;
+
+        String view = assetService.getTokenView(token.tokenInfo.chainId, token.getAddress(), viewName);
+        if (TextUtils.isEmpty(view)) view = buildViewError(token, range, viewName);
+        String style = assetService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
+        String viewData = injectWeb3TokenInit(getContext(), view, attrs.toString());
+        viewData = injectStyleData(viewData, style); //style injected last so it comes first
+
+        String base64 = android.util.Base64.encodeToString(viewData.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+        loadData(base64, "text/html; charset=utf-8", "base64");
+    }
+
+    /**
+     * Form TokenScript diagnostic message if relevant view not found
+     * @param range
+     * @param viewName
+     * @return
+     */
+    private String buildViewError(Token token, TicketRange range, String viewName)
+    {
+        String displayData = "<h3><span style=\"color:Green\">x" + range.tokenIds.size() + "</span><span style=\"color:Black\"> " + token.getFullName() + "</span></h3>";
+        displayData += ("<br /><body>" + getContext().getString(R.string.card_view_not_found_error, viewName) + "</body>");
+        return displayData;
+    }
+
+    /**
+     * Display Token amount and diagnostic, rather than a blank card or error
+     *
+     * @param throwable
+     * @param range
+     */
+    private void onError(Token token, Throwable throwable, TicketRange range)
+    {
+        String displayData = "<h3><span style=\"color:Green\">x" + range.tokenIds.size() + "</span><span style=\"color:Black\"> " + token.getFullName() + "</span></h3>";
+        if (BuildConfig.DEBUG) displayData += ("<br /><body>" + throwable.getLocalizedMessage() + "</body>");
+        loadData(displayData, "text/html", "utf-8");
+    }
+
+    /**
+     * Encode the resolved attribute into the Token properties declaration, eg 'name: "Entry Token",'
+     *
+     * @param attribute
+     * @param attrs StringBuilder holding the token properties as it's being built
+     */
+    private void onAttr(TokenScriptResult.Attribute attribute, StringBuilder attrs)
+    {
+        TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
     }
 }

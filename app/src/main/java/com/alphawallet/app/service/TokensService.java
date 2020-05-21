@@ -9,7 +9,6 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenTicker;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
@@ -264,7 +263,7 @@ public class TokensService
 
         for (ContractLocator r : contracts)
         {
-            Token check = getToken(r.chainId, r.name.toLowerCase());
+            Token check = getToken(r.chainId, r.address.toLowerCase());
             if (check == null)
             {
                 unknowns.add(r);
@@ -411,7 +410,7 @@ public class TokensService
     {
         if (focusToken != null)
         {
-            Token fToken = getToken(focusToken.chainId, focusToken.name);
+            Token fToken = getToken(focusToken.chainId, focusToken.address);
             if (fToken != null) fToken.setFocus(false);
         }
         focusToken = null;

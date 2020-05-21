@@ -8,6 +8,7 @@ import android.support.annotation.RawRes;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
@@ -53,7 +54,8 @@ public class HelpActivity extends BaseActivity {
                 R.string.help_question2,
                 R.string.help_question3,
                 R.string.help_question4,
-                R.string.help_question5
+                R.string.help_question5,
+                R.string.help_question6
         };
 
         int[] answers = {
@@ -61,14 +63,17 @@ public class HelpActivity extends BaseActivity {
                 R.string.why_alphawallet_eth,
                 R.string.how_i_get_money,
                 R.string.what_is_seed_phrase,
-                R.string.how_i_transfer_into_wallet
+                R.string.how_i_transfer_into_wallet,
+                R.string.tokenscript_explaination,
         };
 
         adapter.setWebView(webView);
         List<HelpItem> helpItems = new ArrayList<>();
         for (int i = 0; i < questions.length; i++) {
-            if (isRawResource(answers[i])) helpItems.add(new HelpItem(getString(questions[i]), answers[i]));
-            else if (getString(questions[i]).length() > 0) helpItems.add(new HelpItem(getString(questions[i]), getString(answers[i])));
+            if (isRawResource(answers[i]))
+                helpItems.add(new HelpItem(getString(questions[i]), answers[i]));
+            else if (getString(questions[i]).length() > 0)
+                helpItems.add(new HelpItem(getString(questions[i]), getString(answers[i])));
         }
         adapter.setHelpItems(helpItems);
 
@@ -80,8 +85,33 @@ public class HelpActivity extends BaseActivity {
         });
     }
 
-    private void helpIntent()
-    {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            if (hideWebView()) {
+                super.onOptionsItemSelected(item);
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (hideWebView()) {
+            super.onBackPressed();
+        }
+    }
+
+
+    private boolean hideWebView() {
+        if (webView.getVisibility() == View.VISIBLE) {
+            webView.setVisibility(View.GONE);
+            return false;
+        }
+        return true;
+    }
+
+    private void helpIntent() {
         final String at = "@";
         String uriText =
                 "mailto:" + MediaLinks.AWALLET_EMAIL1 + at + MediaLinks.AWALLET_EMAIL2 +
@@ -142,8 +172,7 @@ public class HelpActivity extends BaseActivity {
     private boolean isRawResource(@RawRes int rawRes) {
         try {
             InputStream in = getResources().openRawResource(rawRes);
-            if (in.available() > 0)
-            {
+            if (in.available() > 0) {
                 in.close();
                 return true;
             }

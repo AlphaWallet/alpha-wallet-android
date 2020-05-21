@@ -24,6 +24,7 @@ import com.alphawallet.app.ui.SplashActivity;
 import com.alphawallet.app.ui.TokenDetailActivity;
 import com.alphawallet.app.ui.TokenFunctionActivity;
 import com.alphawallet.app.ui.TokenManagementActivity;
+import com.alphawallet.app.ui.TokenScriptManagementActivity;
 import com.alphawallet.app.ui.TransactionDetailActivity;
 import com.alphawallet.app.ui.TransactionsFragment;
 import com.alphawallet.app.ui.TransferTicketActivity;
@@ -157,4 +158,8 @@ public abstract class BuildersModule {
 
 	@ContributesAndroidInjector(modules = AdvancedSettingsModule.class)
 	abstract AdvancedSettingsActivity bindAdvancedSettingsActivity();
+
+    @ActivityScope
+    @ContributesAndroidInjector(modules = TokenScriptManagementModule.class)
+    abstract TokenScriptManagementActivity bindTokenScriptManagementActivity();
 }

@@ -50,7 +50,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     CLASSIC_ID, true, "ethereum-classic", CLASSIC_BLOCKSCOUT));
             put(XDAI_ID, new NetworkInfo("xDAI", "xDAI", XDAI_RPC_URL, "https://blockscout.com/poa/dai/tx/",
                     XDAI_ID, false, "dai", XDAI_BLOCKSCOUT));
-            put(POA_ID, new NetworkInfo("POA", "POA", POA_RPC_URL, "https://poaexplorer.com/txid/search/",
+            put(POA_ID, new NetworkInfo("POA", "POA", POA_RPC_URL, "https://blockscout.com/poa/core/tx/",
                     POA_ID, false, "ethereum", POA_BLOCKSCOUT));
             put(ARTIS_SIGMA1_ID, new NetworkInfo("ARTIS sigma1", "ATS", ARTIS_SIGMA1_RPC_URL, "https://explorer.sigma1.artis.network/tx/",
                     ARTIS_SIGMA1_ID, false, "artis", ""));
@@ -58,7 +58,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
                     KOVAN_ID, false, "ethereum", KOVAN_BLOCKSCOUT));
             put(ROPSTEN_ID, new NetworkInfo("Ropsten (Test)", "ETH", ROPSTEN_RPC_URL, "https://ropsten.etherscan.io/tx/",
                     ROPSTEN_ID, false, "ethereum", ROPSTEN_BLOCKSCOUT));
-            put(SOKOL_ID, new NetworkInfo("Sokol (Test)", "POA", SOKOL_RPC_URL, "https://sokol-explorer.poa.network/account/",
+            put(SOKOL_ID, new NetworkInfo("Sokol (Test)", "POA", SOKOL_RPC_URL, "https://blockscout.com/poa/sokol/tx/",
                     SOKOL_ID, false, "ethereum", SOKOL_BLOCKSCOUT));
             put(RINKEBY_ID, new NetworkInfo("Rinkeby (Test)", "ETH", RINKEBY_RPC_URL, "https://rinkeby.etherscan.io/tx/",
                     RINKEBY_ID, false, "ethereum", RINKEBY_BLOCKSCOUT));

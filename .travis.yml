@@ -37,6 +37,7 @@ script:
 - cd lib && ../gradlew -i build && ../gradlew -i test && cd ..
 - cd util && ../gradlew -i build && ../gradlew -i test && cd ..
 - ./gradlew buildawalletdebug
+- ./gradlew -i test
 
 after_success:
  - bash <(curl -s https://codecov.io/bash)

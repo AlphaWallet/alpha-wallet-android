@@ -45,24 +45,32 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
        If you wish your node to be the primary node that AW checks then replace the relevant ..._RPC_URL below
        If you wish your node to be the fallback, tried in case the primary times out then add/replace in ..._FALLBACK_RPC_URL list
      */
+
+    static {
+        System.loadLibrary("keys");
+    }
+
+    public static native String getAmberDataKey();
+    public static native String getInfuraKey();
+
     //Fallback nodes: these nodes are used if there's no Amberdata key, and also as a fallback in case the primary node times out while attempting a call
-    public static final String MAINNET_FALLBACK_RPC_URL = "https://mainnet.infura.io/v3/" + BuildConfig.InfuraAPI;
-    public static final String RINKEBY_FALLBACK_RPC_URL = "https://rinkeby.infura.io/v3/" + BuildConfig.InfuraAPI;
+    public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/" + getInfuraKey();
+    public static final String RINKEBY_RPC_URL = "https://rinkeby.infura.io/v3/" + getInfuraKey();
 
     //Note that AlphaWallet now uses a double node configuration. See class AWHttpService comment 'try primary node'.
     //If you supply a main RPC and secondary it will try the secondary if the primary node times out after 10 seconds.
     //See the declaration of NetworkInfo - it has a member backupNodeUrl. Put your secondary node here.
 
-    public static final String BACKUP_INFURA_KEY = BuildConfig.InfuraAPI;
-    public static final String MAINNET_RPC_URL = !BuildConfig.AmberdataAPI.startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + BuildConfig.AmberdataAPI : MAINNET_FALLBACK_RPC_URL;
+    public static final String BACKUP_INFURA_KEY = BuildConfig.XInfuraAPI;
+    public static final String MAINNET_FALLBACK_RPC_URL = !getAmberDataKey().startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + getAmberDataKey() : MAINNET_RPC_URL;
     public static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
     public static final String XDAI_RPC_URL = "https://dai.poa.network";
     public static final String POA_RPC_URL = "https://core.poa.network/";
-    public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/" + BuildConfig.InfuraAPI;
-    public static final String RINKEBY_RPC_URL = !BuildConfig.AmberdataAPI.startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + BuildConfig.AmberdataAPI + "&x-amberdata-blockchain-id=1b3f7a72b3e99c13" : RINKEBY_FALLBACK_RPC_URL;
-    public static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/" + BuildConfig.InfuraAPI;
+    public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/" + getInfuraKey();
+    public static final String RINKEBY_FALLBACK_RPC_URL = !getAmberDataKey().startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + getAmberDataKey() + "&x-amberdata-blockchain-id=1b3f7a72b3e99c13" : RINKEBY_RPC_URL;
+    public static final String KOVAN_RPC_URL = "https://kovan.infura.io/v3/" + getInfuraKey();
     public static final String SOKOL_RPC_URL = "https://sokol.poa.network";
-    public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/" + BuildConfig.InfuraAPI;
+    public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/" + getInfuraKey();
     public static final String ARTIS_SIGMA1_RPC_URL = "https://rpc.sigma1.artis.network";
     public static final String ARTIS_TAU1_RPC_URL = "https://rpc.tau1.artis.network";
 
@@ -89,7 +97,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String GOERLI_BLOCKSCOUT = "eth/goerli";
 
     final Map<Integer, NetworkInfo> networkMap;
-    protected static boolean useBackupNode = false;
 
     final NetworkInfo[] NETWORKS;
     static final NetworkInfo[] DEFAULT_NETWORKS = new NetworkInfo[] {
@@ -102,7 +109,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     MAINNET_BLOCKSCOUT),
             new NetworkInfo(C.CLASSIC_NETWORK_NAME, C.ETC_SYMBOL,
                     CLASSIC_RPC_URL,
-                    "https://gastracker.io/tx/",CLASSIC_ID, true, C.CLASSIC_TICKER_NAME, CLASSIC_BLOCKSCOUT),
+                    "https://gastracker.io/tx/",CLASSIC_ID, true, CLASSIC_RPC_URL, null, C.CLASSIC_TICKER_NAME, CLASSIC_BLOCKSCOUT),
             new NetworkInfo(C.XDAI_NETWORK_NAME,
                     C.xDAI_SYMBOL,
                     XDAI_RPC_URL,
@@ -113,7 +120,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://blockscout.com/poa/dai/", C.XDAI_TICKER_NAME, XDAI_BLOCKSCOUT),
             new NetworkInfo(C.POA_NETWORK_NAME, C.POA_SYMBOL,
                     POA_RPC_URL,
-                    "https://poaexplorer.com/txid/search/", POA_ID, false, C.ETHEREUM_TICKER_NAME, POA_BLOCKSCOUT),
+                    "https://blockscout.com/poa/core/tx/", POA_ID, false, POA_RPC_URL, "https://blockscout.com/poa/core/", C.ETHEREUM_TICKER_NAME, POA_BLOCKSCOUT),
             new NetworkInfo(C.ARTIS_SIGMA1_NETWORK, C.ARTIS_SIGMA1_SYMBOL, ARTIS_SIGMA1_RPC_URL,
                     "https://explorer.sigma1.artis.network/tx/", ARTIS_SIGMA1_ID, false,
                     ARTIS_SIGMA1_RPC_URL,
@@ -129,7 +136,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://api-ropsten.etherscan.io/", C.ETHEREUM_TICKER_NAME, ROPSTEN_BLOCKSCOUT),
             new NetworkInfo(C.SOKOL_NETWORK_NAME, C.POA_SYMBOL,
                     SOKOL_RPC_URL,
-                    "https://sokol-explorer.poa.network/account/",SOKOL_ID, false, C.ETHEREUM_TICKER_NAME, SOKOL_BLOCKSCOUT),
+                    "https://blockscout.com/poa/sokol/tx/",SOKOL_ID, false, SOKOL_RPC_URL, "https://blockscout.com/poa/sokol/", C.ETHEREUM_TICKER_NAME, SOKOL_BLOCKSCOUT),
             new NetworkInfo(C.RINKEBY_NETWORK_NAME, C.ETH_SYMBOL, RINKEBY_RPC_URL,
                     "https://rinkeby.etherscan.io/tx/",RINKEBY_ID, false,
                     RINKEBY_FALLBACK_RPC_URL,
@@ -358,8 +365,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         switch (networkId)
         {
             case MAINNET_ID:
-                if (useBackupNode) return MAINNET_FALLBACK_RPC_URL;
-                else return MAINNET_RPC_URL;
+                return MAINNET_RPC_URL;
             case KOVAN_ID:
                 return KOVAN_RPC_URL;
             case ROPSTEN_ID:
@@ -382,6 +388,29 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return ARTIS_TAU1_RPC_URL;
             default:
                 return MAINNET_RPC_URL;
+        }
+    }
+
+    /**
+     * This is used so as not to leak API credentials to web3; XInfuraAPI is the backup API key checked into github
+     * @param networkId
+     * @return
+     */
+    public static String getDefaultNodeURL(int networkId) {
+        switch (networkId)
+        {
+            case MAINNET_ID:
+                return "https://mainnet.infura.io/v3/" + BuildConfig.XInfuraAPI;
+            case KOVAN_ID:
+                return "https://kovan.infura.io/v3/" + BuildConfig.XInfuraAPI;
+            case ROPSTEN_ID:
+                return "https://ropsten.infura.io/v3/" + BuildConfig.XInfuraAPI;
+            case RINKEBY_ID:
+                return "https://rinkeby.infura.io/v3/" + BuildConfig.XInfuraAPI;
+            case GOERLI_ID:
+                return "https://goerli.infura.io/v3/" + BuildConfig.XInfuraAPI;
+            default:
+                return getSecondaryNodeURL(networkId);
         }
     }
 
@@ -519,10 +548,5 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public Token getBlankOverrideToken()
     {
         return null;
-    }
-
-    public boolean shouldUseBackupNode()
-    {
-        return useBackupNode;
     }
 }

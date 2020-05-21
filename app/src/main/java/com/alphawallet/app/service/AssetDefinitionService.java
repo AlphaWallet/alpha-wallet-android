@@ -12,7 +12,6 @@ import android.os.FileObserver;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
 import android.util.SparseArray;
 
 import com.alphawallet.app.BuildConfig;
@@ -22,6 +21,7 @@ import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Event;
 import com.alphawallet.app.entity.FragmentMessenger;
+import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.ERC721Token;
@@ -38,6 +38,8 @@ import com.alphawallet.app.repository.entity.RealmCertificateData;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.HomeViewModel;
+import com.alphawallet.app.web3j.FunctionEncoder;
+import com.alphawallet.app.web3j.datatypes.Function;
 import com.alphawallet.token.entity.AttributeInterface;
 import com.alphawallet.token.entity.AttributeType;
 import com.alphawallet.token.entity.ContractAddress;
@@ -57,8 +59,6 @@ import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 
 import org.jetbrains.annotations.NotNull;
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.datatypes.Function;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.EthFilter;
@@ -189,7 +189,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         try
         {
             assetLoadingLock.acquire(); // acquire the semaphore here to prevent attributes from being fetched until loading is complete
-                                        // See flow above for details
+            // See flow above for details
         }
         catch (InterruptedException e)
         {
@@ -206,17 +206,17 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         Observable.fromIterable(getCanonicalizedAssets())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::addContractAssets, error -> { onError(error); parseAllFileScripts(); },
-                           this::parseAllFileScripts).isDisposed();
+                        this::parseAllFileScripts).isDisposed();
     }
 
     private void parseAllFileScripts()
     {
         final File[] files = buildFileList(); //build an ordered list of files that need parsing
-                                        //1. Signed files downloaded from server.
-                                        //2. Files placed in the Android OS external directory (Android/data/<App Package Name>/files)
-                                        //3. Files placed in the /AlphaWallet directory.
-                                        //Depending on the order placed, files can be overridden. A file downloaded from the server is
-                                        //overridden by a script for the same token placed in the /AlphaWallet directory.
+        //1. Signed files downloaded from server.
+        //2. Files placed in the Android OS external directory (Android/data/<App Package Name>/files)
+        //3. Files placed in the /AlphaWallet directory.
+        //Depending on the order placed, files can be overridden. A file downloaded from the server is
+        //overridden by a script for the same token placed in the /AlphaWallet directory.
 
         Observable.fromArray(files)
                 .filter(File::isFile)
@@ -228,7 +228,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     cacheSignature(file)
                             .map(this::addContractAddresses)
                             .subscribe(success -> fileLoadComplete(success, file),
-                                       error -> handleFileLoadError(error, file))
+                                    error -> handleFileLoadError(error, file))
                             .isDisposed();
                 } );
 
@@ -380,6 +380,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     /**
      * Fetch attributes from local storage; not using contract lookup
+     *
      * @param token
      * @param tokenId
      * @return
@@ -616,6 +617,18 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
+    public String getTokenNameFromService(int chainId, String address)
+    {
+        Token token = tokensService.getToken(chainId, address);
+        if (token != null) return token.getFullName();
+        else return "";
+    }
+
+    public Token getTokenFromService(int chainId, String address)
+    {
+        return tokensService.getToken(chainId, address);
+    }
+
     /**
      * Function returns all contracts on this network ID
      *
@@ -638,6 +651,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     /**
      * Get the issuer name given the contract address
      * Note: this is optimised so as we don't need to keep loading in definitions as the user scrolls
+     *
      * @param token
      * @return
      */
@@ -880,6 +894,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         for (String address : strings) addrMap.put(address, new File(path));
         return addrMap;
     }
+
 
     private boolean addContractAssets(String asset)
     {
@@ -1554,13 +1569,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         if (cInfo.contractInterface != null)
                         {
                             checkCorrectInterface(token, cInfo.contractInterface);
-                                Observable.fromIterable(token.getNonZeroArrayBalance())
-                                        .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
-                                        .filter(txResult -> txResult.needsUpdating(token.lastTxTime))
-                                        .concatMap(result -> tokenscriptUtility.fetchAttrResult(token, td.attributeTypes.get(attr.id), result.tokenId, cAddr, td, this))
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe();
+                            Observable.fromIterable(token.getNonZeroArrayBalance())
+                                    .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
+                                    .filter(txResult -> txResult.needsUpdating(token.lastTxTime))
+                                    .concatMap(result -> tokenscriptUtility.fetchAttrResult(token, td.attributeTypes.get(attr.id), result.tokenId, cAddr, td, this))
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe();
                         }
                         else
                         {
@@ -1594,8 +1609,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             case "erc20":
                 cType = ContractType.ERC20;
                 break;
-                // note: ERC721 and ERC721Ticket are contracts with different interfaces which are handled in different ways but we describe them
-                // as the same within the tokenscript.
+            // note: ERC721 and ERC721Ticket are contracts with different interfaces which are handled in different ways but we describe them
+            // as the same within the tokenscript.
             case "erc721":
                 if (token.isERC721() || token.isERC721Ticket()) return;
                 cType = ContractType.ERC721;
@@ -2052,6 +2067,45 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         homeMessenger = callback;
     }
 
+    /**
+     * Using a file search method rather than the pre-parsed method.
+     * This lets us catch bad tokenscripts and report on errors.
+     *
+     * @return List of Tokenscripts with details
+     */
+    public Single<List<TokenLocator>> getAllTokenDefinitions()
+    {
+        return Single.fromCallable(() -> {
+            final File[] files = buildFileList();
+            List<TokenLocator> tokenLocators = new ArrayList<>();
+
+            Observable.fromArray(files)
+                    .filter(File::isFile)
+                    .filter(this::allowableExtension)
+                    .filter(File::canRead)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .blockingForEach(file -> {
+                        try
+                        {
+                            FileInputStream input = new FileInputStream(file);
+                            TokenDefinition tokenDef = parseFile(input);
+                            ContractInfo origins = tokenDef.contracts.get(tokenDef.holdingToken);
+                            if (origins.addresses.size() > 0)
+                            {
+                                TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
+                                tokenLocators.add(new TokenLocator(tokenDef.getTokenName(1), origins, tsf));
+                            }
+                        } // TODO: Catch specific tokenscript parse errors to report tokenscript errors.
+                        catch (Exception e)
+                        {
+                            // don't add to list
+                        }
+                    });
+
+            return tokenLocators;
+        });
+    }
 
     private List<ContractLocator> getAllOriginContracts()
     {

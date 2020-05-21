@@ -5,7 +5,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.alphawallet.app.C;
@@ -52,18 +54,20 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private final Map<String, String> args = new HashMap<>();
     private boolean reloaded;
     private AWalletAlertDialog dialog;
+    private LinearLayout webWrapper;
 
     private void initViews(Token t) {
         token = t;
         String displayIds = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
         RelativeLayout frameLayout = findViewById(R.id.layout_select_ticket);
         tokenView = findViewById(R.id.web3_tokenview);
+        webWrapper = findViewById(R.id.layout_webwrapper);
         idList = token.stringHexToBigIntegerList(displayIds);
         reloaded = false;
 
         TicketRange data = new TicketRange(idList, token.tokenInfo.address, false);
 
-        token.displayTicketHolder(data, frameLayout, viewModel.getAssetDefinitionService(), this, false);
+        tokenView.displayTicketHolder(token, data, viewModel.getAssetDefinitionService(), false);
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSetValuesListener(this);
         functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null);
@@ -133,6 +137,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     @Override
     public void onPageRendered(WebView view)
     {
+        webWrapper.setVisibility(View.VISIBLE);
         if (!reloaded) tokenView.reload(); //issue a single reload
         reloaded = true;
     }
@@ -235,7 +240,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         {
             viewModel.getAssetDefinitionService().addLocalRefs(args);
             //rebuild the view
-            token.displayTicketHolder(data, frameLayout, viewModel.getAssetDefinitionService(), this, false);
+            tokenView.displayTicketHolder(token, data, viewModel.getAssetDefinitionService(), false);
         }
     }
 }

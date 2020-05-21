@@ -36,29 +36,15 @@ android {
     }
     defaultConfig {
         applicationId "io.stormbird.wallet"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 29
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        def CoinmarketCapAPI = "CoinmarketCapAPI"
-        def AmberdataAPI = "AmberdataAPI"
-        def InfuraAPI = "InfuraAPI"
-        def COINMARKET_CAP_KEY = "\"ea2d0a6b-7e77-4015-bccf-4877e5c5b882\""
-        def AMBERDATA_API_KEY = "\"obtain-api-key-from-amberdata-io\"";
-        def INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\"";
-        if (project.hasProperty("coinmarketcapAPI")) {
-            COINMARKET_CAP_KEY = coinmarketcapAPI
-        }
-        if (project.hasProperty("amberdataAPI")) {
-            AMBERDATA_API_KEY = amberdataAPI
-        }
-        if (project.hasProperty("infuraAPI")) {
-            INFURA_API_KEY = infuraAPI
-        }
+        def XInfuraAPI = "XInfuraAPI"
+        //Put your Infura key here
+        def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\"";
 
         buildConfigField 'int', 'DB_VERSION', '7'
-        buildConfigField "String", CoinmarketCapAPI, COINMARKET_CAP_KEY
-        buildConfigField "String", AmberdataAPI, AMBERDATA_API_KEY
-        buildConfigField "String", InfuraAPI, INFURA_API_KEY
+        buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
 
         ndk {
             abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
@@ -68,8 +54,8 @@ android {
     productFlavors {
 	awallet {
 		dimension "targetting"
-        versionCode 103
-        versionName "2.23.5"
+        versionCode 109
+        versionName "2.30.0"
 	}
     }
     buildTypes {
@@ -93,6 +79,11 @@ android {
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_8
         sourceCompatibility JavaVersion.VERSION_1_8
+    }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+        }
     }
 }
 

@@ -6,6 +6,7 @@ import android.support.annotation.RawRes;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.web3.entity.Address;
 
@@ -39,7 +40,7 @@ public class JsInjectorClient {
     private int chainId = 1;
     private Address walletAddress;
     //Note: this default RPC is overriden before injection
-    private String rpcUrl = EthereumNetworkRepository.MAINNET_RPC_URL;
+    private String rpcUrl = EthereumNetworkRepository.getDefaultNodeURL(EthereumNetworkBase.MAINNET_ID);
 
     public JsInjectorClient(Context context) {
         this.context = context;
@@ -123,7 +124,7 @@ public class JsInjectorClient {
         String initSrc = loadFile(ctx, R.raw.init_token);
         //put the view in here
         String tokenIdWrapperName = "token-card-" + tokenId.toString(10);
-        initSrc = String.format(initSrc, tokenContent, walletAddress, EthereumNetworkRepository.getNodeURLByNetworkId(chainId), chainId, tokenIdWrapperName);
+        initSrc = String.format(initSrc, tokenContent, walletAddress, EthereumNetworkRepository.getDefaultNodeURL(chainId), chainId, tokenIdWrapperName);
         //now insert this source into the view
         // note that the <div> is not closed because it is closed in njectStyleAndWrap().
         String wrapper = "<div id=\"token-card-" + tokenId.toString(10) + "\" class=\"token-card\">";

@@ -336,9 +336,12 @@ public class WalletViewModel extends BaseViewModel
 
     private void addUnresolvedContracts(List<ContractLocator> contractCandidates)
     {
-        Observable.fromArray(contractCandidates.toArray(new ContractLocator[0]))
-                .filter(result -> (tokensService.getToken(result.chainId, result.name) == null))
-                .forEach(r -> unknownAddresses.add(r)).isDisposed();
+        if (contractCandidates != null && contractCandidates.size() > 0)
+        {
+            Observable.fromArray(contractCandidates.toArray(new ContractLocator[0]))
+                    .filter(result -> (tokensService.getToken(result.chainId, result.address) == null))
+                    .forEach(r -> unknownAddresses.add(r)).isDisposed();
+        }
     }
 
     private void checkBalances()
@@ -469,7 +472,7 @@ public class WalletViewModel extends BaseViewModel
 
         if (contract != null)
         {
-            disposable = setupTokensInteract.addToken(contract.name, contract.chainId) //fetch tokenInfo
+            disposable = setupTokensInteract.addToken(contract.address, contract.chainId) //fetch tokenInfo
                     .filter(tokenInfo -> tokenInfo.name != null)
                     .flatMap(tokenInfo -> fetchTransactionsInteract.queryInterfaceSpec(tokenInfo).toObservable()
                             .flatMap(contractType -> addTokenInteract.add(tokenInfo, contractType, currentWallet)))

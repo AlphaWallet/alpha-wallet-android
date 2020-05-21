@@ -15,9 +15,9 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 
-import org.web3j.abi.TypeReference;
+import com.alphawallet.app.web3j.TypeReference;
+import com.alphawallet.app.web3j.datatypes.Function;
 import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
 
@@ -121,21 +121,9 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public void setupContent(TokenHolder holder, AssetDefinitionService definition)
+    public int getContractType()
     {
-        //721 Balance
-        int balance = tokenBalanceAssets.size();
-
-        holder.balanceEth.setText(String.valueOf(balance));
-        holder.layoutValueDetails.setVisibility(View.GONE);
-
-        holder.contractType.setVisibility(View.VISIBLE);
-        holder.contractSeparator.setVisibility(View.VISIBLE);
-        holder.contractType.setText(R.string.erc721);
-
-        holder.balanceEth.setVisibility(View.VISIBLE);
-
-        addTokenName(holder, definition);
+        return R.string.erc721;
     }
 
     @Override

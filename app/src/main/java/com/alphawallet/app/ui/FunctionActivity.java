@@ -12,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
@@ -44,7 +43,6 @@ import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.token.entity.AttributeType;
-import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TokenScriptResult;
@@ -143,7 +141,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             TSAction action = functions.get(actionMethod);
             String magicValues = viewModel.getAssetDefinitionService().getMagicValuesForInjection(token.tokenInfo.chainId);
 
-            String injectedView = tokenView.injectWeb3TokenInit(this, action.view.tokenView, tokenAttrs, tokenId);
+            String injectedView = tokenView.injectWeb3TokenInit(action.view.tokenView, tokenAttrs, tokenId);
             injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
             injectedView = tokenView.injectStyleAndWrapper(injectedView, action.style + "\n" + action.view.style);
 
@@ -491,8 +489,10 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public boolean overridePageLoad(WebView view, String url)
     {
-        if (handleMapClick(url)) return true; //handle specific map click
-        else return handleURLClick(url);      //otherwise handle an attempt to visit a URL from TokenScript. If URL isn't in the approved DAPP list then fail
+        if (handleMapClick(url))
+            return true;                     //handle specific map click
+        else
+            return handleURLClick(url);      //otherwise handle an attempt to visit a URL from TokenScript. If URL isn't in the approved DAPP list then fail
     }
 
     @Override

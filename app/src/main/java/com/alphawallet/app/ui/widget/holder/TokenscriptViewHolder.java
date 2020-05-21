@@ -101,7 +101,7 @@ public class TokenscriptViewHolder extends BinderViewHolder<TicketRange> impleme
         String viewType = iconified ? ASSET_SUMMARY_VIEW_NAME : ASSET_DETAIL_VIEW_NAME;
         String view = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), viewType);
         String style = assetDefinitionService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
-        String viewData = tokenView.injectWeb3TokenInit(getContext(), view, tokenAttrs, data.tokenIds.get(0));
+        String viewData = tokenView.injectWeb3TokenInit(view, tokenAttrs, data.tokenIds.get(0));
         viewData = tokenView.injectStyleAndWrapper(viewData, style); //style injected last so it comes first
 
         String base64 = Base64.encodeToString(viewData.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);

@@ -5,6 +5,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.alphawallet.app.R;
@@ -12,13 +15,18 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.web3.Web3TokenView;
+import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 
-public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener, View.OnLongClickListener
+public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener, View.OnLongClickListener, PageReadyCallback
 {
     private TicketRange thisData;
     private Token token;
+    private final Web3TokenView tokenView;
+    private final LinearLayout webWrapper;
+    private final ProgressBar waitSpinner;
     private OnTokenClickListener onTokenClickListener;
     private final AssetDefinitionService assetService; //need to cache this locally, unless we cache every string we need in the constructor
 
@@ -29,11 +37,15 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
         super(resId, parent);
 
         activityView = this.itemView;
-
+        tokenView = findViewById(R.id.web3_tokenview);
+        webWrapper = findViewById(R.id.layout_webwrapper);
+        waitSpinner = findViewById(R.id.progress_element);
         itemView.setOnClickListener(this);
         ticketLayout = findViewById(R.id.layout_select_ticket);
         assetService = service;
         token = ticket;
+        tokenView.setOnReadyCallback(this);
+        waitSpinner.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -43,7 +55,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
 
         if (data.tokenIds.size() > 0)
         {
-            token.displayTicketHolder(data, activityView, assetService, getContext());
+            tokenView.displayTicketHolder(token, data, assetService, true);
         }
     }
 
@@ -67,5 +79,18 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
         }
 
         return true;
+    }
+
+    @Override
+    public void onPageLoaded(WebView view)
+    {
+
+    }
+
+    @Override
+    public void onPageRendered(WebView view)
+    {
+        waitSpinner.setVisibility(View.GONE);
+        webWrapper.setVisibility(View.VISIBLE);
     }
 }

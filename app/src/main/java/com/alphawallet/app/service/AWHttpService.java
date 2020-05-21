@@ -130,7 +130,7 @@ public class AWHttpService extends HttpService
             }
             else
             {
-                response = null;
+                throw new SocketTimeoutException();
             }
         }
         processHeaders(response.headers());

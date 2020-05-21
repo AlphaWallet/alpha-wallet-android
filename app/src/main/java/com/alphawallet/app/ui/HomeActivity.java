@@ -398,6 +398,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             dialog.setTitle(R.string.root_title);
             dialog.setMessage(R.string.root_body);
             dialog.setButtonText(R.string.ok);
+            dialog.setIcon(AWalletAlertDialog.ERROR);
             dialog.setButtonListener(v -> dialog.dismiss());
             dialog.show();
         }

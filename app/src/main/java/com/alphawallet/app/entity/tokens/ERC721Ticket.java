@@ -19,7 +19,7 @@ import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 
-import org.web3j.abi.datatypes.Function;
+import com.alphawallet.app.web3j.datatypes.Function;
 import org.web3j.abi.datatypes.generated.Uint256;
 
 import java.math.BigDecimal;
@@ -150,26 +150,11 @@ public class ERC721Ticket extends Token implements Parcelable {
     {
         viewModel.showRedeemToken(context, this);
     }
-
+    
     @Override
-    public void setupContent(TokenHolder tokenHolder, AssetDefinitionService asset)
+    public int getContractType()
     {
-        tokenHolder.balanceCurrency.setText("--");
-        tokenHolder.textAppreciation.setText("--");
-        tokenHolder.contractType.setVisibility(View.VISIBLE);
-        if (VisibilityFilter.getImageOverride() != 0)
-        {
-            tokenHolder.icon.setVisibility(View.VISIBLE);
-            tokenHolder.icon.setImageResource(VisibilityFilter.getImageOverride());
-        }
-        tokenHolder.chainName.setVisibility(View.VISIBLE);
-        tokenHolder.extendedInfo.setVisibility(View.VISIBLE);
-        tokenHolder.contractType.setText(R.string.ERC721T);
-
-        String composite = getTicketCount() + " " + getFullName(asset, getTicketCount());
-        tokenHolder.balanceEth.setText(composite);
-
-        tokenHolder.layoutValueDetails.setVisibility(View.GONE);
+        return R.string.ERC721T;
     }
 
     public void checkIsMatchedInXML(AssetDefinitionService assetService)

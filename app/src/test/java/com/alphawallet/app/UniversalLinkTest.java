@@ -34,7 +34,7 @@ import com.alphawallet.token.tools.ParseMagicLink;
 
 public class UniversalLinkTest
 {
-    private static ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
+    private static ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), null);
 
     final String[] links = { "https://aw.app/AAAAAFroO8yg2x-t8XoYKvHWEk8mRcRZuarNIgwNDg9OYA205_-QZURILYlNp6astOo-RkQMSSefIzMWHKdjcGsc3kAaHfHYi7rrLTgmUfAMaQjFB_u8G0EbB8HewJwDAA==",
             "https://aw.app/AB6EgFroX2xm8IymiSAXpF2m-3kqjpRvy-PYZRQVFhcYAlMtOEau6TvoUT-lN5HoxjxlErC2T0LJ-1u4DmORCdoVs-UNTIL33W_OJ6jGJy2ocqEyWBmV-RiYPIzQlHq0mwE=",
@@ -183,7 +183,7 @@ public class UniversalLinkTest
         try {
             System.arraycopy(sigData.getR(), 0, sig, 0, 32);
             System.arraycopy(sigData.getS(), 0, sig, 32, 32);
-            sig[64] = sigData.getV();//[0];
+            System.arraycopy(sigData.getV(), 0, sig, 64, 1);
         } catch (IndexOutOfBoundsException e) {
             throw new SalesOrderMalformed("Signature shorter than expected 256");
         }

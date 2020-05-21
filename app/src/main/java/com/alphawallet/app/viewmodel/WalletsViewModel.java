@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.alphawallet.app.C;
@@ -186,16 +187,19 @@ public class WalletsViewModel extends BaseViewModel
         //check names first
         disposable = fetchWalletsInteract.fetch().toObservable()
                 .flatMap(Observable::fromArray)
-                .flatMap(wallet -> ensResolver.resolveWalletEns(wallet).toObservable())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::updateOnName, this::onError, () -> progress.postValue(false));
+                .forEach(wallet -> ensResolver.resolveEnsName(wallet.address)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(ensName -> updateOnName(wallet, ensName), this::onError));
+
+        progress.postValue(false);
     }
 
-    private void updateOnName(Wallet wallet)
+    private void updateOnName(Wallet wallet, String ensName)
     {
-        if (wallet.ENSname != null && wallet.ENSname.length() > 0)
+        if (!TextUtils.isEmpty(ensName))
         {
+            wallet.ENSname = ensName;
             disposable = fetchWalletsInteract.updateWalletData(wallet)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -230,7 +234,7 @@ public class WalletsViewModel extends BaseViewModel
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .subscribe(wallet -> {
-                    fetchTokensInteract.fetchStoredToken(network, wallet, override.name) //fetch cached balance from this wallet's DB
+                    fetchTokensInteract.fetchStoredToken(network, wallet, override.address) //fetch cached balance from this wallet's DB
                     .flatMap(tokenFromCache -> fetchTokensInteract.updateBalance(wallet.address, tokenFromCache)) //update balance
                     .subscribe(this::updateWallet, error -> onFetchError(wallet, network)).isDisposed();
                 }, this::onError);

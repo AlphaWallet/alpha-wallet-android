@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,6 +63,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     private Token token;
     private TicketRangeParcel ticketRange;
     private Web3TokenView tokenView;
+    private LinearLayout webWrapper;
     private boolean signRequest;
 
     @Override
@@ -80,6 +82,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         wallet = getIntent().getParcelableExtra(WALLET);
         ticketRange = getIntent().getParcelableExtra(TICKET_RANGE);
         tokenView = findViewById(R.id.web3_tokenview);
+        webWrapper = findViewById(R.id.layout_webwrapper);
         findViewById(R.id.advanced_options).setVisibility(View.GONE); //setOnClickListener(this);
 
         viewModel = ViewModelProviders.of(this, redeemSignatureDisplayModelFactory)
@@ -94,10 +97,8 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         tv.setText(getString(R.string.waiting_for_blockchain));
         tv.setVisibility(View.VISIBLE);
 
-        View baseView = findViewById(android.R.id.content);
-
         //given a webview populate with rendered token
-        token.displayTicketHolder(ticketRange.range, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
+        tokenView.displayTicketHolder(token, ticketRange.range, viewModel.getAssetDefinitionService());
         tokenView.setOnReadyCallback(this);
         tokenView.setLayout(token, false);
         finishReceiver = new FinishReceiver(this);
@@ -251,6 +252,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     @Override
     public void onPageRendered(WebView view)
     {
-
+        webWrapper.setVisibility(View.VISIBLE);
     }
 }

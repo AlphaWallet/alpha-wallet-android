@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.alphawallet.app.R;
@@ -153,7 +154,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         {
             BigInteger  tokenId = token.getArrayBalance().get(0);
             TicketRange data    = new TicketRange(tokenId, token.getAddress());
-            token.renderTokenscriptView(data, viewModel.getAssetDefinitionService(), null, this, testView, iconified);
+            testView.renderTokenscriptView(token, data, viewModel.getAssetDefinitionService(), iconified);
             testView.setOnReadyCallback(this);
         }
     }

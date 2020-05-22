@@ -163,22 +163,6 @@
 
             <TextView
                 style="@style/TransactionDetailsSubTitleStyle"
-                android:id="@+id/title_confirmations"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/confirmations"
-                android:visibility="gone"/>
-
-            <TextView
-                android:id="@+id/confirmations"
-                style="@style/TransactionDetailsStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="0"
-                android:visibility="gone"/>
-
-            <TextView
-                style="@style/TransactionDetailsSubTitleStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/subtitle_transaction_time" />

@@ -144,11 +144,10 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
             BigInteger txBlock = new BigInteger(transaction.blockNumber);
             if (!latestBlock.equals(BigInteger.ZERO) && !txBlock.equals(BigInteger.ZERO))
             {
-                findViewById(R.id.confirmations).setVisibility(View.VISIBLE);
-                findViewById(R.id.title_confirmations).setVisibility(View.VISIBLE);
                 //how many confirmations?
                 BigInteger confirmations = latestBlock.subtract(txBlock);
-                ((TextView) findViewById(R.id.confirmations)).setText(confirmations.toString(10));
+                String confirmation = " (" + confirmations.toString(10) + " " + getString(R.string.confirmations)  + ")";
+                ((TextView) findViewById(R.id.block_number)).append(confirmation);
             }
         }
         catch (Exception e)
@@ -171,9 +170,6 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         {
             ((TextView) findViewById(R.id.gas_fee)).setText(BalanceUtils.weiToEth(gasFee).toPlainString());
         }
-
-        findViewById(R.id.confirmations).setVisibility(View.GONE);
-        findViewById(R.id.title_confirmations).setVisibility(View.GONE);
     }
 
     private void setupWalletDetails() {

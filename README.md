@@ -6,10 +6,6 @@
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/AlphaWallet/alpha-wallet-android/blob/master/LICENSE)
 [![codecov](https://codecov.io/gh/AlphaWallet/alpha-wallet-android/branch/master/graph/badge.svg)](https://codecov.io/gh/AlphaWallet/alpha-wallet-android)
 
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
-
 AlphaWallet is an open source programmable blockchain apps platform. It's compatible with tokenisation framework TokenScript, offering businesses and their users in-depth token interaction, a clean white label user experience and advanced security options. Supports all Ethereum based networks.
 
 AlphaWallet and TokenScript have been used by tokenisation projects like FIFA and UEFA’s [blockchain tickets](https://apps.apple.com/au/app/shankai/id1492559481), Bartercard’s [Qoin ecommerce ecosystem](https://apps.apple.com/au/app/qoin-wallet/id1483718254), several Automobiles’ [car ownership portal](https://github.com/AlphaWallet/TokenScript-Examples/tree/master/examples/Karma) and many more.
@@ -83,7 +79,7 @@ You can submit feedback and report bugs as Github issues. Please be sure to incl
 
 Would you like to request a feature? Please get in touch with us [Telegram](https://t.me/AlphaWalletGroup), [Twitter](https://twitter.com/AlphaWallet) or through our [community forums](https://community.tokenscript.org/).
 
-If you’d like to contribute code with a Pull Request, please make sure to follow code submtission guidelines.
+If you’d like to contribute code with a Pull Request, please make sure to follow code submission guidelines.
 
 ### Spread the word :hatched_chick:
 
@@ -118,7 +114,38 @@ Thank you to all the contributors! You are awesome.
     <td align="center"><a href="https://github.com/AW-STJ"><img src="https://avatars1.githubusercontent.com/u/61957841?v=4" width="100px;" alt=""/><br /><sub><b>AW-STJ</b></sub></a><br /><a href="#projectManagement-AW-STJ" title="Project Management">📆</a></td>
     <td align="center"><a href="https://github.com/tomekalphawallet"><img src="https://avatars1.githubusercontent.com/u/51817359?v=4" width="100px;" alt=""/><br /><sub><b>Tomek Nowak</b></sub></a><br /><a href="#design-tomekalphawallet" title="Design">🎨</a></td>
     <td align="center"><a href="https://github.com/colourful-land"><img src="https://avatars3.githubusercontent.com/u/548435?v=4" width="100px;" alt=""/><br /><sub><b>Weiwu Zhang</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=colourful-land" title="Code">💻</a></td>
+  <td align="center"><a href="https://github.com/JamesSmartCell"><img src="https://avatars2.githubusercontent.com/u/12689544?v=4" width="100px;" alt=""/><br /><sub><b>James Brown</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=JamesSmartCell" title="Code">💻</a></td>
+  </tr>
+  <tr>
     <td align="center"><a href="https://multisender.app"><img src="https://avatars3.githubusercontent.com/u/9360827?v=4" width="100px;" alt=""/><br /><sub><b>Roman Storm</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/issues?q=author%3Arstormsf" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/justindg"><img src="https://avatars3.githubusercontent.com/u/17334718?v=4" width="100px;" alt=""/><br /><sub><b>justindg</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=justindg" title="Code">💻</a></td>
+    <td align="center"><a href="knowyouralgorithms.wordpress.com"><img src="https://avatars3.githubusercontent.com/u/3628920?v=4" width="100px;" alt=""/><br /><sub><b>Marat Subkhankulov</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=maratsubkhankulov" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/madcake"><img src="https://avatars0.githubusercontent.com/u/133312?v=4" width="100px;" alt=""/><br /><sub><b>Maksim Rasputin</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=madcake" title="Code">💻</a></td>
+    <td align="center"><a href="http://www.lucastoledo.co"><img src="https://avatars3.githubusercontent.com/u/17125002?v=4" width="100px;" alt=""/><br /><sub><b>Lucas Toledo</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=hellolucas" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/farrahfazirah"><img src="https://avatars0.githubusercontent.com/u/20555752?v=4" width="100px;" alt=""/><br /><sub><b>Farrah Fazirah</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=farrahfazirah" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/ChintanRathod"><img src="https://avatars2.githubusercontent.com/u/4371780?v=4" width="100px;" alt=""/><br /><sub><b>Chintan Rathod</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=ChintanRathod" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/lyhistory"><img src="https://avatars0.githubusercontent.com/u/1522513?v=4" width="100px;" alt=""/><br /><sub><b>Liu Yue</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=lyhistory" title="Code">💻</a></td>
+    <td align="center"><a href="http://petergrassberger.com"><img src="https://avatars1.githubusercontent.com/u/666289?v=4" width="100px;" alt=""/><br /><sub><b>Peter Grassberger</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=PeterTheOne" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/daboooooo"><img src="https://avatars3.githubusercontent.com/u/51960472?v=4" width="100px;" alt=""/><br /><sub><b>daboooooo</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=daboooooo" title="Code">💻</a></td>
+    <td align="center"><a href="https://1inch.exchange"><img src="https://avatars2.githubusercontent.com/u/762226?v=4" width="100px;" alt=""/><br /><sub><b>Sergej Kunz</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=deacix" title="Code">💻</a></td>
+    <td align="center"><a href="https://www.bidali.com"><img src="https://avatars3.githubusercontent.com/u/7315?v=4" width="100px;" alt=""/><br /><sub><b>Cory Smith</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=corymsmith" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/corymsmith"><img src="https://avatars3.githubusercontent.com/u/13280244?v=4" width="100px;" alt=""/><br /><sub><b>Corey Caplan</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=coreycaplan3" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/rip32700"><img src="https://avatars1.githubusercontent.com/u/15885971?v=4" width="100px;" alt=""/><br /><sub><b>Philipp Rieger</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=rip32700" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/fuseio"><img src="https://avatars3.githubusercontent.com/u/10231448?v=4" width="100px;" alt=""/><br /><sub><b>Tal Beja</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=bejavu" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/asoong"><img src="https://avatars0.githubusercontent.com/u/3453571?v=4" width="100px;" alt=""/><br /><sub><b>Alex Soong</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=asoong" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/appyhour770"><img src="https://avatars1.githubusercontent.com/u/8951009?v=4" width="100px;" alt=""/><br /><sub><b>BTU Protocol</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=appyhour770" title="Code">💻</a></td>
+    <td align="center"><a href="https://antsankov.com"><img src="https://avatars3.githubusercontent.com/u/2533512?v=4" width="100px;" alt=""/><br /><sub><b>Alex Tsankov</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=antsankov" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/gravitational"><img src="https://avatars2.githubusercontent.com/u/18430731?v=4" width="100px;" alt=""/><br /><sub><b>Anna R</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=annabambi" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/SpiderStore"><img src="https://avatars3.githubusercontent.com/u/20901836?v=4" width="100px;" alt=""/><br /><sub><b>TamirTian</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=TamirTian" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/SpasiboKojima"><img src="https://avatars1.githubusercontent.com/u/34808650?v=4" width="100px;" alt=""/><br /><sub><b>Andrew</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=SpasiboKojima" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/LingTian"><img src="https://avatars1.githubusercontent.com/u/4249432?v=4" width="100px;" alt=""/><br /><sub><b>Ling</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=LingTian" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/Destiner"><img src="https://avatars1.githubusercontent.com/u/4247901?v=4" width="100px;" alt=""/><br /><sub><b>Timur Badretdinov</b></sub></a><br /><a href="https://github.com/AlphaWallet/alpha-wallet-android/commits?author=Destiner" title="Code">💻</a></td>
   </tr>
 </table>
 

@@ -41,7 +41,7 @@
         "projectManagement"
       ]
     },
-    { 
+    {
       "login": "tomekalphawallet",
       "name": "Tomek Nowak",
       "avatar_url": "https://avatars1.githubusercontent.com/u/51817359?v=4",
@@ -66,6 +66,213 @@
       "profile": "https://multisender.app",
       "contributions": [
         "bug"
+      ]
+    }
+    {
+      "login": "JamesSmartCell",
+      "name": "James Brown",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/12689544?v=4",
+      "profile": "https://github.com/JamesSmartCell",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "justindg",
+      "name": "justindg",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/17334718?v=4",
+      "profile": "https://github.com/justindg",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "maratsubkhankulov",
+      "name": "Marat Subkhankulov",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/3628920?v=4",
+      "profile": "knowyouralgorithms.wordpress.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "madcake",
+      "name": "Maksim Rasputin"
+      "avatar_url": "https://avatars0.githubusercontent.com/u/133312?v=4",
+      "profile": "https://github.com/madcake",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "rip32700",
+      "name": "Philipp Rieger",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/15885971?v=4",
+      "profile": "https://github.com/rip32700",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "farrahfazirah",
+      "name": "Farrah Fazirah",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/20555752?v=4",
+      "profile": "https://github.com/farrahfazirah",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "ChintanRathod",
+      "name": "Chintan Rathod",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/4371780?v=4",
+      "profile": "https://github.com/ChintanRathod",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "lyhistory",
+      "name": "Liu Yue",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/1522513?v=4",
+      "profile": "https://github.com/lyhistory",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "PeterTheOne",
+      "name": "Peter Grassberger",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/666289?v=4",
+      "profile": "http://petergrassberger.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "daboooooo",
+      "name": "daboooooo",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/51960472?v=4",
+      "profile": "https://github.com/daboooooo",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "hellolucas",
+      "name": "Lucas Toledo",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/17125002?v=4",
+      "profile": "http://www.lucastoledo.co",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "deacix",
+      "name": "Sergej Kunz",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/762226?v=4",
+      "profile": "https://1inch.exchange",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "corymsmith",
+      "name": "Cory Smith",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/7315?v=4",
+      "profile": "https://www.bidali.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "coreycaplan3",
+      "name": "Corey Caplan",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/13280244?v=4",
+      "profile": "https://github.com/corymsmith",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "bejavu",
+      "name": "Tal Beja",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/10231448?v=4",
+      "profile": "https://github.com/fuseio",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "asoong",
+      "name": "Alex Soong",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/3453571?v=4",
+      "profile": "https://github.com/asoong",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "appyhour770",
+      "name": "BTU Protocol",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/8951009?v=4",
+      "profile": "https://github.com/appyhour770",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "antsankov",
+      "name": "Alex Tsankov",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/2533512?v=4",
+      "profile": "https://antsankov.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "annabambi",
+      "name": "Anna R",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/18430731?v=4",
+      "profile": "https://github.com/gravitational",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "TamirTian",
+      "name": "TamirTian",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/20901836?v=4",
+      "profile": "https://github.com/SpiderStore",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "SpasiboKojima",
+      "name": "Andrew",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/34808650?v=4",
+      "profile": "https://github.com/SpasiboKojima",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "LingTian",
+      "name": "Ling",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/4249432?v=4",
+      "profile": "https://github.com/LingTian",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Destiner",
+      "name": "Timur Badretdinov",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/4247901?v=4",
+      "profile": "https://github.com/Destiner",
+      "contributions": [
+        "code"
       ]
     }
   ],

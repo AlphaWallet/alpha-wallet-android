@@ -61,6 +61,7 @@
     <string name="subtitle_transaction_hash_num">Transaction Hash#</string>
     <string name="subtitle_transaction_time">Transaction Time</string>
     <string name="subtitle_block_num">Block #</string>
+    <string name="subtitle_block">Block</string>
 
     <!-- Actions -->
     <string name="action_share">Share</string>

@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.Menu;
@@ -26,7 +27,6 @@ import com.alphawallet.app.widget.CopyTextView;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -54,9 +54,8 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
         AndroidInjection.inject(this);
+        super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_transaction_detail);
 
@@ -67,7 +66,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
             return;
         }
         toolbar();
-        setTitle(R.string.empty);
+        setTitle();
 
         String blockNumber = transaction.blockNumber;
         if (transaction.blockNumber.equals("0"))
@@ -79,8 +78,8 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         setupVisibilities();
 
         amount = findViewById(R.id.amount);
-        ((TextView) findViewById(R.id.from)).setText(transaction.from);
-        ((TextView) findViewById(R.id.to)).setText(transaction.to);
+        ((CopyTextView) findViewById(R.id.from)).setText(transaction.from);
+        ((CopyTextView) findViewById(R.id.to)).setText(transaction.to);
         ((CopyTextView) findViewById(R.id.txn_hash)).setText(transaction.hash);
         ((TextView) findViewById(R.id.txn_time)).setText(localiseUnixTime(transaction.timeStamp));
 
@@ -99,6 +98,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         viewModel.prepare(transaction.chainId);
 
         chainName = viewModel.getNetworkName(transaction.chainId);
+        ((TextView) findViewById(R.id.network)).setText(chainName);
 
         token = viewModel.getToken(transaction.chainId, transaction.to);
         TextView chainLabel = findViewById(R.id.text_chain_name);
@@ -109,14 +109,10 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         String operationName = null;
         if (token != null)
         {
-            ((TextView)findViewById(R.id.contract_name)).setText(token.getFullName());
             operationName = token.getOperationName(transaction, getApplicationContext());
         }
         else
         {
-            findViewById(R.id.contract_name_title).setVisibility(View.GONE);
-            findViewById(R.id.contract_name).setVisibility(View.GONE);
-
             //no token, did we send? If from == our wallet then we sent this
             if (transaction.from.equalsIgnoreCase(wallet.address)) operationName = getString(R.string.sent);
         }
@@ -132,6 +128,13 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
 
         if (!viewModel.hasEtherscanDetail(transaction)) findViewById(R.id.more_detail).setVisibility(View.GONE);
         setupWalletDetails();
+    }
+
+    private void setTitle() {
+        findViewById(R.id.toolbar_title).setVisibility(View.VISIBLE);
+        ((TextView)findViewById(R.id.toolbar_title)).setText(R.string.title_transaction_details);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle("");
     }
 
     private void onLatestBlock(BigInteger latestBlock)
@@ -218,7 +221,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         Date date = new java.util.Date(timeStampInSec*DateUtils.SECOND_IN_MILLIS);
         DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(this));
         DateFormat dateFormat = java.text.DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(this));
-        return dateFormat.format(date) + " " + timeFormat.format(date);
+        return timeFormat.format(date) + " | " + dateFormat.format(date);
     }
 
     @Override

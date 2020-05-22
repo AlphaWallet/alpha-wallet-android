@@ -20,21 +20,10 @@
             android:paddingLeft="15dp"
             android:paddingRight="15dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="20dp"
-                android:fontFamily="@font/font_light"
-                android:gravity="center"
-                android:text="@string/title_transaction_details"
-                android:textColor="@color/text_black"
-                android:textSize="25sp" />
-
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp">
 
                 <ProgressBar
                     android:id="@+id/pending_spinner"
@@ -80,201 +69,150 @@
                     android:text="@string/action_clear"
                     android:textColor="@color/white"
                     android:textSize="12sp"
-                    android:visibility="visible" />
+                    android:visibility="gone" />
 
             </RelativeLayout>
 
             <TextView
+                style="@style/TransactionDetailsSubTitleStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
-                android:text="@string/subtitle_transaction_hash_num"
-                android:textSize="13sp" />
+                android:layout_marginTop="@dimen/dp16"
+                android:text="@string/subtitle_transaction_hash_num" />
 
             <com.alphawallet.app.widget.CopyTextView
                 android:id="@+id/txn_hash"
+                style="@style/TransactionDetailsCopyTextStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/small_margin"
-                android:layout_marginBottom="@dimen/normal_margin"
-                android:background="@color/white"
-                android:paddingEnd="@dimen/dp16"
-                android:paddingBottom="@dimen/dp5"
                 app:gravity="start"
-                app:textColor="@color/mine" />
+                app:textColor="@color/mine"
+                app:marginRight="@dimen/dp18" />
 
             <TextView
+                style="@style/TransactionDetailsSubTitleStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/subtitle_network"
-                android:textSize="12sp" />
+                android:text="@string/subtitle_network" />
 
             <TextView
                 android:id="@+id/network"
+                style="@style/TransactionDetailsStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_regular"
-                android:layout_marginTop="@dimen/small_margin"
-                android:layout_marginBottom="@dimen/normal_margin"
                 android:drawableLeft="@drawable/ic_coin_eth_small"
                 android:drawablePadding="@dimen/dp5"
-                android:textSize="17sp"
                 android:text="@string/ethereum" />
 
             <TextView
+                style="@style/TransactionDetailsSubTitleStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/subtitle_from"
-                android:textAllCaps="true"
-                android:textSize="12sp" />
+                android:text="@string/subtitle_from" />
 
-            <TextView
+            <com.alphawallet.app.widget.CopyTextView
                 android:id="@+id/from"
-                android:layout_width="wrap_content"
+                style="@style/TransactionDetailsCopyTextStyle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/small_margin"
-                android:layout_marginBottom="@dimen/normal_margin"
-                android:fontFamily="@font/font_regular"
-                android:textIsSelectable="true"
-                android:textSize="14sp"
-                tools:text="0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF" />
+                app:gravity="start"
+                app:textColor="@color/mine"
+                app:marginRight="@dimen/dp18" />
 
             <TextView
+                style="@style/TransactionDetailsSubTitleStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/subtitle_to"
-                android:textAllCaps="true"
-                android:textSize="12sp" />
+                android:text="@string/subtitle_to" />
 
-            <TextView
+            <com.alphawallet.app.widget.CopyTextView
                 android:id="@+id/to"
-                android:layout_width="wrap_content"
+                style="@style/TransactionDetailsCopyTextStyle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/small_margin"
-                android:layout_marginBottom="@dimen/normal_margin"
-                android:fontFamily="@font/font_regular"
-                android:textIsSelectable="true"
-                android:textSize="14sp"
-                tools:text="0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF" />
+                app:gravity="start"
+                app:textColor="@color/mine"
+                app:marginRight="@dimen/dp18" />
 
             <TextView
-                android:id="@+id/contract_name_title"
+                style="@style/TransactionDetailsSubTitleStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/hint_contract_name"
-                android:textAllCaps="true"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/contract_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/small_margin"
-                android:layout_marginBottom="@dimen/normal_margin"
-                android:fontFamily="@font/font_regular"
-                android:textSize="14sp"
-                tools:text="" />
-
-            <TextView
-                android:id="@+id/title_gas_fee"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/subtitle_gas_fee"
-                android:textAllCaps="true"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/gas_fee"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/small_margin"
-                android:layout_marginBottom="@dimen/normal_margin"
-                android:fontFamily="@font/font_regular"
-                android:textSize="14sp"
-                tools:text="0.000044" />
-
-            <TextView
-                android:id="@+id/title_confirmations"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/confirmations"
-                android:textAllCaps="true"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/confirmations"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/small_margin"
-                android:layout_marginBottom="@dimen/normal_margin"
-                android:fontFamily="@font/font_regular"
-                android:textSize="14sp"
-                tools:text="0" />
-
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/subtitle_transaction_time"
-                android:textAllCaps="true"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/txn_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/small_margin"
-                android:layout_marginBottom="@dimen/normal_margin"
-                android:fontFamily="@font/font_regular"
-                android:textSize="14sp"
-                tools:text="September 4, 2017 at 2:32:12 PM" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/font_semibold"
-                android:text="@string/subtitle_block_num"
-                android:textAllCaps="true"
-                android:textSize="12sp" />
+                android:text="@string/subtitle_block" />
 
             <TextView
                 android:id="@+id/block_number"
+                style="@style/TransactionDetailsStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/small_margin"
-                android:layout_marginBottom="@dimen/normal_margin"
-                android:fontFamily="@font/font_regular"
-                android:textSize="14sp"
                 tools:text="4238793" />
+
+            <TextView
+                style="@style/TransactionDetailsSubTitleStyle"
+                android:id="@+id/title_gas_fee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/subtitle_gas_fee" />
+
+            <TextView
+                android:id="@+id/gas_fee"
+                style="@style/TransactionDetailsStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="0.000044" />
+
+            <TextView
+                style="@style/TransactionDetailsSubTitleStyle"
+                android:id="@+id/title_confirmations"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/confirmations"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/confirmations"
+                style="@style/TransactionDetailsStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="0"
+                android:visibility="gone"/>
+
+            <TextView
+                style="@style/TransactionDetailsSubTitleStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/subtitle_transaction_time" />
+
+            <TextView
+                android:id="@+id/txn_time"
+                style="@style/TransactionDetailsStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="September 4, 2017 at 2:32:12 PM" />
 
             <Button
                 android:id="@+id/more_detail"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/big_margin"
+                android:layout_marginTop="@dimen/half_large_margin"
+                android:layout_marginBottom="@dimen/half_large_margin"
                 android:autoLink="web"
-                android:background="@drawable/background_round_primary"
+                android:background="@drawable/background_round_azure_25dp"
                 android:clickable="true"
                 android:focusable="true"
-                android:fontFamily="@font/font_regular"
+                android:fontFamily="@font/font_semibold"
                 android:linksClickable="true"
-                android:paddingLeft="50dp"
                 android:paddingTop="10dp"
-                android:paddingRight="50dp"
                 android:paddingBottom="10dp"
+                android:layout_marginEnd="@dimen/dp16"
+                android:layout_marginStart="@dimen/dp16"
                 android:text="@string/action_open_etherscan"
                 android:textAllCaps="false"
-                android:textColor="@color/white"
+                android:textColor="@color/azure"
                 android:textSize="20sp" />
+
         </LinearLayout>
     </ScrollView>
 </FrameLayout>

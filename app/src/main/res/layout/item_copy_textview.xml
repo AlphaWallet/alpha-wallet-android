@@ -13,8 +13,9 @@
         android:fontFamily="@font/font_regular"
         android:maxWidth="180dp"
         android:maxLines="2"
+        android:lineHeight="12pt"
         android:text="0xbc9a1026a4bc6f0ba8bbe486d1d09da5732b39e4"
-        android:textSize="@dimen/sp20" />
+        android:textSize="@dimen/sp17" />
 
     <ImageView
         android:id="@+id/img_copy"
@@ -25,6 +26,7 @@
         android:clickable="true"
         android:contentDescription="@string/action_copy"
         android:focusable="true"
+        android:padding="@dimen/dp8"
         android:foreground="?android:attr/selectableItemBackground"
         android:src="@drawable/ic_copy" />
 

@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.widget.ImageView;
@@ -25,9 +26,11 @@ public class CopyTextView extends LinearLayout {
     private int textResId;
     private int textColor;
     private int gravity;
-    private String font;
     private boolean showToast;
+    private boolean boldFont;
+    private boolean removePadding;
     private String rawAddress;
+    private float marginRight;
 
     public CopyTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -52,6 +55,9 @@ public class CopyTextView extends LinearLayout {
             textColor = a.getColor(R.styleable.CopyTextView_textColor, -1);
             gravity = a.getInt(R.styleable.CopyTextView_gravity, Gravity.NO_GRAVITY);
             showToast = a.getBoolean(R.styleable.CopyTextView_showToast, true);
+            boldFont = a.getBoolean(R.styleable.CopyTextView_bold, false);
+            removePadding = a.getBoolean(R.styleable.CopyTextView_removePadding, false);
+            marginRight = a.getDimension(R.styleable.CopyTextView_marginRight, 0.0f);
         } finally {
             a.recycle();
         }
@@ -64,6 +70,20 @@ public class CopyTextView extends LinearLayout {
         text.setText(textResId);
         text.setTextColor(textColor);
         text.setGravity(gravity);
+
+        LayoutParams layoutParams = (LayoutParams) text.getLayoutParams();
+        layoutParams.rightMargin = (int) marginRight;
+        text.setLayoutParams(layoutParams);
+
+        if(boldFont)
+        {
+            text.setTypeface(text.getTypeface(), Typeface.BOLD);
+        }
+
+        if(removePadding)
+        {
+            copy.setPadding(0, 0, 0, 0);
+        }
 
         layout.setOnClickListener(v -> copyToClipboard());
         copy.setOnClickListener(v -> copyToClipboard());

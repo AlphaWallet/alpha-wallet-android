@@ -55,6 +55,7 @@
     <string name="subtitle_transaction_hash_num">Transaction Hash#</string>
     <string name="subtitle_transaction_time">交易时间</string>
     <string name="subtitle_block_num">区块 #</string>
+    <string name="subtitle_block">Block</string>
     <!-- Actions -->
     <string name="action_share">共享</string>
     <string name="action_more_details">更多详情</string>

@@ -833,7 +833,7 @@ public class TokenDefinition {
     {
         NodeList nList = contract.getElementsByTagNameNS(nameSpace, "address");
         ContractInfo info = new ContractInfo(contract.getAttribute("interface"));
-        String name = contract.getAttribute("label");
+        String name = contract.getAttribute("name");
         contracts.put(name, info);
 
         for (Node n = contract.getFirstChild(); n != null; n = n.getNextSibling())

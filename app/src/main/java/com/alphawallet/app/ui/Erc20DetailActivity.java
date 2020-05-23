@@ -53,8 +53,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private static final int HISTORY_LENGTH = 5;
     private static final int TX_CHECK_INTERVAL = 4; //check transactions every 4 intervals (or if balance update is seen).
 
-    private boolean sendingTokens = false;
-    private boolean hasDefinition = false;
     private String myAddress;
     private String symbol;
     private Wallet wallet;
@@ -141,7 +139,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         if (wallet.type != WalletType.WATCH)
         {
             functionBar = findViewById(R.id.layoutButtons);
-            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null);
+            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, null);
             functionBar.revealButtons();
         }
     }
@@ -149,10 +147,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private void getIntentData() {
         symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
-        sendingTokens = getIntent().getBooleanExtra(C.EXTRA_SENDING_TOKENS, false);
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-        hasDefinition = getIntent().getBooleanExtra(C.EXTRA_HAS_DEFINITION, false);
     }
 
     private void onTokenData(Token tokenUpdate)

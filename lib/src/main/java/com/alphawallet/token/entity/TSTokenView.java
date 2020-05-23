@@ -13,7 +13,7 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
  */
 public class TSTokenView
 {
-    public String tokenView = null;
+    public String tokenView = "";
     public String style = "";
 
     public TSTokenView(Element element)
@@ -29,10 +29,10 @@ public class TSTokenView
                     {
                         case "style":
                             //record the style for this
-                            style = getHTMLContent(child);
+                            style += getHTMLContent(child);
                             break;
                         default:
-                            tokenView = getElementHTML(child);
+                            tokenView += getElementHTML(child);
                             break;
                     }
                     break;

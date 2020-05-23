@@ -5,6 +5,7 @@ import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import javax.swing.plaf.TextUI;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -17,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.w3c.dom.Node.ELEMENT_NODE;
+import static org.w3c.dom.Node.PROCESSING_INSTRUCTION_NODE;
 
 public class TokenDefinition {
     protected Document xml;
@@ -24,18 +26,18 @@ public class TokenDefinition {
     protected Locale locale;
 
     public Map<String, ContractInfo> contracts = new HashMap<>();
-    //public Map<String, Map<String, String>> attributeSets = new HashMap<>(); //TODO: add language, in case user changes language during operation - see Weiwu's comment further down
     public Map<String, TSAction> actions = new HashMap<>();
     private Map<String, String> names = new HashMap<>(); // store plural etc for token name
     private Map<String, Module> moduleLookup = null; //used to protect against name collision
     private TSTokenViewHolder tokenViews = new TSTokenViewHolder();
+    private Map<String, TSSelection> selections = new HashMap<>();
 
     public String nameSpace;
     public TokenscriptContext context;
     public String holdingToken;
     private int actionCount;
 
-    public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2020/03";
+    public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2020/06";
     public static final String TOKENSCRIPT_REPO_SERVER = "https://repo.tokenscript.org/";
 
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";
@@ -90,7 +92,7 @@ public class TokenDefinition {
             String attrValue = thisAttr.getNodeValue();
             switch (thisAttr.getNodeName())
             {
-                case "event":
+                case "module":
                     ev.eventName = attrValue;
                     ev.eventModule = moduleLookup.get(attrValue);
                     break;
@@ -112,6 +114,7 @@ public class TokenDefinition {
         String contract = resolve.getAttribute("contract");
         function.contract = contracts.get(contract);
         function.method = resolve.getAttribute("function");
+        function.as = parseAs(resolve);
         addFunctionInputs(function, resolve);
         function.syntax = syntax;
         return function;
@@ -199,7 +202,7 @@ public class TokenDefinition {
         return nonLocalised;
     }
 
-    String getLocalisedString(Element container) {
+    public String getLocalisedString(Element container) {
         NodeList nList = container.getChildNodes();
 
         String nonLocalised = null;
@@ -328,15 +331,24 @@ public class TokenDefinition {
                         handleAddresses(element);
                         break;
                     case "name":
-                        extractNameTag(element);
+                    case "label":
+                        names = extractNameTag(element);
                         break;
+                    case "selections":
+                        extractSelections(element);
+                        break;
+                    case "selection":
+                        //For now, allow individual selections outside of the selections block
+                        handleSelection(element);
+                        break;
+                        //throw new SAXException("<ts:selection> tag must be in main scope (eg same as <ts:origins>)");
                     case "attribute-types":
                         handleGlobalAttributes(element);
                         break;
                     case "cards":
                         handleCards(element);
                         break;
-                    case "attribute-type": //treat orphaned attribute-types appearing on the root scope as globals
+                    case "attribute": //treat orphaned attribute-types appearing on the root scope as globals
                         processAttrs(element);
                         break;
                     default:
@@ -344,6 +356,49 @@ public class TokenDefinition {
                 }
             }
         }
+    }
+
+    private void extractSelections(Element node) throws SAXException
+    {
+        for (Node n = node.getFirstChild(); n != null; n = n.getNextSibling())
+        {
+            if (n.getNodeType() == ELEMENT_NODE && n.getLocalName().equals("selection"))
+            {
+                handleSelection((Element)n);
+            }
+        }
+    }
+
+    private void handleSelection(Element selectionNode) throws SAXException
+    {
+        TSSelection selection = parseSelection(selectionNode);
+        String selectionName = selectionNode.getAttribute("id");
+        if (selection.head != null && selectionName != null && selectionName.length() > 0) selections.put(selectionName, selection);
+    }
+
+    private TSSelection parseSelection(Element node) throws SAXException
+    {
+        TSSelection selection = new TSSelection(node);
+
+        for (Node n = node.getFirstChild(); n != null; n = n.getNextSibling())
+        {
+            if (n.getNodeType() == ELEMENT_NODE)
+            {
+                Element element = (Element) n;
+                switch (element.getLocalName())
+                {
+                    case "name":
+                        selection.names = extractNameTag(element);
+                        break;
+                    case "denial":
+                        Node denialNode = getLocalisedNode(element, "string");
+                        selection.denialMessage = (denialNode != null) ? denialNode.getTextContent() : null;
+                        break;
+                }
+            }
+        }
+
+        return selection;
     }
 
     private void handleCards(Element cards) throws Exception
@@ -358,39 +413,13 @@ public class TokenDefinition {
                     case "token":
                         processTokenCardElements(card);
                         break;
-                    case "action":
-                        extractActions(card);
+                    case "card":
+                        extractCard(card);
                         break;
                 }
             }
         }
     }
-
-    /*private void processTokenCardElements(Element card)
-    {
-        Map<String, Map<String, String>> attributeSet = new HashMap<>();
-        for(Node node=card.getFirstChild(); node!=null; node=node.getNextSibling())
-        {
-            if (node.getNodeType() == ELEMENT_NODE)
-            {
-                String htmlContent = getHTMLContent(node);
-                if (!attributeSet.containsKey(node.getLocalName())) attributeSet.put(node.getLocalName(), new HashMap<>());
-                attributeSet.get(node.getLocalName()).put(getLocalisationLang((Element)node), htmlContent);
-            }
-        }
-
-        if (attributeSet.size() > 0)
-        {
-            //create localised attribute set
-            Map<String, String> localisedAttributes = new HashMap<>();
-            for (String attr : attributeSet.keySet())
-            {
-                Map<String, String> attrEntry = attributeSet.get(attr);
-                localisedAttributes.put(attr, getLocalisedEntry(attrEntry));
-            }
-            attributeSets.put("cards", localisedAttributes);
-        }
-    }*/
 
     private void processTokenCardElements(Element card) throws Exception
     {
@@ -511,14 +540,29 @@ public class TokenDefinition {
         }
     }
 
-    private void extractActions(Element action) throws Exception
+    private void extractCard(Element card) throws Exception
     {
-        String name = null;
+        String type = card.getAttribute("type");
+        switch (type)
+        {
+            case "token":
+                processTokenCardElements(card);
+                break;
+            case "action":
+                TSAction action = handleAction(card);
+                actions.put(action.name, action);
+                break;
+            default:
+                throw new SAXException("Unexpected card type found: " + type);
+        }
+    }
+
+    private TSAction handleAction(Element action) throws Exception
+    {
         NodeList ll = action.getChildNodes();
         TSAction tsAction = new TSAction();
         tsAction.order = actionCount;
-        tsAction.type = action.getAttribute("type");
-        tsAction.exclude = "";
+        tsAction.exclude = action.getAttribute("exclude");
         actionCount++;
         for (int j = 0; j < ll.getLength(); j++)
         {
@@ -533,8 +577,12 @@ public class TokenDefinition {
             switch (node.getLocalName())
             {
                 case "name":
-                    name = getLocalisedString(element);
+                    tsAction.name = getLocalisedString(element);
                     break;
+                case "label":
+                    tsAction.name = getLocalisedString(element);
+                    break;
+                case "attribute":
                 case "attribute-type":
                     AttributeType attr = new AttributeType(element, this);
                     if (tsAction.attributeTypes == null)
@@ -547,8 +595,10 @@ public class TokenDefinition {
                 case "exclude":
                     tsAction.exclude = element.getAttribute("selection");
                     break;
+                case "selection":
+                    throw new SAXException("<ts:selection> tag must be in main scope (eg same as <ts:origins>)");
                 case "view": //localised?
-                    tsAction.view = new TSTokenView(element); //getHTMLContent(element);
+                    tsAction.view = new TSTokenView(element);
                     break;
                 case "style":
                     tsAction.style = getHTMLContent(element);
@@ -562,13 +612,13 @@ public class TokenDefinition {
                     break;
                 case "script":
                     //misplaced script tag
-                    throw new SAXException("Misplaced <script> tag in Action '" + name + "'");
+                    throw new SAXException("Misplaced <script> tag in Action '" + tsAction.name + "'");
                 default:
-                    throw new SAXException("Unknown tag <" + node.getLocalName() + "> tag in Action '" + name + "'");
+                    throw new SAXException("Unknown tag <" + node.getLocalName() + "> tag in Action '" + tsAction.name + "'");
             }
         }
 
-        actions.put(name, tsAction);
+        return tsAction;
     }
 
     private Element getFirstChildElement(Element e)
@@ -622,9 +672,12 @@ public class TokenDefinition {
         Element tx = getFirstChildElement(element);
         switch (tx.getLocalName())
         {
-            case "ethereum":
-                tsAction.function = parseFunction(tx, Syntax.IA5String);
-                tsAction.function.as = parseAs(tx);
+            case "transaction":
+                if (tx.getPrefix().equals("ethereum"))
+                {
+                    tsAction.function = parseFunction(tx, Syntax.IA5String);
+                    tsAction.function.as = parseAs(tx);
+                }
                 break;
             default:
                 break;
@@ -705,7 +758,8 @@ public class TokenDefinition {
             switch (n.getLocalName())
             {
                 case "action": //action only script
-                    extractActions((Element)n);
+                    TSAction action = handleAction((Element)n);
+                    actions.put(action.name, action);
                     break;
                 default:
                     extractTags((Element)n);
@@ -725,8 +779,9 @@ public class TokenDefinition {
         }
     }
 
-    private void extractNameTag(Element nameTag)
+    private Map<String, String> extractNameTag(Element nameTag)
     {
+        Map<String, String> localNames = new HashMap<>();
         //deal with plurals
         Node nameNode = getLocalisedNode(nameTag, "plurals");
         if (nameNode != null)
@@ -734,17 +789,19 @@ public class TokenDefinition {
             for (int i = 0; i < nameNode.getChildNodes().getLength(); i++)
             {
                 Node node = nameNode.getChildNodes().item(i);
-                handleNameNode(node);
+                handleNameNode(localNames, node);
             }
         }
         else //no plural
         {
             nameNode = getLocalisedNode(nameTag, "string");
-            handleNameNode(nameNode);
+            handleNameNode(localNames, nameNode);
         }
+
+        return localNames;
     }
 
-    private void handleNameNode(Node node)
+    private void handleNameNode(Map<String, String> localNames, Node node)
     {
         if (node != null && node.getNodeType() == ELEMENT_NODE && node.getLocalName().equals("string"))
         {
@@ -753,7 +810,7 @@ public class TokenDefinition {
             String name = element.getTextContent();
             if (quantity != null && name != null)
             {
-                names.put(quantity, name);
+                localNames.put(quantity, name);
             }
         }
     }
@@ -1077,5 +1134,10 @@ public class TokenDefinition {
     public Map<String, TSAction> getActions()
     {
         return actions;
+    }
+
+    public TSSelection getSelection(String id)
+    {
+        return selections.get(id);
     }
 }

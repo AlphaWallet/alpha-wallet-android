@@ -8,7 +8,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -21,7 +20,6 @@ import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
-import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
@@ -59,7 +57,6 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private void initViews(Token t) {
         token = t;
         String displayIds = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
-        RelativeLayout frameLayout = findViewById(R.id.layout_select_ticket);
         tokenView = findViewById(R.id.web3_tokenview);
         webWrapper = findViewById(R.id.layout_webwrapper);
         idList = token.stringHexToBigIntegerList(displayIds);
@@ -70,9 +67,8 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         tokenView.displayTicketHolder(token, data, viewModel.getAssetDefinitionService(), false);
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSetValuesListener(this);
-        functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null);
         functionBar.revealButtons();
-        functionBar.setSelection(idList);
+        functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, idList);
     }
 
     @Override
@@ -87,9 +83,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
         viewModel.tokenUpdate().observe(this, this::onTokenUpdate);
         SystemView systemView = findViewById(R.id.system_view);
-        ProgressView progressView = findViewById(R.id.progress_view);
         systemView.hide();
-        progressView.hide();
         functionBar = findViewById(R.id.layoutButtons);
         initViews(getIntent().getParcelableExtra(TICKET));
         toolbar();
@@ -179,13 +173,28 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     }
 
     @Override
+    public void handleFunctionDenied(String denialMessage)
+    {
+        if (dialog == null) dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.token_selection);
+        dialog.setMessage(denialMessage);
+        dialog.setButtonText(R.string.dialog_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
+    @Override
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         TSAction action = functions.get(function);
         if (action != null && action.view == null && action.function != null)
         {
-            viewModel.handleFunction(action, selection.get(0), token, this);
+            if (!viewModel.handleFunction(action, selection.get(0), token, this))
+            {
+                showTransactionError();
+            }
         }
         else
         {
@@ -226,7 +235,6 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     {
         boolean newValues = false;
         TicketRange data = new TicketRange(idList, token.tokenInfo.address, false);
-        RelativeLayout frameLayout = findViewById(R.id.layout_select_ticket);
 
         //called when values update
         for (String key : updates.keySet())
@@ -242,5 +250,19 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
             //rebuild the view
             tokenView.displayTicketHolder(token, data, viewModel.getAssetDefinitionService(), false);
         }
+    }
+
+    private void showTransactionError()
+    {
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.tokenscript_error);
+        dialog.setMessage(getString(R.string.invalid_parameters));
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v ->dialog.dismiss());
+        dialog.show();
     }
 }

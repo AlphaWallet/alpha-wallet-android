@@ -357,7 +357,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         context.startActivity(intent);
     }
 
-    public void handleFunction(TSAction action, BigInteger tokenId, Token token, Context context)
+    public boolean handleFunction(TSAction action, BigInteger tokenId, Token token, Context context)
     {
         String functionEffect = action.function.method;
         if (action.function.tx != null && (action.function.method == null || action.function.method.length() == 0)
@@ -371,6 +371,7 @@ public class TokenFunctionViewModel extends BaseViewModel
             //what's selected?
             ContractAddress cAddr = new ContractAddress(action.function, token.tokenInfo.chainId, token.tokenInfo.address); //viewModel.getAssetDefinitionService().getContractAddress(action.function, token);
             String functionData = getTransactionBytes(token, tokenId, action.function);
+            if (functionData == null) return false;
             //function call may include some value
             String value = "0";
             if (action.function.tx != null && action.function.tx.args.containsKey("value"))
@@ -387,6 +388,8 @@ public class TokenFunctionViewModel extends BaseViewModel
 
             confirmTransaction(context, cAddr.chainId, functionData, null, cAddr.address, action.function.method, functionEffect, value);
         }
+
+        return true;
     }
 
     private void NativeSend(TSAction action, Token token, Context context)

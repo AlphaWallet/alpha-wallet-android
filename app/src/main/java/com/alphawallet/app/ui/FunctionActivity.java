@@ -38,7 +38,6 @@ import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
-import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
@@ -241,11 +240,9 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(TokenFunctionViewModel.class);
         systemView = findViewById(R.id.system_view);
-        ProgressView progressView = findViewById(R.id.progress_view);
         systemView.hide();
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
-        progressView.hide();
 
         //expose the webview and remove the token 'card' background
         findViewById(R.id.layout_webwrapper).setBackgroundResource(R.drawable.background_card);
@@ -260,12 +257,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private void setupFunctions()
     {
         functionBar = findViewById(R.id.layoutButtons);
-        List<String> funcList = new ArrayList<>();
-
-        funcList.add(actionMethod);
-
-        functionBar.setupFunctionList(this, funcList);
-        functionBar.revealButtons();
+        functionBar.setupFunctionList(this, actionMethod);
     }
 
     @Override
@@ -305,7 +297,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                 if (e.value.startsWith(TOKENSCRIPT_CONVERSION_ERROR)) //handle parse error
                 {
                     String message = e.value.substring(TOKENSCRIPT_CONVERSION_ERROR.length());
-                    tokenScriptError(message);
+                    if (!TextUtils.isEmpty(attr.name)) tokenScriptError(getString(R.string.complete_tokenscript_value, attr.name), attr.name);
+                    else tokenScriptError(message, null);
                 }
                 else
                 {
@@ -318,7 +311,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             public void unresolvedSymbolError(String value)
             {
                 if (BuildConfig.DEBUG) System.out.println("ATTR/FA: Resolve: ERROR: " + value);
-                tokenScriptError(value);
+                tokenScriptError(value, null);
             }
         };
 
@@ -358,7 +351,10 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         if (resolveInputCheckCount == 0)
         {
-            viewModel.handleFunction(action, tokenId, token, this);
+            if (!viewModel.handleFunction(action, tokenId, token, this))
+            {
+                showTransactionError();
+            }
             viewModel.getAssetDefinitionService().clearResultMap();
         }
     }
@@ -407,13 +403,26 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         alertDialog.show();
     }
 
-    private void tokenScriptError(String elementName)
+    private void tokenScriptError(String elementName, String title)
+    {
+        hideDialog();
+        alertDialog = new AWalletAlertDialog(this);
+        alertDialog.setIcon(AWalletAlertDialog.ERROR);
+        if (title != null) alertDialog.setTitle(title);
+        else alertDialog.setTitle(R.string.tokenscript_error);
+        alertDialog.setMessage(getString(R.string.tokenscript_error_detail, elementName));
+        alertDialog.setButtonText(R.string.button_ok);
+        alertDialog.setButtonListener(v ->alertDialog.dismiss());
+        alertDialog.show();
+    }
+
+    private void showTransactionError()
     {
         hideDialog();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(AWalletAlertDialog.ERROR);
         alertDialog.setTitle(R.string.tokenscript_error);
-        alertDialog.setMessage(getString(R.string.tokenscript_error_detail, elementName));
+        alertDialog.setMessage(getString(R.string.invalid_parameters));
         alertDialog.setButtonText(R.string.button_ok);
         alertDialog.setButtonListener(v ->alertDialog.dismiss());
         alertDialog.show();

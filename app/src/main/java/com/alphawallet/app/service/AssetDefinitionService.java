@@ -12,6 +12,7 @@ import android.os.FileObserver;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.SparseArray;
 
 import com.alphawallet.app.BuildConfig;
@@ -44,12 +45,14 @@ import com.alphawallet.token.entity.AttributeInterface;
 import com.alphawallet.token.entity.AttributeType;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.ContractInfo;
+import com.alphawallet.token.entity.EvaluateSelection;
 import com.alphawallet.token.entity.EventDefinition;
 import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
 import com.alphawallet.token.entity.ParseResult;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.TSAction;
+import com.alphawallet.token.entity.TSSelection;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TokenscriptContext;
 import com.alphawallet.token.entity.TokenscriptElement;
@@ -83,6 +86,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -402,11 +406,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private TokenScriptResult.Attribute getTokenscriptAttr(TokenDefinition td, Token token, BigInteger tokenId, String attribute)
     {
-        TokenScriptResult.Attribute result;
+        TokenScriptResult.Attribute result = null;
         AttributeType attrtype = td.attributeTypes.get(attribute);
         try
         {
-            if (attrtype.event != null)
+            if (attrtype == null)
+            {
+                return null;
+            }
+            else if (attrtype.event != null)
             {
                 result = new TokenScriptResult.Attribute(attrtype.id, attrtype.name, tokenId, "unsupported encoding");
             }
@@ -943,6 +951,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         FileInputStream input = new FileInputStream(file);
         TokenDefinition tokenDef = parseFile(input);
         ContractInfo holdingContracts = tokenDef.contracts.get(tokenDef.holdingToken);
+
         if (holdingContracts != null)
         {
             addToEventList(tokenDef, holdingContracts);
@@ -1061,7 +1070,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             EthBlock txBlock = eventUtils.getTransactionDetails(((Log)ethLog.get()).getBlockHash(), web3j).blockingGet();
 
             long blockTime = txBlock.getBlock().getTimestamp().longValue();
-            eventCallback.receivedEvent(ev.attributeId, attrType.getSyntaxVal(selectVal), blockTime, originToken.tokenInfo.chainId);
+            if (eventCallback != null) eventCallback.receivedEvent(ev.attributeId, attrType.getSyntaxVal(selectVal), blockTime, originToken.tokenInfo.chainId);
             storeEventValue(ev, ethLog, attrType, originToken, blockTime, selectVal);
         }
     }
@@ -1115,6 +1124,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         boolean hasEvent = false;
         for (EventDefinition ev : eventList)
         {
+            if (ev.eventModule == null || ev.eventModule.contractInfo == null) continue;
             ContractInfo originContracts = ev.eventModule.contractInfo;
             if (originContracts.addresses.containsKey(token.tokenInfo.chainId))
             {
@@ -1410,6 +1420,104 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
+    /**
+     * Build a map of all available tokenIds to a list of available functions for that tokenId
+     *
+     * @param token
+     * @return map of unique tokenIds to lists of allowed functions for that ID - note that we allow the function to be displayed if it has a denial message
+     */
+    public Single<Map<BigInteger, List<String>>> fetchFunctionMap(Token token)
+    {
+        return Single.fromCallable(() -> {
+            Map<BigInteger, List<String>> validActions = new HashMap<>();
+            TokenDefinition td = getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
+            if (td != null)
+            {
+                List<BigInteger> tokenIds = token.getUniqueTokenIds();
+                Map<String, TSAction> actions = td.getActions();
+                for (BigInteger tokenId : tokenIds)
+                {
+                    for (String actionName : actions.keySet())
+                    {
+                        TSAction action = actions.get(actionName);
+                        TSSelection selection = action.exclude != null ? td.getSelection(action.exclude) : null;
+                        if (selection == null)
+                        {
+                            if (!validActions.containsKey(tokenId)) validActions.put(tokenId, new ArrayList<>());
+                            validActions.get(tokenId).add(actionName);
+                        }
+                        else
+                        {
+                            //gather list of attribute results
+                            List<String> requiredAttrs = selection.getRequiredAttrs();
+                            //resolve all these attrs
+                            Map<String, TokenScriptResult.Attribute> attrs = new HashMap<>();
+                            //get results
+                            for (String attrId : requiredAttrs)
+                            {
+                                TokenScriptResult.Attribute attrResult = getTokenscriptAttr(td, token, tokenId, attrId);
+                                if (attrResult != null)
+                                    attrs.put(attrId, attrResult);
+                            }
+
+                            boolean exclude = EvaluateSelection.evaluate(selection.head, attrs);
+                            if (!exclude || selection.denialMessage != null)
+                            {
+                                if (!validActions.containsKey(tokenId)) validActions.put(tokenId, new ArrayList<>());
+                                validActions.get(tokenId).add(actionName);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return validActions;
+        });
+    }
+
+    public Map<String, TSAction> getFunctionMap(int chainId, String contractAddr, BigInteger tokenId)
+    {
+        Map<String, TSAction> validActions = new HashMap<>();
+        TokenDefinition td = getAssetDefinition(chainId, contractAddr);
+        if (td != null)
+        {
+            Map<String, TSAction> actions = td.getActions();
+            for (String actionName : actions.keySet())
+            {
+                TSAction action = actions.get(actionName);
+                TSSelection selection = action.exclude != null ? td.getSelection(action.exclude) : null;
+                if (selection == null)
+                {
+                    validActions.put(actionName, action);
+                }
+                else
+                {
+                    //gather list of attribute results
+                    List<String> requiredAttrs = selection.getRequiredAttrs();
+                    //resolve all these attrs
+                    Map<String, TokenScriptResult.Attribute> attrs = new HashMap<>();
+                    Token token = tokensService.getToken(chainId, contractAddr);
+                    //get results
+                    for (String attrId : requiredAttrs)
+                    {
+                        TokenScriptResult.Attribute attrResult = getTokenscriptAttr(td, token, tokenId, attrId);
+                        if (attrResult != null)
+                            attrs.put(attrId, attrResult);
+                    }
+
+                    boolean exclude = EvaluateSelection.evaluate(selection.head, attrs);
+                    if (!exclude) validActions.put(actionName, action);
+                }
+            }
+        }
+        else
+        {
+            return null;
+        }
+
+        return validActions;
+    }
+
     public boolean hasAction(int chainId, String contractAddr)
     {
         TokenDefinition td = getAssetDefinition(chainId, contractAddr);
@@ -1572,7 +1680,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             Observable.fromIterable(token.getNonZeroArrayBalance())
                                     .map(tokenId -> getFunctionResult(cAddr, attr, tokenId))
                                     .filter(txResult -> txResult.needsUpdating(token.lastTxTime))
-                                    .concatMap(result -> tokenscriptUtility.fetchAttrResult(token, td.attributeTypes.get(attr.id), result.tokenId, cAddr, td, this))
+                                    .concatMap(result -> tokenscriptUtility.fetchAttrResult(token, td.attributeTypes.get(attr.id), result.tokenId, cAddr, td, this, false))
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribe();
@@ -1583,7 +1691,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             TransactionResult tr = getFunctionResult(cAddr, attr, BigInteger.ZERO);
                             if (tr.needsUpdating(token.lastTxTime))
                             {
-                                tokenscriptUtility.fetchAttrResult(token, td.attributeTypes.get(attr.id), tr.tokenId, cAddr, td, this)
+                                tokenscriptUtility.fetchAttrResult(token, td.attributeTypes.get(attr.id), tr.tokenId, cAddr, td, this, false)
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe();
@@ -1798,7 +1906,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 String[] contractDetails = eventData.getInstanceKey().split("-");
                 //return tResult.contractAddress + "-" + tResult.tokenId.toString(Character.MAX_RADIX) + "-" + tResult.contractChainId + "-" + tResult.attrId + tResult.resultTime + "-log";
                 String contractAddr = contractDetails[0].toLowerCase();
-                if (ev.eventModule.contractInfo.hasContractTokenScript(eventData.getChainId(), contractAddr))
+                if (ev.eventModule.contractInfo != null && ev.eventModule.contractInfo.hasContractTokenScript(eventData.getChainId(), contractAddr))
                 {
                     ev.readBlock = blockNumber;
                 }
@@ -1907,7 +2015,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         tokenscriptUtility.clearParseMaps();
     }
 
-    public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, BigInteger tokenId, List<AttributeType> extraAttrs)
+    public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, BigInteger tokenId, List<AttributeType> extraAttrs, boolean itemView)
     {
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
@@ -1924,7 +2032,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         return Observable.fromIterable(attrList)
                 .flatMap(attr -> tokenscriptUtility.fetchAttrResult(token, attr, tokenId,
-                                                                    cAddr, definition, this));
+                                                                    cAddr, definition, this, itemView));
     }
 
     public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, List<BigInteger> tokenIds, List<AttributeType> extraAttrs)
@@ -1938,7 +2046,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         //TODO: store transaction fetch time for multiple tokenIds
 
-        return resolveAttrs(token, tokenIds.get(0), extraAttrs);
+        return resolveAttrs(token, tokenIds.get(0), extraAttrs, false);
     }
 
     private void resolveTokenIds(AttributeType attrType, List<BigInteger> tokenIds)
@@ -1984,7 +2092,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenDefinition td = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         if (td == null) return "";
         Function function = tokenscriptUtility.generateTransactionFunction(token, tokenId, td, def, this);
-        return FunctionEncoder.encode(function);
+        if (function.getInputParameters() == null)
+        {
+            return null;
+        }
+        else
+        {
+            return FunctionEncoder.encode(function);
+        }
     }
 
     /**
@@ -2124,5 +2239,39 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return originContracts;
+    }
+
+    public String checkFunctionDenied(Token token, String actionName, List<BigInteger> tokenIds)
+    {
+        String denialMessage = null;
+        TokenDefinition td = getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
+        if (td != null)
+        {
+            BigInteger tokenId = tokenIds != null ? tokenIds.get(0) : BigInteger.ZERO;
+            TSAction action = td.actions.get(actionName);
+            TSSelection selection = action.exclude != null ? td.getSelection(action.exclude) : null;
+            if (selection != null)
+            {
+                //gather list of attribute results
+                List<String> requiredAttrs = selection.getRequiredAttrs();
+                //resolve all these attrs
+                Map<String, TokenScriptResult.Attribute> attrs = new HashMap<>();
+                //get results
+                for (String attrId : requiredAttrs)
+                {
+                    TokenScriptResult.Attribute attrResult = getTokenscriptAttr(td, token, tokenId, attrId);
+                    if (attrResult != null)
+                        attrs.put(attrId, attrResult);
+                }
+
+                boolean exclude = EvaluateSelection.evaluate(selection.head, attrs);
+                if (exclude && !TextUtils.isEmpty(selection.denialMessage))
+                {
+                    denialMessage = selection.denialMessage;
+                }
+            }
+        }
+
+        return denialMessage;
     }
 }

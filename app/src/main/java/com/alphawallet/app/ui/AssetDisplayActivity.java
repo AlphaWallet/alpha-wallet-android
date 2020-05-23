@@ -38,6 +38,8 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.Key.TICKET;
 
@@ -174,7 +176,11 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     {
         super.onResume();
         viewModel.prepare(token);
-        if (functionBar == null) functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter);
+        if (functionBar == null)
+        {
+            functionBar = findViewById(R.id.layoutButtons);
+            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter, token.getArrayBalance());
+        }
     }
 
     @Override
@@ -241,6 +247,31 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         dialog.setIcon(AWalletAlertDialog.ERROR);
         dialog.setTitle(R.string.token_selection);
         dialog.setMessage(getString(R.string.token_requirement, String.valueOf(action.function.getTokenRequirement())));
+        dialog.setButtonText(R.string.dialog_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
+    @Override
+    public void showWaitSpinner(boolean show)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        if (!show) return;
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(getString(R.string.check_function_availability));
+        dialog.setIcon(AWalletAlertDialog.NONE);
+        dialog.setProgressMode();
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
+    @Override
+    public void handleFunctionDenied(String denialMessage)
+    {
+        if (dialog == null) dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.token_selection);
+        dialog.setMessage(denialMessage);
         dialog.setButtonText(R.string.dialog_ok);
         dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
@@ -318,7 +349,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     {
         progressView.setVisibility(View.GONE);
         adapter = new NonFungibleTokenAdapter(functionBar, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
-        functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter);
+        functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter, token.getArrayBalance());
         list.setAdapter(adapter);
     }
 

@@ -420,17 +420,17 @@ public class Web3TokenView extends WebView
         loadData(displayData, "text/html", "utf-8");
     }
 
-    public void renderTokenscriptView(Token token, TicketRange range, AssetDefinitionService assetService, boolean iconified)
+    public void renderTokenscriptView(Token token, TicketRange range, AssetDefinitionService assetService, boolean itemView)
     {
         BigInteger tokenId = range.tokenIds.get(0);
 
         final StringBuilder attrs = assetService.getTokenAttrs(token, tokenId, range.tokenIds.size());
 
-        assetService.resolveAttrs(token, tokenId, assetService.getTokenViewLocalAttributes(token.tokenInfo.chainId, token.tokenInfo.address))
+        assetService.resolveAttrs(token, tokenId, assetService.getTokenViewLocalAttributes(token.tokenInfo.chainId, token.tokenInfo.address), itemView)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(token, throwable, range),
-                           () -> displayTicket(token, assetService, attrs, iconified, range))
+                           () -> displayTicket(token, assetService, attrs, itemView, range))
                 .isDisposed();
     }
 

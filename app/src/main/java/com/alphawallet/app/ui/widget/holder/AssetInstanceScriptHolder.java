@@ -22,7 +22,16 @@ import com.alphawallet.app.ui.TokenFunctionActivity;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
+import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
+
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.Key.TICKET;
 
@@ -36,7 +45,6 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
 
     private final Web3TokenView tokenView;
     private final Token token;
-    private final RelativeLayout frameLayout;
     private final LinearLayout clickWrapper;
     private final LinearLayout webWrapper;
     private final ProgressBar waitSpinner;
@@ -45,13 +53,11 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     private final AppCompatRadioButton itemSelect;
     private final AssetDefinitionService assetDefinitionService; //need to cache this locally, unless we cache every string we need in the constructor
     private boolean activeClick;
-    private final Handler handler;
-    private boolean reloaded;
+    private final Handler handler = new Handler();
 
     public AssetInstanceScriptHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService assetService, boolean iconified)
     {
         super(resId, parent);
-        frameLayout = findViewById(R.id.layout_select_ticket);
         tokenView = findViewById(R.id.web3_tokenview);
         waitSpinner = findViewById(R.id.progress_element);
         webWrapper = findViewById(R.id.layout_webwrapper);
@@ -61,7 +67,6 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         token = t;
         tokenView.setOnReadyCallback(this);
         this.iconified = iconified;
-        handler = new Handler();
 
         tokenView.setLayout(token, iconified);
     }
@@ -70,7 +75,6 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     @Override
     public void bind(@Nullable TicketRange data, @NonNull Bundle addition)
     {
-        reloaded = false;
         activeClick = false;
         try
         {

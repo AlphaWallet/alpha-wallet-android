@@ -9,6 +9,7 @@ import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -32,6 +33,7 @@ import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.TSAction;
+import com.alphawallet.token.tools.TokenDefinition;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -40,6 +42,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 
@@ -51,16 +57,19 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private StandardFunctionInterface callStandardFunctions;
     private int buttonCount;
     private Token token = null;
+    private boolean showButtons = false;
 
     private Button primaryButton;
     private Button secondaryButton;
     private ImageButton moreButton;
     private final Handler handler = new Handler();
+    private AssetDefinitionService assetService;
 
     private BottomSheetDialog bottomSheet;
     private ListView moreActionsListView;
     private List<ItemClick> moreActionsList;
     private FunctionItemAdapter moreActionsAdapter;
+    private final Semaphore functionMapComplete = new Semaphore(1);
 
     public FunctionButtonBar(Context ctx, @Nullable AttributeSet attrs) {
         super(ctx, attrs);
@@ -104,49 +113,37 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         for (int res : functionResources) {
             addFunction(res);
         }
+
+        //always show buttons
+        findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
     }
 
-    public void setupFunctions(StandardFunctionInterface functionInterface, AssetDefinitionService assetSvs, Token token, NonFungibleTokenAdapter adp) {
+    public void setupFunctions(StandardFunctionInterface functionInterface, AssetDefinitionService assetSvs, Token token, NonFungibleTokenAdapter adp, List<BigInteger> tokenIds) {
         callStandardFunctions = functionInterface;
         adapter = adp;
+        selection = tokenIds;
         this.token = token;
         functions = assetSvs.getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
-        resetButtonCount();
-
-        if (!token.isNonFungible()) addStandardTokenFunctions(token);
-
-        if (functions != null && functions.size() > 0)
-        {
-            SparseArray<String> actions = new SparseArray<>();
-            for (String actionName : functions.keySet()) actions.put(functions.get(actionName).order, actionName);
-
-            for (int i = 0; i < actions.size(); i++)
-            {
-                addFunction(new ItemClick(actions.get(i), 0));
-            }
-        }
-
-        if (token.isNonFungible()) addStandardTokenFunctions(token); //For non-fungible, include custom functions first - usually these are more frequently used
-
-        findViewById(R.id.layoutButtons).setVisibility(View.GONE);
+        assetService = assetSvs;
+        getFunctionMap(assetSvs);
     }
 
     /**
      * Use only for TokenScript function list
      * @param functionInterface
-     * @param functionList
+     * @param functionName function
      */
-    public void setupFunctionList(StandardFunctionInterface functionInterface, List<String> functionList) {
+    public void setupFunctionList(StandardFunctionInterface functionInterface, String functionName) {
         callStandardFunctions = functionInterface;
         if (functions == null) functions = new HashMap<>();
         functions.clear();
         resetButtonCount();
 
-        TSAction dummyAction = new TSAction();
-        for (String func : functionList) {
-            addFunction(func);
-            functions.put(func, dummyAction);
-        }
+        addFunction(functionName);
+        functions.put(functionName, new TSAction());
+
+        //always show buttons
+        findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
     }
 
     /**
@@ -155,6 +152,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
      * @param token
      */
     private void addStandardTokenFunctions(Token token) {
+        if (token == null) return;
         switch (token.getInterfaceSpec()) {
             case ERC20:
             case ETHEREUM:
@@ -181,8 +179,14 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         }
     }
 
-    public void revealButtons() {
-        findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
+    public void revealButtons()
+    {
+        showButtons = true;
+        if (adapter == null && selection == null)
+        {
+            populateButtons(token, null);
+            findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -231,6 +235,17 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private void handleUseClick(ItemClick function) {
         if (functions != null && functions.containsKey(function.buttonText)) {
             TSAction action = functions.get(function.buttonText);
+            //first check for availability
+            if (!TextUtils.isEmpty(action.exclude))
+            {
+                String denialMessage = assetService.checkFunctionDenied(token, function.buttonText, selection);
+                if (!TextUtils.isEmpty(denialMessage))
+                {
+                    callStandardFunctions.handleFunctionDenied(denialMessage);
+                    return;
+                }
+            }
+
             //ensure we have sufficient tokens for selection
             if (!hasCorrectTokens(action)) {
                 callStandardFunctions.displayTokenSelectionError(action);
@@ -267,7 +282,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         if (action.function != null) {
             int requiredCount = action.function.getTokenRequirement();
             if (requiredCount == 1 && selected.size() > 1 && groupings == 1) {
-                BigInteger first = selected.get(0);
+                BigInteger first = getSelectedTokenId(selected);
                 selected.clear();
                 selected.add(first);
             }
@@ -288,6 +303,10 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         if (!selected) return;
 
         if (functions != null) {
+            //Wait for availability to complete
+            waitForMapBuild();
+            populateButtons(token, getSelectedTokenId(tokenIds));
+
             for (TSAction action : functions.values()) {
                 if (action.function != null && action.function.getTokenRequirement() > maxSelect) {
                     maxSelect = action.function.getTokenRequirement();
@@ -318,8 +337,33 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             }
         }
 
+        //Wait for availability to complete
+        waitForMapBuild();
+
+        populateButtons(token, getSelectedTokenId(tokenIds));
+
         if (findViewById(R.id.layoutButtons).getVisibility() != View.VISIBLE) {
             findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void waitForMapBuild()
+    {
+        //do we need to wait for the service to finish?
+        if (!functionMapComplete.tryAcquire())
+        {
+            callStandardFunctions.showWaitSpinner(true);
+            try
+            {
+                functionMapComplete.acquire();
+                functionMapComplete.release();
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+                functionMapComplete.release();
+            }
+            callStandardFunctions.showWaitSpinner(false);
         }
     }
 
@@ -402,12 +446,6 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         }, 500);
     }
 
-    public void setSelection(List<BigInteger> idList)
-    {
-        selection = idList;
-    }
-
-
     private void addFunction(ItemClick function) {
         switch (buttonCount) {
             case 0: {
@@ -455,6 +493,92 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             convertView = inflater.inflate(R.layout.item_action, parent, false);
             ((TextView)convertView.findViewById(android.R.id.text1)).setText(item.buttonText);
             return convertView;
+        }
+    }
+
+    private void populateButtons(Token token, BigInteger tokenId)
+    {
+        if (token == null) return;
+
+        resetButtonCount();
+
+        Map<String, TSAction> availableFunctions = new HashMap<>();
+
+        if (!token.isNonFungible()) addStandardTokenFunctions(token);
+
+        TokenDefinition td = assetService.getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
+
+        if (td != null && tokenId != null)
+        {
+            for (String actionName : functions.keySet())
+            {
+                if (token.isFunctionAvailable(tokenId, actionName))
+                {
+                    availableFunctions.put(actionName, functions.get(actionName));
+                }
+            }
+        }
+        else
+        {
+            availableFunctions = functions;
+        }
+
+        if (availableFunctions != null && availableFunctions.size() > 0)
+        {
+            SparseArray<String> actions = new SparseArray<>();
+            for (String actionName : availableFunctions.keySet()) actions.put(availableFunctions.get(actionName).order, actionName);
+
+            for (int i = 0; i < actions.size(); i++)
+            {
+                addFunction(new ItemClick(actions.get(actions.keyAt(i)), 0));
+            }
+        }
+
+        if (token.isNonFungible()) addStandardTokenFunctions(token); //For non-fungible, include custom functions first - usually these are more frequently used
+
+        findViewById(R.id.layoutButtons).setVisibility(View.GONE);
+
+        //TODO: Update Token name with result from selection
+    }
+
+    private void getFunctionMap(AssetDefinitionService assetSvs)
+    {
+        try
+        {
+            functionMapComplete.acquire();
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+
+        //get the available map for this collection
+        assetSvs.fetchFunctionMap(token)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(availabilityMap -> setupTokenMap(token, availabilityMap), this::onMapFetchError)
+                .isDisposed();
+    }
+
+    private void onMapFetchError(Throwable throwable)
+    {
+        functionMapComplete.release();
+    }
+
+    private BigInteger getSelectedTokenId(List<BigInteger> tokenIds)
+    {
+        return (tokenIds != null && tokenIds.size() > 0) ? tokenIds.get(0) : BigInteger.ZERO;
+    }
+
+    private void setupTokenMap(Token token, Map<BigInteger, List<String>> availabilityMap)
+    {
+        token.setFunctionAvailability(availabilityMap);
+        functionMapComplete.release();
+        if (showButtons)
+        {
+            BigInteger tokenId = getSelectedTokenId(selection);
+            populateButtons(token, tokenId);
+            handler.post(() -> findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE) );
         }
     }
 }

@@ -42,7 +42,7 @@ import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
-import com.alphawallet.token.entity.AttributeType;
+import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.MethodArg;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TokenScriptResult;
@@ -170,7 +170,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         // Fetch attributes local to this action and add them to the injected token properties
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         TSAction action = functions.get(actionMethod);
-        List<AttributeType> localAttrs = (action != null && action.attributeTypes != null) ? new ArrayList<>(action.attributeTypes.values()) : null;
+        List<Attribute> localAttrs = (action != null && action.attributeTypes != null) ? new ArrayList<>(action.attributeTypes.values()) : null;
 
         viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds, localAttrs)
                     .subscribeOn(Schedulers.io())
@@ -296,7 +296,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         CalcJsValueCallback cb = new CalcJsValueCallback()
         {
             @Override
-            public void calculationCompleted(String value, String result, TokenscriptElement e, AttributeType attr)
+            public void calculationCompleted(String value, String result, TokenscriptElement e, Attribute attr)
             {
                 if (BuildConfig.DEBUG) System.out.println("ATTR/FA: Resolve " + value + " : " + result);
                 //need to find attr
@@ -345,7 +345,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         if (e.ref != null && e.ref.length() > 0 && action.attributeTypes != null)
         {
-            AttributeType attr = action.attributeTypes.get(e.ref);
+            Attribute attr = action.attributeTypes.get(e.ref);
             if (attr != null && attr.userInput)
             {
                 resolveInputCheckCount++;
@@ -736,11 +736,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
      */
     private interface CalcJsValueCallback
     {
-        void calculationCompleted(String value, String result, TokenscriptElement e, AttributeType attr);
+        void calculationCompleted(String value, String result, TokenscriptElement e, Attribute attr);
         void unresolvedSymbolError(String value);
     }
 
-    private void evaluateJavaScript(CalcJsValueCallback callback, String value, TokenscriptElement e, AttributeType attr)
+    private void evaluateJavaScript(CalcJsValueCallback callback, String value, TokenscriptElement e, Attribute attr)
     {
         tokenView.evaluateJavascript(
                 "(function() { var x = document.getElementById(\"" + value + "\");\n" +
@@ -759,7 +759,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                 });
     }
 
-    private void getValueFromInnerHTML(CalcJsValueCallback callback, String value, TokenscriptElement e, AttributeType attr)
+    private void getValueFromInnerHTML(CalcJsValueCallback callback, String value, TokenscriptElement e, Attribute attr)
     {
         tokenView.evaluateJavascript(
                 "(function() { var x = document.getElementById(\"" + value + "\");\n" +

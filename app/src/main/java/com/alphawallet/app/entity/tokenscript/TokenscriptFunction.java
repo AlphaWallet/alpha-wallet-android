@@ -12,8 +12,8 @@ import com.alphawallet.app.web3j.FunctionReturnDecoder;
 import com.alphawallet.app.web3j.TypeReference;
 import com.alphawallet.app.web3j.datatypes.Function;
 import com.alphawallet.token.entity.As;
+import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.AttributeInterface;
-import com.alphawallet.token.entity.AttributeType;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
@@ -55,7 +55,7 @@ public abstract class TokenscriptFunction
 {
     public static final String TOKENSCRIPT_CONVERSION_ERROR = "<error>";
 
-    private final Map<String, AttributeType> localAttrs = new ConcurrentHashMap<>();
+    private final Map<String, Attribute> localAttrs = new ConcurrentHashMap<>();
     private final Map<String, String> refTags = new ConcurrentHashMap<>();
 
     public Function generateTransactionFunction(Token token, BigInteger tokenId, TokenDefinition definition, FunctionDefinition function, AttributeInterface attrIf)
@@ -492,7 +492,7 @@ public abstract class TokenscriptFunction
         return argBytes;
     }
 
-    private String handleTransactionResult(TransactionResult result, Function function, String responseValue, AttributeType attr, long lastTransactionTime)
+    private String handleTransactionResult(TransactionResult result, Function function, String responseValue, Attribute attr, long lastTransactionTime)
     {
         String transResult = null;
         try
@@ -599,7 +599,7 @@ public abstract class TokenscriptFunction
         return name;
     }
 
-    public TokenScriptResult.Attribute parseFunctionResult(TransactionResult transactionResult, AttributeType attr)
+    public TokenScriptResult.Attribute parseFunctionResult(TransactionResult transactionResult, Attribute attr)
     {
         String res = attr.getSyntaxVal(transactionResult.result);
         BigInteger val = transactionResult.tokenId; //?
@@ -636,7 +636,7 @@ public abstract class TokenscriptFunction
      * @param definition
      * @return
      */
-    public Observable<TransactionResult> fetchResultFromEthereum(Token token, ContractAddress override, AttributeType attr,
+    public Observable<TransactionResult> fetchResultFromEthereum(Token token, ContractAddress override, Attribute attr,
                                                                  BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf, long lastTransactionTime)
     {
         return Observable.fromCallable(() -> {
@@ -708,19 +708,19 @@ public abstract class TokenscriptFunction
         {
             return attrRes.text;
         }
-        else if (definition != null && definition.attributeTypes.containsKey(element.ref)) //resolve from attribute
+        else if (definition != null && definition.attributes.containsKey(element.ref)) //resolve from attribute
         {
-            AttributeType attr = definition.attributeTypes.get(element.ref);
+            Attribute attr = definition.attributes.get(element.ref);
             return fetchArgValue(token, element, attr, tokenId, definition, attrIf);
         }
         else if (localAttrs.containsKey(element.ref)) //wasn't able to resolve, attempt to resolve from local attributes or mark null if unresolved user input
         {
-            AttributeType attr = localAttrs.get(element.ref);
+            Attribute attr = localAttrs.get(element.ref);
             return fetchArgValue(token, element, attr, tokenId, definition, attrIf);
         }
         else if (localAttrs.containsKey(element.localRef))
         {
-            AttributeType attr = localAttrs.get(element.localRef);
+            Attribute attr = localAttrs.get(element.localRef);
             return fetchArgValue(token, element, attr, tokenId, definition, attrIf);
         }
         else if (!TextUtils.isEmpty(element.localRef) && refTags.containsKey(element.localRef))
@@ -733,7 +733,7 @@ public abstract class TokenscriptFunction
         }
     }
 
-    private String fetchArgValue(Token token, TokenscriptElement element, AttributeType attr, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
+    private String fetchArgValue(Token token, TokenscriptElement element, Attribute attr, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
     {
         if (attr.userInput)
         {
@@ -773,7 +773,7 @@ public abstract class TokenscriptFunction
      * @param attrIf
      * @return
      */
-    public Observable<TokenScriptResult.Attribute> fetchAttrResult(Token token, AttributeType attr, BigInteger tokenId, ContractAddress cAddr,
+    public Observable<TokenScriptResult.Attribute> fetchAttrResult(Token token, Attribute attr, BigInteger tokenId, ContractAddress cAddr,
                                                                    TokenDefinition td, AttributeInterface attrIf)
     {
         if (attr == null)
@@ -819,7 +819,7 @@ public abstract class TokenscriptFunction
         }
     }
 
-    private Observable<TokenScriptResult.Attribute> staticAttribute(AttributeType attr, BigInteger tokenId)
+    private Observable<TokenScriptResult.Attribute> staticAttribute(Attribute attr, BigInteger tokenId)
     {
         return Observable.fromCallable(() -> {
             try
@@ -842,7 +842,7 @@ public abstract class TokenscriptFunction
         });
     }
 
-    private Observable<TokenScriptResult.Attribute> resultFromDatabase(TransactionResult transactionResult, AttributeType attr)
+    private Observable<TokenScriptResult.Attribute> resultFromDatabase(TransactionResult transactionResult, Attribute attr)
     {
         return Observable.fromCallable(() -> parseFunctionResult(transactionResult, attr));
     }
@@ -864,7 +864,7 @@ public abstract class TokenscriptFunction
         return result;
     }
 
-    public String convertInputValue(AttributeType attr, String valueFromInput)
+    public String convertInputValue(Attribute attr, String valueFromInput)
     {
         String convertedValue = "";
         try
@@ -941,10 +941,10 @@ public abstract class TokenscriptFunction
         return convertedValue;
     }
 
-    public void buildAttrMap(List<AttributeType> attrs)
+    public void buildAttrMap(List<Attribute> attrs)
     {
         localAttrs.clear();
-        for (AttributeType attr : attrs)
+        for (Attribute attr : attrs)
         {
             localAttrs.put(attr.name, attr);
         }
@@ -959,7 +959,7 @@ public abstract class TokenscriptFunction
         return attrResult;
     }
 
-    private TransactionResult addParseResultIfValid(Token token, BigInteger tokenId, AttributeType attr, TransactionResult result)
+    private TransactionResult addParseResultIfValid(Token token, BigInteger tokenId, Attribute attr, TransactionResult result)
     {
         if (!TextUtils.isEmpty(result.result))
         {

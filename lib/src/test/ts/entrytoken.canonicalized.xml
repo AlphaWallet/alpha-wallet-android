@@ -424,7 +424,8 @@
             </ts:view>
         </ts:card>
     </ts:cards>
-    <ts:attribute-type name="locality" syntax="1.3.6.1.4.1.1466.115.121.1.15">
+    <ts:attribute name="locality">
+        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.15</ts:syntax></ts:type>
         <ts:origins>
             <ethereum:call as="utf8" contract="EntryToken" function="getLocality">
                 <ts:data>
@@ -433,8 +434,9 @@
             </ethereum:call>
         </ts:origins>
 
-    </ts:attribute-type>
-    <ts:attribute-type name="time" syntax="1.3.6.1.4.1.1466.115.121.1.24">
+    </ts:attribute>
+    <ts:attribute name="time">
+        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.24</ts:syntax></ts:type>
         <ts:label>
             <ts:string xml:lang="en">Time</ts:string>
             <ts:string xml:lang="zh">时间</ts:string>
@@ -442,8 +444,9 @@
         <ts:origins>
             <ts:token-id as="utf8" bitmask="0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000"></ts:token-id>
         </ts:origins>
-    </ts:attribute-type>
-    <ts:attribute-type name="expired" syntax="1.3.6.1.4.1.1466.115.121.1.7"> <!-- boolean -->
+    </ts:attribute>
+    <ts:attribute name="expired"> <!-- boolean -->
+        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.7</ts:syntax></ts:type>
         <ts:origins>
             <ethereum:call as="bool" contract="EntryToken" function="isExpired">
                 <ts:data>
@@ -451,8 +454,9 @@
                 </ts:data>
             </ethereum:call>
         </ts:origins>
-    </ts:attribute-type>
-    <ts:attribute-type name="street" syntax="1.3.6.1.4.1.1466.115.121.1.15"> <!-- string -->
+    </ts:attribute>
+    <ts:attribute name="street"> <!-- string -->
+        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.15</ts:syntax></ts:type>
         <ts:origins>
             <ethereum:call as="utf8" contract="EntryToken" function="getStreet">
                 <ts:data>
@@ -460,8 +464,9 @@
                 </ts:data>
             </ethereum:call>
         </ts:origins>
-    </ts:attribute-type>
-    <ts:attribute-type name="building" syntax="1.3.6.1.4.1.1466.115.121.1.15"> <!-- string -->
+    </ts:attribute>
+    <ts:attribute name="building"> <!-- string -->
+        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.15</ts:syntax></ts:type>
         <ts:origins>
             <ethereum:call as="utf8" contract="EntryToken" function="getBuildingName">
                 <ts:data>
@@ -469,8 +474,9 @@
                 </ts:data>
             </ethereum:call>
         </ts:origins>
-    </ts:attribute-type>
-    <ts:attribute-type name="state" syntax="1.3.6.1.4.1.1466.115.121.1.15"> <!-- string -->
+    </ts:attribute>
+    <ts:attribute name="state"> <!-- string -->
+        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.15</ts:syntax></ts:type>
         <ts:origins>
             <ethereum:call as="utf8" contract="EntryToken" function="getState">
                 <ts:data>
@@ -478,5 +484,5 @@
                 </ts:data>
             </ethereum:call>
         </ts:origins>
-    </ts:attribute-type>
+    </ts:attribute>
 </ts:token>

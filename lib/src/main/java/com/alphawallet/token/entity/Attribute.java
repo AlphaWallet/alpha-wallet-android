@@ -25,7 +25,7 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
  * Stormbird in Sydney
  */
 
-public class AttributeType {
+public class Attribute {
     private static final int ADDRESS_SIZE = 160;
     private static final int ADDRESS_LENGTH_IN_HEX = ADDRESS_SIZE >> 2;
     private static final int ADDRESS_LENGTH_IN_BYTES = ADDRESS_SIZE >> 3;
@@ -43,16 +43,18 @@ public class AttributeType {
     public EventDefinition event = null;
     public boolean userInput = false;
 
-    public AttributeType(Element attr, TokenDefinition def)
+    public Attribute(Element attr, TokenDefinition def)
     {
         definition = def;
         //schema 2020/06 id is now name; name is now label
         name = attr.getAttribute("name");
         label = name; //set label to name if not specified
         as = As.Unsigned; //default value
+        //TODO xpath would be better
+        String ASNSyntax = attr.getElementsByTagName("ts:type").item(0).getTextContent();
 
-        if(attr.getAttribute("syntax") != null) {
-            syntax = getSyntax(attr.getAttribute("syntax"));
+        if(ASNSyntax != null) {
+            syntax = getSyntax(ASNSyntax);
         } else {
             syntax = TokenDefinition.Syntax.DirectoryString; // 1.3.6.1.4.1.1466.115.121.1.15
         }

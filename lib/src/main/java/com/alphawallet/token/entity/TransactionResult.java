@@ -16,7 +16,7 @@ public class TransactionResult
     public long resultTime;
     public final String attrId;
 
-    public TransactionResult(int chainId, String address, BigInteger tokenId, AttributeType attr)
+    public TransactionResult(int chainId, String address, BigInteger tokenId, Attribute attr)
     {
         this.contractAddress = address;
         this.contractChainId = chainId;

@@ -14,6 +14,6 @@ public class TSAction
     public TSTokenView view;
     public String style = "";
 
-    public Map<String, AttributeType> attributeTypes;
+    public Map<String, Attribute> attributeTypes;
     public FunctionDefinition function;
 }

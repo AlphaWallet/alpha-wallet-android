@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><ts:card xmlns:ts="http://tokenscript.org/2020/06/tokenscript" xmlns:asnx="urn:ietf:params:xml:ns:asnx" xmlns:ethereum="urn:ethereum:constantinople" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="action" xsi:schemaLocation="http://tokenscript.org/2020/06/tokenscript http://tokenscript.org/2020/03/tokenscript.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><ts:card xmlns:ts="http://tokenscript.org/2020/06/tokenscript" xmlns:asnx="urn:ietf:params:xml:ns:asnx" xmlns:ethereum="urn:ethereum:constantinople" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="action" xsi:schemaLocation="http://tokenscript.org/2020/06/tokenscript http://tokenscript.org/2020/06/tokenscript.xsd">
     <ts:label>
         <ts:string xml:lang="en">Convert to DAI</ts:string>
         <ts:string xml:lang="zh">將xDAI轉爲DAI</ts:string>
     </ts:label>
-    <ts:attribute-type name="amount" syntax="1.3.6.1.4.1.1466.115.121.1.36">
+    <ts:attribute name="amount">
+        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.36</ts:syntax></ts:type>
         <ts:label>
             <ts:string xml:lang="en">Amount</ts:string>
             <ts:string xml:lang="zh">代幣金額</ts:string>
@@ -13,7 +14,7 @@
             rationale for hardcoding: avoiding over-design  -->
             <ts:user-entry as="e18"/>
         </ts:origins>
-    </ts:attribute-type>
+    </ts:attribute>
     <!-- because this action has xdai as input, it should be listed as
          an action under XDAI's token view. -->
     <ts:input>
@@ -49,10 +50,10 @@
          exclude="low_balance" to the root element.
     -->
     <ts:transaction>
-        <ethereum:transfer>
+        <ethereum:transaction>
             <ethereum:to>0x7301CFA0e1756B71869E93d4e4Dca5c7d0eb0AA6</ethereum:to>
-            <ethereum:ether ref="amount"/>
-        </ethereum:transfer>
+            <ethereum:value ref="amount"/>
+        </ethereum:transaction>
     </ts:transaction>
     <ts:view xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
         <style type="text/css">h3 { color: #111; font-family: 'Open Sans', sans-serif; font-size: 20px; font-weight: 300; line-height: 32px; }
@@ -192,15 +193,15 @@
                     <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
                 </ds:Transforms>
                 <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-                <ds:DigestValue>wvq+ZMKlljAzgQYNAsCMatiDDicn4l1uj5yJKMhlfeE=</ds:DigestValue>
+                <ds:DigestValue>7D1ZpnmqhQKkWZXSS9CtgDz3mV/jC6xCmCWxemvJEgc=</ds:DigestValue>
             </ds:Reference>
         </ds:SignedInfo>
         <ds:SignatureValue>
-            gPFjTUGyZt1s1msP1eWvp+FsMa1a6a9zZNtNuSbZ/+yvObTz5WuN7kD+FuucpsoGUoA1UmYqU4IP
-            4kfnzHroMdBn7Y8MR9mQqDon3xjE8uMbyHC7qtah9E2uwJmZlfhjdGwUxlAye1j+rHa74LNeH7ql
-            at0nCyUN8Z0YVLq3QQ1fcxPeKVC1ryKtkg6QJB+qd5ZavXdMaUOfwf/roWIo73emGkuHtC2zNN2K
-            40qoVyyPEZ4GM8GmQS8yltMWkfjK0+RCEfZO/ert4BK5xa7SVk7JJshVo9fYNa26alSxgHghmA6/
-            qHXlVf0WMf4qkXk5iu3XV+xlY/32JdVRvYjunA==
+            exm01j3IHOuGykCvXRXVTJbu380BlQXoiEksyFB/CBpWcYpaY9aLc7fD7SMckWNYNVWaBRwEXDU2
+            Pmv6B3LwaOwco1fcibCFcEORd2IgnuJPrqd9jzpWArksbYrKZx0im9IrxyEtm+rISv423TsXS+u3
+            h6taeZp2yorOhcodF7+uzwmOQ4mt6NZ87HYhXyfF6GUl5kzg7TZyooTn8GJfZqjk6ZOXHQor3Z8E
+            s1ijT42Diotw2qcEgCNZshTn28r70dY2NUExmjLs9u8vNV1OnIxRWDbCbK06rYue/6w0AOGm8d2O
+            /eWhBLoKKgdx5esKzLyPE2edX1rpYNCiweUQaQ==
         </ds:SignatureValue>
         <ds:KeyInfo>
             <ds:KeyName>AlphaWallet</ds:KeyName>

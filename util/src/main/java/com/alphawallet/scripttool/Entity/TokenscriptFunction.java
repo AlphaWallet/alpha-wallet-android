@@ -9,7 +9,6 @@ import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.BytesType;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Int;
 import org.web3j.abi.datatypes.Type;
@@ -556,7 +555,7 @@ public abstract class TokenscriptFunction
         return name;
     }
 
-    public TokenScriptResult.Attribute parseFunctionResult(TransactionResult transactionResult, AttributeType attr)
+    public TokenScriptResult.Attribute parseFunctionResult(TransactionResult transactionResult, Attribute attr)
     {
         String res = attr.getSyntaxVal(transactionResult.result);
         BigInteger val = transactionResult.tokenId; //?
@@ -586,7 +585,7 @@ public abstract class TokenscriptFunction
      * @param definition
      * @return
      */
-    public Observable<TransactionResult> fetchResultFromEthereum(String walletAddress, ContractAddress override, AttributeType attr, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
+    public Observable<TransactionResult> fetchResultFromEthereum(String walletAddress, ContractAddress override, Attribute attr, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
     {
         return Observable.fromCallable(() -> {
             ContractAddress useAddress;
@@ -650,13 +649,13 @@ public abstract class TokenscriptFunction
 
     private void resolveReference(String walletAddress, MethodArg arg, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
     {
-        if (definition != null && definition.attributeTypes.containsKey(arg.element.ref))
+        if (definition != null && definition.attributes.containsKey(arg.element.ref))
         {
-            arg.element.value = fetchAttrResult(walletAddress, definition.attributeTypes.get(arg.element.ref), tokenId, null, definition, attrIf).blockingSingle().text;
+            arg.element.value = fetchAttrResult(walletAddress, definition.attributes.get(arg.element.ref), tokenId, null, definition, attrIf).blockingSingle().text;
         }
     }
 
-    public Observable<TokenScriptResult.Attribute> fetchAttrResult(String walletAddress, AttributeType attr, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf)
+    public Observable<TokenScriptResult.Attribute> fetchAttrResult(String walletAddress, Attribute attr, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf)
     {
         if (attr == null) return Observable.fromCallable(() -> null);
         if (attr.function == null)  // static attribute from tokenId (eg city mapping from tokenId)
@@ -690,11 +689,11 @@ public abstract class TokenscriptFunction
         td.context.cAddr = cAddr;
         td.context.attrInterface = attrIf;
 
-        return Observable.fromIterable(new ArrayList<>(td.attributeTypes.values()))
+        return Observable.fromIterable(new ArrayList<>(td.attributes.values()))
                 .flatMap(attr -> fetchAttrResult(walletAddress, attr, tokenId, cAddr, td, attrIf));
     }
 
-    private Observable<TokenScriptResult.Attribute> staticAttribute(AttributeType attr, BigInteger tokenId)
+    private Observable<TokenScriptResult.Attribute> staticAttribute(Attribute attr, BigInteger tokenId)
     {
         return Observable.fromCallable(() -> {
             try
@@ -709,7 +708,7 @@ public abstract class TokenscriptFunction
         });
     }
 
-    private Observable<TokenScriptResult.Attribute> resultFromDatabase(TransactionResult transactionResult, AttributeType attr)
+    private Observable<TokenScriptResult.Attribute> resultFromDatabase(TransactionResult transactionResult, Attribute attr)
     {
         //return Observable.fromCallable(() -> attr.function.parseFunctionResult(transactionResult, attr));
         return Observable.fromCallable(() -> parseFunctionResult(transactionResult, attr));

@@ -20,7 +20,7 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
 
 public class TokenDefinition {
     protected Document xml;
-    public Map<String, AttributeType> attributeTypes = new HashMap<>();
+    public Map<String, Attribute> attributes = new HashMap<>();
     protected Locale locale;
 
     public Map<String, ContractInfo> contracts = new HashMap<>();
@@ -69,7 +69,7 @@ public class TokenDefinition {
     public List<FunctionDefinition> getFunctionData()
     {
         List<FunctionDefinition> defs = new ArrayList<>();
-        for (AttributeType attr : attributeTypes.values())
+        for (Attribute attr : attributes.values())
         {
             if (attr.function != null)
             {
@@ -345,7 +345,7 @@ public class TokenDefinition {
                     case "cards":
                         handleCards(element);
                         break;
-                    case "attribute": //treat orphaned attribute-types appearing on the root scope as globals
+                    case "attribute":
                         processAttrs(element);
                         break;
                     default:
@@ -434,8 +434,8 @@ public class TokenDefinition {
             Element element = (Element) node;
             switch (node.getLocalName())
             {
-                case "attribute-type":
-                    AttributeType attr = new AttributeType(element, this);
+                case "attribute":
+                    Attribute attr = new Attribute(element, this);
                     tokenViews.localAttributeTypes.put(attr.name, attr);
                     break;
                 case "view": //TODO: Localisation
@@ -577,8 +577,7 @@ public class TokenDefinition {
                     tsAction.name = getLocalisedString(element);
                     break;
                 case "attribute":
-                case "attribute-type":
-                    AttributeType attr = new AttributeType(element, this);
+                    Attribute attr = new Attribute(element, this);
                     if (tsAction.attributeTypes == null)
                         tsAction.attributeTypes = new HashMap<>();
                     tsAction.attributeTypes.put(attr.name, attr);
@@ -680,10 +679,10 @@ public class TokenDefinition {
 
     private void processAttrs(Node n)
     {
-        AttributeType attr = new AttributeType((Element) n, this);
+        Attribute attr = new Attribute((Element) n, this);
         if (attr.bitmask != null || attr.function != null)
         {
-            attributeTypes.put(attr.name, attr);
+            attributes.put(attr.name, attr);
         }
     }
 
@@ -726,16 +725,16 @@ public class TokenDefinition {
     }
 
     public Map<BigInteger, String> getMappingMembersByKey(String key){
-        if(attributeTypes.containsKey(key)) {
-            AttributeType attr = attributeTypes.get(key);
+        if(attributes.containsKey(key)) {
+            Attribute attr = attributes.get(key);
             return attr.members;
         }
         return null;
     }
     public Map<BigInteger, String> getConvertedMappingMembersByKey(String key){
-        if(attributeTypes.containsKey(key)) {
+        if(attributes.containsKey(key)) {
             Map<BigInteger,String> convertedMembers=new HashMap<>();
-            AttributeType attr = attributeTypes.get(key);
+            Attribute attr = attributes.get(key);
             for(BigInteger actualValue:attr.members.keySet()){
                 convertedMembers.put(actualValue.shiftLeft(attr.bitshift).and(attr.bitmask),attr.members.get(actualValue));
             }
@@ -982,8 +981,8 @@ public class TokenDefinition {
     }
 
     public void parseField(BigInteger tokenId, NonFungibleToken token, Map<String, FunctionDefinition> functionMappings) {
-        for (String key : attributeTypes.keySet()) {
-            AttributeType attrtype = attributeTypes.get(key);
+        for (String key : attributes.keySet()) {
+            Attribute attrtype = attributes.get(key);
             BigInteger val = BigInteger.ZERO;
             try
             {
@@ -1064,8 +1063,8 @@ public class TokenDefinition {
     }
 
     public void parseField(BigInteger tokenId, NonFungibleToken token) {
-        for (String key : attributeTypes.keySet()) {
-            AttributeType attrtype = attributeTypes.get(key);
+        for (String key : attributes.keySet()) {
+            Attribute attrtype = attributes.get(key);
             BigInteger val = BigInteger.ZERO;
             try
             {
@@ -1120,7 +1119,7 @@ public class TokenDefinition {
         return tokenViews.getViewStyle(viewTag);
     }
 
-    public Map<String, AttributeType> getTokenViewLocalAttributes()
+    public Map<String, Attribute> getTokenViewLocalAttributes()
     {
         return tokenViews.localAttributeTypes;
     }

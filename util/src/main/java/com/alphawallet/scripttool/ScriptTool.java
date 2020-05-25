@@ -4,8 +4,8 @@ import com.alphawallet.scripttool.Entity.CachedResult;
 import com.alphawallet.scripttool.Entity.ParseState;
 import com.alphawallet.scripttool.Entity.TokenscriptFunction;
 import com.alphawallet.scripttool.Ethereum.TransactionHandler;
+import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.AttributeInterface;
-import com.alphawallet.token.entity.AttributeType;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.ContractInfo;
 import com.alphawallet.token.entity.TSAction;
@@ -230,7 +230,7 @@ public class ScriptTool implements AttributeInterface
     }
 
     @Override
-    public TransactionResult getFunctionResult(ContractAddress contract, AttributeType attr,
+    public TransactionResult getFunctionResult(ContractAddress contract, Attribute attr,
                                                BigInteger tokenId)
     {
         String addressFunctionKey = contract.address + "-" + attr.name;
@@ -263,7 +263,7 @@ public class ScriptTool implements AttributeInterface
     }
 
     @Override
-    public boolean resolveOptimisedAttr(ContractAddress contract, AttributeType attr,
+    public boolean resolveOptimisedAttr(ContractAddress contract, Attribute attr,
                                         TransactionResult transactionResult)
     {
         return false;

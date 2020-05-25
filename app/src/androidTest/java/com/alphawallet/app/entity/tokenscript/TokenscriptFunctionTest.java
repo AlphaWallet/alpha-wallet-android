@@ -442,7 +442,8 @@ public class TokenscriptFunctionTest implements ParseResult {
             "      </ts:view>\n" +
             "    </ts:card>\n" +
             "  </ts:cards>\n" +
-            "    <ts:attribute-type name=\"locality\" syntax=\"1.3.6.1.4.1.1466.115.121.1.15\">\n" +
+            "    <ts:attribute name=\"locality\">\n" +
+            "        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.15</ts:syntax></ts:type>\n" +
             "      <ts:origins>\n" +
             "        <ethereum:call as=\"utf8\" contract=\"EntryToken\" function=\"getLocality\">\n" +
             "            <ts:data>\n" +
@@ -451,8 +452,9 @@ public class TokenscriptFunctionTest implements ParseResult {
             "        </ethereum:call>\n" +
             "      </ts:origins>\n" +
             "\n" +
-            "    </ts:attribute-type>\n" +
-            "    <ts:attribute-type name=\"time\" syntax=\"1.3.6.1.4.1.1466.115.121.1.24\">\n" +
+            "    </ts:attribute>\n" +
+            "    <ts:attribute name=\"time\">\n" +
+            "        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.24</ts:syntax></ts:type>\n" +
             "      <ts:label>\n" +
             "        <ts:string xml:lang=\"en\">Time</ts:string>\n" +
             "        <ts:string xml:lang=\"zh\">时间</ts:string>\n" +
@@ -460,8 +462,9 @@ public class TokenscriptFunctionTest implements ParseResult {
             "      <ts:origins>\n" +
             "        <ts:token-id as=\"utf8\" bitmask=\"0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000\"></ts:token-id>\n" +
             "      </ts:origins>\n" +
-            "    </ts:attribute-type>\n" +
-            "    <ts:attribute-type name=\"expired\" syntax=\"1.3.6.1.4.1.1466.115.121.1.7\"> <!-- boolean -->\n" +
+            "    </ts:attribute>\n" +
+            "    <ts:attribute name=\"expired\"> <!-- boolean -->\n" +
+            "        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.7</ts:syntax></ts:type>\n" +
             "      <ts:origins>\n" +
             "        <ethereum:call as=\"bool\" contract=\"EntryToken\" function=\"isExpired\">\n" +
             "          <ts:data>\n" +
@@ -469,8 +472,9 @@ public class TokenscriptFunctionTest implements ParseResult {
             "          </ts:data>\n" +
             "        </ethereum:call>\n" +
             "      </ts:origins>\n" +
-            "    </ts:attribute-type>\n" +
-            "    <ts:attribute-type name=\"street\" syntax=\"1.3.6.1.4.1.1466.115.121.1.15\"> <!-- string -->\n" +
+            "    </ts:attribute>\n" +
+            "    <ts:attribute name=\"street\"> <!-- string -->\n" +
+            "        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.15</ts:syntax></ts:type>\n" +
             "      <ts:origins>\n" +
             "        <ethereum:call as=\"utf8\" contract=\"EntryToken\" function=\"getStreet\">\n" +
             "          <ts:data>\n" +
@@ -478,8 +482,9 @@ public class TokenscriptFunctionTest implements ParseResult {
             "          </ts:data>\n" +
             "        </ethereum:call>\n" +
             "      </ts:origins>\n" +
-            "    </ts:attribute-type>\n" +
-            "    <ts:attribute-type name=\"building\" syntax=\"1.3.6.1.4.1.1466.115.121.1.15\"> <!-- string -->\n" +
+            "    </ts:attribute>\n" +
+            "    <ts:attribute name=\"building\"> <!-- string -->\n" +
+            "        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.15</ts:syntax></ts:type>\n" +
             "      <ts:origins>\n" +
             "        <ethereum:call as=\"utf8\" contract=\"EntryToken\" function=\"getBuildingName\">\n" +
             "          <ts:data>\n" +
@@ -487,8 +492,9 @@ public class TokenscriptFunctionTest implements ParseResult {
             "          </ts:data>\n" +
             "        </ethereum:call>\n" +
             "      </ts:origins>\n" +
-            "    </ts:attribute-type>\n" +
-            "    <ts:attribute-type name=\"state\" syntax=\"1.3.6.1.4.1.1466.115.121.1.15\"> <!-- string -->\n" +
+            "    </ts:attribute>\n" +
+            "    <ts:attribute name=\"state\"> <!-- string -->\n" +
+            "        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.15</ts:syntax></ts:type>\n" +
             "      <ts:origins>\n" +
             "        <ethereum:call as=\"utf8\" contract=\"EntryToken\" function=\"getState\">\n" +
             "          <ts:data>\n" +
@@ -496,7 +502,7 @@ public class TokenscriptFunctionTest implements ParseResult {
             "          </ts:data>\n" +
             "        </ethereum:call>\n" +
             "      </ts:origins>\n" +
-            "    </ts:attribute-type>\n" +
+            "    </ts:attribute>\n" +
             "</ts:token>\n";
     private TokenDefinition entryToken;
 
@@ -511,16 +517,16 @@ public class TokenscriptFunctionTest implements ParseResult {
 
     @Test
     public void attributeTypesShouldExist() {
-        assertTrue("should have a street attribute", entryToken.attributeTypes.containsKey("street"));
-        assertTrue("should have a building attribute", entryToken.attributeTypes.containsKey("building"));
-        assertTrue("should have a state attribute", entryToken.attributeTypes.containsKey("state"));
+        assertTrue("should have a street attribute", entryToken.attributes.containsKey("street"));
+        assertTrue("should have a building attribute", entryToken.attributes.containsKey("building"));
+        assertTrue("should have a state attribute", entryToken.attributes.containsKey("state"));
     }
 
     @Test
     public void attributeTypesShouldBeUTF8() {
-        As streetType = entryToken.attributeTypes.get("street").as;
-        As buildingType = entryToken.attributeTypes.get("building").as;
-        As stateType = entryToken.attributeTypes.get("state").as;
+        As streetType = entryToken.attributes.get("street").as;
+        As buildingType = entryToken.attributes.get("building").as;
+        As stateType = entryToken.attributes.get("state").as;
         assertTrue("street, building & state should be a UTF8 origin",
                 streetType.equals(As.UTF8) && buildingType.equals(As.UTF8) && stateType.equals(As.UTF8));
     }

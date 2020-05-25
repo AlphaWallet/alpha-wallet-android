@@ -428,7 +428,7 @@ public class TokenDefinition {
             if (node.getNodeType() != ELEMENT_NODE)
                 continue;
 
-            if (node.getPrefix() != null && node.getPrefix().equalsIgnoreCase("ds"))
+            if (node.getPrefix() != null && node.getPrefix().equalsIgnoreCase("ts"))
                 continue;
 
             Element element = (Element) node;

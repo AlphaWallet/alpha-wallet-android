@@ -353,12 +353,12 @@ public class TokenDefinition {
             if (node.getNodeType() == ELEMENT_NODE)
             {
                 Element card = (Element) node;
-                switch (card.getLocalName())
+                switch (card.getAttributes().item(0).getNodeValue())
                 {
-                    case "card[@type=\"token\"]":
+                    case "token":
                         processTokenCardElements(card);
                         break;
-                    case "card[@type=\"action\"]":
+                    case "action":
                         extractActions(card);
                         break;
                 }
@@ -402,7 +402,7 @@ public class TokenDefinition {
             if (node.getNodeType() != ELEMENT_NODE)
                 continue;
 
-            if (node.getPrefix() != null && node.getPrefix().equalsIgnoreCase("ds"))
+            if (node.getPrefix() != null && node.getPrefix().equalsIgnoreCase("ts"))
                 continue;
 
             Element element = (Element) node;
@@ -704,7 +704,7 @@ public class TokenDefinition {
             if (n.getNodeType() != ELEMENT_NODE) continue;
             switch (n.getLocalName())
             {
-                case "card[@type=\"action\"]": //action only script
+                case "action": //action only script
                     extractActions((Element)n);
                     break;
                 default:

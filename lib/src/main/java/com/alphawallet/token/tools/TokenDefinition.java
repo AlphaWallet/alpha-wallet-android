@@ -353,14 +353,19 @@ public class TokenDefinition {
             if (node.getNodeType() == ELEMENT_NODE)
             {
                 Element card = (Element) node;
-                switch (card.getAttributes().item(0).getNodeValue())
-                {
-                    case "token":
-                        processTokenCardElements(card);
-                        break;
-                    case "action":
-                        extractActions(card);
-                        break;
+                String cardType = card.getAttribute("type");
+                if(cardType != null) {
+                    switch (cardType)
+                    {
+                        case "token":
+                            processTokenCardElements(card);
+                            break;
+                        case "action":
+                            extractActions(card);
+                            break;
+                    }
+                } else {
+                    System.out.println("Card type is null, error in TokenScript file");
                 }
             }
         }

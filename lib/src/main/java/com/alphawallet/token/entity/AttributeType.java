@@ -133,7 +133,7 @@ public class AttributeType {
                         event = definition.parseEvent(resolve, syntax);
                         event.attributeId = name;
                         //drop through (no break)
-                    case "token-name":
+                    case "token-id":
                         //this value is obtained from the token name
                         setAs(definition.parseAs(resolve));
                         populate(resolve); //check for mappings

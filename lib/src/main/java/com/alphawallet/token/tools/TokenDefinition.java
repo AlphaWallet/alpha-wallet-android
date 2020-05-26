@@ -330,13 +330,10 @@ public class TokenDefinition {
                     case "label":
                         extractLabelTag(element);
                         break;
-                    case "attribute-types":
-                        handleGlobalAttributes(element);
-                        break;
                     case "cards":
                         handleCards(element);
                         break;
-                    case "attribute-type": //treat orphaned attribute-types appearing on the root scope as globals
+                    case "attribute-type":
                         processAttrs(element);
                         break;
                     default:

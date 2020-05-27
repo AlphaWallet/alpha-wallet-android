@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
@@ -82,6 +83,8 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
         viewModel.tokenUpdate().observe(this, this::onTokenUpdate);
+        viewModel.walletUpdate().observe(this, this::onWalletUpdate);
+
         SystemView systemView = findViewById(R.id.system_view);
         systemView.hide();
         functionBar = findViewById(R.id.layoutButtons);
@@ -95,6 +98,14 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private void onTokenUpdate(Token t)
     {
         initViews(t);
+    }
+
+    private void onWalletUpdate(Wallet w)
+    {
+        if(!viewModel.isAuthorizeToFunction())
+        {
+            functionBar.hideButtons();
+        }
     }
 
     @Override

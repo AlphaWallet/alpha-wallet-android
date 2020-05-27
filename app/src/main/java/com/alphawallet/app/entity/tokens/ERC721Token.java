@@ -121,21 +121,9 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public void setupContent(TokenHolder holder, AssetDefinitionService definition)
+    public int getContractType()
     {
-        //721 Balance
-        int balance = tokenBalanceAssets.size();
-
-        holder.balanceEth.setText(String.valueOf(balance));
-        holder.layoutValueDetails.setVisibility(View.GONE);
-
-        holder.contractType.setVisibility(View.VISIBLE);
-        holder.contractSeparator.setVisibility(View.VISIBLE);
-        holder.contractType.setText(R.string.erc721);
-
-        holder.balanceEth.setVisibility(View.VISIBLE);
-
-        addTokenName(holder, definition);
+        return R.string.erc721;
     }
 
     @Override

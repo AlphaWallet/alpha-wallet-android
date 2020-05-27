@@ -1290,7 +1290,7 @@ public class TokenRepository implements TokenRepositoryType {
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(false)
                 .build();
-        AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getSecondaryNodeURL(chainId), EthereumNetworkRepository.getNodeURLByNetworkId(chainId), okClient, false);
+        AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId(chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), okClient, false);
         EthereumNetworkRepository.addRequiredCredentials(chainId, publicNodeService);
         return Web3j.build(publicNodeService);
     }

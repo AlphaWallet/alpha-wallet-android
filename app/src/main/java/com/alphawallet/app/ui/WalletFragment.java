@@ -349,7 +349,7 @@ public class WalletFragment extends BaseFragment implements
         if (importFileName != null)
         {
             ContractLocator importToken = viewModel.getAssetDefinitionService().getHoldingContract(importFileName);
-            if (importToken != null) Toast.makeText(getContext(), importToken.name, Toast.LENGTH_LONG).show();
+            if (importToken != null) Toast.makeText(getContext(), importToken.address, Toast.LENGTH_LONG).show();
             if (importToken != null && adapter != null) adapter.setScrollToken(importToken);
             importFileName = null;
         }
@@ -475,7 +475,7 @@ public class WalletFragment extends BaseFragment implements
         //see if these are currently known, if so update them in adapter
         for (ContractLocator cResult : tokenContracts)
         {
-            Token t = viewModel.getTokenFromService(cResult.chainId, cResult.name);
+            Token t = viewModel.getTokenFromService(cResult.chainId, cResult.address);
             if (t != null) adapter.updateToken(t, false);
         }
     }

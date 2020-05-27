@@ -196,6 +196,8 @@
     <string name="help_question3">How do I get my money?</string>
     <string name="help_question4">What is a Seed Phrase?</string>
     <string name="help_question5">How do I transfer ETH into my wallet?</string>
+    <string name="help_question6">What is TokenScript?</string>
+    <string name="tokenscript_explaination">tokenscript_explaination.html</string>
     <string name="twenty_four_hours">24 hours</string>
     <string name="appreciation">Appreciation</string>
     <string name="eth_per_ticket">%1s/Ticket</string>
@@ -585,6 +587,7 @@
     <string name="message_version_support_warning">This release of AlphaWallet will be the final version with Android 6.0 support.</string>
     <string name="hide_notification">Hide Notification</string>
     <string name="card_view_not_found_error">%1$s not found</string>
+    <string name="tokenscript_management">Tokenscript Management</string>
 
     <!-- Gas Slider -->
     <string name="speed_gas">Speed (Gas)</string>
@@ -598,4 +601,5 @@
     <string name="error_while_signing_transaction">Error occurred while signing transaction. Please re-import the key for this wallet.</string>
     <string name="error_not_whitelisted">Page Not Whitelisted</string>
     <string name="explain_not_whitelisted">TokenScript attempting to redirect to non-whitelisted page %1$s. If you are the owner of this site please submit PR to AlphaWallet repo to add page for whitelisting.</string>
+    <string name="token_spec">%1$s (%2$s)</string>
 </resources>

@@ -34,6 +34,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -147,9 +148,26 @@ public class Token implements Parcelable, Comparable<Token>
         }
     }
 
-    public String getStringBalance() {
-        BigDecimal correctedBalance = getCorrectedBalance(4);
-        return correctedBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : correctedBalance.toPlainString();
+    public String getStringBalance()
+    {
+        String value;
+        BigDecimal ethBalance = getCorrectedBalance(18);
+        if (ethBalance.equals(BigDecimal.ZERO)) //zero balance
+        {
+            value = "0";
+        }
+        else if (ethBalance.compareTo(BigDecimal.valueOf(0.000001)) < 0) //very low balance
+        {
+            value = "~0.00";
+        }
+        else //otherwise display in standard pattern to 4 dp
+        {
+            DecimalFormat df = new DecimalFormat("###,###,###,##0.####");
+            df.setRoundingMode(RoundingMode.HALF_DOWN);
+            value = df.format(ethBalance);
+        }
+
+        return value;
     }
 
     public boolean hasPositiveBalance() {
@@ -272,80 +290,21 @@ public class Token implements Parcelable, Comparable<Token>
     {
         if (balance == null || balance.equals(BigDecimal.ZERO)) return BigDecimal.ZERO;
         BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
-        BigDecimal ethBalance = tokenInfo.decimals > 0
-                ? balance.divide(decimalDivisor) : balance;
-        return ethBalance.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros();
+        return tokenInfo.decimals > 0
+               ? balance.divide(decimalDivisor, scale, RoundingMode.DOWN).stripTrailingZeros() : balance;
     }
 
-    public void setupContent(TokenHolder holder, AssetDefinitionService definition)
+    public int getContractType()
     {
-        int precision = isFocusToken() ? TOKEN_BALANCE_FOCUS_PRECISION : TOKEN_BALANCE_PRECISION;
-        BigDecimal ethBalance = getCorrectedBalance(precision);
-        String     value      = ethBalance.compareTo(BigDecimal.ZERO) == 0 ? "0" : ethBalance.toPlainString();
-        if (ethBalance.compareTo(BigDecimal.ZERO) == 0 && balance.compareTo(BigDecimal.ZERO) > 0)
+        switch (contractType)
         {
-            ethBalance = balance.divide(new BigDecimal(Math.pow(10, tokenInfo.decimals)));
-            //fractional value. How to represent?
-            value = getMinimalString(ethBalance.toPlainString());
-            if (ethBalance.compareTo(BigDecimal.valueOf(0.000001)) < 0)
-            {
-                value = holder.getString(R.string.dust_value);
-            }
+            case ERC20:
+                return R.string.erc20;
+            case ETHEREUM:
+                return 0; //don't display 'ethereum' as contract type
+            default:
+                return 0;
         }
-
-        holder.balanceEth.setText(value);
-
-        if (isEthereum())
-        {
-            holder.textAppreciationSub.setText(R.string.appreciation);
-            holder.text24HoursSub.setText(R.string.twenty_four_hours);
-            holder.contractType.setVisibility(View.GONE);
-            holder.contractSeparator.setVisibility(View.GONE);
-            holder.layoutValueDetails.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            holder.contractType.setVisibility(View.VISIBLE);
-            holder.contractSeparator.setVisibility(View.VISIBLE);
-            holder.contractType.setText(R.string.erc20);
-            holder.layoutValueDetails.setVisibility(View.GONE);
-        }
-
-        addTokenName(holder, definition);
-
-        //populate ticker if we have it
-        if (ticker != null)
-        {
-            holder.layoutValueDetails.setVisibility(View.VISIBLE);
-            holder.textAppreciationSub.setText(R.string.appreciation);
-            holder.fillCurrency(ethBalance, ticker);
-            holder.text24HoursSub.setText(R.string.twenty_four_hours);
-            holder.currencyLabel.setText(ticker.priceSymbol);
-        }
-        else if (isEthereum())
-        {
-            holder.layoutValueDetails.setVisibility(View.VISIBLE);
-            holder.animateTextWhileWaiting();
-            holder.emptyTicker();
-        }
-        else
-        {
-            holder.layoutValueDetails.setVisibility(View.GONE);
-        }
-
-        holder.balanceEth.setVisibility(View.VISIBLE);
-    }
-
-    void addTokenName(TokenHolder holder, AssetDefinitionService definitionService)
-    {
-        String balance = holder.balanceEth.getText().toString();
-        String symbolStr = tokenInfo.symbol != null ? tokenInfo.symbol.toUpperCase() : "";
-        String nameTxt = TextUtils.isEmpty(tokenInfo.name)
-                         ? symbolStr
-                         : getFullName(definitionService, getTicketCount());
-
-        String composite = balance + " " + nameTxt;
-        holder.balanceEth.setText(composite);
     }
 
     public List<Asset> getTokenAssets() {
@@ -355,26 +314,6 @@ public class Token implements Parcelable, Comparable<Token>
     public List<BigInteger> ticketIdStringToIndexList(String userList)
     {
         return null;
-    }
-
-    private String getMinimalString(String value)
-    {
-        StringBuilder sb = new StringBuilder();
-        for (char c : value.toCharArray())
-        {
-            switch (c)
-            {
-                case '.':
-                case '0':
-                    sb.append(c);
-                    break;
-                default:
-                    sb.append(c);
-                    return sb.toString();
-            }
-        }
-
-        return sb.toString();
     }
 
     /**
@@ -1036,158 +975,6 @@ public class Token implements Parcelable, Comparable<Token>
         return new org.web3j.abi.datatypes.DynamicArray<>(
                         org.web3j.abi.datatypes.generated.Uint256.class,
                         org.web3j.abi.Utils.typeMap(indices, org.web3j.abi.datatypes.generated.Uint256.class));
-    }
-
-
-    /**
-     * Common TokenScript methods
-     */
-
-    public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx) {
-        displayTicketHolder(range, activity, assetService, ctx, false);
-    }
-
-    /**
-     * This is a single method that populates any instance of graphic ticket anywhere
-     *
-     * @param range
-     * @param activity
-     * @param assetService
-     * @param ctx needed to create date/time format objects
-     */
-    public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx, boolean iconified)
-    {
-        //need to wait until the assetDefinitionService has finished loading assets
-        assetService.getAssetDefinitionASync(tokenInfo.chainId, tokenInfo.address)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(td -> renderTicketHolder(td, range, activity, assetService, ctx, iconified), this::loadingError).isDisposed();
-    }
-
-    private void loadingError(Throwable e)
-    {
-        e.printStackTrace();
-    }
-
-    private void renderTicketHolder(TokenDefinition td, TicketRange range, View activity, AssetDefinitionService assetService, Context ctx, boolean iconified)
-    {
-        if (td != null && td.holdingToken != null)
-        {
-            //use webview
-            displayTokenscriptView(range, assetService, activity, ctx, iconified);
-        }
-        else
-        {
-            showLegacyView(range, activity);
-        }
-    }
-
-    private void showLegacyView(TicketRange range, View activity)
-    {
-        activity.findViewById(R.id.layout_legacy).setVisibility(View.VISIBLE);
-        activity.findViewById(R.id.layout_webwrapper).setVisibility(View.GONE);
-
-        TextView amount = activity.findViewById(R.id.amount);
-        TextView name = activity.findViewById(R.id.name);
-
-        String nameStr = getTokenTitle();
-        String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
-
-        name.setText(nameStr);
-        amount.setText(seatCount);
-    }
-
-    protected void displayTokenscriptView(TicketRange range, AssetDefinitionService assetService, View activity, Context ctx, boolean iconified)
-    {
-        //get webview
-        Web3TokenView tokenView = activity.findViewById(R.id.web3_tokenview);
-        ProgressBar waitSpinner = activity.findViewById(R.id.progress_element);
-        activity.findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
-        activity.findViewById(R.id.layout_legacy).setVisibility(View.GONE);
-
-        waitSpinner.setVisibility(View.VISIBLE);
-        renderTokenscriptView(range, assetService, waitSpinner, ctx, tokenView, iconified);
-    }
-
-    public void renderTokenscriptView(TicketRange range, AssetDefinitionService assetService, ProgressBar waitSpinner, Context ctx, Web3TokenView tokenView, boolean iconified)
-    {
-        BigInteger tokenId = range.tokenIds.get(0);
-
-        final StringBuilder attrs = assetService.getTokenAttrs(this, tokenId, range.tokenIds.size());
-
-        assetService.resolveAttrs(this, tokenId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(throwable, waitSpinner, tokenView, range),
-                           () -> displayTicket(ctx, assetService, attrs, waitSpinner, tokenView, iconified, range))
-                .isDisposed();
-    }
-
-    /**
-     * Add the decoded and resolved attributes as Token properties to the relevant view
-     *
-     * @param ctx
-     * @param assetService
-     * @param attrs
-     * @param waitSpinner
-     * @param tokenView
-     * @param iconified
-     * @param range
-     */
-    private void displayTicket(Context ctx, AssetDefinitionService assetService, StringBuilder attrs, ProgressBar waitSpinner, Web3TokenView tokenView, boolean iconified, TicketRange range)
-    {
-        tokenView.setVisibility(View.VISIBLE);
-        String viewName = iconified ? ASSET_SUMMARY_VIEW_NAME : ASSET_DETAIL_VIEW_NAME;
-
-        String view = assetService.getTokenView(tokenInfo.chainId, getAddress(), viewName);
-        if (waitSpinner != null) waitSpinner.setVisibility(View.GONE);
-        if (TextUtils.isEmpty(view)) view = buildViewError(ctx, range, viewName);
-        String style = assetService.getTokenView(tokenInfo.chainId, getAddress(), "style");
-        String viewData = tokenView.injectWeb3TokenInit(ctx, view, attrs.toString());
-        viewData = tokenView.injectStyleData(viewData, style); //style injected last so it comes first
-
-        String base64 = android.util.Base64.encodeToString(viewData.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
-        tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
-    }
-
-    /**
-     * Form TokenScript diagnostic message if relevant view not found
-     * @param range
-     * @param viewName
-     * @return
-     */
-    private String buildViewError(Context ctx, TicketRange range, String viewName)
-    {
-        String displayData = "<h3><span style=\"color:Green\">x" + range.tokenIds.size() + "</span><span style=\"color:Black\"> " + getTokenTitle() + "</span></h3>";
-        displayData += ("<br /><body>" + ctx.getString(R.string.card_view_not_found_error, viewName) + "</body>");
-        return displayData;
-    }
-
-    /**
-     * Display Token amount and diagnostic, rather than a blank card or error
-     *
-     * @param throwable
-     * @param waitSpinner
-     * @param tokenView
-     * @param range
-     */
-    private void onError(Throwable throwable, ProgressBar waitSpinner, Web3TokenView tokenView, TicketRange range)
-    {
-        if (waitSpinner != null) waitSpinner.setVisibility(View.GONE);
-        String displayData = "<h3><span style=\"color:Green\">x" + range.tokenIds.size() + "</span><span style=\"color:Black\"> " + getTokenTitle() + "</span></h3>";
-        if (BuildConfig.DEBUG) displayData += ("<br /><body>" + throwable.getLocalizedMessage() + "</body>");
-        tokenView.loadData(displayData, "text/html", "utf-8");
-    }
-
-    /**
-     * Encode the resolved attribute into the Token properties declaration, eg 'name: "Entry Token",'
-     *
-     * @param attribute
-     * @param attrs StringBuilder holding the token properties as it's being built
-     */
-    private void onAttr(TokenScriptResult.Attribute attribute, StringBuilder attrs)
-    {
-        TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
     }
 
     public boolean checkTickerChange(Token check)

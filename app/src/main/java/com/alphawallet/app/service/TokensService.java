@@ -264,7 +264,7 @@ public class TokensService
 
         for (ContractLocator r : contracts)
         {
-            Token check = getToken(r.chainId, r.name.toLowerCase());
+            Token check = getToken(r.chainId, r.address.toLowerCase());
             if (check == null)
             {
                 unknowns.add(r);
@@ -411,7 +411,7 @@ public class TokensService
     {
         if (focusToken != null)
         {
-            Token fToken = getToken(focusToken.chainId, focusToken.name);
+            Token fToken = getToken(focusToken.chainId, focusToken.address);
             if (fToken != null) fToken.setFocus(false);
         }
         focusToken = null;

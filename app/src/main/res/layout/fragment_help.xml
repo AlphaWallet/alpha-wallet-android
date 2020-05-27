@@ -15,6 +15,8 @@
         android:divider="@android:color/transparent"
         android:dividerHeight="10.0sp"
         android:paddingLeft="10dp"
+        android:layout_above="@id/layout_contact"
+        android:layout_alignParentTop="true"
         android:paddingRight="10dp" />
 
     <TextView

@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
@@ -131,6 +132,7 @@ public class BackupKeyActivity extends BaseActivity implements
         screenWidth = displayMetrics.widthPixels;
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     private void lockOrientation() {
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -176,7 +178,11 @@ public class BackupKeyActivity extends BaseActivity implements
             case KEYSTORE:
             case KEYSTORE_LEGACY:
             case HDKEY:
-                switch (viewModel.upgradeKeySecurity(wallet, this, this)) {
+                switch (viewModel.upgradeKeySecurity(wallet, this))
+                {
+                    case SUCCESSFULLY_UPGRADED:
+                        CreatedKey(wallet.address);
+                        break;
                     case REQUESTING_SECURITY:
                         //Do nothing, callback will return to 'CreatedKey()'. If it fails the returned key is empty
                         break;
@@ -496,7 +502,7 @@ public class BackupKeyActivity extends BaseActivity implements
             layoutWordHolder.removeAllViews();
         }
 
-        viewModel.getSeedPhrase(wallet, this, this);
+        viewModel.getAuthentication(wallet, this, this);
     }
 
     private TextView generateSeedWordTextView(String word) {
@@ -618,8 +624,37 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     @Override
-    public void GotAuthorisation(boolean gotAuth) {
-
+    public void GotAuthorisation(boolean gotAuth)
+    {
+        if (gotAuth)
+        {
+            //use this to get seed backup
+            switch (state)
+            {
+                case UNDEFINED:
+                    break;
+                case ENTER_BACKUP_STATE_HD:
+                    break;
+                case WRITE_DOWN_SEED_PHRASE:
+                    //proceed and get the mnemonic
+                    viewModel.getSeedPhrase(wallet, this, this);
+                    break;
+                case VERIFY_SEED_PHRASE:
+                    break;
+                case SEED_PHRASE_INVALID:
+                    break;
+                case ENTER_JSON_BACKUP:
+                    break;
+                case SET_JSON_PASSWORD:
+                    break;
+                case SHOW_SEED_PHRASE:
+                    viewModel.getSeedPhrase(wallet, this, this);
+                    break;
+                case UPGRADE_KEY_SECURITY:
+                    upgradeKeySecurity();
+                    break;
+            }
+        }
     }
 
     private void initViewModel() {
@@ -790,7 +825,8 @@ public class BackupKeyActivity extends BaseActivity implements
                 viewModel.getPasswordForKeystore(wallet, this, this);
                 break;
             case UPGRADE_KEY_SECURITY:
-                upgradeKeySecurity();
+                //first open authentication
+                viewModel.getAuthentication(wallet, this, this);
                 break;
         }
     }

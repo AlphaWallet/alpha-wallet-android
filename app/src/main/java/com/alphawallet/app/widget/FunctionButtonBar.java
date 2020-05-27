@@ -430,7 +430,6 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private void flashButton(final Button button)
     {
         if (button == null) return;
-
         button.setBackgroundResource(R.drawable.button_round_error);
         handler.postDelayed(() -> {
             switch (button.getId())

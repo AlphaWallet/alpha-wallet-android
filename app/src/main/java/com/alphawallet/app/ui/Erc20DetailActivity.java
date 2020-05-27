@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenTicker;
@@ -136,11 +137,16 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
     private void setupButtons()
     {
-        if (wallet.type != WalletType.WATCH)
+        if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
         {
             functionBar = findViewById(R.id.layoutButtons);
             functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, null);
             functionBar.revealButtons();
+
+            if (BuildConfig.DEBUG && wallet.type == WalletType.WATCH)
+            {
+                findViewById(R.id.text_debug).setVisibility(View.VISIBLE);
+            }
         }
     }
 

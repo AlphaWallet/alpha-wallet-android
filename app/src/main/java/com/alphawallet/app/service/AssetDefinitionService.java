@@ -1062,7 +1062,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         Web3j web3j = getWeb3jService(originToken.tokenInfo.chainId);
         TokenDefinition td = getAssetDefinition(originToken.tokenInfo.chainId, originToken.getAddress());
-        Attribute attrType = td.attributes.get(ev.attributeId);
+        Attribute attrType = td.attributes.get(ev.attributeName);
 
         for (EthLog.LogResult ethLog : logs)
         {
@@ -1070,7 +1070,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             EthBlock txBlock = eventUtils.getTransactionDetails(((Log)ethLog.get()).getBlockHash(), web3j).blockingGet();
 
             long blockTime = txBlock.getBlock().getTimestamp().longValue();
-            if (eventCallback != null) eventCallback.receivedEvent(ev.attributeId, attrType.getSyntaxVal(selectVal), blockTime, originToken.tokenInfo.chainId);
+            if (eventCallback != null) eventCallback.receivedEvent(ev.attributeName, attrType.getSyntaxVal(selectVal), blockTime, originToken.tokenInfo.chainId);
             storeEventValue(ev, ethLog, attrType, originToken, blockTime, selectVal);
         }
     }
@@ -1900,7 +1900,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         for (EventDefinition ev : eventList)
         {
-            if (ev.attributeId.equals(eventData.getFunctionId()))
+            if (ev.attributeName.equals(eventData.getFunctionId()))
             {
                 //does the event module correspond to this contract?
                 String[] contractDetails = eventData.getInstanceKey().split("-");

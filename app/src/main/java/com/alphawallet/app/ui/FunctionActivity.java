@@ -169,7 +169,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         // Fetch attributes local to this action and add them to the injected token properties
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         TSAction action = functions.get(actionMethod);
-        List<Attribute> localAttrs = (action != null && action.attributeTypes != null) ? new ArrayList<>(action.attributeTypes.values()) : null;
+        List<Attribute> localAttrs = (action != null && action.attributes != null) ? new ArrayList<>(action.attributes.values()) : null;
 
         viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds, localAttrs)
                     .subscribeOn(Schedulers.io())
@@ -336,9 +336,9 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void checkTokenScriptElement(CalcJsValueCallback cb, TSAction action, TokenscriptElement e)
     {
-        if (e.ref != null && e.ref.length() > 0 && action.attributeTypes != null)
+        if (e.ref != null && e.ref.length() > 0 && action.attributes != null)
         {
-            Attribute attr = action.attributeTypes.get(e.ref);
+            Attribute attr = action.attributes.get(e.ref);
             if (attr != null && attr.userInput)
             {
                 resolveInputCheckCount++;

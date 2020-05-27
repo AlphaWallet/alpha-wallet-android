@@ -331,16 +331,9 @@ public class TokenDefinition {
                     case "label":
                         labels = extractLabelTag(element);
                         break;
-                    case "selections":
-                        extractSelections(element);
-                        break;
                     case "selection":
                         //For now, allow individual selections outside of the selections block
                         handleSelection(element);
-                        break;
-                        //throw new SAXException("<ts:selection> tag must be in main scope (eg same as <ts:origins>)");
-                    case "attribute-types":
-                        handleGlobalAttributes(element);
                         break;
                     case "cards":
                         handleCards(element);
@@ -351,17 +344,6 @@ public class TokenDefinition {
                     default:
                         break;
                 }
-            }
-        }
-    }
-
-    private void extractSelections(Element node) throws SAXException
-    {
-        for (Node n = node.getFirstChild(); n != null; n = n.getNextSibling())
-        {
-            if (n.getNodeType() == ELEMENT_NODE && n.getLocalName().equals("selection"))
-            {
-                handleSelection((Element)n);
             }
         }
     }
@@ -578,9 +560,10 @@ public class TokenDefinition {
                     break;
                 case "attribute":
                     Attribute attr = new Attribute(element, this);
-                    if (tsAction.attributeTypes == null)
-                        tsAction.attributeTypes = new HashMap<>();
-                    tsAction.attributeTypes.put(attr.name, attr);
+                    if (tsAction.attributes == null) {
+                        tsAction.attributes = new HashMap<>();
+                    }
+                    tsAction.attributes.put(attr.name, attr);
                     break;
                 case "transaction":
                     handleTransaction(tsAction, element);
@@ -761,17 +744,6 @@ public class TokenDefinition {
         }
     }
 
-    private void handleGlobalAttributes(Element attributes)
-    {
-        for (Node n = attributes.getFirstChild(); n != null; n = n.getNextSibling())
-        {
-            if (n.getNodeType() == ELEMENT_NODE && n.getLocalName().equals("attribute-type"))
-            {
-                processAttrs(n);
-            }
-        }
-    }
-
     private Map<String, String> extractLabelTag(Element labelTag)
     {
         Map<String, String> localNames = new HashMap<>();
@@ -830,7 +802,6 @@ public class TokenDefinition {
 
     private void handleAddresses(Element contract) throws Exception
     {
-        NodeList nList = contract.getElementsByTagNameNS(nameSpace, "address");
         ContractInfo info = new ContractInfo(contract.getAttribute("interface"));
         String name = contract.getAttribute("name");
         contracts.put(name, info);

@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class EventDefinition
 {
     public ContractInfo originContract;
-    public String attributeId; //TransactionResult: method
+    public String attributeName; //TransactionResult: method
     public String eventName;
     public Module eventModule;
     public String filter;

@@ -14,6 +14,6 @@ public class TSAction
     public String style = "";
     public String name;
 
-    public Map<String, Attribute> attributeTypes;
+    public Map<String, Attribute> attributes;
     public FunctionDefinition function;
 }

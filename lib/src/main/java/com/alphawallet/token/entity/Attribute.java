@@ -9,7 +9,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -60,7 +59,7 @@ public class Attribute {
         }
 
         for(Node node = attr.getFirstChild();
-            node!=null; node=node.getNextSibling()){
+            node!=null; node=node.getNextSibling()) {
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) node;
                 String label = node.getLocalName();
@@ -163,7 +162,7 @@ public class Attribute {
                             break;
                         case "event":
                             event = definition.parseEvent(resolve, syntax);
-                            event.attributeId = name;
+                            event.attributeName = name;
                             break;
                         default:
                             //throw parse error
@@ -178,7 +177,7 @@ public class Attribute {
                         function = definition.parseFunction(resolve, syntax);
                     case "ethereum:event":
                         event = definition.parseEvent(resolve, syntax);
-                        event.attributeId = name;
+                        event.attributeName = name;
                         //drop through (no break)
                     case "token-id":
                         //this value is obtained from the token name

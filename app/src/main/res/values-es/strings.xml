@@ -523,6 +523,7 @@
     <string name="tokenscript_error">TokenScript Element Error</string>
     <string name="tokenscript_error_detail">Error in TokenScript element: %1$s</string>
     <string name="tokenscript_element_not_present">function input \'%1$s\' not found in HTML elements.</string>
+    <string name="complete_tokenscript_value">Invalid input value: %1$s</string>
     <string name="value">VALUE</string>
     <string name="linkedin">LinkedIn</string>
     <string name="please_enable_security">Unable to create key. Try enabling security on your phone.</string>
@@ -578,6 +579,7 @@
     <string name="title_change_language">Change Language</string>
     <string name="add_hide_tokens">Mostrar / Ocultar Tokens</string>
     <string name="instagram">Instagram</string>
+    <string name="tokenscript_file_error">TokenScript file error</string>
     <string name="settings_locale_currency">Change Currency</string>
     <string name="dialog_title_select_currency">Select FIAT Currency</string>
     <string name="toast_browser_cache_cleared">Browser cache cleared</string>
@@ -602,4 +604,6 @@
     <string name="error_not_whitelisted">Page Not Whitelisted</string>
     <string name="explain_not_whitelisted">TokenScript attempting to redirect to non-whitelisted page %1$s. If you are the owner of this site please submit PR to AlphaWallet repo to add page for whitelisting.</string>
     <string name="token_spec">%1$s (%2$s)</string>
+    <string name="check_function_availability">Function Availability</string>
+    <string name="invalid_parameters">Invalid parameter while calling TokenScript Transaction. Please check inputs.</string>
 </resources>

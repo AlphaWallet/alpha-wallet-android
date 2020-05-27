@@ -272,7 +272,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
         TSAction action = actions.get(actionText);
         if (action != null)
         {
-            return action.view;
+            return action.view.tokenView;
         }
         return null;
     }

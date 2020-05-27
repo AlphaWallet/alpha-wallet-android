@@ -24,6 +24,7 @@ import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3j.datatypes.Function;
+import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.tools.TokenDefinition;
@@ -46,6 +47,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ERROR;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
 
@@ -67,7 +69,6 @@ public class Token implements Parcelable, Comparable<Token>
     public boolean balanceChanged;
     public boolean walletUIUpdateRequired;
     public boolean hasTokenScript;
-    public boolean hasDebugTokenscript;
     public boolean refreshCheck;
     public long lastTxCheck;
     public long lastTxUpdate;
@@ -76,6 +77,9 @@ public class Token implements Parcelable, Comparable<Token>
     public int iconifiedWebviewHeight;
     public int nonIconifiedWebviewHeight;
     private int nameWeight;
+
+    private final Map<BigInteger, Map<String, TokenScriptResult.Attribute>> resultMap = new ConcurrentHashMap<>(); //Build result map for function parse, per tokenId
+    private Map<BigInteger, List<String>> functionAvailabilityMap = null;
 
     public String getNetworkName() { return shortNetworkName; }
 
@@ -102,6 +106,7 @@ public class Token implements Parcelable, Comparable<Token>
         hasTokenScript = false;
         refreshCheck = false;
         nameWeight = calculateTokenNameWeight();
+        resultMap.clear();
     }
 
     public void transferPreviousData(Token oldToken)
@@ -114,10 +119,10 @@ public class Token implements Parcelable, Comparable<Token>
             lastTxUpdate = oldToken.lastTxUpdate;
             balanceChanged = oldToken.balanceChanged;
             hasTokenScript = oldToken.hasTokenScript;
-            hasDebugTokenscript = oldToken.hasDebugTokenscript;
             lastTxTime = oldToken.lastTxTime;
             iconifiedWebviewHeight = oldToken.iconifiedWebviewHeight;
             nonIconifiedWebviewHeight = oldToken.nonIconifiedWebviewHeight;
+            functionAvailabilityMap = oldToken.functionAvailabilityMap;
         }
         refreshCheck = false;
     }
@@ -135,11 +140,11 @@ public class Token implements Parcelable, Comparable<Token>
         lastTxUpdate = in.readLong();
         lastTxTime = in.readLong();
         hasTokenScript = in.readByte() == 1;
-        hasDebugTokenscript = in.readByte() == 1;
         nonIconifiedWebviewHeight = in.readInt();
         iconifiedWebviewHeight = in.readInt();
         nameWeight = in.readInt();
         ticker = in.readParcelable(TokenTicker.class.getClassLoader());
+        functionAvailabilityMap = in.readHashMap(List.class.getClassLoader());
 
         balanceChanged = false;
         if (readType <= ContractType.CREATION.ordinal())
@@ -188,6 +193,23 @@ public class Token implements Parcelable, Comparable<Token>
     public Asset getAssetForToken(String tokenId) {
         return null;
     }
+    public List<BigInteger> getUniqueTokenIds()
+    {
+        List<BigInteger> uniqueIds = new ArrayList<>();
+        if (isNonFungible())
+        {
+            for (BigInteger id : getArrayBalance())
+            {
+                if (!uniqueIds.contains(id)) uniqueIds.add(id);
+            }
+        }
+        else
+        {
+            uniqueIds.add(BigInteger.ZERO);
+        }
+
+        return uniqueIds;
+    }
 
     public void addAssetToTokenBalanceAssets(Asset asset) {
         //only for ERC721, see override in ERC721Token
@@ -224,11 +246,11 @@ public class Token implements Parcelable, Comparable<Token>
         dest.writeLong(lastTxUpdate);
         dest.writeLong(lastTxTime);
         dest.writeByte(hasTokenScript?(byte)1:(byte)0);
-        dest.writeByte(hasDebugTokenscript?(byte)1:(byte)0);
         dest.writeInt(nonIconifiedWebviewHeight);
         dest.writeInt(iconifiedWebviewHeight);
         dest.writeInt(nameWeight);
         dest.writeParcelable(ticker, flags);
+        dest.writeMap(functionAvailabilityMap);
     }
 
     public void setRealmBalance(RealmToken realmToken)
@@ -1147,5 +1169,52 @@ public class Token implements Parcelable, Comparable<Token>
         }
 
         return asset;
+    }
+
+    public TokenScriptResult.Attribute getAttributeResult(String attrId, BigInteger tokenId)
+    {
+        if (resultMap.containsKey(tokenId))
+        {
+            return resultMap.get(tokenId).get(attrId);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void setAttributeResult(BigInteger tokenId, TokenScriptResult.Attribute attrResult)
+    {
+        Map<String, TokenScriptResult.Attribute> resultSet = resultMap.get(tokenId);
+        if (resultSet == null)
+        {
+            resultSet = new ConcurrentHashMap<>();
+            resultMap.put(tokenId, resultSet);
+        }
+
+        resultSet.put(attrResult.id, attrResult);
+    }
+
+    public void clearResultMap()
+    {
+        resultMap.clear();
+    }
+
+    public void setFunctionAvailability(Map<BigInteger, List<String>> availabilityMap)
+    {
+        functionAvailabilityMap = availabilityMap;
+    }
+
+    public boolean isFunctionAvailable(BigInteger tokenId, String functionName)
+    {
+        List<String> mapForToken = functionAvailabilityMap.get(tokenId);
+        if (mapForToken != null)
+        {
+            return mapForToken.contains(functionName);
+        }
+        else
+        {
+            return false;
+        }
     }
 }

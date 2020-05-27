@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.Event;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.TokenInterface;
@@ -105,6 +106,7 @@ public class TransactionsFragment extends BaseFragment implements View.OnClickLi
         viewModel.clearAdapter().observe(this, this::clearAdapter);
         viewModel.refreshAdapter().observe(this, this::refreshAdapter);
         viewModel.newTransactions().observe(this, this::onNewTransactions);
+        viewModel.event().observe(this, this::onNewEvents);
         refreshLayout.setOnRefreshListener(() -> viewModel.prepare());
 
         adapter.clear();
@@ -157,6 +159,11 @@ public class TransactionsFragment extends BaseFragment implements View.OnClickLi
         if (transactions.length > 0) showEmptyTx(false);
     }
 
+    private void onNewEvents(Event[] events)
+    {
+        adapter.addEvents(events);
+    }
+
     @Override
     public void onDestroy()
     {
@@ -186,6 +193,9 @@ public class TransactionsFragment extends BaseFragment implements View.OnClickLi
         }
     }
 
+    /**
+     * Called only after user changes the wallet
+     */
     @Override
     public void resetTokens()
     {
@@ -193,6 +203,7 @@ public class TransactionsFragment extends BaseFragment implements View.OnClickLi
         adapter.clear();
         list.setAdapter(adapter);
         viewModel.clearProcesses();
+        viewModel.restartEventListener();
     }
 
     @Override

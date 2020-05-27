@@ -22,7 +22,7 @@ public interface TokenRepositoryType {
 
     Observable<Token[]> fetchStored(String walletAddress);
     Observable<Token[]> fetchActiveStoredPlusEth(String walletAddress);
-    Observable<Token> fetchActiveSingle(String walletAddress, Token token);
+    Single<Token> fetchActiveSingle(String walletAddress, Token token);
     Observable<Token> fetchCachedSingleToken(int chainId, String walletAddress, String tokenAddress);
     Observable<Token> fetchActiveTokenBalance(String walletAddress, Token token);
     Single<ContractLocator> getTokenResponse(String address, int chainId, String method);

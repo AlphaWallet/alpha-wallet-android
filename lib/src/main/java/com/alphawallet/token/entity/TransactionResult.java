@@ -21,7 +21,9 @@ public class TransactionResult
         this.contractAddress = address;
         this.contractChainId = chainId;
         this.tokenId = tokenId;
-        this.method = attr.function.method;
+        if (attr.function != null) this.method = attr.function.method;
+        else if (attr.event != null) this.method = attr.id; //for event store attribute name
+        else this.method = attr.name;
         this.attrId = attr.id;
         result = null;
         resultTime = 0;

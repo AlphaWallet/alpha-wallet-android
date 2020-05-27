@@ -652,14 +652,12 @@ public abstract class TokenscriptFunction
     {
         if (definition != null && definition.attributeTypes.containsKey(arg.element.ref))
         {
-            arg.element.value = fetchAttrResult(walletAddress, arg.element.ref, tokenId, null, definition, attrIf).blockingSingle().text;
+            arg.element.value = fetchAttrResult(walletAddress, definition.attributeTypes.get(arg.element.ref), tokenId, null, definition, attrIf).blockingSingle().text;
         }
     }
 
-
-    public Observable<TokenScriptResult.Attribute> fetchAttrResult(String walletAddress, String attribute, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf)
+    public Observable<TokenScriptResult.Attribute> fetchAttrResult(String walletAddress, AttributeType attr, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf)
     {
-        AttributeType attr = td.attributeTypes.get(attribute);
         if (attr == null) return Observable.fromCallable(() -> null);
         if (attr.function == null)  // static attribute from tokenId (eg city mapping from tokenId)
         {
@@ -693,7 +691,7 @@ public abstract class TokenscriptFunction
         td.context.attrInterface = attrIf;
 
         return Observable.fromIterable(new ArrayList<>(td.attributeTypes.values()))
-                .flatMap(attr -> fetchAttrResult(walletAddress, attr.id, tokenId, cAddr, td, attrIf));
+                .flatMap(attr -> fetchAttrResult(walletAddress, attr, tokenId, cAddr, td, attrIf));
     }
 
     private Observable<TokenScriptResult.Attribute> staticAttribute(AttributeType attr, BigInteger tokenId)

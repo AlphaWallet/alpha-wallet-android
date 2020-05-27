@@ -10,6 +10,7 @@ import android.text.TextUtils;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
@@ -328,5 +329,10 @@ public class HomeViewModel extends BaseViewModel {
     private void onENSError(Throwable throwable)
     {
         if (BuildConfig.DEBUG) throwable.printStackTrace();
+    }
+
+    public void setErrorCallback(FragmentMessenger callback)
+    {
+        assetDefinitionService.setErrorCallback(callback);
     }
 }

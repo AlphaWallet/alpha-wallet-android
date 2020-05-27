@@ -12,6 +12,7 @@ public class ContractInfo
 {
     public final String contractInterface;
     public final Map<Integer, List<String>> addresses = new HashMap<>();
+    public Map<String, Module> eventModules = null;
 
     public ContractInfo(String contractType, Map<Integer, List<String>> addresses)
     {
@@ -22,5 +23,11 @@ public class ContractInfo
     public ContractInfo(String contractType)
     {
         this.contractInterface = contractType;
+    }
+
+    public boolean hasContractTokenScript(int chainId, String address)
+    {
+        List<String> addrs = addresses.get(chainId);
+        return addrs != null && addrs.contains(address);
     }
 }

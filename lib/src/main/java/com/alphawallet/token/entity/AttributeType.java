@@ -47,33 +47,35 @@ public class AttributeType {
     {
         definition = def;
         id = attr.getAttribute("id");
+        if (id == null || id.length() == 0) id = attr.getAttribute("name");
         name = id; //set name to id if not specified
         as = As.Unsigned; //default value
-
-        if(attr.getAttribute("syntax") != null) {
-            syntax = getSyntax(attr.getAttribute("syntax"));
-        } else {
-            syntax = TokenDefinition.Syntax.DirectoryString; // 1.3.6.1.4.1.1466.115.121.1.15
-        }
+        syntax = TokenDefinition.Syntax.DirectoryString; //default value
 
         for(Node node = attr.getFirstChild();
             node!=null; node=node.getNextSibling()){
             if (node.getNodeType() == Node.ELEMENT_NODE) {
-                Element origin = (Element) node;
+                Element element = (Element) node;
                 String label = node.getLocalName();
                 switch (label)
                 {
+                    case "type":
+                        syntax = handleType(element);
+                        break;
                     case "origins":
-                        handleOrigins(origin);
+                        handleOrigins(element);
                         break;
                     case "name":
-                        name = definition.getLocalisedString(origin, "string");
+                        name = definition.getLocalisedString(element, "string");
+                        break;
+                    case "label":
+                        name = definition.getLocalisedString(element);
                         break;
                     case "mapping":
-                        populate(origin);
+                        populate(element);
                         break;
                 }
-                switch(origin.getAttribute("contract").toLowerCase()) {
+                switch(element.getAttribute("contract").toLowerCase()) {
                     case "holding-contract":
                         setAs(As.Mapping);
                         // TODO: Syntax is not checked
@@ -88,6 +90,31 @@ public class AttributeType {
             while (bitmask.mod(BigInteger.ONE.shiftLeft(++bitshift)).equals(BigInteger.ZERO)) ; // !!
             bitshift--;
         }
+    }
+
+    private TokenDefinition.Syntax handleType(Element syntax)
+    {
+        TokenDefinition.Syntax as = TokenDefinition.Syntax.DirectoryString;
+
+        for(Node node = syntax.getFirstChild();
+                node!=null; node=node.getNextSibling())
+        {
+            if (node.getNodeType() == Node.ELEMENT_NODE)
+            {
+                Element element = (Element) node;
+                switch (element.getLocalName())
+                {
+                    case "syntax":
+                        as = getSyntax(element.getTextContent());
+                        break;
+                    default:
+                        System.out.println("Possible fail: " + element.getLocalName() + " in attribute '" + name + "'");
+                        break;
+                }
+            }
+        }
+
+        return as;
     }
 
     private TokenDefinition.Syntax getSyntax(String ISO) {
@@ -123,6 +150,24 @@ public class AttributeType {
             {
                 Element resolve = (Element) node;
                 setAs(definition.parseAs(resolve));
+                if (resolve.getPrefix().equals("ethereum"))
+                {
+                    switch (node.getLocalName())
+                    {
+                        case "transaction":
+                        case "call":
+                            function = definition.parseFunction(resolve, syntax);
+                            break;
+                        case "event":
+                            event = definition.parseEvent(resolve, syntax);
+                            event.attributeId = id;
+                            break;
+                        default:
+                            //throw parse error
+                            break;
+                    }
+                }
+
                 switch (node.getLocalName())
                 {
                     case "ethereum":

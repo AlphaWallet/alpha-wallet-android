@@ -308,9 +308,11 @@ public abstract class TokenscriptFunction
                         }
                         break;
                     case "string":
+                        if (value == null) throw new Exception("Attempt to use null value");
                         params.add(new Utf8String(value));
                         break;
                     case "bytes":
+                        if (value == null) throw new Exception("Attempt to use null value");
                         params.add(new Bytes32(Numeric.hexStringToByteArray(value)));
                         break;
                     case "bytes1":
@@ -450,6 +452,11 @@ public abstract class TokenscriptFunction
             default:
                 returnTypes.add(new TypeReference<Bytes32>() {});
                 break;
+        }
+
+        if (valueNotFound)
+        {
+            params = null;
         }
 
         return new Function(function.method,
@@ -604,7 +611,12 @@ public abstract class TokenscriptFunction
         String res = attr.getSyntaxVal(transactionResult.result);
         BigInteger val = transactionResult.tokenId; //?
 
-        if (attr.syntax == TokenDefinition.Syntax.NumericString && attr.as != As.Address)
+        if (attr.syntax == TokenDefinition.Syntax.Boolean)
+        {
+            if (res.equalsIgnoreCase("TRUE")) val = BigInteger.ONE;
+            else val = BigInteger.ZERO;
+        }
+        else if (attr.syntax == TokenDefinition.Syntax.NumericString && attr.as != As.Address)
         {
             if (transactionResult.result == null)
             {
@@ -745,7 +757,7 @@ public abstract class TokenscriptFunction
         }
         else
         {
-            return fetchAttrResult(token, attr, tokenId, null, definition, attrIf).blockingSingle().text;
+            return fetchAttrResult(token, attr, tokenId, null, definition, attrIf, false).blockingSingle().text;
         }
 
         return null;
@@ -774,7 +786,7 @@ public abstract class TokenscriptFunction
      * @return
      */
     public Observable<TokenScriptResult.Attribute> fetchAttrResult(Token token, AttributeType attr, BigInteger tokenId, ContractAddress cAddr,
-                                                                   TokenDefinition td, AttributeInterface attrIf)
+                                                                   TokenDefinition td, AttributeInterface attrIf, boolean itemView)
     {
         if (attr == null) return Observable.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));
         else if (token.getAttributeResult(attr.id, tokenId) != null)
@@ -801,7 +813,7 @@ public abstract class TokenscriptFunction
             long lastTxUpdate = attrIf.getLastTokenUpdate(useAddress.chainId, useAddress.address);
             TransactionResult cachedResult = attrIf.getFunctionResult(useAddress, attr, tokenId); //Needs to allow for multiple tokenIds
             if (cAddr != null && !useAddress.address.equalsIgnoreCase(cAddr.address)) lastTxUpdate = 0; //If calling a function which isn't the main tokenscript function retrieve from contract call not cache
-            if (!attr.isVolatile() && (attrIf.resolveOptimisedAttr(useAddress, attr, cachedResult) || !cachedResult.needsUpdating(lastTxUpdate))) //can we use wallet's known data or cached value?
+            if (itemView || (!attr.isVolatile() && (attrIf.resolveOptimisedAttr(useAddress, attr, cachedResult) || !cachedResult.needsUpdating(lastTxUpdate)))) //can we use wallet's known data or cached value?
             {
                 return resultFromDatabase(cachedResult, attr);
             }

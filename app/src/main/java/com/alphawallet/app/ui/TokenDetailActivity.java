@@ -83,11 +83,10 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
         functionBar = findViewById(R.id.layoutButtons);
         if (functionBar != null)
         {
-            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null);
-            functionBar.revealButtons();
             List<BigInteger> selection = new ArrayList<>();
             selection.add(new BigInteger(asset.getTokenId(16), 16));
-            functionBar.setSelection(selection);
+            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, selection);
+            functionBar.revealButtons();
         }
     }
 

@@ -24,6 +24,7 @@ import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3j.datatypes.Function;
+import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.tools.TokenDefinition;
@@ -78,6 +79,7 @@ public class Token implements Parcelable, Comparable<Token>
     private int nameWeight;
 
     private final Map<BigInteger, Map<String, TokenScriptResult.Attribute>> resultMap = new ConcurrentHashMap<>(); //Build result map for function parse, per tokenId
+    private Map<BigInteger, List<String>> functionAvailabilityMap = null;
 
     public String getNetworkName() { return shortNetworkName; }
 
@@ -120,6 +122,7 @@ public class Token implements Parcelable, Comparable<Token>
             lastTxTime = oldToken.lastTxTime;
             iconifiedWebviewHeight = oldToken.iconifiedWebviewHeight;
             nonIconifiedWebviewHeight = oldToken.nonIconifiedWebviewHeight;
+            functionAvailabilityMap = oldToken.functionAvailabilityMap;
         }
         refreshCheck = false;
     }
@@ -141,6 +144,7 @@ public class Token implements Parcelable, Comparable<Token>
         iconifiedWebviewHeight = in.readInt();
         nameWeight = in.readInt();
         ticker = in.readParcelable(TokenTicker.class.getClassLoader());
+        functionAvailabilityMap = in.readHashMap(List.class.getClassLoader());
 
         balanceChanged = false;
         if (readType <= ContractType.CREATION.ordinal())
@@ -246,6 +250,7 @@ public class Token implements Parcelable, Comparable<Token>
         dest.writeInt(iconifiedWebviewHeight);
         dest.writeInt(nameWeight);
         dest.writeParcelable(ticker, flags);
+        dest.writeMap(functionAvailabilityMap);
     }
 
     public void setRealmBalance(RealmToken realmToken)
@@ -1193,5 +1198,23 @@ public class Token implements Parcelable, Comparable<Token>
     public void clearResultMap()
     {
         resultMap.clear();
+    }
+
+    public void setFunctionAvailability(Map<BigInteger, List<String>> availabilityMap)
+    {
+        functionAvailabilityMap = availabilityMap;
+    }
+
+    public boolean isFunctionAvailable(BigInteger tokenId, String functionName)
+    {
+        List<String> mapForToken = functionAvailabilityMap.get(tokenId);
+        if (mapForToken != null)
+        {
+            return mapForToken.contains(functionName);
+        }
+        else
+        {
+            return false;
+        }
     }
 }

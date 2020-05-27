@@ -132,8 +132,8 @@
     <string name="set_price_subtext_abr">设置以太币价格(ETH)</string>
     <string name="transfer_tickets">转让门票</string>
     <string name="link_valid_until">MagicLink有效期至:</string>
-    <string name="generate_pick_up_link">通过MagicLink导出门票</string>
-    <string name="transfer_now">现在直接转让门票</string>
+    <string name="generate_pick_up_link">通过MagicLink转出通证</string>
+    <string name="transfer_now">直接转出通证</string>
     <string name="to">至</string>
     <string-array name="filter_date">
         <item>最新</item>

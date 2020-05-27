@@ -826,8 +826,8 @@ public class TokenDefinition {
 
     private void handleModule(Element module, ContractInfo info) throws Exception
     {
-        String moduleName = module.getAttribute("label");
-        if (moduleName == null) throw new Exception("Module requires label");
+        String moduleName = module.getAttribute("name");
+        if (moduleName == null) throw new Exception("Module requires name");
         if (moduleLookup == null)
         {
             moduleLookup = new HashMap<>();

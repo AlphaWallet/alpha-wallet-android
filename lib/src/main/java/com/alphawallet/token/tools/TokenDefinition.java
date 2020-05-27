@@ -339,7 +339,11 @@ public class TokenDefinition {
                         handleCards(element);
                         break;
                     case "attribute":
-                        processAttrs(element);
+                        Attribute attr = new Attribute((Element) n, this);
+                        if (attr.bitmask != null || attr.function != null)
+                        {
+                            attributes.put(attr.name, attr);
+                        }
                         break;
                     default:
                         break;
@@ -408,9 +412,6 @@ public class TokenDefinition {
         {
             Node node = ll.item(j);
             if (node.getNodeType() != ELEMENT_NODE)
-                continue;
-
-            if (node.getPrefix() != null && node.getPrefix().equalsIgnoreCase("ts"))
                 continue;
 
             Element element = (Element) node;
@@ -824,17 +825,17 @@ public class TokenDefinition {
         }
     }
 
-    private void handleModule(Element module, ContractInfo info) throws Exception
+    private void handleModule(Element module, ContractInfo info) throws SAXException
     {
         String moduleName = module.getAttribute("name");
-        if (moduleName == null) throw new Exception("Module requires name");
+        if (moduleName == null || moduleName.length() == 0) throw new SAXException("Module requires label");
         if (moduleLookup == null)
         {
             moduleLookup = new HashMap<>();
         }
         else if (moduleLookup.containsKey(moduleName))
         {
-            throw new Exception("Duplicate Module label: " + moduleName);
+            throw new SAXException("Duplicate Module label: " + moduleName);
         }
 
         for (Node n = module.getFirstChild(); n != null; n = n.getNextSibling())
@@ -856,7 +857,7 @@ public class TokenDefinition {
         }
     }
 
-    private Module handleElementSequence(Element sequence, ContractInfo info, String moduleName) throws Exception
+    private Module handleElementSequence(Element sequence, ContractInfo info, String moduleName) throws SAXException
     {
         Module module = new Module(info);
         for (Node n = sequence.getFirstChild(); n != null; n = n.getNextSibling())

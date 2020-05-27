@@ -50,20 +50,13 @@ public class Attribute {
         label = name; //set label to name if not specified
         as = As.Unsigned; //default value
         //TODO xpath would be better
-        String ASNSyntax = attr.getElementsByTagName("ts:type").item(0).getTextContent();
-
-        if(ASNSyntax != null) {
-            syntax = getSyntax(ASNSyntax);
-        } else {
-            syntax = TokenDefinition.Syntax.DirectoryString; // 1.3.6.1.4.1.1466.115.121.1.15
-        }
+        syntax = TokenDefinition.Syntax.DirectoryString; //default value
 
         for(Node node = attr.getFirstChild();
             node!=null; node=node.getNextSibling()) {
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) node;
-                String label = node.getLocalName();
-                switch (label)
+                switch (node.getLocalName())
                 {
                     case "type":
                         syntax = handleType(element);
@@ -72,7 +65,7 @@ public class Attribute {
                         handleOrigins(element);
                         break;
                     case "label":
-                        name = definition.getLocalisedString(element);
+                        label = definition.getLocalisedString(element);
                     case "mapping":
                         populate(element);
                         break;

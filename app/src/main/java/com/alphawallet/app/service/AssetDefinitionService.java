@@ -1984,6 +1984,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             name = definition.getTokenName(1);
         }
         TokenScriptResult.addPair(attrs, "name", name);
+        TokenScriptResult.addPair(attrs, "label", name);
         TokenScriptResult.addPair(attrs, "symbol", token.getSymbol());
         TokenScriptResult.addPair(attrs, "_count", String.valueOf(count));
         TokenScriptResult.addPair(attrs, "contractAddress", token.tokenInfo.address);

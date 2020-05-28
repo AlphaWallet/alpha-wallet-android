@@ -642,28 +642,17 @@ public abstract class TokenscriptFunction
 
     /**
      * Haven't pre-cached this value yet, so need to fetch it before we can proceed
-     * @param override
      * @param attr
      * @param tokenId
      * @param definition
      * @return
      */
-    public Observable<TransactionResult> fetchResultFromEthereum(Token token, ContractAddress override, Attribute attr,
+    public Observable<TransactionResult> fetchResultFromEthereum(Token token, ContractAddress contractAddress, Attribute attr,
                                                                  BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf, long lastTransactionTime)
     {
         return Observable.fromCallable(() -> {
-            ContractAddress useAddress;
             long txUpdateTime = lastTransactionTime;
-            if (override == null) // contract not specified - is not holder contract
-            {
-                //determine address using definition context
-                useAddress = new ContractAddress(attr.function, definition.context.cAddr.chainId, definition.context.cAddr.address);
-            }
-            else
-            {
-                useAddress = override;
-            }
-            TransactionResult transactionResult = new TransactionResult(useAddress.chainId, useAddress.address, tokenId, attr);
+            TransactionResult transactionResult = new TransactionResult(contractAddress.chainId, contractAddress.address, tokenId, attr);
             Function transaction = generateTransactionFunction(token, tokenId, definition, attr.function, attrIf);
 
             String result;
@@ -676,7 +665,7 @@ public abstract class TokenscriptFunction
             else
             {
                 //now push the transaction
-                result = callSmartContractFunction(TokenRepository.getWeb3jService(useAddress.chainId), transaction, useAddress.address, ZERO_ADDRESS);
+                result = callSmartContractFunction(TokenRepository.getWeb3jService(contractAddress.chainId), transaction, contractAddress.address, ZERO_ADDRESS);
             }
 
             transactionResult.result = handleTransactionResult(transactionResult, transaction, result, attr, txUpdateTime);
@@ -757,7 +746,7 @@ public abstract class TokenscriptFunction
         }
         else
         {
-            return fetchAttrResult(token, attr, tokenId, null, definition, attrIf, false).blockingSingle().text;
+            return fetchAttrResult(token, attr, tokenId, definition, attrIf, false).blockingSingle().text;
         }
 
         return null;
@@ -780,13 +769,12 @@ public abstract class TokenscriptFunction
      * @param token
      * @param attr
      * @param tokenId
-     * @param cAddr
      * @param td
      * @param attrIf
      * @return
      */
 
-    public Observable<TokenScriptResult.Attribute> fetchAttrResult(Token token, Attribute attr, BigInteger tokenId, ContractAddress cAddr,
+    public Observable<TokenScriptResult.Attribute> fetchAttrResult(Token token, Attribute attr, BigInteger tokenId,
                                                                    TokenDefinition td, AttributeInterface attrIf, boolean itemView)
     {
         if (attr == null)
@@ -811,13 +799,10 @@ public abstract class TokenscriptFunction
         }
         else
         {
-            ContractAddress useAddress;
-            if (cAddr == null) useAddress = new ContractAddress(attr.function);
-            else useAddress = new ContractAddress(attr.function, cAddr.chainId, cAddr.address);
+            ContractAddress useAddress = new ContractAddress(attr.function); //always use the function attribute's address
             long lastTxUpdate = attrIf.getLastTokenUpdate(useAddress.chainId, useAddress.address);
             TransactionResult cachedResult = attrIf.getFunctionResult(useAddress, attr, tokenId); //Needs to allow for multiple tokenIds
-            if (cAddr != null && !useAddress.address.equalsIgnoreCase(cAddr.address)) lastTxUpdate = 0; //If calling a function which isn't the main tokenscript function retrieve from contract call not cache
-            if (itemView || (!attr.isVolatile() && (attrIf.resolveOptimisedAttr(useAddress, attr, cachedResult) || !cachedResult.needsUpdating(lastTxUpdate)))) //can we use wallet's known data or cached value?
+            if (cachedResult.resultTime > 0 && (itemView || (!attr.isVolatile() && ((attrIf.resolveOptimisedAttr(useAddress, attr, cachedResult) || !cachedResult.needsUpdating(lastTxUpdate)))))) //can we use wallet's known data or cached value?
             {
                 return resultFromDatabase(cachedResult, attr);
             }

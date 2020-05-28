@@ -369,7 +369,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         else
         {
             //what's selected?
-            ContractAddress cAddr = new ContractAddress(action.function, token.tokenInfo.chainId, token.tokenInfo.address); //viewModel.getAssetDefinitionService().getContractAddress(action.function, token);
+            ContractAddress cAddr = new ContractAddress(action.function);
             String functionData = getTransactionBytes(token, tokenId, action.function);
             if (functionData == null) return false;
             //function call may include some value

@@ -37,9 +37,9 @@ public class TokenDefinition {
 
     public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2020/06";
     public static final String TOKENSCRIPT_REPO_SERVER = "https://repo.tokenscript.org/";
+    public static final String TOKENSCRIPT_NAMESPACE = "http://tokenscript.org/" + TOKENSCRIPT_CURRENT_SCHEMA + "/tokenscript";
 
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";
-    private static final String TOKENSCRIPT_NAMESPACE = "http://tokenscript.org/" + TOKENSCRIPT_CURRENT_SCHEMA + "/tokenscript";
     private static final String TOKENSCRIPT_BASE_URL = "http://tokenscript.org/";
 
     public static final String TOKENSCRIPT_ERROR = "<h2 style=\"color:rgba(207, 0, 15, 1);\">TokenScript Error</h2>";

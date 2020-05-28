@@ -229,9 +229,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .blockingForEach(file -> {  //load sequentially
+                    TokenDefinition td = parseFile(new FileInputStream(file));
                     cacheSignature(file)
-                            .map(this::addContractAddresses)
-                            .subscribe(success -> fileLoadComplete(success, file),
+                            .map(definition -> addContractAddresses(td, file))
+                            .subscribe(success -> fileLoadComplete(success, file, td),
                                     error -> handleFileLoadError(error, file))
                             .isDisposed();
                 } );
@@ -247,12 +248,22 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         System.out.println("ERROR WHILE PARSING: " + file.getName() + " : " + throwable.getMessage());
     }
 
-    private void fileLoadComplete(List<ContractLocator> originContracts, File file)
+    private void fileLoadComplete(List<ContractLocator> originContracts, File file, TokenDefinition td)
     {
         if (originContracts.size() == 0)
         {
             //TODO: parse error and add to error list for Token Management page
             System.out.println("File: " + file.getName() + " has no origin token");
+        }
+        else
+        {
+            //check for out-of-date script in the secure (downloaded) zone
+            if (isInSecureZone(file) && !td.nameSpace.equals(TokenDefinition.TOKENSCRIPT_NAMESPACE))
+            {
+                //delete this file and check downloads for update
+                removeFile(file.getAbsolutePath());
+                loadScriptFromServer(getFileName(file));
+            }
         }
     }
 
@@ -950,7 +961,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private List<ContractLocator> addContractAddresses(File file) throws Exception
     {
         FileInputStream input = new FileInputStream(file);
-        TokenDefinition tokenDef = parseFile(input);
+        return addContractAddresses(parseFile(input), file);
+    }
+
+    private List<ContractLocator> addContractAddresses(TokenDefinition tokenDef, File file) throws Exception
+    {
         ContractInfo holdingContracts = tokenDef.contracts.get(tokenDef.holdingToken);
 
         if (holdingContracts != null)

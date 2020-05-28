@@ -9,6 +9,7 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -68,8 +69,6 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         tokenView.displayTicketHolder(token, data, viewModel.getAssetDefinitionService(), false);
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSetValuesListener(this);
-        functionBar.revealButtons();
-        functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, idList);
     }
 
     @Override
@@ -102,9 +101,15 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
     private void onWalletUpdate(Wallet w)
     {
-        if(!viewModel.isAuthorizeToFunction())
+        if(BuildConfig.DEBUG || viewModel.isAuthorizeToFunction())
         {
-            functionBar.hideButtons();
+            functionBar.revealButtons();
+            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, idList);
+
+            if(BuildConfig.DEBUG && !viewModel.isAuthorizeToFunction())
+            {
+                findViewById(R.id.text_debug).setVisibility(View.VISIBLE);
+            }
         }
     }
 

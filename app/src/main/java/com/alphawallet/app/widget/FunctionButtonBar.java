@@ -194,6 +194,11 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         findViewById(R.id.layoutButtons).setVisibility(View.GONE);
     }
 
+    public void hideButtons()
+    {
+        findViewById(R.id.layoutButtons).setVisibility(View.GONE);
+    }
+
     @Override
     public void onClick(View v) {
         if (v instanceof Button) { // Instance of 'primary' & 'secondary' buttons

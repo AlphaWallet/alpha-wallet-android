@@ -120,6 +120,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         viewModel.sig().observe(this, this::onSigData);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
+        viewModel.newScriptFound().observe(this, this::onNewScript);
 
         functionBar = findViewById(R.id.layoutButtons);
 
@@ -141,6 +142,16 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         else
         {
             displayTokens();
+        }
+    }
+
+    private void onNewScript(Boolean aBoolean)
+    {
+        //need to reload tokens, now we have an updated/new script
+        if (viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
+        {
+            initWebViewCheck(iconifiedCheck);
+            handler.postDelayed(this, 1500);
         }
     }
 

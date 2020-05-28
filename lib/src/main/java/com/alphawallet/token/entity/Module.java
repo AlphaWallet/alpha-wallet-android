@@ -22,9 +22,9 @@ public class Module
     public void addSequenceElement(Element element, String sequenceName) throws SAXException
     {
         SequenceElement se = new SequenceElement();
-        String indexed = element.getAttribute("ethereum:indexed");
+        String indexed = element.getAttribute("indexed"); //NB : namespace is determined from the prefix() element eg element.getPrefix()
         se.indexed = indexed != null && indexed.equalsIgnoreCase("true");
-        se.type = element.getAttribute("ethereum:type");
+        se.type = element.getAttribute("type");
         se.name = element.getAttribute("name");
         sequence.add(se);
 

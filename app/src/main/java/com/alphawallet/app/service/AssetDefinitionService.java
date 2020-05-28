@@ -201,7 +201,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         loadInternalAssets();
-        checkDownloadedFiles();
     }
 
     //This loads bundled TokenScripts in the /assets directory eg xdaicanonicalized
@@ -761,12 +760,22 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             final File defaultReturn = new File("");
             if (address.equals("")) return defaultReturn;
 
-            //peek to see if this file exists
             File result = getDownloadedXMLFile(address);
+
+            //peek to see if this file exists
             long fileTime = 0;
             if (result != null && result.exists())
             {
-                fileTime = result.lastModified();
+                TokenDefinition td = getTokenDefinition(result);
+                if (definitionIsOutOfDate(td))
+                {
+                    removeFile(result.getAbsolutePath());
+                    assetChecked.put(address, 0L);
+                }
+                else
+                {
+                    fileTime = result.lastModified();
+                }
             }
             else
             {
@@ -812,12 +821,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 switch (response.code())
                 {
                     case HttpURLConnection.HTTP_NOT_MODIFIED:
+                        result = defaultReturn;
                         break;
                     case HttpURLConnection.HTTP_OK:
                         String xmlBody = response.body().string();
                         result = storeFile(address, xmlBody);
                         break;
                     default:
+                        result = defaultReturn;
                         break;
                 }
             }
@@ -834,6 +845,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             return result;
         });
+    }
+
+    private boolean definitionIsOutOfDate(TokenDefinition td)
+    {
+        return td != null && !td.nameSpace.equals(TokenDefinition.TOKENSCRIPT_NAMESPACE);
     }
 
     private void finishLoading()
@@ -2196,10 +2212,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             final File[] files = buildFileList();
             List<TokenLocator> tokenLocators = new ArrayList<>();
 
+            String name = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".toLowerCase();
+
             Observable.fromArray(files)
                     .filter(File::isFile)
                     .filter(this::allowableExtension)
                     .filter(File::canRead)
+                    .filter(file -> file.getAbsolutePath().contains(name) )
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
                     .blockingForEach(file -> {
@@ -2242,5 +2261,18 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return originContracts;
+    }
+
+    public Single<String> checkServerForScript(int chainId, String address)
+    {
+        TokenScriptFile tf = getTokenScriptFile(chainId, address);
+        if (tf != null && !isInSecureZone(tf)) return Single.fromCallable(() -> { return ""; }); //early return for debug script check
+
+        //now try the server
+        return fetchXMLFromServer(address.toLowerCase())
+                .flatMap(this::cacheSignature)
+                .map(this::handleFileLoad)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 }

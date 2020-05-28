@@ -145,7 +145,7 @@ public class Attribute {
             {
                 Element resolve = (Element) node;
                 setAs(definition.parseAs(resolve));
-                if (resolve.getPrefix().equals("ethereum"))
+                if (resolve.getPrefix().equals("ethereum")) //handle ethereum namespace
                 {
                     switch (node.getLocalName())
                     {
@@ -162,32 +162,30 @@ public class Attribute {
                             break;
                     }
                 }
-
-                switch (node.getLocalName())
+                else
                 {
-                    case "ethereum:call":
-                    case "ethereum:transaction":
-                        function = definition.parseFunction(resolve, syntax);
-                    case "ethereum:event":
-                        event = definition.parseEvent(resolve, syntax);
-                        event.attributeName = name;
-                        //drop through (no break)
-                    case "token-id":
-                        //this value is obtained from the token name
-                        setAs(definition.parseAs(resolve));
-                        populate(resolve); //check for mappings
-                        if (function != null) function.as = definition.parseAs(resolve);
-                        if (resolve.hasAttribute("bitmask")) {
-                            bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
-                        }
-                        break;
-                    case "user-entry":
-                        userInput = true;
-                        setAs(definition.parseAs(resolve));
-                        if (resolve.hasAttribute("bitmask")) {
-                            bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
-                        }
-                        break;
+                    switch (node.getLocalName())
+                    {
+                        case "token-id":
+                            //this value is obtained from the token name
+                            setAs(definition.parseAs(resolve));
+                            populate(resolve); //check for mappings
+                            if (function != null)
+                                function.as = definition.parseAs(resolve);
+                            if (resolve.hasAttribute("bitmask"))
+                            {
+                                bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
+                            }
+                            break;
+                        case "user-entry":
+                            userInput = true;
+                            setAs(definition.parseAs(resolve));
+                            if (resolve.hasAttribute("bitmask"))
+                            {
+                                bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
+                            }
+                            break;
+                    }
                 }
             }
         }

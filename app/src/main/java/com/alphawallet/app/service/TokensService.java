@@ -487,6 +487,15 @@ public class TokensService
         return ethereumNetworkRepository.getTokenTicker(token);
     }
 
+    public String getShortNetworkName(int chainId)
+    {
+        NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        if (info != null)
+            return info.getShortName();
+        else
+            return "";
+    }
+
     public static String getCurrentWalletAddress()
     {
         return currentAddress;

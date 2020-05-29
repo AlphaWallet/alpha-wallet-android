@@ -10,9 +10,12 @@ import android.util.AttributeSet;
 import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.webkit.ConsoleMessage;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -30,7 +33,6 @@ import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
-import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
@@ -45,24 +47,37 @@ import io.reactivex.schedulers.Schedulers;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.math.BigInteger;
+import java.util.Map;
+
+import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ERROR;
+
 /**
  * Created by James on 3/04/2019.
  * Stormbird in Singapore
  */
 public class Web3TokenView extends WebView
 {
+    public static final String RENDERING_ERROR = "<html>" + TOKENSCRIPT_ERROR + "${ERR1}</html>";
+
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
     private static final String JS_PROTOCOL_ON_SUCCESSFUL = "executeCallback(%1$s, null, \"%2$s\")";
     private static final String JS_PROTOCOL_ON_FAILURE = "executeCallback(%1$s, \"%2$s\", null)";
+    private static final String REFRESH_ERROR = "refresh is not defined";
 
     private JsInjectorClient jsInjectorClient;
     private TokenScriptClient tokenScriptClient;
     private PageReadyCallback assetHolder;
+    private boolean showingError = false;
 
     protected WebCompletionCallback keyPressCallback;
 
     @Nullable
     private OnSignPersonalMessageListener onSignPersonalMessageListener;
+    @Nullable
+    private OnSetValuesListener onSetValuesListener;
 
     public Web3TokenView(@NonNull Context context) {
         super(context);
@@ -103,19 +118,40 @@ public class Web3TokenView extends WebView
 
         setInitialScale(0);
         clearCache(true);
+        showingError = false;
 
-        addJavascriptInterface(new SignCallbackJSInterface(
+        addJavascriptInterface(new TokenScriptCallbackInterface(
                 this,
-                innerOnSignTransactionListener,
-                innerOnSignMessageListener,
                 innerOnSignPersonalMessageListener,
-                innerOnSignTypedMessageListener), "alpha");
+                innerOnSetValuesListener), "alpha");
 
         super.setWebViewClient(tokenScriptClient);
+
+        setWebChromeClient(new WebChromeClient()
+        {
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage msg)
+            {
+                if (!showingError && msg.messageLevel() == ConsoleMessage.MessageLevel.ERROR)
+                {
+                    if (msg.message().contains(REFRESH_ERROR)) return true; //don't stop for refresh error
+                    String errorMessage = RENDERING_ERROR.replace("${ERR1}", msg.message());
+                    showError(errorMessage);
+                }
+                return true;
+            }
+        });
+    }
+
+    public void showError(String error)
+    {
+        showingError = true;
+        loadData(error, "text/html", "utf-8");
     }
 
     @Override
-    public void setWebChromeClient(WebChromeClient client) {
+    public void setWebChromeClient(WebChromeClient client)
+    {
         super.setWebChromeClient(client);
     }
 
@@ -152,7 +188,7 @@ public class Web3TokenView extends WebView
         jsInjectorClient.setRpcUrl(EthereumNetworkRepository.getDefaultNodeURL(chainId));
     }
 
-    public void onSignPersonalMessageSuccessful(Message message, String signHex) {
+    public void onSignPersonalMessageSuccessful(@NotNull Message message, String signHex) {
         long callbackId = message.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
     }
@@ -192,6 +228,10 @@ public class Web3TokenView extends WebView
         this.onSignPersonalMessageListener = onSignPersonalMessageListener;
     }
 
+    public void setOnSetValuesListener(@Nullable OnSetValuesListener onSetValuesListener) {
+        this.onSetValuesListener = onSetValuesListener;
+    }
+
     private final OnSignTransactionListener innerOnSignTransactionListener = new OnSignTransactionListener() {
         @Override
         public void onSignTransaction(Web3Transaction transaction, String url) {
@@ -213,14 +253,15 @@ public class Web3TokenView extends WebView
         }
     };
 
-    private final OnSignTypedMessageListener innerOnSignTypedMessageListener = new OnSignTypedMessageListener() {
+    private final OnSetValuesListener innerOnSetValuesListener = new OnSetValuesListener() {
         @Override
-        public void onSignTypedMessage(Message<TypedData[]> message) {
-
+        public void setValues(Map<String, String> updates)
+        {
+            if (onSetValuesListener != null) onSetValuesListener.setValues(updates);
         }
     };
 
-    public void onSignCancel(Message message) {
+    public void onSignCancel(@NotNull Message message) {
         long callbackId = message.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
     }
@@ -230,9 +271,9 @@ public class Web3TokenView extends WebView
         assetHolder = holder;
     }
 
-    public String injectWeb3TokenInit(Context ctx, String view, String tokenContent)
+    public String injectWeb3TokenInit(String view, String tokenContent, BigInteger tokenId)
     {
-        return jsInjectorClient.injectWeb3TokenInit(ctx, view, tokenContent);
+        return jsInjectorClient.injectWeb3TokenInit(getContext(), view, tokenContent, tokenId);
     }
 
     public String injectJS(String view, String buildToken)
@@ -245,9 +286,9 @@ public class Web3TokenView extends WebView
         return jsInjectorClient.injectJSAtEnd(view, JSCode);
     }
 
-    public String injectStyleData(String viewData, String style)
+    public String injectStyleAndWrapper(String viewData, String style)
     {
-        return jsInjectorClient.injectStyle(viewData, style);
+        return jsInjectorClient.injectStyleAndWrap(viewData, style);
     }
 
     public void setLayout(Token token, boolean iconified)
@@ -293,6 +334,17 @@ public class Web3TokenView extends WebView
         }
 
         @Override
+        public void onUnhandledKeyEvent(WebView view, KeyEvent event)
+        {
+            if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+            {
+                if (keyPressCallback != null)
+                    keyPressCallback.enterKeyPressed();
+            }
+            super.onUnhandledKeyEvent(view, event);
+        }
+
+        @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url)
         {
             if (assetHolder != null)
@@ -306,12 +358,9 @@ public class Web3TokenView extends WebView
         }
 
         @Override
-        public void onUnhandledKeyEvent(WebView view, KeyEvent event) {
-            if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
-            {
-                if (keyPressCallback != null) keyPressCallback.enterKeyPressed();
-            }
-            super.onUnhandledKeyEvent(view, event);
+        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error)
+        {
+            showError(RENDERING_ERROR.replace("${ERR1}", error.getDescription()));
         }
     }
 
@@ -371,17 +420,17 @@ public class Web3TokenView extends WebView
         loadData(displayData, "text/html", "utf-8");
     }
 
-    public void renderTokenscriptView(Token token, TicketRange range, AssetDefinitionService assetService, boolean iconified)
+    public void renderTokenscriptView(Token token, TicketRange range, AssetDefinitionService assetService, boolean itemView)
     {
         BigInteger tokenId = range.tokenIds.get(0);
 
         final StringBuilder attrs = assetService.getTokenAttrs(token, tokenId, range.tokenIds.size());
 
-        assetService.resolveAttrs(token, tokenId)
+        assetService.resolveAttrs(token, tokenId, assetService.getTokenViewLocalAttributes(token.tokenInfo.chainId, token.tokenInfo.address), itemView)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(token, throwable, range),
-                           () -> displayTicket(token, assetService, attrs, iconified, range))
+                           () -> displayTicket(token, assetService, attrs, itemView, range))
                 .isDisposed();
     }
 
@@ -400,9 +449,9 @@ public class Web3TokenView extends WebView
 
         String view = assetService.getTokenView(token.tokenInfo.chainId, token.getAddress(), viewName);
         if (TextUtils.isEmpty(view)) view = buildViewError(token, range, viewName);
-        String style = assetService.getTokenView(token.tokenInfo.chainId, token.getAddress(), "style");
-        String viewData = injectWeb3TokenInit(getContext(), view, attrs.toString());
-        viewData = injectStyleData(viewData, style); //style injected last so it comes first
+        String style = assetService.getTokenViewStyle(token.tokenInfo.chainId, token.getAddress(), viewName);
+        String viewData = injectWeb3TokenInit(view, attrs.toString(), range.tokenIds.get(0));
+        viewData = injectStyleAndWrapper(viewData, style); //style injected last so it comes first
 
         String base64 = android.util.Base64.encodeToString(viewData.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
         loadData(base64, "text/html; charset=utf-8", "base64");

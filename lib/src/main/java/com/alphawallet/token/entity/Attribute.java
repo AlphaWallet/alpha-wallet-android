@@ -1,5 +1,6 @@
 package com.alphawallet.token.entity;
 
+import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.alphawallet.token.util.DateTime;
 import com.alphawallet.token.util.DateTimeFactory;
@@ -23,74 +24,53 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
  * Stormbird in Sydney
  */
 
-public class AttributeType {
+public class Attribute {
+    private static final int ADDRESS_SIZE = 160;
+    private static final int ADDRESS_LENGTH_IN_HEX = ADDRESS_SIZE >> 2;
+    private static final int ADDRESS_LENGTH_IN_BYTES = ADDRESS_SIZE >> 3;
+
     //default the bitmask to 32 bytes represented
     public BigInteger bitmask = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);    // TODO: BigInteger !== BitInt. Test edge conditions.
-    public String name;  // TODO: should be polyglot because user change change language in the run
-    public String id;
+    public String label;  // TODO: should be polyglot because user change change language in the run
+    public String name;
     public int bitshift = 0;
     public TokenDefinition.Syntax syntax;
     public As as;
     public Map<BigInteger, String> members;
     private TokenDefinition definition;
     public FunctionDefinition function = null;
+    public EventDefinition event = null;
     public boolean userInput = false;
 
-    public AttributeType(Element attr, TokenDefinition def)
+    public Attribute(Element attr, TokenDefinition def)
     {
         definition = def;
-        id = attr.getAttribute("id");
+        //schema 2020/06 id is now name; name is now label
+        name = attr.getAttribute("name");
+        label = name; //set label to name if not specified
         as = As.Unsigned; //default value
-        try {
-            switch (attr.getAttribute("syntax")) { // We don't validate syntax here; schema does it.
-                case "1.3.6.1.4.1.1466.115.121.1.6":
-                    syntax = TokenDefinition.Syntax.BitString;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.7":
-                    syntax = TokenDefinition.Syntax.Boolean;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.11":
-                    syntax = TokenDefinition.Syntax.CountryString;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.28":
-                    syntax = TokenDefinition.Syntax.JPEG;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.36":
-                    syntax = TokenDefinition.Syntax.NumericString;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.24":
-                    syntax = TokenDefinition.Syntax.GeneralizedTime;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.26":
-                    syntax = TokenDefinition.Syntax.IA5String;
-                    break;
-                case "1.3.6.1.4.1.1466.115.121.1.27":
-                    syntax = TokenDefinition.Syntax.Integer;
-                    break;
-                default: // unknown syntax treat as Directory String
-                    syntax = TokenDefinition.Syntax.DirectoryString;
-            }
-        } catch (NullPointerException e) { // missing <syntax>
-            syntax = TokenDefinition.Syntax.DirectoryString; // 1.3.6.1.4.1.1466.115.121.1.15
-        }
+        //TODO xpath would be better
+        syntax = TokenDefinition.Syntax.DirectoryString; //default value
+
         for(Node node = attr.getFirstChild();
-            node!=null; node=node.getNextSibling()){
+            node!=null; node=node.getNextSibling()) {
             if (node.getNodeType() == Node.ELEMENT_NODE) {
-                Element origin = (Element) node;
-                String label = node.getLocalName();
-                switch (label)
+                Element element = (Element) node;
+                switch (node.getLocalName())
                 {
+                    case "type":
+                        syntax = handleType(element);
+                        break;
                     case "origins":
-                        handleOrigins(origin);
+                        handleOrigins(element);
                         break;
-                    case "name":
-                        name = definition.getLocalisedString(origin, "string");
-                        break;
+                    case "label":
+                        label = definition.getLocalisedString(element);
                     case "mapping":
-                        populate(origin);
+                        populate(element);
                         break;
                 }
-                switch(origin.getAttribute("contract").toLowerCase()) {
+                switch(element.getAttribute("contract").toLowerCase()) {
                     case "holding-contract":
                         setAs(As.Mapping);
                         // TODO: Syntax is not checked
@@ -107,6 +87,55 @@ public class AttributeType {
         }
     }
 
+    private TokenDefinition.Syntax handleType(Element syntax)
+    {
+        TokenDefinition.Syntax as = TokenDefinition.Syntax.DirectoryString;
+
+        for(Node node = syntax.getFirstChild();
+                node!=null; node=node.getNextSibling())
+        {
+            if (node.getNodeType() == Node.ELEMENT_NODE)
+            {
+                Element element = (Element) node;
+                switch (element.getLocalName())
+                {
+                    case "syntax":
+                        as = getSyntax(element.getTextContent());
+                        break;
+                    default:
+                        System.out.println("Possible fail: " + element.getLocalName() + " in attribute '" + name + "'");
+                        break;
+                }
+            }
+        }
+
+        return as;
+    }
+
+    private TokenDefinition.Syntax getSyntax(String ISO) {
+        switch (ISO) {
+            case "1.3.6.1.4.1.1466.115.121.1.6":
+                return TokenDefinition.Syntax.BitString;
+            case "1.3.6.1.4.1.1466.115.121.1.7":
+                return TokenDefinition.Syntax.Boolean;
+            case "1.3.6.1.4.1.1466.115.121.1.11":
+                return TokenDefinition.Syntax.CountryString;
+            case "1.3.6.1.4.1.1466.115.121.1.28":
+                return TokenDefinition.Syntax.JPEG;
+            case "1.3.6.1.4.1.1466.115.121.1.36":
+                return TokenDefinition.Syntax.NumericString;
+            case "1.3.6.1.4.1.1466.115.121.1.24":
+                return TokenDefinition.Syntax.GeneralizedTime;
+            case "1.3.6.1.4.1.1466.115.121.1.26":
+                return TokenDefinition.Syntax.IA5String;
+            case "1.3.6.1.4.1.1466.115.121.1.27":
+                return TokenDefinition.Syntax.Integer;
+            case "1.3.6.1.4.1.1466.115.121.1.15":
+                return TokenDefinition.Syntax.DirectoryString;
+        }
+        return null;
+    }
+
     private void handleOrigins(Element origin)
     {
         for(Node node = origin.getFirstChild();
@@ -116,27 +145,47 @@ public class AttributeType {
             {
                 Element resolve = (Element) node;
                 setAs(definition.parseAs(resolve));
-                switch (node.getLocalName())
+                if (resolve.getPrefix().equals("ethereum")) //handle ethereum namespace
                 {
-                    case "ethereum":
-                        function = definition.parseFunction(resolve, syntax);
-                        //drop through (no break)
-                    case "token-id":
-                        //this value is obtained from the token id
-                        setAs(definition.parseAs(resolve));
-                        populate(resolve); //check for mappings
-                        if (function != null) function.as = definition.parseAs(resolve);
-                        if (resolve.hasAttribute("bitmask")) {
-                            bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
-                        }
-                        break;
-                    case "user-entry":
-                        userInput = true;
-                        setAs(definition.parseAs(resolve));
-                        if (resolve.hasAttribute("bitmask")) {
-                            bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
-                        }
-                        break;
+                    switch (node.getLocalName())
+                    {
+                        case "transaction":
+                        case "call":
+                            function = definition.parseFunction(resolve, syntax);
+                            break;
+                        case "event":
+                            event = definition.parseEvent(resolve, syntax);
+                            event.attributeName = name;
+                            break;
+                        default:
+                            //throw parse error
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (node.getLocalName())
+                    {
+                        case "token-id":
+                            //this value is obtained from the token name
+                            setAs(definition.parseAs(resolve));
+                            populate(resolve); //check for mappings
+                            if (function != null)
+                                function.as = definition.parseAs(resolve);
+                            if (resolve.hasAttribute("bitmask"))
+                            {
+                                bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
+                            }
+                            break;
+                        case "user-entry":
+                            userInput = true;
+                            setAs(definition.parseAs(resolve));
+                            if (resolve.hasAttribute("bitmask"))
+                            {
+                                bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
+                            }
+                            break;
+                    }
                 }
             }
         }
@@ -224,13 +273,47 @@ public class AttributeType {
                 {
                     return "0";
                 }
-                else if (data.startsWith("0x"))
+                else if (data.startsWith("0x") && this.as != As.Address) //Address is a special case where we want the leading 0x
                 {
                     data = data.substring(2);
                 }
                 return data;
             default:
                 return data;
+        }
+    }
+
+    //Sometimes value needs to be processed from the raw input.
+    //Currently only time
+    public BigInteger processValue(BigInteger val)
+    {
+        switch (syntax)
+        {
+            case GeneralizedTime:
+                return parseGeneralizedTime(val);
+            case DirectoryString:
+            case IA5String:
+            case Integer:
+            case Boolean:
+            case BitString:
+            case CountryString:
+            case JPEG:
+            case NumericString:
+                break;
+        }
+        return val;
+    }
+
+    private BigInteger parseGeneralizedTime(BigInteger value) {
+        try
+        {
+            DateTime dt = DateTimeFactory.getDateTime(toString(value));
+            return BigInteger.valueOf(dt.toEpoch());
+        }
+        catch (ParseException|UnsupportedEncodingException p)
+        {
+            p.printStackTrace();
+            return value;
         }
     }
 
@@ -302,8 +385,44 @@ public class AttributeType {
                     //refer to 'AlphaWallet meetup indices' where 'Match' mapping is null but for FIFA is not.
                     //throw new NullPointerException("Key " + data.toString() + " can't be mapped.");
                 }
+
+            case Boolean:
+                if (data.equals(BigInteger.ZERO)) return "FALSE";
+                else return "TRUE";
+
+            case UnsignedInput: //convert to unsigned
+                BigInteger conv = new BigInteger(1, data.toByteArray());
+                return conv.toString();
+
+            case TokenId:
+                return data.toString();
+
+            case Bytes:
+                return Numeric.toHexString(data.toByteArray());
+
+            case Address:
+                return parseEthereumAddress(data);
+
+            //e18, e8, e4, e2
+            //return resized data value?
+
             default:
                 throw new NullPointerException("Missing valid 'as' attribute");
+        }
+    }
+
+    private String parseEthereumAddress(BigInteger data)
+    {
+        byte[] padded = Numeric.toBytesPadded(data, ADDRESS_LENGTH_IN_BYTES);
+        String addr = Numeric.toHexString(padded);
+
+        if (Numeric.cleanHexPrefix(addr).length() == ADDRESS_LENGTH_IN_HEX)
+        {
+            return addr;
+        }
+        else
+        {
+            return "<Invalid Address: addr>";
         }
     }
 

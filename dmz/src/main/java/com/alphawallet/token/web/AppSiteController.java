@@ -1,5 +1,6 @@
 package com.alphawallet.token.web;
 
+import com.alphawallet.token.entity.Attribute;
 import com.github.cliftonlabs.json_simple.JsonObject;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +47,6 @@ import java.util.stream.Stream;
 import javax.servlet.http.HttpServletRequest;
 
 import com.alphawallet.token.entity.AttributeInterface;
-import com.alphawallet.token.entity.AttributeType;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.ContractInfo;
 import com.alphawallet.token.entity.MagicLinkData;
@@ -64,7 +64,6 @@ import com.alphawallet.token.web.Ethereum.TransactionHandler;
 import com.alphawallet.token.web.Service.CryptoFunctions;
 import static com.alphawallet.token.tools.Convert.getEthString;
 import static com.alphawallet.token.tools.ParseMagicLink.normal;
-import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
 import static com.alphawallet.token.web.Ethereum.TokenscriptFunction.ZERO_ADDRESS;
 
 @Controller
@@ -466,9 +465,9 @@ public class AppSiteController implements AttributeInterface
     //      once events are available we can selectively update entries.
 
     @Override
-    public TransactionResult getFunctionResult(ContractAddress contract, AttributeType attr, BigInteger tokenId)
+    public TransactionResult getFunctionResult(ContractAddress contract, Attribute attr, BigInteger tokenId)
     {
-        String addressFunctionKey = contract.address + "-" + attr.id;
+        String addressFunctionKey = contract.address + "-" + attr.name;
         TransactionResult tr = new TransactionResult(contract.chainId, contract.address, tokenId, attr);
         //existing entry in map?
         if (transactionResults.containsKey(contract.chainId))
@@ -499,7 +498,7 @@ public class AppSiteController implements AttributeInterface
 
     //Not relevant for website - this function is to access wallet internal balance for tokens
     @Override
-    public boolean resolveOptimisedAttr(ContractAddress contract, AttributeType attr, TransactionResult transactionResult)
+    public boolean resolveOptimisedAttr(ContractAddress contract, Attribute attr, TransactionResult transactionResult)
     {
         return false;
     }

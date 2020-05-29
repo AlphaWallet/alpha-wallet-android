@@ -33,6 +33,7 @@ import io.reactivex.Single;
 import io.reactivex.SingleSource;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
+import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -115,7 +116,7 @@ public class TokensRealmSource implements TokenLocalSource {
         {
             String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address);
             RealmToken realmToken = realm.where(RealmToken.class)
-                    .equalTo("address", dbKey)
+                    .equalTo("address", dbKey, Case.INSENSITIVE)
                     .findFirst();
 
             if (realmToken == null)

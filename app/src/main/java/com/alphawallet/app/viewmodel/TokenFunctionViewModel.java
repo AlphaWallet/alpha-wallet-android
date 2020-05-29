@@ -6,6 +6,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -39,6 +40,7 @@ import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
+import com.alphawallet.token.entity.TokenscriptElement;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 
 import java.math.BigDecimal;
@@ -80,6 +82,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final MutableLiveData<Token> insufficientFunds = new MutableLiveData<>();
     private final MutableLiveData<String> invalidAddress = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> newScriptFound = new MutableLiveData<>();
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -116,6 +119,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     }
     public LiveData<String> invalidAddress() { return invalidAddress; }
     public LiveData<XMLDsigDescriptor> sig() { return sig; }
+    public LiveData<Boolean> newScriptFound() { return newScriptFound; }
 
     public void prepare(Token t)
     {
@@ -150,7 +154,7 @@ public class TokenFunctionViewModel extends BaseViewModel
 
     private void onToken(Token t)
     {
-        if (token.checkBalanceChange(t))
+        if (assetDefinitionService.checkTokenForNewEvent(t) || token.checkBalanceChange(t))
         {
             t.transferPreviousData(token);
             token = t;
@@ -355,7 +359,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         context.startActivity(intent);
     }
 
-    public void handleFunction(TSAction action, BigInteger tokenId, Token token, Context context)
+    public boolean handleFunction(TSAction action, BigInteger tokenId, Token token, Context context)
     {
         String functionEffect = action.function.method;
         if (action.function.tx != null && (action.function.method == null || action.function.method.length() == 0)
@@ -367,17 +371,18 @@ public class TokenFunctionViewModel extends BaseViewModel
         else
         {
             //what's selected?
-            ContractAddress cAddr = new ContractAddress(action.function, token.tokenInfo.chainId, token.tokenInfo.address); //viewModel.getAssetDefinitionService().getContractAddress(action.function, token);
+            ContractAddress cAddr = new ContractAddress(action.function);
             String functionData = getTransactionBytes(token, tokenId, action.function);
+            if (functionData == null) return false;
             //function call may include some value
             String value = "0";
             if (action.function.tx != null && action.function.tx.args.containsKey("value"))
             {
-                //this is very specific but 'value' is a specifically handled param
-                value = action.function.tx.args.get("value").value;
-                BigDecimal valCorrected = getCorrectedBalance(value, 18);
+                TokenscriptElement arg = action.function.tx.args.get("value");
+                //resolve reference
+                value = assetDefinitionService.resolveReference(token, action, arg, tokenId);
                 Token currency = getCurrency(token.tokenInfo.chainId);
-                functionEffect = valCorrected.toString() + " " + currency.getSymbol() + " to " + action.function.method;
+                functionEffect = getCorrectedBalance(value, 18) + " " + currency.getSymbol() + " to " + action.function.method;
             }
 
             //finished resolving attributes, blank definition cache so definition is re-loaded when next needed
@@ -385,6 +390,8 @@ public class TokenFunctionViewModel extends BaseViewModel
 
             confirmTransaction(context, cAddr.chainId, functionData, null, cAddr.address, action.function.method, functionEffect, value);
         }
+
+        return true;
     }
 
     private void NativeSend(TSAction action, Token token, Context context)
@@ -433,13 +440,13 @@ public class TokenFunctionViewModel extends BaseViewModel
         }
     }
 
-    private BigDecimal getCorrectedBalance(String value, int scale)
+    private BigDecimal getCorrectedBalance(String value, int divisor)
     {
         BigDecimal val = BigDecimal.ZERO;
         try
         {
             val = new BigDecimal(value);
-            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, scale));
+            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, divisor));
             val = val.divide(decimalDivisor);
         }
         catch (Exception e)
@@ -447,7 +454,7 @@ public class TokenFunctionViewModel extends BaseViewModel
             e.printStackTrace();
         }
 
-        return val.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros();
+        return val.setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros();
     }
 
     public OpenseaService getOpenseaService()
@@ -458,5 +465,20 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void updateTokenScriptViewSize(Token token)
     {
         tokensService.updateTokenViewSizes(token);
+    }
+
+    public void checkForNewScript(Token token)
+    {
+        //check server for new tokenscript
+        assetDefinitionService.checkServerForScript(token.tokenInfo.chainId, token.getAddress())
+                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.single())
+                .subscribe(this::handleFilename, this::onError)
+                .isDisposed();
+    }
+
+    private void handleFilename(String newFile)
+    {
+        if (!TextUtils.isEmpty(newFile)) newScriptFound.postValue(true);
     }
 }

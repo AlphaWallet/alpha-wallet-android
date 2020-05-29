@@ -15,4 +15,6 @@ public interface StandardFunctionInterface
     default void displayTokenSelectionError(TSAction action) { };
     default void handleClick(String action) { };
     default void handleTokenScriptFunction(String function, List<BigInteger> selection) { };
+    default void showWaitSpinner(boolean show) { };
+    default void handleFunctionDenied(String denialMessage) { };
 }

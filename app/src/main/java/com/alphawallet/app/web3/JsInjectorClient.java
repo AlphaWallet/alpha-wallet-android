@@ -12,6 +12,7 @@ import com.alphawallet.app.web3.entity.Address;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -118,12 +119,17 @@ public class JsInjectorClient {
         return injectJS(html, js);
     }
 
-    String injectWeb3TokenInit(Context ctx, String view, String tokenContent)
+    String injectWeb3TokenInit(Context ctx, String view, String tokenContent, BigInteger tokenId)
     {
         String initSrc = loadFile(ctx, R.raw.init_token);
-        initSrc = String.format(initSrc, tokenContent, walletAddress, EthereumNetworkRepository.getDefaultNodeURL(chainId), chainId);
+        //put the view in here
+        String tokenIdWrapperName = "token-card-" + tokenId.toString(10);
+        initSrc = String.format(initSrc, tokenContent, walletAddress, EthereumNetworkRepository.getDefaultNodeURL(chainId), chainId, tokenIdWrapperName);
         //now insert this source into the view
-        return injectJSembed(view, initSrc);
+        // note that the <div> is not closed because it is closed in njectStyleAndWrap().
+        String wrapper = "<div id=\"token-card-" + tokenId.toString(10) + "\" class=\"token-card\">";
+        initSrc = "<script>\n" + initSrc + "</script>\n" + wrapper;
+        return injectJS(view, initSrc);
     }
 
     String injectJSAtEnd(String view, String newCode)
@@ -135,12 +141,6 @@ public class JsInjectorClient {
             return beforeTag + newCode + afterTab;
         }
         return view;
-    }
-
-    String injectJSembed(String view, String initSrc)
-    {
-        initSrc = "<script>\n" + initSrc + "</script>\n";
-        return injectJS(view, initSrc);
     }
 
     String injectJS(String html, String js) {
@@ -169,6 +169,9 @@ public class JsInjectorClient {
         }
         if (index < 0) {
             index = body.indexOf("</head");
+        }
+        if (index < 0) {
+            index = 0; //just wrap whole view
         }
         return index;
     }
@@ -202,11 +205,18 @@ public class JsInjectorClient {
         return String.format(initSrc, address, rpcUrl, chainId);
     }
 
-    String injectStyle(String view, String style)
+    String injectStyleAndWrap(String view, String style)
     {
-        String injectHeader = "<head><meta name=\"viewport\" content=\"width=device-width, user-scalable=false\" /></head>";
-        style = "<style type=\"text/css\">\n" + style + "</style><body>\n";
-        return injectHeader + style + view + "</body>";
+        if (style == null) style = "";
+        //String injectHeader = "<head><meta name=\"viewport\" content=\"width=device-width, user-scalable=false\" /></head>";
+        String injectHeader = "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no\" />"; //iOS uses these header settings
+        style = "<style type=\"text/css\">\n" + style + ".token-card {\n" +
+                "padding: 0pt;\n" +
+                "margin: 0pt;\n" +
+                "}</style></head>" +
+                "<body>\n";
+        // the opening of the following </div> is in injectWeb3TokenInit();
+        return injectHeader + style + view + "</div></body>";
     }
 
     private static String loadFile(Context context, @RawRes int rawRes) {

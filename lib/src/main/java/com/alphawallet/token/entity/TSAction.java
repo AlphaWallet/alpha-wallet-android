@@ -9,11 +9,11 @@ import java.util.Map;
 public class TSAction
 {
     public int order;
-    public String type;
     public String exclude;
-    public String view;
-    public String style;
+    public TSTokenView view;
+    public String style = "";
+    public String name;
 
-    public Map<String, AttributeType> attributeTypes;
+    public Map<String, Attribute> attributes;
     public FunctionDefinition function;
 }

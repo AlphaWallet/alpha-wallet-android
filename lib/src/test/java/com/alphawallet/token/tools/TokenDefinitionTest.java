@@ -18,13 +18,13 @@ import static org.junit.Assert.fail;
 
 public class TokenDefinitionTest implements ParseResult
 {
-    private File entryTokenTestFile = new File("src/test/ts/entrytoken.xml");
+    private File entryTokenTestFile = new File("src/test/ts/entrytoken.canonicalized.xml");
 
     @Test
     public void TokenInformationCanBeExtracted() throws IOException, SAXException {
         assertTrue(entryTokenTestFile.exists());
         TokenDefinition entryToken = new TokenDefinition(new FileInputStream(entryTokenTestFile), new Locale("en"), this);
-        assertFalse(entryToken.attributeTypes.isEmpty());
+        assertFalse(entryToken.attributes.isEmpty());
         for (String contractName : entryToken.contracts.keySet())
         {
             assertNotEquals(0, contractName.length());

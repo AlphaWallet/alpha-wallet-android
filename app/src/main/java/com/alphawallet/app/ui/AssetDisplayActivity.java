@@ -38,6 +38,8 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.Key.TICKET;
 
@@ -118,6 +120,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         viewModel.sig().observe(this, this::onSigData);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
+        viewModel.newScriptFound().observe(this, this::onNewScript);
 
         functionBar = findViewById(R.id.layoutButtons);
 
@@ -127,8 +130,10 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         finishReceiver = new FinishReceiver(this);
         findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE);
         viewModel.checkTokenScriptValidity(token);
+        token.clearResultMap();
 
         iconifiedCheck = true;
+
         if (token.iconifiedWebviewHeight == 0 && token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
         {
             initWebViewCheck(iconifiedCheck);
@@ -137,6 +142,16 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         else
         {
             displayTokens();
+        }
+    }
+
+    private void onNewScript(Boolean aBoolean)
+    {
+        //need to reload tokens, now we have an updated/new script
+        if (viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
+        {
+            initWebViewCheck(iconifiedCheck);
+            handler.postDelayed(this, 1500);
         }
     }
 
@@ -172,7 +187,11 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     {
         super.onResume();
         viewModel.prepare(token);
-        if (functionBar == null) functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter);
+        if (functionBar == null)
+        {
+            functionBar = findViewById(R.id.layoutButtons);
+            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter, token.getArrayBalance());
+        }
     }
 
     @Override
@@ -245,11 +264,37 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     }
 
     @Override
+    public void showWaitSpinner(boolean show)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        if (!show) return;
+        dialog = new AWalletAlertDialog(this);
+        dialog.setTitle(getString(R.string.check_function_availability));
+        dialog.setIcon(AWalletAlertDialog.NONE);
+        dialog.setProgressMode();
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
+    @Override
+    public void handleFunctionDenied(String denialMessage)
+    {
+        if (dialog == null) dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.ERROR);
+        dialog.setTitle(R.string.token_selection);
+        dialog.setMessage(denialMessage);
+        dialog.setButtonText(R.string.dialog_ok);
+        dialog.setButtonListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
+    @Override
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
         //does the function have a view? If it's transaction only then handle here
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
         TSAction action = functions.get(function);
+        token.clearResultMap();
 
         //handle TS function
         if (action != null && action.view == null && action.function != null)
@@ -315,7 +360,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     {
         progressView.setVisibility(View.GONE);
         adapter = new NonFungibleTokenAdapter(functionBar, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
-        functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter);
+        functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter, token.getArrayBalance());
         list.setAdapter(adapter);
     }
 

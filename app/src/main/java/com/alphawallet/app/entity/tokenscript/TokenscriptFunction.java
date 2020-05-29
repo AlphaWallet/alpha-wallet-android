@@ -1,19 +1,23 @@
 package com.alphawallet.app.entity.tokenscript;
 
+import android.text.TextUtils;
+
 import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3j.FunctionEncoder;
 import com.alphawallet.app.web3j.FunctionReturnDecoder;
 import com.alphawallet.app.web3j.TypeReference;
 import com.alphawallet.app.web3j.datatypes.Function;
+import com.alphawallet.token.entity.As;
+import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.AttributeInterface;
-import com.alphawallet.token.entity.AttributeType;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
 import com.alphawallet.token.entity.TokenScriptResult;
-import com.alphawallet.token.entity.TokenscriptContext;
 import com.alphawallet.token.entity.TokenscriptElement;
 import com.alphawallet.token.entity.TransactionResult;
 import com.alphawallet.token.tools.TokenDefinition;
@@ -27,6 +31,7 @@ import org.web3j.abi.datatypes.generated.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.utils.Bytes;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -35,6 +40,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Observable;
 
@@ -48,362 +55,408 @@ public abstract class TokenscriptFunction
 {
     public static final String TOKENSCRIPT_CONVERSION_ERROR = "<error>";
 
-    public Function generateTransactionFunction(String walletAddress, BigInteger tokenId, TokenDefinition definition, FunctionDefinition function, AttributeInterface attrIf)
+    private final Map<String, Attribute> localAttrs = new ConcurrentHashMap<>();
+    private final Map<String, String> refTags = new ConcurrentHashMap<>();
+
+    public Function generateTransactionFunction(Token token, BigInteger tokenId, TokenDefinition definition, FunctionDefinition function, AttributeInterface attrIf)
     {
+        boolean valueNotFound = false;
         //pre-parse tokenId.
         if (tokenId.bitCount() > 256) tokenId = tokenId.or(BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE)); //truncate tokenId too large
-        if (walletAddress == null) walletAddress = ZERO_ADDRESS;
 
         List<Type> params = new ArrayList<Type>();
         List<TypeReference<?>> returnTypes = new ArrayList<TypeReference<?>>();
         for (MethodArg arg : function.parameters)
         {
-            resolveReference(walletAddress, arg, tokenId, definition, attrIf);
-            switch (arg.parameterType)
-            {
+            String value = resolveReference(token, arg.element, tokenId, definition, attrIf);
+            //get arg.element.value in the form of BigInteger if appropriate
+            byte[] argValueBytes = null;
+            BigInteger argValueBI = null;
 
-                case "int":
-                    params.add(new Int(new BigInteger(arg.element.value)));
-                    break;
-                case "int8":
-                    params.add(new Int8(new BigInteger(arg.element.value)));
-                    break;
-                case "int16":
-                    params.add(new Int16(new BigInteger(arg.element.value)));
-                    break;
-                case "int24":
-                    params.add(new Int24(new BigInteger(arg.element.value)));
-                    break;
-                case "int32":
-                    params.add(new Int32(new BigInteger(arg.element.value)));
-                    break;
-                case "int40":
-                    params.add(new Int40(new BigInteger(arg.element.value)));
-                    break;
-                case "int48":
-                    params.add(new Int48(new BigInteger(arg.element.value)));
-                    break;
-                case "int56":
-                    params.add(new Int56(new BigInteger(arg.element.value)));
-                    break;
-                case "int64":
-                    params.add(new Int64(new BigInteger(arg.element.value)));
-                    break;
-                case "int72":
-                    params.add(new Int72(new BigInteger(arg.element.value)));
-                    break;
-                case "int80":
-                    params.add(new Int80(new BigInteger(arg.element.value)));
-                    break;
-                case "int88":
-                    params.add(new Int88(new BigInteger(arg.element.value)));
-                    break;
-                case "int96":
-                    params.add(new Int96(new BigInteger(arg.element.value)));
-                    break;
-                case "int104":
-                    params.add(new Int104(new BigInteger(arg.element.value)));
-                    break;
-                case "int112":
-                    params.add(new Int112(new BigInteger(arg.element.value)));
-                    break;
-                case "int120":
-                    params.add(new Int120(new BigInteger(arg.element.value)));
-                    break;
-                case "int128":
-                    params.add(new Int128(new BigInteger(arg.element.value)));
-                    break;
-                case "int136":
-                    params.add(new Int136(new BigInteger(arg.element.value)));
-                    break;
-                case "int144":
-                    params.add(new Int144(new BigInteger(arg.element.value)));
-                    break;
-                case "int152":
-                    params.add(new Int152(new BigInteger(arg.element.value)));
-                    break;
-                case "int160":
-                    params.add(new Int160(new BigInteger(arg.element.value)));
-                    break;
-                case "int168":
-                    params.add(new Int168(new BigInteger(arg.element.value)));
-                    break;
-                case "int176":
-                    params.add(new Int176(new BigInteger(arg.element.value)));
-                    break;
-                case "int184":
-                    params.add(new Int184(new BigInteger(arg.element.value)));
-                    break;
-                case "int192":
-                    params.add(new Int192(new BigInteger(arg.element.value)));
-                    break;
-                case "int200":
-                    params.add(new Int200(new BigInteger(arg.element.value)));
-                    break;
-                case "int208":
-                    params.add(new Int208(new BigInteger(arg.element.value)));
-                    break;
-                case "int216":
-                    params.add(new Int216(new BigInteger(arg.element.value)));
-                    break;
-                case "int224":
-                    params.add(new Int224(new BigInteger(arg.element.value)));
-                    break;
-                case "int232":
-                    params.add(new Int232(new BigInteger(arg.element.value)));
-                    break;
-                case "int240":
-                    params.add(new Int240(new BigInteger(arg.element.value)));
-                    break;
-                case "int248":
-                    params.add(new Int248(new BigInteger(arg.element.value)));
-                    break;
-                case "int256":
-                    params.add(new Int256(new BigInteger(arg.element.value)));
-                    break;
-                case "uint":
-                    params.add(new Uint(new BigInteger(arg.element.value)));
-                    break;
-                case "uint8":
-                    params.add(new Uint8(new BigInteger(arg.element.value)));
-                    break;
-                case "uint16":
-                    params.add(new Uint16(new BigInteger(arg.element.value)));
-                    break;
-                case "uint24":
-                    params.add(new Uint24(new BigInteger(arg.element.value)));
-                    break;
-                case "uint32":
-                    params.add(new Uint32(new BigInteger(arg.element.value)));
-                    break;
-                case "uint40":
-                    params.add(new Uint40(new BigInteger(arg.element.value)));
-                    break;
-                case "uint48":
-                    params.add(new Uint48(new BigInteger(arg.element.value)));
-                    break;
-                case "uint56":
-                    params.add(new Uint56(new BigInteger(arg.element.value)));
-                    break;
-                case "uint64":
-                    params.add(new Uint64(new BigInteger(arg.element.value)));
-                    break;
-                case "uint72":
-                    params.add(new Uint72(new BigInteger(arg.element.value)));
-                    break;
-                case "uint80":
-                    params.add(new Uint80(new BigInteger(arg.element.value)));
-                    break;
-                case "uint88":
-                    params.add(new Uint88(new BigInteger(arg.element.value)));
-                    break;
-                case "uint96":
-                    params.add(new Uint96(new BigInteger(arg.element.value)));
-                    break;
-                case "uint104":
-                    params.add(new Uint104(new BigInteger(arg.element.value)));
-                    break;
-                case "uint112":
-                    params.add(new Uint112(new BigInteger(arg.element.value)));
-                    break;
-                case "uint120":
-                    params.add(new Uint120(new BigInteger(arg.element.value)));
-                    break;
-                case "uint128":
-                    params.add(new Uint128(new BigInteger(arg.element.value)));
-                    break;
-                case "uint136":
-                    params.add(new Uint136(new BigInteger(arg.element.value)));
-                    break;
-                case "uint144":
-                    params.add(new Uint144(new BigInteger(arg.element.value)));
-                    break;
-                case "uint152":
-                    params.add(new Uint152(new BigInteger(arg.element.value)));
-                    break;
-                case "uint160":
-                    params.add(new Uint160(new BigInteger(arg.element.value)));
-                    break;
-                case "uint168":
-                    params.add(new Uint168(new BigInteger(arg.element.value)));
-                    break;
-                case "uint176":
-                    params.add(new Uint176(new BigInteger(arg.element.value)));
-                    break;
-                case "uint184":
-                    params.add(new Uint184(new BigInteger(arg.element.value)));
-                    break;
-                case "uint192":
-                    params.add(new Uint192(new BigInteger(arg.element.value)));
-                    break;
-                case "uint200":
-                    params.add(new Uint200(new BigInteger(arg.element.value)));
-                    break;
-                case "uint208":
-                    params.add(new Uint208(new BigInteger(arg.element.value)));
-                    break;
-                case "uint216":
-                    params.add(new Uint216(new BigInteger(arg.element.value)));
-                    break;
-                case "uint224":
-                    params.add(new Uint224(new BigInteger(arg.element.value)));
-                    break;
-                case "uint232":
-                    params.add(new Uint232(new BigInteger(arg.element.value)));
-                    break;
-                case "uint240":
-                    params.add(new Uint240(new BigInteger(arg.element.value)));
-                    break;
-                case "uint248":
-                    params.add(new Uint248(new BigInteger(arg.element.value)));
-                    break;
-                case "uint256":
-                    switch (arg.element.ref)
-                    {
-                        case "tokenId":
-                            params.add(new Uint256(tokenId));
-                            break;
-                        case "value":
-                        default:
-                            params.add(new Uint256(new BigInteger(arg.element.value)));
-                            break;
-                    }
-                    break;
-                case "address":
-                    switch (arg.element.ref)
-                    {
-                        case "ownerAddress":
-                            params.add(new Address(walletAddress));
-                            break;
-                        case "value":
-                        default:
-                            params.add(new Address(arg.element.value));
-                            break;
-                    }
-                    break;
-                case "string":
-                    params.add(new Utf8String(arg.element.value));
-                    break;
-                case "bytes":
-                    params.add(new Bytes32(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes1":
-                    params.add(new Bytes1(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes2":
-                    params.add(new Bytes2(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes3":
-                    params.add(new Bytes3(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes4":
-                    params.add(new Bytes4(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes5":
-                    params.add(new Bytes5(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes6":
-                    params.add(new Bytes6(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes7":
-                    params.add(new Bytes7(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes8":
-                    params.add(new Bytes8(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes9":
-                    params.add(new Bytes9(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes10":
-                    params.add(new Bytes10(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes11":
-                    params.add(new Bytes11(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes12":
-                    params.add(new Bytes12(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes13":
-                    params.add(new Bytes13(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes14":
-                    params.add(new Bytes14(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes15":
-                    params.add(new Bytes15(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes16":
-                    params.add(new Bytes16(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes17":
-                    params.add(new Bytes17(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes18":
-                    params.add(new Bytes18(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes19":
-                    params.add(new Bytes19(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes20":
-                    params.add(new Bytes20(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes21":
-                    params.add(new Bytes21(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes22":
-                    params.add(new Bytes22(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes23":
-                    params.add(new Bytes23(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes24":
-                    params.add(new Bytes24(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes25":
-                    params.add(new Bytes25(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes26":
-                    params.add(new Bytes26(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes27":
-                    params.add(new Bytes27(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes28":
-                    params.add(new Bytes28(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes29":
-                    params.add(new Bytes29(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes30":
-                    params.add(new Bytes30(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes31":
-                    params.add(new Bytes31(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                case "bytes32":
-                    params.add(new Bytes32(Numeric.hexStringToByteArray(arg.element.value)));
-                    break;
-                default:
-                    System.out.println("NOT IMPLEMENTED: " + arg.parameterType);
-                    break;
+            if (valueNotFound)
+            {
+                params = null;
+                continue;
+            }
+            if (value != null && !arg.parameterType.equals("string"))
+            {
+                argValueBytes = convertArgToBytes(value);
+                argValueBI = new BigInteger(1, argValueBytes);
+            }
+
+            try
+            {
+                switch (arg.parameterType)
+                {
+                    case "int":
+                        params.add(new Int(argValueBI));
+                        break;
+                    case "int8":
+                        params.add(new Int8(argValueBI));
+                        break;
+                    case "int16":
+                        params.add(new Int16(argValueBI));
+                        break;
+                    case "int24":
+                        params.add(new Int24(argValueBI));
+                        break;
+                    case "int32":
+                        params.add(new Int32(argValueBI));
+                        break;
+                    case "int40":
+                        params.add(new Int40(argValueBI));
+                        break;
+                    case "int48":
+                        params.add(new Int48(argValueBI));
+                        break;
+                    case "int56":
+                        params.add(new Int56(argValueBI));
+                        break;
+                    case "int64":
+                        params.add(new Int64(argValueBI));
+                        break;
+                    case "int72":
+                        params.add(new Int72(argValueBI));
+                        break;
+                    case "int80":
+                        params.add(new Int80(argValueBI));
+                        break;
+                    case "int88":
+                        params.add(new Int88(argValueBI));
+                        break;
+                    case "int96":
+                        params.add(new Int96(argValueBI));
+                        break;
+                    case "int104":
+                        params.add(new Int104(argValueBI));
+                        break;
+                    case "int112":
+                        params.add(new Int112(argValueBI));
+                        break;
+                    case "int120":
+                        params.add(new Int120(argValueBI));
+                        break;
+                    case "int128":
+                        params.add(new Int128(argValueBI));
+                        break;
+                    case "int136":
+                        params.add(new Int136(argValueBI));
+                        break;
+                    case "int144":
+                        params.add(new Int144(argValueBI));
+                        break;
+                    case "int152":
+                        params.add(new Int152(argValueBI));
+                        break;
+                    case "int160":
+                        params.add(new Int160(argValueBI));
+                        break;
+                    case "int168":
+                        params.add(new Int168(argValueBI));
+                        break;
+                    case "int176":
+                        params.add(new Int176(argValueBI));
+                        break;
+                    case "int184":
+                        params.add(new Int184(argValueBI));
+                        break;
+                    case "int192":
+                        params.add(new Int192(argValueBI));
+                        break;
+                    case "int200":
+                        params.add(new Int200(argValueBI));
+                        break;
+                    case "int208":
+                        params.add(new Int208(argValueBI));
+                        break;
+                    case "int216":
+                        params.add(new Int216(argValueBI));
+                        break;
+                    case "int224":
+                        params.add(new Int224(argValueBI));
+                        break;
+                    case "int232":
+                        params.add(new Int232(argValueBI));
+                        break;
+                    case "int240":
+                        params.add(new Int240(argValueBI));
+                        break;
+                    case "int248":
+                        params.add(new Int248(argValueBI));
+                        break;
+                    case "int256":
+                        params.add(new Int256(argValueBI));
+                        break;
+                    case "uint":
+                        params.add(new Uint(argValueBI));
+                        break;
+                    case "uint8":
+                        params.add(new Uint8(argValueBI));
+                        break;
+                    case "uint16":
+                        params.add(new Uint16(argValueBI));
+                        break;
+                    case "uint24":
+                        params.add(new Uint24(argValueBI));
+                        break;
+                    case "uint32":
+                        params.add(new Uint32(argValueBI));
+                        break;
+                    case "uint40":
+                        params.add(new Uint40(argValueBI));
+                        break;
+                    case "uint48":
+                        params.add(new Uint48(argValueBI));
+                        break;
+                    case "uint56":
+                        params.add(new Uint56(argValueBI));
+                        break;
+                    case "uint64":
+                        params.add(new Uint64(argValueBI));
+                        break;
+                    case "uint72":
+                        params.add(new Uint72(argValueBI));
+                        break;
+                    case "uint80":
+                        params.add(new Uint80(argValueBI));
+                        break;
+                    case "uint88":
+                        params.add(new Uint88(argValueBI));
+                        break;
+                    case "uint96":
+                        params.add(new Uint96(argValueBI));
+                        break;
+                    case "uint104":
+                        params.add(new Uint104(argValueBI));
+                        break;
+                    case "uint112":
+                        params.add(new Uint112(argValueBI));
+                        break;
+                    case "uint120":
+                        params.add(new Uint120(argValueBI));
+                        break;
+                    case "uint128":
+                        params.add(new Uint128(argValueBI));
+                        break;
+                    case "uint136":
+                        params.add(new Uint136(argValueBI));
+                        break;
+                    case "uint144":
+                        params.add(new Uint144(argValueBI));
+                        break;
+                    case "uint152":
+                        params.add(new Uint152(argValueBI));
+                        break;
+                    case "uint160":
+                        params.add(new Uint160(argValueBI));
+                        break;
+                    case "uint168":
+                        params.add(new Uint168(argValueBI));
+                        break;
+                    case "uint176":
+                        params.add(new Uint176(argValueBI));
+                        break;
+                    case "uint184":
+                        params.add(new Uint184(argValueBI));
+                        break;
+                    case "uint192":
+                        params.add(new Uint192(argValueBI));
+                        break;
+                    case "uint200":
+                        params.add(new Uint200(argValueBI));
+                        break;
+                    case "uint208":
+                        params.add(new Uint208(argValueBI));
+                        break;
+                    case "uint216":
+                        params.add(new Uint216(argValueBI));
+                        break;
+                    case "uint224":
+                        params.add(new Uint224(argValueBI));
+                        break;
+                    case "uint232":
+                        params.add(new Uint232(argValueBI));
+                        break;
+                    case "uint240":
+                        params.add(new Uint240(argValueBI));
+                        break;
+                    case "uint248":
+                        params.add(new Uint248(argValueBI));
+                        break;
+                    case "uint256":
+                        switch (arg.element.ref)
+                        {
+                            case "tokenId":
+                                params.add(new Uint256(tokenId));
+                                break;
+                            case "value":
+                            default:
+                                params.add(new Uint256(argValueBI));
+                                break;
+                        }
+                        break;
+                    case "address":
+                        switch (arg.element.ref)
+                        {
+                            case "ownerAddress":
+                                params.add(new Address(token.getWallet()));
+                                break;
+                            case "value":
+                            default:
+                                params.add(new Address(Numeric.toHexString(argValueBytes)));
+                                break;
+                        }
+                        break;
+                    case "string":
+                        if (value == null) throw new Exception("Attempt to use null value");
+                        params.add(new Utf8String(value));
+                        break;
+                    case "bytes":
+                        if (value == null) throw new Exception("Attempt to use null value");
+                        params.add(new Bytes32(Numeric.hexStringToByteArray(value)));
+                        break;
+                    case "bytes1":
+                        params.add(new Bytes1(argValueBytes));
+                        break;
+                    case "bytes2":
+                        params.add(new Bytes2(argValueBytes));
+                        break;
+                    case "bytes3":
+                        params.add(new Bytes3(argValueBytes));
+                        break;
+                    case "bytes4":
+                        params.add(new Bytes4(argValueBytes));
+                        break;
+                    case "bytes5":
+                        params.add(new Bytes5(argValueBytes));
+                        break;
+                    case "bytes6":
+                        params.add(new Bytes6(argValueBytes));
+                        break;
+                    case "bytes7":
+                        params.add(new Bytes7(argValueBytes));
+                        break;
+                    case "bytes8":
+                        params.add(new Bytes8(argValueBytes));
+                        break;
+                    case "bytes9":
+                        params.add(new Bytes9(argValueBytes));
+                        break;
+                    case "bytes10":
+                        params.add(new Bytes10(argValueBytes));
+                        break;
+                    case "bytes11":
+                        params.add(new Bytes11(argValueBytes));
+                        break;
+                    case "bytes12":
+                        params.add(new Bytes12(argValueBytes));
+                        break;
+                    case "bytes13":
+                        params.add(new Bytes13(argValueBytes));
+                        break;
+                    case "bytes14":
+                        params.add(new Bytes14(argValueBytes));
+                        break;
+                    case "bytes15":
+                        params.add(new Bytes15(argValueBytes));
+                        break;
+                    case "bytes16":
+                        params.add(new Bytes16(argValueBytes));
+                        break;
+                    case "bytes17":
+                        params.add(new Bytes17(argValueBytes));
+                        break;
+                    case "bytes18":
+                        params.add(new Bytes18(argValueBytes));
+                        break;
+                    case "bytes19":
+                        params.add(new Bytes19(argValueBytes));
+                        break;
+                    case "bytes20":
+                        params.add(new Bytes20(argValueBytes));
+                        break;
+                    case "bytes21":
+                        params.add(new Bytes21(argValueBytes));
+                        break;
+                    case "bytes22":
+                        params.add(new Bytes22(argValueBytes));
+                        break;
+                    case "bytes23":
+                        params.add(new Bytes23(argValueBytes));
+                        break;
+                    case "bytes24":
+                        params.add(new Bytes24(argValueBytes));
+                        break;
+                    case "bytes25":
+                        params.add(new Bytes25(argValueBytes));
+                        break;
+                    case "bytes26":
+                        params.add(new Bytes26(argValueBytes));
+                        break;
+                    case "bytes27":
+                        params.add(new Bytes27(argValueBytes));
+                        break;
+                    case "bytes28":
+                        params.add(new Bytes28(argValueBytes));
+                        break;
+                    case "bytes29":
+                        params.add(new Bytes29(argValueBytes));
+                        break;
+                    case "bytes30":
+                        params.add(new Bytes30(argValueBytes));
+                        break;
+                    case "bytes31":
+                        params.add(new Bytes31(argValueBytes));
+                        break;
+                    case "bytes32": //sometimes tokenId can be passed as bytes32
+                        switch (arg.element.ref)
+                        {
+                            case "tokenId":
+                                params.add(new Bytes32(Numeric.toBytesPadded(tokenId, 32)));
+                                break;
+                            case "value":
+                                params.add(new Bytes32(argValueBytes));
+                                break;
+                            default:
+                                params.add(new Bytes32(Numeric.toBytesPadded(argValueBI, 32)));
+                                break;
+                        }
+                        break;
+                    default:
+                        System.out.println("NOT IMPLEMENTED: " + arg.parameterType);
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                //attempting to use unformed value
+                valueNotFound = true;
             }
         }
-        switch (function.syntax)
+        switch (function.as)
         {
-            //not used as of now
+            case UTF8:
+                returnTypes.add(new TypeReference<Utf8String>() {});
+                break;
+            case Signed:
+            case Unsigned:
+            case UnsignedInput:
+            case TokenId:
+                returnTypes.add(new TypeReference<Uint256>() {});
+                break;
+            case Address:
+                returnTypes.add(new TypeReference<Address>() {});
+                break;
+            case Mapping:
             case Boolean:
-            case Integer:
-            case NumericString:
-                returnTypes.add(new TypeReference<Uint256>()
-                {
-                });
+            default:
+                returnTypes.add(new TypeReference<Bytes32>() {});
                 break;
-            case IA5String:
-            case DirectoryString:
-                returnTypes.add(new TypeReference<Utf8String>()
-                {
-                });
-                break;
+        }
+
+        if (valueNotFound)
+        {
+            params = null;
         }
 
         return new Function(function.method,
@@ -425,7 +478,6 @@ public abstract class TokenscriptFunction
                 }
                 catch (NumberFormatException e)
                 {
-                    e.printStackTrace();
                     value = new BigInteger(inputValue, 16);
                 }
 
@@ -447,45 +499,86 @@ public abstract class TokenscriptFunction
         return argBytes;
     }
 
-    private void handleTransactionResult(TransactionResult result, Function function, String responseValue, FunctionDefinition fd, long lastTransactionTime)
+    private String handleTransactionResult(TransactionResult result, Function function, String responseValue, Attribute attr, long lastTransactionTime)
     {
+        String transResult = null;
         try
         {
-            //try to interpret the value
+            //try to interpret the value. For now, just use the raw return value - this is more reliable until we need to interpret arrays
             List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
             if (response.size() > 0)
             {
                 result.resultTime = lastTransactionTime;
                 Type val = response.get(0);
-                switch (fd.syntax)
+
+                BigInteger value;
+                byte[] bytes = Bytes.trimLeadingZeroes(Numeric.hexStringToByteArray(responseValue));
+                String hexBytes = Numeric.toHexString(bytes);
+
+                switch (attr.syntax)
                 {
                     case Boolean:
-                        BigDecimal value = new BigDecimal(((Uint256) val).getValue());
-                        result.result = value.equals(BigDecimal.ZERO) ? "FALSE" : "TRUE";
+                        value = Numeric.toBigInt(hexBytes);
+                        transResult = value.equals(BigDecimal.ZERO) ? "FALSE" : "TRUE";
                         break;
                     case Integer:
+                        value = Numeric.toBigInt(hexBytes);
+                        transResult = value.toString();
+                        break;
+                    case BitString:
                     case NumericString:
-                        result.result = new BigDecimal(((Uint256) val).getValue()).toString();
+                        if (val.getTypeAsString().equals("string"))
+                        {
+                            transResult = (String)val.getValue();
+                            if (responseValue.length() > 2 && transResult.length() == 0)
+                            {
+                                transResult = checkBytesString(responseValue);
+                            }
+                        }
+                        else
+                        {
+                            //should be a decimal string
+                            value = Numeric.toBigInt(hexBytes);
+                            transResult = value.toString();
+                        }
                         break;
                     case IA5String:
                     case DirectoryString:
-                        result.result = (String) response.get(0).getValue();
-                        if (responseValue.length() > 2 && result.result.length() == 0)
+                    case GeneralizedTime:
+                    case CountryString:
+                        if (val.getTypeAsString().equals("string"))
                         {
-                            result.result = checkBytesString(responseValue);
+                            transResult = (String)val.getValue();
+                            if (responseValue.length() > 2 && transResult.length() == 0)
+                            {
+                                transResult = checkBytesString(responseValue);
+                            }
                         }
+                        else if (val.getTypeAsString().equals("address"))
+                        {
+                            transResult = (String)val.getValue();
+                        }
+                        else
+                        {
+                            transResult = hexBytes;
+                        }
+                        break;
+                    default:
+                        transResult = hexBytes;
                         break;
                 }
             }
             else
             {
-                result.resultTime = 0;
+                result.resultTime = lastTransactionTime == -1 ? -1 : 0;
             }
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
+
+        return transResult;
     }
 
     private String checkBytesString(String responseValue) throws Exception
@@ -513,12 +606,17 @@ public abstract class TokenscriptFunction
         return name;
     }
 
-    public TokenScriptResult.Attribute parseFunctionResult(TransactionResult transactionResult, AttributeType attr)
+    public TokenScriptResult.Attribute parseFunctionResult(TransactionResult transactionResult, Attribute attr)
     {
         String res = attr.getSyntaxVal(transactionResult.result);
         BigInteger val = transactionResult.tokenId; //?
 
-        if (attr.syntax == TokenDefinition.Syntax.NumericString)
+        if (attr.syntax == TokenDefinition.Syntax.Boolean)
+        {
+            if (res.equalsIgnoreCase("TRUE")) val = BigInteger.ONE;
+            else val = BigInteger.ZERO;
+        }
+        else if (attr.syntax == TokenDefinition.Syntax.NumericString && attr.as != As.Address)
         {
             if (transactionResult.result == null)
             {
@@ -537,40 +635,40 @@ public abstract class TokenscriptFunction
                 val = BigInteger.ZERO;
             }
         }
-        return new TokenScriptResult.Attribute(attr.id, attr.name, val, res);
+        return new TokenScriptResult.Attribute(attr.name, attr.label, val, res);
     }
 
     public static final String ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
     /**
      * Haven't pre-cached this value yet, so need to fetch it before we can proceed
-     * @param override
      * @param attr
      * @param tokenId
      * @param definition
      * @return
      */
-    public Observable<TransactionResult> fetchResultFromEthereum(String walletAddress, ContractAddress override, AttributeType attr,
+    public Observable<TransactionResult> fetchResultFromEthereum(Token token, ContractAddress contractAddress, Attribute attr,
                                                                  BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf, long lastTransactionTime)
     {
         return Observable.fromCallable(() -> {
-            ContractAddress useAddress;
-            if (override == null) // contract not specified - is not holder contract
+            long txUpdateTime = lastTransactionTime;
+            TransactionResult transactionResult = new TransactionResult(contractAddress.chainId, contractAddress.address, tokenId, attr);
+            Function transaction = generateTransactionFunction(token, tokenId, definition, attr.function, attrIf);
+
+            String result;
+            if (transaction.getInputParameters() == null)
             {
-                //determine address using definition context
-                useAddress = new ContractAddress(attr.function, definition.context.cAddr.chainId, definition.context.cAddr.address);
+                //couldn't validate all the input param values
+                result = "";
+                txUpdateTime = -1;
             }
             else
             {
-                useAddress = override;
+                //now push the transaction
+                result = callSmartContractFunction(TokenRepository.getWeb3jService(contractAddress.chainId), transaction, contractAddress.address, ZERO_ADDRESS);
             }
-            TransactionResult transactionResult = new TransactionResult(useAddress.chainId, useAddress.address, tokenId, attr);
-            Function transaction = generateTransactionFunction(walletAddress, tokenId, definition, attr.function, attrIf);
 
-            //now push the transaction
-            String result = callSmartContractFunction(TokenRepository.getWeb3jService(useAddress.chainId), transaction, useAddress.address, ZERO_ADDRESS);
-
-            handleTransactionResult(transactionResult, transaction, result, attr.function, lastTransactionTime);
+            transactionResult.result = handleTransactionResult(transactionResult, transaction, result, attr, txUpdateTime);
             return transactionResult;
         });
     }
@@ -600,12 +698,58 @@ public abstract class TokenscriptFunction
         }
     }
 
-    private void resolveReference(String walletAddress, MethodArg arg, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
+    public String resolveReference(Token token, TokenscriptElement element, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
     {
-        if (definition != null && definition.attributeTypes.containsKey(arg.element.ref))
+        TokenScriptResult.Attribute attrRes = token.getAttributeResult(element.ref, tokenId);
+        if (!TextUtils.isEmpty(element.value))
         {
-            arg.element.value = fetchAttrResult(walletAddress, arg.element.ref, tokenId, null, definition, attrIf, 0).blockingSingle().text;
+            return element.value;
         }
+        else if (attrRes != null) //resolve from result map
+        {
+            return attrRes.text;
+        }
+        else if (definition != null && definition.attributes.containsKey(element.ref)) //resolve from attribute
+        {
+            Attribute attr = definition.attributes.get(element.ref);
+            return fetchArgValue(token, element, attr, tokenId, definition, attrIf);
+        }
+        else if (localAttrs.containsKey(element.ref)) //wasn't able to resolve, attempt to resolve from local attributes or mark null if unresolved user input
+        {
+            Attribute attr = localAttrs.get(element.ref);
+            return fetchArgValue(token, element, attr, tokenId, definition, attrIf);
+        }
+        else if (localAttrs.containsKey(element.localRef))
+        {
+            Attribute attr = localAttrs.get(element.localRef);
+            return fetchArgValue(token, element, attr, tokenId, definition, attrIf);
+        }
+        else if (!TextUtils.isEmpty(element.localRef) && refTags.containsKey(element.localRef))
+        {
+            return refTags.get(element.localRef);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private String fetchArgValue(Token token, TokenscriptElement element, Attribute attr, BigInteger tokenId, TokenDefinition definition, AttributeInterface attrIf)
+    {
+        if (attr.userInput)
+        {
+            if (!TextUtils.isEmpty(element.value)) return element.value; //nullify user input if value is not set
+        }
+        else if (!TextUtils.isEmpty(element.value))
+        {
+            return element.value;
+        }
+        else
+        {
+            return fetchAttrResult(token, attr, tokenId, definition, attrIf, false).blockingSingle().text;
+        }
+
+        return null;
     }
 
     /**
@@ -622,37 +766,50 @@ public abstract class TokenscriptFunction
      *       It may not be possible to always safely cache these values; even with an event handler we have to interpret those events and invalidate
      *       any cached results. However if we're tracking the referenced contract as a token then it should be safe
      *
-     * @param walletAddress
-     * @param attribute
+     * @param token
+     * @param attr
      * @param tokenId
-     * @param cAddr
      * @param td
      * @param attrIf
-     * @param transactionUpdate
      * @return
      */
-    public Observable<TokenScriptResult.Attribute> fetchAttrResult(String walletAddress, String attribute, BigInteger tokenId, ContractAddress cAddr, TokenDefinition td, AttributeInterface attrIf, long transactionUpdate)
+
+    public Observable<TokenScriptResult.Attribute> fetchAttrResult(Token token, Attribute attr, BigInteger tokenId,
+                                                                   TokenDefinition td, AttributeInterface attrIf, boolean itemView)
     {
-        AttributeType attr = td.attributeTypes.get(attribute);
-        if (attr == null || isAttrIncomplete(attr)) return Observable.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));
-        if (attr.function == null)  // static attribute from tokenId (eg city mapping from tokenId)
+        if (attr == null)
+        {
+            return Observable.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));
+        }
+        else if (token.getAttributeResult(attr.name, tokenId) != null)
+        {
+            return Observable.fromCallable(() -> token.getAttributeResult(attr.name, tokenId));
+        }
+        else if (attr.event != null)
+        {
+            //retrieve events from DB
+            ContractAddress useAddress = new ContractAddress(attr.event.eventModule.contractInfo.addresses.keySet().iterator().next(),
+                                                             attr.event.eventModule.contractInfo.addresses.values().iterator().next().get(0));
+            TransactionResult cachedResult = attrIf.getFunctionResult(useAddress, attr, tokenId); //Needs to allow for multiple tokenIds
+            return resultFromDatabase(cachedResult, attr);
+        }
+        else if (attr.function == null)  // static attribute from tokenId (eg city mapping from tokenId)
         {
             return staticAttribute(attr, tokenId);
         }
         else
         {
-            ContractAddress useAddress;
-            if (cAddr == null) useAddress = new ContractAddress(attr.function);
-            else useAddress = new ContractAddress(attr.function, cAddr.chainId, cAddr.address);
+            ContractAddress useAddress = new ContractAddress(attr.function); //always use the function attribute's address
+            long lastTxUpdate = attrIf.getLastTokenUpdate(useAddress.chainId, useAddress.address);
             TransactionResult cachedResult = attrIf.getFunctionResult(useAddress, attr, tokenId); //Needs to allow for multiple tokenIds
-            if (cAddr != null && !useAddress.address.equalsIgnoreCase(cAddr.address)) transactionUpdate = 0; //If calling a function which isn't the main tokenscript function retrieve from contract call not cache
-            if (!attr.isVolatile() && (attrIf.resolveOptimisedAttr(useAddress, attr, cachedResult) || !cachedResult.needsUpdating(transactionUpdate))) //can we use wallet's known data or cached value?
+            if (cachedResult.resultTime > 0 && (itemView || (!attr.isVolatile() && ((attrIf.resolveOptimisedAttr(useAddress, attr, cachedResult) || !cachedResult.needsUpdating(lastTxUpdate)))))) //can we use wallet's known data or cached value?
             {
                 return resultFromDatabase(cachedResult, attr);
             }
             else  //if cached value is invalid or if value is dynamic
             {
-                return fetchResultFromEthereum(walletAddress, useAddress, attr, tokenId, td, attrIf, transactionUpdate)       // Fetch function result from blockchain
+                return fetchResultFromEthereum(token, useAddress, attr, tokenId, td, attrIf, lastTxUpdate)       // Fetch function result from blockchain
+                        .map(transactionResult -> addParseResultIfValid(token, tokenId, attr, transactionResult))// only cache live transaction result
                         .map(result -> restoreFromDBIfRequired(result, cachedResult))  // If network unavailable restore value from cache
                         .map(attrIf::storeAuxData)                                     // store new data
                         .map(result -> parseFunctionResult(result, attr));    // write returned data into attribute
@@ -660,49 +817,30 @@ public abstract class TokenscriptFunction
         }
     }
 
-    private boolean isAttrIncomplete(AttributeType attr)
-    {
-        if (attr.function == null) return false;
-
-        for (MethodArg arg : attr.function.parameters)
-        {
-            int index = arg.getTokenIndex();
-            if (arg.isTokenId() && index >= 0 && (arg.element.value == null || arg.element.value.length() == 0))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public Observable<TokenScriptResult.Attribute> resolveAttributes(String walletAddress, BigInteger tokenId, AttributeInterface attrIf, ContractAddress cAddr, TokenDefinition td, long transactionUpdate)
-    {
-        td.context = new TokenscriptContext();
-        td.context.cAddr = cAddr;
-        td.context.attrInterface = attrIf;
-
-        return Observable.fromIterable(new ArrayList<>(td.attributeTypes.values()))
-                .flatMap(attr -> fetchAttrResult(walletAddress, attr.id, tokenId, cAddr, td, attrIf, transactionUpdate));
-    }
-
-    private Observable<TokenScriptResult.Attribute> staticAttribute(AttributeType attr, BigInteger tokenId)
+    private Observable<TokenScriptResult.Attribute> staticAttribute(Attribute attr, BigInteger tokenId)
     {
         return Observable.fromCallable(() -> {
             try
             {
-                BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
-                if (BuildConfig.DEBUG) System.out.println("ATTR: " + attr.name + " : " + attr.id + " : " + attr.getSyntaxVal(attr.toString(val)));
-                return new TokenScriptResult.Attribute(attr.id, attr.name, val, attr.getSyntaxVal(attr.toString(val)));
+                if (attr.userInput)
+                {
+                    return new TokenScriptResult.Attribute(attr.name, attr.label, BigInteger.ZERO, "", true);
+                }
+                else
+                {
+                    BigInteger val = tokenId.and(attr.bitmask).shiftRight(attr.bitshift);
+                    if (BuildConfig.DEBUG) System.out.println("ATTR: " + attr.label + " : " + attr.name + " : " + attr.getSyntaxVal(attr.toString(val)));
+                    return new TokenScriptResult.Attribute(attr.name, attr.label, val, attr.getSyntaxVal(attr.toString(val)));
+                }
             }
             catch (Exception e)
             {
-                return new TokenScriptResult.Attribute(attr.id, attr.name, tokenId, "unsupported encoding");
+                return new TokenScriptResult.Attribute(attr.name, attr.label, tokenId, "unsupported encoding");
             }
         });
     }
 
-    private Observable<TokenScriptResult.Attribute> resultFromDatabase(TransactionResult transactionResult, AttributeType attr)
+    private Observable<TokenScriptResult.Attribute> resultFromDatabase(TransactionResult transactionResult, Attribute attr)
     {
         return Observable.fromCallable(() -> parseFunctionResult(transactionResult, attr));
     }
@@ -724,7 +862,7 @@ public abstract class TokenscriptFunction
         return result;
     }
 
-    public String convertInputValue(AttributeType attr, TokenscriptElement e, String valueFromInput)
+    public String convertInputValue(Attribute attr, String valueFromInput)
     {
         String convertedValue = "";
         try
@@ -736,13 +874,11 @@ public abstract class TokenscriptFunction
                 case Unsigned:
                 case Signed:
                 case UnsignedInput:
-                    inputBytes = TokenscriptFunction.convertArgToBytes(valueFromInput);
+                    inputBytes = TokenscriptFunction.convertArgToBytes(Utils.isolateNumeric(valueFromInput)); //convert cleaned user input
                     BigInteger unsignedValue = new BigInteger(inputBytes);
                     convertedValue = unsignedValue.toString();
-                    e.value = unsignedValue.toString();
                     break;
                 case UTF8:
-                    e.value = valueFromInput;
                     convertedValue = valueFromInput;
                     break;
                 case Bytes:
@@ -751,46 +887,46 @@ public abstract class TokenscriptFunction
                     if (inputBytes.length <= 32)
                     {
                         BigInteger val = new BigInteger(1, inputBytes).and(attr.bitmask).shiftRight(attr.bitshift);
-                        e.value = val.toString(16);
+                        convertedValue = val.toString(16);
                     }
                     else
                     {
-                        e.value = com.alphawallet.token.tools.Numeric.toHexString(inputBytes);
+                        convertedValue = com.alphawallet.token.tools.Numeric.toHexString(inputBytes);
                     }
-                    convertedValue = e.value;
                     break;
                 case e18:
-                    e.value = BalanceUtils.EthToWei(valueFromInput);
-                    convertedValue = e.value;
+                    convertedValue = BalanceUtils.EthToWei(valueFromInput);
                     break;
                 case e8:
-                    e.value = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("100000000"));
-                    convertedValue = e.value;
+                    convertedValue = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("100000000"));
+                    break;
+                case e6:
+                    convertedValue = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("1000000"));
                     break;
                 case e4:
-                    e.value = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("1000"));
-                    convertedValue = e.value;
+                    convertedValue = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("1000"));
                     break;
                 case e2:
-                    e.value = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("100"));
-                    convertedValue = e.value;
+                    convertedValue = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("100"));
                     break;
                 case Mapping:
                     //makes no sense as input
+                    convertedValue = TOKENSCRIPT_CONVERSION_ERROR + "Mapping in user input params: " + attr.name;
                     break;
                 case Boolean:
                     //attempt to decode
                     if (valueFromInput.equalsIgnoreCase("true") || valueFromInput.equals("1"))
                     {
-                        e.value = "TRUE";
+                        convertedValue = "TRUE";
                     }
                     else
                     {
-                        e.value = "FALSE";
+                        convertedValue = "FALSE";
                     }
-                    convertedValue = e.value;
                     break;
                 case TokenId:
+                    //Shouldn't get here - tokenId should have been handled before.
+                    convertedValue = TOKENSCRIPT_CONVERSION_ERROR + "Token ID in user input params: " + attr.name;
                     break;
             }
         }
@@ -801,5 +937,43 @@ public abstract class TokenscriptFunction
         }
 
         return convertedValue;
+    }
+
+    public void buildAttrMap(List<Attribute> attrs)
+    {
+        localAttrs.clear();
+        for (Attribute attr : attrs)
+        {
+            localAttrs.put(attr.name, attr);
+        }
+    }
+
+    public TokenScriptResult.Attribute addParseResultIfValid(Token token, BigInteger tokenId, TokenScriptResult.Attribute attrResult)
+    {
+        if (!TextUtils.isEmpty(attrResult.text))
+        {
+            token.setAttributeResult(tokenId, attrResult);
+        }
+        return attrResult;
+    }
+
+    private TransactionResult addParseResultIfValid(Token token, BigInteger tokenId, Attribute attr, TransactionResult result)
+    {
+        if (!TextUtils.isEmpty(result.result))
+        {
+            token.setAttributeResult(tokenId, parseFunctionResult(result, attr));
+        }
+        return result;
+    }
+
+    public void addLocalRefs(Map<String, String> refs)
+    {
+        refTags.putAll(refs);
+    }
+
+    public void clearParseMaps()
+    {
+        localAttrs.clear();
+        refTags.clear();
     }
 }

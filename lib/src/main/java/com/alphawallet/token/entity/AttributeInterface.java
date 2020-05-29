@@ -8,9 +8,11 @@ import java.math.BigInteger;
  */
 public interface AttributeInterface
 {
-    TransactionResult getFunctionResult(ContractAddress contract, AttributeType attr, BigInteger tokenId);
+    TransactionResult getFunctionResult(ContractAddress contract, Attribute attr, BigInteger tokenId);
     TransactionResult storeAuxData(TransactionResult tResult);
-    boolean resolveOptimisedAttr(ContractAddress contract, AttributeType attr, TransactionResult transactionResult);
+    boolean resolveOptimisedAttr(ContractAddress contract, Attribute attr, TransactionResult transactionResult);
 
     String getWalletAddr();
+
+    default long getLastTokenUpdate(int chainId, String address) { return 0; };
 }

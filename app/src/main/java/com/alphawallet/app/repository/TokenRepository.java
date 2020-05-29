@@ -234,14 +234,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Observable<Token> fetchActiveSingle(String walletAddress, Token token)
+    public Single<Token> fetchActiveSingle(String walletAddress, Token token)
     {
         NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(token.tokenInfo.chainId);
         Wallet wallet = new Wallet(walletAddress);
-        return Single.merge(
-                fetchCachedToken(network.chainId, wallet, token.getAddress()),
-                updateBalance(network, wallet, token)) // Looking for new tokens
-                .toObservable();
+        return fetchCachedToken(token.tokenInfo.chainId, wallet, token.getAddress())
+               .flatMap(t -> updateBalance(network, wallet, t)); // Looking for new tokens
     }
 
     @Override
@@ -1289,7 +1287,7 @@ public class TokenRepository implements TokenRepositoryType {
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(false)
                 .build();
-        AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getSecondaryNodeURL(chainId), EthereumNetworkRepository.getNodeURLByNetworkId(chainId), okClient, false);
+        AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId (chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), okClient, false);
         EthereumNetworkRepository.addRequiredCredentials(chainId, publicNodeService);
         return Web3j.build(publicNodeService);
     }

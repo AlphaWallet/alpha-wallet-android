@@ -81,7 +81,7 @@ public class OpenseaService {
             return foundTokens.values().toArray(new Token[0]);
         });
     }
-    
+
     private void processOpenseaTokens(Map<String, Token> foundTokens, JSONArray assets, String address, int networkId, String networkName) throws Exception
     {
         TokenFactory tf = new TokenFactory();

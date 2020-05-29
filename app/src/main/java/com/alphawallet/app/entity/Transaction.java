@@ -457,10 +457,10 @@ public class Transaction implements Parcelable {
 	 * @param token
 	 * @return
 	 */
-	public String getOperationResult(Token token)
+	public String getOperationResult(Token token, int precision)
 	{
 		if (operations == null || operations.length == 0)
-			return token.getTransactionValue(this);
+			return token.getTransactionValue(this, precision);
 		if (error.equals("1")) return "";
 
 		//TODO: Handle multiple operation transactions

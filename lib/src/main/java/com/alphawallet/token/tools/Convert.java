@@ -16,7 +16,7 @@ public final class Convert {
     }
 
     public static BigDecimal fromWei(BigDecimal number, Unit unit) {
-        return number.divide(unit.getWeiFactor());
+        return number.divide(unit.getWeiFactor(), 18, RoundingMode.DOWN);
     }
 
     public static BigDecimal toWei(String number, Unit unit) {
@@ -88,9 +88,8 @@ public final class Convert {
 
     public static String getConvertedValue(BigDecimal rawValue, int divisor)
     {
-        BigDecimal convertedValue = rawValue.divide(new BigDecimal(Math.pow(10, divisor)));
+        BigDecimal convertedValue = rawValue.divide(new BigDecimal(Math.pow(10, divisor)), 18, RoundingMode.DOWN);
         DecimalFormat df = new DecimalFormat("0.#####");
-        df.setRoundingMode(RoundingMode.HALF_DOWN);
         return df.format(convertedValue);
     }
 

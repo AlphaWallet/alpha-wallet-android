@@ -447,7 +447,7 @@ public class TokenFunctionViewModel extends BaseViewModel
             e.printStackTrace();
         }
 
-        return val.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros();
+        return val.setScale(scale, RoundingMode.DOWN).stripTrailingZeros();
     }
 
     public OpenseaService getOpenseaService()

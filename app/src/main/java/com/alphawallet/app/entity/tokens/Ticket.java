@@ -388,18 +388,6 @@ public class Ticket extends Token implements Parcelable
     }
 
     @Override
-    protected String addSuffix(String result, Transaction transaction)
-    {
-        return result;
-    }
-
-    @Override
-    public boolean checkIntrinsicType()
-    {
-        return (contractType == ContractType.ERC875 || contractType == ContractType.ERC875_LEGACY);
-    }
-
-    @Override
     public boolean hasArrayBalance()
     {
         return true;

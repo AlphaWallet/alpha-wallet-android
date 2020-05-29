@@ -17,6 +17,7 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.widget.holder.TransactionHolder;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
@@ -69,6 +70,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         setTitle(R.string.empty);
 
         String blockNumber = transaction.blockNumber;
+        TransactionOperation op = null;
         if (transaction.blockNumber.equals("0"))
         {
             blockNumber = getString(R.string.status_pending);
@@ -88,7 +90,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
 
         if (transaction.operations != null && transaction.operations.length > 0)
         {
-            TransactionOperation op = transaction.operations[0];
+            op = transaction.operations[0];
             if (op != null && op.to != null) ((TextView) findViewById(R.id.to)).setText(op.to);
         }
 
@@ -130,7 +132,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         }
 
         if (!viewModel.hasEtherscanDetail(transaction)) findViewById(R.id.more_detail).setVisibility(View.GONE);
-        setupWalletDetails();
+        setupWalletDetails(op);
     }
 
     private void onLatestBlock(BigInteger latestBlock)
@@ -172,7 +174,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         findViewById(R.id.title_confirmations).setVisibility(View.GONE);
     }
 
-    private void setupWalletDetails() {
+    private void setupWalletDetails(TransactionOperation op) {
         boolean isSent = transaction.from.equalsIgnoreCase(wallet.address);
         String rawValue;
         String prefix = "";
@@ -184,32 +186,28 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
 
         if (token != null)
         {
-            BigDecimal rawTxValue = token.getTxValue(transaction);
-            rawValue = getScaledValue(rawTxValue, token.tokenInfo.decimals);
-            rawValue = rawValue + " " + token.getSymbol();
-            isSent = token.getIsSent(transaction);
+            if (token.isNonFungible() || op != null)
+            {
+                rawValue = token.getTransactionResultValue(transaction, TransactionHolder.TRANSACTION_BALANCE_PRECISION);
+            }
+            else
+            {
+                //higher precision
+                rawValue = BalanceUtils.getScaledValueWithLimit(token.getTxValue(transaction), token.tokenInfo.decimals) + " " + token.getSymbol();
+                prefix = (token.getIsSent(transaction) ? "-" : "+");
+            }
         }
         else
         {
             BigDecimal txValue = new BigDecimal(transaction.value);
-            rawValue = getScaledValue(txValue, 18);
+            rawValue = BalanceUtils.getScaledValueWithLimit(txValue, 18);
+            prefix = (isSent ? "-" : "+");
         }
-
-        prefix = (isSent ? "-" : "+");
 
         amount.setTextColor(ContextCompat.getColor(this, isSent ? R.color.red : R.color.green));
         rawValue =  prefix + rawValue;
 
         amount.setText(rawValue);
-    }
-
-    public String getScaledValue(BigDecimal value, long decimals)
-    {
-        NumberFormat formatter = new DecimalFormat("0.00######");
-        formatter.setRoundingMode(RoundingMode.DOWN);
-
-        value = value.divide(new BigDecimal(Math.pow(10, decimals)));
-        return formatter.format(value);
     }
 
     private String localiseUnixTime(long timeStampInSec)

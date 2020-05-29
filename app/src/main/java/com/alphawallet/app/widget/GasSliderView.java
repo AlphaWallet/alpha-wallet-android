@@ -178,9 +178,7 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
                 For example, progress on seekbar is 150, then expected result is 16.0
                  */
                 BigDecimal scaledGasPrice = BigDecimal.valueOf((progress * scaleFactor) + minimumPrice)
-                        .divide(BigDecimal.TEN) //divide by ten because price from API is x10
-                        .setScale(2, RoundingMode.HALF_DOWN); //to 2 dp
-
+                        .divide(BigDecimal.TEN, 2, RoundingMode.DOWN); //divide by ten because price from API is x10
                 gasPrice.setValue(scaledGasPrice);
                 updateTimings();
             }

@@ -32,7 +32,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
 
     public static final int VIEW_TYPE = 1003;
 
-    private static final int SIGNIFICANT_FIGURES = 3;
+    public static final int TRANSACTION_BALANCE_PRECISION = 4;
 
     public static final String DEFAULT_ADDRESS_ADDITIONAL = "default_address";
     public static final String DEFAULT_SYMBOL_ADDITIONAL = "network_symbol";
@@ -96,7 +96,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         Token token = getOperationToken();
         if (token == null) return;
 
-        String transactionOperation = token.getTransactionResultValue(transaction);
+        String transactionOperation = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
         value.setText(transactionOperation);
         value.setTextColor(getValueColour(token));
 

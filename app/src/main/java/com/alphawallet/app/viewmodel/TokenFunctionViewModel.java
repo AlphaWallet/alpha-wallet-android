@@ -32,6 +32,7 @@ import com.alphawallet.app.ui.RedeemAssetSelectActivity;
 import com.alphawallet.app.ui.SellDetailActivity;
 import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
+import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.token.entity.ContractAddress;
@@ -382,7 +383,8 @@ public class TokenFunctionViewModel extends BaseViewModel
                 //resolve reference
                 value = assetDefinitionService.resolveReference(token, action, arg, tokenId);
                 Token currency = getCurrency(token.tokenInfo.chainId);
-                functionEffect = getCorrectedBalance(value, 18) + " " + currency.getSymbol() + " to " + action.function.method;
+                functionEffect = BalanceUtils.getScaledValue(value, 18, Token.TOKEN_BALANCE_PRECISION)
+                         + " " + currency.getSymbol() + " to " + action.function.method;
             }
 
             //finished resolving attributes, blank definition cache so definition is re-loaded when next needed
@@ -427,7 +429,7 @@ public class TokenFunctionViewModel extends BaseViewModel
             isValid = false;
         }
 
-        BigDecimal valCorrected = getCorrectedBalance(value.toString(), 18);
+        String valCorrected = BalanceUtils.getScaledValue(value, token.tokenInfo.decimals, Token.TOKEN_BALANCE_PRECISION);
 
         //eg Send 2(*1) ETH(*2) to Alex's Amazing Coffee House(*3) (0xdeadacec0ffee(*4))
         String extraInfo = String.format(context.getString(R.string.tokenscript_send_native), valCorrected, token.getSymbol(), action.function.method, to);
@@ -438,23 +440,6 @@ public class TokenFunctionViewModel extends BaseViewModel
         if (isValid) {
             confirmNativeTransaction(context, to, value, token, extraInfo);
         }
-    }
-
-    private BigDecimal getCorrectedBalance(String value, int divisor)
-    {
-        BigDecimal val = BigDecimal.ZERO;
-        try
-        {
-            val = new BigDecimal(value);
-            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, divisor));
-            val = val.divide(decimalDivisor);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return val.setScale(4, RoundingMode.HALF_DOWN).stripTrailingZeros();
     }
 
     public OpenseaService getOpenseaService()

@@ -31,7 +31,7 @@ public class GetDefaultWalletBalance {
                     balances.put(
                             ethereumNetworkRepository.getDefaultNetwork().symbol,
                             BalanceUtils.weiToEth(ethBalance)
-                                    .setScale(4, RoundingMode.HALF_DOWN)
+                                    .setScale(4, RoundingMode.DOWN)
                                 .stripTrailingZeros().toPlainString());
                     return Single.just(balances);
                 })

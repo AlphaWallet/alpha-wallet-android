@@ -21,6 +21,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
+import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3j.datatypes.Function;
@@ -53,7 +54,7 @@ import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_V
 
 public class Token implements Parcelable, Comparable<Token>
 {
-    private final static int TOKEN_BALANCE_PRECISION = 4;
+    public final static int TOKEN_BALANCE_PRECISION = 4;
     private final static int TOKEN_BALANCE_FOCUS_PRECISION = 5;
     private final static float FOCUS_TOKEN_WEIGHT = 2.1f; //Magic update weighting to ensure focus token is regularly updated
 
@@ -497,7 +498,7 @@ public class Token implements Parcelable, Comparable<Token>
             String prefix = "";
             BigDecimal diff = pendingBalance.subtract(balance);
             if (diff.compareTo(BigDecimal.ZERO) > 0) prefix = "+";
-            String diffStr = prefix + getScaledValue(diff, tokenInfo.decimals);
+            String diffStr = prefix + BalanceUtils.getScaledValue(diff, tokenInfo.decimals, TOKEN_BALANCE_PRECISION);
             if (diffStr.startsWith("~")) diffStr = null;
             return diffStr;
         }
@@ -608,50 +609,28 @@ public class Token implements Parcelable, Comparable<Token>
         return name;
     }
 
+    /* Raw string value for balance */
     public String getScaledBalance()
     {
-        return getScaledValue(balance, tokenInfo.decimals);
-    }
-
-    public static String getScaledValue(BigDecimal value, long decimals)
-    {
-        value = value.divide(new BigDecimal(Math.pow(10, decimals)));
-        int scale = 4;
-        if (value.equals(BigDecimal.ZERO))
-        {
-            return "0.0000";
-        }
-        if (value.abs().compareTo(BigDecimal.valueOf(0.0001)) < 0)
-        {
-            return "0.0000";
-        }
-        else
-        {
-            return value.setScale(scale, RoundingMode.HALF_DOWN).toPlainString();
-        }
+        return balance.divide(new BigDecimal(Math.pow(10, tokenInfo.decimals)), 18, RoundingMode.DOWN).toString();
     }
 
     /**
-     * Universal scaled value method
-     * @param valueStr
-     * @param decimals
-     * @return
+     * Balance in human readable form, variable decimal width - will only display decimals if present (eg 14.5, 20, 32.5432)
+     * @return formatted balance
      */
-    public static String getScaledValue(String valueStr, long decimals) {
-        // Perform decimal conversion
-        if (decimals > 1 && valueStr != null && valueStr.length() > 0 && Character.isDigit(valueStr.charAt(0)))
-        {
-            BigDecimal value = new BigDecimal(valueStr);
-            return getScaledValue(value, decimals); //represent balance transfers according to 'decimals' contract indicator property
-        }
-        else if (valueStr != null)
-        {
-            return valueStr;
-        }
-        else
-        {
-            return "0";
-        }
+    public String getFormattedBalance()
+    {
+        return BalanceUtils.getScaledValue(balance, tokenInfo.decimals, TOKEN_BALANCE_PRECISION);
+    }
+
+    /**
+     * Balance in human readable form, fixed decimal width eg 14.5000
+     * @return formatted balance
+     */
+    public String getFixedFormattedBalance()
+    {
+        return BalanceUtils.getScaledValueFixed(balance, tokenInfo.decimals, TOKEN_BALANCE_PRECISION);
     }
 
     /**
@@ -688,11 +667,11 @@ public class Token implements Parcelable, Comparable<Token>
      * @param transaction
      * @return
      */
-    public String getTransactionValue(Transaction transaction)
+    public String getTransactionValue(Transaction transaction, int precision)
     {
         if (transaction.error.equals("1")) return "";
         else if (transaction.value.equals("0")) return "0";
-        return transaction.getPrefix(this) + " " + getScaledValue(transaction.value, tokenInfo.decimals);
+        return transaction.getPrefix(this) + BalanceUtils.getScaledValueFixed(new BigDecimal(transaction.value), tokenInfo.decimals, precision);
     }
 
     /**
@@ -701,58 +680,10 @@ public class Token implements Parcelable, Comparable<Token>
      * @param transaction
      * @return
      */
-    public String getTransactionResultValue(Transaction transaction)
+    public String getTransactionResultValue(Transaction transaction, int precision)
     {
-        String txResultValue = isEthereum() ? getTransactionValue(transaction) : transaction.getOperationResult(this);
+        String txResultValue = isEthereum() ? getTransactionValue(transaction, precision) : transaction.getOperationResult(this, precision);
         return txResultValue + " " + getSymbol();
-    }
-
-    public String getTransactionValue(Transaction transaction, Context context)
-    {
-        String result = "0";
-        if (transaction.error.equals("1"))
-        {
-            return "";
-        }
-        else if (transaction.operations != null && transaction.operations.length > 0)
-        {
-            result = transaction.operations[0].getValue(tokenInfo.decimals);
-        }
-        else if (!transaction.value.equals("0"))
-        {
-            result = getScaledValue(transaction.value, tokenInfo.decimals);
-        }
-
-        if (result.length() > 0 && tokenInfo.symbol != null)
-        {
-            result = result + " " + tokenInfo.symbol;
-        }
-
-        if (result.length() > 0 && !result.equals("0") && !result.startsWith("~"))
-        {
-            result = addSuffix(result, transaction);
-        }
-
-        return result;
-    }
-
-    protected String addSuffix(String result, Transaction transaction)
-    {
-        if (transaction.from.equalsIgnoreCase(tokenWallet.toLowerCase()))
-        {
-            result = "-" + result;
-        }
-        else
-        {
-            result = "+" + result;
-        }
-
-        return result;
-    }
-
-    public boolean checkIntrinsicType()
-    {
-        return (contractType == ContractType.ETHEREUM || contractType == ContractType.ERC20 || contractType == ContractType.OTHER);
     }
 
     public boolean hasArrayBalance()
@@ -961,7 +892,6 @@ public class Token implements Parcelable, Comparable<Token>
         {
             BigDecimal bd = new BigDecimal(newAmount);
             BigDecimal factor = new BigDecimal(Math.pow(10, tokenInfo.decimals));
-            //.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros();
             return bd.multiply(factor).setScale(0, RoundingMode.DOWN).stripTrailingZeros();
         }
         catch (Exception e)

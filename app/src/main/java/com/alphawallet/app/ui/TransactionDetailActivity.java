@@ -179,7 +179,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         String rawValue;
         String prefix = "";
 
-        if (token == null && (transaction.input == null || transaction.input.equals("0x")))
+        if (token == null && op == null)
         {
             token = viewModel.getToken(transaction.chainId, wallet.address);
         }
@@ -192,7 +192,6 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
             }
             else
             {
-                //higher precision
                 rawValue = BalanceUtils.getScaledValueWithLimit(token.getTxValue(transaction), token.tokenInfo.decimals) + " " + token.getSymbol();
                 prefix = (token.getIsSent(transaction) ? "-" : "+");
             }
@@ -200,7 +199,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         else
         {
             BigDecimal txValue = new BigDecimal(transaction.value);
-            rawValue = BalanceUtils.getScaledValueWithLimit(txValue, 18);
+            rawValue = BalanceUtils.getScaledValueWithLimit(txValue, 18) + " " + viewModel.getNetworkSymbol(transaction.chainId);
             prefix = (isSent ? "-" : "+");
         }
 

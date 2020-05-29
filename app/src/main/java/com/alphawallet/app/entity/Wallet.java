@@ -8,7 +8,6 @@ import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.util.BalanceUtils;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 public class Wallet implements Parcelable {
     public final String address;
@@ -108,7 +107,7 @@ public class Wallet implements Parcelable {
 		if (balance.equals("-"))
 		{
 			balanceSymbol = networkInfo.symbol;
-			balance = BalanceUtils.getScaledValueFixed(BigDecimal.ZERO, 0, 4);
+			balance = BalanceUtils.getScaledValueFixed(BigDecimal.ZERO, 0, Token.TOKEN_BALANCE_PRECISION);
 		}
 	}
 }

@@ -15,6 +15,7 @@ import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
@@ -83,6 +84,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final MutableLiveData<String> invalidAddress = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
     private final MutableLiveData<Boolean> newScriptFound = new MutableLiveData<>();
+    private final MutableLiveData<Wallet> walletUpdate = new MutableLiveData<>();
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -119,6 +121,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     }
     public LiveData<String> invalidAddress() { return invalidAddress; }
     public LiveData<XMLDsigDescriptor> sig() { return sig; }
+    public LiveData<Wallet> walletUpdate() { return walletUpdate; }
     public LiveData<Boolean> newScriptFound() { return newScriptFound; }
 
     public void prepare(Token t)
@@ -311,6 +314,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     private void onDefaultWallet(Wallet w) {
         progress.postValue(false);
         wallet = w;
+        walletUpdate.postValue(w);
         if (token != null) fetchCurrentTokenBalance();
     }
 
@@ -480,5 +484,10 @@ public class TokenFunctionViewModel extends BaseViewModel
     private void handleFilename(String newFile)
     {
         if (!TextUtils.isEmpty(newFile)) newScriptFound.postValue(true);
+    }
+
+    public boolean isAuthorizeToFunction()
+    {
+        return wallet.type != WalletType.WATCH;
     }
 }

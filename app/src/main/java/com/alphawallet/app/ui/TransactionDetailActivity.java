@@ -56,7 +56,6 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_transaction_detail);
 
         transaction = getIntent().getParcelableExtra(TRANSACTION);
@@ -78,9 +77,13 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         setupVisibilities();
 
         amount = findViewById(R.id.amount);
-        ((CopyTextView) findViewById(R.id.from)).setText(transaction.from);
-        ((CopyTextView) findViewById(R.id.to)).setText(transaction.to);
-        ((CopyTextView) findViewById(R.id.txn_hash)).setText(transaction.hash);
+        CopyTextView toValue = findViewById(R.id.to);
+        CopyTextView fromValue = findViewById(R.id.from);
+        CopyTextView txHashView = findViewById(R.id.txn_hash);
+
+        fromValue.setText(transaction.from);
+        toValue.setText(transaction.to);
+        txHashView.setText(transaction.hash);
         ((TextView) findViewById(R.id.txn_time)).setText(localiseUnixTime(transaction.timeStamp));
 
         ((TextView) findViewById(R.id.block_number)).setText(blockNumber);
@@ -89,7 +92,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         if (transaction.operations != null && transaction.operations.length > 0)
         {
             TransactionOperation op = transaction.operations[0];
-            if (op != null && op.to != null) ((TextView) findViewById(R.id.to)).setText(op.to);
+            if (op != null && op.to != null) toValue.findViewById(R.id.to);
         }
 
         viewModel = ViewModelProviders.of(this, transactionDetailViewModelFactory)

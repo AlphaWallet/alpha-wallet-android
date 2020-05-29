@@ -15,8 +15,10 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
+import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.widget.holder.TransactionHolder;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
@@ -67,6 +69,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         setTitle();
 
         String blockNumber = transaction.blockNumber;
+        TransactionOperation op = null;
         if (transaction.blockNumber.equals("0"))
         {
             blockNumber = getString(R.string.status_pending);
@@ -120,7 +123,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         }
 
         if (!viewModel.hasEtherscanDetail(transaction)) findViewById(R.id.more_detail).setVisibility(View.GONE);
-        setupWalletDetails();
+        setupWalletDetails(op);
     }
 
     private void setTitle() {
@@ -165,41 +168,38 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         }
     }
 
-    private void setupWalletDetails() {
+    private void setupWalletDetails(TransactionOperation op) {
         boolean isSent = transaction.from.equalsIgnoreCase(wallet.address);
         String rawValue;
         String prefix = "";
 
-        if (token == null && (transaction.input == null || transaction.input.equals("0x")))
+        if (token == null && op == null)
         {
             token = viewModel.getToken(transaction.chainId, wallet.address);
         }
 
         if (token != null)
         {
-            BigDecimal rawTxValue = token.getTxValue(transaction);
-            rawValue = getScaledValue(rawTxValue, token.tokenInfo.decimals);
-            rawValue = rawValue + " " + token.getSymbol();
-            isSent = token.getIsSent(transaction);
+            if (token.isNonFungible() || op != null)
+            {
+                rawValue = token.getTransactionResultValue(transaction, TransactionHolder.TRANSACTION_BALANCE_PRECISION);
+            }
+            else
+            {
+                rawValue = BalanceUtils.getScaledValueWithLimit(token.getTxValue(transaction), token.tokenInfo.decimals) + " " + token.getSymbol();
+                prefix = (token.getIsSent(transaction) ? "-" : "+");
+            }
         }
         else
         {
             BigDecimal txValue = new BigDecimal(transaction.value);
-            rawValue = getScaledValue(txValue, 18);
+            rawValue = BalanceUtils.getScaledValueWithLimit(txValue, 18) + " " + viewModel.getNetworkSymbol(transaction.chainId);
+            prefix = (isSent ? "-" : "+");
         }
 
         prefix = (isSent ? "-" : "+");
         rawValue =  prefix + rawValue;
         amount.setText(rawValue);
-    }
-
-    public String getScaledValue(BigDecimal value, long decimals)
-    {
-        NumberFormat formatter = new DecimalFormat("0.00######");
-        formatter.setRoundingMode(RoundingMode.DOWN);
-
-        value = value.divide(new BigDecimal(Math.pow(10, decimals)));
-        return formatter.format(value);
     }
 
     private String localiseUnixTime(long timeStampInSec)

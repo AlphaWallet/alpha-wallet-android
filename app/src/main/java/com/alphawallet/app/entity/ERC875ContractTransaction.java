@@ -7,6 +7,7 @@ import android.os.Parcelable;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.util.BalanceUtils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -328,7 +329,7 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
     @Override
     public String getOperationResult(Token token, TransactionOperation operation, Transaction tx)
     {
-        return Token.getScaledValue(operation.value, 0);
+        return BalanceUtils.getScaledValue(operation.value, 0);
     }
 
     public int getOperationImage(Token token, Transaction tx)
@@ -356,10 +357,10 @@ public class ERC875ContractTransaction extends TransactionContract implements Pa
         switch (operation)
         {
             case MAGICLINK_SALE: //we received ether from magiclink sale
-                supplimentalTxt = "+" + Token.getScaledValue(tx.value, ETHER_DECIMALS) + " " + networkName;
+                supplimentalTxt = "+" + BalanceUtils.getScaledValue(tx.value, ETHER_DECIMALS) + " " + networkName;
                 break;
             case MAGICLINK_PURCHASE: //we purchased a ticket from a magiclink
-                supplimentalTxt = "-" + Token.getScaledValue(tx.value, ETHER_DECIMALS) + " " + networkName;
+                supplimentalTxt = "-" + BalanceUtils.getScaledValue(tx.value, ETHER_DECIMALS) + " " + networkName;
                 break;
             default:
                 break;

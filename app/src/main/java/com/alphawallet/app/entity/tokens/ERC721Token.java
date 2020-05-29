@@ -189,7 +189,7 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public String getTransactionValue(Transaction transaction, Context ctx)
+    public String getTransactionValue(Transaction transaction, int precision)
     {
         if (transaction.operations != null && transaction.operations.length > 0)
         {
@@ -200,18 +200,6 @@ public class ERC721Token extends Token implements Parcelable
         {
             return "-"; //Placeholder - should never see this
         }
-    }
-
-    @Override
-    protected String addSuffix(String result, Transaction transaction)
-    {
-        return result;
-    }
-
-    @Override
-    public boolean checkIntrinsicType()
-    {
-        return (contractType == ContractType.ERC721);
     }
 
     /**

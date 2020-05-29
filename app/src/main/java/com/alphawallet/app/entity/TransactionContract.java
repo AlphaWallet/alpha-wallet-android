@@ -7,6 +7,8 @@ import android.text.TextUtils;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.widget.holder.TransactionHolder;
+import com.alphawallet.app.util.BalanceUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -170,11 +172,11 @@ public class TransactionContract implements Parcelable {
     {
         try
         {
-            if (operation.value == null || operation.value.length() > 0 && Character.isDigit(operation.value.charAt(0)))
+            if (!token.isNonFungible() && (operation.value == null || operation.value.length() > 0 && Character.isDigit(operation.value.charAt(0))))
             {
                 BigDecimal value = new BigDecimal(operation.value);
                 //appears to be a number; try to produce number with prefix
-                return tx.getPrefix(token) + " " + Token.getScaledValue(value, token.tokenInfo.decimals);
+                return tx.getPrefix(token) + BalanceUtils.getScaledValueFixed(value, token.tokenInfo.decimals, TransactionHolder.TRANSACTION_BALANCE_PRECISION);
             }
             else
             {
@@ -205,11 +207,11 @@ public class TransactionContract implements Parcelable {
             //simple heuristic: if value is attached to a transaction from the user, then it's outgoing
             if (tx.from.equalsIgnoreCase(walletAddress))
             {
-                supplimentalTxt = "-" + Token.getScaledValue(tx.value, C.ETHER_DECIMALS) + " " + networkName;
+                supplimentalTxt = "-" + BalanceUtils.getScaledValue(tx.value, C.ETHER_DECIMALS) + " " + networkName;
             }
             else
             {
-                supplimentalTxt = "+" + Token.getScaledValue(tx.value, C.ETHER_DECIMALS) + " " + networkName;
+                supplimentalTxt = "+" + BalanceUtils.getScaledValue(tx.value, C.ETHER_DECIMALS) + " " + networkName;
             }
         }
 

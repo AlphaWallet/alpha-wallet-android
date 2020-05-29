@@ -5,6 +5,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.widget.holder.TransactionHolder;
+import com.alphawallet.app.util.BalanceUtils;
 
 import java.math.BigDecimal;
 
@@ -98,7 +100,14 @@ public class TransactionOperation implements Parcelable {
 
     public String getValue(int decimals)
     {
-        return Token.getScaledValue(value, decimals);
+        try
+        {
+            return BalanceUtils.getScaledValueFixed(getRawValue(), decimals, TransactionHolder.TRANSACTION_BALANCE_PRECISION);
+        }
+        catch (Exception e)
+        {
+            return "0";
+        }
     }
 
     String getOperationResult(Token token, Transaction tx)
@@ -109,7 +118,7 @@ public class TransactionOperation implements Parcelable {
         }
         else
         {
-            return token.getTransactionValue(tx);
+            return getValue(token.tokenInfo.decimals);
         }
     }
 

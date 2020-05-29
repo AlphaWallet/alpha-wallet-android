@@ -239,18 +239,6 @@ public class ERC721Ticket extends Token implements Parcelable {
     }
 
     @Override
-    protected String addSuffix(String result, Transaction transaction)
-    {
-        return result;
-    }
-
-    @Override
-    public boolean checkIntrinsicType()
-    {
-        return contractType == ContractType.ERC721_TICKET;
-    }
-
-    @Override
     public boolean hasArrayBalance()
     {
         return true;

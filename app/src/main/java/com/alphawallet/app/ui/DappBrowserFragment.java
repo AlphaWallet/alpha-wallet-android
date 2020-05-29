@@ -657,7 +657,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private void onUpdateBalance(Token token) {
         balance.setVisibility(View.VISIBLE);
         symbol.setVisibility(View.VISIBLE);
-        balance.setText(token.getScaledBalance());
+        balance.setText(token.getFixedFormattedBalance());
         symbol.setText(token.getSymbol());
     }
 

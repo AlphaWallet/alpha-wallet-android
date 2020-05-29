@@ -1,5 +1,7 @@
 package com.alphawallet.app.util;
 
+import com.alphawallet.app.entity.tokens.Token;
+
 import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
@@ -81,9 +83,67 @@ public class BalanceUtils {
 
     public static String getScaledValueWithLimit(BigDecimal value, long decimals)
     {
-        NumberFormat formatter = new DecimalFormat("0.00#######");
-        formatter.setRoundingMode(RoundingMode.DOWN);
-        value = value.divide(new BigDecimal(Math.pow(10, decimals)), 10, RoundingMode.HALF_DOWN);
-        return formatter.format(value);
+        String pattern = "###,###,###,##0.00#######";
+        return scaledValue(value, pattern, decimals);
     }
+
+    public static String getScaledValueFixed(BigDecimal value, long decimals, int precision)
+    {
+        //form precision
+        String pattern = "###,###,###,##0.";
+        for (int i = 0; i < precision; i++) pattern += "0";
+        return scaledValue(value, pattern, decimals);
+    }
+
+    public static String getScaledValue(BigDecimal value, long decimals, int precision)
+    {
+        //form precision
+        String pattern = "###,###,###,##0.";
+        for (int i = 0; i < precision; i++) pattern += "#";
+        return scaledValue(value, pattern, decimals);
+    }
+
+    private static String scaledValue(BigDecimal value, String pattern, long decimals)
+    {
+        DecimalFormat df = new DecimalFormat(pattern);
+        value = value.divide(new BigDecimal(Math.pow(10, decimals)), 18, RoundingMode.DOWN);
+        df.setRoundingMode(RoundingMode.DOWN);
+        return df.format(value);
+    }
+
+    /**
+     * Default precision method
+     *
+     * @param valueStr
+     * @param decimals
+     * @return
+     */
+    public static String getScaledValue(String valueStr, long decimals)
+    {
+        return getScaledValue(valueStr, decimals, Token.TOKEN_BALANCE_PRECISION);
+    }
+
+    /**
+     * Universal scaled value method
+     * @param valueStr
+     * @param decimals
+     * @return
+     */
+    public static String getScaledValue(String valueStr, long decimals, int precision) {
+        // Perform decimal conversion
+        if (decimals > 1 && valueStr != null && valueStr.length() > 0 && Character.isDigit(valueStr.charAt(0)))
+        {
+            BigDecimal value = new BigDecimal(valueStr);
+            return getScaledValue(value, decimals, precision); //represent balance transfers according to 'decimals' contract indicator property
+        }
+        else if (valueStr != null)
+        {
+            return valueStr;
+        }
+        else
+        {
+            return "0";
+        }
+    }
+
 }

@@ -1,4 +1,4 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,7 +9,9 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/more_detail"
         android:layout_marginTop="?actionBarSize"
         android:background="@drawable/background_card">
 
@@ -35,28 +37,6 @@
                     android:indeterminateTint="@color/colorPrimaryDark"
                     android:visibility="gone" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/transaction_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="10dp"
-                        android:fontFamily="@font/font_semibold"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/amount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/font_bold"
-                        android:textSize="18sp" />
-                </LinearLayout>
-
                 <TextView
                     android:id="@+id/text_chain_name"
                     android:layout_width="wrap_content"
@@ -78,6 +58,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dp16"
+                android:text="@string/value" />
+
+            <TextView
+                android:id="@+id/amount"
+                style="@style/TransactionDetailsStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="4238793"  />
+
+            <TextView
+                style="@style/TransactionDetailsSubTitleStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp16"
                 android:text="@string/subtitle_transaction_hash_num" />
 
             <com.alphawallet.app.widget.CopyTextView
@@ -86,6 +80,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:gravity="start"
+                app:bold="false"
                 app:textColor="@color/mine"
                 app:marginRight="@dimen/dp18" />
 
@@ -116,6 +111,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:gravity="start"
+                app:bold="false"
                 app:textColor="@color/mine"
                 app:marginRight="@dimen/dp18" />
 
@@ -131,6 +127,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:gravity="start"
+                app:bold="false"
                 app:textColor="@color/mine"
                 app:marginRight="@dimen/dp18" />
 
@@ -174,29 +171,37 @@
                 android:layout_height="wrap_content"
                 tools:text="September 4, 2017 at 2:32:12 PM" />
 
-            <Button
-                android:id="@+id/more_detail"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/half_large_margin"
-                android:layout_marginBottom="@dimen/half_large_margin"
-                android:autoLink="web"
-                android:background="@drawable/background_round_azure_25dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:fontFamily="@font/font_semibold"
-                android:linksClickable="true"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
-                android:layout_marginEnd="@dimen/dp16"
-                android:layout_marginStart="@dimen/dp16"
-                android:text="@string/action_open_etherscan"
-                android:textAllCaps="false"
-                android:textColor="@color/azure"
-                android:textSize="20sp" />
-
         </LinearLayout>
     </ScrollView>
-</FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_above="@+id/more_detail"
+        android:background="@color/greyf6"/>
+
+    <Button
+        android:id="@+id/more_detail"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="@dimen/big_margin"
+        android:layout_marginBottom="@dimen/big_margin"
+        android:autoLink="web"
+        android:background="@drawable/background_round_azure_25dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:fontFamily="@font/font_semibold"
+        android:linksClickable="true"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:layout_marginEnd="@dimen/dp16"
+        android:layout_marginStart="@dimen/dp16"
+        android:text="@string/action_open_etherscan"
+        android:textAllCaps="false"
+        android:textColor="@color/azure"
+        android:textSize="20sp" />
+
+</RelativeLayout>

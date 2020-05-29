@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
-        android:fontFamily="@font/font_semibold"
+        android:fontFamily="@font/font_regular"
         android:gravity="center"
         android:maxWidth="180dp"
         android:maxLines="2"

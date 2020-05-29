@@ -3,7 +3,6 @@ package com.alphawallet.app.ui;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -120,15 +119,6 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
             if (transaction.from.equalsIgnoreCase(wallet.address)) operationName = getString(R.string.sent);
         }
 
-        if (operationName != null)
-        {
-            ((TextView)findViewById(R.id.transaction_name)).setText(operationName);
-        }
-        else
-        {
-            findViewById(R.id.transaction_name).setVisibility(View.GONE);
-        }
-
         if (!viewModel.hasEtherscanDetail(transaction)) findViewById(R.id.more_detail).setVisibility(View.GONE);
         setupWalletDetails();
     }
@@ -199,10 +189,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         }
 
         prefix = (isSent ? "-" : "+");
-
-        amount.setTextColor(ContextCompat.getColor(this, isSent ? R.color.red : R.color.green));
         rawValue =  prefix + rawValue;
-
         amount.setText(rawValue);
     }
 

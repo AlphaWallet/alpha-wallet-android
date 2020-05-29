@@ -9,6 +9,13 @@
     android:paddingBottom="12dp"
     android:visibility="visible">
 
+    <ProgressBar
+        android:id="@+id/wait_buttons"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_height="48dp"
+        android:visibility="gone"/>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="12dp"

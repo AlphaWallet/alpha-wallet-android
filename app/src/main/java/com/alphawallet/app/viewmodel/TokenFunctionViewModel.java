@@ -82,6 +82,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final MutableLiveData<Token> insufficientFunds = new MutableLiveData<>();
     private final MutableLiveData<String> invalidAddress = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> newScriptFound = new MutableLiveData<>();
 
     @Nullable
     private Disposable getBalanceDisposable;
@@ -118,6 +119,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     }
     public LiveData<String> invalidAddress() { return invalidAddress; }
     public LiveData<XMLDsigDescriptor> sig() { return sig; }
+    public LiveData<Boolean> newScriptFound() { return newScriptFound; }
 
     public void prepare(Token t)
     {
@@ -369,7 +371,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         else
         {
             //what's selected?
-            ContractAddress cAddr = new ContractAddress(action.function, token.tokenInfo.chainId, token.tokenInfo.address); //viewModel.getAssetDefinitionService().getContractAddress(action.function, token);
+            ContractAddress cAddr = new ContractAddress(action.function);
             String functionData = getTransactionBytes(token, tokenId, action.function);
             if (functionData == null) return false;
             //function call may include some value
@@ -463,5 +465,20 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void updateTokenScriptViewSize(Token token)
     {
         tokensService.updateTokenViewSizes(token);
+    }
+
+    public void checkForNewScript(Token token)
+    {
+        //check server for new tokenscript
+        assetDefinitionService.checkServerForScript(token.tokenInfo.chainId, token.getAddress())
+                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.single())
+                .subscribe(this::handleFilename, this::onError)
+                .isDisposed();
+    }
+
+    private void handleFilename(String newFile)
+    {
+        if (!TextUtils.isEmpty(newFile)) newScriptFound.postValue(true);
     }
 }

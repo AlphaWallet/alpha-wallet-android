@@ -5,7 +5,6 @@ import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import javax.swing.plaf.TextUI;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -18,16 +17,15 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.w3c.dom.Node.ELEMENT_NODE;
-import static org.w3c.dom.Node.PROCESSING_INSTRUCTION_NODE;
 
 public class TokenDefinition {
     protected Document xml;
-    public Map<String, AttributeType> attributeTypes = new HashMap<>();
+    public Map<String, Attribute> attributes = new HashMap<>();
     protected Locale locale;
 
     public Map<String, ContractInfo> contracts = new HashMap<>();
     public Map<String, TSAction> actions = new HashMap<>();
-    private Map<String, String> names = new HashMap<>(); // store plural etc for token name
+    private Map<String, String> labels = new HashMap<>(); // store plural etc for token name
     private Map<String, Module> moduleLookup = null; //used to protect against name collision
     private TSTokenViewHolder tokenViews = new TSTokenViewHolder();
     private Map<String, TSSelection> selections = new HashMap<>();
@@ -39,9 +37,9 @@ public class TokenDefinition {
 
     public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2020/06";
     public static final String TOKENSCRIPT_REPO_SERVER = "https://repo.tokenscript.org/";
+    public static final String TOKENSCRIPT_NAMESPACE = "http://tokenscript.org/" + TOKENSCRIPT_CURRENT_SCHEMA + "/tokenscript";
 
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";
-    private static final String TOKENSCRIPT_NAMESPACE = "http://tokenscript.org/" + TOKENSCRIPT_CURRENT_SCHEMA + "/tokenscript";
     private static final String TOKENSCRIPT_BASE_URL = "http://tokenscript.org/";
 
     public static final String TOKENSCRIPT_ERROR = "<h2 style=\"color:rgba(207, 0, 15, 1);\">TokenScript Error</h2>";
@@ -57,7 +55,7 @@ public class TokenDefinition {
        it own way of specifying implementation, like marketQueueAPI.
 
      - tokenName is going to be selectable through filters -
-       that is, it's allowed that token names are different in the
+       that is, it's allowed that token labels are different in the
        same asset class. There are use-cases for this.
 
      - each token definition XML file can incorporate multiple
@@ -71,7 +69,7 @@ public class TokenDefinition {
     public List<FunctionDefinition> getFunctionData()
     {
         List<FunctionDefinition> defs = new ArrayList<>();
-        for (AttributeType attr : attributeTypes.values())
+        for (Attribute attr : attributes.values())
         {
             if (attr.function != null)
             {
@@ -330,41 +328,26 @@ public class TokenDefinition {
                     case "contract":
                         handleAddresses(element);
                         break;
-                    case "name":
                     case "label":
-                        names = extractNameTag(element);
-                        break;
-                    case "selections":
-                        extractSelections(element);
+                        labels = extractLabelTag(element);
                         break;
                     case "selection":
                         //For now, allow individual selections outside of the selections block
                         handleSelection(element);
                         break;
-                        //throw new SAXException("<ts:selection> tag must be in main scope (eg same as <ts:origins>)");
-                    case "attribute-types":
-                        handleGlobalAttributes(element);
-                        break;
                     case "cards":
                         handleCards(element);
                         break;
-                    case "attribute": //treat orphaned attribute-types appearing on the root scope as globals
-                        processAttrs(element);
+                    case "attribute":
+                        Attribute attr = new Attribute((Element) n, this);
+                        if (attr.bitmask != null || attr.function != null)
+                        {
+                            attributes.put(attr.name, attr);
+                        }
                         break;
                     default:
                         break;
                 }
-            }
-        }
-    }
-
-    private void extractSelections(Element node) throws SAXException
-    {
-        for (Node n = node.getFirstChild(); n != null; n = n.getNextSibling())
-        {
-            if (n.getNodeType() == ELEMENT_NODE && n.getLocalName().equals("selection"))
-            {
-                handleSelection((Element)n);
             }
         }
     }
@@ -388,7 +371,7 @@ public class TokenDefinition {
                 switch (element.getLocalName())
                 {
                     case "name":
-                        selection.names = extractNameTag(element);
+                        selection.names = extractLabelTag(element);
                         break;
                     case "denial":
                         Node denialNode = getLocalisedNode(element, "string");
@@ -431,15 +414,12 @@ public class TokenDefinition {
             if (node.getNodeType() != ELEMENT_NODE)
                 continue;
 
-            if (node.getPrefix() != null && node.getPrefix().equalsIgnoreCase("ds"))
-                continue;
-
             Element element = (Element) node;
             switch (node.getLocalName())
             {
-                case "attribute-type":
-                    AttributeType attr = new AttributeType(element, this);
-                    tokenViews.localAttributeTypes.put(attr.id, attr);
+                case "attribute":
+                    Attribute attr = new Attribute(element, this);
+                    tokenViews.localAttributeTypes.put(attr.name, attr);
                     break;
                 case "view": //TODO: Localisation
                 case "item-view":
@@ -576,18 +556,15 @@ public class TokenDefinition {
             Element element = (Element) node;
             switch (node.getLocalName())
             {
-                case "name":
-                    tsAction.name = getLocalisedString(element);
-                    break;
                 case "label":
                     tsAction.name = getLocalisedString(element);
                     break;
                 case "attribute":
-                case "attribute-type":
-                    AttributeType attr = new AttributeType(element, this);
-                    if (tsAction.attributeTypes == null)
-                        tsAction.attributeTypes = new HashMap<>();
-                    tsAction.attributeTypes.put(attr.id, attr);
+                    Attribute attr = new Attribute(element, this);
+                    if (tsAction.attributes == null) {
+                        tsAction.attributes = new HashMap<>();
+                    }
+                    tsAction.attributes.put(attr.name, attr);
                     break;
                 case "transaction":
                     handleTransaction(tsAction, element);
@@ -637,7 +614,7 @@ public class TokenDefinition {
         {
             if (n.getNodeType() != ELEMENT_NODE) continue;
             Element tokenType = (Element)n;
-            String name = tokenType.getAttribute("name");
+            String label = tokenType.getAttribute("label");
             switch (tokenType.getLocalName())
             {
                 case "token":
@@ -651,7 +628,7 @@ public class TokenDefinition {
                                 int chainId = Integer.parseInt(chainIdStr);
                                 ContractInfo ci = new ContractInfo(tokenSpec.getLocalName());
                                 ci.addresses.put(chainId, new ArrayList<>(Arrays.asList(ci.contractInterface)));
-                                contracts.put(name, ci);
+                                contracts.put(label, ci);
                                 break;
                             case "contract":
                                 handleAddresses(getFirstChildElement(element));
@@ -686,10 +663,10 @@ public class TokenDefinition {
 
     private void processAttrs(Node n)
     {
-        AttributeType attr = new AttributeType((Element) n, this);
+        Attribute attr = new Attribute((Element) n, this);
         if (attr.bitmask != null || attr.function != null)
         {
-            attributeTypes.put(attr.id, attr);
+            attributes.put(attr.name, attr);
         }
     }
 
@@ -712,36 +689,36 @@ public class TokenDefinition {
         switch (count)
         {
             case 1:
-                if (names.containsKey("one")) value = names.get("one");
-                else value = names.get("");
+                if (labels.containsKey("one")) value = labels.get("one");
+                else value = labels.get("");
                 break;
             case 2:
-                value = names.get("two");
+                value = labels.get("two");
                 if (value != null) break; //drop through to 'other' if null.
             default:
-                value = names.get("other");
+                value = labels.get("other");
                 break;
         }
 
-        if (value == null && names.values().size() > 0)
+        if (value == null && labels.values().size() > 0)
         {
-            value = names.values().iterator().next();
+            value = labels.values().iterator().next();
         }
 
         return value;
     }
 
     public Map<BigInteger, String> getMappingMembersByKey(String key){
-        if(attributeTypes.containsKey(key)) {
-            AttributeType attr = attributeTypes.get(key);
+        if(attributes.containsKey(key)) {
+            Attribute attr = attributes.get(key);
             return attr.members;
         }
         return null;
     }
     public Map<BigInteger, String> getConvertedMappingMembersByKey(String key){
-        if(attributeTypes.containsKey(key)) {
+        if(attributes.containsKey(key)) {
             Map<BigInteger,String> convertedMembers=new HashMap<>();
-            AttributeType attr = attributeTypes.get(key);
+            Attribute attr = attributes.get(key);
             for(BigInteger actualValue:attr.members.keySet()){
                 convertedMembers.put(actualValue.shiftLeft(attr.bitshift).and(attr.bitmask),attr.members.get(actualValue));
             }
@@ -768,22 +745,11 @@ public class TokenDefinition {
         }
     }
 
-    private void handleGlobalAttributes(Element attributes)
-    {
-        for (Node n = attributes.getFirstChild(); n != null; n = n.getNextSibling())
-        {
-            if (n.getNodeType() == ELEMENT_NODE && n.getLocalName().equals("attribute-type"))
-            {
-                processAttrs(n);
-            }
-        }
-    }
-
-    private Map<String, String> extractNameTag(Element nameTag)
+    private Map<String, String> extractLabelTag(Element labelTag)
     {
         Map<String, String> localNames = new HashMap<>();
         //deal with plurals
-        Node nameNode = getLocalisedNode(nameTag, "plurals");
+        Node nameNode = getLocalisedNode(labelTag, "plurals");
         if (nameNode != null)
         {
             for (int i = 0; i < nameNode.getChildNodes().getLength(); i++)
@@ -794,7 +760,7 @@ public class TokenDefinition {
         }
         else //no plural
         {
-            nameNode = getLocalisedNode(nameTag, "string");
+            nameNode = getLocalisedNode(labelTag, "string");
             handleNameNode(localNames, nameNode);
         }
 
@@ -837,7 +803,6 @@ public class TokenDefinition {
 
     private void handleAddresses(Element contract) throws Exception
     {
-        NodeList nList = contract.getElementsByTagNameNS(nameSpace, "address");
         ContractInfo info = new ContractInfo(contract.getAttribute("interface"));
         String name = contract.getAttribute("name");
         contracts.put(name, info);
@@ -860,17 +825,17 @@ public class TokenDefinition {
         }
     }
 
-    private void handleModule(Element module, ContractInfo info) throws Exception
+    private void handleModule(Element module, ContractInfo info) throws SAXException
     {
         String moduleName = module.getAttribute("name");
-        if (moduleName == null) throw new Exception("Module requires name");
+        if (moduleName == null || moduleName.length() == 0) throw new SAXException("Module requires label");
         if (moduleLookup == null)
         {
             moduleLookup = new HashMap<>();
         }
         else if (moduleLookup.containsKey(moduleName))
         {
-            throw new Exception("Duplicate Module name: " + moduleName);
+            throw new SAXException("Duplicate Module label: " + moduleName);
         }
 
         for (Node n = module.getFirstChild(); n != null; n = n.getNextSibling())
@@ -892,7 +857,7 @@ public class TokenDefinition {
         }
     }
 
-    private Module handleElementSequence(Element sequence, ContractInfo info, String moduleName) throws Exception
+    private Module handleElementSequence(Element sequence, ContractInfo info, String moduleName) throws SAXException
     {
         Module module = new Module(info);
         for (Node n = sequence.getFirstChild(); n != null; n = n.getNextSibling())
@@ -988,8 +953,8 @@ public class TokenDefinition {
     }
 
     public void parseField(BigInteger tokenId, NonFungibleToken token, Map<String, FunctionDefinition> functionMappings) {
-        for (String key : attributeTypes.keySet()) {
-            AttributeType attrtype = attributeTypes.get(key);
+        for (String key : attributes.keySet()) {
+            Attribute attrtype = attributes.get(key);
             BigInteger val = BigInteger.ZERO;
             try
             {
@@ -1004,20 +969,20 @@ public class TokenDefinition {
                         if (result.startsWith("0x")) result = result.substring(2);
                         val = new BigInteger(result, 16);
                     }
-                    token.setAttribute(attrtype.id,
-                                       new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, result));
+                    token.setAttribute(attrtype.name,
+                                       new NonFungibleToken.Attribute(attrtype.name, attrtype.label, val, result));
                 }
                 else
                 {
                     val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
-                    token.setAttribute(attrtype.id,
-                                       new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, attrtype.toString(val)));
+                    token.setAttribute(attrtype.name,
+                                       new NonFungibleToken.Attribute(attrtype.name, attrtype.label, val, attrtype.toString(val)));
                 }
             }
             catch (Exception e)
             {
-                token.setAttribute(attrtype.id,
-                                   new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, "unsupported encoding"));
+                token.setAttribute(attrtype.name,
+                                   new NonFungibleToken.Attribute(attrtype.name, attrtype.label, val, "unsupported encoding"));
             }
         }
     }
@@ -1070,28 +1035,28 @@ public class TokenDefinition {
     }
 
     public void parseField(BigInteger tokenId, NonFungibleToken token) {
-        for (String key : attributeTypes.keySet()) {
-            AttributeType attrtype = attributeTypes.get(key);
+        for (String key : attributes.keySet()) {
+            Attribute attrtype = attributes.get(key);
             BigInteger val = BigInteger.ZERO;
             try
             {
                 if (attrtype.function != null)
                 {
                     //obtain this from the function return, can't get it here
-                    token.setAttribute(attrtype.id,
-                                       new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, "unsupported encoding"));
+                    token.setAttribute(attrtype.name,
+                                       new NonFungibleToken.Attribute(attrtype.name, attrtype.label, val, "unsupported encoding"));
                 }
                 else
                 {
                     val = tokenId.and(attrtype.bitmask).shiftRight(attrtype.bitshift);
-                    token.setAttribute(attrtype.id,
-                                       new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, attrtype.toString(val)));
+                    token.setAttribute(attrtype.name,
+                                       new NonFungibleToken.Attribute(attrtype.name, attrtype.label, val, attrtype.toString(val)));
                 }
             }
             catch (UnsupportedEncodingException e)
             {
-                token.setAttribute(attrtype.id,
-                                   new NonFungibleToken.Attribute(attrtype.id, attrtype.name, val, "unsupported encoding"));
+                token.setAttribute(attrtype.name,
+                                   new NonFungibleToken.Attribute(attrtype.name, attrtype.label, val, "unsupported encoding"));
             }
         }
     }
@@ -1126,7 +1091,7 @@ public class TokenDefinition {
         return tokenViews.getViewStyle(viewTag);
     }
 
-    public Map<String, AttributeType> getTokenViewLocalAttributes()
+    public Map<String, Attribute> getTokenViewLocalAttributes()
     {
         return tokenViews.localAttributeTypes;
     }

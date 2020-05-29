@@ -9,7 +9,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,15 +24,15 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
  * Stormbird in Sydney
  */
 
-public class AttributeType {
+public class Attribute {
     private static final int ADDRESS_SIZE = 160;
     private static final int ADDRESS_LENGTH_IN_HEX = ADDRESS_SIZE >> 2;
     private static final int ADDRESS_LENGTH_IN_BYTES = ADDRESS_SIZE >> 3;
 
     //default the bitmask to 32 bytes represented
     public BigInteger bitmask = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);    // TODO: BigInteger !== BitInt. Test edge conditions.
-    public String name;  // TODO: should be polyglot because user change change language in the run
-    public String id;
+    public String label;  // TODO: should be polyglot because user change change language in the run
+    public String name;
     public int bitshift = 0;
     public TokenDefinition.Syntax syntax;
     public As as;
@@ -43,21 +42,21 @@ public class AttributeType {
     public EventDefinition event = null;
     public boolean userInput = false;
 
-    public AttributeType(Element attr, TokenDefinition def)
+    public Attribute(Element attr, TokenDefinition def)
     {
         definition = def;
-        id = attr.getAttribute("id");
-        if (id == null || id.length() == 0) id = attr.getAttribute("name");
-        name = id; //set name to id if not specified
+        //schema 2020/06 id is now name; name is now label
+        name = attr.getAttribute("name");
+        label = name; //set label to name if not specified
         as = As.Unsigned; //default value
+        //TODO xpath would be better
         syntax = TokenDefinition.Syntax.DirectoryString; //default value
 
         for(Node node = attr.getFirstChild();
-            node!=null; node=node.getNextSibling()){
+            node!=null; node=node.getNextSibling()) {
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) node;
-                String label = node.getLocalName();
-                switch (label)
+                switch (node.getLocalName())
                 {
                     case "type":
                         syntax = handleType(element);
@@ -65,12 +64,8 @@ public class AttributeType {
                     case "origins":
                         handleOrigins(element);
                         break;
-                    case "name":
-                        name = definition.getLocalisedString(element, "string");
-                        break;
                     case "label":
-                        name = definition.getLocalisedString(element);
-                        break;
+                        label = definition.getLocalisedString(element);
                     case "mapping":
                         populate(element);
                         break;
@@ -150,7 +145,7 @@ public class AttributeType {
             {
                 Element resolve = (Element) node;
                 setAs(definition.parseAs(resolve));
-                if (resolve.getPrefix().equals("ethereum"))
+                if (resolve.getPrefix().equals("ethereum")) //handle ethereum namespace
                 {
                     switch (node.getLocalName())
                     {
@@ -160,43 +155,37 @@ public class AttributeType {
                             break;
                         case "event":
                             event = definition.parseEvent(resolve, syntax);
-                            event.attributeId = id;
+                            event.attributeName = name;
                             break;
                         default:
                             //throw parse error
                             break;
                     }
                 }
-
-                switch (node.getLocalName())
+                else
                 {
-                    case "ethereum":
-                        if (resolve.hasAttribute("event"))
-                        {
-                            event = definition.parseEvent(resolve, syntax);
-                            event.attributeId = id;
-                        }
-                        else if (resolve.hasAttribute("function"))
-                        {
-                            function = definition.parseFunction(resolve, syntax);
-                        }
-                        //drop through (no break)
-                    case "token-id":
-                        //this value is obtained from the token id
-                        setAs(definition.parseAs(resolve));
-                        populate(resolve); //check for mappings
-                        if (function != null) function.as = definition.parseAs(resolve);
-                        if (resolve.hasAttribute("bitmask")) {
-                            bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
-                        }
-                        break;
-                    case "user-entry":
-                        userInput = true;
-                        setAs(definition.parseAs(resolve));
-                        if (resolve.hasAttribute("bitmask")) {
-                            bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
-                        }
-                        break;
+                    switch (node.getLocalName())
+                    {
+                        case "token-id":
+                            //this value is obtained from the token name
+                            setAs(definition.parseAs(resolve));
+                            populate(resolve); //check for mappings
+                            if (function != null)
+                                function.as = definition.parseAs(resolve);
+                            if (resolve.hasAttribute("bitmask"))
+                            {
+                                bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
+                            }
+                            break;
+                        case "user-entry":
+                            userInput = true;
+                            setAs(definition.parseAs(resolve));
+                            if (resolve.hasAttribute("bitmask"))
+                            {
+                                bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
+                            }
+                            break;
+                    }
                 }
             }
         }

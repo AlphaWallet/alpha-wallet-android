@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,7 @@ import com.alphawallet.app.router.SendTokenRouter;
 import com.alphawallet.app.router.TransactionDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.token.tools.TokenDefinition;
 
 public class Erc20DetailViewModel extends BaseViewModel {
     private static final long CHECK_ETHPRICE_INTERVAL = 5;
@@ -42,6 +44,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
     private final MutableLiveData<TokenTicker> tokenTicker = new MutableLiveData<>();
     private final MutableLiveData<Transaction[]> transactionUpdate = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> newScriptFound = new MutableLiveData<>();
 
     private final MyAddressRouter myAddressRouter;
     private final FetchTransactionsInteract fetchTransactionsInteract;
@@ -218,6 +221,8 @@ public class Erc20DetailViewModel extends BaseViewModel {
         return wallet;
     }
 
+    public LiveData<Boolean> newScriptFound() { return newScriptFound; }
+
     public void prepare(Token token)
     {
         tokensService.setFocusToken(token);
@@ -297,5 +302,20 @@ public class Erc20DetailViewModel extends BaseViewModel {
         failSig.type = SigReturnType.NO_TOKENSCRIPT;
         failSig.subject = throwable.getMessage();
         sig.postValue(failSig);
+    }
+
+    public void checkForNewScript(Token token)
+    {
+        //check server for new tokenscript
+        assetDefinitionService.checkServerForScript(token.tokenInfo.chainId, token.getAddress())
+                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.single())
+                .subscribe(this::handleFilename, this::onError)
+                .isDisposed();
+    }
+
+    private void handleFilename(String newFile)
+    {
+        if (!TextUtils.isEmpty(newFile)) newScriptFound.postValue(true);
     }
 }

@@ -182,11 +182,11 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     public void revealButtons()
     {
         showButtons = true;
-        if (adapter == null && selection == null)
-        {
-            populateButtons(token, null);
-            findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
-        }
+//        if (adapter == null && selection == null)
+//        {
+//            populateButtons(token, null);
+//            findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
+//        }
     }
 
     @Override
@@ -561,6 +561,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     private void onMapFetchError(Throwable throwable)
     {
+        findViewById(R.id.wait_buttons).setVisibility(View.GONE);
         functionMapComplete.release();
     }
 
@@ -573,11 +574,15 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     {
         token.setFunctionAvailability(availabilityMap);
         functionMapComplete.release();
+        findViewById(R.id.wait_buttons).setVisibility(View.GONE);
+
         if (showButtons)
         {
             BigInteger tokenId = getSelectedTokenId(selection);
             populateButtons(token, tokenId);
-            handler.post(() -> findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE) );
+            handler.post(() -> {
+                findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
+            });
         }
     }
 }

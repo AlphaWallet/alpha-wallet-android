@@ -8,7 +8,7 @@ import java.util.Map;
  */
 public class TSTokenViewHolder
 {
-    public Map<String, AttributeType> localAttributeTypes = new HashMap<>();
+    public Map<String, Attribute> localAttributeTypes = new HashMap<>();
     public Map<String, TSTokenView> views = new HashMap<>();
     public String globalStyle = "";
 

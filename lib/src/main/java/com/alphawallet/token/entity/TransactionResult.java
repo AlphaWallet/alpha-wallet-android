@@ -16,15 +16,15 @@ public class TransactionResult
     public long resultTime;
     public final String attrId;
 
-    public TransactionResult(int chainId, String address, BigInteger tokenId, AttributeType attr)
+    public TransactionResult(int chainId, String address, BigInteger tokenId, Attribute attr)
     {
         this.contractAddress = address;
         this.contractChainId = chainId;
         this.tokenId = tokenId;
         if (attr.function != null) this.method = attr.function.method;
-        else if (attr.event != null) this.method = attr.id; //for event store attribute name
-        else this.method = attr.name;
-        this.attrId = attr.id;
+        else if (attr.event != null) this.method = attr.name; //for event store attribute name
+        else this.method = attr.label;
+        this.attrId = attr.name;
         result = null;
         resultTime = 0;
     }

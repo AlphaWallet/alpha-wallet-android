@@ -341,11 +341,6 @@ public class TransactionsViewModel extends BaseViewModel implements ActionEventC
             Transaction lastTx = transactions[transactions.length - 1];
             token.lastBlockCheck = Long.parseLong(lastTx.blockNumber);
             token.lastTxTime = lastTx.timeStamp*1000; //update last transaction received time
-
-            if (token.hasTokenScript) assetDefinitionService.updateEthereumResults(token)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(Schedulers.io()).subscribe();
-
             token.lastTxUpdate = token.lastTxCheck;
         }
 

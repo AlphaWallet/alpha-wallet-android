@@ -260,7 +260,7 @@ public abstract class EventUtils
         String selectVal;
 
         // Note this param gets interpreted according to the script 'syntax'
-        // by the attribute value conversion function getSyntaxVal(String ...) in class AttributeType
+        // by the attribute value conversion function getSyntaxVal(String ...) in class Attribute
         switch (typeName.toLowerCase())
         {
             case "string":

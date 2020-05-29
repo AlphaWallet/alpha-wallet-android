@@ -1,5 +1,5 @@
-<ts:token xmlns:ts="http://tokenscript.org/2020/03/tokenscript" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" custodian="false" xsi:schemaLocation="http://tokenscript.org/2020/03/tokenscript http://tokenscript.org/2020/03/tokenscript.xsd">
-    <ts:name>
+<ts:token xmlns:ethereum="urn:ethereum:constantinople" xmlns:ts="http://tokenscript.org/2020/06/tokenscript" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" custodian="false" xsi:schemaLocation="http://tokenscript.org/2020/06/tokenscript http://tokenscript.org/2020/06/tokenscript.xsd">
+    <ts:label>
         <ts:plurals xml:lang="en">
             <ts:string quantity="one">Ticket</ts:string>
             <ts:string quantity="other">Tickets</ts:string>
@@ -12,7 +12,7 @@
             <ts:string quantity="one">入場券</ts:string>
             <ts:string quantity="other">入場券</ts:string>
         </ts:plurals>
-    </ts:name>
+    </ts:label>
     <ts:contract interface="erc875" name="EntryToken">
         <ts:address network="1">0x63cCEF733a093E5Bd773b41C96D3eCE361464942</ts:address>
         <ts:address network="3">0xFB82A5a2922A249f32222316b9D1F5cbD3838678</ts:address>
@@ -20,25 +20,21 @@
     </ts:contract>
     <ts:origins>
         <!-- Define the contract which holds the token that the user will use -->
-        <ts:ethereum contract="EntryToken">
-        </ts:ethereum>
+        <ts:ethereum contract="EntryToken"></ts:ethereum>
     </ts:origins>
-    <ts:selections>
-        <ts:selection id="expired">
-            <ts:name>
-                <ts:plurals xml:lang="en">
-                    <ts:string quantity="one">Expired Ticket</ts:string>
-                    <ts:string quantity="other">Expired Tickets</ts:string>
-                </ts:plurals>
-                <ts:string xml:lang="zh">已经过期的票</ts:string>
-            </ts:name>
-            <ts:filter>expired</ts:filter>
-        </ts:selection>
-    </ts:selections>
+    <ts:selection filter="expired=TRUE" id="expired">
+        <ts:label>
+            <ts:plurals xml:lang="en">
+                <ts:string quantity="one">Expired Ticket</ts:string>
+                <ts:string quantity="other">Expired Tickets</ts:string>
+            </ts:plurals>
+            <ts:string xml:lang="zh">已经过期的票</ts:string>
+        </ts:label>
+    </ts:selection>
     <ts:cards>
-        <ts:token>
+        <ts:card type="token">
             <ts:item-view xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-                <xhtml:style type="text/css">.ts-count {
+                <style type="text/css">.ts-count {
                     font-family: "SourceSansPro";
                     font-weight: bolder;
                     font-size: 21px;
@@ -91,7 +87,7 @@
                     .tbml-count {   font-family: "SourceSansPro";   font-weight: bolder;   font-size: 21px;   color: rgb(117, 185, 67); } .tbml-category {   font-family: "SourceSansPro";   font-weight: lighter;   font-size: 21px;   color: rgb(67, 67, 67); } .tbml-venue {   font-family: "SourceSansPro";   font-weight: lighter;   font-size: 16px;   color: rgb(67, 67, 67); } .tbml-date {   font-family: "SourceSansPro";   font-weight: bold;   font-size: 14px;   color: rgb(112, 112, 112);   margin-left: 7px;   margin-right: 7px; } .tbml-time {   font-family: "SourceSansPro";   font-weight: lighter;   font-size: 16px;   color: rgb(112, 112, 112); }    html {    }        body {    padding: 0px;    margin: 0px;    }        div {    margin: 0px;    padding: 0px;    }     .data-icon {    height:16px;    vertical-align: middle    } 
 
 
-                </xhtml:style>
+                </style>
                 <body><div>
                     <!-- Iconified view displayed on the first page when clicking on token card in AlphaWallet -->
                     <p>Enter Satoshi's villa with this special token!
@@ -101,7 +97,7 @@
                 </body>
             </ts:item-view>
             <ts:view xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-                <xhtml:style type="text/css">.ts-count {
+                <style type="text/css">.ts-count {
                     font-family: "SourceSansPro";
                     font-weight: bolder;
                     font-size: 21px;
@@ -154,7 +150,7 @@
                     .tbml-count {   font-family: "SourceSansPro";   font-weight: bolder;   font-size: 21px;   color: rgb(117, 185, 67); } .tbml-category {   font-family: "SourceSansPro";   font-weight: lighter;   font-size: 21px;   color: rgb(67, 67, 67); } .tbml-venue {   font-family: "SourceSansPro";   font-weight: lighter;   font-size: 16px;   color: rgb(67, 67, 67); } .tbml-date {   font-family: "SourceSansPro";   font-weight: bold;   font-size: 14px;   color: rgb(112, 112, 112);   margin-left: 7px;   margin-right: 7px; } .tbml-time {   font-family: "SourceSansPro";   font-weight: lighter;   font-size: 16px;   color: rgb(112, 112, 112); }    html {    }        body {    padding: 0px;    margin: 0px;    }        div {    margin: 0px;    padding: 0px;    }     .data-icon {    height:16px;    vertical-align: middle    } 
 
 
-                </xhtml:style>
+                </style>
                 <script type="text/javascript">//
                     (function() {
                     'use strict'
@@ -286,28 +282,27 @@
 
                     web3.tokens.dataChanged = (oldTokens, updatedTokens, tokenCardId) =&gt; {
                     const currentTokenInstance = updatedTokens.currentInstance;
-                    document.getElementById(tokenCardId).getElementsByClassName("contents")[0].innerHTML = new Token(currentTokenInstance).render()
+                    document.getElementById(tokenCardId).innerHTML = new Token(currentTokenInstance).render();
                     };
 
                     //
                 </script>
             </ts:view>
-        </ts:token>
-        <ts:action>
+        </ts:card>
+        <ts:card exclude="expired" type="action">
             <!-- this action is of the model confirm-back.
-            It should be <ts:action model="confirm-back"> but Weiwu
+            It should be <ts:card type="action" model="confirm-back"> but Weiwu
             shied away from specifying that due to the likely change of design causing an upgrade path issue.
             window.onConfirm is called if user hit "confirm";
             window.close() causes the back button to be pressed.
             -->
-            <ts:name>
+            <ts:label>
                 <ts:string xml:lang="en">Enter</ts:string>
                 <ts:string xml:lang="zh">入場</ts:string>
                 <ts:string xml:lang="es">Entrar</ts:string>
-            </ts:name>
-            <ts:exclude selection="expired"></ts:exclude>
+            </ts:label>
             <ts:view xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-                <xhtml:style type="text/css">.ts-count {
+                <style type="text/css">.ts-count {
                     font-family: "SourceSansPro";
                     font-weight: bolder;
                     font-size: 21px;
@@ -360,7 +355,7 @@
                     .tbml-count {   font-family: "SourceSansPro";   font-weight: bolder;   font-size: 21px;   color: rgb(117, 185, 67); } .tbml-category {   font-family: "SourceSansPro";   font-weight: lighter;   font-size: 21px;   color: rgb(67, 67, 67); } .tbml-venue {   font-family: "SourceSansPro";   font-weight: lighter;   font-size: 16px;   color: rgb(67, 67, 67); } .tbml-date {   font-family: "SourceSansPro";   font-weight: bold;   font-size: 14px;   color: rgb(112, 112, 112);   margin-left: 7px;   margin-right: 7px; } .tbml-time {   font-family: "SourceSansPro";   font-weight: lighter;   font-size: 16px;   color: rgb(112, 112, 112); }    html {    }        body {    padding: 0px;    margin: 0px;    }        div {    margin: 0px;    padding: 0px;    }     .data-icon {    height:16px;    vertical-align: middle    } 
 
 
-                </xhtml:style>
+                </style>
                 <script type="text/javascript">//
                     class Token {
                     constructor(tokenInstance) {
@@ -371,7 +366,7 @@
 
                     web3.tokens.dataChanged = (oldTokens, updatedTokens, tokenCardId) =&gt; {
                     const currentTokenInstance = updatedTokens.currentInstance;
-                    document.getElementById(tokenCardId).getElementsByClassName("contents")[0].innerHTML = new Token(currentTokenInstance).render()
+                    document.getElementById(tokenCardId).innerHTML = new Token(currentTokenInstance).render();
                     };
 
                     document.addEventListener("DOMContentLoaded", function() {
@@ -427,63 +422,67 @@
                     <div id="status"></div>
                 </body>
             </ts:view>
-        </ts:action>
+        </ts:card>
     </ts:cards>
-    <ts:attribute-types>
-        <ts:attribute-type id="locality" syntax="1.3.6.1.4.1.1466.115.121.1.15">
-            <ts:origins>
-                <ts:ethereum as="utf8" contract="EntryToken" function="getLocality">
-                    <ts:data>
-                        <ts:uint256 ref="tokenId"></ts:uint256>
-                    </ts:data>
-                </ts:ethereum>
-            </ts:origins>
+    <ts:attribute name="locality">
+        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.15</ts:syntax></ts:type>
+        <ts:origins>
+            <ethereum:call as="utf8" contract="EntryToken" function="getLocality">
+                <ts:data>
+                    <ts:uint256 ref="tokenId"></ts:uint256>
+                </ts:data>
+            </ethereum:call>
+        </ts:origins>
 
-        </ts:attribute-type>
-        <ts:attribute-type id="time" syntax="1.3.6.1.4.1.1466.115.121.1.24">
-            <ts:name>
-                <ts:string xml:lang="en">Time</ts:string>
-                <ts:string xml:lang="zh">时间</ts:string>
-            </ts:name>
-            <ts:origins>
-                <ts:token-id as="utf8" bitmask="0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000"></ts:token-id>
-            </ts:origins>
-        </ts:attribute-type>
-        <ts:attribute-type id="expired" syntax="1.3.6.1.4.1.1466.115.121.1.7"> <!-- boolean -->
-            <ts:origins>
-                <ts:ethereum as="bool" contract="EntryToken" function="isExpired">
-                    <ts:data>
-                        <ts:uint256 ref="tokenId"></ts:uint256>
-                    </ts:data>
-                </ts:ethereum>
-            </ts:origins>
-        </ts:attribute-type>
-        <ts:attribute-type id="street" syntax="1.3.6.1.4.1.1466.115.121.1.15"> <!-- string -->
-            <ts:origins>
-                <ts:ethereum as="utf8" contract="EntryToken" function="getStreet">
-                    <ts:data>
-                        <ts:uint256 ref="tokenId"></ts:uint256>
-                    </ts:data>
-                </ts:ethereum>
-            </ts:origins>
-        </ts:attribute-type>
-        <ts:attribute-type id="building" syntax="1.3.6.1.4.1.1466.115.121.1.15"> <!-- string -->
-            <ts:origins>
-                <ts:ethereum as="utf8" contract="EntryToken" function="getBuildingName">
-                    <ts:data>
-                        <ts:uint256 ref="tokenId"></ts:uint256>
-                    </ts:data>
-                </ts:ethereum>
-            </ts:origins>
-        </ts:attribute-type>
-        <ts:attribute-type id="state" syntax="1.3.6.1.4.1.1466.115.121.1.15"> <!-- string -->
-            <ts:origins>
-                <ts:ethereum as="utf8" contract="EntryToken" function="getState">
-                    <ts:data>
-                        <ts:uint256 ref="tokenId"></ts:uint256>
-                    </ts:data>
-                </ts:ethereum>
-            </ts:origins>
-        </ts:attribute-type>
-    </ts:attribute-types>
+    </ts:attribute>
+    <ts:attribute name="time">
+        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.24</ts:syntax></ts:type>
+        <ts:label>
+            <ts:string xml:lang="en">Time</ts:string>
+            <ts:string xml:lang="zh">时间</ts:string>
+        </ts:label>
+        <ts:origins>
+            <ts:token-id as="utf8" bitmask="0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000"></ts:token-id>
+        </ts:origins>
+    </ts:attribute>
+    <ts:attribute name="expired"> <!-- boolean -->
+        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.7</ts:syntax></ts:type>
+        <ts:origins>
+            <ethereum:call as="bool" contract="EntryToken" function="isExpired">
+                <ts:data>
+                    <ts:uint256 ref="tokenId"></ts:uint256>
+                </ts:data>
+            </ethereum:call>
+        </ts:origins>
+    </ts:attribute>
+    <ts:attribute name="street"> <!-- string -->
+        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.15</ts:syntax></ts:type>
+        <ts:origins>
+            <ethereum:call as="utf8" contract="EntryToken" function="getStreet">
+                <ts:data>
+                    <ts:uint256 ref="tokenId"></ts:uint256>
+                </ts:data>
+            </ethereum:call>
+        </ts:origins>
+    </ts:attribute>
+    <ts:attribute name="building"> <!-- string -->
+        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.15</ts:syntax></ts:type>
+        <ts:origins>
+            <ethereum:call as="utf8" contract="EntryToken" function="getBuildingName">
+                <ts:data>
+                    <ts:uint256 ref="tokenId"></ts:uint256>
+                </ts:data>
+            </ethereum:call>
+        </ts:origins>
+    </ts:attribute>
+    <ts:attribute name="state"> <!-- string -->
+        <ts:type><ts:syntax>1.3.6.1.4.1.1466.115.121.1.15</ts:syntax></ts:type>
+        <ts:origins>
+            <ethereum:call as="utf8" contract="EntryToken" function="getState">
+                <ts:data>
+                    <ts:uint256 ref="tokenId"></ts:uint256>
+                </ts:data>
+            </ethereum:call>
+        </ts:origins>
+    </ts:attribute>
 </ts:token>

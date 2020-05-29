@@ -91,6 +91,15 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         viewModel.tokenTicker().observe(this, this::onTokenTicker);
         viewModel.transactionUpdate().observe(this, this::newTransactions);
         viewModel.sig().observe(this, sigData -> toolbarView.onSigData(sigData, this));
+        viewModel.newScriptFound().observe(this, this::onNewScript);
+        viewModel.checkForNewScript(token);
+    }
+
+    private void onNewScript(Boolean hasNewScript)
+    {
+        //found a new tokenscript for this token
+        //refresh the view
+        setUpTokenView();
     }
 
     private void onTokenTicker(TokenTicker ticker)

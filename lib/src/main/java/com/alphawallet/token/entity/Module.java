@@ -1,6 +1,7 @@
 package com.alphawallet.token.entity;
 
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,22 +19,22 @@ public class Module
         contractInfo = info;
     }
 
-    public void addSequenceElement(Element element, String sequenceName) throws Exception
+    public void addSequenceElement(Element element, String sequenceName) throws SAXException
     {
         SequenceElement se = new SequenceElement();
-        String indexed = element.getAttribute("ethereum:indexed");
+        String indexed = element.getAttribute("indexed"); //NB : namespace is determined from the prefix() element eg element.getPrefix()
         se.indexed = indexed != null && indexed.equalsIgnoreCase("true");
-        se.type = element.getAttribute("ethereum:type");
+        se.type = element.getAttribute("type");
         se.name = element.getAttribute("name");
         sequence.add(se);
 
         if (se.type == null)
         {
-            throw new Exception("Malformed sequence element in: " + sequenceName + " name: " + se.name);
+            throw new SAXException("Malformed sequence element in: " + sequenceName + " name: " + se.name);
         }
         else if (se.name == null)
         {
-            throw new Exception("Malformed sequence element in: " + sequenceName + " type: " + se.type);
+            throw new SAXException("Malformed sequence element in: " + sequenceName + " type: " + se.type);
         }
     }
 

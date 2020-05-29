@@ -24,7 +24,7 @@ public class TokenDefinitionTest implements ParseResult
     public void TokenInformationCanBeExtracted() throws IOException, SAXException {
         assertTrue(entryTokenTestFile.exists());
         TokenDefinition entryToken = new TokenDefinition(new FileInputStream(entryTokenTestFile), new Locale("en"), this);
-        assertFalse(entryToken.attributeTypes.isEmpty());
+        assertFalse(entryToken.attributes.isEmpty());
         for (String contractName : entryToken.contracts.keySet())
         {
             assertNotEquals(0, contractName.length());

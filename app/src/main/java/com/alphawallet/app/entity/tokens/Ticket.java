@@ -3,7 +3,6 @@ package com.alphawallet.app.entity.tokens;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.View;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
@@ -13,12 +12,11 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
+import com.alphawallet.app.web3j.datatypes.Function;
 import com.alphawallet.token.entity.TicketRange;
 
 import org.web3j.abi.datatypes.DynamicArray;
-import com.alphawallet.app.web3j.datatypes.Function;
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -152,7 +150,7 @@ public class Ticket extends Token implements Parcelable
     @Override
     public void clickReact(BaseViewModel viewModel, Context context)
     {
-        viewModel.showRedeemToken(context, this);
+        viewModel.showTokenList(context, this);
     }
 
     @Override

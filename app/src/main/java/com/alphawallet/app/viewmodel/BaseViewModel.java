@@ -136,7 +136,7 @@ public class BaseViewModel extends ViewModel
 		//do nothing
 	}
 
-	public void showRedeemToken(Context context, Token token) {
+	public void showTokenList(Context context, Token token) {
 		//do nothing
 	}
 

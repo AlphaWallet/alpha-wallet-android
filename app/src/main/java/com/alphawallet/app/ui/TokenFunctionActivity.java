@@ -105,11 +105,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         {
             functionBar.revealButtons();
             functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, idList);
-
-            if(BuildConfig.DEBUG && !viewModel.isAuthorizeToFunction())
-            {
-                findViewById(R.id.text_debug).setVisibility(View.VISIBLE);
-            }
+            functionBar.setWalletType(w.type);
         }
     }
 

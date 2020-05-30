@@ -204,6 +204,7 @@ public class WalletViewModel extends BaseViewModel
         tokensService.addTokens(cachedTokens);
         tokensService.requireTokensRefresh();
         tokens.postValue(tokensService.getAllLiveTokens().toArray(new Token[0]));
+        checkUnknownTokens(cachedTokens);
     }
 
     private void onTokenFetchError(Throwable throwable)
@@ -341,6 +342,21 @@ public class WalletViewModel extends BaseViewModel
             Observable.fromArray(contractCandidates.toArray(new ContractLocator[0]))
                     .filter(result -> (tokensService.getToken(result.chainId, result.address) == null))
                     .forEach(r -> unknownAddresses.add(r)).isDisposed();
+        }
+    }
+
+    /**
+     * Checks for tokens with contract type 'OTHER' returned from the initial storage fetch
+     * These tokens will have their type interface re-checked.
+     */
+    private void checkUnknownTokens(Token[] tokens)
+    {
+        for (Token t : tokens)
+        {
+            if (t.getInterfaceSpec() == ContractType.OTHER)
+            {
+                unknownAddresses.add(new ContractLocator(t.getAddress(), t.tokenInfo.chainId));
+            }
         }
     }
 

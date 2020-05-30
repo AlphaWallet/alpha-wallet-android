@@ -121,6 +121,19 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
     }
 
+    public void setupSecondaryFunction(StandardFunctionInterface functionInterface, int functionNameResource)
+    {
+        callStandardFunctions = functionInterface;
+        adapter = null;
+        functions = null;
+        resetButtonCount();
+        buttonCount = 1;
+        addFunction(functionNameResource);
+
+        //always show buttons
+        findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
+    }
+
     public void setupFunctions(StandardFunctionInterface functionInterface, AssetDefinitionService assetSvs, Token token, NonFungibleTokenAdapter adp, List<BigInteger> tokenIds) {
         callStandardFunctions = functionInterface;
         adapter = adp;

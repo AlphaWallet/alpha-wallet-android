@@ -4,16 +4,15 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.util.Utils;
-
-import org.web3j.crypto.WalletUtils;
 
 public class CopyTextView extends LinearLayout {
 
@@ -25,8 +24,13 @@ public class CopyTextView extends LinearLayout {
     private LinearLayout layout;
 
     private int textResId;
+    private int textColor;
+    private int gravity;
     private boolean showToast;
+    private boolean boldFont;
+    private boolean removePadding;
     private String rawAddress;
+    private float marginRight;
 
     public CopyTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -47,8 +51,13 @@ public class CopyTextView extends LinearLayout {
         );
 
         try {
-            textResId = a.getResourceId(R.styleable.CopyTextView_text, R.string.empty);
+            textResId = a.getResourceId(R.styleable.CopyTextView_text, R.string.action_add_wallet);
+            textColor = a.getColor(R.styleable.CopyTextView_textColor, -1);
+            gravity = a.getInt(R.styleable.CopyTextView_gravity, Gravity.NO_GRAVITY);
             showToast = a.getBoolean(R.styleable.CopyTextView_showToast, true);
+            boldFont = a.getBoolean(R.styleable.CopyTextView_bold, false);
+            removePadding = a.getBoolean(R.styleable.CopyTextView_removePadding, false);
+            marginRight = a.getDimension(R.styleable.CopyTextView_marginRight, 0.0f);
         } finally {
             a.recycle();
         }
@@ -59,6 +68,22 @@ public class CopyTextView extends LinearLayout {
         copy = findViewById(R.id.img_copy);
         text = findViewById(R.id.text);
         text.setText(textResId);
+        text.setTextColor(textColor);
+        text.setGravity(gravity);
+
+        LayoutParams layoutParams = (LayoutParams) text.getLayoutParams();
+        layoutParams.rightMargin = (int) marginRight;
+        text.setLayoutParams(layoutParams);
+
+        if(boldFont)
+        {
+            text.setTypeface(text.getTypeface(), Typeface.BOLD);
+        }
+
+        if(removePadding)
+        {
+            copy.setPadding(0, 0, 0, 0);
+        }
 
         layout.setOnClickListener(v -> copyToClipboard());
         copy.setOnClickListener(v -> copyToClipboard());

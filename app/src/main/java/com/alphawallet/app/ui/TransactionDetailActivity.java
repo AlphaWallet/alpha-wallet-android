@@ -3,7 +3,7 @@ package com.alphawallet.app.ui;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.Menu;
@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.VisibilityFilter;
@@ -24,10 +25,11 @@ import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModel;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModelFactory;
+import com.alphawallet.app.widget.CopyTextView;
+import com.alphawallet.app.widget.FunctionButtonBar;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -41,8 +43,8 @@ import dagger.android.AndroidInjection;
 import static com.alphawallet.app.C.Key.TRANSACTION;
 import static com.alphawallet.app.C.Key.WALLET;
 
-public class TransactionDetailActivity extends BaseActivity implements View.OnClickListener {
-
+public class TransactionDetailActivity extends BaseActivity implements StandardFunctionInterface
+{
     @Inject
     TransactionDetailViewModelFactory transactionDetailViewModelFactory;
     private TransactionDetailViewModel viewModel;
@@ -52,13 +54,12 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
     private Token token;
     private String chainName;
     private Wallet wallet;
+    private FunctionButtonBar functionBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
         AndroidInjection.inject(this);
-
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction_detail);
 
         transaction = getIntent().getParcelableExtra(TRANSACTION);
@@ -68,11 +69,11 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
             return;
         }
         toolbar();
-        setTitle(R.string.empty);
+        setTitle();
 
         String blockNumber = transaction.blockNumber;
         TransactionOperation op = null;
-        if (transaction.blockNumber.equals("0"))
+        if (transaction.blockNumber != null && transaction.blockNumber.equals("0"))
         {
             blockNumber = getString(R.string.status_pending);
             findViewById(R.id.pending_spinner).setVisibility(View.VISIBLE);
@@ -81,18 +82,22 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         setupVisibilities();
 
         amount = findViewById(R.id.amount);
-        ((TextView) findViewById(R.id.from)).setText(transaction.from);
-        ((TextView) findViewById(R.id.to)).setText(transaction.to);
-        ((TextView) findViewById(R.id.txn_hash)).setText(transaction.hash);
+        CopyTextView toValue = findViewById(R.id.to);
+        CopyTextView fromValue = findViewById(R.id.from);
+        CopyTextView txHashView = findViewById(R.id.txn_hash);
+        functionBar = findViewById(R.id.layoutButtons);
+
+        fromValue.setText(transaction.from);
+        toValue.setText(transaction.to);
+        txHashView.setText(transaction.hash);
         ((TextView) findViewById(R.id.txn_time)).setText(localiseUnixTime(transaction.timeStamp));
 
         ((TextView) findViewById(R.id.block_number)).setText(blockNumber);
-        findViewById(R.id.more_detail).setOnClickListener(this);
 
         if (transaction.operations != null && transaction.operations.length > 0)
         {
             op = transaction.operations[0];
-            if (op != null && op.to != null) ((TextView) findViewById(R.id.to)).setText(op.to);
+            if (op != null && op.to != null) toValue.findViewById(R.id.to);
         }
 
         viewModel = ViewModelProviders.of(this, transactionDetailViewModelFactory)
@@ -101,6 +106,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         viewModel.prepare(transaction.chainId);
 
         chainName = viewModel.getNetworkName(transaction.chainId);
+        ((TextView) findViewById(R.id.network)).setText(chainName);
 
         token = viewModel.getToken(transaction.chainId, transaction.to);
         TextView chainLabel = findViewById(R.id.text_chain_name);
@@ -108,32 +114,19 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         Utils.setChainColour(chainLabel, transaction.chainId);
         chainLabel.setText(chainName);
 
-        String operationName = null;
-        if (token != null)
-        {
-            ((TextView)findViewById(R.id.contract_name)).setText(token.getFullName());
-            operationName = token.getOperationName(transaction, getApplicationContext());
-        }
-        else
-        {
-            findViewById(R.id.contract_name_title).setVisibility(View.GONE);
-            findViewById(R.id.contract_name).setVisibility(View.GONE);
-
-            //no token, did we send? If from == our wallet then we sent this
-            if (transaction.from.equalsIgnoreCase(wallet.address)) operationName = getString(R.string.sent);
-        }
-
-        if (operationName != null)
-        {
-            ((TextView)findViewById(R.id.transaction_name)).setText(operationName);
-        }
-        else
-        {
-            findViewById(R.id.transaction_name).setVisibility(View.GONE);
-        }
+        setOperationName();
 
         if (!viewModel.hasEtherscanDetail(transaction)) findViewById(R.id.more_detail).setVisibility(View.GONE);
         setupWalletDetails(op);
+
+        functionBar.setupSecondaryFunction(this, R.string.action_open_etherscan);
+    }
+
+    private void setTitle() {
+        findViewById(R.id.toolbar_title).setVisibility(View.VISIBLE);
+        ((TextView)findViewById(R.id.toolbar_title)).setText(R.string.title_transaction_details);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle("");
     }
 
     private void onLatestBlock(BigInteger latestBlock)
@@ -143,11 +136,10 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
             BigInteger txBlock = new BigInteger(transaction.blockNumber);
             if (!latestBlock.equals(BigInteger.ZERO) && !txBlock.equals(BigInteger.ZERO))
             {
-                findViewById(R.id.confirmations).setVisibility(View.VISIBLE);
-                findViewById(R.id.title_confirmations).setVisibility(View.VISIBLE);
                 //how many confirmations?
                 BigInteger confirmations = latestBlock.subtract(txBlock);
-                ((TextView) findViewById(R.id.confirmations)).setText(confirmations.toString(10));
+                String confirmation = " (" + confirmations.toString(10) + " " + getString(R.string.confirmations)  + ")";
+                ((TextView) findViewById(R.id.block_number)).append(confirmation);
             }
         }
         catch (Exception e)
@@ -170,9 +162,6 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         {
             ((TextView) findViewById(R.id.gas_fee)).setText(BalanceUtils.weiToEth(gasFee).toPlainString());
         }
-
-        findViewById(R.id.confirmations).setVisibility(View.GONE);
-        findViewById(R.id.title_confirmations).setVisibility(View.GONE);
     }
 
     private void setupWalletDetails(TransactionOperation op) {
@@ -204,9 +193,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
             prefix = (isSent ? "-" : "+");
         }
 
-        amount.setTextColor(ContextCompat.getColor(this, isSent ? R.color.red : R.color.green));
         rawValue =  prefix + rawValue;
-
         amount.setText(rawValue);
     }
 
@@ -215,7 +202,7 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         Date date = new java.util.Date(timeStampInSec*DateUtils.SECOND_IN_MILLIS);
         DateFormat timeFormat = java.text.DateFormat.getTimeInstance(DateFormat.SHORT, LocaleUtils.getDeviceLocale(this));
         DateFormat dateFormat = java.text.DateFormat.getDateInstance(DateFormat.MEDIUM, LocaleUtils.getDeviceLocale(this));
-        return dateFormat.format(date) + " " + timeFormat.format(date);
+        return timeFormat.format(date) + " | " + dateFormat.format(date);
     }
 
     @Override
@@ -232,13 +219,32 @@ public class TransactionDetailActivity extends BaseActivity implements View.OnCl
         return super.onOptionsItemSelected(item);
     }
 
-    private void onDefaultNetwork(NetworkInfo networkInfo) {
-        findViewById(R.id.more_detail).setVisibility(
-                TextUtils.isEmpty(networkInfo.etherscanUrl) ? View.GONE : View.VISIBLE);
+    private void setOperationName()
+    {
+        String operationName = null;
+        if (token != null)
+        {
+            operationName = token.getOperationName(transaction, getApplicationContext());
+        }
+        else
+        {
+            //no token, did we send? If from == our wallet then we sent this
+            if (transaction.from.equalsIgnoreCase(wallet.address)) operationName = getString(R.string.sent);
+        }
+
+        if (operationName != null)
+        {
+            ((TextView)findViewById(R.id.text_operation_name)).setText(operationName);
+        }
+        else
+        {
+            findViewById(R.id.text_operation_name).setVisibility(View.GONE);
+        }
     }
 
     @Override
-    public void onClick(View v) {
+    public void handleClick(String action)
+    {
         viewModel.showMoreDetails(this, transaction);
     }
 }

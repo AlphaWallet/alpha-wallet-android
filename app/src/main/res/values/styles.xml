@@ -69,4 +69,35 @@
         <item name="colorControlActivated">@color/azure</item>
         <item name="colorSwitchThumbNormal">@color/dove</item>
     </style>
+
+    <style name="MyAddressCopyTextStyle">
+        <item name="android:paddingTop">@dimen/dp15</item>
+        <item name="android:paddingBottom">@dimen/dp15</item>
+        <item name="android:paddingEnd">@dimen/dp25</item>
+        <item name="android:paddingStart">@dimen/dp25</item>
+        <item name="android:background">@drawable/background_round_grey_5dp</item>
+    </style>
+
+    <style name="TransactionDetailsCopyTextStyle">
+        <item name="android:paddingTop">@dimen/dp5</item>
+        <item name="android:background">@color/white</item>
+        <item name="android:paddingEnd">@dimen/dp16</item>
+        <item name="android:paddingBottom">@dimen/dp5</item>
+    </style>
+
+    <style name="TransactionDetailsSubTitleStyle">
+        <item name="android:layout_marginTop">@dimen/big_margin</item>
+        <item name="android:fontFamily">@font/font_regular</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/dove</item>
+    </style>
+
+    <style name="TransactionDetailsStyle">
+        <item name="android:paddingTop">@dimen/dp5</item>
+        <item name="android:background">@color/white</item>
+        <item name="android:fontFamily">@font/font_regular</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textColor">@color/mine</item>
+    </style>
+
 </resources>

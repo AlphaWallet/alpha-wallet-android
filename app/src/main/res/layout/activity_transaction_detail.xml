@@ -7,6 +7,12 @@
 
     <include layout="@layout/layout_simple_toolbar" />
 
+    <com.alphawallet.app.widget.FunctionButtonBar
+        android:layout_alignParentBottom="true"
+        android:id="@+id/layoutButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -60,12 +66,27 @@
                 android:layout_marginTop="@dimen/dp16"
                 android:text="@string/value" />
 
-            <TextView
-                android:id="@+id/amount"
-                style="@style/TransactionDetailsStyle"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="4238793"  />
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/text_operation_name"
+                    style="@style/TransactionDetailsStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/dp16"
+                    tools:text="Sent"  />
+
+                <TextView
+                    android:id="@+id/amount"
+                    style="@style/TransactionDetailsStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="4238793"  />
+
+            </LinearLayout>
 
             <TextView
                 style="@style/TransactionDetailsSubTitleStyle"
@@ -179,29 +200,5 @@
         android:layout_height="1dp"
         android:layout_above="@+id/more_detail"
         android:background="@color/greyf6"/>
-
-    <Button
-        android:id="@+id/more_detail"
-        style="@style/Widget.AppCompat.Button.Borderless.Colored"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="@dimen/big_margin"
-        android:layout_marginBottom="@dimen/big_margin"
-        android:autoLink="web"
-        android:background="@drawable/background_round_azure_25dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/font_semibold"
-        android:linksClickable="true"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:layout_marginEnd="@dimen/dp16"
-        android:layout_marginStart="@dimen/dp16"
-        android:text="@string/action_open_etherscan"
-        android:textAllCaps="false"
-        android:textColor="@color/azure"
-        android:textSize="20sp" />
 
 </RelativeLayout>

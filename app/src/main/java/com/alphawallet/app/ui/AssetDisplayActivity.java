@@ -17,6 +17,7 @@ import android.widget.ProgressBar;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
@@ -42,6 +43,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.Key.TICKET;
+import static com.alphawallet.app.C.Key.WALLET;
 
 /**
  * Created by James on 22/01/2018.
@@ -79,6 +81,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     private CertifiedToolbarView toolbarView;
     private FunctionButtonBar functionBar;
     private Token token;
+    private Wallet wallet;
     private NonFungibleTokenAdapter adapter;
     private AWalletAlertDialog dialog;
     private Web3TokenView testView;
@@ -92,6 +95,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         AndroidInjection.inject(this);
 
         token = getIntent().getParcelableExtra(TICKET);
+        wallet = getIntent().getParcelableExtra(WALLET);
 
         super.onCreate(savedInstanceState);
 
@@ -191,6 +195,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         {
             functionBar = findViewById(R.id.layoutButtons);
             functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter, token.getArrayBalance());
+            functionBar.setWalletType(wallet.type);
         }
     }
 
@@ -361,6 +366,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         progressView.setVisibility(View.GONE);
         adapter = new NonFungibleTokenAdapter(functionBar, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
         functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter, token.getArrayBalance());
+        functionBar.setWalletType(wallet.type);
         list.setAdapter(adapter);
     }
 

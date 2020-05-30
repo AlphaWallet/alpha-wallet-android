@@ -443,8 +443,8 @@ public class WalletViewModel extends BaseViewModel
     }
 
     @Override
-    public void showRedeemToken(Context context, Token token) {
-        assetDisplayRouter.open(context, token);
+    public void showTokenList(Context context, Token token) {
+        assetDisplayRouter.open(context, token, currentWallet);
     }
 
     public LiveData<Map<String, String>> currentWalletBalance() {

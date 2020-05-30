@@ -3,7 +3,6 @@ package com.alphawallet.app.entity.tokens;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.View;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
@@ -11,15 +10,13 @@ import com.alphawallet.app.entity.ERC875ContractTransaction;
 import com.alphawallet.app.entity.TicketRangeElement;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
-import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
+import com.alphawallet.app.web3j.datatypes.Function;
 import com.alphawallet.token.entity.TicketRange;
 
-import com.alphawallet.app.web3j.datatypes.Function;
 import org.web3j.abi.datatypes.generated.Uint256;
 
 import java.math.BigDecimal;
@@ -148,9 +145,9 @@ public class ERC721Ticket extends Token implements Parcelable {
     @Override
     public void clickReact(BaseViewModel viewModel, Context context)
     {
-        viewModel.showRedeemToken(context, this);
+        viewModel.showTokenList(context, this);
     }
-    
+
     @Override
     public int getContractType()
     {

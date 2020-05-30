@@ -24,9 +24,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ItemClick;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
@@ -64,6 +66,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private ImageButton moreButton;
     private final Handler handler = new Handler();
     private AssetDefinitionService assetService;
+    private WalletType walletType = WalletType.WATCH; //assume watch unless otherwise notified
 
     private BottomSheetDialog bottomSheet;
     private ListView moreActionsListView;
@@ -182,11 +185,6 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     public void revealButtons()
     {
         showButtons = true;
-//        if (adapter == null && selection == null)
-//        {
-//            populateButtons(token, null);
-//            findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
-//        }
     }
 
     @Override
@@ -341,10 +339,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         waitForMapBuild();
 
         populateButtons(token, getSelectedTokenId(tokenIds));
-
-        if (findViewById(R.id.layoutButtons).getVisibility() != View.VISIBLE) {
-            findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
-        }
+        showButtons();
     }
 
     private void waitForMapBuild()
@@ -479,6 +474,11 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         addFunction(new ItemClick(context.getString(resourceId), resourceId));
     }
 
+    public void setWalletType(WalletType type)
+    {
+        walletType = type;
+    }
+
     private static class FunctionItemAdapter extends ArrayAdapter<ItemClick>
     {
         public FunctionItemAdapter(Context context, int resource, List<ItemClick> objects) {
@@ -580,8 +580,21 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         {
             BigInteger tokenId = getSelectedTokenId(selection);
             populateButtons(token, tokenId);
+            showButtons();
+        }
+    }
+
+    private void showButtons()
+    {
+        if (BuildConfig.DEBUG || walletType != WalletType.WATCH)
+        {
             handler.post(() -> {
                 findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
+
+                if (BuildConfig.DEBUG && walletType == WalletType.WATCH)
+                {
+                    findViewById(R.id.text_debug).setVisibility(View.VISIBLE);
+                }
             });
         }
     }

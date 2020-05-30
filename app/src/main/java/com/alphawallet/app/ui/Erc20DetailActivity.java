@@ -151,11 +151,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             functionBar = findViewById(R.id.layoutButtons);
             functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, null);
             functionBar.revealButtons();
-
-            if (BuildConfig.DEBUG && wallet.type == WalletType.WATCH)
-            {
-                findViewById(R.id.text_debug).setVisibility(View.VISIBLE);
-            }
+            functionBar.setWalletType(wallet.type);
         }
     }
 

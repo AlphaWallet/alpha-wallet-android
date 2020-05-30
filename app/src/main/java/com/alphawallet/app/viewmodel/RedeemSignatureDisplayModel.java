@@ -324,10 +324,6 @@ public class RedeemSignatureDisplayModel extends BaseViewModel
         }
     }
 
-    public void showAssets(Context context, Ticket t, boolean isClearStack) {
-        assetDisplayRouter.open(context, t, isClearStack);
-    }
-
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;

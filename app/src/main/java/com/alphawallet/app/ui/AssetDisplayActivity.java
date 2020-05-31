@@ -147,6 +147,8 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         {
             displayTokens();
         }
+
+        viewModel.checkForNewScript(token); //check for updated script
     }
 
     private void onNewScript(Boolean aBoolean)

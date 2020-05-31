@@ -10,8 +10,8 @@ import android.util.AttributeSet;
 import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.webkit.ConsoleMessage;
 import android.view.View;
+import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -29,6 +29,7 @@ import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.app.web3.entity.Message;
@@ -38,20 +39,20 @@ import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.tools.TokenDefinition;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
+import java.io.LineNumberReader;
+import java.io.StringReader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
-
-import org.jetbrains.annotations.NotNull;
-
-import java.math.BigInteger;
-import java.util.Map;
-
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ERROR;
 
 /**
@@ -61,6 +62,7 @@ import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ERROR;
 public class Web3TokenView extends WebView
 {
     public static final String RENDERING_ERROR = "<html>" + TOKENSCRIPT_ERROR + "${ERR1}</html>";
+    public static final String RENDERING_ERROR_SUPPLIMENTAL = "</br></br>Error in line $ERR1:</br>$ERR2";
 
     private static final String JS_PROTOCOL_CANCELLED = "cancelled";
     private static final String JS_PROTOCOL_ON_SUCCESSFUL = "executeCallback(%1$s, null, \"%2$s\")";
@@ -71,6 +73,7 @@ public class Web3TokenView extends WebView
     private TokenScriptClient tokenScriptClient;
     private PageReadyCallback assetHolder;
     private boolean showingError = false;
+    private String unencodedPage;
 
     protected WebCompletionCallback keyPressCallback;
 
@@ -135,8 +138,31 @@ public class Web3TokenView extends WebView
                 if (!showingError && msg.messageLevel() == ConsoleMessage.MessageLevel.ERROR)
                 {
                     if (msg.message().contains(REFRESH_ERROR)) return true; //don't stop for refresh error
+                    String errorLine = "";
+                    try
+                    {
+                        LineNumberReader lineNumberReader = new LineNumberReader(new StringReader(unencodedPage));
+                        lineNumberReader.setLineNumber(0);
+
+                        String lineStr;
+                        while ((lineStr = lineNumberReader.readLine()) != null)
+                        {
+                            if (lineNumberReader.getLineNumber() == msg.lineNumber())
+                            {
+                                errorLine = Utils.escapeHTML(lineStr); //ensure string is displayed exactly how it is read
+                                break;
+                            }
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        errorLine = "";
+                    }
+
                     String errorMessage = RENDERING_ERROR.replace("${ERR1}", msg.message());
+                    if (!TextUtils.isEmpty(errorLine)) errorMessage += RENDERING_ERROR_SUPPLIMENTAL.replace("$ERR1", String.valueOf(msg.lineNumber())).replace("$ERR2", errorLine); //.replace("$ERR2", errorMessage)
                     showError(errorMessage);
+                    unencodedPage = null;
                 }
                 return true;
             }
@@ -321,6 +347,7 @@ public class Web3TokenView extends WebView
         public void onPageFinished(WebView view, String url)
         {
             super.onPageFinished(view, url);
+            unencodedPage = null;
             if (assetHolder != null)
                 assetHolder.onPageRendered(view);
         }
@@ -450,10 +477,10 @@ public class Web3TokenView extends WebView
         String view = assetService.getTokenView(token.tokenInfo.chainId, token.getAddress(), viewName);
         if (TextUtils.isEmpty(view)) view = buildViewError(token, range, viewName);
         String style = assetService.getTokenViewStyle(token.tokenInfo.chainId, token.getAddress(), viewName);
-        String viewData = injectWeb3TokenInit(view, attrs.toString(), range.tokenIds.get(0));
-        viewData = injectStyleAndWrapper(viewData, style); //style injected last so it comes first
+        unencodedPage = injectWeb3TokenInit(view, attrs.toString(), range.tokenIds.get(0));
+        unencodedPage = injectStyleAndWrapper(unencodedPage, style); //style injected last so it comes first
 
-        String base64 = android.util.Base64.encodeToString(viewData.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+        String base64 = android.util.Base64.encodeToString(unencodedPage.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
         loadData(base64, "text/html; charset=utf-8", "base64");
     }
 

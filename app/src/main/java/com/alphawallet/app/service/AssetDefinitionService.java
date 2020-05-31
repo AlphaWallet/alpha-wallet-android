@@ -2212,14 +2212,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return Single.fromCallable(() -> {
             final File[] files = buildFileList();
             List<TokenLocator> tokenLocators = new ArrayList<>();
-
-            String name = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".toLowerCase();
-
             Observable.fromArray(files)
                     .filter(File::isFile)
                     .filter(this::allowableExtension)
                     .filter(File::canRead)
-                    .filter(file -> file.getAbsolutePath().contains(name) )
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
                     .blockingForEach(file -> {

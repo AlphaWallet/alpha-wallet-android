@@ -346,4 +346,34 @@ public class Utils {
         StringBuilder formatted = new StringBuilder(result);
         return formatted.append(firstSix).append("...").append(lastSix).toString().toLowerCase();
     }
+
+    /**
+     * Just enough for diagnosis of most errors
+     * @param s String to be HTML escaped
+     * @return escaped string
+     */
+    public static String escapeHTML(String s) {
+        StringBuilder out = new StringBuilder(Math.max(16, s.length()));
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            switch (c)
+            {
+                case '"':
+                    out.append("&quot;");
+                    break;
+                case '&':
+                    out.append("&amp;");
+                    break;
+                case '<':
+                    out.append("&lt;");
+                    break;
+                case '>':
+                    out.append("&gt;");
+                    break;
+                default:
+                    out.append(c);
+            }
+        }
+        return out.toString();
+    }
 }

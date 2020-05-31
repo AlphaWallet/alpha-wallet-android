@@ -325,7 +325,7 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
         copyAddress.setVisibility(View.VISIBLE);
 
         currentMode = MODE_CONTRACT;
-        displayAddress = token.getAddress();
+        displayAddress = Keys.toChecksumAddress(token.getAddress());
         setTitle(getString(R.string.contract_address));
         copyAddress.setText(displayAddress);
         onWindowFocusChanged(true);

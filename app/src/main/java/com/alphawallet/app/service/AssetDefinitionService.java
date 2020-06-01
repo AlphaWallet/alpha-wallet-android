@@ -203,10 +203,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         loadInternalAssets();
     }
 
-    //This loads bundled TokenScripts in the /assets directory eg xdaicanonicalized
+    //This loads bundled TokenScripts in the /assets directory eg xDAI bridge
     private void loadInternalAssets()
     {
-        Observable.fromIterable(getCanonicalizedAssets())
+        Observable.fromIterable(getLocalTSMLFiles())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::addContractAssets, error -> { onError(error); parseAllFileScripts(); },
                         this::parseAllFileScripts).isDisposed();
@@ -2113,18 +2113,18 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    private List<String> getCanonicalizedAssets()
+    private List<String> getLocalTSMLFiles()
     {
-        List<String> canonicalizedFilesStr = new ArrayList<>();
+        List<String> localTSMLFilesStr = new ArrayList<>();
         AssetManager mgr = context.getResources().getAssets();
         try
         {
             String[] filelist = mgr.list("");
             for (String file : filelist)
             {
-                if (file.contains("canonicalized"))
+                if (file.contains("tsml"))
                 {
-                    canonicalizedFilesStr.add(file);
+                    localTSMLFilesStr.add(file);
                 }
             }
 
@@ -2134,7 +2134,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             e.printStackTrace();
         }
 
-        return canonicalizedFilesStr;
+        return localTSMLFilesStr;
     }
 
     public String generateTransactionPayload(Token token, BigInteger tokenId, FunctionDefinition def)

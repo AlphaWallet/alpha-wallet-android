@@ -753,7 +753,7 @@ public class TokenDefinition {
             if (n.getNodeType() != ELEMENT_NODE) continue;
             switch (n.getLocalName())
             {
-                case "action": //action only script
+                case "card": //action only script
                     TSAction action = handleAction((Element)n);
                     actions.put(action.name, action);
                     break;

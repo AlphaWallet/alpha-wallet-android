@@ -1,6 +1,7 @@
 package com.alphawallet.token.entity;
 
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import java.util.ArrayList;
@@ -11,31 +12,42 @@ import java.util.List;
  */
 public class Module
 {
-    public final ContractInfo contractInfo;
     public List<SequenceElement> sequence = new ArrayList<>();
-
-    public Module(ContractInfo info)
-    {
-        contractInfo = info;
-    }
 
     public void addSequenceElement(Element element, String sequenceName) throws SAXException
     {
         SequenceElement se = new SequenceElement();
-        String indexed = element.getAttribute("indexed"); //NB : namespace is determined from the prefix() element eg element.getPrefix()
-        se.indexed = indexed != null && indexed.equalsIgnoreCase("true");
-        se.type = element.getAttribute("type");
-        se.name = element.getAttribute("name");
-        sequence.add(se);
 
-        if (se.type == null)
+        for (int i = 0; i < element.getAttributes().getLength(); i++)
+        {
+            Node thisAttr = element.getAttributes().item(i);
+            String value = thisAttr.getNodeValue();
+            switch (thisAttr.getLocalName())
+            {
+                case "type":
+                    se.type = value;
+                    break;
+                case "name":
+                    se.name = value;
+                    break;
+                case "indexed":
+                    if (value.equalsIgnoreCase("true")) se.indexed = true;
+                    break;
+                default:
+                    throw new SAXException("Unexpected event attribute in: " + sequenceName + " attribute: " + thisAttr.getLocalName());
+            }
+        }
+
+        if (se.type == null || se.type.length() == 0)
         {
             throw new SAXException("Malformed sequence element in: " + sequenceName + " name: " + se.name);
         }
-        else if (se.name == null)
+        else if (se.name == null || se.name.length() == 0)
         {
             throw new SAXException("Malformed sequence element in: " + sequenceName + " type: " + se.type);
         }
+
+        sequence.add(se);
     }
 
 
@@ -85,6 +97,6 @@ public class Module
     {
         public String name;
         public String type;
-        public boolean indexed;
+        public boolean indexed = false;
     }
 }

@@ -26,7 +26,7 @@ public class TokenDefinition {
     public Map<String, ContractInfo> contracts = new HashMap<>();
     public Map<String, TSAction> actions = new HashMap<>();
     private Map<String, String> labels = new HashMap<>(); // store plural etc for token name
-    private Map<String, Module> moduleLookup = null; //used to protect against name collision
+    private Map<String, Module> moduleLookup = new HashMap<>(); //used to protect against name collision
     private TSTokenViewHolder tokenViews = new TSTokenViewHolder();
     private Map<String, TSSelection> selections = new HashMap<>();
 
@@ -80,7 +80,7 @@ public class TokenDefinition {
         return defs;
     }
 
-    public EventDefinition parseEvent(Element resolve, Syntax syntax)
+    public EventDefinition parseEvent(Element resolve)
     {
         EventDefinition ev = new EventDefinition();
 
@@ -90,7 +90,10 @@ public class TokenDefinition {
             String attrValue = thisAttr.getNodeValue();
             switch (thisAttr.getNodeName())
             {
-                case "module":
+                case "contract":
+                    ev.contract = contracts.get(attrValue);
+                    break;
+                case "type":
                     ev.eventName = attrValue;
                     ev.eventModule = moduleLookup.get(attrValue);
                     break;
@@ -332,8 +335,12 @@ public class TokenDefinition {
                         labels = extractLabelTag(element);
                         break;
                     case "selection":
-                        //For now, allow individual selections outside of the selections block
-                        handleSelection(element);
+                        TSSelection selection = parseSelection(element);
+                        if (selection != null && selection.checkParse())
+                            selections.put(selection.name, selection);
+                        break;
+                    case "module":
+                        handleModule(element);
                         break;
                     case "cards":
                         handleCards(element);
@@ -352,31 +359,43 @@ public class TokenDefinition {
         }
     }
 
-    private void handleSelection(Element selectionNode) throws SAXException
-    {
-        TSSelection selection = parseSelection(selectionNode);
-        String selectionName = selectionNode.getAttribute("id");
-        if (selection.head != null && selectionName != null && selectionName.length() > 0) selections.put(selectionName, selection);
-    }
-
     private TSSelection parseSelection(Element node) throws SAXException
     {
-        TSSelection selection = new TSSelection(node);
-
-        for (Node n = node.getFirstChild(); n != null; n = n.getNextSibling())
+        String name = "";
+        TSSelection selection = null;
+        for (int i = 0; i < node.getAttributes().getLength(); i++)
         {
-            if (n.getNodeType() == ELEMENT_NODE)
+            Node thisAttr = node.getAttributes().item(i);
+            switch (thisAttr.getLocalName())
             {
-                Element element = (Element) n;
-                switch (element.getLocalName())
+                case "name":
+                case "id":
+                    name = thisAttr.getNodeValue();
+                    break;
+                case "filter":
+                    selection = new TSSelection(thisAttr.getNodeValue());
+                    break;
+            }
+        }
+
+        if (selection != null)
+        {
+            selection.name = name;
+            for (Node n = node.getFirstChild(); n != null; n = n.getNextSibling())
+            {
+                if (n.getNodeType() == ELEMENT_NODE)
                 {
-                    case "name":
-                        selection.names = extractLabelTag(element);
-                        break;
-                    case "denial":
-                        Node denialNode = getLocalisedNode(element, "string");
-                        selection.denialMessage = (denialNode != null) ? denialNode.getTextContent() : null;
-                        break;
+                    Element element = (Element) n;
+                    switch (element.getLocalName())
+                    {
+                        case "name":
+                            selection.names = extractLabelTag(element);
+                            break;
+                        case "denial":
+                            Node denialNode = getLocalisedNode(element, "string");
+                            selection.denialMessage = (denialNode != null) ? denialNode.getTextContent() : null;
+                            break;
+                    }
                 }
             }
         }
@@ -818,37 +837,46 @@ public class TokenDefinition {
                         handleAddress(element, info);
                         break;
                     case "module":
-                        handleModule(element, info);
+                        handleModule(element);
                         break;
                 }
             }
         }
     }
 
-    private void handleModule(Element module, ContractInfo info) throws SAXException
+    private void handleModule(Element module) throws SAXException
     {
-        String moduleName = module.getAttribute("name");
-        if (moduleName == null || moduleName.length() == 0) throw new SAXException("Module requires label");
-        if (moduleLookup == null)
-        {
-            moduleLookup = new HashMap<>();
-        }
-        else if (moduleLookup.containsKey(moduleName))
-        {
-            throw new SAXException("Duplicate Module label: " + moduleName);
-        }
+        String currentModuleName = null;
 
         for (Node n = module.getFirstChild(); n != null; n = n.getNextSibling())
         {
             if (n.getNodeType() == ELEMENT_NODE)
             {
+                Element element = (Element)n;
                 switch (n.getNodeName())
                 {
+                    case "namedType":
+                        currentModuleName = element.getAttribute("name");
+                        if (currentModuleName.length() == 0)
+                        {
+                            throw new SAXException("Module must have name attribute.");
+                        }
+                        else if (moduleLookup.containsKey(currentModuleName))
+                        {
+                            throw new SAXException("Duplicate Module label: " + currentModuleName);
+                        }
+                        else
+                        {
+                            Module eventModule = handleElementSequence(element, currentModuleName);
+                            moduleLookup.put(currentModuleName, eventModule);
+                            currentModuleName = null;
+                        }
+                        break;
                     case "sequence":
-                        Module eventModule = handleElementSequence((Element)n, info, moduleName);
-                        if (info.eventModules == null) info.eventModules = new HashMap<>();
-                        info.eventModules.put(moduleName, eventModule);
-                        moduleLookup.put(moduleName, eventModule);
+                        if (currentModuleName == null) { throw new SAXException("Sequence must be enclosed within <namedType name=... />"); }
+                        Module eventModule = handleElementSequence(element, currentModuleName);
+                        moduleLookup.put(currentModuleName, eventModule);
+                        currentModuleName = null;
                         break;
                     default:
                         break;
@@ -857,15 +885,21 @@ public class TokenDefinition {
         }
     }
 
-    private Module handleElementSequence(Element sequence, ContractInfo info, String moduleName) throws SAXException
+    private Module handleElementSequence(Element namedType, String moduleName) throws SAXException
     {
-        Module module = new Module(info);
-        for (Node n = sequence.getFirstChild(); n != null; n = n.getNextSibling())
+        Module module = new Module();
+        for (Node c = namedType.getFirstChild(); c != null; c = c.getNextSibling())
         {
-            if (n.getNodeType() == ELEMENT_NODE)
+            if (c.getNodeType() == ELEMENT_NODE && c.getNodeName().equals("sequence"))
             {
-                Element element = (Element)n;
-                module.addSequenceElement(element, moduleName);
+                for (Node n = c.getFirstChild(); n != null; n = n.getNextSibling())
+                {
+                    if (n.getNodeType() == ELEMENT_NODE)
+                    {
+                        Element element = (Element) n;
+                        module.addSequenceElement(element, moduleName);
+                    }
+                }
             }
         }
 

@@ -228,12 +228,19 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .blockingForEach(file -> {  //load sequentially
-                    TokenDefinition td = parseFile(new FileInputStream(file));
-                    cacheSignature(file)
-                            .map(definition -> addContractAddresses(td, file))
-                            .subscribe(success -> fileLoadComplete(success, file, td),
-                                    error -> handleFileLoadError(error, file))
-                            .isDisposed();
+                    try
+                    {
+                        final TokenDefinition td = parseFile(new FileInputStream(file));
+                        cacheSignature(file)
+                                .map(definition -> addContractAddresses(td, file))
+                                .subscribe(success -> fileLoadComplete(success, file, td),
+                                           error -> handleFileLoadError(error, file))
+                                .isDisposed();
+                    }
+                    catch (Exception e)
+                    {
+                        handleFileLoadError(e, file);
+                    }
                 } );
 
         //executes after observable completes due to blockingForEach
@@ -377,6 +384,35 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return txUpdateTime;
     };
 
+    @Override
+    public Attribute fetchAttribute(ContractInfo origin, String attributeName)
+    {
+        String addr = null;
+        TokenDefinition td = null;
+        int chainId = origin.addresses.keySet().iterator().next();
+        if (origin.addresses.get(chainId).size() > 0) addr = origin.addresses.get(chainId).get(0);
+        if (addr != null) td = getAssetDefinition(chainId, addr);
+        if (td != null)
+        {
+            return td.attributes.get(attributeName);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    @Override
+    public TokenScriptResult.Attribute fetchAttrResult(ContractAddress origin, Attribute attr, BigInteger tokenId)
+    {
+        TokenDefinition td = getAssetDefinition(origin.chainId, origin.address);
+        Token originToken = tokensService.getToken(origin.chainId, origin.address);
+        if (originToken == null || td == null) return null;
+
+        //produce result
+        return tokenscriptUtility.fetchAttrResult(originToken, attr, tokenId, td, this, false).blockingSingle();
+    }
+
     public void addLocalRefs(Map<String, String> refs)
     {
         tokenscriptUtility.addLocalRefs(refs);
@@ -407,14 +443,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             for (String key : definition.attributes.keySet())
             {
-                result.setAttribute(key, getTokenscriptAttr(definition, token, tokenId, key));
+                result.setAttribute(key, getTokenscriptAttr(definition, tokenId, key));
             }
         }
 
         return result;
     }
 
-    private TokenScriptResult.Attribute getTokenscriptAttr(TokenDefinition td, Token token, BigInteger tokenId, String attribute)
+    private TokenScriptResult.Attribute getTokenscriptAttr(TokenDefinition td, BigInteger tokenId, String attribute)
     {
         TokenScriptResult.Attribute result = null;
         Attribute attrtype = td.attributes.get(attribute);
@@ -454,7 +490,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenDefinition definition = getAssetDefinition(token.tokenInfo.chainId, token.tokenInfo.address);
         if (definition != null && definition.attributes.containsKey(attribute))
         {
-            return getTokenscriptAttr(definition, token, tokenId, attribute);
+            return getTokenscriptAttr(definition, tokenId, attribute);
         }
         else
         {
@@ -986,7 +1022,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         if (holdingContracts != null)
         {
-            addToEventList(tokenDef, holdingContracts);
+            addToEventList(tokenDef);
             for (int network : holdingContracts.addresses.keySet())
             {
                 addContractsToNetwork(network, networkAddresses(holdingContracts.addresses.get(network), file.getAbsolutePath()));
@@ -998,14 +1034,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return new ArrayList<>();
     }
 
-    private void addToEventList(TokenDefinition tokenDef, ContractInfo cInfo)
+    private void addToEventList(TokenDefinition tokenDef)
     {
         for (String attrName : tokenDef.attributes.keySet())
         {
             Attribute attr = tokenDef.attributes.get(attrName);
-            if (attr.event != null)
+            if (attr.event != null && attr.event.contract != null)
             {
-                attr.event.originContract = cInfo;
                 eventList.add(attr.event); //note: event definition contains link back to the contract it refers to
             }
         }
@@ -1040,34 +1075,36 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return Completable.fromAction(() -> {
             for (EventDefinition ev : eventList)
             {
-                ContractInfo originContracts = ev.originContract;
-                for (int chainId : originContracts.addresses.keySet())
+                try
                 {
-                    for (String addr : originContracts.addresses.get(chainId))
-                    {
-                        //have corresponding token?
-                        Token originToken = tokensService.getToken(chainId, addr);
-                        if (originToken != null && originToken.hasPositiveBalance())
-                        {
-                            //initiate listener
-                            getEvents(ev, originToken);
-                        }
-                    }
+                    getEvents(ev);
+                }
+                catch (Exception e)
+                {
+                    //TODO: Handle event issues
+                    e.printStackTrace();
                 }
             }
         });
     }
 
-    private void getEvents(EventDefinition ev, Token originToken)
+    private void getEvents(EventDefinition ev) throws Exception
     {
-        Web3j web3j = getWeb3jService(originToken.tokenInfo.chainId);
-        final EthFilter filter = eventUtils.generateLogFilter(ev, originToken);
+        int chainId = ev.contract.addresses.keySet().iterator().next();
+        String address = ev.contract.addresses.get(chainId).get(0);
+
+        int originChainId = ev.parentAttribute.originContract.addresses.keySet().iterator().next();
+        String originAddress = ev.parentAttribute.originContract.addresses.get(originChainId).get(0);
+
+        Web3j web3j = getWeb3jService(chainId);
+        Token originToken = tokensService.getToken(originChainId, originAddress);
+        final EthFilter filter = eventUtils.generateLogFilter(ev, originToken, this);
 
         try
         {
             eventConnection.acquire(); //prevent overlapping event calls
             EthLog ethLogs = web3j.ethGetLogs(filter).send();
-            processLogs(ev, ethLogs.getLogs(), originToken);
+            processLogs(ev, ethLogs.getLogs());
         }
         catch (Exception e)
         {
@@ -1088,13 +1125,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 //        }, this::onLogError);
     }
 
-    private void processLogs(EventDefinition ev, List<EthLog.LogResult> logs, Token originToken)
+    private void processLogs(EventDefinition ev, List<EthLog.LogResult> logs)
     {
         if (logs.size() == 0) return; //early return
-
-        Web3j web3j = getWeb3jService(originToken.tokenInfo.chainId);
-        TokenDefinition td = getAssetDefinition(originToken.tokenInfo.chainId, originToken.getAddress());
-        Attribute attrType = td.attributes.get(ev.attributeName);
+        int chainId = ev.contract.addresses.keySet().iterator().next();
+        Web3j web3j = getWeb3jService(chainId);
 
         for (EthLog.LogResult ethLog : logs)
         {
@@ -1102,13 +1137,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             EthBlock txBlock = eventUtils.getTransactionDetails(((Log)ethLog.get()).getBlockHash(), web3j).blockingGet();
 
             long blockTime = txBlock.getBlock().getTimestamp().longValue();
-            if (eventCallback != null) eventCallback.receivedEvent(ev.attributeName, attrType.getSyntaxVal(selectVal), blockTime, originToken.tokenInfo.chainId);
-            storeEventValue(ev, ethLog, attrType, originToken, blockTime, selectVal);
+            if (eventCallback != null) eventCallback.receivedEvent(ev.attributeName, ev.parentAttribute.getSyntaxVal(selectVal), blockTime, chainId);
+            storeEventValue(ev, ethLog, ev.parentAttribute, blockTime, selectVal);
         }
     }
 
     private void storeEventValue(EventDefinition ev, EthLog.LogResult log, Attribute attr,
-                                 Token originToken, long blockTime, String selectVal)
+                                 long blockTime, String selectVal)
     {
         //store result
         String filterTopicValue = ev.getFilterTopicValue();
@@ -1129,11 +1164,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         else
         {
-            tokenId = originToken.getArrayBalance().get(0);
+            tokenId = BigInteger.ZERO;
         }
 
-        ContractAddress eventContractAddress = new ContractAddress(attr.event.eventModule.contractInfo.addresses.keySet().iterator().next(),
-                                                                   attr.event.eventModule.contractInfo.addresses.values().iterator().next().get(0));
+        ContractAddress eventContractAddress = new ContractAddress(attr.event.contract.addresses.keySet().iterator().next(),
+                                                                   attr.event.contract.addresses.values().iterator().next().get(0));
         txResult = getFunctionResult(eventContractAddress, attr, tokenId);
 
         txResult.result = selectVal;
@@ -1156,11 +1191,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         boolean hasEvent = false;
         for (EventDefinition ev : eventList)
         {
-            if (ev.eventModule == null || ev.eventModule.contractInfo == null) continue;
-            ContractInfo originContracts = ev.eventModule.contractInfo;
-            if (originContracts.addresses.containsKey(token.tokenInfo.chainId))
+            if (ev.eventModule == null || ev.contract == null) continue;
+            if (ev.contract.addresses.containsKey(token.tokenInfo.chainId))
             {
-                if (originContracts.addresses.get(token.tokenInfo.chainId).contains(token.getAddress().toLowerCase()))
+                if (ev.contract.addresses.get(token.tokenInfo.chainId).contains(token.getAddress().toLowerCase()))
                 {
                     hasEvent = ev.hasNewEvent;
                     ev.hasNewEvent = false;
@@ -1923,11 +1957,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 //does the event module correspond to this contract?
                 String[] contractDetails = eventData.getInstanceKey().split("-");
                 //return tResult.contractAddress + "-" + tResult.tokenId.toString(Character.MAX_RADIX) + "-" + tResult.contractChainId + "-" + tResult.attrId + tResult.resultTime + "-log";
-                String contractAddr = contractDetails[0].toLowerCase();
-                if (ev.eventModule.contractInfo != null && ev.eventModule.contractInfo.hasContractTokenScript(eventData.getChainId(), contractAddr))
-                {
-                    ev.readBlock = blockNumber;
-                }
+                ev.readBlock = blockNumber;
             }
         }
     }
@@ -1936,7 +1966,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         try
         {
-            ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
+            //ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
             RealmAuxData realmData = realm.createObject(RealmAuxData.class, dataBaseKey);
             realmData.setResultTime(tResult.resultTime);
             realmData.setResult(tResult.result);
@@ -1966,6 +1996,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             if (tokenAsset.getDescription() != null) TokenScriptResult.addPair(attrs, "description", URLEncoder.encode(tokenAsset.getDescription(), "utf-8"));
             if (tokenAsset.getExternalLink() != null) TokenScriptResult.addPair(attrs, "external_link", URLEncoder.encode(tokenAsset.getExternalLink(), "utf-8"));
             if (tokenAsset.getTraits() != null) TokenScriptResult.addPair(attrs, "traits", tokenAsset.getTraits());
+            if (tokenAsset.getName() != null) TokenScriptResult.addPair(attrs, "name", URLEncoder.encode(tokenAsset.getName(), "utf-8"));
         }
         catch (UnsupportedEncodingException e)
         {

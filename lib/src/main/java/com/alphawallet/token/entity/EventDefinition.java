@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  */
 public class EventDefinition
 {
-    public ContractInfo originContract;
+    public ContractInfo contract;
     public String attributeName; //TransactionResult: method
     public String eventName;
     public Module eventModule;
@@ -18,6 +18,7 @@ public class EventDefinition
     public String select;
     public BigInteger readBlock;
     public boolean hasNewEvent = false;
+    public Attribute parentAttribute;
 
     public String getFilterTopicValue()
     {

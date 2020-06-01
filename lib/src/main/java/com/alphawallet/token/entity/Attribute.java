@@ -37,14 +37,14 @@ public class Attribute {
     public TokenDefinition.Syntax syntax;
     public As as;
     public Map<BigInteger, String> members;
-    private TokenDefinition definition;
+    public ContractInfo originContract;
     public FunctionDefinition function = null;
     public EventDefinition event = null;
     public boolean userInput = false;
 
     public Attribute(Element attr, TokenDefinition def)
     {
-        definition = def;
+        originContract = def.contracts.get(def.holdingToken);
         //schema 2020/06 id is now name; name is now label
         name = attr.getAttribute("name");
         label = name; //set label to name if not specified
@@ -62,12 +62,12 @@ public class Attribute {
                         syntax = handleType(element);
                         break;
                     case "origins":
-                        handleOrigins(element);
+                        handleOrigins(element, def);
                         break;
                     case "label":
-                        label = definition.getLocalisedString(element);
+                        label = def.getLocalisedString(element);
                     case "mapping":
-                        populate(element);
+                        populate(element, def);
                         break;
                 }
                 switch(element.getAttribute("contract").toLowerCase()) {
@@ -136,7 +136,7 @@ public class Attribute {
         return null;
     }
 
-    private void handleOrigins(Element origin)
+    private void handleOrigins(Element origin, TokenDefinition def)
     {
         for(Node node = origin.getFirstChild();
             node!=null; node=node.getNextSibling())
@@ -144,18 +144,19 @@ public class Attribute {
             if (node.getNodeType() == Node.ELEMENT_NODE)
             {
                 Element resolve = (Element) node;
-                setAs(definition.parseAs(resolve));
+                setAs(def.parseAs(resolve));
                 if (resolve.getPrefix().equals("ethereum")) //handle ethereum namespace
                 {
                     switch (node.getLocalName())
                     {
                         case "transaction":
                         case "call":
-                            function = definition.parseFunction(resolve, syntax);
+                            function = def.parseFunction(resolve, syntax);
                             break;
                         case "event":
-                            event = definition.parseEvent(resolve, syntax);
+                            event = def.parseEvent(resolve);
                             event.attributeName = name;
+                            event.parentAttribute = this;
                             break;
                         default:
                             //throw parse error
@@ -168,10 +169,10 @@ public class Attribute {
                     {
                         case "token-id":
                             //this value is obtained from the token name
-                            setAs(definition.parseAs(resolve));
-                            populate(resolve); //check for mappings
+                            setAs(def.parseAs(resolve));
+                            populate(resolve, def); //check for mappings
                             if (function != null)
-                                function.as = definition.parseAs(resolve);
+                                function.as = def.parseAs(resolve);
                             if (resolve.hasAttribute("bitmask"))
                             {
                                 bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
@@ -179,7 +180,7 @@ public class Attribute {
                             break;
                         case "user-entry":
                             userInput = true;
-                            setAs(definition.parseAs(resolve));
+                            setAs(def.parseAs(resolve));
                             if (resolve.hasAttribute("bitmask"))
                             {
                                 bitmask = new BigInteger(resolve.getAttribute("bitmask"), 16);
@@ -191,7 +192,7 @@ public class Attribute {
         }
     }
 
-    private void populate(Element origin) {
+    private void populate(Element origin, TokenDefinition def) {
         Element option;
         for (Node n = origin.getFirstChild(); n != null; n = n.getNextSibling())
         {
@@ -203,10 +204,10 @@ public class Attribute {
                     members = new HashMap<>();
                     setAs(As.Mapping);
 
-                    NodeList nList = origin.getElementsByTagNameNS(definition.nameSpace, "option");
+                    NodeList nList = origin.getElementsByTagNameNS(def.nameSpace, "option");
                     for (int i = 0; i < nList.getLength(); i++) {
                         option = (Element) nList.item(i);
-                        members.put(new BigInteger(option.getAttribute("key")), definition.getLocalisedString(option, "value"));
+                        members.put(new BigInteger(option.getAttribute("key")), def.getLocalisedString(option, "value"));
                     }
                 }
             }

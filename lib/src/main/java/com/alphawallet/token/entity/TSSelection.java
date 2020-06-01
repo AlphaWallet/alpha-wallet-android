@@ -17,11 +17,10 @@ public class TSSelection
     public String denialMessage = null;
     public Map<String, String> names = null; //use these names if the selection filter is true
     private boolean negate = false;
+    public String name = null;
 
-    public TSSelection(Element element) throws SAXException
+    public TSSelection(String filterExpression) throws SAXException
     {
-        String filterExpression = element.getAttribute("filter");
-
         //tokenise
         List<String> tokens = tokeniseExpression(filterExpression);
         ListIterator<String> tokenItr = tokens.listIterator();
@@ -290,5 +289,11 @@ public class TSSelection
         }
 
         return attrs;
+    }
+
+    public boolean checkParse()
+    {
+        return name != null && name.length() > 0
+                && head != null;
     }
 }

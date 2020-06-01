@@ -890,8 +890,8 @@ public abstract class TokenscriptFunction
         else if (attr.event != null)
         {
             //retrieve events from DB
-            ContractAddress useAddress = new ContractAddress(attr.event.eventModule.contractInfo.addresses.keySet().iterator().next(),
-                                                             attr.event.eventModule.contractInfo.addresses.values().iterator().next().get(0));
+            ContractAddress useAddress = new ContractAddress(attr.event.contract.addresses.keySet().iterator().next(),
+                                                             attr.event.contract.addresses.values().iterator().next().get(0));
             TransactionResult cachedResult = attrIf.getFunctionResult(useAddress, attr, tokenId); //Needs to allow for multiple tokenIds
             return resultFromDatabase(cachedResult, attr);
         }

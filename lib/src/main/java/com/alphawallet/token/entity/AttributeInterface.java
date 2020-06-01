@@ -1,5 +1,7 @@
 package com.alphawallet.token.entity;
 
+import com.alphawallet.token.tools.TokenDefinition;
+
 import java.math.BigInteger;
 
 /**
@@ -15,4 +17,6 @@ public interface AttributeInterface
     String getWalletAddr();
 
     default long getLastTokenUpdate(int chainId, String address) { return 0; };
+    default Attribute fetchAttribute(ContractInfo origin, String attributeName) { return null; };
+    default TokenScriptResult.Attribute fetchAttrResult(ContractAddress origin, Attribute attr, BigInteger tokenId) { return null; };
 }

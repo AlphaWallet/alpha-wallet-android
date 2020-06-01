@@ -169,7 +169,7 @@ public class Token implements Parcelable, Comparable<Token>
         else //otherwise display in standard pattern to 4 dp
         {
             DecimalFormat df = new DecimalFormat("###,###,###,##0.####");
-            df.setRoundingMode(RoundingMode.HALF_DOWN);
+            df.setRoundingMode(RoundingMode.DOWN);
             value = df.format(ethBalance);
         }
 

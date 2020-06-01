@@ -1,8 +1,13 @@
 package com.alphawallet.app.entity.tokenscript;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.token.entity.Attribute;
+import com.alphawallet.token.entity.AttributeInterface;
+import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.EventDefinition;
 import com.alphawallet.token.entity.Module;
+import com.alphawallet.token.entity.TokenScriptResult;
 
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
@@ -124,6 +129,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Single;
 
@@ -147,9 +153,11 @@ import static org.web3j.tx.Contract.staticExtractEventParameters;
  */
 public abstract class EventUtils
 {
-    public EthFilter generateLogFilter(EventDefinition ev, Token originToken)
+    public EthFilter generateLogFilter(EventDefinition ev, Token originToken, AttributeInterface attrIf) throws Exception
     {
-        String eventContractAddr = ev.eventModule.contractInfo.addresses.get(originToken.tokenInfo.chainId).get(0);
+        int chainId = ev.contract.addresses.keySet().iterator().next();
+        String eventContractAddr = ev.contract.addresses.get(chainId).get(0);
+
         final Event resolverEvent = generateEventFunction(ev);
         //work out which topics to filter on
         String filterTopic = ev.getFilterTopicIndex();
@@ -165,8 +173,7 @@ public abstract class EventUtils
 
         if (ev.readBlock != null && ev.readBlock.compareTo(BigInteger.ZERO) > 0)
         {
-            //TODO: ADD this back in if all is good
-            //startBlock = DefaultBlockParameter.valueOf(ev.readBlock);
+            startBlock = DefaultBlockParameter.valueOf(ev.readBlock);
         }
 
         final org.web3j.protocol.core.methods.request.EthFilter filter =
@@ -180,7 +187,7 @@ public abstract class EventUtils
         {
             if (i == topicIndex)
             {
-                addTopicFilter(filter, filterTopicValue, originToken); //add the required log filter - allowing for multiple tokenIds
+                addTopicFilter(ev, filter, filterTopicValue, originToken, eventContractAddr, attrIf); //add the required log filter - allowing for multiple tokenIds
                 break;
             }
             else
@@ -616,13 +623,17 @@ public abstract class EventUtils
         return new Event(ev.eventName, eventArgSpec);
     }
 
-    private void addTopicFilter(EthFilter filter, String filterTopicValue, Token originToken)
+    private void addTopicFilter(EventDefinition ev, EthFilter filter, String filterTopicValue, Token originToken, String contractAddr, AttributeInterface attrIf) throws Exception
     {
         //find the topic value
         switch (filterTopicValue)
         {
             case "tokenId":
-                if (originToken.isNonFungible())
+                if (originToken == null)
+                {
+                    throw new Exception("Unable to use tokenId with unknown Token: " + contractAddr);
+                }
+                else if (originToken.isNonFungible())
                 {
                     //get unique tokenId balance
                     List<BigInteger> uniqueTokenIds = originToken.getUniqueTokenIds();
@@ -648,14 +659,37 @@ public abstract class EventUtils
                     System.out.println("ERROR: using 'tokenId' with Fungible token");
                 }
                 break;
-            case "value":
-                //TODO: Fulfilled from user entry - work out a way of doing this
-                filter.addSingleTopic(null);
-                break;
             case "ownerAddress":
-                filter.addSingleTopic("0x" + TypeEncoder.encode(new Address(originToken.getWallet())));
+                filter.addSingleTopic("0x" + TypeEncoder.encode(new Address(attrIf.getWalletAddr())));
                 break;
             default:
+                Attribute attr = attrIf.fetchAttribute(ev.contract, filterTopicValue);
+                if (attr != null)
+                {
+                    ContractAddress tokenAddr = new ContractAddress(originToken.tokenInfo.chainId, originToken.getAddress());
+                    List<BigInteger> uniqueTokenIds = originToken.getUniqueTokenIds();
+                    if (uniqueTokenIds.size() == 1)
+                    {
+                        TokenScriptResult.Attribute attrResult = attrIf.fetchAttrResult(tokenAddr, attr, uniqueTokenIds.get(0));
+                        filter.addSingleTopic("0x" + TypeEncoder.encode(new Uint256(attrResult.value)));
+                    }
+                    else
+                    {
+                        //listen for multiple tokenId results
+                        List<String> optionals = new ArrayList<>();
+                        for (BigInteger uid : uniqueTokenIds)
+                        {
+                            TokenScriptResult.Attribute attrResult = attrIf.fetchAttrResult(tokenAddr, attr, uid);
+                            String entry = "0x" + TypeEncoder.encode(new Uint256(attrResult.value));
+                            optionals.add(entry);
+                        }
+                        filter.addOptionalTopics(optionals.toArray(new String[0]));
+                    }
+                }
+                else
+                {
+                    throw new Exception("Unresolved event filter name: " + filterTopicValue);
+                }
                 break;
         }
     }

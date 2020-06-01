@@ -306,7 +306,6 @@ public class TransactionsViewModel extends BaseViewModel implements ActionEventC
         Log.d("TRANSACTION", "Queried for " + token.tokenInfo.name + " : " + transactions.length + " Network transactions");
 
         token.lastTxCheck = System.currentTimeMillis();
-        token.lastTxUpdate = System.currentTimeMillis();
         List<Transaction> newTxs = new ArrayList<>();
 
         //NB: final transaction is block marker transaction, it's not used. If it is relevant, then it's a duplicate.

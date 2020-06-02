@@ -110,6 +110,12 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenIds = token.stringHexToBigIntegerList(tokenIdStr);
         tokenId = tokenIds.get(0);
 
+        if (token == null)
+        {
+            showInitError();
+            return;
+        }
+
         tokenView = findViewById(R.id.web3_tokenview);
         waitSpinner = findViewById(R.id.progress_element);
 
@@ -122,9 +128,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenView.setOnSetValuesListener(this);
         tokenView.setVisibility(View.GONE);
         waitSpinner.setVisibility(View.VISIBLE);
+        tokenView.setKeyboardListenerCallback(this);
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
         viewModel.getCurrentWallet();
-        tokenView.setKeyboardListenerCallback(this);
+
+        //expose the webview and remove the token 'card' background
+        findViewById(R.id.layout_webwrapper).setBackgroundResource(R.drawable.background_card);
+        findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
 
         parsePass = 1;
         viewModel.getAssetDefinitionService().clearResultMap();
@@ -236,22 +246,27 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_script_view);
+    }
 
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        initViewModel();
+        initViews();
+        toolbar();
+        setTitle(actionMethod);
+        setupFunctions();
+    }
+
+    private void initViewModel()
+    {
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(TokenFunctionViewModel.class);
         systemView = findViewById(R.id.system_view);
         systemView.hide();
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
-
-        //expose the webview and remove the token 'card' background
-        findViewById(R.id.layout_webwrapper).setBackgroundResource(R.drawable.background_card);
-        findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
-
-        initViews();
-        toolbar();
-        setTitle(actionMethod);
-        setupFunctions();
     }
 
     private void setupFunctions()
@@ -411,6 +426,18 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         if (title != null) alertDialog.setTitle(title);
         else alertDialog.setTitle(R.string.tokenscript_error);
         alertDialog.setMessage(getString(R.string.tokenscript_error_detail, elementName));
+        alertDialog.setButtonText(R.string.button_ok);
+        alertDialog.setButtonListener(v ->alertDialog.dismiss());
+        alertDialog.show();
+    }
+
+    private void showInitError()
+    {
+        hideDialog();
+        alertDialog = new AWalletAlertDialog(this);
+        alertDialog.setIcon(AWalletAlertDialog.ERROR);
+        alertDialog.setTitle(R.string.error_fail_load_tokens);
+        alertDialog.setMessage(getString(R.string.ticket_not_valid));
         alertDialog.setButtonText(R.string.button_ok);
         alertDialog.setButtonListener(v ->alertDialog.dismiss());
         alertDialog.show();

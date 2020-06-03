@@ -19,8 +19,11 @@ public class TokenScriptManagementViewModel extends BaseViewModel {
     public TokenScriptManagementViewModel(AssetDefinitionService assetDefinitionService) {
         this.assetDefinitionService = assetDefinitionService;
         tokenLocatorsLiveData = new MutableLiveData<>();
+    }
 
-        assetDefinitionService.getAllTokenDefinitions() //holds for loading complete then returns origin contracts
+    public void onPrepare(boolean refresh)
+    {
+        assetDefinitionService.getAllTokenDefinitions(refresh) //holds for loading complete then returns origin contracts
                 .subscribeOn(Schedulers.single())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::addUnresolvedTokens)

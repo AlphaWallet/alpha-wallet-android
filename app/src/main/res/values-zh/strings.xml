@@ -519,7 +519,7 @@
     <string name="value">值</string>
     <string name="linkedin">LinkedIn</string>
     <string name="please_enable_security">无法创建密钥。请尝试在手机上启用安全功能。</string>
-    <string name="what_is_seed_phrase">助记词、恢复助记词或备份助记词均属于词语列表，可存储用于恢复比特币钱包所需的所有信息。钱包软件通常会生成助记词，并指示用户将其记在纸上。</string>
+    <string name="what_is_seed_phrase">助记词、恢复助记词或备份助记词均属于词语列表，可存储用于恢复以太坊钱包所需的所有信息。钱包软件通常会生成助记词，并指示用户将其记在纸上。</string>
     <string name="transaction_too_large">交易太大</string>
     <string name="unable_to_handle_tx">交易有效负载太大</string>
     <string name="show_token_contract">显示通证合约</string>

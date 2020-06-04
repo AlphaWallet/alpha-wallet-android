@@ -29,4 +29,16 @@ public class ContractInfo
         List<String> addrs = addresses.get(chainId);
         return addrs != null && addrs.contains(address);
     }
+
+    public int getfirstChainId()
+    {
+        if (addresses.keySet().size() > 0) return addresses.keySet().iterator().next();
+        else return 0;
+    }
+
+    public String getFirstAddress()
+    {
+        int chainId = getfirstChainId();
+        return addresses.get(chainId).size() > 0 ? addresses.get(chainId).get(0) : "";
+    }
 }

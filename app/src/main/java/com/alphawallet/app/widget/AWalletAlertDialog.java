@@ -31,15 +31,15 @@ public class AWalletAlertDialog extends Dialog {
         LEFT
     }
 
-    private static AWalletAlertDialog dialog = null;
-    private ImageView icon;
-    private TextView titleText;
-    private TextView messageText;
-    private Button button;
-    private Button secondaryButton;
-    private Context context;
-    private ProgressBar progressBar;
-    private RelativeLayout viewContainer;
+    private final ImageView icon;
+    private final TextView titleText;
+    private final TextView messageText;
+    private final Button button;
+    private final Button secondaryButton;
+    private final Context context;
+    private final ProgressBar progressBar;
+    private final RelativeLayout viewContainer;
+    private final RelativeLayout dialogLayout;
 
     public AWalletAlertDialog(@NonNull Activity activity) {
         super(activity);
@@ -57,9 +57,21 @@ public class AWalletAlertDialog extends Dialog {
         secondaryButton = findViewById(R.id.dialog_button2);
         progressBar = findViewById(R.id.dialog_progress);
         viewContainer = findViewById(R.id.dialog_view);
+        dialogLayout = findViewById(R.id.layout_dialog_container);
 
         button.setOnClickListener(v -> dismiss());
         secondaryButton.setOnClickListener(v -> dismiss());
+    }
+
+    public void makeWide()
+    {
+        float scale = context.getResources().getDisplayMetrics().density;
+        int dp15 = (int) (15*scale + 0.5f);
+        int dp10 = (int) (10*scale + 0.5f);
+        dialogLayout.setPadding(dp15, dp15, dp15, dp15);
+        ViewGroup.MarginLayoutParams marginLayout = (ViewGroup.MarginLayoutParams) dialogLayout.getLayoutParams();
+        marginLayout.setMargins(dp10, dp10, dp10, dp10);
+        dialogLayout.requestLayout();
     }
 
     public void setProgressMode() {

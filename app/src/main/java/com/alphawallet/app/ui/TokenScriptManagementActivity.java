@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
@@ -41,14 +42,33 @@ public class TokenScriptManagementActivity extends BaseActivity {
 
         tokenScriptList = findViewById(R.id.token_script_list);
         tokenScriptList.setLayoutManager(new LinearLayoutManager(this));
+    }
 
+    private void initViewModel()
+    {
         viewModel = ViewModelProviders.of(this, tokenScriptManagementViewModelFactory)
                 .get(TokenScriptManagementViewModel.class);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        initViewModel();
+        refreshList(false);
+    }
+
+    public void refreshList(boolean refreshScripts)
+    {
+        final TokenScriptManagementActivity thisActivity = this;
+
+        viewModel.onPrepare(refreshScripts);
 
         viewModel.getTokenLocatorsLiveData().observe(this, new Observer<List<TokenLocator>>() {
             @Override
             public void onChanged(List<TokenLocator> tokenList) {
-                adapter = new TokenScriptManagementAdapter(getBaseContext(), tokenList, viewModel.getAssetService());
+                if (adapter == null) adapter = new TokenScriptManagementAdapter(thisActivity, tokenList, viewModel.getAssetService());
+                else adapter.refreshList(tokenList);
                 tokenScriptList.setAdapter(adapter);
             }
         });

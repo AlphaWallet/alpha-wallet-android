@@ -1,24 +1,31 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 import android.content.Context;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokenscript.TokenScriptFile;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.ui.TokenScriptManagementActivity;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.token.entity.ContractInfo;
+import com.alphawallet.token.entity.MagicLinkInfo;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,13 +34,17 @@ import io.reactivex.schedulers.Schedulers;
 
 public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScriptManagementAdapter.TokenHolder> {
 
+    private final TokenScriptManagementActivity activity;
     private final Context context;
     private final LayoutInflater inflater;
     private final List<TokenLocator> tokenLocators;
     private final AssetDefinitionService assetDefinitionService;
+    private AWalletAlertDialog dialog;
+    private final Handler handler = new Handler();
 
-    public TokenScriptManagementAdapter(Context context, List<TokenLocator> locators, AssetDefinitionService assetDefinitionService) {
-        this.context = context;
+    public TokenScriptManagementAdapter(TokenScriptManagementActivity activity, List<TokenLocator> locators, AssetDefinitionService assetDefinitionService) {
+        this.context = activity.getBaseContext();
+        this.activity = activity;
         this.tokenLocators = new ArrayList<>(locators);
         this.assetDefinitionService = assetDefinitionService;
         inflater = LayoutInflater.from(context);
@@ -48,9 +59,6 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
     public void onBindViewHolder(@NonNull TokenHolder tokenHolder, int pos) {
 
         TokenLocator tokenLocator = tokenLocators.get(pos);
-
-        tokenHolder.txtToken.setText(tokenLocator.getDefinitionName());
-        tokenHolder.txtTokenFile.setText(tokenLocator.getFileName());
         ContractInfo originContract = tokenLocator.getContracts();
         int chainId;
         String address;
@@ -66,6 +74,24 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
             chainId = originContract.addresses.keySet().iterator().next();
             address = originContract.addresses.get(chainId).iterator().next();
         }
+
+        //see what the current TS file serving this contract is
+        TokenScriptFile servingFile = assetDefinitionService.getTokenScriptFile(chainId, address);
+        final TokenScriptFile overrideFile = (servingFile != null && !tokenLocator.getFullFileName().equals(servingFile.getAbsolutePath())) ? servingFile : null;
+        if (overrideFile != null)
+        {
+            tokenHolder.overrideLayer.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            tokenHolder.overrideLayer.setVisibility(View.GONE);
+        }
+
+        tokenHolder.clickHolder.setOnClickListener(v -> displayFileDialog(overrideFile, tokenLocator));
+        tokenHolder.clickHolder.setOnLongClickListener(v -> displayDeleteFileDialog(tokenLocator));
+
+        tokenHolder.txtToken.setText(tokenLocator.getDefinitionName());
+        tokenHolder.txtTokenFile.setText(tokenLocator.getFileName());
 
         Token t = assetDefinitionService.getTokenFromService(chainId, address);
         if (t != null)
@@ -84,6 +110,79 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
                 .subscribe(sig -> onSigData(sig, tokenHolder), Throwable::printStackTrace).isDisposed();
     }
 
+    private void displayFileDialog(TokenScriptFile override, TokenLocator tokenLocator)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.hide();
+        dialog = new AWalletAlertDialog(activity);
+        dialog.makeWide();
+        dialog.setIcon(AWalletAlertDialog.NONE);
+        dialog.setTitle(tokenLocator.getFileName());
+        dialog.setTextStyle(AWalletAlertDialog.TEXT_STYLE.LEFT);
+        StringBuilder message = new StringBuilder();
+        if (override != null)
+        {
+            String actualFile = override.getName();
+            String debug = override.isDebug() ? context.getString(R.string.is_debug_script) : "";
+
+            message.append(context.getString(R.string.file_override, actualFile, debug));
+        }
+
+        message.append(context.getString(R.string.origin_token_title));
+        for (int chainId : tokenLocator.addresses.keySet())
+        {
+            String chainName = MagicLinkInfo.getNetworkNameById(chainId);
+            for (String address : tokenLocator.addresses.get(chainId))
+            {
+                message.append(context.getString(R.string.tokenscript_contract_line, chainName, address));
+            }
+        }
+        dialog.setMessage(message);
+        dialog.setButtonText(R.string.ok);
+        dialog.setButtonListener(v -> {
+            dialog.cancel();
+        });
+        dialog.show();
+    }
+
+    private boolean displayDeleteFileDialog(TokenLocator tokenLocator)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.hide();
+        dialog = new AWalletAlertDialog(activity);
+        dialog.setIcon(AWalletAlertDialog.NONE);
+        dialog.setTitle(R.string.confirm_delete_file);
+        dialog.setMessage(context.getString(R.string.confirm_delete_file_message, tokenLocator.getFileName()));
+        dialog.setButtonText(R.string.delete);
+        dialog.setButtonListener(v -> { deleteFile(tokenLocator); } );
+        dialog.setSecondaryButtonText(R.string.action_cancel);
+        dialog.setSecondaryButtonListener(v -> dialog.cancel());
+        dialog.show();
+        return true;
+    }
+
+    private void deleteFile(TokenLocator tokenLocator)
+    {
+        File targetFile = new File(tokenLocator.getFullFileName());
+        if (targetFile.exists() && targetFile.delete())
+        {
+            showWaitDialog();
+            activity.refreshList(true);
+        }
+    }
+
+    private void showWaitDialog()
+    {
+        handler.postDelayed(() -> {
+            if (dialog != null && dialog.isShowing())
+                dialog.hide();
+            dialog = new AWalletAlertDialog(activity);
+            dialog.setTitle(context.getString(R.string.refreshing_tokenscripts));
+            dialog.setIcon(AWalletAlertDialog.NONE);
+            dialog.setProgressMode();
+            dialog.setCancelable(false);
+            dialog.show();
+        }, 100);
+    }
+
     @Override
     public int getItemCount() {
         return tokenLocators.size();
@@ -94,14 +193,24 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
         tokenLocators.addAll(tokenList);
     }
 
-    class TokenHolder extends RecyclerView.ViewHolder {
+    public void refreshList(List<TokenLocator> tokenList)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.hide();
+        tokenLocators.clear();
+        tokenLocators.addAll(tokenList);
+        notifyDataSetChanged();
+    }
 
-        TextView txtToken;
-        TextView txtTokenFile;
-        TextView txtTokenAddress;
-        TextView tokenFullName;
-        TextView chainName;
-        ImageView imgLock;
+    static class TokenHolder extends RecyclerView.ViewHolder {
+
+        final TextView txtToken;
+        final TextView txtTokenFile;
+        final TextView txtTokenAddress;
+        final TextView tokenFullName;
+        final TextView chainName;
+        final LinearLayout overrideLayer;
+        final ImageView imgLock;
+        final LinearLayout clickHolder;
 
         public TokenHolder(@NonNull View itemView) {
             super(itemView);
@@ -112,6 +221,8 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
             tokenFullName = itemView.findViewById(R.id.token_name);
             chainName = itemView.findViewById(R.id.text_chain_name);
             imgLock = itemView.findViewById(R.id.image_lock);
+            overrideLayer = itemView.findViewById(R.id.layout_override);
+            clickHolder = itemView.findViewById(R.id.layout_click_holder);
         }
     }
 

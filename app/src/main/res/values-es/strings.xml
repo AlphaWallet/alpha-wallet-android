@@ -608,4 +608,12 @@
     <string name="token_spec">%1$s (%2$s)</string>
     <string name="check_function_availability">Function Availability</string>
     <string name="invalid_parameters">Invalid parameter while calling TokenScript Transaction. Please check inputs.</string>
+    <string name="file_override">TokenScript overridden by %1$s%2$s\n\n</string>
+    <string name="origin_token_title">Origin Tokens:\n\n</string>
+    <string name="tokenscript_contract_line">%1$s -> %2$s\n\n</string>
+    <string name="is_debug_script"> (Debug)</string>
+    <string name="confirm_delete_file">Confirm File Delete</string>
+    <string name="confirm_delete_file_message">Delete file %1$s</string>
+    <string name="delete">Delete</string>
+    <string name="refreshing_tokenscripts">Refresh TokenScripts</string>
 </resources>

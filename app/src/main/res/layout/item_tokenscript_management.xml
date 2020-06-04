@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
+
+<LinearLayout
+    android:id="@+id/main_wrapper"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -103,3 +108,31 @@
         android:background="@color/silver" />
 
 </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_override"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/main_wrapper"
+        android:layout_alignTop="@id/main_wrapper"
+        android:background="@color/translucentWhite"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_click_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/main_wrapper"
+        android:layout_alignTop="@id/main_wrapper"
+        android:background="@color/transparent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+    </LinearLayout>
+
+</RelativeLayout>

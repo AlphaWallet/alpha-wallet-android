@@ -186,7 +186,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      * This order has to be observed because it's an expected developer override order. If a script is placed in the /AlphaWallet directory
      * it is expected to override the one fetched from the repo server.
      * If a developer clicks on a script intent this script is expected to override the one fetched from the server.
-     * TODO: This also requires a script management page where overrides can be removed.
      */
     private void loadAssetScripts()
     {
@@ -206,6 +205,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     //This loads bundled TokenScripts in the /assets directory eg xDAI bridge
     private void loadInternalAssets()
     {
+        assetDefinitions.clear();
+
         Observable.fromIterable(getLocalTSMLFiles())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::addContractAssets, error -> { onError(error); parseAllFileScripts(); },
@@ -541,7 +542,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return result;
     }
 
-    private TokenScriptFile getTokenScriptFile(int chainId, String address)
+    public TokenScriptFile getTokenScriptFile(int chainId, String address)
     {
         if (address.equalsIgnoreCase(tokensService.getCurrentAddress()))
         {
@@ -2238,9 +2239,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      *
      * @return List of Tokenscripts with details
      */
-    public Single<List<TokenLocator>> getAllTokenDefinitions()
+    public Single<List<TokenLocator>> getAllTokenDefinitions(boolean refresh)
     {
         return Single.fromCallable(() -> {
+            if (refresh)
+            {
+                loadAssetScripts();
+            }
+            waitForAssets();
             final File[] files = buildFileList();
             List<TokenLocator> tokenLocators = new ArrayList<>();
             Observable.fromArray(files)

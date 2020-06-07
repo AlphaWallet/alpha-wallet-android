@@ -1,12 +1,20 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 import android.content.Context;
+<<<<<<< HEAD
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
+=======
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.SortedList;
+import androidx.recyclerview.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.view.ViewGroup;
 
 import com.alphawallet.app.R;
@@ -14,6 +22,7 @@ import com.alphawallet.app.entity.KnownContract;
 import com.alphawallet.app.entity.TokenManageType;
 import com.alphawallet.app.entity.UnknownToken;
 import com.alphawallet.app.entity.tokens.Token;
+<<<<<<< HEAD
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
@@ -26,6 +35,8 @@ import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.TokenLabelViewHolder;
 import com.alphawallet.app.ui.widget.holder.TokenListHolder;
 import com.google.gson.Gson;
+=======
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 
 import java.io.IOException;
 import java.io.InputStream;

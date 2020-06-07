@@ -1,8 +1,8 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -10,8 +10,6 @@ import android.widget.TextView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.AssetDefinitionService;
-
-import org.w3c.dom.Text;
 
 /**
  * Created by James on 12/02/2018.

@@ -1,11 +1,11 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.content.Context;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import android.os.NetworkOnMainThreadException;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.alphawallet.app.entity.MessagePair;
 import com.alphawallet.app.entity.Operation;

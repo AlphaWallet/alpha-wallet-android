@@ -1,12 +1,17 @@
 package com.alphawallet.app.ui;
 
 import android.Manifest;
+<<<<<<< HEAD
 import android.arch.lifecycle.ViewModelProviders;
+=======
+import androidx.lifecycle.ViewModelProviders;
+
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,7 +28,11 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AmountUpdateCallback;
 import com.alphawallet.app.entity.EIP681Request;
 import com.alphawallet.app.entity.NetworkInfo;
+<<<<<<< HEAD
 import com.alphawallet.app.entity.CustomViewSettings;
+=======
+import com.alphawallet.app.entity.VisibilityFilter;
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;

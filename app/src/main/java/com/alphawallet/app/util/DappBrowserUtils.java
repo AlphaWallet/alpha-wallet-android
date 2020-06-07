@@ -41,25 +41,7 @@ public class DappBrowserUtils {
 
     private static List<DApp> getPrimarySites(Context context)
     {
-        StringBuilder myDappsJson = new StringBuilder("[");
-        String[] customItems = context.getResources().getStringArray(R.array.PrimarySites);
-        boolean firstItem = true;
-
-        for (String s : customItems)
-        {
-            if (!firstItem) myDappsJson.append(",");
-            myDappsJson.append(s);
-            firstItem = false;
-        }
-
-        myDappsJson.append("]");
-
-        if (myDappsJson.length() > 0) {
-            return new Gson().fromJson(myDappsJson.toString(), new TypeToken<ArrayList<DApp>>() {
-            }.getType());
-        } else {
-            return new ArrayList<>();
-        }
+        return new ArrayList<>();
     }
 
     public static List<DApp> getMyDapps(Context context) {

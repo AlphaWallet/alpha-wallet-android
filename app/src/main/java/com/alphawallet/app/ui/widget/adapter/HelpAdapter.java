@@ -1,7 +1,7 @@
 package com.alphawallet.app.ui.widget.adapter;
 
-import android.support.v7.util.SortedList;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.SortedList;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 

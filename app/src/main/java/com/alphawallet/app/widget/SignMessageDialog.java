@@ -5,9 +5,13 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+<<<<<<< HEAD
 import android.support.annotation.NonNull;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
+=======
+import androidx.annotation.NonNull;
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;

@@ -1,6 +1,6 @@
 package com.alphawallet.app.service;
 
-import android.arch.lifecycle.MutableLiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.Wallet;

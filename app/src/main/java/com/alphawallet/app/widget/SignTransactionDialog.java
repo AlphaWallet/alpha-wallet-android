@@ -12,10 +12,15 @@ import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.CancellationSignal;
+<<<<<<< HEAD
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.ActivityCompat;
+=======
+import androidx.annotation.NonNull;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;

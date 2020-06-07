@@ -1,8 +1,12 @@
 package com.alphawallet.app.web3;
 
+<<<<<<< HEAD
 import android.support.annotation.NonNull;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
+=======
+import androidx.annotation.NonNull;
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.text.TextUtils;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;

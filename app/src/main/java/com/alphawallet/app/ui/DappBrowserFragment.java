@@ -5,7 +5,7 @@ import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -16,12 +16,20 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+<<<<<<< HEAD
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.BuildConfig;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+=======
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.widget.Toolbar;
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;

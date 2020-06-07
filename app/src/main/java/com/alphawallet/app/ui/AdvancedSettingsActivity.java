@@ -1,14 +1,20 @@
 package com.alphawallet.app.ui;
 
 import android.Manifest;
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+<<<<<<< HEAD
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+=======
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.util.Log;
 import android.webkit.WebView;
 import android.widget.LinearLayout;

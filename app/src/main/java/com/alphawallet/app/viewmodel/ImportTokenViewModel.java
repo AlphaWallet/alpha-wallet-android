@@ -1,9 +1,9 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.support.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import com.alphawallet.app.C;

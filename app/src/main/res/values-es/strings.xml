@@ -111,6 +111,7 @@
     <string name="token_balance">%1$s%2$s</string>
     <!--<string name="token_balance">%1$s%2$s %3$s</string>-->
     <string name="token_name">%1$s (%2$s)</string>
+<<<<<<< HEAD
     <string name="create_sell_order">Crear orden de venta</string>
     <string name="select_tickets">Selecciona %1$s para vender:</string>
     <string name="select_tickets_redeem">Selecciona los tickets para canjear:</string>
@@ -138,6 +139,36 @@
     <string name="generate_pick_up_link">Generar un MagicLink</string>
     <string name="transfer_now">Transferir ahora</string>
     <string name="to">a</string>
+=======
+    <string name="create_sell_order">Create Sales Order</string>
+    <string name="select_tickets">Select %1$s to Sell:</string>
+    <string name="select_tickets_redeem">Select Tickets to Redeem:</string>
+    <string name="action_purchase">Purchase</string>
+    <string name="toolbar_header_wallet">Wallet</string>
+    <string name="toolbar_header_settings">Settings</string>
+    <string name="toolbar_header_help">Help \u0026 FAQ</string>
+    <string name="toolbar_header_transactions">Transactions</string>
+    <string name="settings_my_wallet_address">My Wallet Address</string>
+    <string name="settings_notification">Notifications</string>
+    <string name="title_redeem">Redeem Ticket</string>
+    <string name="waiting_for_blockchain">Waiting for blockchain …</string>
+    <string name="btn_text_apply">Apply</string>
+    <string name="filter_by">Filter by:</string>
+    <string name="filter_date_label">Date</string>
+    <string name="filter_price_label">Price</string>
+    <string name="filter_distance_label">Distance</string>
+    <string name="filter_timeframe_label">Timeframe</string>
+    <string name="set_a_price">Set a Price:</string>
+    <string name="learn_more_about_ethereum">Learn more about Ethereum</string>
+    <string name="price_per_ticket">Price Per Ticket</string>
+    <string name="set_price_subtext_abr">Set price in %1$s (%2$s)</string>
+    <string name="transfer_tickets">Transfer Tickets</string>
+    <string name="link_valid_until">The MagicLink will be valid until %1$s %2$s</string>
+    <string name="generate_pick_up_link">Generate a MagicLink</string>
+    <string name="transfer_now">Transfer Now</string>
+    <string name="to">to</string>
+
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
     <string-array name="filter_date">
         <item>Más reciente</item>
         <item>Más antigua</item>
@@ -175,6 +206,7 @@
         <item>DD/MM/YY</item>
     </string-array>
     <string name="eth">ETH</string>
+<<<<<<< HEAD
     <string name="quantity_of_tickets">Cantidad de tickets</string>
     <string name="total_cost_label">Coste total:</string>
     <string name="equivalent_in_usd">Equivalente en USD</string>
@@ -195,6 +227,28 @@
     <string name="twenty_four_hours">24 horas</string>
     <string name="appreciation">Valoración</string>
     <string name="eth_per_ticket">%1s/ticket</string>
+=======
+    <string name="quantity_of_tickets">Quantity of Tickets</string>
+    <string name="total_cost_label">Total Cost:</string>
+    <string name="equivalent_in_usd">Equivalent in USD</string>
+    <string name="total_cost">%1$s %2$s</string>
+    <string name="select_quantity_tickets">Select Quantity of %1$s</string>
+    <string name="ticket_redeemed">Your ticket has been redeemed</string>
+    <string name="search_for">Search for:</string>
+    <string name="filter_search_class">Class</string>
+    <string name="filter_search_seats">No. of Seats Together</string>
+    <string name="search_label_match">Match</string>
+    <string name="help_question1">What is ETH/Ethereum?</string>
+    <string name="help_question2">Why does aWallet use Ethereum?</string>
+    <string name="help_question3">How do I get my money?</string>
+    <string name="help_question4">What is a Seed Phrase?</string>
+    <string name="help_question5">How do I transfer ETH into my wallet?</string>
+    <string name="help_question6">What is TokenScript?</string>
+    <string name="tokenscript_explaination">tokenscript_explaination.html</string>
+    <string name="twenty_four_hours">24 hours</string>
+    <string name="appreciation">Appreciation</string>
+    <string name="eth_per_ticket">%1$s/Ticket</string>
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
     <string name="ethereum">Ethereum</string>
     <string name="ethereum_blockchain">Cadena de bloques de Ethereum</string>
     <string name="issuer">Emisor:</string>
@@ -222,6 +276,7 @@
     <string name="toolbar_header_importing_tickets">Importación de tokens</string>
     <string name="ticket">Ticket</string>
     <string name="tickets">Tickets</string>
+<<<<<<< HEAD
     <string name="failed">Fallida</string>
     <string name="total_cost_for_x_tickets">Coste total de %1d %2s:</string>
     <string name="title_import_token">Importar tickets</string>
@@ -234,6 +289,20 @@
     <string name="send_universal_link">Compartir MagicLink</string>
     <string name="generate_sale_transfer_link">Generar MagicLink</string>
     <string name="place_tickets_marketplace">Anunciar en el mercado</string>
+=======
+    <string name="failed">Failed</string>
+    <string name="total_cost_for_x_tickets">Total cost for %1d %2$s:</string>
+    <string name="title_import_token">Import Tickets</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="confirm_purchase">Confirm Purchase</string>
+    <string name="bad_import_link">Invalid Import Link</string>
+    <string name="bad_import_link_body">Import link contains an error; please re-request the link</string>
+    <string name="depreciation">DEPRECIATION</string>
+    <string name="generate_free_transfer_link">Create free transfer link?</string>
+    <string name="send_universal_link">Share MagicLink</string>
+    <string name="generate_sale_transfer_link">Generate MagicLink</string>
+    <string name="place_tickets_marketplace">List on marketplace</string>
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
     <string name="hint_time">--:--</string>
     <string name="link_expiry_time">Hora de expiración del MagicLink</string>
     <string name="error_time">Selecciona una hora de expiración</string>
@@ -249,10 +318,17 @@
     <string name="copied_to_clipboard">Copiado al portapapeles</string>
     <string name="universal_link_expiry_on">El MagicLink expira el:</string>
     <string name="confirm_sale_total">Total: %s</string>
+<<<<<<< HEAD
     <string name="set_universal_link_expiry">Define la expiración del MagicLink:</string>
     <string name="tickets_selected">%1s %2s seleccionados</string>
     <string name="eth_per_ticket_w_value">%1s %2s/ticket</string>
     <string name="universal_link_info">Se creará un MagicLink para que los compradores puedan adquirir tus tickets.</string>
+=======
+    <string name="set_universal_link_expiry">Set MagicLink Expiry:</string>
+    <string name="tickets_selected">%1$s %2$s Selected</string>
+    <string name="eth_per_ticket_w_value">%1$s %2$s/Ticket</string>
+    <string name="universal_link_info">A MagicLink will be created to allow buyers to purchase your tickets.</string>
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
     <string name="date_hint">DD/MM/YYYY</string>
     <string name="universal_link_notice">Antes de que expire el enlace, cualquiera que tenga el MagicLink puede comprar tus tickets con un clic.</string>
     <string name="label_important">Importante</string>
@@ -373,6 +449,7 @@
     <string name="currency_import">Importación de monedas</string>
     <string name="you_will_receive">recibirás</string>
     <string name="dust_value"><![CDATA[~0.00]]></string>
+<<<<<<< HEAD
     <string name="action_scan_dapp">Escanear código QR</string>
     <string name="toast_invalid_code">Resultado del escaneo no válido</string>
     <string name="address_found">Dirección de Ethereum</string>
@@ -413,6 +490,48 @@
     <string name="dapp_address">Dirección</string>
     <string name="search_or_type_web_address">Busca o escribe una dirección web</string>
     <string name="network">Redes</string>
+=======
+    <string name="action_scan_dapp">Scan QR Code</string>
+    <string name="toast_invalid_code">Invalid Scan Result</string>
+    <string name="address_found">Ethereum Address</string>
+    <string name="is_address">Just scanned an Ethereum address. Do you want to try to load this as a Token?</string>
+    <string name="dialog_load_as_contract">Load Token</string>
+    <string name="blockchain">%1$s Blockchain</string>
+    <string name="currency_00">0.00 %s</string>
+    <string name="telegram">Telegram</string>
+    <string name="transfer_request">Transfer request</string>
+    <string name="token_transfer_request">Token transfer request: %1$s</string>
+    <string name="generate_payment_request">Generate Payment Request</string>
+    <string name="enter_the_requested_amount">Enter the requested amount:</string>
+    <string name="feemaster_service_not_available">Feemaster service is currently not available, please try again later.</string>
+    <string name="importing_tickets">Importing Tokens</string>
+    <string name="wallet_name">Wallet Name</string>
+    <string name="wallet_name_template">Wallet %1$d</string>
+    <string name="no_token_found_title">Token Not Found</string>
+    <string name="no_token_found">No Token contract found at this address on any active Ethereum chain.</string>
+    <string name="welcome_to_the_decentralized_web">Welcome to the Decentralized web</string>
+    <string name="action_remove">Remove</string>
+    <string name="title_remove_dapp">Remove DApp</string>
+    <string name="remove_from_my_dapps">Remove %1$s from My DApps?</string>
+    <string name="dialog_title_clear">Clear History</string>
+    <string name="action_clear">Clear</string>
+    <string name="dialog_message_clear">Are you sure you clear your browser history?</string>
+    <string name="your_browser_history_appears_here">Your browser history appears here.</string>
+    <string name="browser_history">Browser History</string>
+    <string name="you_have_no_dapps_displayed_yet_start_by_surfing_the_browser">You have no DApps displayed yet.\nStart by surfing the browser.</string>
+    <string name="my_dapps">My DApps</string>
+    <string name="add">Add</string>
+    <string name="edit">Edit</string>
+    <string name="history">History</string>
+    <string name="discover_dapps">Discover DApps</string>
+    <string name="action_add">Add</string>
+    <string name="add_to_my_dapps">Add to My DApps</string>
+    <string name="edit_dapp">Edit DApp</string>
+    <string name="dapp_title">Title</string>
+    <string name="dapp_address">Address</string>
+    <string name="search_or_type_web_address">Search or type web address</string>
+    <string name="network">Networks</string>
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
     <string name="select_active_networks">Seleccionar redes activas</string>
     <string name="collectibles">Coleccionables</string>
     <string name="token_function">Función del token</string>

@@ -1,9 +1,15 @@
 package com.alphawallet.app.ui;
 
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+<<<<<<< HEAD
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
+=======
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,7 +18,10 @@ import android.widget.TextView;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+<<<<<<< HEAD
 import com.alphawallet.app.entity.ConfirmationType;
+=======
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
@@ -30,8 +39,11 @@ import com.alphawallet.app.widget.FunctionButtonBar;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DateFormat;
+<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.Collections;
+=======
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import java.util.Date;
 import java.util.List;
 

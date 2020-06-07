@@ -29,6 +29,7 @@ import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.Buffer;
 import okio.BufferedSource;
@@ -124,24 +125,50 @@ public class AWHttpService extends HttpService
         {
             if (secondaryUrl != null) //only if we have a secondary node
             {
-                httpRequest =
-                        new okhttp3.Request.Builder().url(secondaryUrl).headers(headers).post(requestBody).build();
-                response = httpClient.newCall(httpRequest).execute();
+                return trySecondaryNode(request);
             }
             else
             {
                 throw new SocketTimeoutException();
             }
         }
+
+        return processNodeResponse(response, request, false);
+    }
+
+    private InputStream trySecondaryNode(String request) throws IOException
+    {
+        RequestBody requestBody = RequestBody.create(request, JSON_MEDIA_TYPE);
+        Headers headers = buildHeaders();
+
+        okhttp3.Request httpRequest =
+                new okhttp3.Request.Builder().url(secondaryUrl).headers(headers).post(requestBody).build();
+        okhttp3.Response response  = httpClient.newCall(httpRequest).execute();
+
+        return processNodeResponse(response, request, true);
+    }
+
+    private InputStream processNodeResponse(Response response, String request, boolean useSecondaryNode) throws IOException
+    {
         processHeaders(response.headers());
         ResponseBody responseBody = response.body();
-        if (response.isSuccessful()) {
-            if (responseBody != null) {
+        if (response.isSuccessful())
+        {
+            if (responseBody != null)
+            {
                 return buildInputStream(responseBody);
-            } else {
+            }
+            else
+            {
                 return null;
             }
-        } else {
+        }
+        else if (!useSecondaryNode && secondaryUrl != null)
+        {
+            return trySecondaryNode(request);
+        }
+        else
+        {
             int code = response.code();
             String text = responseBody == null ? "N/A" : responseBody.string();
 

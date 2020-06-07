@@ -100,7 +100,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         //given a webview populate with rendered token
         tokenView.displayTicketHolder(token, ticketRange.range, viewModel.getAssetDefinitionService());
         tokenView.setOnReadyCallback(this);
-        tokenView.setLayout(token, false);
+        tokenView.setLayout(token, true);
         finishReceiver = new FinishReceiver(this);
     }
 

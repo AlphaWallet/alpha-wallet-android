@@ -20,9 +20,10 @@
         android:paddingEnd="6dp">
 
         <ProgressBar
-            android:id="@+id/progress_element"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignTop="@id/total_wrapper"
+            android:layout_alignBottom="@id/total_wrapper"
             android:layout_centerInParent="true"
             android:indeterminateTint="@color/tealish"
             android:visibility="visible" />
@@ -31,6 +32,7 @@
             android:id="@+id/total_wrapper"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:minHeight="100dp"
             android:layout_centerHorizontal="true"
             android:orientation="horizontal">
 
@@ -50,18 +52,18 @@
                 android:id="@+id/layout_webwrapper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:minHeight="100dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="6dp"
                 android:background="@color/white"
-                android:gravity="center"
+                android:gravity="top"
                 android:orientation="vertical"
                 android:visibility="gone">
 
                 <com.alphawallet.app.web3.Web3TokenView
                     android:id="@+id/web3_tokenview"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="200dp">
+                    android:layout_height="wrap_content">
 
                 </com.alphawallet.app.web3.Web3TokenView>
 

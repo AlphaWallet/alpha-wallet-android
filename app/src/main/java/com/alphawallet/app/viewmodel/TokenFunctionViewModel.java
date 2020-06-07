@@ -160,7 +160,6 @@ public class TokenFunctionViewModel extends BaseViewModel
     {
         if (assetDefinitionService.checkTokenForNewEvent(t) || token.checkBalanceChange(t))
         {
-            t.transferPreviousData(token);
             token = t;
             tokenUpdate.postValue(token);
         }
@@ -451,9 +450,10 @@ public class TokenFunctionViewModel extends BaseViewModel
         return openseaService;
     }
 
-    public void updateTokenScriptViewSize(Token token)
+    public void updateTokenScriptViewSize(Token token, int itemViewHeight)
     {
-        tokensService.updateTokenViewSizes(token);
+        assetDefinitionService.storeTokenViewHeight(token.tokenInfo.chainId, token.getAddress(), itemViewHeight)
+                    .isDisposed();
     }
 
     public void checkForNewScript(Token token)

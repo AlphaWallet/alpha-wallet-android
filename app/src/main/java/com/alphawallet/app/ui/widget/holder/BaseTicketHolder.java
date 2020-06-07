@@ -26,7 +26,6 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     private Token token;
     private final Web3TokenView tokenView;
     private final LinearLayout webWrapper;
-    private final ProgressBar waitSpinner;
     private OnTokenClickListener onTokenClickListener;
     private final AssetDefinitionService assetService; //need to cache this locally, unless we cache every string we need in the constructor
 
@@ -39,13 +38,11 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
         activityView = this.itemView;
         tokenView = findViewById(R.id.web3_tokenview);
         webWrapper = findViewById(R.id.layout_webwrapper);
-        waitSpinner = findViewById(R.id.progress_element);
         itemView.setOnClickListener(this);
         ticketLayout = findViewById(R.id.layout_select_ticket);
         assetService = service;
         token = ticket;
         tokenView.setOnReadyCallback(this);
-        waitSpinner.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -90,7 +87,6 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     @Override
     public void onPageRendered(WebView view)
     {
-        waitSpinner.setVisibility(View.GONE);
         webWrapper.setVisibility(View.VISIBLE);
     }
 }

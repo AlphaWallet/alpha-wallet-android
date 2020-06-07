@@ -4,13 +4,7 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
-import android.util.Base64;
-import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
@@ -20,37 +14,24 @@ import com.alphawallet.app.interact.SetupTokensInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
-import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3j.datatypes.Function;
-import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
-import com.alphawallet.token.tools.TokenDefinition;
 
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-
-import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ERROR;
-import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
-import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
 
 public class Token implements Parcelable, Comparable<Token>
 {
@@ -74,10 +55,8 @@ public class Token implements Parcelable, Comparable<Token>
     public long lastTxCheck;
     public long lastTxUpdate;
     public long lastTxTime;
-
-    public int iconifiedWebviewHeight;
-    public int nonIconifiedWebviewHeight;
     private int nameWeight;
+    public int itemViewHeight;
 
     private final Map<BigInteger, Map<String, TokenScriptResult.Attribute>> resultMap = new ConcurrentHashMap<>(); //Build result map for function parse, per tokenId
     private Map<BigInteger, List<String>> functionAvailabilityMap = null;
@@ -121,8 +100,6 @@ public class Token implements Parcelable, Comparable<Token>
             balanceChanged = oldToken.balanceChanged;
             hasTokenScript = oldToken.hasTokenScript;
             lastTxTime = oldToken.lastTxTime;
-            iconifiedWebviewHeight = oldToken.iconifiedWebviewHeight;
-            nonIconifiedWebviewHeight = oldToken.nonIconifiedWebviewHeight;
             functionAvailabilityMap = oldToken.functionAvailabilityMap;
         }
         refreshCheck = false;
@@ -141,8 +118,6 @@ public class Token implements Parcelable, Comparable<Token>
         lastTxUpdate = in.readLong();
         lastTxTime = in.readLong();
         hasTokenScript = in.readByte() == 1;
-        nonIconifiedWebviewHeight = in.readInt();
-        iconifiedWebviewHeight = in.readInt();
         nameWeight = in.readInt();
         ticker = in.readParcelable(TokenTicker.class.getClassLoader());
         functionAvailabilityMap = in.readHashMap(List.class.getClassLoader());
@@ -247,8 +222,6 @@ public class Token implements Parcelable, Comparable<Token>
         dest.writeLong(lastTxUpdate);
         dest.writeLong(lastTxTime);
         dest.writeByte(hasTokenScript?(byte)1:(byte)0);
-        dest.writeInt(nonIconifiedWebviewHeight);
-        dest.writeInt(iconifiedWebviewHeight);
         dest.writeInt(nameWeight);
         dest.writeParcelable(ticker, flags);
         dest.writeMap(functionAvailabilityMap);

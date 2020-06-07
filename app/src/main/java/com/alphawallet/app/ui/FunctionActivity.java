@@ -90,7 +90,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private String actionMethod;
     private SystemView systemView;
     private Web3TokenView tokenView;
-    private ProgressBar waitSpinner;
     private SignMessageDialog dialog;
     private final Map<String, String> args = new HashMap<>();
     private StringBuilder attrs;
@@ -117,7 +116,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
 
         tokenView = findViewById(R.id.web3_tokenview);
-        waitSpinner = findViewById(R.id.progress_element);
 
         tokenView.setChainId(token.tokenInfo.chainId);
         tokenView.setWalletAddress(new Address(token.getWallet()));
@@ -126,15 +124,9 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSignPersonalMessageListener(this);
         tokenView.setOnSetValuesListener(this);
-        tokenView.setVisibility(View.GONE);
-        waitSpinner.setVisibility(View.VISIBLE);
         tokenView.setKeyboardListenerCallback(this);
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
         viewModel.getCurrentWallet();
-
-        //expose the webview and remove the token 'card' background
-        findViewById(R.id.layout_webwrapper).setBackgroundResource(R.drawable.background_card);
-        findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
 
         parsePass = 1;
         viewModel.getAssetDefinitionService().clearResultMap();
@@ -238,6 +230,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void fillEmpty()
     {
+        findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
         tokenView.loadData("<html><body>No Data</body></html>", "text/html", "utf-8");
     }
 
@@ -512,11 +505,10 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void onPageRendered(WebView view)
     {
+        findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
         if (parsePass == 1)
         {
             tokenView.reload();
-            waitSpinner.setVisibility(View.GONE);
-            tokenView.setVisibility(View.VISIBLE);
         }
 
         parsePass++;

@@ -8,11 +8,11 @@ import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileObserver;
-import android.support.annotation.Keep;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+
+import androidx.annotation.Keep;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractLocator;
@@ -695,7 +695,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     }
 
     private boolean checkReadPermission() {
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
+        return context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
@@ -1963,7 +1963,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 if (!TextUtils.isEmpty(tokenDefinition.holdingToken))
                 {
-                    notificationService.DisplayNotification("Definition Updated", file.getName(), NotificationCompat.PRIORITY_MAX);
+                    notificationService.DisplayNotification("Definition Updated", file.getName(),
+                            NotificationCompat.PRIORITY_MAX);
                     List<ContractLocator> originContracts = getOriginContracts(tokenDefinition);
                     for (ContractLocator cl : originContracts)
                     {

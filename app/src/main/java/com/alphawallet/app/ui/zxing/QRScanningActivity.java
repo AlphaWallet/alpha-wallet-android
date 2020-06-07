@@ -9,9 +9,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+<<<<<<< HEAD
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+=======
+import androidx.core.app.ActivityCompat;
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.util.Log;
 import android.widget.TextView;
 

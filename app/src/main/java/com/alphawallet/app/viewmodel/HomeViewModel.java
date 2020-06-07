@@ -2,6 +2,7 @@ package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
 import android.app.DownloadManager;
+<<<<<<< HEAD
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.BroadcastReceiver;
@@ -9,6 +10,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+=======
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import android.content.*;
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -35,6 +41,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
+<<<<<<< HEAD
 import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
@@ -43,11 +50,19 @@ import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TransactionsService;
+=======
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.LocaleUtils;
+<<<<<<< HEAD
 import com.alphawallet.app.util.QRParser;
+=======
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.tools.ParseMagicLink;
 

@@ -36,7 +36,7 @@
 
     </FrameLayout>
 
-    <android.support.v7.widget.AppCompatSeekBar
+    <androidx.appcompat.widget.AppCompatSeekBar
         android:id="@+id/gas_price_slider1"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
@@ -120,7 +120,7 @@
             android:textSize="@dimen/sp17"
             android:text="@string/minutes_0" />
 
-        <android.support.v7.widget.AppCompatSeekBar
+        <androidx.appcompat.widget.AppCompatSeekBar
             android:id="@+id/gas_limit_slider"
             android:visibility="gone"
             style="?android:attr/progressBarStyleHorizontal"

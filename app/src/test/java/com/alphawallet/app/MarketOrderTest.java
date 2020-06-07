@@ -1,6 +1,6 @@
 package com.alphawallet.app;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.BaseViewCallback;

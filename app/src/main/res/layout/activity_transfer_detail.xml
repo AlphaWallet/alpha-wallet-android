@@ -52,7 +52,7 @@
                     android:textColor="@color/text_black"
                     android:textSize="25sp" />
 
-                <android.support.v7.widget.RecyclerView
+                <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/listTickets"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
@@ -222,7 +222,7 @@
                             android:orientation="horizontal"
                             android:padding="15dp">
 
-                            <android.support.v7.widget.AppCompatRadioButton
+                            <androidx.appcompat.widget.AppCompatRadioButton
                                 android:id="@+id/radio_pickup_link"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -252,7 +252,7 @@
                             android:padding="15dp"
                             android:gravity="center_vertical">
 
-                            <android.support.v7.widget.AppCompatRadioButton
+                            <androidx.appcompat.widget.AppCompatRadioButton
                                 android:id="@+id/radio_transfer_now"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"

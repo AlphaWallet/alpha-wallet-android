@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+<<<<<<< HEAD
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,6 +12,15 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
+=======
+import androidx.lifecycle.ViewModelProviders;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 import android.widget.Button;
 import android.widget.EditText;
 

@@ -1,9 +1,15 @@
 package com.alphawallet.app.viewmodel;
 
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import android.content.Context;
+<<<<<<< HEAD
+=======
+import android.os.Handler;
+import androidx.annotation.Nullable;
+import android.text.format.DateUtils;
+>>>>>>> e3074436a... Attempt to upgrade to AndroidX
 
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;

@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -22,16 +21,7 @@ import com.alphawallet.app.ui.TokenFunctionActivity;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
-import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
-
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.Key.TICKET;
 
@@ -47,7 +37,6 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     private final Token token;
     private final LinearLayout clickWrapper;
     private final LinearLayout webWrapper;
-    private final ProgressBar waitSpinner;
     private final boolean iconified;
     private OnTokenClickListener tokenClickListener;
     private final AppCompatRadioButton itemSelect;
@@ -59,7 +48,6 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     {
         super(resId, parent);
         tokenView = findViewById(R.id.web3_tokenview);
-        waitSpinner = findViewById(R.id.progress_element);
         webWrapper = findViewById(R.id.layout_webwrapper);
         assetDefinitionService = assetService;
         clickWrapper = findViewById(R.id.click_layer);
@@ -67,8 +55,6 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         token = t;
         tokenView.setOnReadyCallback(this);
         this.iconified = iconified;
-
-        tokenView.setLayout(token, iconified);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -78,6 +64,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         activeClick = false;
         try
         {
+            tokenView.setLayout(token, iconified);
             if (data.tokenIds.size() == 0) { fillEmpty(); return; }
             if (data.exposeRadio)
             {
@@ -88,7 +75,6 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
                 itemSelect.setVisibility(View.GONE);
             }
 
-            waitSpinner.setVisibility(View.VISIBLE);
             itemSelect.setChecked(data.isChecked);
             tokenView.displayTicketHolder(token, data, assetDefinitionService, iconified);
             tokenView.setOnReadyCallback(this);
@@ -121,7 +107,6 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     public void onPageRendered(WebView view)
     {
         webWrapper.setVisibility(View.VISIBLE);
-        waitSpinner.setVisibility(View.GONE);
     }
 
     public void handleClick(View v, TicketRange data)

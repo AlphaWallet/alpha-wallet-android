@@ -172,6 +172,7 @@ public class Web3TokenView extends WebView
     public void showError(String error)
     {
         showingError = true;
+        setVisibility(View.VISIBLE);
         loadData(error, "text/html", "utf-8");
     }
 
@@ -319,28 +320,18 @@ public class Web3TokenView extends WebView
 
     public void setLayout(Token token, boolean iconified)
     {
-        if (iconified && token.iconifiedWebviewHeight > 0)
+        if (iconified && token.itemViewHeight > 0)
         {
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, token.iconifiedWebviewHeight);
-            setLayoutParams(params);
-        }
-        else if (token.nonIconifiedWebviewHeight > 0)
-        {
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, token.nonIconifiedWebviewHeight);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, token.itemViewHeight);
             setLayoutParams(params);
         }
     }
 
     private class TokenScriptClient extends WebViewClient
     {
-        private boolean loadingFinished = true;
-        private boolean redirect = false;
-        private Web3TokenView parent;
-
         public TokenScriptClient(Web3TokenView web3)
         {
             super();
-            parent = web3;
         }
 
         @Override
@@ -391,11 +382,9 @@ public class Web3TokenView extends WebView
         }
     }
 
-
-
     // Rendering
     public void displayTicketHolder(Token token, TicketRange range, AssetDefinitionService assetService) {
-        displayTicketHolder(token, range, assetService, false);
+        displayTicketHolder(token, range, assetService, true);
     }
 
     /**

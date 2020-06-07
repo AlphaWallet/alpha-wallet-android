@@ -70,6 +70,8 @@ import static com.alphawallet.app.C.Key.WALLET;
  */
 public class AssetDisplayActivity extends BaseActivity implements StandardFunctionInterface, PageReadyCallback, Runnable
 {
+    private static final int TOKEN_SIZING_DELAY = 3000; //3 seconds until timeout waiting for tokenview size calculation
+
     @Inject
     protected TokenFunctionViewModelFactory tokenFunctionViewModelFactory;
     private TokenFunctionViewModel viewModel;
@@ -86,8 +88,8 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     private AWalletAlertDialog dialog;
     private Web3TokenView testView;
     private final Handler handler = new Handler();
-    private boolean iconifiedCheck;
     private int checkVal;
+    private int itemViewHeight;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -136,12 +138,9 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         viewModel.checkTokenScriptValidity(token);
         token.clearResultMap();
 
-        iconifiedCheck = true;
-
-        if (token.iconifiedWebviewHeight == 0 && token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
+        if (token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
         {
-            initWebViewCheck(iconifiedCheck);
-            handler.postDelayed(this, 1500);
+            loadItemViewHeight();
         }
         else
         {
@@ -151,30 +150,54 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         viewModel.checkForNewScript(token); //check for updated script
     }
 
+    private void loadItemViewHeight()
+    {
+        viewModel.getAssetDefinitionService().fetchViewHeight(token.tokenInfo.chainId, token.getAddress())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::viewHeight, error -> { viewHeight(0); })
+                .isDisposed();
+    }
+
+    private void viewHeight(int fetchedViewHeight)
+    {
+        if (fetchedViewHeight == 0)
+        {
+            initWebViewCheck();
+            handler.postDelayed(this, TOKEN_SIZING_DELAY); //wait 3 seconds until ending height check
+        }
+        else
+        {
+            token.itemViewHeight = fetchedViewHeight;
+            displayTokens();
+        }
+    }
+
     private void onNewScript(Boolean aBoolean)
     {
         //need to reload tokens, now we have an updated/new script
         if (viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
         {
-            initWebViewCheck(iconifiedCheck);
-            handler.postDelayed(this, 1500);
+            initWebViewCheck();
+            handler.postDelayed(this, TOKEN_SIZING_DELAY);
         }
     }
 
-    private void initWebViewCheck(boolean iconified)
+    private void initWebViewCheck()
     {
         checkVal = 0;
+        itemViewHeight = 0;
         //first see if we need this - is iconified equal to non iconified?
-        if (!iconified && viewModel.getAssetDefinitionService().viewsEqual(token))
-        {
-            token.nonIconifiedWebviewHeight = token.iconifiedWebviewHeight;
-        }
-        else if (token.getArrayBalance().size() > 0)
+        if (token.getArrayBalance().size() > 0)
         {
             BigInteger  tokenId = token.getArrayBalance().get(0);
             TicketRange data    = new TicketRange(tokenId, token.getAddress());
-            testView.renderTokenscriptView(token, data, viewModel.getAssetDefinitionService(), iconified);
+            testView.renderTokenscriptView(token, data, viewModel.getAssetDefinitionService(), true);
             testView.setOnReadyCallback(this);
+        }
+        else
+        {
+            displayTokens();
         }
     }
 
@@ -325,14 +348,8 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     public void onPageRendered(WebView view)
     {
         testView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-            if (token != null)
-            {
-                if (iconifiedCheck) token.iconifiedWebviewHeight = bottom - top;
-                else token.nonIconifiedWebviewHeight = bottom - top;
-                checkVal++;
-                viewModel.updateTokenScriptViewSize(token);
-            }
-
+            itemViewHeight = bottom - top;
+            checkVal++;
             if (checkVal == 3) addRunCall(0); //received the third webview render update - this is always the final size we want, but sometimes there's only 1 or 2 updates
             else addRunCall(400);//wait another 400ms for the second view update
         });
@@ -347,24 +364,19 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     @Override
     public void run()
     {
-        if (iconifiedCheck)
-        {
-            iconifiedCheck = false;
-            displayTokens();
-            initWebViewCheck(iconifiedCheck);
-        }
-        else
-        {
-            //destroy webview
-            testView.destroyDrawingCache();
-            testView.removeAllViews();
-            testView.loadUrl("about:blank");
-            testView.setVisibility(View.GONE);
-        }
+        token.itemViewHeight = itemViewHeight;
+        viewModel.updateTokenScriptViewSize(token, itemViewHeight);
+        displayTokens();
+        //destroy webview
+        testView.destroyDrawingCache();
+        testView.removeAllViews();
+        testView.loadUrl("about:blank");
+        testView.setVisibility(View.GONE);
     }
 
     private void displayTokens()
     {
+        handler.removeCallbacks(this);
         progressView.setVisibility(View.GONE);
         adapter = new NonFungibleTokenAdapter(functionBar, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
         functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter, token.getArrayBalance());

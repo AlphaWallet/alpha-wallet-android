@@ -1,5 +1,6 @@
 package com.alphawallet.app.service;
 
+import android.text.TextUtils;
 import android.util.SparseArray;
 
 import com.alphawallet.app.C;
@@ -103,6 +104,7 @@ public class TokensService
     public Token getToken(int chainId, String addr)
     {
         Token token = null;
+        if (TextUtils.isEmpty(currentAddress)) return null;
         if (addr != null)
         {
             if (tokenMap.containsKey(addr.toLowerCase()))

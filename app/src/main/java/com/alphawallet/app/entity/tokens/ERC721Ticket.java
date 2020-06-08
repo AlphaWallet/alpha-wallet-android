@@ -14,9 +14,9 @@ import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.viewmodel.BaseViewModel;
-import com.alphawallet.app.web3j.datatypes.Function;
 import com.alphawallet.token.entity.TicketRange;
 
+import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.generated.Uint256;
 
 import java.math.BigDecimal;

@@ -92,7 +92,6 @@ project.ext {
     okhttpVersion = "4.0.0"
     picassoVersion = "2.71828"
     supportVersion = "28.0.0"
-    web3jVersion = "4.5.17"
     gsonVersion = "2.8.5"
     rxJavaVersion = "2.2.10"
     rxAndroidVersion = "2.1.1"
@@ -107,10 +106,10 @@ dependencies {
     // WARNING!  The China marketing team
     // WARNING!  Many Chinese Android phones execute (meaning terminate) any app that
     // WARNING!  users google gms summarily, like immune systems cleansing infections
-    // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING! 
+    // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!
 
     // Ethereum client
-    implementation "org.web3j:core:$project.web3jVersion"
+    implementation "org.web3j:core:4.6.0-android"
 
     // Http client
     implementation "com.squareup.retrofit2:retrofit:$project.retrofitVersion"

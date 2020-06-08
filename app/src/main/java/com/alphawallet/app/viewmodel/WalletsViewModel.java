@@ -254,17 +254,11 @@ public class WalletsViewModel extends BaseViewModel
 
     private void updateWallet(Token token)
     {
-        if (walletBalances.containsKey(token.getWallet().toLowerCase()))
+        Wallet wallet = walletBalances.get(token.getWallet().toLowerCase());
+        if (wallet != null)
         {
-            Wallet wallet = walletBalances.get(token.getWallet().toLowerCase());
-            if (wallet != null)
-            {
-                if (wallet.setWalletBalance(token))
-                {
-                    //update wallet balance
-                    updateBalance.postValue(wallet);
-                }
-            }
+            wallet.setWalletBalance(token);
+            updateBalance.postValue(wallet);
         }
         storeWallets();
     }

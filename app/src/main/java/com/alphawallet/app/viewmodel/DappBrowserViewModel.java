@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.TransactionTooLargeException;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QrUrlResult;
@@ -37,6 +38,7 @@ import com.alphawallet.app.web3.entity.Web3Transaction;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.app.interact.CreateTransactionInteract;
@@ -53,6 +55,7 @@ import org.web3j.abi.datatypes.Address;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.alphawallet.app.C.Key.WALLET;
 
@@ -61,6 +64,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
     private final MutableLiveData<Token> token = new MutableLiveData<>();
+
+    private static final int BALANCE_CHECK_INTERVAL_SECONDS = 20;
 
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GenericWalletInteract genericWalletInteract;
@@ -73,6 +78,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final KeyService keyService;
 
     private ArrayList<String> bookmarks;
+    @Nullable
+    private Disposable balanceTimerDisposable;
 
     DappBrowserViewModel(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -143,9 +150,18 @@ public class DappBrowserViewModel extends BaseViewModel  {
                 .subscribe(this::onDefaultWallet, this::onError);
     }
 
-    private void onDefaultWallet(Wallet wallet) {
+    private void onDefaultWallet(final Wallet wallet) {
         defaultWallet.setValue(wallet);
         //get the balance token
+
+        if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
+
+        balanceTimerDisposable = Observable.interval(0, BALANCE_CHECK_INTERVAL_SECONDS, TimeUnit.SECONDS)
+                    .doOnNext(l -> checkBalance(wallet)).subscribe();
+    }
+
+    private void checkBalance(final Wallet wallet)
+    {
         Token blank = ethereumNetworkRepository.getBlankOverrideToken(defaultNetwork.getValue());
         String address = blank.getAddress().equals(Address.DEFAULT.toString()) ? wallet.address.toLowerCase() : blank.getAddress().toLowerCase();
         disposable = fetchTokensInteract.fetchStoredToken(defaultNetwork.getValue(), wallet, address)
@@ -315,5 +331,10 @@ public class DappBrowserViewModel extends BaseViewModel  {
         Intent intent = new Intent(ctx, MyAddressActivity.class);
         intent.putExtra(WALLET, defaultWallet.getValue());
         ctx.startActivity(intent);
+    }
+
+    public void onDestroy()
+    {
+        if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
     }
 }

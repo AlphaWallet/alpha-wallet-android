@@ -442,6 +442,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     public void onDestroy()
     {
         super.onDestroy();
+        viewModel.onDestroy();
     }
 
     private void setupMenu(View baseView)

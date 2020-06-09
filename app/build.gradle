@@ -36,7 +36,7 @@ android {
     }
     defaultConfig {
         applicationId "io.stormbird.wallet"
-        minSdkVersion 24
+        minSdkVersion 23
         targetSdkVersion 29
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         def XInfuraAPI = "XInfuraAPI"
@@ -54,8 +54,8 @@ android {
     productFlavors {
 	awallet {
 		dimension "targetting"
-        versionCode 113
-        versionName "3.00.0"
+        versionCode 114
+        versionName "3.00.1"
 	}
     }
     buildTypes {

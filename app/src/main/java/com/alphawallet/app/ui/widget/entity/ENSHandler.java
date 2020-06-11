@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui.widget.entity;
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,12 +11,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.alphawallet.app.entity.ENSCallback;
+import com.alphawallet.app.entity.UnstoppableResolutionAsyncTask;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteUrlAdapter;
 import com.alphawallet.app.util.KeyboardUtils;
 
 import com.alphawallet.app.R;
 
 import com.alphawallet.app.widget.AWalletAlertDialog;
+
+import java.util.concurrent.ExecutionException;
 
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
@@ -56,7 +60,6 @@ public class ENSHandler
         this.host = host;
         this.runnable = processs;
         this.ensCallback = ensCallback;
-
         createWatcher();
     }
 
@@ -102,40 +105,58 @@ public class ENSHandler
         }
     }
 
+    public String resolveCryptoDomain(String domain) {
+        AsyncTask task = new UnstoppableResolutionAsyncTask().execute(domain);
+        try {
+            String address = (String) task.get();
+            if (!address.startsWith("0x")) {
+                toAddressError.setVisibility(View.VISIBLE);
+                toAddressError.setText(address);
+                return null;
+            } else {
+                layoutENSResolve.setVisibility(View.VISIBLE);
+                textENS.setText(address);
+                return address;
+            }
+        } catch (Exception e) {
+            toAddressError.setVisibility(View.VISIBLE);
+            toAddressError.setText(e.getLocalizedMessage());
+            return null;
+        }
+    }
+
     public String getAddressFromEditView()
     {
         //check send address
         ensName = null;
         toAddressError.setVisibility(View.GONE);
         String to = toAddressEditText.getText().toString();
-        if (!isValidAddress(to))
-        {
-            String ens = to;
-            to = textENS.getText().toString();
-            ensName = "@" + ens + " (" + to + ")";
-        }
-
-        if (!isValidAddress(to))
-        {
-            to = null;
-            if (waitingForENS)
-            {
-                transferAfterENS = true;
-                onENSProgress(true);
+        if (to.endsWith(".crypto")) {
+            to = resolveCryptoDomain(to);
+            return to;
+        } else {
+            if (!isValidAddress(to)) {
+                String ens = to;
+                to = textENS.getText().toString();
+                ensName = "@" + ens + " (" + to + ")";
             }
-            else
-            {
-                toAddressError.setVisibility(View.VISIBLE);
-                toAddressError.setText(host.getString(R.string.error_invalid_address));
+
+            if (!isValidAddress(to)) {
+                to = null;
+                if (waitingForENS) {
+                    transferAfterENS = true;
+                    onENSProgress(true);
+                } else {
+                    toAddressError.setVisibility(View.VISIBLE);
+                    toAddressError.setText(host.getString(R.string.error_invalid_address));
+                }
+            } else if (ensName != null) {
+                adapterUrl.add(toAddressEditText.getText().toString());
             }
         }
-        else if (ensName != null)
-        {
-            adapterUrl.add(toAddressEditText.getText().toString());
-        }
-
         return to;
     }
+
 
     public void onENSProgress(boolean shouldShowProgress)
     {

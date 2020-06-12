@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -33,6 +34,8 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	private final TextView walletAddressSeparator;
 	private final TextView walletAddressText;
 	private final ImageView walletSelectedIcon;
+	private final int greyColor;
+	private final int blackColor;
 
 	private final WalletClickCallback clickCallback;
 	private Wallet wallet;
@@ -53,6 +56,8 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		walletSelectedIcon.setOnClickListener(this);
 		walletInfoLayout.setOnClickListener(this);
 		manageWalletLayout.setOnClickListener(this);
+		greyColor = parent.getContext().getColor(R.color.greyffive);
+		blackColor = parent.getContext().getColor(R.color.text_black);
 	}
 
 	@Override
@@ -84,7 +89,17 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 
 			walletIcon.setImageBitmap(Blockies.createIcon(wallet.address.toLowerCase()));
 
-			walletBalanceText.setText(wallet.balance);
+			String walletBalance = wallet.balance;
+			if (!TextUtils.isEmpty(walletBalance) && walletBalance.startsWith("*"))
+			{
+				walletBalance = walletBalance.substring(1);
+				walletBalanceText.setTextColor(greyColor);
+			}
+			else
+			{
+				walletBalanceText.setTextColor(blackColor);
+			}
+			walletBalanceText.setText(walletBalance);
 			walletBalanceCurrency.setText(wallet.balanceSymbol);
 
 			walletAddressText.setText(Utils.formatAddress(wallet.address));

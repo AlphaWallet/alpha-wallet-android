@@ -100,7 +100,7 @@ public class WalletsActivity extends BaseActivity implements
             viewModel.noWalletsError().observe(this, this::noWallets);
         }
 
-        viewModel.findNetwork();
+        viewModel.onPrepare();
     }
 
     protected Activity getThisActivity()
@@ -166,6 +166,7 @@ public class WalletsActivity extends BaseActivity implements
     protected void onPause() {
         super.onPause();
         hideDialog();
+        viewModel.onPause(); //no need to update balances if view isn't showing
     }
 
     @Override

@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by JB on 21/05/2020.
@@ -18,6 +20,8 @@ public class TSSelection
     public Map<String, String> names = null; //use these names if the selection filter is true
     private boolean negate = false;
     public String name = null;
+
+    public static final Pattern decodeParam = Pattern.compile("[$][{](\\w*)[}]$");
 
     public TSSelection(String filterExpression) throws SAXException
     {
@@ -137,14 +141,14 @@ public class TSSelection
 
         String b = tokens.next();
         FilterType typeB = getType(b);
-        if (typeB != FilterType.VALUE)
+        if (!(typeB == FilterType.VALUE || typeB == FilterType.ATTRIBUTE))
         {
             throw new SAXException("PARSE ERROR: Invalid subject after '" + a + logic);
         }
 
         TSFilterNode comparator = new TSFilterNode(typeLogic, currentNode);
-        comparator.first = new TSFilterNode(a, comparator);
-        comparator.second = new TSFilterNode(b, comparator);
+        comparator.first = new TSFilterNode(a, comparator, FilterType.ATTRIBUTE);
+        comparator.second = new TSFilterNode(b, comparator, typeB);
         if (negate)
         {
             comparator.negate = true;
@@ -190,7 +194,7 @@ public class TSSelection
                 type = FilterType.NOT;
                 break;
             default:
-                type = FilterType.VALUE;
+                type = unwrapValue(token);
                 break;
         }
 
@@ -289,6 +293,20 @@ public class TSSelection
         }
 
         return attrs;
+    }
+
+    private FilterType unwrapValue(String token)
+    {
+        Matcher matcher = decodeParam.matcher(token);
+        if (matcher.find() && !matcher.group(1).isEmpty())
+        {
+            //found an attribute param
+            return FilterType.ATTRIBUTE;
+        }
+        else
+        {
+            return FilterType.VALUE;
+        }
     }
 
     public boolean checkParse()

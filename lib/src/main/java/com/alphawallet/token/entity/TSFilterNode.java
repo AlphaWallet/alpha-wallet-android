@@ -2,6 +2,9 @@ package com.alphawallet.token.entity;
 
 import java.math.BigInteger;
 import java.util.Map;
+import java.util.regex.Matcher;
+
+import static com.alphawallet.token.entity.TSSelection.decodeParam;
 
 /**
  * Created by JB on 21/05/2020.
@@ -17,9 +20,14 @@ public class TSFilterNode
     String strValue = null;
     LogicState logic = LogicState.NONE;
 
-    public TSFilterNode(String val, TSFilterNode p)
+    public TSFilterNode(String val, TSFilterNode p, FilterType t)
     {
-        type = FilterType.VALUE;
+        if (t == FilterType.ATTRIBUTE)
+        {
+            val = extractAttribute(val);
+        }
+
+        type = t;
         try
         {
             value = new BigInteger(val);
@@ -166,7 +174,7 @@ public class TSFilterNode
         {
             returnValue = node.logic.toString();
         }
-        else if (node.strValue != null && node.strValue.length() > 0)
+        else if (node.type == FilterType.ATTRIBUTE)
         {
             TokenScriptResult.Attribute attr = attrs.get(node.strValue);
             if (attr != null)
@@ -174,10 +182,10 @@ public class TSFilterNode
                 //found an attribute
                 returnValue = attr.text;
             }
-            else
-            {
-                returnValue = node.strValue;
-            }
+        }
+        else if (node.strValue != null && node.strValue.length() > 0)
+        {
+            returnValue = node.strValue;
         }
 
         return returnValue;
@@ -207,6 +215,20 @@ public class TSFilterNode
         else
         {
             return negate ? LogicState.TRUE : LogicState.FALSE;
+        }
+    }
+
+    private String extractAttribute(String val)
+    {
+        Matcher matcher = decodeParam.matcher(val);
+        if (matcher.find() && !matcher.group(1).isEmpty())
+        {
+            //found an attribute param
+            return matcher.group(1);
+        }
+        else
+        {
+            return val;
         }
     }
 

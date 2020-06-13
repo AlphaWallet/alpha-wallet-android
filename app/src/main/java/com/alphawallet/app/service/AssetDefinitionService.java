@@ -1523,6 +1523,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             //get required Attribute Results for this tokenId & selection
                             List<String> requiredAttributeNames = selection.getRequiredAttrs();
                             Map<String, TokenScriptResult.Attribute> idAttrResults = getAttributeResultsForTokenIds(attrResults, requiredAttributeNames, tokenId);
+                            addIntrinsicAttributes(idAttrResults, token, tokenId); //adding intrinsic attributes eg ownerAddress, tokenId, contractAddress
 
                             //Now evaluate the selection
                             boolean exclude = EvaluateSelection.evaluate(selection.head, idAttrResults);
@@ -1538,6 +1539,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             return validActions;
         });
+    }
+
+    private void addIntrinsicAttributes(Map<String, TokenScriptResult.Attribute> attrs, Token token, BigInteger tokenId)
+    {
+        //add tokenId, ownerAddress & contractAddress
+        attrs.put("tokenId", new TokenScriptResult.Attribute("tokenId", "tokenId", tokenId, tokenId.toString(10)));
+        attrs.put("ownerAddress", new TokenScriptResult.Attribute("ownerAddress", "ownerAddress", BigInteger.ZERO, token.getWallet()));
+        attrs.put("contractAddress", new TokenScriptResult.Attribute("contractAddress", "contractAddress", BigInteger.ZERO, token.getAddress()));
     }
 
     public String checkFunctionDenied(Token token, String actionName, List<BigInteger> tokenIds)
@@ -1563,6 +1572,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, tokenId, td, this, false).blockingSingle();
                     if (attrResult != null) attrs.put(attrId, attrResult);
                 }
+
+                addIntrinsicAttributes(attrs, token, tokenId);
 
                 boolean exclude = EvaluateSelection.evaluate(selection.head, attrs);
                 if (exclude && !TextUtils.isEmpty(selection.denialMessage))

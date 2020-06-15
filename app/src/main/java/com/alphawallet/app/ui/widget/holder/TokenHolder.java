@@ -55,7 +55,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     private final TextView textAppreciationSub;
     private final TextView contractType;
     private final TextView currencyLabel;
-    private final TextView chainName;
     private final View contractSeparator;
     private final LinearLayout layoutValueDetails;
     private final LinearLayout extendedInfo;
@@ -84,7 +83,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         contractType = findViewById(R.id.contract_type);
         contractSeparator = findViewById(R.id.contract_seperator);
         layoutValueDetails = findViewById(R.id.layout_value_details);
-        chainName = findViewById(R.id.text_chain_name);
         pendingText = findViewById(R.id.balance_eth_pending);
         tokenLayout = findViewById(R.id.token_layout);
         extendedInfo = findViewById(R.id.layout_extended_info);
@@ -115,8 +113,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             setIssuerDetails();
 
             setPendingAmount();
-
-            setChainColour();
         } catch (Exception ex) {
             fillEmpty();
         }
@@ -218,18 +214,16 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
     private void displayTokenIcon()
     {
-        //form URL
         String correctedAddr = Keys.toChecksumAddress(token.getAddress());
-        //String URL = "https://raw.githubusercontent.com/ethereum-lists/tokens/master/tokens/eth/[TOKEN].json".replace("[TOKEN]", correctedAddr);
         String tURL = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/[TOKEN]/logo.png".replace("[TOKEN]", correctedAddr);
-        okhttp3.Response response = null;
-        JSONObject tokenInfo = null;
+
+        int fallbackIcon = EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId);
 
         Glide.with(getContext())
                 .load(tURL)
                 .signature(new ObjectKey(correctedAddr + "-" + token.tokenInfo.chainId))
                 .apply(new RequestOptions().circleCrop())
-                .apply(new RequestOptions().fallback())
+                .apply(new RequestOptions().placeholder(fallbackIcon))
                 .into(icon);
 
         icon.setVisibility(View.VISIBLE);
@@ -338,12 +332,5 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         text24Hours.setText(R.string.unknown_balance_without_symbol);
         textAppreciation.setText(R.string.unknown_balance_without_symbol);
         balanceCurrency.setText(R.string.unknown_balance_without_symbol);
-    }
-
-    private void setChainColour()
-    {
-        chainName.setVisibility(View.VISIBLE);
-        chainName.setText(token.getNetworkName());
-        Utils.setChainColour(chainName, token.tokenInfo.chainId);
     }
 }

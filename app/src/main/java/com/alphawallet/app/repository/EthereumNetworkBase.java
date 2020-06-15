@@ -5,6 +5,7 @@ package com.alphawallet.app.repository;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -358,6 +359,36 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return ARTIS_TAU1_RPC_URL;
             default:
                 return MAINNET_RPC_URL;
+        }
+    }
+
+    public static int getChainLogo(int networkId) {
+        switch (networkId)
+        {
+            case MAINNET_ID:
+                return R.drawable.ethereum_logo;
+            case KOVAN_ID:
+                return R.drawable.kovan_logo;
+            case ROPSTEN_ID:
+                return R.drawable.ropsten_logo;
+            case RINKEBY_ID:
+                return R.drawable.rinkeby_logo;
+            case POA_ID:
+                return R.drawable.poa_logo;
+            case SOKOL_ID:
+                return R.drawable.sokol_logo;
+            case CLASSIC_ID:
+                return R.drawable.classic_logo;
+            case XDAI_ID:
+                return R.drawable.xdai_logo;
+            case GOERLI_ID:
+                return R.drawable.goerli_logo;
+            case ARTIS_SIGMA1_ID:
+                return R.drawable.artis_sigma;
+            case ARTIS_TAU1_ID:
+                return R.drawable.artis_tau;
+            default:
+                return R.drawable.ethereum_logo;
         }
     }
 

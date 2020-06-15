@@ -26,9 +26,19 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.util.Utils;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.signature.ObjectKey;
+
+import org.json.JSONObject;
+import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.HttpURLConnection;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener, View.OnLongClickListener {
 
@@ -95,6 +105,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             //setup name and value (put these together on a single string to make wrap-around text appear better).
             String nameValue = token.getStringBalance() + " " + token.getFullName(assetDefinition, token.getTicketCount());
             balanceEth.setText(nameValue);
+
+            displayTokenIcon();
 
             setContractType();
 
@@ -202,6 +214,25 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         {
             this.textAppreciation.setText(EMPTY_BALANCE);
         }
+    }
+
+    private void displayTokenIcon()
+    {
+        //form URL
+        String correctedAddr = Keys.toChecksumAddress(token.getAddress());
+        //String URL = "https://raw.githubusercontent.com/ethereum-lists/tokens/master/tokens/eth/[TOKEN].json".replace("[TOKEN]", correctedAddr);
+        String tURL = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/[TOKEN]/logo.png".replace("[TOKEN]", correctedAddr);
+        okhttp3.Response response = null;
+        JSONObject tokenInfo = null;
+
+        Glide.with(getContext())
+                .load(tURL)
+                .signature(new ObjectKey(correctedAddr + "-" + token.tokenInfo.chainId))
+                .apply(new RequestOptions().circleCrop())
+                .apply(new RequestOptions().fallback())
+                .into(icon);
+
+        icon.setVisibility(View.VISIBLE);
     }
 
     private void fillEmpty() {

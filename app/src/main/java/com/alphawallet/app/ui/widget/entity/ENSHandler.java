@@ -132,9 +132,11 @@ public class ENSHandler
         toAddressError.setVisibility(View.GONE);
         String to = toAddressEditText.getText().toString();
         if (to.endsWith(".crypto")) {
+            waitingForENS = false;
+            transferAfterENS = true;
             to = resolveCryptoDomain(to);
             return to;
-        } else {
+        } else if(to.endsWith(".eth")) {
             if (!isValidAddress(to)) {
                 String ens = to;
                 to = textENS.getText().toString();

@@ -77,6 +77,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -2280,7 +2282,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         } // TODO: Catch specific tokenscript parse errors to report tokenscript errors.
                         catch (Exception e)
                         {
-                            // don't add to list
+                            TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
+                            ContractInfo contractInfo = new ContractInfo("Contract Type",new HashMap<>());
+                            StringWriter stackTrace = new StringWriter();
+                            e.printStackTrace(new PrintWriter(stackTrace));
+
+                            tokenLocators.add(new TokenLocator(file.getName(), contractInfo, tsf, true, stackTrace.toString()));
                         }
                     });
 

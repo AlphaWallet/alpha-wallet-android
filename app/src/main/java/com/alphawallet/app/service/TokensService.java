@@ -530,4 +530,9 @@ public class TokensService
         if (info != null) return info.getShortName();
         else return "";
     }
+
+    public void addTokenImageUrl(int networkId, String address, String imageUrl)
+    {
+        tokenRepository.addImageUrl(networkId, address, imageUrl);
+    }
 }

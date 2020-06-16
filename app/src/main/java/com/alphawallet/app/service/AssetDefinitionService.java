@@ -111,6 +111,7 @@ import okhttp3.Request;
 
 import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
+import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
 
@@ -2372,6 +2373,29 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         }
                     }
                 });
+    }
+
+    public String getTokenImageUrl(int networkId, String address)
+    {
+        String url = "";
+        String instanceKey = address.toLowerCase() + "-" + networkId;
+        try (Realm realm = realmManager.getAuxRealmInstance(IMAGES_DB))
+        {
+            RealmAuxData instance = realm.where(RealmAuxData.class)
+                    .equalTo("instanceKey", instanceKey)
+                    .findFirst();
+
+            if (instance != null)
+            {
+                url = instance.getResult();
+            }
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+
+        return url;
     }
 
     public Single<Integer> fetchViewHeight(int chainId, String address)

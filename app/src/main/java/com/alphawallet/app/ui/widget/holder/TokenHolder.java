@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,30 +21,25 @@ import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
-import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.signature.ObjectKey;
 
-import org.json.JSONObject;
 import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.HttpURLConnection;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener, View.OnLongClickListener {
 
     public static final int VIEW_TYPE = 1005;
     public static final String EMPTY_BALANCE = "\u2014\u2014";
+    private static final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
+    private static final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
 
     private final TextView balanceEth;
     private final TextView balanceCurrency;
@@ -215,11 +211,15 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     private void displayTokenIcon()
     {
         String correctedAddr = Keys.toChecksumAddress(token.getAddress());
-        String tURL = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/[TOKEN]/logo.png".replace("[TOKEN]", correctedAddr);
+        String tURL = assetDefinition.getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
+        if (TextUtils.isEmpty(tURL))
+        {
+            tURL = TRUST_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, correctedAddr);
+        }
 
         int fallbackIcon = EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId);
 
-        Glide.with(getContext())
+        Glide.with(getContext().getApplicationContext())
                 .load(tURL)
                 .signature(new ObjectKey(correctedAddr + "-" + token.tokenInfo.chainId))
                 .apply(new RequestOptions().circleCrop())

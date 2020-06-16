@@ -59,55 +59,71 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
     public void onBindViewHolder(@NonNull TokenHolder tokenHolder, int pos) {
 
         TokenLocator tokenLocator = tokenLocators.get(pos);
-        ContractInfo originContract = tokenLocator.getContracts();
-        int chainId;
-        String address;
 
-        //sweep to see if there's a mainnet holding contract
-        if (originContract.addresses.get(EthereumNetworkBase.MAINNET_ID) != null)
+        if(!tokenLocator.isError())
         {
-            chainId = EthereumNetworkBase.MAINNET_ID;
-            address = originContract.addresses.get(chainId).get(0);
+            ContractInfo originContract = tokenLocator.getContracts();
+            int chainId;
+            String address;
+
+            //sweep to see if there's a mainnet holding contract
+            if (originContract.addresses.get(EthereumNetworkBase.MAINNET_ID) != null)
+            {
+                chainId = EthereumNetworkBase.MAINNET_ID;
+                address = originContract.addresses.get(chainId).get(0);
+            }
+            else
+            {
+                chainId = originContract.addresses.keySet().iterator().next();
+                address = originContract.addresses.get(chainId).iterator().next();
+            }
+
+            //see what the current TS file serving this contract is
+            TokenScriptFile servingFile = assetDefinitionService.getTokenScriptFile(chainId, address);
+            final TokenScriptFile overrideFile = (servingFile != null && !tokenLocator.getFullFileName().equals(servingFile.getAbsolutePath())) ? servingFile : null;
+            if (overrideFile != null)
+            {
+                tokenHolder.overrideLayer.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                tokenHolder.overrideLayer.setVisibility(View.GONE);
+            }
+
+            tokenHolder.clickHolder.setOnClickListener(v -> displayFileDialog(overrideFile, tokenLocator));
+            tokenHolder.clickHolder.setOnLongClickListener(v -> displayDeleteFileDialog(tokenLocator));
+
+            tokenHolder.txtToken.setText(tokenLocator.getDefinitionName());
+            tokenHolder.txtTokenFile.setText(tokenLocator.getFileName());
+
+            Token t = assetDefinitionService.getTokenFromService(chainId, address);
+            if (t != null)
+            {
+                tokenHolder.chainName.setVisibility(View.VISIBLE);
+                tokenHolder.chainName.setText(t.getNetworkName());
+                Utils.setChainColour(tokenHolder.chainName, t.tokenInfo.chainId);
+                String tokenSpec = context.getString(R.string.token_spec, address, originContract.contractInterface);
+                tokenHolder.txtTokenAddress.setText(tokenSpec);
+                tokenHolder.tokenFullName.setText(t.getFullName());
+            }
+
+            assetDefinitionService.getSignatureData(chainId, address)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(sig -> onSigData(sig, tokenHolder), Throwable::printStackTrace).isDisposed();
         }
         else
         {
-            chainId = originContract.addresses.keySet().iterator().next();
-            address = originContract.addresses.get(chainId).iterator().next();
+            tokenHolder.txtToken.setText(R.string.tokenscript_file_error);
+            tokenHolder.txtTokenFile.setText(tokenLocator.getDefinitionName());
+            tokenHolder.txtTokenAddress.setVisibility(View.INVISIBLE);
+
+            tokenHolder.imgLock.setVisibility(View.VISIBLE);
+            tokenHolder.imgLock.setImageResource(R.drawable.ic_error);
+
+            tokenHolder.clickHolder.setOnClickListener(v -> displayErrorDialog(tokenLocator));
+            tokenHolder.clickHolder.setOnLongClickListener(v -> displayDeleteFileDialog(tokenLocator));
         }
-
-        //see what the current TS file serving this contract is
-        TokenScriptFile servingFile = assetDefinitionService.getTokenScriptFile(chainId, address);
-        final TokenScriptFile overrideFile = (servingFile != null && !tokenLocator.getFullFileName().equals(servingFile.getAbsolutePath())) ? servingFile : null;
-        if (overrideFile != null)
-        {
-            tokenHolder.overrideLayer.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            tokenHolder.overrideLayer.setVisibility(View.GONE);
-        }
-
-        tokenHolder.clickHolder.setOnClickListener(v -> displayFileDialog(overrideFile, tokenLocator));
-        tokenHolder.clickHolder.setOnLongClickListener(v -> displayDeleteFileDialog(tokenLocator));
-
-        tokenHolder.txtToken.setText(tokenLocator.getDefinitionName());
-        tokenHolder.txtTokenFile.setText(tokenLocator.getFileName());
-
-        Token t = assetDefinitionService.getTokenFromService(chainId, address);
-        if (t != null)
-        {
-            tokenHolder.chainName.setVisibility(View.VISIBLE);
-            tokenHolder.chainName.setText(t.getNetworkName());
-            Utils.setChainColour(tokenHolder.chainName, t.tokenInfo.chainId);
-            String tokenSpec = context.getString(R.string.token_spec, address, originContract.contractInterface);
-            tokenHolder.txtTokenAddress.setText(tokenSpec);
-            tokenHolder.tokenFullName.setText(t.getFullName());
-        }
-
-        assetDefinitionService.getSignatureData(chainId, address)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(sig -> onSigData(sig, tokenHolder), Throwable::printStackTrace).isDisposed();
     }
 
     private void displayFileDialog(TokenScriptFile override, TokenLocator tokenLocator)
@@ -136,6 +152,25 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
                 message.append(context.getString(R.string.tokenscript_contract_line, chainName, address));
             }
         }
+        dialog.setMessage(message);
+        dialog.setButtonText(R.string.ok);
+        dialog.setButtonListener(v -> {
+            dialog.cancel();
+        });
+        dialog.show();
+    }
+
+    private void displayErrorDialog(TokenLocator tokenLocator)
+    {
+        if (dialog != null && dialog.isShowing()) dialog.hide();
+        dialog = new AWalletAlertDialog(activity);
+        dialog.makeWide();
+        dialog.setIcon(AWalletAlertDialog.NONE);
+        dialog.setTitle(tokenLocator.getFileName());
+        dialog.setTextStyle(AWalletAlertDialog.TEXT_STYLE.LEFT);
+        StringBuilder message = new StringBuilder();
+        message.append(context.getString(R.string.file_override, tokenLocator.getErrorMessage(), "True"));
+
         dialog.setMessage(message);
         dialog.setButtonText(R.string.ok);
         dialog.setButtonListener(v -> {

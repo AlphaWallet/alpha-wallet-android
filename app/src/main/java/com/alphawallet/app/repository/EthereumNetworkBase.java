@@ -384,9 +384,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case GOERLI_ID:
                 return R.drawable.goerli_logo;
             case ARTIS_SIGMA1_ID:
-                return R.drawable.artis_sigma;
+                return R.drawable.artis_sigma_logo;
             case ARTIS_TAU1_ID:
-                return R.drawable.artis_tau;
+                return R.drawable.artis_tau_logo;
             default:
                 return R.drawable.ethereum_logo;
         }

@@ -2,29 +2,30 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
-import com.alphawallet.app.entity.tokens.TokenFactory;
-import com.google.gson.Gson;
-import io.reactivex.Single;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.opensea.Asset;
-import com.alphawallet.app.entity.opensea.OpenseaServiceError;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenFactory;
+import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InterruptedIOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Single;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 /**
  * Created by James on 2/10/2018.
@@ -37,6 +38,9 @@ public class OpenseaService {
     private final Context context;
     private final TokensService tokensService;
     private static final int PAGE_SIZE = 40;
+    private int checkInProgress = 0;
+    private final Map<String, String> imageUrls = new HashMap<>();
+    private final List<Integer> storedImagesForChain = new ArrayList<>();
 
     //TODO: remove old files not accessed for some time
     //      On service creation, check files for old files and delete
@@ -62,6 +66,15 @@ public class OpenseaService {
         return Single.fromCallable(() -> {
             int receivedTokens;
             int offset = 0;
+            if (checkInProgress != 0)
+            {
+                //long updateBlancaTime, String networkName, ContractType type
+                Token[] tokens = new Token[1];
+                tokens[0] = new Token(null, BigDecimal.ZERO, 0, "", ContractType.NOT_SET);
+                return tokens;
+            }
+
+            checkInProgress = networkId;
             Map<String, Token> foundTokens = new HashMap<>();
 
             do
@@ -78,6 +91,19 @@ public class OpenseaService {
             }
             while (receivedTokens == PAGE_SIZE); //keep fetching until last page
 
+            //now write the contract images
+            if (!storedImagesForChain.contains(networkId))
+            {
+                storedImagesForChain.add(networkId);
+                for (String keyAddr : imageUrls.keySet())
+                {
+                    tokensService.addTokenImageUrl(networkId, keyAddr, imageUrls.get(keyAddr));
+                }
+                imageUrls.clear();
+            }
+
+            checkInProgress = 0;
+
             return foundTokens.values().toArray(new Token[0]);
         });
     }
@@ -85,7 +111,6 @@ public class OpenseaService {
     private void processOpenseaTokens(Map<String, Token> foundTokens, JSONArray assets, String address, int networkId, String networkName) throws Exception
     {
         TokenFactory tf = new TokenFactory();
-
         for (int i = 0; i < assets.length(); i++)
         {
             Asset asset = new Gson().fromJson(assets.getJSONObject(i).toString(), Asset.class);
@@ -93,6 +118,7 @@ public class OpenseaService {
                     || asset.getAssetContract().getSchemaName().length() == 0
                     || asset.getAssetContract().getSchemaName().equalsIgnoreCase("ERC721"))) //filter ERC721
             {
+                addAssetImageToHashMap(imageUrls, assets.getJSONObject(i), networkId);
                 Token token = foundTokens.get(asset.getAssetContract().getAddress());
                 if (token == null)
                 {
@@ -116,6 +142,32 @@ public class OpenseaService {
                 }
                 token.addAssetToTokenBalanceAssets(asset);
             }
+        }
+    }
+
+    private void addAssetImageToHashMap(Map<String, String> imageUrls, JSONObject asset, int networkId)
+    {
+        if (storedImagesForChain.contains(networkId)) return;
+
+        try
+        {
+            if (asset.has("asset_contract"))
+            {
+                JSONObject assetContract = asset.getJSONObject("asset_contract");
+                String address = assetContract.getString("address").toLowerCase();
+                if (!imageUrls.containsKey(address) && assetContract.has("image_url"))
+                {
+                    String url = assetContract.getString("image_url");
+                    if (!TextUtils.isEmpty(url) && url.startsWith("http"))
+                    {
+                        imageUrls.put(address, url);
+                    }
+                }
+            }
+        }
+        catch (JSONException e)
+        {
+            // no action
         }
     }
 

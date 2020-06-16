@@ -34,4 +34,5 @@ public interface TokenLocalSource {
     void deleteRealmToken(int chainId, Wallet wallet, String address);
 
     Token updateTokenType(Token token, Wallet wallet, ContractType type);
+    Disposable storeTokenUrl(int networkId, String address, String imageUrl);
 }

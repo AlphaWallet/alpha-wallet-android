@@ -50,4 +50,6 @@ public interface TokenRepositoryType {
     Single<Token[]> storeTickers(Wallet wallet, Token[] tokens);
 
     Single<Boolean> fetchIsRedeemed(Token token, BigInteger tokenId);
+
+    Disposable addImageUrl(int networkId, String address, String imageUrl);
 }

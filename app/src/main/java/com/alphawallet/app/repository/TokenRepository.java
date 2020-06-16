@@ -1279,6 +1279,12 @@ public class TokenRepository implements TokenRepositoryType {
         return localSource.storeBlockRead(token, wallet);
     }
 
+    @Override
+    public Disposable addImageUrl(int networkId, String address, String imageUrl)
+    {
+        return localSource.storeTokenUrl(networkId, address, imageUrl);
+    }
+
     public static Web3j getWeb3jService(int chainId)
     {
         OkHttpClient okClient = new OkHttpClient.Builder()

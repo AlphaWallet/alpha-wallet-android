@@ -18,14 +18,13 @@ import android.widget.TextView;
 
 import com.alphawallet.app.entity.AmountUpdateCallback;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.ENSCallback;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QrUrlResult;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.ui.widget.adapter.AutoCompleteUrlAdapter;
+import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.ui.widget.entity.AmountEntryItem;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.ItemClickListener;
@@ -175,7 +174,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
     }
 
     private void setupAddressEditField() {
-        AutoCompleteUrlAdapter adapterUrl = new AutoCompleteUrlAdapter(getApplicationContext(), C.ENS_HISTORY);
+        AutoCompleteAddressAdapter adapterUrl = new AutoCompleteAddressAdapter(getApplicationContext(), C.ENS_HISTORY);
         adapterUrl.setListener(this);
         ensHandler = new ENSHandler(this, adapterUrl, this::onNext);
         viewModel.tokenFinalised().observe(this, this::resumeEIP681);

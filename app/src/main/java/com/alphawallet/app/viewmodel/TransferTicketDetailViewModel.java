@@ -48,8 +48,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
     private final MutableLiveData<String> userTransaction = new MutableLiveData<>();
-    private final MutableLiveData<String> ensResolve = new MutableLiveData<>();
-    private final MutableLiveData<String> ensFail = new MutableLiveData<>();
 
     private final GenericWalletInteract genericWalletInteract;
     private final KeyService keyService;
@@ -95,8 +93,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public LiveData<String> newTransaction() { return newTransaction; }
     public LiveData<String> universalLinkReady() { return universalLinkReady; }
     public LiveData<String> userTransaction() { return userTransaction; }
-    public LiveData<String> ensResolve() { return ensResolve; }
-    public LiveData<String> ensFail() { return ensFail; }
 
     private void initParser()
     {
@@ -239,14 +235,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         {
             confirmationRouter.openERC721Transfer(ctx, to, hexTokenId, token.getAddress(), token.getFullName(), asset.getName(), ensDetails, token);
         }
-    }
-
-    public void checkENSAddress(int chainId, String name)
-    {
-        disposable = ensInteract.checkENSAddress (chainId, name)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(ensResolve::postValue, throwable -> ensFail.postValue(""));
     }
 
     public void stopGasSettingsFetch()

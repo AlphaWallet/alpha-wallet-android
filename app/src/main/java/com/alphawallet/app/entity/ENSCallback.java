@@ -8,5 +8,4 @@ package com.alphawallet.app.entity;
 public interface ENSCallback
 {
     void ENSComplete();
-    void ENSCheck(String name);
 }

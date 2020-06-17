@@ -357,7 +357,7 @@
     <string name="confirm_dapp_transaction">Confirm DApp transaction"</string>
     <string name="ens_address">Resolved Address</string>
     <string name="confirm_erc721_transfer">Confirm Token Transfer</string>
-    <string name="title_dialog_check_ens">Checking ENS</string>
+    <string name="title_dialog_check_ens">Checking blockchain name</string>
     <string name="allocate_to">Allocate To</string>
     <string name="approve">Approve</string>
     <string name="check_feemaster">Checking for gas free service</string>

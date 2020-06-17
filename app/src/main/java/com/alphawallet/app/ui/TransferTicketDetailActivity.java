@@ -89,7 +89,7 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
  * Created by James on 21/02/2018.
  */
 
-public class TransferTicketDetailActivity extends BaseActivity implements Runnable, ItemClickListener, OnTokenClickListener, StandardFunctionInterface
+public class TransferTicketDetailActivity extends BaseActivity implements ItemClickListener, OnTokenClickListener, StandardFunctionInterface
 {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
     private static final int SEND_INTENT_REQUEST_CODE = 2;
@@ -119,7 +119,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private DisplayState transferStatus;
 
     private ENSHandler ensHandler;
-    private Handler handler;
 
     private AWalletConfirmationDialog confirmationDialog;
 
@@ -148,7 +147,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         setContentView(R.layout.activity_transfer_detail);
 
         token = getIntent().getParcelableExtra(TICKET);
-        handler = new Handler();
 
         Wallet wallet = getIntent().getParcelableExtra(WALLET);
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
@@ -256,23 +254,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     {
         AutoCompleteUrlAdapter adapterUrl = new AutoCompleteUrlAdapter(getApplicationContext(), C.ENS_HISTORY);
         adapterUrl.setListener(this);
-        ENSCallback ensCallback = new ENSCallback()
-        {
-            @Override
-            public void ENSComplete()
-            {
-                confirmTransfer();
-            }
-
-            @Override
-            public void ENSCheck(String name)
-            {
-                viewModel.checkENSAddress(token.tokenInfo.chainId, name);
-            }
-        };
-        ensHandler = new ENSHandler(this, handler, adapterUrl, this, ensCallback);
-        viewModel.ensResolve().observe(this, ensHandler::onENSSuccess);
-        viewModel.ensFail().observe(this, ensHandler::hideENS);
+        ensHandler = new ENSHandler(this, adapterUrl, this::confirmTransfer);
     }
 
     //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
@@ -808,12 +790,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         String time = String.format(Locale.getDefault(), "%02d:%02d", Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
                                     Calendar.getInstance().get(Calendar.MINUTE));
         expiryTimeEditText.setText(time);
-    }
-
-    @Override
-    public void run()
-    {
-        ensHandler.checkENS();
     }
 
     @Override

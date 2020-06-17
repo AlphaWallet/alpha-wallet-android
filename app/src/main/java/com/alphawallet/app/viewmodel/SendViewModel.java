@@ -29,8 +29,6 @@ import com.alphawallet.app.service.TokensService;
 import java.math.BigInteger;
 
 public class SendViewModel extends BaseViewModel {
-    private final MutableLiveData<String> ensResolve = new MutableLiveData<>();
-    private final MutableLiveData<String> ensFail = new MutableLiveData<>();
     private final MutableLiveData<Token> finalisedToken = new MutableLiveData<>();
 
     private final ConfirmationRouter confirmationRouter;
@@ -66,8 +64,6 @@ public class SendViewModel extends BaseViewModel {
         this.gasService = gasService;
     }
 
-    public LiveData<String> ensResolve() { return ensResolve; }
-    public LiveData<String> ensFail() { return ensFail; }
     public MutableLiveData<Token> tokenFinalised() { return finalisedToken; }
 
     public void openConfirmation(Context context, String to, BigInteger amount, String contractAddress, int decimals, String symbol, boolean sendingTokens, String ensDetails, int chainId) {
@@ -90,13 +86,6 @@ public class SendViewModel extends BaseViewModel {
     }
 
     public Token getToken(int chainId, String tokenAddress) { return tokensService.getToken(chainId, tokenAddress); };
-    public void checkENSAddress(int chainId, String name)
-    {
-        disposable = ensInteract.checkENSAddress(chainId, name)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(ensResolve::postValue, throwable -> ensFail.postValue(""));
-    }
 
     public void showImportLink(Context context, String importTxt)
     {

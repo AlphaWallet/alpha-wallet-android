@@ -2,15 +2,15 @@ package com.alphawallet.app.util;
 
 import android.text.TextUtils;
 
-import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.web3j.FunctionEncoder;
 import com.alphawallet.app.web3j.FunctionReturnDecoder;
 import com.alphawallet.app.web3j.TypeReference;
 import com.alphawallet.app.web3j.datatypes.Function;
+import com.unstoppabledomains.resolution.Resolution;
 
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Type;
@@ -20,17 +20,12 @@ import org.web3j.crypto.WalletUtils;
 import org.web3j.ens.Contracts;
 import org.web3j.ens.EnsResolutionException;
 import org.web3j.ens.NameHash;
-import org.web3j.ens.contracts.generated.ENS;
-import org.web3j.ens.contracts.generated.PublicResolver;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthSyncing;
 import org.web3j.protocol.core.methods.response.NetVersion;
-import org.web3j.tx.ClientTransactionManager;
-import org.web3j.tx.TransactionManager;
-import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Numeric;
 
 import java.io.InterruptedIOException;
@@ -50,12 +45,14 @@ public class EnsResolver {
 
     private final Web3j web3j;
     private final int addressLength;
+    private final Resolution resolution;
     private long syncThreshold; // non-final in case this value needs to be tweaked
 
     public EnsResolver(Web3j web3j, long syncThreshold, int addressLength) {
         this.web3j = web3j;
         this.syncThreshold = syncThreshold;
         this.addressLength = addressLength;
+        this.resolution = new Resolution(EthereumNetworkRepository.MAINNET_RPC_URL); //for .crypto domain
     }
 
     public EnsResolver(Web3j web3j, long syncThreshold) {
@@ -90,6 +87,10 @@ public class EnsResolver {
                 if (!isSynced()) //ensure node is synced
                 {
                     throw new EnsResolutionException("Node is not currently synced");
+                }
+                else if (contractId.endsWith(".crypto")) //check crypto namespace
+                {
+                    return resolution.addr(contractId, "eth");
                 }
                 else
                 {
@@ -161,7 +162,8 @@ public class EnsResolver {
         }
     }
 
-    private String lookupResolver(String ensName) throws Exception {
+    private String lookupResolver(String ensName) throws Exception
+    {
         NetVersion netVersion = web3j.netVersion().send();
         String registryContract = Contracts.resolveRegistryContract(netVersion.getNetVersion());
         byte[] nameHash = NameHash.nameHashAsBytes(ensName);

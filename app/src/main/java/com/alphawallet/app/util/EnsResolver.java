@@ -4,9 +4,7 @@ import android.text.TextUtils;
 
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
-import com.unstoppabledomains.resolution.Resolution;
 
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
@@ -29,6 +27,7 @@ import org.web3j.protocol.core.methods.response.NetVersion;
 import org.web3j.utils.Numeric;
 
 import java.io.InterruptedIOException;
+import java.math.BigInteger;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
@@ -42,17 +41,17 @@ public class EnsResolver {
 
     public static final long DEFAULT_SYNC_THRESHOLD = 1000 * 60 * 3;
     public static final String REVERSE_NAME_SUFFIX = ".addr.reverse";
+    public static final String CRYPTO_RESOLVER = "0xD1E5b0FF1287aA9f9A268759062E4Ab08b9Dacbe";
+    public static final String CRYPTO_ETH_KEY = "crypto.ETH.address";
 
     private final Web3j web3j;
     private final int addressLength;
-    private final Resolution resolution;
     private long syncThreshold; // non-final in case this value needs to be tweaked
 
     public EnsResolver(Web3j web3j, long syncThreshold, int addressLength) {
         this.web3j = web3j;
         this.syncThreshold = syncThreshold;
         this.addressLength = addressLength;
-        this.resolution = new Resolution(EthereumNetworkRepository.MAINNET_RPC_URL); //for .crypto domain
     }
 
     public EnsResolver(Web3j web3j, long syncThreshold) {
@@ -90,7 +89,13 @@ public class EnsResolver {
                 }
                 else if (contractId.endsWith(".crypto")) //check crypto namespace
                 {
-                    return resolution.addr(contractId, "eth");
+                    byte[] nameHash = NameHash.nameHashAsBytes(contractId);
+                    BigInteger nameId = new BigInteger(nameHash);
+                    String resolverAddress = getContractData(EthereumNetworkBase.MAINNET_ID, CRYPTO_RESOLVER, getResolverOf(nameId));
+                    if (!TextUtils.isEmpty(resolverAddress))
+                    {
+                        contractAddress = getContractData(EthereumNetworkBase.MAINNET_ID, resolverAddress, get(nameId));
+                    }
                 }
                 else
                 {
@@ -176,6 +181,24 @@ public class EnsResolver {
         return new Function("resolver",
                             Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
                             Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                            {
+                            }));
+    }
+
+    private Function getResolverOf(BigInteger nameId)
+    {
+        return new Function("resolverOf",
+                            Arrays.<Type>asList(new org.web3j.abi.datatypes.Uint(nameId)),
+                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                            {
+                            }));
+    }
+
+    private Function get(BigInteger nameId)
+    {
+        return new Function("get",
+                            Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(EnsResolver.CRYPTO_ETH_KEY), new org.web3j.abi.datatypes.generated.Uint256(nameId)),
+                            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>()
                             {
                             }));
     }

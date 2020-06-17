@@ -110,7 +110,6 @@ dependencies {
 
     // Ethereum client
     implementation "org.web3j:core:4.6.0-android"
-    implementation "com.unstoppabledomains.resolution:resolution:1.0.6"
 
     // Http client
     implementation "com.squareup.retrofit2:retrofit:$project.retrofitVersion"

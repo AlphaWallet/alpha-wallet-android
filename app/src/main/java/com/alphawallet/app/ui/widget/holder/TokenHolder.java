@@ -264,18 +264,25 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     private void setIssuerDetails()
     {
         String issuerName = assetDefinition.getIssuerName(token);
-        if(issuerName != null)
+        if(issuerName != null && !issuerName.equalsIgnoreCase(getString(R.string.app_name))) //don't display issuer if it's alphawallet
         {
             issuer.setVisibility(View.VISIBLE);
             issuerPlaceholder.setVisibility(View.VISIBLE);
-            //contractSeparator.setVisibility(View.VISIBLE);
+            if (contractType.getVisibility() == View.VISIBLE)
+            {
+                contractSeparator.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                contractSeparator.setVisibility(View.GONE);
+            }
             issuer.setText(issuerName);
         }
         else
         {
             issuer.setVisibility(View.GONE);
             issuerPlaceholder.setVisibility(View.GONE);
-            //contractSeparator.setVisibility(View.GONE);
+            contractSeparator.setVisibility(View.GONE);
         }
     }
 
@@ -292,13 +299,11 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         if (contractStringId > 0)
         {
             contractType.setText(contractStringId);
-            contractSeparator.setVisibility(View.VISIBLE);
             contractType.setVisibility(View.VISIBLE);
         }
         else
         {
             contractType.setVisibility(View.GONE);
-            contractSeparator.setVisibility(View.GONE);
         }
     }
 

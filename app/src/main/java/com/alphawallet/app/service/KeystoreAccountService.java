@@ -27,7 +27,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
-import static com.alphawallet.app.service.KeyService.FAILED_SIGNATURE;
 
 public class KeystoreAccountService implements AccountKeystoreService
 {
@@ -270,6 +269,12 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     private static byte[] encode(RawTransaction rawTransaction, Sign.SignatureData signatureData) {
+        List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, signatureData);
+        RlpList rlpList = new RlpList(values);
+        return RlpEncoder.encode(rlpList);
+    }
+
+    /*private static byte[] encode(RawTransaction rawTransaction, Sign.SignatureData signatureData) {
         List<RlpType> values = asRlpValues(rawTransaction, signatureData);
         RlpList rlpList = new RlpList(values);
         return RlpEncoder.encode(rlpList);
@@ -306,7 +311,7 @@ public class KeystoreAccountService implements AccountKeystoreService
         }
 
         return result;
-    }
+    }*/
 
     @Override
     public Single<byte[]> signTransactionFast(Wallet signer, String signerPassword, byte[] message, long chainId) {

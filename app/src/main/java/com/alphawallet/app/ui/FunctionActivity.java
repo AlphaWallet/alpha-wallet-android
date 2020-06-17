@@ -170,7 +170,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
         // Fetch attributes local to this action and add them to the injected token properties
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
-        TSAction action = functions.get(actionMethod);
+        action = functions.get(actionMethod);
         List<Attribute> localAttrs = (action != null && action.attributes != null) ? new ArrayList<>(action.attributes.values()) : null;
 
         viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds, localAttrs)
@@ -239,17 +239,26 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_script_view);
+        setupViews();
+    }
+
+    private void setupViews()
+    {
+        initViewModel();
+        initViews();
+        toolbar();
+        setTitle(actionMethod);
+        setupFunctions();
     }
 
     @Override
     public void onResume()
     {
         super.onResume();
-        initViewModel();
-        initViews();
-        toolbar();
-        setTitle(actionMethod);
-        setupFunctions();
+        if (viewModel == null)
+        {
+            initViews();
+        }
     }
 
     private void initViewModel()
@@ -531,6 +540,23 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        super.onSaveInstanceState(savedInstanceState);
+        tokenView.saveState(savedInstanceState);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState)
+    {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null)
+        {
+            tokenView.restoreState(savedInstanceState);
+        }
+    }
+
+    @Override
     public void onSignPersonalMessage(Message<String> message)
     {
         dialog = new SignMessageDialog(this, message);
@@ -803,6 +829,15 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                     {
                         callback.unresolvedSymbolError(value);
                     }
+                });
+    }
+
+    private void repopulateInputField(String key, String value)
+    {
+        tokenView.evaluateJavascript(
+                "(function() { document.getElementById(\"" + key + "\").innerHTML = \"" + value + "\"; })();",
+                html -> {
+                    System.out.println("Worked?");
                 });
     }
 }

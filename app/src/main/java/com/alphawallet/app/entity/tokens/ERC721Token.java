@@ -11,10 +11,10 @@ import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.viewmodel.BaseViewModel;
-import com.alphawallet.app.web3j.TypeReference;
-import com.alphawallet.app.web3j.datatypes.Function;
 
+import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
 

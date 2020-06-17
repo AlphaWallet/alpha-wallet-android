@@ -36,7 +36,7 @@ android {
     }
     defaultConfig {
         applicationId "io.stormbird.wallet"
-        minSdkVersion 24
+        minSdkVersion 23
         targetSdkVersion 29
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         def XInfuraAPI = "XInfuraAPI"
@@ -54,8 +54,8 @@ android {
     productFlavors {
 	awallet {
 		dimension "targetting"
-        versionCode 112
-        versionName "3.00.0"
+        versionCode 115
+        versionName "3.00.2"
 	}
     }
     buildTypes {
@@ -106,11 +106,10 @@ dependencies {
     // WARNING!  The China marketing team
     // WARNING!  Many Chinese Android phones execute (meaning terminate) any app that
     // WARNING!  users google gms summarily, like immune systems cleansing infections
-    // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING! 
+    // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!
 
     // Ethereum client
     implementation "org.web3j:core:4.6.0-android"
-
     implementation "com.unstoppabledomains.resolution:resolution:1.0.6"
 
     // Http client

@@ -7,10 +7,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.web3j.FunctionEncoder;
-import com.alphawallet.app.web3j.FunctionReturnDecoder;
-import com.alphawallet.app.web3j.TypeReference;
-import com.alphawallet.app.web3j.datatypes.Function;
 import com.alphawallet.token.entity.As;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.AttributeInterface;
@@ -22,7 +18,11 @@ import com.alphawallet.token.entity.TokenscriptElement;
 import com.alphawallet.token.entity.TransactionResult;
 import com.alphawallet.token.tools.TokenDefinition;
 
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Int;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
@@ -913,6 +913,9 @@ public abstract class TokenscriptFunction
                     //makes no sense as input
                     convertedValue = TOKENSCRIPT_CONVERSION_ERROR + "Mapping in user input params: " + attr.name;
                     break;
+                case Address:
+                    convertedValue = valueFromInput;
+                    break;
                 case Boolean:
                     //attempt to decode
                     if (valueFromInput.equalsIgnoreCase("true") || valueFromInput.equals("1"))
@@ -927,6 +930,9 @@ public abstract class TokenscriptFunction
                 case TokenId:
                     //Shouldn't get here - tokenId should have been handled before.
                     convertedValue = TOKENSCRIPT_CONVERSION_ERROR + "Token ID in user input params: " + attr.name;
+                    break;
+                default:
+                    convertedValue = valueFromInput;
                     break;
             }
         }

@@ -19,9 +19,11 @@ import com.alphawallet.app.repository.entity.RealmERC721Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.RealmManager;
+import com.alphawallet.token.entity.MagicLinkInfo;
 
 import org.web3j.crypto.WalletUtils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -173,7 +175,16 @@ public class TokensRealmSource implements TokenLocalSource {
 
     @Override
     public Single<Token> fetchEnabledToken(int chainId, Wallet wallet, String address) {
-        return Single.fromCallable(() -> fetchToken(chainId, wallet, address));
+        return Single.fromCallable(() -> {
+            Token t = fetchToken(chainId, wallet, address);
+            if (t == null)
+            {
+                t = new Token(new TokenInfo(address, "", "", 18, false, chainId),
+                              BigDecimal.ZERO, System.currentTimeMillis(), MagicLinkInfo.getNetworkNameById(chainId), ContractType.NOT_SET);
+                t.setTokenWallet(wallet.address);
+            }
+            return t;
+        });
     }
 
     @Override

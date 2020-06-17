@@ -6,13 +6,13 @@ import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
-import com.alphawallet.app.web3j.FunctionEncoder;
-import com.alphawallet.app.web3j.FunctionReturnDecoder;
-import com.alphawallet.app.web3j.TypeReference;
-import com.alphawallet.app.web3j.datatypes.Function;
 import com.unstoppabledomains.resolution.Resolution;
 
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.crypto.Keys;
@@ -133,7 +133,7 @@ public class EnsResolver {
     public String reverseResolve(String address)
     {
         String name = null;
-        if (WalletUtils.isValidAddress(address, addressLength))
+        if (WalletUtils.isValidAddress(address))
         {
             String reverseName = Numeric.cleanHexPrefix(address) + REVERSE_NAME_SUFFIX;
             try
@@ -262,6 +262,6 @@ public class EnsResolver {
 
     public static boolean isValidEnsName(String input, int addressLength) {
         return input != null // will be set to null on new Contract creation
-                && (input.contains(".") || !WalletUtils.isValidAddress(input, addressLength));
+                && (input.contains(".") || !WalletUtils.isValidAddress(input));
     }
 }

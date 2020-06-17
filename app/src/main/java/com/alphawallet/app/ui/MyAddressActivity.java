@@ -2,12 +2,10 @@ package com.alphawallet.app.ui;
 
 import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
@@ -20,14 +18,12 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AmountUpdateCallback;
 import com.alphawallet.app.entity.EIP681Request;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
@@ -43,15 +39,14 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.viewmodel.MyAddressViewModelFactory;
 import com.alphawallet.app.widget.CopyTextView;
-import com.alphawallet.app.widget.FunctionButtonBar;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.web3j.crypto.Keys;
 import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
 
 import javax.inject.Inject;
 
@@ -290,6 +285,11 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
         onWindowFocusChanged(true);
         updateAddressWithENS(wallet.ENSname); //JB: see if there's any cached value to display while we wait for ENS
 
+        /*
+        This method will check if previously ENS lookup was stored, then it will fetch from the cached data.
+         */
+        updateFromCachedEnsHistory();
+
         //When view changes, this function loads again. It will again try to fetch ENS
         if(TextUtils.isEmpty(displayName))
         {
@@ -305,6 +305,17 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
         else
         {
             updateAddressWithENS(displayName);
+        }
+    }
+
+    private void updateFromCachedEnsHistory()
+    {
+        String historyJson = PreferenceManager.getDefaultSharedPreferences(this).getString(C.ENS_HISTORY_PAIR, "");
+        HashMap<String, String> history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>() {}.getType());
+
+        if(history.containsKey(wallet.address))
+        {
+            displayName = history.get(wallet.address);
         }
     }
 

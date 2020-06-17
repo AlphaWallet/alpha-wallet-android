@@ -2,6 +2,7 @@ package com.alphawallet.app.ui.widget.entity;
 
 import android.app.Activity;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -12,14 +13,19 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ENSCallback;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
-import com.alphawallet.app.ui.widget.adapter.AutoCompleteUrlAdapter;
+import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.util.HashMap;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -41,7 +47,7 @@ public class ENSHandler implements Runnable
     private TextWatcher ensTextWatcher;
     private String ensName;
     private final Handler handler;
-    private final AutoCompleteUrlAdapter adapterUrl;
+    private final AutoCompleteAddressAdapter adapterUrl;
     private final TextView toAddressError;
     private final Activity host;
     private final ProgressBar ensSpinner;
@@ -56,7 +62,7 @@ public class ENSHandler implements Runnable
     public volatile boolean waitingForENS = false;
     public boolean transferAfterENS = false;
 
-    public ENSHandler(Activity host, AutoCompleteUrlAdapter adapter, ENSCallback ensCallback)
+    public ENSHandler(Activity host, AutoCompleteAddressAdapter adapter, ENSCallback ensCallback)
     {
         this.layoutENSResolve = host.findViewById(R.id.layout_ens);
         this.toAddressEditText = host.findViewById(R.id.edit_to_address);
@@ -70,6 +76,7 @@ public class ENSHandler implements Runnable
         this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID));
         this.ensSpinner.setVisibility(View.GONE);
         createWatcher();
+        getENSHistoryFromPrefs();
     }
 
     private void createWatcher()
@@ -196,6 +203,8 @@ public class ENSHandler implements Runnable
                 KeyboardUtils.hideKeyboard(host.getCurrentFocus()); //user was waiting for ENS, not in the middle of typing a value etc
             checkIfWaitingForENS();
             toAddressError.setVisibility(View.GONE);
+
+            storeItem(toAddressEditText.getText().toString(), address);
         }
     }
 
@@ -251,5 +260,50 @@ public class ENSHandler implements Runnable
     public void run()
     {
         checkENS();
+    }
+
+    /**
+     * This method will fetch stored ENS cached history of Reverse lookup
+     * @return Key Value pair of Address vs ENS name
+     */
+    private HashMap<String, String> getENSHistoryFromPrefs()
+    {
+        HashMap<String, String> history;
+        String historyJson = PreferenceManager.getDefaultSharedPreferences(host).getString(C.ENS_HISTORY_PAIR, "");
+        if (!historyJson.isEmpty())
+        {
+            history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>(){}.getType());
+        }
+        else
+        {
+            history = new HashMap<>();
+        }
+        return history;
+    }
+
+    /**
+     * This method will store Address vs ENS name key value pair in preference.
+     * @param address Wallet Address
+     * @param ensName Wallet Name
+     */
+    private void storeItem(String address, String ensName)
+    {
+        HashMap<String, String> history = getENSHistoryFromPrefs();
+
+        if (!history.containsKey(address))
+        {
+            history.put(address, ensName);
+            storeHistory(history);
+        }
+    }
+
+    /**
+     * This method will store key value pair in preference
+     * @param history Key value pair
+     */
+    private void storeHistory(HashMap<String, String> history)
+    {
+        String historyJson = new Gson().toJson(history);
+        PreferenceManager.getDefaultSharedPreferences(host).edit().putString(C.ENS_HISTORY_PAIR, historyJson).apply();
     }
 }

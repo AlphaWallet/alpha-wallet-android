@@ -2,17 +2,17 @@ package com.alphawallet.app.ui.widget.entity;
 
 import android.widget.Filter;
 
-import com.alphawallet.app.ui.widget.adapter.AutoCompleteUrlAdapter;
+import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class UrlFilter extends Filter {
-    AutoCompleteUrlAdapter adapter;
+    AutoCompleteAddressAdapter adapter;
     List<String> originalList;
     List<String> filteredList;
 
-    public UrlFilter(AutoCompleteUrlAdapter adapter, List<String> originalList) {
+    public UrlFilter(AutoCompleteAddressAdapter adapter, List<String> originalList) {
         super();
         this.adapter = adapter;
         this.originalList = originalList;

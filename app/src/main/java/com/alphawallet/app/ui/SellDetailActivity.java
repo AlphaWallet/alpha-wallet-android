@@ -281,12 +281,6 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
                     viewModel.getAuthorisation(this, this);
                 }
                 break;
-            case SET_MARKET_SALE:
-                if (isPriceAndQuantityValid())
-                {
-                    confirmPlaceMarketOrderDialog();
-                }
-                break;
         }
     }
 
@@ -516,27 +510,6 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         dialog.show();
     }
 
-    private void confirmPlaceMarketOrderDialog()
-    {
-        //how many indices are we selling?
-        int quantity = selection.size();
-        String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
-        String qty = String.valueOf(quantity) + " " + unit + " @" + getEthString(sellPriceValue) + getString(R.string.eth_per_ticket);
-
-        AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
-        dialog.setTitle(R.string.confirm_sale_title);
-        dialog.setSmallText(R.string.place_tickets_marketplace);
-        dialog.setMediumText(qty);
-        dialog.setPrimaryButtonText(R.string.create_sell_order);
-        dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
-        dialog.setPrimaryButtonListener(v1 -> {
-            sellTicketFinal();
-            sendBroadcast(new Intent(PRUNE_ACTIVITY));
-        });
-        dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
-        dialog.show();
-    }
-
     private void sellLinkFinal(String universalLink) {
         //create share intent
         Intent sendIntent = new Intent();
@@ -594,7 +567,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
                 break;
 
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
-                GotAuthorisation(resultCode == RESULT_OK);
+                gotAuthorisation(resultCode == RESULT_OK);
                 break;
 
             default:
@@ -609,7 +582,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     }
 
     @Override
-    public void GotAuthorisation(boolean gotAuth)
+    public void gotAuthorisation(boolean gotAuth)
     {
         if (gotAuth)
         {
@@ -617,5 +590,11 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
             sellTicketLinkFinal();
         }
         else viewModel.failedAuthentication(SIGN_DATA);
+    }
+
+    @Override
+    public void cancelAuthentication()
+    {
+
     }
 }

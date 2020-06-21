@@ -590,13 +590,19 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
-    public void GotAuthorisation(boolean gotAuth)
+    public void gotAuthorisation(boolean gotAuth)
     {
 
     }
 
     @Override
-    public void CreatedKey(String keyAddress)
+    public void cancelAuthentication()
+    {
+
+    }
+
+    @Override
+    public void createdKey(String keyAddress)
     {
         //Key was upgraded
         //viewModel.upgradeWallet(keyAddress);
@@ -880,7 +886,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 switch (getSelectedItem())
                 {
                     case DAPP_BROWSER:
-                        ((DappBrowserFragment)dappBrowserFragment).GotAuthorisation(resultCode == RESULT_OK);
+                        ((DappBrowserFragment)dappBrowserFragment).gotAuthorisation(resultCode == RESULT_OK);
                         break;
                     default:
                         //continue with generating the authenticated key - NB currently no flow reaches this code but in future it could
@@ -888,7 +894,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         else
                         {
                             authInterface.failedAuthentication(taskCode);
-                            GotAuthorisation(false);
+                            gotAuthorisation(false);
                         }
                         break;
                 }

@@ -9,7 +9,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,7 +19,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -31,10 +29,8 @@ import android.widget.Toast;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DisplayState;
-import com.alphawallet.app.entity.ENSCallback;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FinishReceiver;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.VisibilityFilter;
@@ -360,7 +356,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
         signCallback = new SignAuthenticationCallback()
         {
             @Override
-            public void GotAuthorisation(boolean gotAuth)
+            public void gotAuthorisation(boolean gotAuth)
             {
                 if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
                 else viewModel.failedAuthentication(SIGN_DATA);
@@ -381,6 +377,12 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
                     //display fail auth
                     onError(new ErrorEnvelope(getString(R.string.authentication_failed)));
                 }
+            }
+
+            @Override
+            public void cancelAuthentication()
+            {
+
             }
         };
 
@@ -639,7 +641,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
                 break;
 
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
-                signCallback.GotAuthorisation(resultCode == RESULT_OK);
+                signCallback.gotAuthorisation(resultCode == RESULT_OK);
                 break;
 
             default:
@@ -717,12 +719,26 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
         signCallback = new SignAuthenticationCallback()
         {
             @Override
-            public void GotAuthorisation(boolean gotAuth)
+            public void gotAuthorisation(boolean gotAuth)
             {
                 if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
                 else viewModel.failedAuthentication(SIGN_DATA);
 
                 if (gotAuth) transferTicketFinal();
+            }
+
+            @Override
+            public void cancelAuthentication()
+            {
+                AWalletAlertDialog dialog = new AWalletAlertDialog(getParent());
+                dialog.setIcon(AWalletAlertDialog.NONE);
+                dialog.setTitle(R.string.authentication_cancelled);
+                dialog.setButtonText(R.string.ok);
+                dialog.setButtonListener(v -> {
+                    dialog.dismiss();
+                });
+                dialog.setCancelable(true);
+                dialog.show();
             }
         };
 

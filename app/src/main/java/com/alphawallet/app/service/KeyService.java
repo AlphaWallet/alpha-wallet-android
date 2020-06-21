@@ -219,7 +219,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         try
         {
             String mnemonic = unpackMnemonic();
-            callback.FetchMnemonic(mnemonic);
+            callback.fetchMnemonic(mnemonic);
         }
         catch (KeyServiceException e)
         {
@@ -252,7 +252,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         switch (wallet.type)
         {
             case KEYSTORE_LEGACY:
-                signCallback.GotAuthorisation(true); //Legacy keys don't require authentication
+                signCallback.gotAuthorisation(true); //Legacy keys don't require authentication
                 break;
             case KEYSTORE:
             case HDKEY:
@@ -261,7 +261,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             case NOT_DEFINED:
             case TEXT_MARKER:
             case WATCH:
-                signCallback.GotAuthorisation(false);
+                signCallback.gotAuthorisation(false);
                 break;
         }
     }
@@ -386,11 +386,11 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             {
                 case KEYSTORE:
                     password = unpackMnemonic();
-                    callback.FetchMnemonic(password);
+                    callback.fetchMnemonic(password);
                     break;
                 case KEYSTORE_LEGACY:
                     password = new String(getLegacyPassword(context, wallet.address));
-                    callback.FetchMnemonic(password);
+                    callback.fetchMnemonic(password);
                     break;
                 default:
                     break;
@@ -433,14 +433,14 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             String encryptedHDKeyPath = getFilePath(context, matchingAddr);
             if (!new File(encryptedHDKeyPath).exists() || secretKey == null)
             {
-                signCallback.GotAuthorisation(false);
+                signCallback.gotAuthorisation(false);
                 return;
             }
             byte[] iv = readBytesFromFile(getFilePath(context, matchingAddr + "iv"));
             Cipher outCipher = Cipher.getInstance(CIPHER_ALGORITHM);
             final GCMParameterSpec spec = new GCMParameterSpec(128, iv);
             outCipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
-            signCallback.GotAuthorisation(true);
+            signCallback.gotAuthorisation(true);
             return;
         }
         catch (UserNotAuthenticatedException e)
@@ -460,7 +460,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             e.printStackTrace();
         }
 
-        signCallback.GotAuthorisation(false);
+        signCallback.gotAuthorisation(false);
     }
 
     private synchronized String unpackMnemonic() throws KeyServiceException, UserNotAuthenticatedException
@@ -783,7 +783,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 if (!requireAuthentication && (currentWallet.authLevel == TEE_NO_AUTHENTICATION || currentWallet.authLevel == STRONGBOX_NO_AUTHENTICATION)
                         && !requiresUnlock() && signCallback != null)
                 {
-                    signCallback.GotAuthorisation(true);
+                    signCallback.gotAuthorisation(true);
                     return;
                 }
                 break;
@@ -828,7 +828,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             case FETCH_MNEMONIC:
                 try
                 {
-                    callbackInterface.FetchMnemonic(unpackMnemonic());
+                    callbackInterface.fetchMnemonic(unpackMnemonic());
                 }
                 catch (UserNotAuthenticatedException e)
                 {
@@ -884,7 +884,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
         if (callbackId == UPGRADE_HD_KEY)
         {
-            signCallback.GotAuthorisation(false);
+            signCallback.gotAuthorisation(false);
         }
 
         if (activity == null || activity.isDestroyed())
@@ -900,7 +900,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             if (callbackInterface != null)
                 callbackInterface.keyFailure(message);
             else if (signCallback != null)
-                signCallback.GotAuthorisation(false);
+                signCallback.gotAuthorisation(false);
             else
                 AuthorisationFailMessage(message);
         }
@@ -908,10 +908,10 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     private void cancelAuthentication()
     {
-        if (callbackInterface != null)
+        if (signCallback != null)
+            signCallback.cancelAuthentication();
+        else if (callbackInterface != null)
             callbackInterface.cancelAuthentication();
-        else if (signCallback != null)
-            signCallback.GotAuthorisation(false);
     }
 
     public boolean isChecking()

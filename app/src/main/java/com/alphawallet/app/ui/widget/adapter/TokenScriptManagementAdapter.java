@@ -117,6 +117,8 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
             tokenHolder.txtToken.setText(R.string.tokenscript_file_error);
             tokenHolder.txtTokenFile.setText(tokenLocator.getDefinitionName());
             tokenHolder.txtTokenAddress.setVisibility(View.INVISIBLE);
+            tokenHolder.tokenFullName.setVisibility(View.GONE);
+            tokenHolder.chainName.setVisibility(View.GONE);
 
             tokenHolder.imgLock.setVisibility(View.VISIBLE);
             tokenHolder.imgLock.setImageResource(R.drawable.ic_error);
@@ -169,7 +171,7 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
         dialog.setTitle(tokenLocator.getFileName());
         dialog.setTextStyle(AWalletAlertDialog.TEXT_STYLE.LEFT);
         StringBuilder message = new StringBuilder();
-        message.append(context.getString(R.string.file_override, tokenLocator.getErrorMessage(), "True"));
+        message.append(context.getString(R.string.file_error, tokenLocator.getErrorMessage()));
 
         dialog.setMessage(message);
         dialog.setButtonText(R.string.ok);

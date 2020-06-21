@@ -103,6 +103,9 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     private void resetButtonCount() {
         buttonCount = 0;
+        primaryButton.setVisibility(View.GONE);
+        secondaryButton.setVisibility(View.GONE);
+        moreButton.setVisibility(View.GONE);
         moreActionsList.clear();
         moreActionsAdapter.notifyDataSetChanged();
     }
@@ -238,7 +241,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
                 if (isSelectionValid(action.buttonId)) callStandardFunctions.selectRedeemTokens(selection);
                 break;
             default:
-                callStandardFunctions.handleClick(action.buttonText);
+                callStandardFunctions.handleClick(action.buttonText, action.buttonId);
                 break;
         }
     }

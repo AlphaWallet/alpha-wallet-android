@@ -50,6 +50,7 @@
     <string name="label_to">To</string>
     <string name="label_gas_limit">Gas Limit</string>
     <string name="label_gas_price">Gas Price</string>
+    <string name="label_old_gas_price">Old Gas Price</string>
     <string name="label_network_fee">Network Fee</string>
     <string name="button_ok">OK</string>
 
@@ -57,6 +58,7 @@
     <string name="subtitle_from">From</string>
     <string name="subtitle_to">To</string>
     <string name="subtitle_gas_fee">Gas Fee</string>
+    <string name="subtitle_gas_price">Gas Price</string>
     <string name="subtitle_transaction_num">Transaction #</string>
     <string name="subtitle_transaction_hash_num">Transaction Hash#</string>
     <string name="subtitle_transaction_time">Transaction Time</string>
@@ -592,6 +594,7 @@
     <string name="hide_notification">Hide Notification</string>
     <string name="card_view_not_found_error">%1$s not found</string>
     <string name="tokenscript_management">Tokenscript Management</string>
+    <string name="subtitle_network">Network</string>
 
     <!-- Gas Slider -->
     <string name="speed_gas">Speed (Gas)</string>
@@ -616,4 +619,15 @@
     <string name="confirm_delete_file_message">Delete file %1$s</string>
     <string name="delete">Delete</string>
     <string name="refreshing_tokenscripts">Refresh TokenScripts</string>
+    <string name="speedup_transaction">Speedup TX</string>
+    <string name="cancel_transaction">Cancel TX</string>
+    <string name="day_single">1 día</string>
+    <string name="day_plural">%s días</string>
+    <string name="hour_single">1 hora</string>
+    <string name="hour_plural">%s horas</string>
+    <string name="minute_single">1 minuto</string>
+    <string name="minute_plural">%s minutos</string>
+    <string name="second_single">1 segundo</string>
+    <string name="second_plural">%s segundos</string>
+    <string name="transaction_pending_for">Transaction Pending for %s</string>
 </resources>

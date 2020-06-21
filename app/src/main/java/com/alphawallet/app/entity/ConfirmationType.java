@@ -12,5 +12,7 @@ public enum ConfirmationType
     MARKET,
     WEB3TRANSACTION,
     ERC721,
-    TOKENSCRIPT
+    TOKENSCRIPT,
+    RESEND,
+    CANCEL_TX
 }

@@ -160,6 +160,17 @@ public class MarketOrderTest
             {
                 return null;
             }
+
+            @Override
+            public Single<String> resendTransaction(Wallet from, String to, BigInteger subunitAmount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
+            {
+                return Single.fromCallable(() -> { return ""; });
+            }
+
+            @Override public void removeOldTransaction(Wallet wallet, String oldTxHash)
+            {
+
+            }
         };
 
         marketService = new MarketQueueService(null, null, transactionRepository);

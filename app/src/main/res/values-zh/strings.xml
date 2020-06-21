@@ -606,4 +606,5 @@
     <string name="confirm_delete_file_message">Delete file %1$s</string>
     <string name="delete">Delete</string>
     <string name="refreshing_tokenscripts">Refresh TokenScripts</string>
+    <string name="file_error">TokenScript error : %1$s\n\n</string>
 </resources>

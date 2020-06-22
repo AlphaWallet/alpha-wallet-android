@@ -309,6 +309,21 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         viewModel.sendGasSettings().observe(this, this::onSendGasSettings);
         finishReceiver = new FinishReceiver(this);
 
+        findViewById(R.id.layout_gas_price).setOnClickListener(view -> {
+            //open gas slider settings
+            viewModel.openGasSettings(this, chainId);
+        });
+
+        findViewById(R.id.layout_gas_limit).setOnClickListener(view -> {
+            //open gas slider settings
+            viewModel.openGasSettings(this, chainId);
+        });
+
+        gasLimitText.setOnClickListener(view -> {
+            //open gas slider settings
+            viewModel.openGasSettings(this, chainId);
+        });
+
         getGasSettings();
     }
 
@@ -548,7 +563,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private void setupResendGasSettings()
     {
         //increase gas price - gas price is in GWEI, so add 5 GWEI to price
-        BigInteger gasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(5)));
+        BigInteger gasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(1)));
 
         findViewById(R.id.layout_old_gas_price).setVisibility(View.VISIBLE);
         ((TextView)findViewById(R.id.old_gas_price)).setText(BalanceUtils.weiToGwei(oldGasPrice));

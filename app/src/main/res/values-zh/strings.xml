@@ -620,6 +620,6 @@
     <string name="second_single">1秒</string>
     <string name="second_plural">%s秒</string>
     <string name="transaction_pending_for">Transaction Pending for %s</string>
-    <string name="speedup_tx_description">Submit duplicate Transaction with higher TX fee.</string>
+    <string name="speedup_tx_description">Submit replacement Transaction with higher gas price.</string>
     <string name="cancel_tx_description">Cancel Transaction by replacing pending with zero value TX.</string>
 </resources>

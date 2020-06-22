@@ -51,7 +51,7 @@
     <string name="label_gas_limit">Gas Limit</string>
     <string name="label_gas_price">Gas Price</string>
     <string name="label_old_gas_price">Old Gas Price</string>
-    <string name="label_network_fee">Network Fee</string>
+    <string name="label_network_fee">Network Fee (Maximum)</string>
     <string name="button_ok">OK</string>
 
     <!-- Subtitles -->
@@ -630,6 +630,6 @@
     <string name="second_single">1 segundo</string>
     <string name="second_plural">%s segundos</string>
     <string name="transaction_pending_for">Transaction Pending for %s</string>
-    <string name="speedup_tx_description">Submit duplicate Transaction with higher TX fee.</string>
+    <string name="speedup_tx_description">Submit replacement Transaction with higher gas price.</string>
     <string name="cancel_tx_description">Cancel Transaction by replacing pending with zero value TX.</string>
 </resources>

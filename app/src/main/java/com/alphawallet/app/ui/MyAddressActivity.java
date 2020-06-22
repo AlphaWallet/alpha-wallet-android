@@ -5,7 +5,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
@@ -39,14 +38,11 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.MyAddressViewModel;
 import com.alphawallet.app.viewmodel.MyAddressViewModelFactory;
 import com.alphawallet.app.widget.CopyTextView;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import org.web3j.crypto.Keys;
 import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 
 import javax.inject.Inject;
 
@@ -285,15 +281,10 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
         onWindowFocusChanged(true);
         updateAddressWithENS(wallet.ENSname); //JB: see if there's any cached value to display while we wait for ENS
 
-        /*
-        This method will check if previously ENS lookup was stored, then it will fetch from the cached data.
-         */
-        updateFromCachedEnsHistory();
-
         //When view changes, this function loads again. It will again try to fetch ENS
         if(TextUtils.isEmpty(displayName))
         {
-            new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID))
+            new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), getApplicationContext())
                     .resolveEnsName(displayAddress)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
@@ -305,17 +296,6 @@ public class MyAddressActivity extends BaseActivity implements AmountUpdateCallb
         else
         {
             updateAddressWithENS(displayName);
-        }
-    }
-
-    private void updateFromCachedEnsHistory()
-    {
-        String historyJson = PreferenceManager.getDefaultSharedPreferences(this).getString(C.ENS_HISTORY_PAIR, "");
-        HashMap<String, String> history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>() {}.getType());
-
-        if(history.containsKey(wallet.address))
-        {
-            displayName = history.get(wallet.address);
         }
     }
 

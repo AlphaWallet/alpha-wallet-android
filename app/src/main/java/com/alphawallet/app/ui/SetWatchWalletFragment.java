@@ -191,7 +191,7 @@ public class SetWatchWalletFragment extends Fragment implements View.OnClickList
     {
         ensProgress();
         if (ensResolver == null)
-            ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID));
+            ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), getContext());
         ensResolver.resolveENSAddress(name)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

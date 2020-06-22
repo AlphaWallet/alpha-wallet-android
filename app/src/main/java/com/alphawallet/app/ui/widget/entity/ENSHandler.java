@@ -73,7 +73,7 @@ public class ENSHandler implements Runnable
         this.adapterUrl = adapter;
         this.host = host;
         this.ensCallback = ensCallback;
-        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID));
+        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), host.getApplicationContext());
         this.ensSpinner.setVisibility(View.GONE);
         createWatcher();
         getENSHistoryFromPrefs();
@@ -187,24 +187,24 @@ public class ENSHandler implements Runnable
         handler.post(this);
     }
 
-    public void onENSSuccess(String address)
+    public void onENSSuccess(String resolvedAddress, String ensDomain)
     {
-        if (TextUtils.isEmpty(address) || address.equals("0"))
+        if (TextUtils.isEmpty(resolvedAddress) || resolvedAddress.equals("0"))
         {
-            hideENS(address);
+            hideENS(resolvedAddress);
         }
         else
         {
             waitingForENS = false;
             toAddressEditText.dismissDropDown();
             layoutENSResolve.setVisibility(View.VISIBLE);
-            textENS.setText(address);
+            textENS.setText(resolvedAddress);
             if (toAddressEditText.hasFocus())
                 KeyboardUtils.hideKeyboard(host.getCurrentFocus()); //user was waiting for ENS, not in the middle of typing a value etc
             checkIfWaitingForENS();
             toAddressError.setVisibility(View.GONE);
 
-            storeItem(toAddressEditText.getText().toString(), address);
+            storeItem(resolvedAddress, ensDomain);
         }
     }
 
@@ -243,7 +243,7 @@ public class ENSHandler implements Runnable
         disposable = ensResolver.resolveENSAddress(to)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onENSSuccess, this::onENSError);
+                .subscribe(resolvedAddress -> onENSSuccess(resolvedAddress, to), this::onENSError);
     }
 
     private void onENSError(Throwable throwable)
@@ -290,9 +290,9 @@ public class ENSHandler implements Runnable
     {
         HashMap<String, String> history = getENSHistoryFromPrefs();
 
-        if (!history.containsKey(address))
+        if (!history.containsKey(address.toLowerCase()))
         {
-            history.put(address, ensName);
+            history.put(address.toLowerCase(), ensName);
             storeHistory(history);
         }
     }

@@ -1,5 +1,7 @@
 package com.alphawallet.app.di;
 
+import android.content.Context;
+
 import dagger.Module;
 import dagger.Provides;
 import com.alphawallet.app.interact.FetchWalletsInteract;
@@ -28,7 +30,8 @@ class HomeModule {
             GenericWalletInteract genericWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
             CurrencyRepositoryType currencyRepository,
-            EthereumNetworkRepositoryType ethereumNetworkRepository) {
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            Context context) {
         return new HomeViewModelFactory(
                 preferenceRepository,
                 localeRepository,
@@ -38,7 +41,8 @@ class HomeModule {
                 genericWalletInteract,
                 fetchWalletsInteract,
                 currencyRepository,
-                ethereumNetworkRepository);
+                ethereumNetworkRepository,
+                context);
     }
 
     @Provides

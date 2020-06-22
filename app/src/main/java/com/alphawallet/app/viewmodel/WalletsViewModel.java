@@ -5,6 +5,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -30,12 +31,16 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;

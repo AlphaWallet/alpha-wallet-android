@@ -1,5 +1,7 @@
 package com.alphawallet.app.di;
 
+import android.content.Context;
+
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
@@ -32,7 +34,8 @@ class AccountsManageModule {
 			FindDefaultNetworkInteract findDefaultNetworkInteract,
 			KeyService keyService,
 			GasService gasService,
-			TokensService tokensService)
+			TokensService tokensService,
+			Context context)
 	{
 		return new WalletsViewModelFactory(setDefaultWalletInteract,
 										   fetchWalletsInteract,
@@ -43,7 +46,8 @@ class AccountsManageModule {
 										   findDefaultNetworkInteract,
 										   keyService,
 				gasService,
-				tokensService);
+				tokensService,
+				context);
 	}
 
 	@Provides

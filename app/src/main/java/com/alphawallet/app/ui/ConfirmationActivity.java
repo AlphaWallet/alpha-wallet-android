@@ -261,8 +261,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 oldTxHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
                 nonceId = getIntent().getIntExtra(C.EXTRA_NONCE, 0);
                 nonce = BigInteger.valueOf(nonceId);
-                amountString = BalanceUtils.getScaledValueWithLimit(amount, token != null ? token.tokenInfo.decimals : 18);
-                symbolText.setText(token.getNetworkName());
+                amountString = getString(R.string.speedup_tx_description);
+                symbolText.setVisibility(View.GONE);
                 oldGasPrice = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
                 oldGasLimit = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT));
                 transactionHex = getIntent().getStringExtra(C.EXTRA_TRANSACTION_DATA);
@@ -274,8 +274,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 nonceId = getIntent().getIntExtra(C.EXTRA_NONCE, 0);
                 nonce = BigInteger.valueOf(nonceId);
                 amount = BigDecimal.ZERO;
-                amountString = getString(R.string.cancel_transaction) + " (0)";
-                symbolText.setText(token.getNetworkName());
+                amountString = getString(R.string.cancel_tx_description);
+                symbolText.setVisibility(View.GONE);
                 oldGasPrice = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
                 oldGasLimit = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT));
                 transactionHex = "0x";

@@ -366,7 +366,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         switch (networkId)
         {
             case MAINNET_ID:
-                return R.drawable.ethereum_logo;
+                return R.drawable.ic_ethereum_logo;
             case KOVAN_ID:
                 return R.drawable.kovan_logo;
             case ROPSTEN_ID:
@@ -374,9 +374,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case RINKEBY_ID:
                 return R.drawable.rinkeby_logo;
             case POA_ID:
-                return R.drawable.poa_logo;
+                return R.drawable.ic_poa_logo;
             case SOKOL_ID:
-                return R.drawable.sokol_logo;
+                return R.drawable.ic_poa_sokol;
             case CLASSIC_ID:
                 return R.drawable.classic_logo;
             case XDAI_ID:
@@ -384,11 +384,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             case GOERLI_ID:
                 return R.drawable.goerli_logo;
             case ARTIS_SIGMA1_ID:
-                return R.drawable.artis_sigma_logo;
+                return R.drawable.ic_artis_sigma_logo;
             case ARTIS_TAU1_ID:
-                return R.drawable.artis_tau_logo;
+                return R.drawable.ic_artis_tau_logo;
             default:
-                return R.drawable.ethereum_logo;
+                return R.drawable.ic_ethereum_logo;
         }
     }
 

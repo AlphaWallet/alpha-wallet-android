@@ -199,6 +199,10 @@
     <string name="help_question4">What is a Seed Phrase?</string>
     <string name="help_question5">How do I transfer ETH into my wallet?</string>
     <string name="help_question6">What is TokenScript?</string>
+    <string name="help_question7" translatable="false">Privacy Policy</string>
+    <string name="help_question8" translatable="false">Terms of Service</string>
+    <string name="privacy_policy" translatable="false">privacyPolicy.html</string>
+    <string name="terms_of_service" translatable="false">termsOfService.html</string>
     <string name="tokenscript_explaination">tokenscript_explaination.html</string>
     <string name="twenty_four_hours">24 hours</string>
     <string name="appreciation">Appreciation</string>

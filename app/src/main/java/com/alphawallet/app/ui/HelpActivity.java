@@ -55,7 +55,9 @@ public class HelpActivity extends BaseActivity {
                 R.string.help_question3,
                 R.string.help_question4,
                 R.string.help_question5,
-                R.string.help_question6
+                R.string.help_question6,
+                R.string.help_question7,
+                R.string.help_question8
         };
 
         int[] answers = {
@@ -65,6 +67,8 @@ public class HelpActivity extends BaseActivity {
                 R.string.what_is_seed_phrase,
                 R.string.how_i_transfer_into_wallet,
                 R.string.tokenscript_explaination,
+                R.string.privacy_policy,
+                R.string.terms_of_service
         };
 
         adapter.setWebView(webView);

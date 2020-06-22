@@ -2,6 +2,7 @@ package com.alphawallet.app.viewmodel;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
+import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -24,6 +25,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final FetchWalletsInteract fetchWalletsInteract;
     private final CurrencyRepositoryType currencyRepository;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final Context context;
 
     public HomeViewModelFactory(
             PreferenceRepositoryType preferenceRepository,
@@ -34,7 +36,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             GenericWalletInteract genericWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
             CurrencyRepositoryType currencyRepository,
-            EthereumNetworkRepositoryType ethereumNetworkRepository) {
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            Context context) {
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.importTokenRouter = importTokenRouter;
@@ -44,6 +47,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.currencyRepository = currencyRepository;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.context = context;
     }
 
     @NonNull
@@ -58,7 +62,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 genericWalletInteract,
                 fetchWalletsInteract,
                 currencyRepository,
-                ethereumNetworkRepository
+                ethereumNetworkRepository,
+                context
                 );
     }
 }

@@ -169,6 +169,7 @@ public abstract class C {
 
     public static final String ENS_SCAN_BLOCK = "ens_check_block";
     public static final String ENS_HISTORY = "ensHistory";
+    public static final String ENS_HISTORY_PAIR = "ens_history_pair";
 
     public enum TokenStatus {
         DEFAULT, PENDING, INCOMPLETE

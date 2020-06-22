@@ -2,6 +2,7 @@ package com.alphawallet.app.util;
 
 import android.text.TextUtils;
 
+import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.TokenRepository;
@@ -135,7 +136,7 @@ public class EnsResolver {
      * @param address an ethereum address, example: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e"
      * @return a EnsName registered for provided address
      */
-    public String reverseResolve(String address)
+    public String reverseResolve(String address) throws UnableToResolveENS
     {
         String name = null;
         if (WalletUtils.isValidAddress(address))
@@ -154,7 +155,7 @@ public class EnsResolver {
 
             if (!isValidEnsName(name, addressLength))
             {
-                throw new RuntimeException("Unable to resolve name for address: " + address);
+                throw new UnableToResolveENS("Unable to resolve name for address: " + address);
             }
             else
             {

@@ -41,7 +41,7 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
     ImportWalletViewModel(ImportWalletInteract importWalletInteract, KeyService keyService, GasService gasService) {
         this.importWalletInteract = importWalletInteract;
         this.keyService = keyService;
-        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID));
+        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), keyService.getContext());
     }
 
     public void onKeystore(String keystore, String password, String newPassword, KeyService.AuthenticationLevel level) {

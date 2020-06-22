@@ -103,9 +103,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     static final NetworkInfo[] DEFAULT_NETWORKS = new NetworkInfo[] {
             new NetworkInfo(C.ETHEREUM_NETWORK_NAME, C.ETH_SYMBOL,
                     MAINNET_RPC_URL,
-                    "https://etherscan.io/tx/",MAINNET_ID, true,
+                    "https://cn.etherscan.com/tx/",MAINNET_ID, true,
                     MAINNET_FALLBACK_RPC_URL,
-                    "https://api.etherscan.io/",
+                    "https://api-cn.etherscan.com/",
                     C.ETHEREUM_TICKER_NAME,
                     MAINNET_BLOCKSCOUT),
             new NetworkInfo(C.CLASSIC_NETWORK_NAME, C.ETC_SYMBOL,

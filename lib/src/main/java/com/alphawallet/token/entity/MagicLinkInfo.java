@@ -23,7 +23,7 @@ public class MagicLinkInfo
     private static final String customMagicLinkDomain = "custom.aw.app";
 
     //Etherscan domains
-    private static final String mainNetEtherscan = "https://etherscan.io/";
+    private static final String mainNetEtherscan = "https://cn.etherscan.com/";
     private static final String classicEtherscan = "https://gastracker.io/";
     private static final String callistoEtherscan = "https://etherscan.io/"; //TODO: determine callisto etherscan
     private static final String kovanEtherscan = "https://kovan.etherscan.io/";

@@ -15,6 +15,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.tokens.TokenTicker;
+import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmERC721Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
@@ -46,6 +47,7 @@ import static com.alphawallet.app.interact.SetupTokensInteract.EXPIRED_CONTRACT;
 public class TokensRealmSource implements TokenLocalSource {
 
     public static final String TAG = "TLS";
+    public static final String IMAGES_DB = "image_urls_db";
     public static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
     private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
 
@@ -495,6 +497,52 @@ public class TokensRealmSource implements TokenLocalSource {
                         {
                             saveToken(wallet, token, new Date());
                         }
+                    }
+
+                    @Override
+                    public void onComplete()
+                    {
+                        if (realm.isInTransaction()) realm.commitTransaction();
+                        TransactionsRealmCache.subRealm();
+                        realm.close();
+                    }
+
+                    @Override
+                    public void onError(Throwable e)
+                    {
+                        if (realm != null && !realm.isClosed())
+                        {
+                            realm.close();
+                        }
+                    }
+                });
+    }
+
+    @Override
+    public Disposable storeTokenUrl(int networkId, String address, String imageUrl)
+    {
+        return Completable.complete()
+                .subscribeWith(new DisposableCompletableObserver()
+                {
+                    Realm realm;
+                    @Override
+                    public void onStart()
+                    {
+                        String instanceKey = address.toLowerCase() + "-" + networkId;
+                        realm = realmManager.getAuxRealmInstance(IMAGES_DB);
+                        RealmAuxData instance = realm.where(RealmAuxData.class)
+                                .equalTo("instanceKey", instanceKey)
+                                .findFirst();
+
+                        TransactionsRealmCache.addRealm();
+                        realm.beginTransaction();
+                        if (instance == null)
+                        {
+                            instance = realm.createObject(RealmAuxData.class, instanceKey);
+                        }
+
+                        instance.setResult(imageUrl);
+                        instance.setResultTime(System.currentTimeMillis());
                     }
 
                     @Override

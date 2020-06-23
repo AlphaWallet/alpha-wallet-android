@@ -54,8 +54,8 @@ android {
     productFlavors {
 	awallet {
 		dimension "targetting"
-        versionCode 114
-        versionName "3.00.1"
+        versionCode 115
+        versionName "3.00.2"
 	}
     }
     buildTypes {
@@ -154,7 +154,7 @@ dependencies {
     implementation "com.google.dagger:dagger-android:$project.daggerVersion"
 
     // Image Loader
-    implementation 'com.github.bumptech.glide:glide:4.8.0'
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
 
     // Amazon Android SDK

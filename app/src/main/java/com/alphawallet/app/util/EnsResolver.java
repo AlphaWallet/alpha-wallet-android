@@ -2,8 +2,7 @@ package com.alphawallet.app.util;
 
 import android.text.TextUtils;
 
-import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.entity.tokenscript.TokenscriptFunction;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.TokenRepository;
@@ -20,20 +19,16 @@ import org.web3j.crypto.WalletUtils;
 import org.web3j.ens.Contracts;
 import org.web3j.ens.EnsResolutionException;
 import org.web3j.ens.NameHash;
-import org.web3j.ens.contracts.generated.ENS;
-import org.web3j.ens.contracts.generated.PublicResolver;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthSyncing;
 import org.web3j.protocol.core.methods.response.NetVersion;
-import org.web3j.tx.ClientTransactionManager;
-import org.web3j.tx.TransactionManager;
-import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Numeric;
 
 import java.io.InterruptedIOException;
+import java.math.BigInteger;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
@@ -47,6 +42,8 @@ public class EnsResolver {
 
     public static final long DEFAULT_SYNC_THRESHOLD = 1000 * 60 * 3;
     public static final String REVERSE_NAME_SUFFIX = ".addr.reverse";
+    public static final String CRYPTO_RESOLVER = "0xD1E5b0FF1287aA9f9A268759062E4Ab08b9Dacbe";
+    public static final String CRYPTO_ETH_KEY = "crypto.ETH.address";
 
     private final Web3j web3j;
     private final int addressLength;
@@ -91,6 +88,16 @@ public class EnsResolver {
                 {
                     throw new EnsResolutionException("Node is not currently synced");
                 }
+                else if (contractId.endsWith(".crypto")) //check crypto namespace
+                {
+                    byte[] nameHash = NameHash.nameHashAsBytes(contractId);
+                    BigInteger nameId = new BigInteger(nameHash);
+                    String resolverAddress = getContractData(EthereumNetworkBase.MAINNET_ID, CRYPTO_RESOLVER, getResolverOf(nameId));
+                    if (!TextUtils.isEmpty(resolverAddress))
+                    {
+                        contractAddress = getContractData(EthereumNetworkBase.MAINNET_ID, resolverAddress, get(nameId));
+                    }
+                }
                 else
                 {
                     String resolverAddress = lookupResolver(contractId);
@@ -129,7 +136,7 @@ public class EnsResolver {
      * @param address an ethereum address, example: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e"
      * @return a EnsName registered for provided address
      */
-    public String reverseResolve(String address)
+    public String reverseResolve(String address) throws UnableToResolveENS
     {
         String name = null;
         if (WalletUtils.isValidAddress(address))
@@ -148,7 +155,7 @@ public class EnsResolver {
 
             if (!isValidEnsName(name, addressLength))
             {
-                throw new RuntimeException("Unable to resolve name for address: " + address);
+                throw new UnableToResolveENS("Unable to resolve name for address: " + address);
             }
             else
             {
@@ -161,7 +168,8 @@ public class EnsResolver {
         }
     }
 
-    private String lookupResolver(String ensName) throws Exception {
+    private String lookupResolver(String ensName) throws Exception
+    {
         NetVersion netVersion = web3j.netVersion().send();
         String registryContract = Contracts.resolveRegistryContract(netVersion.getNetVersion());
         byte[] nameHash = NameHash.nameHashAsBytes(ensName);
@@ -174,6 +182,24 @@ public class EnsResolver {
         return new Function("resolver",
                             Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(nameHash)),
                             Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                            {
+                            }));
+    }
+
+    private Function getResolverOf(BigInteger nameId)
+    {
+        return new Function("resolverOf",
+                            Arrays.<Type>asList(new org.web3j.abi.datatypes.Uint(nameId)),
+                            Arrays.<TypeReference<?>>asList(new TypeReference<Address>()
+                            {
+                            }));
+    }
+
+    private Function get(BigInteger nameId)
+    {
+        return new Function("get",
+                            Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(EnsResolver.CRYPTO_ETH_KEY), new org.web3j.abi.datatypes.generated.Uint256(nameId)),
+                            Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>()
                             {
                             }));
     }

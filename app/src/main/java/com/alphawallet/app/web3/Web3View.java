@@ -94,7 +94,7 @@ public class Web3View extends WebView {
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webSettings.setUserAgentString(webSettings.getUserAgentString()
                                                + "AlphaWallet(Platform=Android&AppVersion=" + BuildConfig.VERSION_NAME + ")");
-        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
+        WebView.setWebContentsDebuggingEnabled(true); //so devs can debug their scripts/pages
         addJavascriptInterface(new SignCallbackJSInterface(
                 this,
                 innerOnSignTransactionListener,

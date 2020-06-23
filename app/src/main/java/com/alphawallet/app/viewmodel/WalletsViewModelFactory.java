@@ -2,6 +2,7 @@ package com.alphawallet.app.viewmodel;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
+import android.content.Context;
 import android.support.annotation.NonNull;
 
 import javax.inject.Inject;
@@ -28,6 +29,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
     private final KeyService keyService;
     private final GasService gasService;
     private final TokensService tokensService;
+    private final Context context;
 
     @Inject
     public WalletsViewModelFactory(
@@ -40,7 +42,8 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             KeyService keyService,
             GasService gasService,
-            TokensService tokensService) {
+            TokensService tokensService,
+            Context context) {
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.genericWalletInteract = genericWalletInteract;
@@ -51,6 +54,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
         this.keyService = keyService;
         this.gasService = gasService;
         this.tokensService = tokensService;
+        this.context = context;
     }
 
     @NonNull
@@ -66,6 +70,7 @@ public class WalletsViewModelFactory implements ViewModelProvider.Factory {
                 findDefaultNetworkInteract,
                 keyService,
                 gasService,
-                tokensService);
+                tokensService,
+                context);
     }
 }

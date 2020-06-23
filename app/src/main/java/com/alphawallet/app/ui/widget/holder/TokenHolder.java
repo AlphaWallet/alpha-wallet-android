@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,12 +21,15 @@ import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
-import com.alphawallet.app.util.Utils;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.signature.ObjectKey;
+
+import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -34,6 +38,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
     public static final int VIEW_TYPE = 1005;
     public static final String EMPTY_BALANCE = "\u2014\u2014";
+    private static final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
+    private static final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
 
     private final TextView balanceEth;
     private final TextView balanceCurrency;
@@ -45,7 +51,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     private final TextView textAppreciationSub;
     private final TextView contractType;
     private final TextView currencyLabel;
-    private final TextView chainName;
     private final View contractSeparator;
     private final LinearLayout layoutValueDetails;
     private final LinearLayout extendedInfo;
@@ -74,7 +79,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         contractType = findViewById(R.id.contract_type);
         contractSeparator = findViewById(R.id.contract_seperator);
         layoutValueDetails = findViewById(R.id.layout_value_details);
-        chainName = findViewById(R.id.text_chain_name);
         pendingText = findViewById(R.id.balance_eth_pending);
         tokenLayout = findViewById(R.id.token_layout);
         extendedInfo = findViewById(R.id.layout_extended_info);
@@ -96,6 +100,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             String nameValue = token.getStringBalance() + " " + token.getFullName(assetDefinition, token.getTicketCount());
             balanceEth.setText(nameValue);
 
+            displayTokenIcon();
+
             setContractType();
 
             populateTicker();
@@ -103,8 +109,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
             setIssuerDetails();
 
             setPendingAmount();
-
-            setChainColour();
         } catch (Exception ex) {
             fillEmpty();
         }
@@ -204,6 +208,27 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         }
     }
 
+    private void displayTokenIcon()
+    {
+        String correctedAddr = Keys.toChecksumAddress(token.getAddress());
+        String tURL = assetDefinition.getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
+        if (TextUtils.isEmpty(tURL))
+        {
+            tURL = TRUST_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, correctedAddr);
+        }
+
+        int fallbackIcon = EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId);
+
+        Glide.with(getContext().getApplicationContext())
+                .load(tURL)
+                .signature(new ObjectKey(correctedAddr + "-" + token.tokenInfo.chainId))
+                .apply(new RequestOptions().circleCrop())
+                .apply(new RequestOptions().placeholder(fallbackIcon))
+                .into(icon);
+
+        icon.setVisibility(View.VISIBLE);
+    }
+
     private void fillEmpty() {
         balanceEth.setText(R.string.NA);
         balanceCurrency.setText(EMPTY_BALANCE);
@@ -264,18 +289,25 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     private void setIssuerDetails()
     {
         String issuerName = assetDefinition.getIssuerName(token);
-        if(issuerName != null)
+        if(issuerName != null && !issuerName.equalsIgnoreCase(getString(R.string.app_name))) //don't display issuer if it's alphawallet
         {
             issuer.setVisibility(View.VISIBLE);
             issuerPlaceholder.setVisibility(View.VISIBLE);
-            //contractSeparator.setVisibility(View.VISIBLE);
+            if (contractType.getVisibility() == View.VISIBLE)
+            {
+                contractSeparator.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                contractSeparator.setVisibility(View.GONE);
+            }
             issuer.setText(issuerName);
         }
         else
         {
             issuer.setVisibility(View.GONE);
             issuerPlaceholder.setVisibility(View.GONE);
-            //contractSeparator.setVisibility(View.GONE);
+            contractSeparator.setVisibility(View.GONE);
         }
     }
 
@@ -292,13 +324,11 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         if (contractStringId > 0)
         {
             contractType.setText(contractStringId);
-            contractSeparator.setVisibility(View.VISIBLE);
             contractType.setVisibility(View.VISIBLE);
         }
         else
         {
             contractType.setVisibility(View.GONE);
-            contractSeparator.setVisibility(View.GONE);
         }
     }
 
@@ -307,12 +337,5 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         text24Hours.setText(R.string.unknown_balance_without_symbol);
         textAppreciation.setText(R.string.unknown_balance_without_symbol);
         balanceCurrency.setText(R.string.unknown_balance_without_symbol);
-    }
-
-    private void setChainColour()
-    {
-        chainName.setVisibility(View.VISIBLE);
-        chainName.setText(token.getNetworkName());
-        Utils.setChainColour(chainName, token.tokenInfo.chainId);
     }
 }

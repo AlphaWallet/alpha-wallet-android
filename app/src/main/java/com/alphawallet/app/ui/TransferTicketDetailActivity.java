@@ -9,7 +9,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,7 +19,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -31,10 +29,8 @@ import android.widget.Toast;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DisplayState;
-import com.alphawallet.app.entity.ENSCallback;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FinishReceiver;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.VisibilityFilter;
@@ -44,7 +40,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
-import com.alphawallet.app.ui.widget.adapter.AutoCompleteUrlAdapter;
+import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.ItemClickListener;
@@ -89,7 +85,7 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
  * Created by James on 21/02/2018.
  */
 
-public class TransferTicketDetailActivity extends BaseActivity implements Runnable, ItemClickListener, OnTokenClickListener, StandardFunctionInterface
+public class TransferTicketDetailActivity extends BaseActivity implements ItemClickListener, OnTokenClickListener, StandardFunctionInterface
 {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
     private static final int SEND_INTENT_REQUEST_CODE = 2;
@@ -119,7 +115,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
     private DisplayState transferStatus;
 
     private ENSHandler ensHandler;
-    private Handler handler;
 
     private AWalletConfirmationDialog confirmationDialog;
 
@@ -148,7 +143,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         setContentView(R.layout.activity_transfer_detail);
 
         token = getIntent().getParcelableExtra(TICKET);
-        handler = new Handler();
 
         Wallet wallet = getIntent().getParcelableExtra(WALLET);
         ticketIds = getIntent().getStringExtra(EXTRA_TOKENID_LIST);
@@ -254,25 +248,9 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
 
     private void setupAddressEditField()
     {
-        AutoCompleteUrlAdapter adapterUrl = new AutoCompleteUrlAdapter(getApplicationContext(), C.ENS_HISTORY);
+        AutoCompleteAddressAdapter adapterUrl = new AutoCompleteAddressAdapter(getApplicationContext(), C.ENS_HISTORY);
         adapterUrl.setListener(this);
-        ENSCallback ensCallback = new ENSCallback()
-        {
-            @Override
-            public void ENSComplete()
-            {
-                confirmTransfer();
-            }
-
-            @Override
-            public void ENSCheck(String name)
-            {
-                viewModel.checkENSAddress(token.tokenInfo.chainId, name);
-            }
-        };
-        ensHandler = new ENSHandler(this, handler, adapterUrl, this, ensCallback);
-        viewModel.ensResolve().observe(this, ensHandler::onENSSuccess);
-        viewModel.ensFail().observe(this, ensHandler::hideENS);
+        ensHandler = new ENSHandler(this, adapterUrl, this::confirmTransfer);
     }
 
     //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
@@ -808,12 +786,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements Runnab
         String time = String.format(Locale.getDefault(), "%02d:%02d", Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
                                     Calendar.getInstance().get(Calendar.MINUTE));
         expiryTimeEditText.setText(time);
-    }
-
-    @Override
-    public void run()
-    {
-        ensHandler.checkENS();
     }
 
     @Override

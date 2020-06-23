@@ -5,6 +5,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -30,12 +31,16 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.AWEnsResolver;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -55,6 +60,7 @@ public class WalletsViewModel extends BaseViewModel
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final KeyService keyService;
     private final GasService gasService;
+    private final Context context;
 
     private final ImportWalletRouter importWalletRouter;
     private final HomeRouter homeRouter;
@@ -86,7 +92,8 @@ public class WalletsViewModel extends BaseViewModel
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             KeyService keyService,
             GasService gasService,
-            TokensService tokensService)
+            TokensService tokensService,
+            Context context)
     {
         this.setDefaultWalletInteract = setDefaultWalletInteract;
         this.fetchWalletsInteract = fetchWalletsInteract;
@@ -98,8 +105,9 @@ public class WalletsViewModel extends BaseViewModel
         this.keyService = keyService;
         this.gasService = gasService;
         this.tokensService = tokensService;
+        this.context = context;
 
-        ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID));
+        ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), context);
     }
 
     public LiveData<Wallet[]> wallets()

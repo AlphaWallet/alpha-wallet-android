@@ -18,14 +18,13 @@ import android.widget.TextView;
 
 import com.alphawallet.app.entity.AmountUpdateCallback;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.ENSCallback;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QrUrlResult;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.ui.widget.adapter.AutoCompleteUrlAdapter;
+import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.ui.widget.entity.AmountEntryItem;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.ItemClickListener;
@@ -56,7 +55,7 @@ import static com.alphawallet.token.tools.Convert.getEthString;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
-public class SendActivity extends BaseActivity implements Runnable, ItemClickListener, AmountUpdateCallback
+public class SendActivity extends BaseActivity implements ItemClickListener, AmountUpdateCallback
 {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
 
@@ -175,22 +174,9 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
     }
 
     private void setupAddressEditField() {
-        AutoCompleteUrlAdapter adapterUrl = new AutoCompleteUrlAdapter(getApplicationContext(), C.ENS_HISTORY);
+        AutoCompleteAddressAdapter adapterUrl = new AutoCompleteAddressAdapter(getApplicationContext(), C.ENS_HISTORY);
         adapterUrl.setListener(this);
-        ENSCallback ensCallback = new ENSCallback() {
-            @Override
-            public void ENSComplete() {
-                onNext();
-            }
-
-            @Override
-            public void ENSCheck(String name) {
-                viewModel.checkENSAddress(token.tokenInfo.chainId, name);
-            }
-        };
-        ensHandler = new ENSHandler(this, handler, adapterUrl, this, ensCallback);
-        viewModel.ensResolve().observe(this, ensHandler::onENSSuccess);
-        viewModel.ensFail().observe(this, ensHandler::hideENS);
+        ensHandler = new ENSHandler(this, adapterUrl, this::onNext);
         viewModel.tokenFinalised().observe(this, this::resumeEIP681);
     }
 
@@ -550,11 +536,6 @@ public class SendActivity extends BaseActivity implements Runnable, ItemClickLis
             chainName.setText(viewModel.getChainName(token.tokenInfo.chainId));
             viewModel.startGasPriceChecker(token.tokenInfo.chainId);
         }
-    }
-
-    @Override
-    public void run() {
-        ensHandler.checkENS();
     }
 
     @Override

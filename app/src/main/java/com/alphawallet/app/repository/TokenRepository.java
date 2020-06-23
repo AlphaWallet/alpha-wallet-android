@@ -373,7 +373,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public Single<String> resolveENS(int chainId, String ensName)
     {
-        if (ensResolver == null) ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID));
+        if (ensResolver == null) ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), context);
         return ensResolver.resolveENSAddress(ensName);
     }
 
@@ -1277,6 +1277,12 @@ public class TokenRepository implements TokenRepositoryType {
     public Disposable updateBlockRead(Token token, Wallet wallet)
     {
         return localSource.storeBlockRead(token, wallet);
+    }
+
+    @Override
+    public Disposable addImageUrl(int networkId, String address, String imageUrl)
+    {
+        return localSource.storeTokenUrl(networkId, address, imageUrl);
     }
 
     public static Web3j getWeb3jService(int chainId)

@@ -6,9 +6,11 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.*;
 import android.net.Uri;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
 import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -26,6 +28,7 @@ import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.LocaleUtils;
 
 import io.reactivex.Single;
+import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import com.alphawallet.token.entity.MagicLinkData;
@@ -36,9 +39,12 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.HashMap;
 
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
@@ -60,6 +66,7 @@ public class HomeViewModel extends BaseViewModel {
     private final FetchWalletsInteract fetchWalletsInteract;
     private final CurrencyRepositoryType currencyRepository;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final Context context;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
@@ -76,7 +83,8 @@ public class HomeViewModel extends BaseViewModel {
             GenericWalletInteract genericWalletInteract,
             FetchWalletsInteract fetchWalletsInteract,
             CurrencyRepositoryType currencyRepository,
-            EthereumNetworkRepositoryType ethereumNetworkRepository) {
+            EthereumNetworkRepositoryType ethereumNetworkRepository,
+            Context context) {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
         this.addTokenRouter = addTokenRouter;
@@ -86,6 +94,7 @@ public class HomeViewModel extends BaseViewModel {
         this.fetchWalletsInteract = fetchWalletsInteract;
         this.currencyRepository = currencyRepository;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        this.context = context;
     }
 
     @Override
@@ -243,7 +252,7 @@ public class HomeViewModel extends BaseViewModel {
         }
 
         //check for ENS name (could have changed)
-        new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID))
+        new AWEnsResolver(TokenRepository.getWeb3jService(EthereumNetworkRepository.MAINNET_ID), context)
                 .resolveEnsName(wallet.address)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())

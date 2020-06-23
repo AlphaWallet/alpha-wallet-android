@@ -147,7 +147,7 @@
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp">
 
-                    <include layout="@layout/item_input_address" />
+                    <include layout="@layout/item_input_send_address" />
                 </LinearLayout>
 
                 <LinearLayout

@@ -913,6 +913,9 @@ public abstract class TokenscriptFunction
                     //makes no sense as input
                     convertedValue = TOKENSCRIPT_CONVERSION_ERROR + "Mapping in user input params: " + attr.name;
                     break;
+                case Address:
+                    convertedValue = valueFromInput;
+                    break;
                 case Boolean:
                     //attempt to decode
                     if (valueFromInput.equalsIgnoreCase("true") || valueFromInput.equals("1"))
@@ -927,6 +930,9 @@ public abstract class TokenscriptFunction
                 case TokenId:
                     //Shouldn't get here - tokenId should have been handled before.
                     convertedValue = TOKENSCRIPT_CONVERSION_ERROR + "Token ID in user input params: " + attr.name;
+                    break;
+                default:
+                    convertedValue = valueFromInput;
                     break;
             }
         }

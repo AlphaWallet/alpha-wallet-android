@@ -5,6 +5,7 @@ package com.alphawallet.app.repository;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -102,9 +103,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     static final NetworkInfo[] DEFAULT_NETWORKS = new NetworkInfo[] {
             new NetworkInfo(C.ETHEREUM_NETWORK_NAME, C.ETH_SYMBOL,
                     MAINNET_RPC_URL,
-                    "https://etherscan.io/tx/",MAINNET_ID, true,
+                    "https://cn.etherscan.com/tx/",MAINNET_ID, true,
                     MAINNET_FALLBACK_RPC_URL,
-                    "https://api.etherscan.io/",
+                    "https://api-cn.etherscan.com/",
                     C.ETHEREUM_TICKER_NAME,
                     MAINNET_BLOCKSCOUT),
             new NetworkInfo(C.CLASSIC_NETWORK_NAME, C.ETC_SYMBOL,
@@ -358,6 +359,36 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 return ARTIS_TAU1_RPC_URL;
             default:
                 return MAINNET_RPC_URL;
+        }
+    }
+
+    public static int getChainLogo(int networkId) {
+        switch (networkId)
+        {
+            case MAINNET_ID:
+                return R.drawable.ic_ethereum_logo;
+            case KOVAN_ID:
+                return R.drawable.kovan_logo;
+            case ROPSTEN_ID:
+                return R.drawable.ropsten_logo;
+            case RINKEBY_ID:
+                return R.drawable.rinkeby_logo;
+            case POA_ID:
+                return R.drawable.ic_poa_logo;
+            case SOKOL_ID:
+                return R.drawable.ic_poa_sokol;
+            case CLASSIC_ID:
+                return R.drawable.classic_logo;
+            case XDAI_ID:
+                return R.drawable.xdai_logo;
+            case GOERLI_ID:
+                return R.drawable.goerli_logo;
+            case ARTIS_SIGMA1_ID:
+                return R.drawable.ic_artis_sigma_logo;
+            case ARTIS_TAU1_ID:
+                return R.drawable.ic_artis_tau_logo;
+            default:
+                return R.drawable.ic_ethereum_logo;
         }
     }
 

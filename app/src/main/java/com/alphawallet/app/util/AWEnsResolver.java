@@ -1,10 +1,18 @@
 package com.alphawallet.app.util;
 
+import android.content.Context;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
+import com.alphawallet.app.C;
+import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.entity.Wallet;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.web3j.protocol.Web3j;
+
+import java.util.HashMap;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
@@ -16,13 +24,11 @@ import io.reactivex.schedulers.Schedulers;
 public class AWEnsResolver extends EnsResolver
 {
     static final long DEFAULT_SYNC_THRESHOLD = 1000 * 60 * 3;
+    private final Context context;
 
-    public AWEnsResolver(Web3j web3j, long syncThreshold) {
-        super(web3j, syncThreshold);
-    }
-
-    public AWEnsResolver(Web3j web3j) {
-        this(web3j, DEFAULT_SYNC_THRESHOLD);
+    public AWEnsResolver(Web3j web3j, Context context) {
+        super(web3j, DEFAULT_SYNC_THRESHOLD);
+        this.context = context;
     }
 
     /**
@@ -48,15 +54,52 @@ public class AWEnsResolver extends EnsResolver
                 }
                 else
                 {
-                    ensName = "";
+                    ensName = fetchPreviouslyUsedENS(address);
                 }
+            }
+            catch (UnableToResolveENS resolve)
+            {
+                ensName = fetchPreviouslyUsedENS(address);
             }
             catch (Exception e)
             {
+                e.printStackTrace();
                 // no action
             }
             return ensName;
         });
+    }
+
+    private String fetchPreviouslyUsedENS(String address)
+    {
+        String ensName = "";
+        //try previously resolved names
+        String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(C.ENS_HISTORY_PAIR, "");
+        HashMap<String, String> history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>() {}.getType());
+        if (history.containsKey(address.toLowerCase()))
+        {
+            String previouslyUsedDomain = history.get(address.toLowerCase());
+            //perform an additional check, to ensure this ENS name is still valid, try this ENS name to see if it resolves to the address
+            ensName = resolveENSAddress(previouslyUsedDomain)
+                    .map(resolvedAddress -> checkResolvedAddressMatches(resolvedAddress, address, previouslyUsedDomain))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .blockingGet();
+        }
+
+        return ensName;
+    }
+
+    private String checkResolvedAddressMatches(String resolvedAddress, String address, String previouslyUsedDomain)
+    {
+        if (resolvedAddress.equalsIgnoreCase(address))
+        {
+            return previouslyUsedDomain;
+        }
+        else
+        {
+            return "";
+        }
     }
 
     /**

@@ -20,7 +20,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.ui.widget.entity.ItemClickListener;
 import com.alphawallet.app.ui.widget.entity.UrlFilter;
 
-public class AutoCompleteUrlAdapter extends ArrayAdapter<String>
+public class AutoCompleteAddressAdapter extends ArrayAdapter<String>
 {
     private final List<String> history;
     public List<String> filteredUrls = new ArrayList<>();
@@ -28,7 +28,7 @@ public class AutoCompleteUrlAdapter extends ArrayAdapter<String>
     private ItemClickListener listener;
     private String preferenceTag;
 
-    public AutoCompleteUrlAdapter(Context context, String tag) {
+    public AutoCompleteAddressAdapter(Context context, String tag) {
         super(context, 0);
         preferenceTag = tag;
         this.context = context;

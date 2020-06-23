@@ -77,6 +77,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -111,6 +113,7 @@ import okhttp3.Request;
 
 import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
+import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
 
@@ -1523,6 +1526,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             //get required Attribute Results for this tokenId & selection
                             List<String> requiredAttributeNames = selection.getRequiredAttrs();
                             Map<String, TokenScriptResult.Attribute> idAttrResults = getAttributeResultsForTokenIds(attrResults, requiredAttributeNames, tokenId);
+                            addIntrinsicAttributes(idAttrResults, token, tokenId); //adding intrinsic attributes eg ownerAddress, tokenId, contractAddress
 
                             //Now evaluate the selection
                             boolean exclude = EvaluateSelection.evaluate(selection.head, idAttrResults);
@@ -1538,6 +1542,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             return validActions;
         });
+    }
+
+    private void addIntrinsicAttributes(Map<String, TokenScriptResult.Attribute> attrs, Token token, BigInteger tokenId)
+    {
+        //add tokenId, ownerAddress & contractAddress
+        attrs.put("tokenId", new TokenScriptResult.Attribute("tokenId", "tokenId", tokenId, tokenId.toString(10)));
+        attrs.put("ownerAddress", new TokenScriptResult.Attribute("ownerAddress", "ownerAddress", BigInteger.ZERO, token.getWallet()));
+        attrs.put("contractAddress", new TokenScriptResult.Attribute("contractAddress", "contractAddress", BigInteger.ZERO, token.getAddress()));
     }
 
     public String checkFunctionDenied(Token token, String actionName, List<BigInteger> tokenIds)
@@ -1563,6 +1575,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, tokenId, td, this, false).blockingSingle();
                     if (attrResult != null) attrs.put(attrId, attrResult);
                 }
+
+                addIntrinsicAttributes(attrs, token, tokenId);
 
                 boolean exclude = EvaluateSelection.evaluate(selection.head, attrs);
                 if (exclude && !TextUtils.isEmpty(selection.denialMessage))
@@ -2269,7 +2283,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         } // TODO: Catch specific tokenscript parse errors to report tokenscript errors.
                         catch (Exception e)
                         {
-                            // don't add to list
+                            TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
+                            ContractInfo contractInfo = new ContractInfo("Contract Type",new HashMap<>());
+                            StringWriter stackTrace = new StringWriter();
+                            e.printStackTrace(new PrintWriter(stackTrace));
+
+                            tokenLocators.add(new TokenLocator(file.getName(), contractInfo, tsf, true, stackTrace.toString()));
                         }
                     });
 
@@ -2361,6 +2380,29 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         }
                     }
                 });
+    }
+
+    public String getTokenImageUrl(int networkId, String address)
+    {
+        String url = "";
+        String instanceKey = address.toLowerCase() + "-" + networkId;
+        try (Realm realm = realmManager.getAuxRealmInstance(IMAGES_DB))
+        {
+            RealmAuxData instance = realm.where(RealmAuxData.class)
+                    .equalTo("instanceKey", instanceKey)
+                    .findFirst();
+
+            if (instance != null)
+            {
+                url = instance.getResult();
+            }
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+
+        return url;
     }
 
     public Single<Integer> fetchViewHeight(int chainId, String address)

@@ -1100,8 +1100,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         int originChainId = ev.parentAttribute.originContract.addresses.keySet().iterator().next();
         String originAddress = ev.parentAttribute.originContract.addresses.get(originChainId).get(0);
 
-        Web3j web3j = getWeb3jService(chainId);
         Token originToken = tokensService.getToken(originChainId, originAddress);
+        if (originToken == null || !originToken.hasPositiveBalance()) return; //early return if wallet has zero balance for this token
+
+        Web3j web3j = getWeb3jService(chainId);
+
         final EthFilter filter = eventUtils.generateLogFilter(ev, originToken, this);
 
         try

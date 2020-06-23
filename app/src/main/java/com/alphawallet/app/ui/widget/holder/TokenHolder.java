@@ -33,6 +33,8 @@ import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener, View.OnLongClickListener {
 
@@ -40,6 +42,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public static final String EMPTY_BALANCE = "\u2014\u2014";
     private static final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
     private static final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
+    private static final Map<String, Boolean> iconCheck = new ConcurrentHashMap<>();
 
     private final TextView balanceEth;
     private final TextView balanceCurrency;
@@ -219,14 +222,19 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
         int fallbackIcon = EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId);
 
+        boolean onlyTryCache = iconCheck.containsKey(correctedAddr);
+
         Glide.with(getContext().getApplicationContext())
                 .load(tURL)
                 .signature(new ObjectKey(correctedAddr + "-" + token.tokenInfo.chainId))
+                .onlyRetrieveFromCache(onlyTryCache) //reduce URL checking, only check once per session
                 .apply(new RequestOptions().circleCrop())
                 .apply(new RequestOptions().placeholder(fallbackIcon))
                 .into(icon);
 
         icon.setVisibility(View.VISIBLE);
+
+        iconCheck.put(correctedAddr, true);
     }
 
     private void fillEmpty() {

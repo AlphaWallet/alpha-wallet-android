@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -35,11 +36,13 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
@@ -47,6 +50,8 @@ import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_AD
 public class WalletsViewModel extends BaseViewModel
 {
     private final static String TAG = WalletsViewModel.class.getSimpleName();
+
+    private static final int BALANCE_CHECK_INTERVAL_SECONDS = 20;
 
     private final SetDefaultWalletInteract setDefaultWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
@@ -73,6 +78,9 @@ public class WalletsViewModel extends BaseViewModel
     private NetworkInfo currentNetwork;
     private Map<String, Wallet> walletBalances = new HashMap<>();
     private int walletUpdateCount;
+
+    @Nullable
+    private Disposable balanceTimerDisposable;
 
     WalletsViewModel(
             SetDefaultWalletInteract setDefaultWalletInteract,
@@ -134,7 +142,7 @@ public class WalletsViewModel extends BaseViewModel
     {
         disposable = setDefaultWalletInteract
                 .set(wallet)
-                .subscribe(() -> onDefaultWalletChanged(wallet), this::onError);
+                .subscribe(() -> onDefaultWallet(wallet), this::onError);
     }
 
     private Wallet addWalletToMap(Wallet wallet) {
@@ -142,16 +150,33 @@ public class WalletsViewModel extends BaseViewModel
         return wallet;
     }
 
-    public void findNetwork()
+    public void onPrepare()
     {
+        walletBalances.clear();
         progress.postValue(true);
         ContractLocator override = EthereumNetworkRepository.getOverrideToken();
         currentNetwork = findDefaultNetworkInteract.getNetworkInfo(override.chainId);
 
         disposable = genericWalletInteract
                 .find()
-                .subscribe(this::onDefaultWalletChanged,
+                .subscribe(this::onDefaultWallet,
                            error -> noWalletsError.postValue(true));
+    }
+
+    private void onDefaultWallet(Wallet wallet)
+    {
+        defaultWallet.postValue(wallet);
+        disposable = fetchWalletsInteract
+                .fetch()
+                .subscribe(this::onWallets, this::onError);
+    }
+
+    private void updateWallets()
+    {
+        //now load the current wallets from database
+        disposable = fetchWalletsInteract
+                .fetch()
+                .subscribe(this::getWalletsBalance, this::onError);
     }
 
     private void onWallets(Wallet[] items)
@@ -168,6 +193,8 @@ public class WalletsViewModel extends BaseViewModel
             }
         }
         wallets.postValue(items);
+
+        startBalanceUpdateTimer(items);
     }
 
     public void updateBalancesIfRequired(Wallet[] wallets)
@@ -178,19 +205,8 @@ public class WalletsViewModel extends BaseViewModel
         }
     }
 
-    private void onDefaultWalletChanged(Wallet wallet)
-    {
-        defaultWallet.postValue(wallet);
-
-        //now load the current wallets from database
-        disposable = fetchWalletsInteract
-                .fetch()
-                .subscribe(this::onWallets, this::onError);
-    }
-
     public void swipeRefreshWallets()
     {
-        walletBalances.clear();
         //check for updates
         //check names first
         disposable = fetchWalletsInteract.fetch().toObservable()
@@ -200,7 +216,7 @@ public class WalletsViewModel extends BaseViewModel
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(ensName -> updateOnName(wallet, ensName), this::onError));
 
-        progress.postValue(false);
+        updateWallets();
     }
 
     private void updateOnName(Wallet wallet, String ensName)
@@ -218,12 +234,20 @@ public class WalletsViewModel extends BaseViewModel
     public void fetchWallets()
     {
         progress.postValue(true);
-        findNetwork();
+        onPrepare();
     }
 
     public void newWallet(Activity ctx, CreateWalletCallbackInterface createCallback)
     {
         keyService.createNewHDKey(ctx, createCallback);
+    }
+
+    private void startBalanceUpdateTimer(final Wallet[] wallets)
+    {
+        if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
+
+        balanceTimerDisposable = Observable.interval(0, BALANCE_CHECK_INTERVAL_SECONDS, TimeUnit.SECONDS)
+                .doOnNext(l -> getWalletsBalance(wallets)).subscribe();
     }
 
     /**
@@ -244,17 +268,18 @@ public class WalletsViewModel extends BaseViewModel
                 .subscribe(wallet -> {
                     fetchTokensInteract.fetchStoredToken(network, wallet, override.address) //fetch cached balance from this wallet's DB
                     .flatMap(tokenFromCache -> fetchTokensInteract.updateBalance(wallet.address, tokenFromCache)) //update balance
-                    .subscribe(this::updateWallet, error -> onFetchError(wallet, network)).isDisposed();
-                }, this::onError);
+                    .subscribe(this::updateWallet, error -> onFetchError(wallet)).isDisposed();
+                }, this::onError, () -> progress.postValue(false));
     }
 
-    private void onFetchError(Wallet wallet, NetworkInfo networkInfo)
+    private void onFetchError(Wallet wallet)
     {
-        //leave wallet blank
+        //leave wallet with stale value, but grey out balance
         if (walletBalances.containsKey(wallet.address.toLowerCase()))
         {
-            wallet.zeroWalletBalance(networkInfo);
+            wallet.balance = "*" + wallet.balance; //stale balance annotation - only used in WalletHolder
             updateBalance.postValue(wallet);
+            wallet.balance = wallet.balance.substring(1); //don't store the stale balance annotation
             walletBalances.put(wallet.address.toLowerCase(), wallet);
         }
         storeWallets();
@@ -338,5 +363,11 @@ public class WalletsViewModel extends BaseViewModel
     public void failedAuthentication(Operation taskCode)
     {
         keyService.failedAuthentication(taskCode);
+    }
+
+    public void onPause()
+    {
+        if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
+        balanceTimerDisposable = null;
     }
 }

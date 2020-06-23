@@ -633,4 +633,6 @@
     <string name="speedup_tx_description">Submit replacement Transaction with higher gas price.</string>
     <string name="cancel_tx_description">Cancel Transaction by replacing pending with zero value TX.</string>
     <string name="file_error">TokenScript error : %1$s\n\n</string>
+    <string name="transaction_already_written">Transaction already written to blockchain, cannot resend or cancel.</string>
+    <string name="transaction_already_written_title">Transaction Already Written</string>
 </resources>

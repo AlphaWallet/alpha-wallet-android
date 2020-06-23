@@ -54,10 +54,12 @@ import static com.alphawallet.app.entity.ConfirmationType.ETH;
 import static com.alphawallet.app.entity.ConfirmationType.WEB3TRANSACTION;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static com.alphawallet.token.tools.Convert.getEthString;
 
 public class ConfirmationActivity extends BaseActivity implements SignAuthenticationCallback
 {
+    private static final String NONCE_LOW_MESSAGE = "nonce is too low";
     AWalletAlertDialog dialog;
 
     @Inject
@@ -604,9 +606,21 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private void onError(ErrorEnvelope error) {
         hideDialog();
         dialog = new AWalletAlertDialog(this);
-        dialog.setTitle(R.string.error_transaction_failed);
-        dialog.setMessage(error.message);
-        dialog.setIcon(ERROR);
+
+        String errorMessage = error.message != null ? error.message.toLowerCase() : "";
+        if (confirmationType == ConfirmationType.RESEND || confirmationType == ConfirmationType.CANCEL_TX && errorMessage.contains(NONCE_LOW_MESSAGE))
+        {
+            dialog.setIcon(WARNING);
+            dialog.setTitle(R.string.transaction_already_written_title);
+            dialog.setMessage(R.string.transaction_already_written);
+        }
+        else
+        {
+            dialog.setIcon(ERROR);
+            dialog.setTitle(R.string.error_transaction_failed);
+            dialog.setMessage(error.message);
+        }
+
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> {
             dialog.dismiss();

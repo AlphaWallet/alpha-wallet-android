@@ -64,7 +64,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static final String BACKUP_INFURA_KEY = BuildConfig.XInfuraAPI;
     public static final String MAINNET_FALLBACK_RPC_URL = !getAmberDataKey().startsWith("obtain") ? "https://rpc.web3api.io?x-api-key=" + getAmberDataKey() : MAINNET_RPC_URL;
-    public static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
+    public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
     public static final String XDAI_RPC_URL = "https://dai.poa.network";
     public static final String POA_RPC_URL = "https://core.poa.network/";
     public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/" + getInfuraKey();
@@ -110,7 +110,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     MAINNET_BLOCKSCOUT),
             new NetworkInfo(C.CLASSIC_NETWORK_NAME, C.ETC_SYMBOL,
                     CLASSIC_RPC_URL,
-                    "https://gastracker.io/tx/",CLASSIC_ID, true, CLASSIC_RPC_URL, null, C.CLASSIC_TICKER_NAME, CLASSIC_BLOCKSCOUT),
+                    "https://blockscout.com/etc/mainnet/tx/",CLASSIC_ID, true, CLASSIC_RPC_URL, "https://blockscout.com/etc/mainnet/", C.CLASSIC_TICKER_NAME, CLASSIC_BLOCKSCOUT),
             new NetworkInfo(C.XDAI_NETWORK_NAME,
                     C.xDAI_SYMBOL,
                     XDAI_RPC_URL,

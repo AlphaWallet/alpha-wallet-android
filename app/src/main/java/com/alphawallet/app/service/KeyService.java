@@ -293,22 +293,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             return UpgradeKeyResult.NO_SCREENLOCK;
 
         return upgradeKey();
-
-        /*//request authentication
-        switch (wallet.type)
-        {
-            case KEYSTORE:
-            case KEYSTORE_LEGACY:
-                checkAuthentication(UPGRADE_KEYSTORE_KEY);
-                return UpgradeKeyResult.REQUESTING_SECURITY;
-            case HDKEY:
-                checkAuthentication(UPGRADE_HD_KEY);
-                return UpgradeKeyResult.REQUESTING_SECURITY;
-            default:
-                break;
-        }
-
-        return UpgradeKeyResult.ERROR;*/
     }
 
     /**
@@ -716,6 +700,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                                       .setKeySize(256)
                                       .setUserAuthenticationRequired(useAuthentication)
                                       .setIsStrongBoxBacked(true)
+                                      .setInvalidatedByBiometricEnrollment(false)
                                       .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
                                       .setRandomizedEncryptionRequired(true)
                                       .setEncryptionPaddings(PADDING)
@@ -739,16 +724,33 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     {
         try
         {
-            keyGenerator.init(new KeyGenParameterSpec.Builder(
-                    keyAddress,
-                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                                      .setBlockModes(BLOCK_MODE)
-                                      .setKeySize(256)
-                                      .setUserAuthenticationRequired(useAuthentication)
-                                      .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
-                                      .setRandomizedEncryptionRequired(true)
-                                      .setEncryptionPaddings(PADDING)
-                                      .build());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            {
+                keyGenerator.init(new KeyGenParameterSpec.Builder(
+                        keyAddress,
+                        KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                        .setBlockModes(BLOCK_MODE)
+                        .setKeySize(256)
+                        .setUserAuthenticationRequired(useAuthentication)
+                        .setInvalidatedByBiometricEnrollment(false)
+                        .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
+                        .setRandomizedEncryptionRequired(true)
+                        .setEncryptionPaddings(PADDING)
+                        .build());
+            }
+            else
+            {
+                keyGenerator.init(new KeyGenParameterSpec.Builder(
+                        keyAddress,
+                        KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                        .setBlockModes(BLOCK_MODE)
+                        .setKeySize(256)
+                        .setUserAuthenticationRequired(useAuthentication)
+                        .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
+                        .setRandomizedEncryptionRequired(true)
+                        .setEncryptionPaddings(PADDING)
+                        .build());
+            }
         }
         catch (IllegalStateException | InvalidAlgorithmParameterException e)
         {

@@ -23,13 +23,13 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.QrUrlResult;
+import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
-import com.alphawallet.app.util.QRURLParser;
+import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.AddTokenViewModel;
 import com.alphawallet.app.viewmodel.AddTokenViewModelFactory;
@@ -81,7 +81,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
     private TextView currentNetwork;
     private RelativeLayout selectNetworkLayout;
     public TextView chainName;
-    private QrUrlResult currentResult;
+    private QRResult currentResult;
     private InputView tokenType;
     private boolean zeroBalanceToken = false;
 
@@ -427,7 +427,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                     if (data != null) {
                         String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
 
-                        QRURLParser parser = QRURLParser.getInstance();
+                        QRParser parser = QRParser.getInstance();
                         currentResult = parser.parse(barcode);
 
                         String extracted_address = null;

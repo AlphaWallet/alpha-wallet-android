@@ -1,8 +1,8 @@
 package com.alphawallet.app;
 
 import com.alphawallet.app.entity.EIP681Type;
-import com.alphawallet.app.util.QRURLParser;
-import com.alphawallet.app.entity.QrUrlResult;
+import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.entity.QRResult;
 
 import org.junit.Test;
 
@@ -22,7 +22,7 @@ public class QRExtractorTest {
     public void extractingIsCorrect()
     {
 
-        QRURLParser parser = QRURLParser.getInstance();
+        QRParser parser = QRParser.getInstance();
 
         // Correct string
         String extractedString = parser.extractAddressFromQrString("ethereum:0x0000000000000000000000000000000000000000?value=0");
@@ -106,8 +106,8 @@ public class QRExtractorTest {
 
     @Test
     public void parseQRURLTest() {
-        QRURLParser parser = QRURLParser.getInstance();
-        QrUrlResult result;
+        QRParser parser = QRParser.getInstance();
+        QRResult result;
         Map<String, String> params;
 
         result = parser.parse("protocol:0x0000000000000000000000000000000000000XyZ?k1=v1");

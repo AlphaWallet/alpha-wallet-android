@@ -2,6 +2,7 @@ package com.alphawallet.app.ui;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
@@ -427,6 +428,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         dialog = null;
     }
 
+    private void onBrowserWithURL(String url)
+    {
+        showPage(DAPP_BROWSER);
+        ((DappBrowserFragment)dappBrowserFragment).onItemClick(url);
+    }
+
     @Override
     public void onDestroy()
     {
@@ -617,7 +624,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 .beginTransaction()
                 .detach(fragment)
                 .attach(fragment)
-                .commit();
+                .commitAllowingStateLoss();
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
@@ -896,6 +903,13 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case C.UPDATE_LOCALE:
                 updateLocale(data);
                 break;
+            case C.REQUEST_UNIVERSAL_SCAN:
+                if(resultCode == Activity.RESULT_OK)
+                {
+                    String url = null;
+                    if (data != null) url = data.getStringExtra(C.EXTRA_URL);
+                    onBrowserWithURL(url);
+                }
             default:
                 super.onActivityResult(requestCode, resultCode, data);
                 break;

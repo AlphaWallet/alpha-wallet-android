@@ -32,6 +32,7 @@ import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.ui.WalletActionsActivity;
 import com.alphawallet.app.ui.WalletFragment;
 import com.alphawallet.app.ui.WalletsActivity;
+import com.alphawallet.app.ui.zxing.QRScanningActivity;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -162,4 +163,8 @@ public abstract class BuildersModule {
     @ActivityScope
     @ContributesAndroidInjector(modules = TokenScriptManagementModule.class)
     abstract TokenScriptManagementActivity bindTokenScriptManagementActivity();
+
+	@ActivityScope
+	@ContributesAndroidInjector(modules = QRScanningModule.class)
+	abstract QRScanningActivity bindQRScanningActivity();
 }

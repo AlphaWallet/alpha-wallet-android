@@ -47,7 +47,7 @@ import com.alphawallet.app.ui.widget.entity.ItemClickListener;
 import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
-import com.alphawallet.app.util.QRURLParser;
+import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -609,7 +609,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
                                 return;
                             }
 
-                            QRURLParser parser = QRURLParser.getInstance();
+                            QRParser parser = QRParser.getInstance();
                             String extracted_address = parser.extractAddressFromQrString(barcode);
                             if (extracted_address == null)
                             {

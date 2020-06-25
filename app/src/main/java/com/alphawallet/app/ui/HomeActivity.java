@@ -34,6 +34,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -64,6 +65,8 @@ import com.alphawallet.app.widget.DepositView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
+
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
 import org.web3j.crypto.WalletUtils;
 
@@ -105,6 +108,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private TutoShowcase findWalletAddressDialog;
     private PinAuthenticationCallbackInterface authInterface;
     private String importFileName;
+    private boolean bottomMarginSet = false;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -234,6 +238,23 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         viewModel.cleanDatabases(this);
+
+        //Ensure when keyboard appears the webview gets squashed into remaining view. Also remove navigation bar to increase screen size
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        KeyboardVisibilityEvent.setEventListener(
+                this, isOpen -> {
+                    if (isOpen)
+                    {
+                        bottomMarginSet = viewPager.hasBottomMargin();
+                        viewPager.setBottomMargin(false);
+                        setNavBarVisibility(View.GONE);
+                    }
+                    else
+                    {
+                        if (bottomMarginSet) viewPager.setBottomMargin(true);
+                        setNavBarVisibility(View.VISIBLE);
+                    }
+                });
     }
 
     private void onBackup(String address)
@@ -371,6 +392,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 return true;
             }
             case DAPP_BROWSER: {
+                viewPager.setBottomMargin(true);
                 if (getSelectedItem() == DAPP_BROWSER) {
                     ((DappBrowserFragment)dappBrowserFragment).homePressed();
                 } else {
@@ -379,10 +401,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 return true;
             }
             case WALLET: {
+                viewPager.setBottomMargin(false);
                 showPage(WALLET);
                 return true;
             }
             case SETTINGS: {
+                viewPager.setBottomMargin(false);
                 showPage(SETTINGS);
                 return true;
             }
@@ -439,6 +463,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         switch (page) {
             case DAPP_BROWSER: {
                 hideToolbar();
+                viewPager.setBottomMargin(true);
                 viewPager.setCurrentItem(DAPP_BROWSER);
                 setTitle(getString(R.string.toolbar_header_browser));
                 selectNavigationItem(DAPP_BROWSER);
@@ -448,6 +473,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             case WALLET: {
                 showToolbar();
+                viewPager.setBottomMargin(false);
                 viewPager.setCurrentItem(WALLET);
                 if (walletTitle == null || walletTitle.isEmpty()) {
                     setTitle(getString(R.string.toolbar_header_wallet));
@@ -462,6 +488,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             case SETTINGS: {
                 showToolbar();
+                viewPager.setBottomMargin(false);
                 viewPager.setCurrentItem(SETTINGS);
                 setTitle(getString(R.string.toolbar_header_settings));
                 selectNavigationItem(SETTINGS);
@@ -471,6 +498,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             case TRANSACTIONS: {
                 showToolbar();
+                viewPager.setBottomMargin(true);
                 viewPager.setCurrentItem(TRANSACTIONS);
                 setTitle(getString(R.string.toolbar_header_transactions));
                 selectNavigationItem(TRANSACTIONS);
@@ -482,6 +510,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             default:
                 showToolbar();
                 viewPager.setCurrentItem(WALLET);
+                viewPager.setBottomMargin(false);
                 setTitle(getString(R.string.toolbar_header_wallet));
                 selectNavigationItem(WALLET);
                 enableDisplayHomeAsHome(false);

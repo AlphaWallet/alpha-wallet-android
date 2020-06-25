@@ -865,15 +865,23 @@ public class TokenDefinition {
                         {
                             throw new SAXException("Duplicate Module label: " + currentModuleName);
                         }
-                        else
+                        break;
+                    case "type":
+                        if(currentModuleName != null)
                         {
                             Module eventModule = handleElementSequence(element, currentModuleName);
                             moduleLookup.put(currentModuleName, eventModule);
                             currentModuleName = null;
                         }
+                        else
+                        {
+                            throw new SAXException("Sequence must be enclosed within <namedType name=... />");
+                        }
                         break;
                     case "sequence":
-                        if (currentModuleName == null) { throw new SAXException("Sequence must be enclosed within <namedType name=... />"); }
+                        if (currentModuleName == null) {
+                            throw new SAXException("Sequence must be enclosed within <namedType name=... />");
+                        }
                         Module eventModule = handleElementSequence(element, currentModuleName);
                         moduleLookup.put(currentModuleName, eventModule);
                         currentModuleName = null;

@@ -773,10 +773,10 @@ public class TokensRealmSource implements TokenLocalSource {
     {
         if (realmItem == null) return null;
         if (tf == null) tf   = new TokenFactory();
-        Token        result  = null;
         TokenInfo    info    = tf.createTokenInfo(realmItem);
         NetworkInfo  network = ethereumNetworkRepository.getNetworkByChain(info.chainId);
-        result = tf.createToken(info, realmItem, realmItem.getUpdateTime(), network.getShortName());
+        if (network == null) return null;
+        Token result = tf.createToken(info, realmItem, realmItem.getUpdateTime(), network.getShortName());
         result.setTokenWallet(wallet.address);
         RealmTokenTicker rawItem = realm.where(RealmTokenTicker.class)
                 .equalTo("contract", result.getAddress() + "-" + result.tokenInfo.chainId)

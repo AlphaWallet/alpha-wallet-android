@@ -16,7 +16,7 @@ import static com.alphawallet.token.web.AppSiteController.getInfuraKey;
 public class EthRPCNodes
 {
     private static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/" + getInfuraKey();
-    private static final String CLASSIC_RPC_URL = "https://web3.gastracker.io";
+    private static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
     private static final String XDAI_RPC_URL = "https://dai.poa.network";
     private static final String POA_RPC_URL = "https://core.poa.network/";
     private static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/" + getInfuraKey();

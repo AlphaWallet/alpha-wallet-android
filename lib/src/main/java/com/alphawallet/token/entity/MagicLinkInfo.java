@@ -24,7 +24,7 @@ public class MagicLinkInfo
 
     //Etherscan domains
     private static final String mainNetEtherscan = "https://cn.etherscan.com/";
-    private static final String classicEtherscan = "https://gastracker.io/";
+    private static final String classicEtherscan = "https://blockscout.com/etc/mainnet/";
     private static final String callistoEtherscan = "https://etherscan.io/"; //TODO: determine callisto etherscan
     private static final String kovanEtherscan = "https://kovan.etherscan.io/";
     private static final String ropstenEtherscan = "https://ropsten.etherscan.io/";

@@ -75,16 +75,19 @@ public class AWEnsResolver extends EnsResolver
         String ensName = "";
         //try previously resolved names
         String historyJson = PreferenceManager.getDefaultSharedPreferences(context).getString(C.ENS_HISTORY_PAIR, "");
-        HashMap<String, String> history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>() {}.getType());
-        if (history.containsKey(address.toLowerCase()))
+        if (historyJson.length() > 0)
         {
-            String previouslyUsedDomain = history.get(address.toLowerCase());
-            //perform an additional check, to ensure this ENS name is still valid, try this ENS name to see if it resolves to the address
-            ensName = resolveENSAddress(previouslyUsedDomain)
-                    .map(resolvedAddress -> checkResolvedAddressMatches(resolvedAddress, address, previouslyUsedDomain))
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(Schedulers.io())
-                    .blockingGet();
+            HashMap<String, String> history = new Gson().fromJson(historyJson, new TypeToken<HashMap<String, String>>() {}.getType());
+            if (history.containsKey(address.toLowerCase()))
+            {
+                String previouslyUsedDomain = history.get(address.toLowerCase());
+                //perform an additional check, to ensure this ENS name is still valid, try this ENS name to see if it resolves to the address
+                ensName = resolveENSAddress(previouslyUsedDomain)
+                        .map(resolvedAddress -> checkResolvedAddressMatches(resolvedAddress, address, previouslyUsedDomain))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(Schedulers.io())
+                        .blockingGet();
+            }
         }
 
         return ensName;

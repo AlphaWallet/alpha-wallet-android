@@ -21,7 +21,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
     public static final int ARTIS_TAU1_ID = 246785;
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
-    public static final String CLASSIC_RPC_URL = "https://ethereumclassic.network";
+    public static final String CLASSIC_RPC_URL = "https://www.ethercluster.com/etc";
     public static final String XDAI_RPC_URL = "https://dai.poa.network";
     public static final String POA_RPC_URL = "https://core.poa.network/";
     public static final String ROPSTEN_RPC_URL = "https://ropsten.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -46,7 +46,7 @@ public abstract class EthereumNetworkBase { // implements EthereumNetworkReposit
         {
             put(MAINNET_ID, new NetworkInfo("Ethereum", "ETH", MAINNET_RPC_URL, "https://etherscan.io/tx/",
                     MAINNET_ID, true, "ethereum", MAINNET_BLOCKSCOUT));
-            put(CLASSIC_ID, new NetworkInfo("Ethereum Classic", "ETC", CLASSIC_RPC_URL, "https://gastracker.io/tx/",
+            put(CLASSIC_ID, new NetworkInfo("Ethereum Classic", "ETC", CLASSIC_RPC_URL, "https://blockscout.com/etc/mainnet/tx/",
                     CLASSIC_ID, true, "ethereum-classic", CLASSIC_BLOCKSCOUT));
             put(XDAI_ID, new NetworkInfo("xDAI", "xDAI", XDAI_RPC_URL, "https://blockscout.com/poa/dai/tx/",
                     XDAI_ID, false, "dai", XDAI_BLOCKSCOUT));

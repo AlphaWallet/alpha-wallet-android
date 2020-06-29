@@ -13,6 +13,7 @@ import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
+import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 
 public class HomeViewModelFactory implements ViewModelProvider.Factory {
@@ -26,6 +27,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final CurrencyRepositoryType currencyRepository;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final Context context;
+    private final MyAddressRouter myAddressRouter;
 
     public HomeViewModelFactory(
             PreferenceRepositoryType preferenceRepository,
@@ -37,7 +39,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             FetchWalletsInteract fetchWalletsInteract,
             CurrencyRepositoryType currencyRepository,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            Context context) {
+            Context context,
+            MyAddressRouter myAddressRouter) {
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.importTokenRouter = importTokenRouter;
@@ -48,6 +51,7 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.currencyRepository = currencyRepository;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.context = context;
+        this.myAddressRouter = myAddressRouter;
     }
 
     @NonNull
@@ -63,7 +67,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 fetchWalletsInteract,
                 currencyRepository,
                 ethereumNetworkRepository,
-                context
-                );
+                context,
+                myAddressRouter
+        );
     }
 }

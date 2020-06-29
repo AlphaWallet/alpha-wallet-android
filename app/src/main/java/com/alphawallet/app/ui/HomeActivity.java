@@ -49,6 +49,7 @@ import com.alphawallet.app.entity.HomeCommsInterface;
 import com.alphawallet.app.entity.HomeReceiver;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
+import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
@@ -428,7 +429,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         dialog = null;
     }
 
-    private void onBrowserWithURL(String url)
+    public void onBrowserWithURL(String url)
     {
         showPage(DAPP_BROWSER);
         ((DappBrowserFragment)dappBrowserFragment).onItemClick(url);
@@ -906,9 +907,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case C.REQUEST_UNIVERSAL_SCAN:
                 if(resultCode == Activity.RESULT_OK)
                 {
-                    String url = null;
-                    if (data != null) url = data.getStringExtra(C.EXTRA_URL);
-                    onBrowserWithURL(url);
+                    String qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
+                    viewModel.handleQRCode(this, qrCode);
                 }
             default:
                 super.onActivityResult(requestCode, resultCode, data);

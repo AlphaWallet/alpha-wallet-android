@@ -7,15 +7,11 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.QRResult;
-import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.ui.BaseActivity;
 import com.alphawallet.app.ui.widget.OnQRCodeScannedListener;
-import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.viewmodel.QRScanningViewModel;
 import com.alphawallet.app.viewmodel.QRScanningViewModelFactory;
 
@@ -125,53 +121,7 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
 
     public void handleQRCode(String qrCode)
     {
-        try
-        {
-            if (qrCode == null) return;
-
-            QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
-            QRResult qrResult = parser.parse(qrCode);
-
-            switch (qrResult.type)
-            {
-                case ADDRESS:
-                    viewModel.showMyAddress(this);
-                    break;
-                case PAYMENT:
-                    viewModel.showSend(this, qrResult);
-                    break;
-                case TRANSFER:
-                    viewModel.showSend(this, qrResult);
-                    break;
-                case FUNCTION_CALL:
-                    //TODO
-                    break;
-                case URL:
-                    String finalQrCode = qrCode;
-                    viewModel.loadUrl(this, finalQrCode);
-                    break;
-                case MAGIC_LINK:
-                    viewModel.showImportLink(this, qrCode);
-                    break;
-                case OTHER:
-                    qrCode = null;
-                    break;
-            }
-        }
-        catch (Exception e)
-        {
-            qrCode = null;
-        }
-
-        if(qrCode != null)
-        {
-            finish();
-        }
-        else
-        {
-            Toast.makeText(this, R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
-            fullScannerFragment.onResume();
-        }
+        viewModel.handleResult(this, qrCode);
     }
 
     @Override

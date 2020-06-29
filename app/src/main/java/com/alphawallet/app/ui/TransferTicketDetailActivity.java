@@ -609,7 +609,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
                                 return;
                             }
 
-                            QRParser parser = QRParser.getInstance();
+                            QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
                             String extracted_address = parser.extractAddressFromQrString(barcode);
                             if (extracted_address == null)
                             {

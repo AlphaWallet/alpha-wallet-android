@@ -23,6 +23,7 @@ import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.ui.widget.entity.AmountEntryItem;
@@ -256,7 +257,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
                             return;
                         }
 
-                        QRParser parser = QRParser.getInstance();
+                        QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
                         QRResult result = parser.parse(barcode);
                         String extracted_address = null;
                         if (result != null)

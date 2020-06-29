@@ -25,6 +25,7 @@ import com.alphawallet.app.entity.ImportWalletCallback;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.ui.widget.OnImportKeystoreListener;
 import com.alphawallet.app.ui.widget.OnImportPrivateKeyListener;
@@ -412,7 +413,7 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
                         return;
                     }
 
-                    QRParser parser = QRParser.getInstance();
+                    QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
                     QRResult result = parser.parse(barcode);
                     String extracted_address = null;
                     if (result != null && result.type == EIP681Type.ADDRESS)

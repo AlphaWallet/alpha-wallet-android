@@ -26,6 +26,7 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
@@ -427,7 +428,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
                     if (data != null) {
                         String barcode = data.getStringExtra(FullScannerFragment.BarcodeObject);
 
-                        QRParser parser = QRParser.getInstance();
+                        QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
                         currentResult = parser.parse(barcode);
 
                         String extracted_address = null;

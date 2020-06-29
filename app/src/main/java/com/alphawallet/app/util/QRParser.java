@@ -6,10 +6,13 @@ import com.alphawallet.app.entity.EthereumProtocolParser;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
+import com.alphawallet.token.entity.ChainSpec;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.web3j.crypto.WalletUtils.isValidAddress;
@@ -30,8 +33,9 @@ import static org.web3j.crypto.WalletUtils.isValidAddress;
 public class QRParser {
     private static QRParser mInstance;
     private static final Pattern findAddress = Pattern.compile("(0x)([0-9a-fA-F]{40})($|\\s)");
+    private static final List<ChainSpec> extraChains = new ArrayList<>();
 
-    public static QRParser getInstance() {
+    public static QRParser getInstance(List<ChainSpec> chains) {
         if (mInstance == null) {
             synchronized (QRParser.class) {
                 if (mInstance == null) {
@@ -39,6 +43,8 @@ public class QRParser {
                 }
             }
         }
+        extraChains.clear();
+        if (chains != null) extraChains.addAll(chains);
         return mInstance;
     }
 
@@ -173,7 +179,7 @@ public class QRParser {
     {
         try
         {
-            ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
+            ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), extraChains);
             if (parser.parseUniversalLink(data).chainId > 0) //see if it's a valid link
             {
                 return true;
@@ -181,7 +187,7 @@ public class QRParser {
         }
         catch (SalesOrderMalformed e)
         {
-            e.printStackTrace();
+            // No action
         }
 
         return false;

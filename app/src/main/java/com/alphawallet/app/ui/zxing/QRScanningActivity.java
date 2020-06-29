@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.QRResult;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.ui.BaseActivity;
 import com.alphawallet.app.ui.widget.OnQRCodeScannedListener;
 import com.alphawallet.app.util.QRParser;
@@ -128,7 +129,7 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
         {
             if (qrCode == null) return;
 
-            QRParser parser = QRParser.getInstance();
+            QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
             QRResult qrResult = parser.parse(qrCode);
 
             switch (qrResult.type)

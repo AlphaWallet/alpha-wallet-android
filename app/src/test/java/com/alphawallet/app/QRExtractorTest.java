@@ -22,7 +22,7 @@ public class QRExtractorTest {
     public void extractingIsCorrect()
     {
 
-        QRParser parser = QRParser.getInstance();
+        QRParser parser = QRParser.getInstance(null);
 
         // Correct string
         String extractedString = parser.extractAddressFromQrString("ethereum:0x0000000000000000000000000000000000000000?value=0");
@@ -106,7 +106,7 @@ public class QRExtractorTest {
 
     @Test
     public void parseQRURLTest() {
-        QRParser parser = QRParser.getInstance();
+        QRParser parser = QRParser.getInstance(null);
         QRResult result;
         Map<String, String> params;
 

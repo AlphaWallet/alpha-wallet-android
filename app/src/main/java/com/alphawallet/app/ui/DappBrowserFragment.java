@@ -1284,7 +1284,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                     {
                         qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
                         if (qrCode == null || checkForMagicLink(qrCode)) return;
-                        QRParser parser = QRParser.getInstance();
+                        QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
                         QRResult result = parser.parse(qrCode);
                         switch (result.type)
                         {

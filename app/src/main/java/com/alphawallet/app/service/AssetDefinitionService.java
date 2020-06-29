@@ -1101,8 +1101,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         String originAddress = ev.parentAttribute.originContract.addresses.get(originChainId).get(0);
 
         Token originToken = tokensService.getToken(originChainId, originAddress);
-        if (originToken == null || !originToken.hasPositiveBalance()) return; //early return if wallet has zero balance for this token
-
+        if (originToken == null ||
+                (originToken.isNonFungible() && !originToken.hasPositiveBalance())) return; // early return if NFT and wallet has zero balance for this token
+                                                                                            // Note: Fungible with zero balance is safe to query events as filter is always ownerAddress
         Web3j web3j = getWeb3jService(chainId);
 
         final EthFilter filter = eventUtils.generateLogFilter(ev, originToken, this);

@@ -579,7 +579,7 @@
     <string name="title_clear_browser_cache">Clear Browser Caches</string>
     <string name="title_tokenscript">TokenScript</string>
     <string name="title_change_language">Change Language</string>
-    <string name="add_hide_tokens">Mostrar / Ocultar Tokens</string>
+    <string name="add_hide_tokens">Agregar / Ocultar tokens</string>
     <string name="instagram">Instagram</string>
     <string name="tokenscript_file_error">TokenScript file error</string>
     <string name="settings_locale_currency">Change Currency</string>
@@ -592,6 +592,7 @@
     <string name="hide_notification">Hide Notification</string>
     <string name="card_view_not_found_error">%1$s not found</string>
     <string name="tokenscript_management">Tokenscript Management</string>
+    <string name="subtitle_network">Red Ethereum</string>
 
     <!-- Gas Slider -->
     <string name="speed_gas">Speed (Gas)</string>

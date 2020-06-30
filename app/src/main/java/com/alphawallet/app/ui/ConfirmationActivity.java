@@ -59,7 +59,8 @@ import static com.alphawallet.token.tools.Convert.getEthString;
 
 public class ConfirmationActivity extends BaseActivity implements SignAuthenticationCallback
 {
-    private static final String NONCE_LOW_MESSAGE = "nonce is too low";
+    private static final String NONCE_LOW_MESSAGE = "too low";
+    private static final String NONCE_STRING = "nonce";
     AWalletAlertDialog dialog;
 
     @Inject
@@ -471,9 +472,15 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         hideDialog();
         dialog = new AWalletAlertDialog(this);
         dialog.setTitle(R.string.transaction_succeeded);
+        dialog.setCancelable(true);
         dialog.setMessage(hash);
-        dialog.setButtonText(R.string.copy);
+        dialog.setButtonText(R.string.ok);
+        dialog.setSecondaryButtonText(R.string.copy);
         dialog.setButtonListener(v -> {
+            dialog.dismiss();
+            sendBroadcast(new Intent(PRUNE_ACTIVITY));
+        });
+        dialog.setSecondaryButtonListener(v -> {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("transaction hash",
                     EthereumNetworkBase.getEtherscanURLbyNetwork(token.tokenInfo.chainId) + "tx/" + hash);
@@ -608,7 +615,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         dialog = new AWalletAlertDialog(this);
 
         String errorMessage = error.message != null ? error.message.toLowerCase() : "";
-        if (confirmationType == ConfirmationType.RESEND || confirmationType == ConfirmationType.CANCEL_TX && errorMessage.contains(NONCE_LOW_MESSAGE))
+        if (confirmationType == ConfirmationType.RESEND || confirmationType == ConfirmationType.CANCEL_TX && errorMessage.contains(NONCE_LOW_MESSAGE) && errorMessage.contains(NONCE_STRING))
         {
             dialog.setIcon(WARNING);
             dialog.setTitle(R.string.transaction_already_written_title);

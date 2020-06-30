@@ -585,7 +585,7 @@
     <string name="title_clear_browser_cache">Clear Browser Caches</string>
     <string name="title_tokenscript">TokenScript</string>
     <string name="title_change_language">Change Language</string>
-    <string name="add_hide_tokens">Show / Hide Tokens</string>
+    <string name="add_hide_tokens">Add / Hide Tokens</string>
     <string name="instagram">Instagram</string>
     <string name="settings_locale_currency">Change Currency</string>
     <string name="dialog_title_select_currency">Select FIAT Currency</string>
@@ -637,6 +637,10 @@
     <string name="speedup_tx_description">Submit replacement Transaction with higher gas price.</string>
     <string name="cancel_tx_description">Cancel Transaction by replacing pending with zero value TX.</string>
     <string name="file_error">TokenScript error : %1$s\n\n</string>
+    <string name="message_scan_camera">Point your camera on QR code</string>
+    <string name="light">Light</string>
+    <string name="my_qr_code">My QR Code</string>
+    <string name="browse">Browse</string>
     <string name="transaction_already_written">Transaction already written to blockchain, cannot resend or cancel.</string>
     <string name="transaction_already_written_title">Transaction Already Written</string>
 </resources>

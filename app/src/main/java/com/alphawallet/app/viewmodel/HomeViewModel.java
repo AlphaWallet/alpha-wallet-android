@@ -1,36 +1,43 @@
 package com.alphawallet.app.viewmodel;
 
+import android.app.Activity;
 import android.app.DownloadManager;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.*;
 import android.net.Uri;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.widget.Toast;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
-import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.ui.HomeActivity;
+import com.alphawallet.app.ui.ImportTokenActivity;
+import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.LocaleUtils;
 
-import io.reactivex.Single;
-import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+
+import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.widget.AWalletBottomNavigationView;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.alphawallet.app.R;
@@ -39,12 +46,9 @@ import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.HashMap;
 
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
@@ -67,12 +71,14 @@ public class HomeViewModel extends BaseViewModel {
     private final CurrencyRepositoryType currencyRepository;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final Context context;
+    private final MyAddressRouter myAddressRouter;
 
     private CryptoFunctions cryptoFunctions;
     private ParseMagicLink parser;
 
     private final MutableLiveData<File> installIntent = new MutableLiveData<>();
     private final MutableLiveData<String> walletName = new MutableLiveData<>();
+    private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
 
     HomeViewModel(
             PreferenceRepositoryType preferenceRepository,
@@ -84,7 +90,8 @@ public class HomeViewModel extends BaseViewModel {
             FetchWalletsInteract fetchWalletsInteract,
             CurrencyRepositoryType currencyRepository,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            Context context) {
+            Context context,
+            MyAddressRouter myAddressRouter) {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
         this.addTokenRouter = addTokenRouter;
@@ -95,6 +102,7 @@ public class HomeViewModel extends BaseViewModel {
         this.currencyRepository = currencyRepository;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.context = context;
+        this.myAddressRouter = myAddressRouter;
     }
 
     @Override
@@ -120,6 +128,9 @@ public class HomeViewModel extends BaseViewModel {
 
     public void prepare() {
         progress.postValue(false);
+        disposable = genericWalletInteract
+                .find()
+                .subscribe(this::onDefaultWallet, this::onError);
     }
 
     public void onClean()
@@ -127,13 +138,18 @@ public class HomeViewModel extends BaseViewModel {
 
     }
 
-    public void showImportLink(Context context, String importData) {
+    private void onDefaultWallet(final Wallet wallet)
+    {
+        defaultWallet.setValue(wallet);
+    }
+
+    public void showImportLink(Activity activity, String importData) {
         disposable = genericWalletInteract
                 .find().toObservable()
                 .filter(wallet -> checkWalletNotEqual(wallet, importData))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(wallet -> importLink(wallet, context, importData), this::onError);
+                .subscribe(wallet -> importLink(wallet, activity, importData), this::onError);
     }
 
     private boolean checkWalletNotEqual(Wallet wallet, String importData) {
@@ -160,14 +176,8 @@ public class HomeViewModel extends BaseViewModel {
         return filterPass;
     }
 
-    private void importLink(Wallet wallet, Context context, String importData) {
-        //valid link, remove from clipboard
-        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        if (clipboard != null) {
-            ClipData clipData = ClipData.newPlainText("", "");
-            clipboard.setPrimaryClip(clipData);
-        }
-        importTokenRouter.open(context, importData);
+    private void importLink(Wallet wallet, Activity activity, String importData) {
+        importTokenRouter.open(activity, importData);
     }
 
     public void showAddToken(Context context, String address) {
@@ -343,5 +353,73 @@ public class HomeViewModel extends BaseViewModel {
     public void setErrorCallback(FragmentMessenger callback)
     {
         assetDefinitionService.setErrorCallback(callback);
+    }
+
+    public void handleQRCode(Activity activity, String qrCode)
+    {
+        try
+        {
+            if (qrCode == null) return;
+
+            QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
+            QRResult qrResult = parser.parse(qrCode);
+
+            switch (qrResult.type)
+            {
+                case ADDRESS:
+                    showMyAddress(activity);
+                    break;
+                case PAYMENT:
+                    showSend(activity, qrResult);
+                    break;
+                case TRANSFER:
+                    showSend(activity, qrResult);
+                    break;
+                case FUNCTION_CALL:
+                    //TODO: Handle via ConfirmationActivity
+                    break;
+                case URL:
+                    ((HomeActivity)activity).onBrowserWithURL(qrCode);
+                    break;
+                case MAGIC_LINK:
+                    showImportLink(activity, qrCode);
+                    break;
+                case OTHER:
+                    qrCode = null;
+                    break;
+            }
+        }
+        catch (Exception e)
+        {
+            qrCode = null;
+        }
+
+        if(qrCode == null)
+        {
+            Toast.makeText(context, R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void showSend(Activity ctx, QRResult result)
+    {
+        Intent intent = new Intent(ctx, SendActivity.class);
+        boolean sendingTokens = (result.getFunction() != null && result.getFunction().length() > 0);
+        String address = defaultWallet.getValue().address;
+        int decimals = 18;
+
+        intent.putExtra(C.EXTRA_SENDING_TOKENS, sendingTokens);
+        intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
+        intent.putExtra(C.EXTRA_SYMBOL, ethereumNetworkRepository.getNetworkByChain(result.chainId).symbol);
+        intent.putExtra(C.EXTRA_DECIMALS, decimals);
+        intent.putExtra(C.Key.WALLET, defaultWallet.getValue());
+        intent.putExtra(C.EXTRA_TOKEN_ID, (Token)null);
+        intent.putExtra(C.EXTRA_AMOUNT, result);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        ctx.startActivity(intent);
+    }
+
+    public void showMyAddress(Activity activity)
+    {
+        myAddressRouter.open(activity, defaultWallet.getValue());
     }
 }

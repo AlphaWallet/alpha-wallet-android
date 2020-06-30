@@ -18,9 +18,9 @@ public class EthereumProtocolParser
 
     }
 
-    public QrUrlResult readProtocol(String protocol, String data)
+    public QRResult readProtocol(String protocol, String data)
     {
-        QrUrlResult result = null;
+        QRResult result = null;
         List<EthTypeParam> args = new ArrayList<>();
         try
         {
@@ -31,7 +31,7 @@ public class EthereumProtocolParser
             if (address.value.length() < 2) return null;
             if (address.value.startsWith("0x") && address.value.length() != ADDRESS_LENGTH) return null;
 
-            result = new QrUrlResult(protocol, address.value.toLowerCase());
+            result = new QRResult(protocol, address.value.toLowerCase());
             ParseState readState = ParseState.ADDRESS;
 
             String type = null;

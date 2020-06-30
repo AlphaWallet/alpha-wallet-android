@@ -648,6 +648,9 @@ public class WalletFragment extends BaseFragment implements
         if (menuItem.getItemId() == R.id.action_add) {
             viewModel.showAddToken(getContext());
         }
+        if (menuItem.getItemId() == R.id.action_scan) {
+            viewModel.showQRCodeScanning(getActivity());
+        }
         return super.onMenuItemClick(menuItem);
     }
 

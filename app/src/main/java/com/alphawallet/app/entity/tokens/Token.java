@@ -435,7 +435,7 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean isBad()
     {
-        return tokenInfo.symbol == null && tokenInfo.name == null;
+        return tokenInfo == null || (tokenInfo.symbol == null && tokenInfo.name == null);
     }
 
     public boolean checkTokenWallet(String address)

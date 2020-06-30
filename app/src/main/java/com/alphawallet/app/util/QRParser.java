@@ -1,11 +1,20 @@
 package com.alphawallet.app.util;
 
+import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.EthereumProtocolParser;
-import com.alphawallet.app.entity.QrUrlResult;
+import com.alphawallet.app.entity.QRResult;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
+import com.alphawallet.token.entity.ChainSpec;
+import com.alphawallet.token.entity.MagicLinkData;
+import com.alphawallet.token.entity.MagicLinkInfo;
+import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.web3j.crypto.WalletUtils.isValidAddress;
@@ -23,22 +32,25 @@ import static org.web3j.crypto.WalletUtils.isValidAddress;
  * - Plain Ethereum address
  */
 
-public class QRURLParser {
-    private static QRURLParser mInstance;
+public class QRParser {
+    private static QRParser mInstance;
     private static final Pattern findAddress = Pattern.compile("(0x)([0-9a-fA-F]{40})($|\\s)");
+    private static final List<ChainSpec> extraChains = new ArrayList<>();
 
-    public static QRURLParser getInstance() {
+    public static QRParser getInstance(List<ChainSpec> chains) {
         if (mInstance == null) {
-            synchronized (QRURLParser.class) {
+            synchronized (QRParser.class) {
                 if (mInstance == null) {
-                    mInstance = new QRURLParser();
+                    mInstance = new QRParser();
                 }
             }
         }
+        extraChains.clear();
+        if (chains != null) extraChains.addAll(chains);
         return mInstance;
     }
 
-    private QRURLParser() { }
+    private QRParser() { }
 
     private static String extractAddress(String str)
     {
@@ -74,18 +86,25 @@ public class QRURLParser {
         return (isValidAddress(address) || ENSHandler.canBeENSName(address)) ? address : null;
     }
 
-    public QrUrlResult parse(String url) {
+    public QRResult parse(String url) {
         if (url == null) return null;
         String[] parts = url.split(":");
 
-        QrUrlResult result = null;
+        QRResult result = null;
+
+        //Check for import/magic link
+        if(checkForMagicLink(url))
+        {
+            result = new QRResult(url, EIP681Type.MAGIC_LINK);
+            return result;
+        }
 
         if (parts.length == 1)
         {
             String address = extractAddress(parts[0]);
 
             if (address != null) {
-                result = new QrUrlResult(address);
+                result = new QRResult(address);
             }
         }
         else if (parts.length == 2)
@@ -99,7 +118,7 @@ public class QRURLParser {
         {
             String address = extractAddress(url);
             if (address != null) {
-                result = new QrUrlResult(address);
+                result = new QRResult(address);
             }
             else
             {
@@ -107,11 +126,11 @@ public class QRURLParser {
                 {
                     //looks like a URL?
                     new URL(url);
-                    result = new QrUrlResult(url, EIP681Type.URL); //resolve to URL
+                    result = new QRResult(url, EIP681Type.URL); //resolve to URL
                 }
                 catch (Exception e)
                 {
-                    result = new QrUrlResult(url, EIP681Type.OTHER);
+                    result = new QRResult(url, EIP681Type.OTHER);
                 }
             }
         }
@@ -121,7 +140,7 @@ public class QRURLParser {
 
     public String extractAddressFromQrString(String url) {
 
-        QrUrlResult result = parse(url);
+        QRResult result = parse(url);
 
         if (result == null || result.type == EIP681Type.OTHER) {
             return null;
@@ -140,10 +159,39 @@ public class QRURLParser {
             {
                 case "eth":
                 case "xyz":
+                case "crypto":
                     return true;
                 default:
                     break;
             }
+        }
+
+        return false;
+    }
+
+    /**
+     * This method checks for Magic/Import token kind of URL which can be redirected to
+     * import token screen later.
+     * @param data QR Code
+     * @return
+     * TRUE: The given data is Magic/Import one
+     * FALSE: The given data is not Magic/Import one
+     */
+    private boolean checkForMagicLink(String data)
+    {
+        try
+        {
+            int chainId = MagicLinkInfo.identifyChainId(data);
+
+            if (chainId > 0) //see if it's a valid link
+            {
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+            // No action
+            e.printStackTrace();
         }
 
         return false;

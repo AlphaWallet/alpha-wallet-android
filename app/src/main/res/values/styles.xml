@@ -100,4 +100,14 @@
         <item name="android:textColor">@color/mine</item>
     </style>
 
+    <style name="QRScannerTextView">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:drawablePadding">@dimen/normal_margin</item>
+    </style>
+
 </resources>

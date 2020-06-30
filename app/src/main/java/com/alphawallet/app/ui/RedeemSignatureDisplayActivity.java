@@ -23,7 +23,6 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.alphawallet.app.entity.FinishReceiver;
-import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.SignaturePair;
 import com.alphawallet.app.entity.tokens.Token;
@@ -65,6 +64,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     private Web3TokenView tokenView;
     private LinearLayout webWrapper;
     private boolean signRequest;
+    private AWalletAlertDialog dialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -212,12 +212,12 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            GotAuthorisation(resultCode == RESULT_OK);
+            gotAuthorisation(resultCode == RESULT_OK);
         }
     }
 
     @Override
-    public void GotAuthorisation(boolean gotAuth)
+    public void gotAuthorisation(boolean gotAuth)
     {
         if (gotAuth)
         {
@@ -230,9 +230,25 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         }
     }
 
+    @Override
+    public void cancelAuthentication()
+    {
+        if (dialog != null && dialog.isShowing()) dialog.cancel();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.NONE);
+        dialog.setTitle(R.string.authentication_cancelled);
+        dialog.setButtonText(R.string.ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.setCancelable(true);
+        dialog.show();
+    }
+
     private void dialogKeyNotAvailableError()
     {
-        AWalletAlertDialog dialog = new AWalletAlertDialog(this);
+        if (dialog != null && dialog.isShowing()) dialog.cancel();
+        dialog = new AWalletAlertDialog(this);
         dialog.setTitle(R.string.key_error);
         dialog.setIcon(AWalletAlertDialog.ERROR);
         dialog.setMessage(getString(R.string.fail_sign));

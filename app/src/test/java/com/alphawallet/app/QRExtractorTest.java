@@ -1,12 +1,14 @@
 package com.alphawallet.app;
 
+import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.EIP681Type;
-import com.alphawallet.app.util.QRURLParser;
-import com.alphawallet.app.entity.QrUrlResult;
+import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.entity.QRResult;
 
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.util.Base64;
 import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
@@ -22,7 +24,7 @@ public class QRExtractorTest {
     public void extractingIsCorrect()
     {
 
-        QRURLParser parser = QRURLParser.getInstance();
+        QRParser parser = QRParser.getInstance(null);
 
         // Correct string
         String extractedString = parser.extractAddressFromQrString("ethereum:0x0000000000000000000000000000000000000000?value=0");
@@ -106,9 +108,24 @@ public class QRExtractorTest {
 
     @Test
     public void parseQRURLTest() {
-        QRURLParser parser = QRURLParser.getInstance();
-        QrUrlResult result;
+        QRParser parser = QRParser.getInstance(null);
+        QRResult result;
         Map<String, String> params;
+
+        CryptoFunctions cryptoFunctions = new CryptoFunctions()
+        {
+            @Override
+            public byte[] Base64Decode(String message)
+            {
+                return Base64.getUrlDecoder().decode(message);
+            }
+
+            @Override
+            public byte[] Base64Encode(byte[] data)
+            {
+                return Base64.getUrlEncoder().encode(data);
+            }
+        };
 
         result = parser.parse("protocol:0x0000000000000000000000000000000000000XyZ?k1=v1");
         assertTrue("protocol".equals(result.getProtocol()));
@@ -164,16 +181,32 @@ public class QRExtractorTest {
         assertTrue("0xF629cBd94d3791C9250152BD8dfBDF380E2a3B9c".equalsIgnoreCase(result.getAddress()));
         assertTrue("0xB4Eda076896D62419409e6D89f734A336608D18D".equalsIgnoreCase(result.functionToAddress));
 
+        //Test function calls and function signature generation
         result = parser.parse("ethereum:0xaaf3A96b8f5E663Fc47bCc19f14e10A3FD9c414B@4/pay?uint256=100000&value=1000&gasPrice=700000&gasLimit=27500");
         assertTrue("ethereum".equals(result.getProtocol()));
+        assertTrue(result.type == EIP681Type.FUNCTION_CALL);
         assertTrue("0xaaf3a96b8f5e663fc47bcc19f14e10a3fd9c414b".equals(result.getAddress()));
         assertTrue(result.getFunction().equals("pay(uint256)"));
         assertTrue(result.getGasPrice().equals(BigInteger.valueOf(700000)));
         assertTrue(result.getGasLimit().equals(BigInteger.valueOf(27500)));
         assertTrue(new BigInteger("1000",10).equals(result.getValue()));
 
-        result = parser.parse("www.duckduckgo.com"); //should't parse URL without protocol
-        assertTrue(result.type == EIP681Type.OTHER);
+        result = parser.parse("ethereum:0xaaf3A96b8f5E663Fc47bCc19f14e10A3FD9c414B@4/approve?address=0x8e23ee67d1332ad560396262c48ffbb01f93d052&uint256=1000");
+        assertTrue("ethereum".equals(result.getProtocol()));
+        assertTrue(result.type == EIP681Type.FUNCTION_CALL);
+        assertTrue("0xaaf3a96b8f5e663fc47bcc19f14e10a3fd9c414b".equals(result.getAddress()));
+        assertTrue(result.getFunction().equals("approve(address,uint256)"));
+
+        //ethereum function with no params
+        result = parser.parse("ethereum:0xaaf3A96b8f5E663Fc47bCc19f14e10A3FD9c414B@4/activateCompoundFinance");
+        assertTrue("ethereum".equals(result.getProtocol()));
+        assertTrue(result.type == EIP681Type.FUNCTION_CALL);
+        assertTrue("0xaaf3a96b8f5e663fc47bcc19f14e10a3fd9c414b".equals(result.getAddress()));
+        assertTrue(result.getFunction().equals("activateCompoundFinance()"));
+
+        //Test magiclink
+        result = parser.parse("https://rinkeby.aw.app/AQAHoSBfnM-scRdqGWp_UEFOHl90fBDj0M9-ItcPWPUGu2LCYyzBDW7mt9VVyoPkHIk1ElL9xCQM90jeMiYJMYA4l4-JtVQ-UGijRcbFEaCZLSvSsCuXGpApc4zCehw=");
+        assertTrue(result.type == EIP681Type.MAGIC_LINK);
 
         result = parser.parse("https://www.alphawallet.com");
         System.out.println(result.getAddress());

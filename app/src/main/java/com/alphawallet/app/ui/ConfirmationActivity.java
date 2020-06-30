@@ -658,12 +658,12 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         }
         else if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            GotAuthorisation(resultCode == RESULT_OK);
+            gotAuthorisation(resultCode == RESULT_OK);
         }
     }
 
     @Override
-    public void GotAuthorisation(boolean gotAuth)
+    public void gotAuthorisation(boolean gotAuth)
     {
         if (gotAuth)
         {
@@ -676,6 +676,12 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         }
         //got authorisation, continue with transaction
         if (gotAuth) finaliseTransaction();
+    }
+
+    @Override
+    public void cancelAuthentication()
+    {
+        hideDialog();
     }
 
     private void securityError() {

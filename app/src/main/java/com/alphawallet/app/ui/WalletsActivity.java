@@ -374,7 +374,7 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
-    public void FetchMnemonic(String mnemonic)
+    public void fetchMnemonic(String mnemonic)
     {
 
     }

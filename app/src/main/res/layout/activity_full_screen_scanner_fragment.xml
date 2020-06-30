@@ -1,37 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/toolbar1"
+        layout="@layout/layout_app_bar" />
 
     <fragment
         android:id="@+id/scanner_fragment"
         android:name="com.alphawallet.app.ui.zxing.FullScannerFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar1" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|bottom"
+        android:text=""
+        android:textColor="#ffffff" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/scanner_fragment"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/full_large_margin"
+        android:text="@string/message_scan_camera"
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp17" />
 
     <LinearLayout
-        android:id="@+id/click_layout"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/half_large_margin"
+        android:orientation="horizontal">
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-            android:gravity="center"
-            android:src="@drawable/ic_light_back" />
+        <TextView
+            style="@style/QRScannerTextView"
+            android:drawableTop="@drawable/ic_flash"
+            android:text="@string/light" />
+
+        <TextView
+            style="@style/QRScannerTextView"
+            android:drawableTop="@drawable/ic_qr_rounded_white"
+            android:text="@string/light" />
+
+        <TextView
+            style="@style/QRScannerTextView"
+            android:drawableTop="@drawable/ic_browse"
+            android:text="@string/light" />
 
     </LinearLayout>
 
-    <TextView
-        android:layout_gravity="center|bottom"
-        android:text=""
-        android:layout_width="wrap_content"
-        android:textColor="#ffffff"
-        android:layout_height="wrap_content"/>
-</FrameLayout>
+</RelativeLayout>

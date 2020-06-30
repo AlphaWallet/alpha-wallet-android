@@ -28,7 +28,7 @@ public abstract class BarcodeScannerView extends FrameLayout implements Camera.P
     @ColorInt
     private int mLaserColor = ContextCompat.getColor(getContext(), R.color.viewfinder_laser);
     @ColorInt
-    private int mBorderColor = ContextCompat.getColor(getContext(), R.color.colorPrimaryLight);
+    private int mBorderColor = ContextCompat.getColor(getContext(), R.color.onboarding_indicator_unselected);
     private int mMaskColor = ContextCompat.getColor(getContext(), R.color.viewfinder_mask);
     private int mBorderWidth = getResources().getInteger(R.integer.viewfinder_border_width);
     private int mBorderLength = getResources().getInteger(R.integer.viewfinder_border_length);

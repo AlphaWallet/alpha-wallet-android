@@ -108,7 +108,7 @@ public class WalletFragment extends BaseFragment implements
         View view = inflater.inflate(R.layout.fragment_wallet, container, false);
 
         if (VisibilityFilter.canAddTokens()) {
-            toolbar(view, R.menu.menu_add, this::onMenuItemClick);
+            toolbar(view, R.menu.menu_wallet, this::onMenuItemClick);
         } else {
             toolbar(view);
         }
@@ -645,8 +645,8 @@ public class WalletFragment extends BaseFragment implements
 
     @Override
     public boolean onMenuItemClick(MenuItem menuItem) {
-        if (menuItem.getItemId() == R.id.action_add) {
-            viewModel.showAddToken(getContext());
+        if (menuItem.getItemId() == R.id.action_my_wallet) {
+            viewModel.showMyAddress(getContext());
         }
         if (menuItem.getItemId() == R.id.action_scan) {
             viewModel.showQRCodeScanning(getActivity());

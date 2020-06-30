@@ -13,6 +13,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.crashlytics.android.Crashlytics;
 import com.alphawallet.app.BuildConfig;
@@ -80,6 +81,7 @@ public class WalletViewModel extends BaseViewModel
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
+    private final MyAddressRouter myAddressRouter;
 
     private final MutableLiveData<Map<String, String>> currentWalletBalance = new MutableLiveData<>();
 
@@ -111,7 +113,8 @@ public class WalletViewModel extends BaseViewModel
             OpenseaService openseaService,
             FetchTransactionsInteract fetchTransactionsInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            ChangeTokenEnableInteract changeTokenEnableInteract)
+            ChangeTokenEnableInteract changeTokenEnableInteract,
+            MyAddressRouter myAddressRouter)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
@@ -127,6 +130,7 @@ public class WalletViewModel extends BaseViewModel
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.changeTokenEnableInteract = changeTokenEnableInteract;
+        this.myAddressRouter = myAddressRouter;
     }
 
     public LiveData<Token[]> tokens() {
@@ -665,5 +669,10 @@ public class WalletViewModel extends BaseViewModel
     public void newTokensFound(List<ContractLocator> tokenContracts)
     {
         addUnresolvedContracts(tokenContracts);
+    }
+
+    public void showMyAddress(Context context)
+    {
+        myAddressRouter.open(context, currentWallet);
     }
 }

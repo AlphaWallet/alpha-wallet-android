@@ -328,6 +328,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
                         if (parser.parseUniversalLink(clipText.toString()).chainId > 0) //see if it's a valid link
                         {
+                            //valid link, remove from clipboard
+                            ClipData clipData = ClipData.newPlainText("", "");
+                            clipboard.setPrimaryClip(clipData);
                             //let's try to import the link
                             viewModel.showImportLink(this, clipText.toString());
                         }

@@ -1,7 +1,7 @@
 package com.alphawallet.app.ui.zxing;
 
 import android.Manifest;
-import android.arch.lifecycle.ViewModelProviders;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -12,20 +12,10 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.ui.BaseActivity;
 import com.alphawallet.app.ui.widget.OnQRCodeScannedListener;
-import com.alphawallet.app.viewmodel.QRScanningViewModel;
-import com.alphawallet.app.viewmodel.QRScanningViewModelFactory;
 
 import java.util.Objects;
 
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
-
 public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedListener {
-
-    @Inject
-    QRScanningViewModelFactory qrScanningViewModelFactory;
-    private QRScanningViewModel viewModel;
 
     private static final int RC_HANDLE_CAMERA_PERM = 2;
 
@@ -36,8 +26,6 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
     @Override
     public void onCreate(Bundle state)
     {
-        AndroidInjection.inject(this);
-
         super.onCreate(state);
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if (rc == PackageManager.PERMISSION_GRANTED)
@@ -63,10 +51,6 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
         {
             Objects.requireNonNull(fullScannerFragment).registerListener(this);
         }
-
-        viewModel = ViewModelProviders.of(this, qrScanningViewModelFactory)
-                .get(QRScanningViewModel.class);
-        viewModel.prepare(this);
     }
 
     // Handles the requesting of the camera permission.
@@ -121,12 +105,17 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
 
     public void handleQRCode(String qrCode)
     {
-        viewModel.handleResult(this, qrCode);
+        Intent intent = new Intent();
+        intent.putExtra(C.EXTRA_QR_CODE, qrCode);
+        setResult(Activity.RESULT_OK, intent);
+        finish();
     }
 
     @Override
     public void onBackPressed()
     {
-        viewModel.finishWithCancel(this);
+        Intent intent = new Intent();
+        setResult(Activity.RESULT_CANCELED, intent);
+        finish();
     }
 }

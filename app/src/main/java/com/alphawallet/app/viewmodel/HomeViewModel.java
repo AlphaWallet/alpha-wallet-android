@@ -143,13 +143,13 @@ public class HomeViewModel extends BaseViewModel {
         defaultWallet.setValue(wallet);
     }
 
-    public void showImportLink(Context context, String importData) {
+    public void showImportLink(Activity activity, String importData) {
         disposable = genericWalletInteract
                 .find().toObservable()
                 .filter(wallet -> checkWalletNotEqual(wallet, importData))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(wallet -> importLink(wallet, context, importData), this::onError);
+                .subscribe(wallet -> importLink(wallet, activity, importData), this::onError);
     }
 
     private boolean checkWalletNotEqual(Wallet wallet, String importData) {
@@ -176,14 +176,8 @@ public class HomeViewModel extends BaseViewModel {
         return filterPass;
     }
 
-    private void importLink(Wallet wallet, Context context, String importData) {
-        //valid link, remove from clipboard
-        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        if (clipboard != null) {
-            ClipData clipData = ClipData.newPlainText("", "");
-            clipboard.setPrimaryClip(clipData);
-        }
-        importTokenRouter.open(context, importData);
+    private void importLink(Wallet wallet, Activity activity, String importData) {
+        importTokenRouter.open(activity, importData);
     }
 
     public void showAddToken(Context context, String address) {
@@ -376,19 +370,19 @@ public class HomeViewModel extends BaseViewModel {
                     showMyAddress(activity);
                     break;
                 case PAYMENT:
-                    showSend(context, qrResult);
+                    showSend(activity, qrResult);
                     break;
                 case TRANSFER:
-                    showSend(context, qrResult);
+                    showSend(activity, qrResult);
                     break;
                 case FUNCTION_CALL:
-                    //TODO
+                    //TODO: Handle via ConfirmationActivity
                     break;
                 case URL:
                     ((HomeActivity)activity).onBrowserWithURL(qrCode);
                     break;
                 case MAGIC_LINK:
-                    showImportLink(context, qrCode);
+                    showImportLink(activity, qrCode);
                     break;
                 case OTHER:
                     qrCode = null;
@@ -406,7 +400,7 @@ public class HomeViewModel extends BaseViewModel {
         }
     }
 
-    public void showSend(Context ctx, QRResult result)
+    public void showSend(Activity ctx, QRResult result)
     {
         Intent intent = new Intent(ctx, SendActivity.class);
         boolean sendingTokens = (result.getFunction() != null && result.getFunction().length() > 0);

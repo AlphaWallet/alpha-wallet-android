@@ -135,7 +135,6 @@ public class QRResult implements Parcelable
         if (params.size() == 0)
         {
             if (weiValue.compareTo(BigInteger.ZERO) > 0) type = EIP681Type.PAYMENT;
-            return;
         }
 
         //TODO: Build function bytes
@@ -151,6 +150,10 @@ public class QRResult implements Parcelable
                 override = true;
                 //assume transfer request
                 type = EIP681Type.TRANSFER;
+            }
+            else
+            {
+                return;
             }
         }
 
@@ -205,13 +208,9 @@ public class QRResult implements Parcelable
             {
                 type = EIP681Type.TRANSFER;
             }
-            else if (params.size() > 0)
-            {
-                type = EIP681Type.FUNCTION_CALL;
-            }
             else
             {
-                type = EIP681Type.OTHER;
+                type = EIP681Type.FUNCTION_CALL;
             }
         }
 

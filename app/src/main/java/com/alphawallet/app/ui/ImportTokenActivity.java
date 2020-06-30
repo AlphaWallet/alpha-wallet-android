@@ -357,10 +357,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         Button importTickets = findViewById(R.id.import_ticket);
         importTickets.setVisibility(View.VISIBLE);
         importTickets.setAlpha(1.0f);
-
         MagicLinkData data = viewModel.getSalesOrder();
-        //Customise button text
-        View baseView = findViewById(android.R.id.content);
 
         switch (data.contractType)
         {
@@ -374,9 +371,14 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                 break;
             default:
                 importTxt.setText(R.string.ticket_import_valid);
-                if (token != null) 
+                if (token != null)
                     tokenView.displayTicketHolder(token, ticketRange, viewModel.getAssetDefinitionService());
                 break;
+        }
+
+        if (tokenView != null)
+        {
+            tokenView.setOnReadyCallback(this);
         }
     }
 
@@ -661,7 +663,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void onPageLoaded(WebView view)
     {
-
+        webWrapper.setVisibility(View.VISIBLE);
     }
 
     @Override

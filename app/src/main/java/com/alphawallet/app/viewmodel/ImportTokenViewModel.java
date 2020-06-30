@@ -247,7 +247,8 @@ public class ImportTokenViewModel extends BaseViewModel
 
     private void onToken(Token token)
     {
-        if (token.addressMatches(importOrder.contractAddress) && (token instanceof Ticket))
+        if (token.addressMatches(importOrder.contractAddress) &&
+                (!(token.getInterfaceSpec() == ContractType.NOT_SET || token.getInterfaceSpec() == ContractType.OTHER)))
         {
             importToken = token;
             regularBalanceCheck(); //fetch balance and display

@@ -7,6 +7,8 @@ import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.token.entity.ChainSpec;
+import com.alphawallet.token.entity.MagicLinkData;
+import com.alphawallet.token.entity.MagicLinkInfo;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
 
@@ -179,15 +181,17 @@ public class QRParser {
     {
         try
         {
-            ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), extraChains);
-            if (parser.parseUniversalLink(data).chainId > 0) //see if it's a valid link
+            int chainId = MagicLinkInfo.identifyChainId(data);
+
+            if (chainId > 0) //see if it's a valid link
             {
                 return true;
             }
         }
-        catch (SalesOrderMalformed e)
+        catch (Exception e)
         {
             // No action
+            e.printStackTrace();
         }
 
         return false;

@@ -163,8 +163,4 @@ public abstract class BuildersModule {
     @ActivityScope
     @ContributesAndroidInjector(modules = TokenScriptManagementModule.class)
     abstract TokenScriptManagementActivity bindTokenScriptManagementActivity();
-
-	@ActivityScope
-	@ContributesAndroidInjector(modules = QRScanningModule.class)
-	abstract QRScanningActivity bindQRScanningActivity();
 }

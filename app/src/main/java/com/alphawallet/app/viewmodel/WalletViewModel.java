@@ -1,16 +1,20 @@
 package com.alphawallet.app.viewmodel;
 
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.crashlytics.android.Crashlytics;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractLocator;
@@ -46,6 +50,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.app.widget.InputAddressView.BARCODE_READER_REQUEST_CODE;
 
 public class WalletViewModel extends BaseViewModel
 {
@@ -442,6 +447,12 @@ public class WalletViewModel extends BaseViewModel
 
     public void showAddToken(Context context) {
         addTokenRouter.open(context, null);
+    }
+
+    public void showQRCodeScanning(Activity activity) {
+        Intent intent = new Intent(activity, QRScanningActivity.class);
+        intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
+        activity.startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
     }
 
     @Override

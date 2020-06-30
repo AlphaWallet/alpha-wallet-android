@@ -2,6 +2,7 @@ package com.alphawallet.app.ui;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
@@ -48,6 +49,7 @@ import com.alphawallet.app.entity.HomeCommsInterface;
 import com.alphawallet.app.entity.HomeReceiver;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
+import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
@@ -326,6 +328,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
                         if (parser.parseUniversalLink(clipText.toString()).chainId > 0) //see if it's a valid link
                         {
+                            //valid link, remove from clipboard
+                            ClipData clipData = ClipData.newPlainText("", "");
+                            clipboard.setPrimaryClip(clipData);
                             //let's try to import the link
                             viewModel.showImportLink(this, clipText.toString());
                         }
@@ -425,6 +430,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         ((DappBrowserFragment)dappBrowserFragment).onItemClick(url);
         dialog.dismiss();
         dialog = null;
+    }
+
+    public void onBrowserWithURL(String url)
+    {
+        showPage(DAPP_BROWSER);
+        ((DappBrowserFragment)dappBrowserFragment).onItemClick(url);
     }
 
     @Override
@@ -617,7 +628,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 .beginTransaction()
                 .detach(fragment)
                 .attach(fragment)
-                .commit();
+                .commitAllowingStateLoss();
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
@@ -896,6 +907,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case C.UPDATE_LOCALE:
                 updateLocale(data);
                 break;
+            case C.REQUEST_UNIVERSAL_SCAN:
+                if(resultCode == Activity.RESULT_OK)
+                {
+                    String qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
+                    viewModel.handleQRCode(this, qrCode);
+                }
             default:
                 super.onActivityResult(requestCode, resultCode, data);
                 break;

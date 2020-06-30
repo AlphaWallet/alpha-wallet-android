@@ -10,11 +10,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 
 import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.entity.QrUrlResult;
-import com.alphawallet.app.entity.tokens.TokenTicker;
-import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.google.gson.Gson;
@@ -40,7 +36,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import com.alphawallet.token.tools.Numeric;
+
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
@@ -52,7 +48,6 @@ import com.alphawallet.app.service.KeyService;
 
 import org.web3j.abi.datatypes.Address;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -308,7 +303,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         keyService.failedAuthentication(signData);
     }
 
-    public void showSend(Context ctx, QrUrlResult result)
+    public void showSend(Context ctx, QRResult result)
     {
         Intent intent = new Intent(ctx, SendActivity.class);
         boolean sendingTokens = (result.getFunction() != null && result.getFunction().length() > 0);

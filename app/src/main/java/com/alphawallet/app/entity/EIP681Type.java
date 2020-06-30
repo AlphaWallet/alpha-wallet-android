@@ -6,5 +6,11 @@ package com.alphawallet.app.entity;
  */
 public enum EIP681Type
 {
-    ADDRESS, PAYMENT, TRANSFER, FUNCTION_CALL, URL, OTHER
+    ADDRESS,
+    PAYMENT,
+    TRANSFER,
+    FUNCTION_CALL,
+    URL,
+    MAGIC_LINK,
+    OTHER
 }

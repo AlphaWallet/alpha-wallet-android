@@ -9,7 +9,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.QrUrlResult;
+import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
@@ -207,7 +207,7 @@ public class AddTokenViewModel extends BaseViewModel {
         testAddress = null;
     }
 
-    public void showSend(Context ctx, QrUrlResult result, Token token)
+    public void showSend(Context ctx, QRResult result, Token token)
     {
         Intent intent = new Intent(ctx, SendActivity.class);
         boolean sendingTokens = (result.getFunction() != null && result.getFunction().length() > 0);

@@ -19,10 +19,11 @@ import android.widget.TextView;
 import com.alphawallet.app.entity.AmountUpdateCallback;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.QrUrlResult;
+import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
 import com.alphawallet.app.ui.widget.entity.AmountEntryItem;
@@ -32,7 +33,7 @@ import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.KeyboardUtils;
-import com.alphawallet.app.util.QRURLParser;
+import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 
 import dagger.android.AndroidInjection;
@@ -84,7 +85,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
     private TextView pasteText;
     private Button nextBtn;
     private String currentAmount;
-    private QrUrlResult currentResult;
+    private QRResult currentResult;
 
     private AmountEntryItem amountInput;
 
@@ -107,7 +108,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         wallet = getIntent().getParcelableExtra(WALLET);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-        QrUrlResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
+        QRResult result = getIntent().getParcelableExtra(C.EXTRA_AMOUNT);
         currentChain = getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
         myAddress = wallet.address;
 
@@ -256,8 +257,8 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
                             return;
                         }
 
-                        QRURLParser parser = QRURLParser.getInstance();
-                        QrUrlResult result = parser.parse(barcode);
+                        QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
+                        QRResult result = parser.parse(barcode);
                         String extracted_address = null;
                         if (result != null)
                         {
@@ -339,7 +340,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         dialog.show();
     }
 
-    private void validateEIP681Request(QrUrlResult result, boolean overrideNetwork)
+    private void validateEIP681Request(QRResult result, boolean overrideNetwork)
     {
         if (dialog != null) dialog.dismiss();
         //check chain

@@ -15,6 +15,7 @@ import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
+import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.viewmodel.HomeViewModelFactory;
 
@@ -31,7 +32,8 @@ class HomeModule {
             FetchWalletsInteract fetchWalletsInteract,
             CurrencyRepositoryType currencyRepository,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            Context context) {
+            Context context,
+            MyAddressRouter myAddressRouter) {
         return new HomeViewModelFactory(
                 preferenceRepository,
                 localeRepository,
@@ -42,7 +44,8 @@ class HomeModule {
                 fetchWalletsInteract,
                 currencyRepository,
                 ethereumNetworkRepository,
-                context);
+                context,
+                myAddressRouter);
     }
 
     @Provides
@@ -71,5 +74,10 @@ class HomeModule {
     @Provides
     CurrencyRepositoryType provideCurrencyRepository(PreferenceRepositoryType preferenceRepository) {
         return new CurrencyRepository(preferenceRepository);
+    }
+
+    @Provides
+    MyAddressRouter provideMyAddressRouter() {
+        return new MyAddressRouter();
     }
 }

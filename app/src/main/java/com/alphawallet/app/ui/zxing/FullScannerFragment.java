@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui.zxing;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -11,6 +12,8 @@ import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.alphawallet.app.ui.widget.OnQRCodeScannedListener;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 
@@ -20,7 +23,7 @@ import java.util.List;
 public class FullScannerFragment extends Fragment implements ZXingScannerView.ResultHandler
 {
     public static final String BarcodeObject = "Barcode";
-    public static final int SUCCESS = 0; /* currenly, this is the only possible result, so does it really make sense to use it? - Weiwu
+    public static final int SUCCESS = Activity.RESULT_OK; /* currenly, this is the only possible result, so does it really make sense to use it? - Weiwu
                                             yes it does because there's also 'DENY_PERMISSION' I assume that wasn't coded at the time
                                             of the comment - JB*/
 
@@ -32,6 +35,8 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
     private ArrayList<Integer> mSelectedIndices;
     private int mCameraId = -1;
     private int mScanCode = 0;
+
+    private OnQRCodeScannedListener listener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state)
@@ -88,10 +93,18 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
             r.play();
         } catch (Exception e) {}
 
-        Intent intent = new Intent();
-        intent.putExtra(BarcodeObject, rawResult.getText());
-        getActivity().setResult(SUCCESS, intent);
-        getActivity().finish();
+        //Check for listener
+        if(listener != null)
+        {
+            listener.onReceive(rawResult.getText());
+        }
+        else
+        {
+            Intent intent = new Intent();
+            intent.putExtra(BarcodeObject, rawResult.getText());
+            getActivity().setResult(SUCCESS, intent);
+            getActivity().finish();
+        }
     }
 
     public void closeMessageDialog() {
@@ -133,5 +146,10 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
         mScannerView.stopCamera();
         closeMessageDialog();
         closeFormatsDialog();
+    }
+
+    public void registerListener(OnQRCodeScannedListener listener)
+    {
+        this.listener = listener;
     }
 }

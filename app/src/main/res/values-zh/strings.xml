@@ -608,4 +608,8 @@
     <string name="delete">Delete</string>
     <string name="refreshing_tokenscripts">Refresh TokenScripts</string>
     <string name="file_error">TokenScript error : %1$s\n\n</string>
+    <string name="message_scan_camera">Point your camera on QR code</string>
+    <string name="light">Light</string>
+    <string name="my_qr_code">My QR Code</string>
+    <string name="browse">Browse</string>
 </resources>

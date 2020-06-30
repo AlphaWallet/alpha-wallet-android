@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.alphawallet.app">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -25,6 +26,8 @@
         android:testOnly="false"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
+        tools:replace="android:appComponentFactory"
+        android:appComponentFactory="android.support.v4.app.CoreComponentFactory"
         android:theme="@style/AppTheme.NoActionBar"
         >
         <activity

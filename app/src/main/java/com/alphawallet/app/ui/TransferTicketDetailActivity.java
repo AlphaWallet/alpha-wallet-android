@@ -356,7 +356,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
         signCallback = new SignAuthenticationCallback()
         {
             @Override
-            public void GotAuthorisation(boolean gotAuth)
+            public void gotAuthorisation(boolean gotAuth)
             {
                 if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
                 else viewModel.failedAuthentication(SIGN_DATA);
@@ -377,6 +377,12 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
                     //display fail auth
                     onError(new ErrorEnvelope(getString(R.string.authentication_failed)));
                 }
+            }
+
+            @Override
+            public void cancelAuthentication()
+            {
+
             }
         };
 
@@ -635,7 +641,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
                 break;
 
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
-                signCallback.GotAuthorisation(resultCode == RESULT_OK);
+                signCallback.gotAuthorisation(resultCode == RESULT_OK);
                 break;
 
             default:
@@ -713,12 +719,26 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
         signCallback = new SignAuthenticationCallback()
         {
             @Override
-            public void GotAuthorisation(boolean gotAuth)
+            public void gotAuthorisation(boolean gotAuth)
             {
                 if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
                 else viewModel.failedAuthentication(SIGN_DATA);
 
                 if (gotAuth) transferTicketFinal();
+            }
+
+            @Override
+            public void cancelAuthentication()
+            {
+                AWalletAlertDialog dialog = new AWalletAlertDialog(getParent());
+                dialog.setIcon(AWalletAlertDialog.NONE);
+                dialog.setTitle(R.string.authentication_cancelled);
+                dialog.setButtonText(R.string.ok);
+                dialog.setButtonListener(v -> {
+                    dialog.dismiss();
+                });
+                dialog.setCancelable(true);
+                dialog.show();
             }
         };
 

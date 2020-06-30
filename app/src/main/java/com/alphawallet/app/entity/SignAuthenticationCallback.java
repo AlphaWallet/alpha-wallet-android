@@ -6,6 +6,7 @@ package com.alphawallet.app.entity;
  */
 public interface SignAuthenticationCallback
 {
-    void GotAuthorisation(boolean gotAuth);
-    default void CreatedKey(String keyAddress) { };
+    void gotAuthorisation(boolean gotAuth);
+    default void createdKey(String keyAddress) { };
+    void cancelAuthentication();
 }

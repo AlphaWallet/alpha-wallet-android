@@ -140,6 +140,9 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:$project.rxJavaVersion"
     implementation "io.reactivex.rxjava2:rxandroid:$project.rxAndroidVersion"
 
+    // Keyboard visibility
+    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC2'
+
     // Dagger 2
 
     // Dagger core

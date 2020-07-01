@@ -48,4 +48,10 @@ public class BaseNavigationActivity extends BaseActivity implements AWalletBotto
     public void hideNavBar() { nav.setVisibility(View.GONE); }
 
     public boolean isNavBarVisible() { return nav.getVisibility() == View.VISIBLE; }
+
+    public void setNavBarVisibility(int view)
+    {
+        if (nav == null) nav = findViewById(R.id.nav);
+        if (nav != null) nav.setVisibility(view);
+    }
 }

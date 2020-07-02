@@ -81,7 +81,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
             //how long has this TX been pending
             findViewById(R.id.pending_spinner).setVisibility(View.VISIBLE);
             List<Integer> functionList = new ArrayList<>(Collections.singletonList(R.string.speedup_transaction));
-            functionList.add(R.string.cancel_transaction);
+            //functionList.add(R.string.cancel_transaction); No cancel TX at this stage
             functionList.add(R.string.action_open_etherscan);
             blockNumber = "";
 

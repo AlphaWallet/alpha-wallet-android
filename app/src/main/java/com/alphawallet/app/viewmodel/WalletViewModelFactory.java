@@ -16,6 +16,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.Erc20DetailRouter;
+import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.SendTokenRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.OpenseaService;
@@ -36,6 +37,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
+    private final MyAddressRouter myAddressRouter;
 
     public WalletViewModelFactory(FetchTokensInteract fetchTokensInteract,
                                   AddTokenRouter addTokenRouter,
@@ -50,7 +52,8 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                                   OpenseaService openseaService,
                                   FetchTransactionsInteract fetchTransactionsInteract,
                                   EthereumNetworkRepositoryType ethereumNetworkRepository,
-                                  ChangeTokenEnableInteract changeTokenEnableInteract) {
+                                  ChangeTokenEnableInteract changeTokenEnableInteract,
+                                  MyAddressRouter myAddressRouter) {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
         this.sendTokenRouter = sendTokenRouter;
@@ -65,6 +68,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.changeTokenEnableInteract = changeTokenEnableInteract;
+        this.myAddressRouter = myAddressRouter;
     }
 
     @NonNull
@@ -84,6 +88,7 @@ public class WalletViewModelFactory implements ViewModelProvider.Factory {
                 openseaService,
                 fetchTransactionsInteract,
                 ethereumNetworkRepository,
-                changeTokenEnableInteract);
+                changeTokenEnableInteract,
+                myAddressRouter);
     }
 }

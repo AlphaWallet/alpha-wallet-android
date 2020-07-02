@@ -357,10 +357,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         Button importTickets = findViewById(R.id.import_ticket);
         importTickets.setVisibility(View.VISIBLE);
         importTickets.setAlpha(1.0f);
-
         MagicLinkData data = viewModel.getSalesOrder();
-        //Customise button text
-        View baseView = findViewById(android.R.id.content);
 
         switch (data.contractType)
         {
@@ -374,9 +371,14 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
                 break;
             default:
                 importTxt.setText(R.string.ticket_import_valid);
-                if (token != null) 
+                if (token != null)
                     tokenView.displayTicketHolder(token, ticketRange, viewModel.getAssetDefinitionService());
                 break;
+        }
+
+        if (tokenView != null)
+        {
+            tokenView.setOnReadyCallback(this);
         }
     }
 
@@ -570,11 +572,16 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
             SignAuthenticationCallback cb = new SignAuthenticationCallback()
             {
                 @Override
-                public void GotAuthorisation(boolean gotAuth)
+                public void gotAuthorisation(boolean gotAuth)
                 {
                     viewModel.performImport();
                 }
 
+                @Override
+                public void cancelAuthentication()
+                {
+
+                }
             };
             viewModel.getAuthorisation(this, cb);
         }
@@ -635,7 +642,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            GotAuthorisation(resultCode == RESULT_OK);
+            gotAuthorisation(resultCode == RESULT_OK);
         }
     }
 
@@ -650,7 +657,7 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
      * @param gotAuth authorisation was successful
      */
     @Override
-    public void GotAuthorisation(boolean gotAuth)
+    public void gotAuthorisation(boolean gotAuth)
     {
         if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
         else viewModel.failedAuthentication(SIGN_DATA);
@@ -659,9 +666,23 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     }
 
     @Override
+    public void cancelAuthentication()
+    {
+        AWalletAlertDialog dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.NONE);
+        dialog.setTitle(R.string.authentication_cancelled);
+        dialog.setButtonText(R.string.ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.setCancelable(true);
+        dialog.show();
+    }
+
+    @Override
     public void onPageLoaded(WebView view)
     {
-
+        webWrapper.setVisibility(View.VISIBLE);
     }
 
     @Override

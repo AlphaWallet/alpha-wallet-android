@@ -8,6 +8,7 @@
 	<dimen name="normal_margin">8dp</dimen>
 	<dimen name="big_margin">16dp</dimen>
 	<dimen name="half_large_margin">32dp</dimen>
+	<dimen name="full_large_margin">64dp</dimen>
 
     <dimen name="list_group_head">14sp</dimen>
 

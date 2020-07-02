@@ -51,7 +51,7 @@ import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
-import com.alphawallet.app.entity.QrUrlResult;
+import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.SignTransactionInterface;
 import com.alphawallet.app.entity.URLLoadInterface;
@@ -72,7 +72,7 @@ import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.util.KeyboardUtils;
-import com.alphawallet.app.util.QRURLParser;
+import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.DappBrowserViewModel;
 import com.alphawallet.app.viewmodel.DappBrowserViewModelFactory;
@@ -643,7 +643,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         if (fragment != null && fragment.isVisible() && !fragment.isDetached()) {
             getChildFragmentManager().beginTransaction()
                     .remove(fragment)
-                    .commit();
+                    .commitAllowingStateLoss();
         }
     }
 
@@ -1284,8 +1284,8 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                     {
                         qrCode = data.getStringExtra(FullScannerFragment.BarcodeObject);
                         if (qrCode == null || checkForMagicLink(qrCode)) return;
-                        QRURLParser parser = QRURLParser.getInstance();
-                        QrUrlResult result = parser.parse(qrCode);
+                        QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
+                        QRResult result = parser.parse(qrCode);
                         switch (result.type)
                         {
                             case ADDRESS:
@@ -1505,7 +1505,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     {
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            GotAuthorisation(resultCode == RESULT_OK);
+            gotAuthorisation(resultCode == RESULT_OK);
         }
         else if (requestCode == UPLOAD_FILE && uploadMessage != null)
         {
@@ -1525,7 +1525,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     }
 
     @Override
-    public void GotAuthorisation(boolean gotAuth)
+    public void gotAuthorisation(boolean gotAuth)
     {
         if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
         else viewModel.failedAuthentication(SIGN_DATA);
@@ -1539,5 +1539,11 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
             web3.onSignCancel(messageToSign);
             dialog.dismiss();
         }
+    }
+
+    @Override
+    public void cancelAuthentication()
+    {
+
     }
 }

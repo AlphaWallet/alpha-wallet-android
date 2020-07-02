@@ -848,7 +848,9 @@ public class TokenDefinition {
     {
         String currentModuleName = null;
 
-        for (Node n = module.getFirstChild(); n != null; n = n.getNextSibling())
+        Node n = module.getFirstChild();
+
+        while (n != null)
         {
             if (n.getNodeType() == ELEMENT_NODE)
             {
@@ -865,41 +867,40 @@ public class TokenDefinition {
                         {
                             throw new SAXException("Duplicate Module label: " + currentModuleName);
                         }
-                        else
-                        {
-                            Module eventModule = handleElementSequence(element, currentModuleName);
-                            moduleLookup.put(currentModuleName, eventModule);
-                            currentModuleName = null;
-                        }
+                        n = element.getFirstChild();
+                        break;
+                    case "type":
+                        n = element.getFirstChild();
                         break;
                     case "sequence":
-                        if (currentModuleName == null) { throw new SAXException("Sequence must be enclosed within <namedType name=... />"); }
+                        if (currentModuleName == null) {
+                            throw new SAXException("Sequence must be enclosed within <namedType name=... />");
+                        }
                         Module eventModule = handleElementSequence(element, currentModuleName);
                         moduleLookup.put(currentModuleName, eventModule);
                         currentModuleName = null;
+                        n = n.getNextSibling();
                         break;
                     default:
                         break;
                 }
             }
+            else
+            {
+                n = n.getNextSibling();
+            }
         }
     }
 
-    private Module handleElementSequence(Element namedType, String moduleName) throws SAXException
+    private Module handleElementSequence(Node c, String moduleName) throws SAXException
     {
         Module module = new Module();
-        for (Node c = namedType.getFirstChild(); c != null; c = c.getNextSibling())
+        for (Node n = c.getFirstChild(); n != null; n = n.getNextSibling())
         {
-            if (c.getNodeType() == ELEMENT_NODE && c.getNodeName().equals("sequence"))
+            if (n.getNodeType() == ELEMENT_NODE)
             {
-                for (Node n = c.getFirstChild(); n != null; n = n.getNextSibling())
-                {
-                    if (n.getNodeType() == ELEMENT_NODE)
-                    {
-                        Element element = (Element) n;
-                        module.addSequenceElement(element, moduleName);
-                    }
-                }
+                Element element = (Element) n;
+                module.addSequenceElement(element, moduleName);
             }
         }
 

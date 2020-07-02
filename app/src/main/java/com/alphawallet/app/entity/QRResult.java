@@ -2,8 +2,6 @@ package com.alphawallet.app.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -14,7 +12,7 @@ import java.util.List;
  * Stormbird in Singapore
  */
 
-public class QrUrlResult implements Parcelable
+public class QRResult implements Parcelable
 {
     private String protocol;
     private String address; //becomes the token address for a transfer
@@ -29,20 +27,21 @@ public class QrUrlResult implements Parcelable
     public String function; //formed function hex
     public EIP681Type type;
 
-    public QrUrlResult(String address)
+    public QRResult(String address)
     {
         this.protocol = "address";
         this.address = address;
         defaultParams();
     }
 
-    public QrUrlResult(String protocol, String address) {
+    public QRResult(String protocol, String address)
+    {
         this.protocol = protocol;
         this.address = address;
         defaultParams();
     }
 
-    public QrUrlResult(String data, EIP681Type type)
+    public QRResult(String data, EIP681Type type)
     {
         this.type = type;
         this.address = data;
@@ -61,7 +60,7 @@ public class QrUrlResult implements Parcelable
         weiValue = BigInteger.ZERO;
     }
 
-    protected QrUrlResult(Parcel in)
+    protected QRResult(Parcel in)
     {
         protocol = in.readString();
         address = in.readString();
@@ -77,18 +76,18 @@ public class QrUrlResult implements Parcelable
         type = EIP681Type.values()[resultType];
     }
 
-    public static final Creator<QrUrlResult> CREATOR = new Creator<QrUrlResult>()
+    public static final Creator<QRResult> CREATOR = new Creator<QRResult>()
     {
         @Override
-        public QrUrlResult createFromParcel(Parcel in)
+        public QRResult createFromParcel(Parcel in)
         {
-            return new QrUrlResult(in);
+            return new QRResult(in);
         }
 
         @Override
-        public QrUrlResult[] newArray(int size)
+        public QRResult[] newArray(int size)
         {
-            return new QrUrlResult[size];
+            return new QRResult[size];
         }
     };
 
@@ -136,7 +135,6 @@ public class QrUrlResult implements Parcelable
         if (params.size() == 0)
         {
             if (weiValue.compareTo(BigInteger.ZERO) > 0) type = EIP681Type.PAYMENT;
-            return;
         }
 
         //TODO: Build function bytes
@@ -152,6 +150,10 @@ public class QrUrlResult implements Parcelable
                 override = true;
                 //assume transfer request
                 type = EIP681Type.TRANSFER;
+            }
+            else
+            {
+                return;
             }
         }
 
@@ -206,13 +208,9 @@ public class QrUrlResult implements Parcelable
             {
                 type = EIP681Type.TRANSFER;
             }
-            else if (params.size() > 0)
-            {
-                type = EIP681Type.FUNCTION_CALL;
-            }
             else
             {
-                type = EIP681Type.OTHER;
+                type = EIP681Type.FUNCTION_CALL;
             }
         }
 

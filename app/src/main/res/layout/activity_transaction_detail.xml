@@ -11,13 +11,13 @@
         android:layout_alignParentBottom="true"
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"/>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_above="@+id/more_detail"
+        android:layout_above="@id/layoutButtons"
         android:layout_marginTop="?actionBarSize"
         android:background="@drawable/background_card">
 
@@ -30,24 +30,22 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp">
+                android:layout_height="wrap_content">
 
-                <ProgressBar
-                    android:id="@+id/pending_spinner"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:contentDescription="@string/empty"
-                    android:indeterminateTint="@color/colorPrimaryDark"
-                    android:visibility="gone" />
+                <TextView
+                    android:id="@+id/value_header"
+                    style="@style/TransactionDetailsSubTitleStyle"
+                    android:layout_alignParentTop="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp16"
+                    android:text="@string/value" />
 
                 <TextView
                     android:id="@+id/text_chain_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
+                    android:layout_centerVertical="true"
                     android:layout_alignParentEnd="true"
                     android:background="@drawable/background_status_pending"
                     android:fontFamily="@font/font_bold"
@@ -57,36 +55,30 @@
                     android:textSize="12sp"
                     android:visibility="gone" />
 
+                <LinearLayout
+                    android:layout_below="@id/value_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/text_operation_name"
+                        style="@style/TransactionDetailsStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/dp16"
+                        tools:text="Sent"  />
+
+                    <TextView
+                        android:id="@+id/amount"
+                        style="@style/TransactionDetailsStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="4238793"  />
+
+                </LinearLayout>
+
             </RelativeLayout>
-
-            <TextView
-                style="@style/TransactionDetailsSubTitleStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dp16"
-                android:text="@string/value" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/text_operation_name"
-                    style="@style/TransactionDetailsStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/dp16"
-                    tools:text="Sent"  />
-
-                <TextView
-                    android:id="@+id/amount"
-                    style="@style/TransactionDetailsStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:text="4238793"  />
-
-            </LinearLayout>
 
             <TextView
                 style="@style/TransactionDetailsSubTitleStyle"
@@ -158,26 +150,109 @@
                 android:layout_height="wrap_content"
                 android:text="@string/subtitle_block" />
 
-            <TextView
-                android:id="@+id/block_number"
-                style="@style/TransactionDetailsStyle"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="4238793" />
+                android:orientation="horizontal">
 
-            <TextView
-                style="@style/TransactionDetailsSubTitleStyle"
-                android:id="@+id/title_gas_fee"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/subtitle_gas_fee" />
+                <ProgressBar
+                    android:id="@+id/pending_spinner"
+                    android:layout_width="@dimen/dp14"
+                    android:layout_gravity="center_vertical"
+                    android:layout_height="@dimen/dp14"
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="@string/empty"
+                    android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/gas_fee"
-                style="@style/TransactionDetailsStyle"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/block_number"
+                    style="@style/TransactionDetailsStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="4238793" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:text="0.000044" />
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/layout_gas_fee"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TransactionDetailsSubTitleStyle"
+                        android:id="@+id/title_gas_fee"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/subtitle_gas_fee" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/gas_fee"
+                            style="@style/TransactionDetailsStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            tools:text="4.2" />
+
+                        <TextView
+                            style="@style/TransactionDetailsStyle"
+                            android:layout_marginStart="@dimen/dp5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/eth" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_gas_price"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:visibility="gone"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TransactionDetailsSubTitleStyle"
+                        android:id="@+id/title_gas_price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/subtitle_gas_price" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/gas_price"
+                            style="@style/TransactionDetailsStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            tools:text="1.2" />
+
+                        <TextView
+                            style="@style/TransactionDetailsStyle"
+                            android:layout_marginStart="@dimen/dp5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Gwei" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
 
             <TextView
                 style="@style/TransactionDetailsSubTitleStyle"
@@ -194,11 +269,5 @@
 
         </LinearLayout>
     </ScrollView>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_above="@+id/more_detail"
-        android:background="@color/greyf6"/>
 
 </RelativeLayout>

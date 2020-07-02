@@ -57,4 +57,16 @@ public class CreateTransactionInteract
                                          .subscribeOn(Schedulers.computation())
                                          .observeOn(AndroidSchedulers.mainThread());
     }
+
+    public Single<String> resend(Wallet from, BigInteger nonce, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
+    {
+        return transactionRepository.resendTransaction(from, to, subunitAmount, nonce, gasPrice, gasLimit, data, chainId)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public void removeOverridenTransaction(Wallet wallet, String oldTxHash)
+    {
+        transactionRepository.removeOldTransaction(wallet, oldTxHash);
+    }
 }

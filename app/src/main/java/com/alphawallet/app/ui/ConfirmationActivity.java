@@ -49,14 +49,18 @@ import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.ETH_SYMBOL;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
+import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.ConfirmationType.ETH;
 import static com.alphawallet.app.entity.ConfirmationType.WEB3TRANSACTION;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static com.alphawallet.token.tools.Convert.getEthString;
 
 public class ConfirmationActivity extends BaseActivity implements SignAuthenticationCallback
 {
+    private static final String NONCE_LOW_MESSAGE = "too low";
+    private static final String NONCE_STRING = "nonce";
     AWalletAlertDialog dialog;
 
     @Inject
@@ -91,6 +95,10 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private Token token;
     private int chainId;
     private Wallet sendingWallet;
+    private BigInteger nonce;
+    private String oldTxHash = null;
+    private BigInteger oldGasPrice = BigInteger.ZERO;
+    private BigInteger oldGasLimit = BigInteger.ZERO;
 
     private ConfirmationType confirmationType;
     private byte[] transactionBytes = null;
@@ -140,6 +148,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         String functionDetails = getIntent().getStringExtra(C.EXTRA_FUNCTION_NAME);
 
         String amountString;
+        int nonceId;
 
         viewModel = ViewModelProviders.of(this, confirmationViewModelFactory)
                 .get(ConfirmationViewModel.class);
@@ -250,6 +259,31 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 amountString = symbol;
                 transactionBytes = viewModel.getERC721TransferBytes(to, contractAddress, amountStr, chainId);
                 break;
+            case RESEND:
+                setTitle(getString(R.string.speedup_transaction));
+                oldTxHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
+                nonceId = getIntent().getIntExtra(C.EXTRA_NONCE, 0);
+                nonce = BigInteger.valueOf(nonceId);
+                amountString = getString(R.string.speedup_tx_description);
+                symbolText.setVisibility(View.GONE);
+                oldGasPrice = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
+                oldGasLimit = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT));
+                transactionHex = getIntent().getStringExtra(C.EXTRA_TRANSACTION_DATA);
+                setupResendGasSettings();
+                break;
+            case CANCEL_TX:
+                setTitle(getString(R.string.cancel_transaction));
+                oldTxHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
+                nonceId = getIntent().getIntExtra(C.EXTRA_NONCE, 0);
+                nonce = BigInteger.valueOf(nonceId);
+                amount = BigDecimal.ZERO;
+                amountString = getString(R.string.cancel_tx_description);
+                symbolText.setVisibility(View.GONE);
+                oldGasPrice = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
+                oldGasLimit = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT));
+                transactionHex = "0x";
+                setupCancelGasSettings();
+                break;
             default:
                 amountString = "-" + BalanceUtils.getScaledValueWithLimit(amount, decimals);
                 symbolText.setText(symbol);
@@ -277,6 +311,21 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.sendGasSettings().observe(this, this::onSendGasSettings);
         finishReceiver = new FinishReceiver(this);
+
+        findViewById(R.id.layout_gas_price).setOnClickListener(view -> {
+            //open gas slider settings
+            viewModel.openGasSettings(this, chainId);
+        });
+
+        findViewById(R.id.layout_gas_limit).setOnClickListener(view -> {
+            //open gas slider settings
+            viewModel.openGasSettings(this, chainId);
+        });
+
+        gasLimitText.setOnClickListener(view -> {
+            //open gas slider settings
+            viewModel.openGasSettings(this, chainId);
+        });
 
         getGasSettings();
     }
@@ -403,6 +452,12 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                         chainId);
                 break;
 
+            case RESEND:
+            case CANCEL_TX:
+                viewModel.sendOverrideTransaction(
+                        transactionHex, to, nonce, localGasSettings.gasPrice, localGasSettings.gasLimit, amount.toBigInteger(), chainId);
+                break;
+
             default:
                 break;
         }
@@ -417,9 +472,15 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         hideDialog();
         dialog = new AWalletAlertDialog(this);
         dialog.setTitle(R.string.transaction_succeeded);
+        dialog.setCancelable(true);
         dialog.setMessage(hash);
-        dialog.setButtonText(R.string.copy);
+        dialog.setButtonText(R.string.ok);
+        dialog.setSecondaryButtonText(R.string.copy);
         dialog.setButtonListener(v -> {
+            dialog.dismiss();
+            sendBroadcast(new Intent(PRUNE_ACTIVITY));
+        });
+        dialog.setSecondaryButtonListener(v -> {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("transaction hash",
                     EthereumNetworkBase.getEtherscanURLbyNetwork(token.tokenInfo.chainId) + "tx/" + hash);
@@ -433,6 +494,12 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
             finish();
         });
         dialog.show();
+
+        if (oldTxHash != null)
+        {
+            viewModel.removeOverridenTransaction(oldTxHash);
+            sendBroadcast(new Intent(RESET_WALLET)); //refresh transactions list
+        }
     }
 
     private void onDappTransaction(TransactionData txData) {
@@ -488,8 +555,37 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         }
     }
 
+    private void setupCancelGasSettings()
+    {
+        BigInteger gasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(2))); //doesn't need more than this for cancel
+
+        findViewById(R.id.layout_old_gas_price).setVisibility(View.VISIBLE);
+        ((TextView)findViewById(R.id.old_gas_price)).setText(BalanceUtils.weiToGwei(oldGasPrice));
+
+        String gasPriceStr = BalanceUtils.weiToGwei(gasPrice);
+
+        gasPriceText.setText(gasPriceStr);
+        GasSettings overrideSettings = new GasSettings(gasPrice, oldGasLimit);
+        viewModel.overrideGasSettings(overrideSettings);
+    }
+
+    private void setupResendGasSettings()
+    {
+        //increase gas price - gas price is in GWEI, so add 5 GWEI to price
+        BigInteger gasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(1)));
+
+        findViewById(R.id.layout_old_gas_price).setVisibility(View.VISIBLE);
+        ((TextView)findViewById(R.id.old_gas_price)).setText(BalanceUtils.weiToGwei(oldGasPrice));
+
+        String gasPriceStr = BalanceUtils.weiToGwei(gasPrice);
+
+        gasPriceText.setText(gasPriceStr);
+        GasSettings overrideSettings = new GasSettings(gasPrice, oldGasLimit);
+        viewModel.overrideGasSettings(overrideSettings);
+    }
+
     private void onGasSettings(GasSettings gasSettings) {
-        String gasPrice = BalanceUtils.weiToGwei(gasSettings.gasPrice) + " " + C.GWEI_UNIT;
+        String gasPrice = BalanceUtils.weiToGwei(gasSettings.gasPrice);
         gasPriceText.setText(gasPrice);
         gasLimitText.setText(gasSettings.gasLimit.toString());
 
@@ -499,24 +595,39 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         String networkFee = BalanceUtils.weiToEth(networkFeeBD).toPlainString() + " " + viewModel.getNetworkSymbol(chainId);
         networkFeeText.setText(networkFee);
 
-        if (confirmationType == WEB3TRANSACTION)
+        switch (confirmationType)
         {
-            //update amount
-            BigDecimal ethValueBD = amount.add(networkFeeBD);
+            case WEB3TRANSACTION:
+                BigDecimal ethValueBD = amount.add(networkFeeBD);
 
-            //convert to ETH
-            ethValueBD = Convert.fromWei(ethValueBD, Convert.Unit.ETHER);
-            String valueUpdate = getEthString(ethValueBD.doubleValue());
-            valueText.setText(valueUpdate);
+                //convert to ETH
+                ethValueBD = Convert.fromWei(ethValueBD, Convert.Unit.ETHER);
+                String valueUpdate = getEthString(ethValueBD.doubleValue());
+                valueText.setText(valueUpdate);
+                break;
+            default:
+                break;
         }
     }
 
     private void onError(ErrorEnvelope error) {
         hideDialog();
         dialog = new AWalletAlertDialog(this);
-        dialog.setTitle(R.string.error_transaction_failed);
-        dialog.setMessage(error.message);
-        dialog.setIcon(ERROR);
+
+        String errorMessage = error.message != null ? error.message.toLowerCase() : "";
+        if (confirmationType == ConfirmationType.RESEND || confirmationType == ConfirmationType.CANCEL_TX && errorMessage.contains(NONCE_LOW_MESSAGE) && errorMessage.contains(NONCE_STRING))
+        {
+            dialog.setIcon(WARNING);
+            dialog.setTitle(R.string.transaction_already_written_title);
+            dialog.setMessage(R.string.transaction_already_written);
+        }
+        else
+        {
+            dialog.setIcon(ERROR);
+            dialog.setTitle(R.string.error_transaction_failed);
+            dialog.setMessage(error.message);
+        }
+
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> {
             dialog.dismiss();

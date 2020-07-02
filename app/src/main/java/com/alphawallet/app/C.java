@@ -84,6 +84,8 @@ public abstract class C {
     public static final String EXTRA_CURRENCY = "CURRENCY_STRING";
     public static final String EXTRA_QR_CODE = "QR_SCAN_CODE";
     public static final String EXTRA_UNIVERSAL_SCAN = "UNIVERSAL_SCAN";
+    public static final String EXTRA_NONCE = "_NONCE";
+    public static final String EXTRA_TXHASH = "_TXHASH";
 
     public static final String PRUNE_ACTIVITY =
             "com.stormbird.wallet.PRUNE_ACTIVITY";

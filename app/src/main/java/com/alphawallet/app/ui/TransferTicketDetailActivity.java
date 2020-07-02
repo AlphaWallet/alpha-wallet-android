@@ -815,7 +815,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
     }
 
     @Override
-    public void handleClick(String action)
+    public void handleClick(String action, int id)
     {
         viewModel.openTransferState(this, token, token.bigIntListToString(selection, false), getNextState());
     }

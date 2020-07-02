@@ -50,13 +50,15 @@
     <string name="label_to">To</string>
     <string name="label_gas_limit">Gas Limit</string>
     <string name="label_gas_price">Gas Price</string>
-    <string name="label_network_fee">Network Fee</string>
+    <string name="label_old_gas_price">Old Gas Price</string>
+    <string name="label_network_fee">Network Fee (Maximum)</string>
     <string name="button_ok">OK</string>
 
     <!-- Subtitles -->
     <string name="subtitle_from">From</string>
     <string name="subtitle_to">To</string>
     <string name="subtitle_gas_fee">Gas Fee</string>
+    <string name="subtitle_gas_price">Gas Price</string>
     <string name="subtitle_transaction_num">Transaction #</string>
     <string name="subtitle_transaction_hash_num">Transaction Hash#</string>
     <string name="subtitle_transaction_time">Transaction Time</string>
@@ -579,7 +581,7 @@
     <string name="title_clear_browser_cache">Clear Browser Caches</string>
     <string name="title_tokenscript">TokenScript</string>
     <string name="title_change_language">Change Language</string>
-    <string name="add_hide_tokens">Agregar / Ocultar tokens</string>
+    <string name="add_hide_tokens">Agregar / Ocultar Tokens</string>
     <string name="instagram">Instagram</string>
     <string name="tokenscript_file_error">TokenScript file error</string>
     <string name="settings_locale_currency">Change Currency</string>
@@ -617,6 +619,19 @@
     <string name="confirm_delete_file_message">Delete file %1$s</string>
     <string name="delete">Delete</string>
     <string name="refreshing_tokenscripts">Refresh TokenScripts</string>
+    <string name="speedup_transaction">Speedup TX</string>
+    <string name="cancel_transaction">Cancel TX</string>
+    <string name="day_single">1 día</string>
+    <string name="day_plural">%s días</string>
+    <string name="hour_single">1 hora</string>
+    <string name="hour_plural">%s horas</string>
+    <string name="minute_single">1 minuto</string>
+    <string name="minute_plural">%s minutos</string>
+    <string name="second_single">1 segundo</string>
+    <string name="second_plural">%s segundos</string>
+    <string name="transaction_pending_for">Transaction Pending for %s</string>
+    <string name="speedup_tx_description">Submit replacement Transaction with higher gas price.</string>
+    <string name="cancel_tx_description">Cancel Transaction by replacing pending with zero value TX.</string>
     <string name="file_error">TokenScript error : %1$s\n\n</string>
     <string name="message_scan_camera">Point your camera on QR code</string>
     <string name="light">Light</string>
@@ -624,4 +639,6 @@
     <string name="browse">Browse</string>
     <string name="label_gas_estimate">Gas Estimate</string>
     <string name="label_estimated_network_fee">Estimated Network Fee</string>
+    <string name="transaction_already_written">Transaction already written to blockchain, cannot resend or cancel.</string>
+    <string name="transaction_already_written_title">Transaction Already Written</string>
 </resources>

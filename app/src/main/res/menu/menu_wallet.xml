@@ -4,6 +4,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
     <item
+        android:id="@+id/action_scan"
+        android:icon="@drawable/ic_camera_scan"
+        android:orderInCategory="1"
+        android:title="@string/action_scan_dapp"
+        app:showAsAction="always"
+        />
+    <item
         android:id="@+id/action_my_wallet"
         android:icon="@drawable/ic_my_wallet"
         android:orderInCategory="20"

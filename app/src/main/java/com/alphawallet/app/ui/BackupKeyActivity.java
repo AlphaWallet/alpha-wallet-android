@@ -343,7 +343,7 @@ public class BackupKeyActivity extends BaseActivity implements
     @Override
     public void onClick(View view) {
         // Passing an empty String as this class handles clicks based on state
-        handleClick("");
+        handleClick("", 0);
     }
 
     private void ResetInputBox() {
@@ -800,7 +800,7 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     @Override
-    public void handleClick(String action) {
+    public void handleClick(String action, int id) {
         switch (state) {
             case ENTER_BACKUP_STATE_HD:
                 WriteDownSeedPhrase();

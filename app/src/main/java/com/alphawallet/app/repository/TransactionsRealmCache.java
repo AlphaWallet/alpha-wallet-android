@@ -185,6 +185,30 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         }
     }
 
+    @Override
+    public void deleteTransaction(Wallet wallet, String oldTxHash)
+    {
+        try (Realm instance = realmManager.getRealmInstance(wallet))
+        {
+            RealmTransaction realmTx = instance.where(RealmTransaction.class)
+                    .equalTo("hash", oldTxHash)
+                    .findFirst();
+
+            if (realmTx != null)
+            {
+                instance.beginTransaction();
+                realmTx.deleteFromRealm();
+                instance.commitTransaction();
+                //signal to transaction view to refresh
+            }
+        }
+        catch (Exception e)
+        {
+            //do not record
+            e.printStackTrace();
+        }
+    }
+
     private boolean alreadyRecorded(Realm instance, String hash)
     {
         RealmTransaction realmTx = instance.where(RealmTransaction.class)

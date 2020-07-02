@@ -45,12 +45,14 @@
     <string name="label_to">接收地址</string>
     <string name="label_gas_limit">燃料限制</string>
     <string name="label_gas_price">燃料价格</string>
+    <string name="label_old_gas_price">先前的燃油价格</string>
     <string name="label_network_fee">交易手续费</string>
     <string name="button_ok">确定</string>
     <!-- Subtitles -->
     <string name="subtitle_from">来源地址</string>
     <string name="subtitle_to">接收地址</string>
     <string name="subtitle_gas_fee">燃料费用</string>
+    <string name="subtitle_gas_price">燃料价格</string>
     <string name="subtitle_transaction_num">交易 #</string>
     <string name="subtitle_transaction_hash_num">Transaction Hash#</string>
     <string name="subtitle_transaction_time">交易时间</string>
@@ -607,6 +609,19 @@
     <string name="confirm_delete_file_message">Delete file %1$s</string>
     <string name="delete">Delete</string>
     <string name="refreshing_tokenscripts">Refresh TokenScripts</string>
+    <string name="speedup_transaction">Speedup TX</string>
+    <string name="cancel_transaction">Cancel TX</string>
+    <string name="day_single">1天</string>
+    <string name="day_plural">%s天</string>
+    <string name="hour_single">1小时</string>
+    <string name="hour_plural">%s小时</string>
+    <string name="minute_single">1分钟</string>
+    <string name="minute_plural">%s分钟</string>
+    <string name="second_single">1秒</string>
+    <string name="second_plural">%s秒</string>
+    <string name="transaction_pending_for">Transaction Pending for %s</string>
+    <string name="speedup_tx_description">Submit replacement Transaction with higher gas price.</string>
+    <string name="cancel_tx_description">Cancel Transaction by replacing pending with zero value TX.</string>
     <string name="file_error">TokenScript error : %1$s\n\n</string>
     <string name="message_scan_camera">Point your camera on QR code</string>
     <string name="light">Light</string>
@@ -614,4 +629,6 @@
     <string name="browse">Browse</string>
     <string name="label_gas_estimate">Gas Estimate</string>
     <string name="label_estimated_network_fee">Estimated Network Fee</string>
+    <string name="transaction_already_written">Transaction already written to blockchain, cannot resend or cancel.</string>
+    <string name="transaction_already_written_title">Transaction Already Written</string>
 </resources>

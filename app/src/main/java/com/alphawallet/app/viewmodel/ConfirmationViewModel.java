@@ -319,4 +319,18 @@ public class ConfirmationViewModel extends BaseViewModel {
             gasEstimateError.postValue(new ErrorEnvelope(estimateGas.getError().getMessage()));
         }
     }
+  
+    public void sendOverrideTransaction(String transactionHex, String to, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, BigInteger value, int chainId)
+    {
+        byte[] data = Numeric.hexStringToByteArray(transactionHex);
+        disposable = createTransactionInteract
+                .resend(defaultWallet.getValue(), nonce, to, value, gasPrice, gasLimit, data, chainId)
+                .subscribe(this::onCreateTransaction,
+                           this::onError);
+    }
+
+    public void removeOverridenTransaction(String oldTxHash)
+    {
+        createTransactionInteract.removeOverridenTransaction(defaultWallet.getValue(), oldTxHash);
+    }
 }

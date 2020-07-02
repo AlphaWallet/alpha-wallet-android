@@ -4,7 +4,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
-import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,11 +11,10 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.ConfirmationType;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
-import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.holder.TransactionHolder;
@@ -30,11 +28,11 @@ import com.alphawallet.app.widget.FunctionButtonBar;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -70,13 +68,30 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         }
         toolbar();
         setTitle();
+        viewModel = ViewModelProviders.of(this, transactionDetailViewModelFactory)
+                .get(TransactionDetailViewModel.class);
+        viewModel.latestBlock().observe(this, this::onLatestBlock);
+        viewModel.prepare(transaction.chainId, wallet.address);
+        functionBar = findViewById(R.id.layoutButtons);
 
         String blockNumber = transaction.blockNumber;
         TransactionOperation op = null;
         if (transaction.blockNumber != null && transaction.blockNumber.equals("0"))
         {
-            blockNumber = getString(R.string.status_pending);
+            //how long has this TX been pending
             findViewById(R.id.pending_spinner).setVisibility(View.VISIBLE);
+            List<Integer> functionList = new ArrayList<>(Collections.singletonList(R.string.speedup_transaction));
+            //functionList.add(R.string.cancel_transaction); No cancel TX at this stage
+            functionList.add(R.string.action_open_etherscan);
+            blockNumber = "";
+
+            functionBar.setupFunctions(this, functionList);
+            viewModel.startPendingTimeDisplay(transaction.hash);
+            viewModel.lastestTx().observe(this, this::onTxUpdated);
+        }
+        else
+        {
+            functionBar.setupSecondaryFunction(this, R.string.action_open_etherscan);
         }
 
         setupVisibilities();
@@ -85,11 +100,10 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         CopyTextView toValue = findViewById(R.id.to);
         CopyTextView fromValue = findViewById(R.id.from);
         CopyTextView txHashView = findViewById(R.id.txn_hash);
-        functionBar = findViewById(R.id.layoutButtons);
 
-        fromValue.setText(transaction.from);
-        toValue.setText(transaction.to);
-        txHashView.setText(transaction.hash);
+        fromValue.setText(transaction.from != null ? transaction.from : "");
+        toValue.setText(transaction.to != null ? transaction.to : "");
+        txHashView.setText(transaction.hash != null ? transaction.hash : "");
         ((TextView) findViewById(R.id.txn_time)).setText(localiseUnixTime(transaction.timeStamp));
 
         ((TextView) findViewById(R.id.block_number)).setText(blockNumber);
@@ -99,11 +113,6 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
             op = transaction.operations[0];
             if (op != null && op.to != null) toValue.findViewById(R.id.to);
         }
-
-        viewModel = ViewModelProviders.of(this, transactionDetailViewModelFactory)
-                .get(TransactionDetailViewModel.class);
-        viewModel.latestBlock().observe(this, this::onLatestBlock);
-        viewModel.prepare(transaction.chainId);
 
         chainName = viewModel.getNetworkName(transaction.chainId);
         ((TextView) findViewById(R.id.network)).setText(chainName);
@@ -118,8 +127,24 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
         if (!viewModel.hasEtherscanDetail(transaction)) findViewById(R.id.more_detail).setVisibility(View.GONE);
         setupWalletDetails(op);
+    }
 
-        functionBar.setupSecondaryFunction(this, R.string.action_open_etherscan);
+    private void onTxUpdated(Transaction latestTx)
+    {
+        if (latestTx.blockNumber.equals("0"))
+        {
+            long pendingTimeInSeconds = (System.currentTimeMillis() / 1000) - latestTx.timeStamp;
+            ((TextView) findViewById(R.id.block_number)).setText(getString(R.string.transaction_pending_for, Utils.convertTimePeriodInSeconds(pendingTimeInSeconds, this)));
+        }
+        else
+        {
+            transaction = latestTx;
+            ((TextView) findViewById(R.id.block_number)).setText(transaction.blockNumber);
+            findViewById(R.id.pending_spinner).setVisibility(View.GONE);
+            ((TextView) findViewById(R.id.txn_time)).setText(localiseUnixTime(transaction.timeStamp));
+            //update function bar
+            functionBar.setupSecondaryFunction(this, R.string.action_open_etherscan);
+        }
     }
 
     private void setTitle() {
@@ -138,8 +163,8 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
             {
                 //how many confirmations?
                 BigInteger confirmations = latestBlock.subtract(txBlock);
-                String confirmation = " (" + confirmations.toString(10) + " " + getString(R.string.confirmations)  + ")";
-                ((TextView) findViewById(R.id.block_number)).append(confirmation);
+                String confirmation = transaction.blockNumber + " (" + confirmations.toString(10) + " " + getString(R.string.confirmations)  + ")";
+                ((TextView) findViewById(R.id.block_number)).setText(confirmation);
             }
         }
         catch (Exception e)
@@ -151,16 +176,26 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     private void setupVisibilities()
     {
         BigDecimal gasFee = new BigDecimal(transaction.gasUsed).multiply(new BigDecimal(transaction.gasPrice));
+        BigDecimal gasPrice = new BigDecimal(transaction.gasPrice);
         //any gas fee?
-        BigDecimal gasFeeEth = BalanceUtils.weiToEth(gasFee);
-        if (gasFeeEth.equals(BigDecimal.ZERO))
+        if (gasFee.equals(BigDecimal.ZERO))
         {
-            findViewById(R.id.gas_fee).setVisibility(View.GONE);
-            findViewById(R.id.title_gas_fee).setVisibility(View.GONE);
+            findViewById(R.id.layout_gas_fee).setVisibility(View.GONE);
         }
         else
         {
-            ((TextView) findViewById(R.id.gas_fee)).setText(BalanceUtils.weiToEth(gasFee).toPlainString());
+            findViewById(R.id.layout_gas_fee).setVisibility(View.VISIBLE);
+            ((TextView) findViewById(R.id.gas_fee)).setText(BalanceUtils.weiToEth(gasFee).toPlainString());// .toPlainString());
+        }
+
+        if (gasPrice.equals(BigDecimal.ZERO))
+        {
+            findViewById(R.id.layout_gas_price).setVisibility(View.GONE);
+        }
+        else
+        {
+            findViewById(R.id.layout_gas_price).setVisibility(View.VISIBLE);
+            ((TextView) findViewById(R.id.gas_price)).setText(BalanceUtils.weiToGwei(gasPrice.toBigInteger()));
         }
     }
 
@@ -219,6 +254,13 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        viewModel.onDispose();
+    }
+
     private void setOperationName()
     {
         String operationName = null;
@@ -243,8 +285,23 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     }
 
     @Override
-    public void handleClick(String action)
+    public void handleClick(String action, int id)
     {
-        viewModel.showMoreDetails(this, transaction);
+        switch (id)
+        {
+            case R.string.speedup_transaction:
+                //resend the transaction to speedup
+                viewModel.reSendTransaction(transaction, this, token, ConfirmationType.RESEND);
+                break;
+            case R.string.cancel_transaction:
+                //cancel the transaction
+                viewModel.reSendTransaction(transaction, this, token, ConfirmationType.CANCEL_TX);
+                break;
+            case R.string.action_open_etherscan:
+                viewModel.showMoreDetails(this, transaction);
+                break;
+            default:
+                break;
+        }
     }
 }

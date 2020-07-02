@@ -220,6 +220,99 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:id="@+id/layout_gas_price"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@color/transparent"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:layout_marginTop="20dp"
+                                android:fontFamily="@font/font_regular"
+                                android:text="@string/label_gas_price"
+                                android:textColor="@color/text_dark_gray"
+                                android:textSize="18sp" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/text_gas_price"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="10dp"
+                                    android:fontFamily="@font/font_bold"
+                                    android:gravity="center"
+                                    android:textColor="@color/azure"
+                                    tools:text="2.4"
+                                    android:textSize="@dimen/sp15" />
+
+                                <TextView
+                                    style="@style/TransactionDetailsStyle"
+                                    android:layout_marginStart="@dimen/dp5"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Gwei" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/layout_old_gas_price"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:visibility="gone"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:layout_marginTop="20dp"
+                                android:fontFamily="@font/font_regular"
+                                android:text="@string/label_old_gas_price"
+                                android:textColor="@color/text_dark_gray"
+                                android:textSize="18sp" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/old_gas_price"
+                                    style="@style/TransactionDetailsStyle"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="@dimen/sp14"
+                                    tools:text="1.2" />
+
+                                <TextView
+                                    style="@style/TransactionDetailsStyle"
+                                    android:layout_marginStart="@dimen/dp5"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Gwei" />
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:baselineAligned="false">
 
@@ -249,18 +342,25 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginBottom="10dp"
-                                    android:fontFamily="@font/font_regular"
-                                    android:gravity="center|start"
-                                    android:textColor="@color/text_dark_gray"
-                                    android:textIsSelectable="true"
-                                    android:textSize="14sp" />
+                                    android:fontFamily="@font/font_bold"
+                                    android:gravity="center"
+                                    android:textColor="@color/azure"
+                                    tools:text="23000"
+                                    android:textSize="@dimen/sp15" />
+
+                                <TextView
+                                    style="@style/TransactionDetailsStyle"
+                                    android:layout_marginStart="@dimen/dp5"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Gwei" />
 
                                 <ProgressBar
                                     android:id="@+id/progress_gas_estimate"
                                     style="?android:attr/progressBarStyleSmall"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_gravity="start"
+                                    android:layout_gravity="start|center_vertical"
                                     android:layout_marginStart="4dp" />
 
                             </LinearLayout>
@@ -268,6 +368,7 @@
                         </LinearLayout>
 
                         <LinearLayout
+                            android:id="@+id/layout_gas_limit"
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
@@ -283,16 +384,30 @@
                                 android:textColor="@color/text_dark_gray"
                                 android:textSize="18sp" />
 
-                            <TextView
-                                android:id="@+id/text_gas_limit"
+                            <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"
-                                android:fontFamily="@font/font_regular"
-                                android:gravity="center|start"
-                                android:textColor="@color/text_dark_gray"
-                                android:textIsSelectable="true"
-                                android:textSize="14sp" />
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/text_gas_limit"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="10dp"
+                                    android:fontFamily="@font/font_bold"
+                                    android:gravity="center"
+                                    android:textColor="@color/azure"
+                                    tools:text="23000"
+                                    android:textSize="@dimen/sp15" />
+
+                                <TextView
+                                    style="@style/TransactionDetailsStyle"
+                                    android:layout_marginStart="@dimen/dp5"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Gwei" />
+
+                            </LinearLayout>
 
                         </LinearLayout>
 

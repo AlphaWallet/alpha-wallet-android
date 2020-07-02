@@ -622,4 +622,6 @@
     <string name="light">Light</string>
     <string name="my_qr_code">My QR Code</string>
     <string name="browse">Browse</string>
+    <string name="label_gas_estimate">Gas Estimate</string>
+    <string name="label_estimated_network_fee">Estimated Network Fee</string>
 </resources>

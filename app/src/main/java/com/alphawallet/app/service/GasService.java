@@ -3,18 +3,24 @@ package com.alphawallet.app.service;
 import android.arch.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.util.BalanceUtils;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 import com.alphawallet.app.entity.GasSettings;
+import com.alphawallet.token.tools.Numeric;
 
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthEstimateGas;
 import org.web3j.protocol.core.methods.response.EthGasPrice;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.gas.ContractGasProvider;
 
 import java.math.BigDecimal;
@@ -262,5 +268,40 @@ public class GasService implements ContractGasProvider
                     break;
             }
         }
+    }
+
+    public Single<EthEstimateGas> calculateGasEstimate(byte[] transactionBytes, int chainId, String toAddress, BigInteger amount, Wallet wallet)
+    {
+        String txData = "";
+        if (transactionBytes != null && transactionBytes.length > 0)
+        {
+            txData = Numeric.toHexString(transactionBytes);
+        }
+
+        Web3j web3j = TokenRepository.getWeb3jService(chainId);
+        //latest nonce for wallet & chainId
+        String finalTxData = txData;
+
+        return networkRepository.getLastTransactionNonce(web3j, wallet.address)
+                .subscribeOn(Schedulers.io())
+                .flatMap(nonce -> ethEstimateGas(transactionBytes, wallet.address, nonce, getGasPrice(), getGasLimit(), toAddress, amount, finalTxData, web3j));
+    }
+
+    private Single<EthEstimateGas> ethEstimateGas(byte[] transactionBytes, String fromAddress, BigInteger nonce, BigInteger gasPrice,
+                                               BigInteger gasLimit, String toAddress,
+                                               BigInteger amount, String txData, Web3j web3j)
+    {
+        return Single.fromCallable(() -> {
+            Transaction transaction = new Transaction (
+                    fromAddress,
+                    nonce,
+                    gasPrice,
+                    gasLimit,
+                    toAddress,
+                    amount,
+                    txData);
+
+            return web3j.ethEstimateGas(transaction).send();
+        }).subscribeOn(Schedulers.io());
     }
 }

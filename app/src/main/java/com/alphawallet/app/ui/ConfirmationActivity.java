@@ -12,7 +12,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -80,9 +82,13 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private Button moreDetail;
     private TextView title;
     private TextView chainName;
+    private TextView gasEstimateText;
+    private ProgressBar progressGasEstimate;
+    private ProgressBar progressNetworkFee;
     private GasSettings localGasSettings;
 
     private BigDecimal amount;
+    private BigInteger gasPrice;
     private int decimals;
     private String contractAddress;
     private String amountStr;
@@ -122,6 +128,9 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         websiteText = findViewById(R.id.text_website);
         title = findViewById(R.id.title_confirm);
         chainName = findViewById(R.id.text_chain_name);
+        gasEstimateText = findViewById(R.id.text_gas_estimate);
+        progressGasEstimate = findViewById(R.id.progress_gas_estimate);
+        progressNetworkFee = findViewById(R.id.progress_network_fee);
         sendButton.setOnClickListener(view -> onSend());
 
         transaction = getIntent().getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
@@ -276,6 +285,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         viewModel.error().observe(this, this::onError);
         viewModel.pushToast().observe(this, this::displayToast);
         viewModel.sendGasSettings().observe(this, this::onSendGasSettings);
+        viewModel.sendGasEstimate().observe(this, this::onGasEstimate);
+        viewModel.sendGasEstimateError().observe(this, this::onEstimateError);
         finishReceiver = new FinishReceiver(this);
 
         getGasSettings();
@@ -411,6 +422,9 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private void onDefaultWallet(Wallet wallet) {
         fromAddressText.setText(wallet.address);
         sendingWallet = wallet;
+        progressGasEstimate.setVisibility(View.VISIBLE);
+        progressNetworkFee.setVisibility(View.VISIBLE);
+        viewModel.calculateGasEstimate(transactionBytes, chainId, to, new BigInteger(amountStr));
     }
 
     private void onTransaction(String hash) {
@@ -489,15 +503,12 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     }
 
     private void onGasSettings(GasSettings gasSettings) {
-        String gasPrice = BalanceUtils.weiToGwei(gasSettings.gasPrice) + " " + C.GWEI_UNIT;
-        gasPriceText.setText(gasPrice);
+        String gasPriceStr = BalanceUtils.weiToGwei(gasSettings.gasPrice) + " " + C.GWEI_UNIT;
+        gasPrice = gasSettings.gasPrice;
+        gasPriceText.setText(gasPriceStr);
         gasLimitText.setText(gasSettings.gasLimit.toString());
 
-        BigDecimal networkFeeBD = new BigDecimal(gasSettings
-                                                         .gasPrice.multiply(gasSettings.gasLimit));
-
-        String networkFee = BalanceUtils.weiToEth(networkFeeBD).toPlainString() + " " + viewModel.getNetworkSymbol(chainId);
-        networkFeeText.setText(networkFee);
+        BigDecimal networkFeeBD = new BigDecimal(gasSettings.gasPrice.multiply(gasSettings.gasLimit));
 
         if (confirmationType == WEB3TRANSACTION)
         {
@@ -509,6 +520,17 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
             String valueUpdate = getEthString(ethValueBD.doubleValue());
             valueText.setText(valueUpdate);
         }
+    }
+
+    private void onGasEstimate(BigInteger gasEstimate) {
+        progressGasEstimate.setVisibility(View.GONE);
+        progressNetworkFee.setVisibility(View.GONE);
+
+        BigDecimal networkFeeBD = new BigDecimal(gasPrice.multiply(gasEstimate));
+
+        String networkFee = BalanceUtils.weiToEth(networkFeeBD).toPlainString() + " " + viewModel.getNetworkSymbol(chainId);
+        networkFeeText.setText(networkFee);
+        gasEstimateText.setText(String.valueOf(gasEstimate));
     }
 
     private void onError(ErrorEnvelope error) {
@@ -531,6 +553,10 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
             if (error.message == null || !error.message.equals(getString(R.string.authentication_error))) finish();
         });
         dialog.show();
+    }
+
+    private void onEstimateError(ErrorEnvelope error) {
+        Toast.makeText(this, error.message, Toast.LENGTH_LONG).show();
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -25,10 +27,14 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.CustomViewTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.signature.ObjectKey;
 
+import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
@@ -47,6 +53,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     private final TextView balanceEth;
     private final TextView balanceCurrency;
     private final ImageView icon;
+    private final TextView textIcon;
     private final TextView text24Hours;
     private final TextView textAppreciation;
     private final TextView issuer;
@@ -60,6 +67,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
+    private final CustomViewTarget viewTarget;
+    private String tokenName;
 
     private Handler handler;
 
@@ -71,6 +80,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         super(resId, parent);
 
         icon = findViewById(R.id.icon);
+        textIcon = findViewById(R.id.text_icon);
         balanceEth = findViewById(R.id.eth_data);
         balanceCurrency = findViewById(R.id.balance_currency);
         currencyLabel = findViewById(R.id.currency_label);
@@ -87,6 +97,28 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         extendedInfo = findViewById(R.id.layout_extended_info);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
+
+        icon.setVisibility(View.INVISIBLE);
+        textIcon.setVisibility(View.GONE);
+
+        viewTarget = new CustomViewTarget<ImageView, BitmapDrawable>(icon) {
+            @Override
+            protected void onResourceCleared(@Nullable Drawable placeholder) { }
+
+            @Override
+            public void onLoadFailed(@Nullable Drawable errorDrawable)
+            {
+                setupTextIcon(token);
+            }
+
+            @Override
+            public void onResourceReady(@NotNull BitmapDrawable bitmap, Transition<? super BitmapDrawable> transition)
+            {
+                textIcon.setVisibility(View.GONE);
+                icon.setVisibility(View.VISIBLE);
+                icon.setImageDrawable(bitmap);
+            }
+        };
     }
 
     @Override
@@ -95,12 +127,12 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
         try
         {
-            icon.setVisibility(View.GONE); // TODO: code for icon display
             tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
+            tokenName = token.getFullName(assetDefinition, token.getTicketCount());
 
             //setup name and value (put these together on a single string to make wrap-around text appear better).
-            String nameValue = token.getStringBalance() + " " + token.getFullName(assetDefinition, token.getTicketCount());
+            String nameValue = token.getStringBalance() + " " + tokenName;
             balanceEth.setText(nameValue);
 
             displayTokenIcon();
@@ -213,28 +245,40 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
     private void displayTokenIcon()
     {
-        String correctedAddr = Keys.toChecksumAddress(token.getAddress());
-        String tURL = assetDefinition.getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
-        if (TextUtils.isEmpty(tURL))
+        int chainIcon = EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId);
+
+        // This appears more complex than necessary;
+        // This is because we are dealing with: new token holder view, refreshing views and recycled views
+        // If the token is a basechain token, immediately show the chain icon - no need to load
+        // Otherwise, try to load the icon resource. If there's no icon resource then generate a text token Icon (round circle with first four chars from the name)
+        // Only reveal the icon immediately before populating it - this stops the update flicker.
+        if (token.isEthereum())
         {
-            tURL = TRUST_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, correctedAddr);
+            textIcon.setVisibility(View.GONE);
+            icon.setImageResource(chainIcon);
+            icon.setVisibility(View.VISIBLE);
         }
+        else
+        {
+            String correctedAddr = Keys.toChecksumAddress(token.getAddress());
+            String tURL = assetDefinition.getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
+            if (TextUtils.isEmpty(tURL))
+            {
+                tURL = TRUST_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, correctedAddr);
+            }
 
-        int fallbackIcon = EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId);
+            boolean onlyTryCache = iconCheck.containsKey(correctedAddr);
 
-        boolean onlyTryCache = iconCheck.containsKey(correctedAddr);
+            Glide.with(getContext().getApplicationContext())
+                    .load(tURL)
+                    .signature(new ObjectKey(correctedAddr + "-" + token.tokenInfo.chainId))
+                    .onlyRetrieveFromCache(onlyTryCache) //reduce URL checking, only check once per session
+                    .apply(new RequestOptions().circleCrop())
+                    .apply(new RequestOptions().placeholder(chainIcon))
+                    .into(viewTarget);
 
-        Glide.with(getContext().getApplicationContext())
-                .load(tURL)
-                .signature(new ObjectKey(correctedAddr + "-" + token.tokenInfo.chainId))
-                .onlyRetrieveFromCache(onlyTryCache) //reduce URL checking, only check once per session
-                .apply(new RequestOptions().circleCrop())
-                .apply(new RequestOptions().placeholder(fallbackIcon))
-                .into(icon);
-
-        icon.setVisibility(View.VISIBLE);
-
-        iconCheck.put(correctedAddr, true);
+            iconCheck.put(correctedAddr, true);
+        }
     }
 
     private void fillEmpty() {
@@ -278,6 +322,13 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
     public void setOnLongClickListener(OnTokenClickListener onTokenClickListener) {
         this.onTokenClickListener = onTokenClickListener;
+    }
+
+    private void setupTextIcon(@NotNull Token token) {
+        icon.setVisibility(View.GONE);
+        textIcon.setVisibility(View.VISIBLE);
+        textIcon.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), Utils.getChainColour(token.tokenInfo.chainId)));
+        textIcon.setText(Utils.getIconisedText(tokenName));
     }
 
     private void animateTextWhileWaiting() {

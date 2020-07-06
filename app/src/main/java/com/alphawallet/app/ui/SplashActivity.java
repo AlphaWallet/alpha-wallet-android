@@ -257,7 +257,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     }
 
     @Override
-    public void FetchMnemonic(String mnemonic)
+    public void fetchMnemonic(String mnemonic)
     {
 
     }

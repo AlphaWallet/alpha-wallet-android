@@ -2,6 +2,7 @@ package com.alphawallet.app.ui;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
@@ -34,6 +35,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -48,6 +50,7 @@ import com.alphawallet.app.entity.HomeCommsInterface;
 import com.alphawallet.app.entity.HomeReceiver;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
+import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
@@ -64,6 +67,8 @@ import com.alphawallet.app.widget.DepositView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
+
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
 import org.web3j.crypto.WalletUtils;
 
@@ -105,6 +110,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private TutoShowcase findWalletAddressDialog;
     private PinAuthenticationCallbackInterface authInterface;
     private String importFileName;
+    private boolean bottomMarginSet = false;
 
     public static final int RC_DOWNLOAD_EXTERNAL_WRITE_PERM = 222;
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
@@ -234,6 +240,23 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         viewModel.cleanDatabases(this);
+
+        //Ensure when keyboard appears the webview gets squashed into remaining view. Also remove navigation bar to increase screen size
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        KeyboardVisibilityEvent.setEventListener(
+                this, isOpen -> {
+                    if (isOpen)
+                    {
+                        bottomMarginSet = viewPager.hasBottomMargin();
+                        viewPager.setBottomMargin(false);
+                        setNavBarVisibility(View.GONE);
+                    }
+                    else
+                    {
+                        if (bottomMarginSet) viewPager.setBottomMargin(true);
+                        setNavBarVisibility(View.VISIBLE);
+                    }
+                });
     }
 
     private void onBackup(String address)
@@ -326,6 +349,9 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
                         if (parser.parseUniversalLink(clipText.toString()).chainId > 0) //see if it's a valid link
                         {
+                            //valid link, remove from clipboard
+                            ClipData clipData = ClipData.newPlainText("", "");
+                            clipboard.setPrimaryClip(clipData);
                             //let's try to import the link
                             viewModel.showImportLink(this, clipText.toString());
                         }
@@ -371,6 +397,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 return true;
             }
             case DAPP_BROWSER: {
+                viewPager.setBottomMargin(true);
                 if (getSelectedItem() == DAPP_BROWSER) {
                     ((DappBrowserFragment)dappBrowserFragment).homePressed();
                 } else {
@@ -379,10 +406,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 return true;
             }
             case WALLET: {
+                viewPager.setBottomMargin(false);
                 showPage(WALLET);
                 return true;
             }
             case SETTINGS: {
+                viewPager.setBottomMargin(false);
                 showPage(SETTINGS);
                 return true;
             }
@@ -427,6 +456,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         dialog = null;
     }
 
+    public void onBrowserWithURL(String url)
+    {
+        showPage(DAPP_BROWSER);
+        ((DappBrowserFragment)dappBrowserFragment).onItemClick(url);
+    }
+
     @Override
     public void onDestroy()
     {
@@ -439,6 +474,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         switch (page) {
             case DAPP_BROWSER: {
                 hideToolbar();
+                viewPager.setBottomMargin(true);
                 viewPager.setCurrentItem(DAPP_BROWSER);
                 setTitle(getString(R.string.toolbar_header_browser));
                 selectNavigationItem(DAPP_BROWSER);
@@ -448,6 +484,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             case WALLET: {
                 showToolbar();
+                viewPager.setBottomMargin(false);
                 viewPager.setCurrentItem(WALLET);
                 if (walletTitle == null || walletTitle.isEmpty()) {
                     setTitle(getString(R.string.toolbar_header_wallet));
@@ -462,6 +499,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             case SETTINGS: {
                 showToolbar();
+                viewPager.setBottomMargin(false);
                 viewPager.setCurrentItem(SETTINGS);
                 setTitle(getString(R.string.toolbar_header_settings));
                 selectNavigationItem(SETTINGS);
@@ -471,6 +509,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             }
             case TRANSACTIONS: {
                 showToolbar();
+                viewPager.setBottomMargin(true);
                 viewPager.setCurrentItem(TRANSACTIONS);
                 setTitle(getString(R.string.toolbar_header_transactions));
                 selectNavigationItem(TRANSACTIONS);
@@ -482,6 +521,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             default:
                 showToolbar();
                 viewPager.setCurrentItem(WALLET);
+                viewPager.setBottomMargin(false);
                 setTitle(getString(R.string.toolbar_header_wallet));
                 selectNavigationItem(WALLET);
                 enableDisplayHomeAsHome(false);
@@ -590,13 +630,19 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     }
 
     @Override
-    public void GotAuthorisation(boolean gotAuth)
+    public void gotAuthorisation(boolean gotAuth)
     {
 
     }
 
     @Override
-    public void CreatedKey(String keyAddress)
+    public void cancelAuthentication()
+    {
+
+    }
+
+    @Override
+    public void createdKey(String keyAddress)
     {
         //Key was upgraded
         //viewModel.upgradeWallet(keyAddress);
@@ -617,7 +663,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 .beginTransaction()
                 .detach(fragment)
                 .attach(fragment)
-                .commit();
+                .commitAllowingStateLoss();
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
@@ -880,7 +926,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 switch (getSelectedItem())
                 {
                     case DAPP_BROWSER:
-                        ((DappBrowserFragment)dappBrowserFragment).GotAuthorisation(resultCode == RESULT_OK);
+                        ((DappBrowserFragment)dappBrowserFragment).gotAuthorisation(resultCode == RESULT_OK);
                         break;
                     default:
                         //continue with generating the authenticated key - NB currently no flow reaches this code but in future it could
@@ -888,7 +934,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                         else
                         {
                             authInterface.failedAuthentication(taskCode);
-                            GotAuthorisation(false);
+                            gotAuthorisation(false);
                         }
                         break;
                 }
@@ -896,6 +942,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case C.UPDATE_LOCALE:
                 updateLocale(data);
                 break;
+            case C.REQUEST_UNIVERSAL_SCAN:
+                if(resultCode == Activity.RESULT_OK)
+                {
+                    String qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
+                    viewModel.handleQRCode(this, qrCode);
+                }
             default:
                 super.onActivityResult(requestCode, resultCode, data);
                 break;

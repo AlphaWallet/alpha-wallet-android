@@ -176,7 +176,7 @@ public class Token implements Parcelable, Comparable<Token>
         {
             for (BigInteger id : getArrayBalance())
             {
-                if (!uniqueIds.contains(id)) uniqueIds.add(id);
+                if (!uniqueIds.contains(id) && !id.equals(BigInteger.ZERO)) uniqueIds.add(id);
             }
         }
         else
@@ -435,7 +435,7 @@ public class Token implements Parcelable, Comparable<Token>
 
     public boolean isBad()
     {
-        return tokenInfo.symbol == null && tokenInfo.name == null;
+        return tokenInfo == null || (tokenInfo.symbol == null && tokenInfo.name == null);
     }
 
     public boolean checkTokenWallet(String address)

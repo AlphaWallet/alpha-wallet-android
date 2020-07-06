@@ -85,7 +85,7 @@ public class GasSettingsActivity extends BaseActivity implements StandardFunctio
     }
 
     @Override
-    public void handleClick(String action)
+    public void handleClick(String action, int id)
     {
         Intent intent = new Intent();
         BigInteger weiGasPrice = Convert.toWei(gasSliderView.getGasPrice(), Convert.Unit.GWEI).toBigInteger();

@@ -16,6 +16,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -25,11 +26,11 @@ import android.widget.TextView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.util.Utils;
 
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
+
 public class PasswordInputView extends LinearLayout implements TextView.OnEditorActionListener
 {
     private final Context context;
-
-    private final int KEYBOARD_SIZE = 300;
 
     private final TextView label;
     private final TextView error;
@@ -45,7 +46,6 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
     private String imeOptions;
     private Activity activity;
     private LayoutCallbackListener callbackListener;
-    private int previousMarkerLocation;
 
     public PasswordInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -72,9 +72,9 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
     {
         activity = a;
         callbackListener = callback;
-        previousMarkerLocation = 0;
-        getViewTreeObserver().addOnGlobalLayoutListener(screenLayoutListener);
         getEditText().setOnEditorActionListener(this);
+
+        addKeyboardListener(callback);
     }
 
     public EditText getEditText()
@@ -235,30 +235,20 @@ public class PasswordInputView extends LinearLayout implements TextView.OnEditor
         return error.getVisibility() == View.VISIBLE;
     }
 
-    private ViewTreeObserver.OnGlobalLayoutListener screenLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
-        @Override
-        public void onGlobalLayout()
-        {
-            if (activity == null || callbackListener == null) return;
-
-            int contentViewBottom = activity.getWindow()
-                    .findViewById(Window.ID_ANDROID_CONTENT)
-                    .getBottom();
-
-            if (contentViewBottom == 0) return;
-
-            if (contentViewBottom < (previousMarkerLocation - KEYBOARD_SIZE))
-            {
-                callbackListener.onLayoutShrunk();
-            }
-            else if (previousMarkerLocation > 0 && (contentViewBottom > previousMarkerLocation + KEYBOARD_SIZE))
-            {
-                callbackListener.onLayoutExpand();
-            }
-
-            previousMarkerLocation = contentViewBottom;
-        }
-    };
+    private void addKeyboardListener(LayoutCallbackListener callback)
+    {
+        KeyboardVisibilityEvent.setEventListener(
+                activity, isOpen -> {
+                    if (isOpen)
+                    {
+                        callback.onLayoutShrunk();
+                    }
+                    else
+                    {
+                        callback.onLayoutExpand();
+                    }
+                });
+    }
 
     @Override
     public boolean onEditorAction(TextView view, int i, KeyEvent keyEvent)

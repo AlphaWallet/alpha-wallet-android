@@ -27,8 +27,6 @@ import com.alphawallet.app.entity.GasTransactionResponse;
 import com.alphawallet.app.util.BalanceUtils;
 import com.google.gson.Gson;
 
-import org.web3j.tx.ChainId;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -41,6 +39,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+
+import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 
 public class GasSliderView extends RelativeLayout implements LifecycleObserver {
 
@@ -62,6 +62,7 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
     private TextView gasLimitValue;
     private TextView networkFeeValue;
     private TextView estimateTimeValue;
+    private TextView estimatedTimeTitle;
 
     private View layoutValueDetails;
     private AppCompatSeekBar gasPriceSlider;
@@ -149,6 +150,7 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
         gasLimitValue = findViewById(R.id.gas_limit_value);
         networkFeeValue = findViewById(R.id.network_fee_value);
         estimateTimeValue = findViewById(R.id.estimated_time_value);
+        estimatedTimeTitle = findViewById(R.id.estimated_time_text);
         layoutValueDetails = findViewById(R.id.layout_value_details);
         gasPriceSlider = findViewById(R.id.gas_price_slider1);
         gasLimitSlider = findViewById(R.id.gas_limit_slider);
@@ -547,9 +549,11 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
     public void setChainId(int chainId)
     {
         //TODO: Add tx fee in FIAT for network transactions. Requires token or ticker.
-        if (chainId != ChainId.MAINNET)
+        if (chainId != MAINNET_ID)
         {
             isMainNet = false;
+            estimatedTimeTitle.setVisibility(View.INVISIBLE);
+            estimateTimeValue.setVisibility(View.INVISIBLE);
         }
     }
 

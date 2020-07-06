@@ -29,4 +29,8 @@ public interface TransactionRepositoryType {
     Single<ContractType> queryInterfaceSpec(String address, TokenInfo tokenInfo);
 
     Transaction fetchCachedTransaction(String walletAddr, String hash);
+
+	Single<String> resendTransaction(Wallet from, String to, BigInteger subunitAmount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId);
+
+	void removeOldTransaction(Wallet wallet, String oldTxHash);
 }

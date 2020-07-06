@@ -13,7 +13,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
@@ -127,11 +126,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenView.setKeyboardListenerCallback(this);
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
         viewModel.getCurrentWallet();
-
-        parsePass = 1;
-        viewModel.getAssetDefinitionService().clearResultMap();
-        args.clear();
-        getAttrs();
     }
 
     private void displayFunction(String tokenAttrs)
@@ -259,6 +253,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         {
             initViews();
         }
+
+        parsePass = 1;
+        viewModel.getAssetDefinitionService().clearResultMap();
+        args.clear();
+        getAttrs();
     }
 
     private void initViewModel()
@@ -628,7 +627,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            GotAuthorisation(resultCode == RESULT_OK);
+            gotAuthorisation(resultCode == RESULT_OK);
         }
     }
 
@@ -709,7 +708,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void GotAuthorisation(boolean gotAuth)
+    public void gotAuthorisation(boolean gotAuth)
     {
         if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
         else viewModel.failedAuthentication(SIGN_DATA);
@@ -743,6 +742,12 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                     + convertedMessage;
             signMessage(signMessage.getBytes(), dAppFunction, messageToSign);
         }
+    }
+
+    @Override
+    public void cancelAuthentication()
+    {
+
     }
 
     @Override

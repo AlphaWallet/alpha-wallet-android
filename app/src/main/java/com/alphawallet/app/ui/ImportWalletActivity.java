@@ -23,8 +23,9 @@ import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.ImportWalletCallback;
 import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.entity.QrUrlResult;
+import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.ui.widget.OnImportKeystoreListener;
 import com.alphawallet.app.ui.widget.OnImportPrivateKeyListener;
@@ -32,7 +33,7 @@ import com.alphawallet.app.ui.widget.OnImportSeedListener;
 import com.alphawallet.app.ui.widget.adapter.TabPagerAdapter;
 import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
-import com.alphawallet.app.util.QRURLParser;
+import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.ImportWalletViewModel;
 import com.alphawallet.app.viewmodel.ImportWalletViewModelFactory;
@@ -412,8 +413,8 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
                         return;
                     }
 
-                    QRURLParser parser = QRURLParser.getInstance();
-                    QrUrlResult result = parser.parse(barcode);
+                    QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
+                    QRResult result = parser.parse(barcode);
                     String extracted_address = null;
                     if (result != null && result.type == EIP681Type.ADDRESS)
                     {

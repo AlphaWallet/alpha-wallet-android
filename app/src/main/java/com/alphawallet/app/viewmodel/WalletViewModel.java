@@ -1,15 +1,20 @@
 package com.alphawallet.app.viewmodel;
 
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.crashlytics.android.Crashlytics;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.ContractLocator;
@@ -45,6 +50,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.app.widget.InputAddressView.BARCODE_READER_REQUEST_CODE;
 
 public class WalletViewModel extends BaseViewModel
 {
@@ -75,6 +81,7 @@ public class WalletViewModel extends BaseViewModel
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
+    private final MyAddressRouter myAddressRouter;
 
     private final MutableLiveData<Map<String, String>> currentWalletBalance = new MutableLiveData<>();
 
@@ -106,7 +113,8 @@ public class WalletViewModel extends BaseViewModel
             OpenseaService openseaService,
             FetchTransactionsInteract fetchTransactionsInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            ChangeTokenEnableInteract changeTokenEnableInteract)
+            ChangeTokenEnableInteract changeTokenEnableInteract,
+            MyAddressRouter myAddressRouter)
     {
         this.fetchTokensInteract = fetchTokensInteract;
         this.addTokenRouter = addTokenRouter;
@@ -122,6 +130,7 @@ public class WalletViewModel extends BaseViewModel
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.changeTokenEnableInteract = changeTokenEnableInteract;
+        this.myAddressRouter = myAddressRouter;
     }
 
     public LiveData<Token[]> tokens() {
@@ -440,6 +449,12 @@ public class WalletViewModel extends BaseViewModel
         addTokenRouter.open(context, null);
     }
 
+    public void showQRCodeScanning(Activity activity) {
+        Intent intent = new Intent(activity, QRScanningActivity.class);
+        intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
+        activity.startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
+    }
+
     @Override
     public void showErc20TokenDetail(Context context, @NotNull String address, String symbol, int decimals, @NotNull Token token) {
         boolean isToken = !address.equalsIgnoreCase(currentWallet.address);
@@ -654,5 +669,10 @@ public class WalletViewModel extends BaseViewModel
     public void newTokensFound(List<ContractLocator> tokenContracts)
     {
         addUnresolvedContracts(tokenContracts);
+    }
+
+    public void showMyAddress(Context context)
+    {
+        myAddressRouter.open(context, currentWallet);
     }
 }

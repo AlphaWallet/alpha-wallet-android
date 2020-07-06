@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+    <item
+        android:id="@+id/action_scan"
+        android:icon="@drawable/ic_camera_scan"
+        android:orderInCategory="1"
+        android:title="@string/action_scan_dapp"
+        app:showAsAction="always"
+        />
+    <item
+        android:id="@+id/action_my_wallet"
+        android:icon="@drawable/ic_my_wallet"
+        android:orderInCategory="20"
+        android:title="@string/my_wallet_address"
+        app:showAsAction="always"
+        />
+</menu>

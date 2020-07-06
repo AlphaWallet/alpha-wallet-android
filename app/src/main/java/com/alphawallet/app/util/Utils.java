@@ -258,7 +258,7 @@ public class Utils {
 
     public static boolean isAddressValid(String address)
     {
-        return WalletUtils.isValidAddress(address);
+        return address != null && address.length() > 0 && WalletUtils.isValidAddress(address);
     }
 
     public static String intArrayToString(int[] values)
@@ -375,5 +375,87 @@ public class Utils {
             }
         }
         return out.toString();
+    }
+
+    public static String convertTimePeriodInSeconds(long pendingTimeInSeconds, Context ctx)
+    {
+        long days = pendingTimeInSeconds/(60*60*24);
+        pendingTimeInSeconds -= (days*60*60*24);
+        long hours = pendingTimeInSeconds/(60*60);
+        pendingTimeInSeconds -= (hours*60*60);
+        long minutes = pendingTimeInSeconds/60;
+        long seconds = pendingTimeInSeconds%60;
+
+        StringBuilder sb = new StringBuilder();
+        int timePoints = 0;
+
+        if (days > 0)
+        {
+            timePoints = 2;
+            if (days == 1)
+            {
+                sb.append(ctx.getString(R.string.day_single));
+            }
+            else
+            {
+                sb.append(ctx.getString(R.string.day_plural, String.valueOf(days)));
+            }
+        }
+
+        if (hours > 0)
+        {
+            if (timePoints == 0)
+            {
+                timePoints = 1;
+            }
+            else
+            {
+                sb.append(", ");
+            }
+
+            if (hours == 1)
+            {
+                sb.append(ctx.getString(R.string.hour_single));
+            }
+            else
+            {
+                sb.append(ctx.getString(R.string.hour_plural, String.valueOf(hours)));
+            }
+        }
+
+        if (minutes > 0 && timePoints < 2)
+        {
+            if (timePoints != 0)
+            {
+                sb.append(", ");
+            }
+            timePoints++;
+            if (minutes == 1)
+            {
+                sb.append(ctx.getString(R.string.minute_single));
+            }
+            else
+            {
+                sb.append(ctx.getString(R.string.minute_plural, String.valueOf(minutes)));
+            }
+        }
+
+        if (seconds > 0 && timePoints < 2)
+        {
+            if (timePoints != 0)
+            {
+                sb.append(", ");
+            }
+            if (seconds == 1)
+            {
+                sb.append(ctx.getString(R.string.second_single));
+            }
+            else
+            {
+                sb.append(ctx.getString(R.string.second_plural, String.valueOf(seconds)));
+            }
+        }
+
+        return sb.toString();
     }
 }

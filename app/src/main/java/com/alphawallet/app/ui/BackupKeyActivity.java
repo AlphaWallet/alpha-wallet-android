@@ -181,7 +181,7 @@ public class BackupKeyActivity extends BaseActivity implements
                 switch (viewModel.upgradeKeySecurity(wallet, this))
                 {
                     case SUCCESSFULLY_UPGRADED:
-                        CreatedKey(wallet.address);
+                        createdKey(wallet.address);
                         break;
                     case REQUESTING_SECURITY:
                         //Do nothing, callback will return to 'CreatedKey()'. If it fails the returned key is empty
@@ -203,7 +203,7 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     @Override
-    public void CreatedKey(String address) {
+    public void createdKey(String address) {
         //key upgraded
         //store wallet upgrade
         if (wallet.address.equalsIgnoreCase(address)) {
@@ -343,7 +343,7 @@ public class BackupKeyActivity extends BaseActivity implements
     @Override
     public void onClick(View view) {
         // Passing an empty String as this class handles clicks based on state
-        handleClick("");
+        handleClick("", 0);
     }
 
     private void ResetInputBox() {
@@ -576,15 +576,7 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     @Override
-    public void cancelAuthentication() {
-        Intent intent = new Intent();
-        setResult(RESULT_CANCELED, intent);
-        intent.putExtra("Key", wallet.address);
-        finish();
-    }
-
-    @Override
-    public void FetchMnemonic(String mnemonic) {
+    public void fetchMnemonic(String mnemonic) {
         switch (state) {
             case WRITE_DOWN_SEED_PHRASE:
                 WriteDownSeedPhrase();
@@ -624,7 +616,7 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     @Override
-    public void GotAuthorisation(boolean gotAuth)
+    public void gotAuthorisation(boolean gotAuth)
     {
         if (gotAuth)
         {
@@ -655,6 +647,15 @@ public class BackupKeyActivity extends BaseActivity implements
                     break;
             }
         }
+    }
+
+    @Override
+    public void cancelAuthentication()
+    {
+        Intent intent = new Intent();
+        setResult(RESULT_CANCELED, intent);
+        intent.putExtra("Key", wallet.address);
+        finish();
     }
 
     private void initViewModel() {
@@ -799,7 +800,7 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     @Override
-    public void handleClick(String action) {
+    public void handleClick(String action, int id) {
         switch (state) {
             case ENTER_BACKUP_STATE_HD:
                 WriteDownSeedPhrase();

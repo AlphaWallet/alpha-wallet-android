@@ -12,7 +12,13 @@ import java.util.List;
  */
 public class Module
 {
+    public final String name;
     public List<SequenceElement> sequence = new ArrayList<>();
+
+    public Module(String moduleName)
+    {
+        name = moduleName;
+    }
 
     public void addSequenceElement(Element element, String sequenceName) throws SAXException
     {

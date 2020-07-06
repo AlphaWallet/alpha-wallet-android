@@ -620,7 +620,7 @@ public abstract class EventUtils
     private Event generateEventFunction(EventDefinition ev)
     {
         List<TypeReference<?>> eventArgSpec = EventUtils.generateFunctionDefinition(ev.eventModule.getSequenceArgs());
-        return new Event(ev.eventName, eventArgSpec);
+        return new Event(ev.eventModule.name, eventArgSpec);
     }
 
     private void addTopicFilter(EventDefinition ev, EthFilter filter, String filterTopicValue, Token originToken, String contractAddr, AttributeInterface attrIf) throws Exception

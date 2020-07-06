@@ -14,6 +14,7 @@ import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.AssetDisplayRouter;
 import com.alphawallet.app.router.Erc20DetailRouter;
+import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.SendTokenRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.OpenseaService;
@@ -40,7 +41,8 @@ public class WalletModule {
             OpenseaService openseaService,
             FetchTransactionsInteract fetchTransactionsInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            ChangeTokenEnableInteract changeTokenEnableInteract) {
+            ChangeTokenEnableInteract changeTokenEnableInteract,
+            MyAddressRouter myAddressRouter) {
         return new WalletViewModelFactory(
                 fetchTokensInteract,
                 addTokenRouter,
@@ -55,7 +57,8 @@ public class WalletModule {
                 openseaService,
                 fetchTransactionsInteract,
                 ethereumNetworkRepository,
-                changeTokenEnableInteract);
+                changeTokenEnableInteract,
+                myAddressRouter);
     }
 
     @Provides
@@ -108,5 +111,10 @@ public class WalletModule {
     @Provides
     ChangeTokenEnableInteract provideChangeTokenEnableInteract(TokenRepositoryType tokenRepository) {
         return new ChangeTokenEnableInteract(tokenRepository);
+    }
+
+    @Provides
+    MyAddressRouter provideMyAddressRouter() {
+        return new MyAddressRouter();
     }
 }

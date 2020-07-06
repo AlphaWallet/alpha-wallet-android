@@ -47,7 +47,7 @@ import com.alphawallet.app.ui.widget.entity.ItemClickListener;
 import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
-import com.alphawallet.app.util.QRURLParser;
+import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -356,7 +356,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
         signCallback = new SignAuthenticationCallback()
         {
             @Override
-            public void GotAuthorisation(boolean gotAuth)
+            public void gotAuthorisation(boolean gotAuth)
             {
                 if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
                 else viewModel.failedAuthentication(SIGN_DATA);
@@ -377,6 +377,12 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
                     //display fail auth
                     onError(new ErrorEnvelope(getString(R.string.authentication_failed)));
                 }
+            }
+
+            @Override
+            public void cancelAuthentication()
+            {
+
             }
         };
 
@@ -609,7 +615,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
                                 return;
                             }
 
-                            QRURLParser parser = QRURLParser.getInstance();
+                            QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
                             String extracted_address = parser.extractAddressFromQrString(barcode);
                             if (extracted_address == null)
                             {
@@ -635,7 +641,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
                 break;
 
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
-                signCallback.GotAuthorisation(resultCode == RESULT_OK);
+                signCallback.gotAuthorisation(resultCode == RESULT_OK);
                 break;
 
             default:
@@ -713,12 +719,26 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
         signCallback = new SignAuthenticationCallback()
         {
             @Override
-            public void GotAuthorisation(boolean gotAuth)
+            public void gotAuthorisation(boolean gotAuth)
             {
                 if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
                 else viewModel.failedAuthentication(SIGN_DATA);
 
                 if (gotAuth) transferTicketFinal();
+            }
+
+            @Override
+            public void cancelAuthentication()
+            {
+                AWalletAlertDialog dialog = new AWalletAlertDialog(getParent());
+                dialog.setIcon(AWalletAlertDialog.NONE);
+                dialog.setTitle(R.string.authentication_cancelled);
+                dialog.setButtonText(R.string.ok);
+                dialog.setButtonListener(v -> {
+                    dialog.dismiss();
+                });
+                dialog.setCancelable(true);
+                dialog.show();
             }
         };
 
@@ -795,7 +815,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
     }
 
     @Override
-    public void handleClick(String action)
+    public void handleClick(String action, int id)
     {
         viewModel.openTransferState(this, token, token.bigIntListToString(selection, false), getNextState());
     }

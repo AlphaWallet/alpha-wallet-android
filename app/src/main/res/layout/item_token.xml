@@ -72,6 +72,25 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
+            <TextView
+                android:id="@+id/text_icon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/grid_icon"
+                android:backgroundTint="@color/azure"
+                android:fontFamily="@font/font_bold"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:lines="1"
+                android:text="UEFA"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                app:autoSizeMaxTextSize="@dimen/sp13"
+                app:autoSizeMinTextSize="@dimen/sp12"
+                app:autoSizeStepGranularity="1sp"
+                app:autoSizeTextType="uniform" />
+
             <ImageView
                 android:id="@+id/icon"
                 android:layout_width="40dp"

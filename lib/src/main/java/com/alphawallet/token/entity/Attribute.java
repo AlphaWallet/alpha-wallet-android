@@ -7,6 +7,7 @@ import com.alphawallet.token.util.DateTimeFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -42,7 +43,7 @@ public class Attribute {
     public EventDefinition event = null;
     public boolean userInput = false;
 
-    public Attribute(Element attr, TokenDefinition def)
+    public Attribute(Element attr, TokenDefinition def) throws SAXException
     {
         originContract = def.contracts.get(def.holdingToken);
         //schema 2020/06 id is now name; name is now label
@@ -136,7 +137,7 @@ public class Attribute {
         return null;
     }
 
-    private void handleOrigins(Element origin, TokenDefinition def)
+    private void handleOrigins(Element origin, TokenDefinition def) throws SAXException
     {
         for(Node node = origin.getFirstChild();
             node!=null; node=node.getNextSibling())

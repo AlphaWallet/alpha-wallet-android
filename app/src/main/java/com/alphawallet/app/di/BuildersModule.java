@@ -32,6 +32,7 @@ import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.ui.WalletActionsActivity;
 import com.alphawallet.app.ui.WalletFragment;
 import com.alphawallet.app.ui.WalletsActivity;
+import com.alphawallet.app.ui.zxing.QRScanningActivity;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;

@@ -14,4 +14,5 @@ public interface TransactionLocalSource {
 	Transaction fetchTransaction(Wallet wallet, String hash);
 	Single<Transaction[]> putAndReturnTransactions(Wallet wallet, Transaction[] txList);
 	void putTransaction(Wallet wallet, Transaction tx);
+    void deleteTransaction(Wallet wallet, String oldTxHash);
 }

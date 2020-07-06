@@ -12,7 +12,6 @@ public class EventDefinition
 {
     public ContractInfo contract;
     public String attributeName; //TransactionResult: method
-    public String eventName;
     public Module eventModule;
     public String filter;
     public String select;

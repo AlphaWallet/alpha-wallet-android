@@ -258,7 +258,7 @@ public class Utils {
 
     public static boolean isAddressValid(String address)
     {
-        return WalletUtils.isValidAddress(address);
+        return address != null && address.length() > 0 && WalletUtils.isValidAddress(address);
     }
 
     public static String intArrayToString(int[] values)

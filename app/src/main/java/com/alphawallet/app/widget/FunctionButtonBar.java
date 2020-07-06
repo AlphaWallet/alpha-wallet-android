@@ -66,7 +66,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private ImageButton moreButton;
     private final Handler handler = new Handler();
     private AssetDefinitionService assetService;
-    private WalletType walletType = WalletType.WATCH; //assume watch unless otherwise notified
+    private WalletType walletType = WalletType.NOT_DEFINED;
 
     private BottomSheetDialog bottomSheet;
     private ListView moreActionsListView;

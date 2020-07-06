@@ -57,7 +57,7 @@ public class ConfirmationRouter {
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, contractAddress);
         intent.putExtra(C.EXTRA_DECIMALS, 0);
         intent.putExtra(C.EXTRA_SYMBOL, tokenName);
-        intent.putExtra(C.EXTRA_AMOUNT, tokenId);
+        intent.putExtra(C.EXTRA_AMOUNT, "0");
         intent.putExtra(C.EXTRA_SENDING_TOKENS, true);
         intent.putExtra(C.TOKEN_TYPE, ConfirmationType.ERC721.ordinal());
         intent.putExtra(C.EXTRA_TOKENID_LIST, tokenId);

@@ -388,7 +388,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         Token token = tokensService.getToken(chainId, address);
         if (token != null)
         {
-            txUpdateTime = token.lastTxUpdate;
+            txUpdateTime = token.lastTxTime;
         }
 
         return txUpdateTime;
@@ -1827,11 +1827,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         newToken.setTokenWallet(token.getWallet());
         newToken.walletUIUpdateRequired = true;
         newToken.updateBlancaTime = 0;
-        newToken.transferPreviousData(token);
 
         tokenLocalSource.saveToken(new Wallet(token.getWallet()), newToken)
                 .subscribeOn(Schedulers.io())
-                .subscribe(tokensService::addToken).isDisposed();
+                .subscribe()
+                .isDisposed();
     }
 
 

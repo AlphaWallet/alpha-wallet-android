@@ -27,21 +27,10 @@ public interface EthereumNetworkRepositoryType {
 
 	void addOnChangeDefaultNetwork(OnNetworkChangeListener onNetworkChanged);
 
-	Single<TokenTicker> getTicker(Token token);
-	Single<TokenTicker> getTicker(int chainId);
-	TokenTicker updateTicker(Token token, TokenTicker ticker);
-	Single<Token> attachTokenTicker(Token token);
-	Single<Token[]> attachTokenTickers(Token[] tokens);
-	TokenTicker getTokenTicker(Token token);
 	String getNameById(int id);
-
-	Single<Token[]> getTokensOnNetwork(int chainId, String address, TokensService tokensService);
 
     List<Integer> getFilterNetworkList();
     void setFilterNetworkList(int[] networkList);
-
-	void refreshTickers();
-	boolean checkTickers();
 
 	List<ContractLocator> getAllKnownContracts(List<Integer> networkFilters);
 	Single<Token[]> getBlankOverrideTokens(Wallet wallet);

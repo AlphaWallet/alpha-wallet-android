@@ -22,35 +22,19 @@ class Erc20DetailModule {
     @Provides
     Erc20DetailViewModelFactory provideErc20DetailViewModelFactory(MyAddressRouter myAddressRouter,
                                                                    FetchTransactionsInteract fetchTransactionsInteract,
-                                                                   FindDefaultNetworkInteract findDefaultNetworkInteract,
-                                                                   GenericWalletInteract genericWalletInteract,
                                                                    TransactionDetailRouter transactionDetailRouter,
                                                                    AssetDefinitionService assetDefinitionService,
-                                                                   TokensService tokensService,
-                                                                   FetchTokensInteract fetchTokensInteract) {
+                                                                   TokensService tokensService) {
         return new Erc20DetailViewModelFactory(myAddressRouter,
                 fetchTransactionsInteract,
-                findDefaultNetworkInteract,
-                genericWalletInteract,
                 transactionDetailRouter,
                 assetDefinitionService,
-                tokensService, fetchTokensInteract);
+                tokensService);
     }
 
     @Provides
     MyAddressRouter provideMyAddressRouter() {
         return new MyAddressRouter();
-    }
-
-    @Provides
-    FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
-            EthereumNetworkRepositoryType ethereumNetworkRepositoryType) {
-        return new FindDefaultNetworkInteract(ethereumNetworkRepositoryType);
-    }
-
-    @Provides
-    GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
-        return new GenericWalletInteract(walletRepository);
     }
 
     @Provides
@@ -62,10 +46,5 @@ class Erc20DetailModule {
     FetchTransactionsInteract provideFetchTransactionsInteract(TransactionRepositoryType transactionRepositoryType,
                                                                TokenRepositoryType tokenRepositoryType) {
         return new FetchTransactionsInteract(transactionRepositoryType, tokenRepositoryType);
-    }
-
-    @Provides
-    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
-        return new FetchTokensInteract(tokenRepository);
     }
 }

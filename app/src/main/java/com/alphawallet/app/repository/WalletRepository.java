@@ -15,6 +15,8 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.service.AccountKeystoreService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TransactionsNetworkClientType;
+
+import io.realm.Realm;
 import okhttp3.OkHttpClient;
 
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
@@ -191,4 +193,10 @@ public class WalletRepository implements WalletRepositoryType
 		}
 		return false;
     }
+
+    @Override
+	public Realm getWalletRealm()
+	{
+		return walletDataRealmSource.getWalletRealm();
+	}
 }

@@ -3,6 +3,7 @@ package com.alphawallet.app.repository;
 import android.util.Log;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
@@ -15,6 +16,7 @@ import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.service.AccountKeystoreService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsNetworkClientType;
+import com.alphawallet.app.service.TransactionsService;
 
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign;
@@ -33,6 +35,7 @@ import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
@@ -44,25 +47,17 @@ public class TransactionRepository implements TransactionRepositoryType {
 	private final EthereumNetworkRepositoryType networkRepository;
 	private final AccountKeystoreService accountKeystoreService;
     private final TransactionLocalSource inDiskCache;
-    private final TransactionsNetworkClientType blockExplorerClient;
+    private final TransactionsService transactionsService;
 
 	public TransactionRepository(
 			EthereumNetworkRepositoryType networkRepository,
 			AccountKeystoreService accountKeystoreService,
 			TransactionLocalSource inDiskCache,
-			TransactionsNetworkClientType blockExplorerClient) {
+			TransactionsService transactionsService) {
 		this.networkRepository = networkRepository;
 		this.accountKeystoreService = accountKeystoreService;
-		this.blockExplorerClient = blockExplorerClient;
 		this.inDiskCache = inDiskCache;
-	}
-
-	@Override
-	public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet, int maxTransactions, List<Integer> networkFilters) {
-		Log.d(TAG, "Fetching Cached TX: " + wallet.address);
-		return fetchFromCache(wallet, maxTransactions, networkFilters)
-				.observeOn(Schedulers.newThread())
-				.toObservable();
+		this.transactionsService = transactionsService;
 	}
 
 	@Override
@@ -70,13 +65,6 @@ public class TransactionRepository implements TransactionRepositoryType {
 	{
 		Wallet wallet = new Wallet(walletAddr);
 		return inDiskCache.fetchTransaction(wallet, hash);
-	}
-
-	@Override
-	public Observable<Transaction[]> fetchNetworkTransaction(NetworkInfo network, String tokenAddress, long lastBlock, String userAddress) {
-		return fetchFromNetwork(network, tokenAddress, lastBlock, userAddress)
-				.observeOn(Schedulers.newThread())
-				.toObservable();
 	}
 
 	@Override
@@ -105,28 +93,36 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId) {
+	public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)
+	{
 		final Web3j web3j = getWeb3jService(chainId);
 		final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
-		BigInteger nonce = networkRepository.getLastTransactionNonce(web3j, from.address).subscribeOn(Schedulers.io()).blockingGet();
 
-		return accountKeystoreService.signTransaction(from, toAddress, subunitAmount, useGasPrice, gasLimit, nonce.longValue(), data, chainId)
-			.flatMap(signedMessage -> Single.fromCallable( () -> {
-				if (signedMessage.sigType != SignatureReturnType.SIGNATURE_GENERATED)
-				{
-					throw new Exception(signedMessage.failMessage);
-				}
-				EthSendTransaction raw = web3j
-						.ethSendRawTransaction(Numeric.toHexString(signedMessage.signature))
-						.send();
-				if (raw.hasError())
-				{
-					throw new Exception(raw.getError().getMessage());
-				}
-				return raw.getTransactionHash();
-			}))
-		.flatMap(txHash -> storeUnconfirmedTransaction(from, txHash, toAddress, subunitAmount, nonce, useGasPrice, gasLimit, chainId, data != null ? Numeric.toHexString(data) : "0x"))
-		.subscribeOn(Schedulers.io());
+		TransactionData txData = new TransactionData();
+
+		return networkRepository.getLastTransactionNonce(web3j, from.address)
+				.flatMap(nonce -> {
+					txData.nonce = nonce;
+					return accountKeystoreService.signTransaction(from, toAddress, subunitAmount, useGasPrice, gasLimit, nonce.longValue(), data, chainId);
+				})
+				.flatMap(signedMessage -> Single.fromCallable(() -> {
+					if (signedMessage.sigType != SignatureReturnType.SIGNATURE_GENERATED)
+					{
+						throw new Exception(signedMessage.failMessage);
+					}
+					txData.signature = Numeric.toHexString(signedMessage.signature);
+					EthSendTransaction raw = web3j
+							.ethSendRawTransaction(Numeric.toHexString(signedMessage.signature))
+							.send();
+					if (raw.hasError())
+					{
+						throw new Exception(raw.getError().getMessage());
+					}
+					txData.txHash = raw.getTransactionHash();
+					return txData;
+				}))
+				.flatMap(tx -> storeUnconfirmedTransaction(from, tx.txHash, toAddress, subunitAmount, tx.nonce, useGasPrice, gasLimit, chainId, data != null ? Numeric.toHexString(data) : "0x"))
+				.subscribeOn(Schedulers.io());
 	}
 
 	@Override
@@ -135,9 +131,12 @@ public class TransactionRepository implements TransactionRepositoryType {
 		final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
 
 		TransactionData txData = new TransactionData();
-		BigInteger nonce = networkRepository.getLastTransactionNonce(web3j, from.address).subscribeOn(Schedulers.io()).blockingGet();
 
-		return accountKeystoreService.signTransaction(from, toAddress, subunitAmount, useGasPrice, gasLimit, nonce.longValue(), data, chainId)
+		return networkRepository.getLastTransactionNonce(web3j, from.address)
+				.flatMap(nonce -> {
+					txData.nonce = nonce;
+					return accountKeystoreService.signTransaction(from, toAddress, subunitAmount, useGasPrice, gasLimit, nonce.longValue(), data, chainId);
+				})
 				.flatMap(signedMessage -> Single.fromCallable( () -> {
 					if (signedMessage.sigType != SignatureReturnType.SIGNATURE_GENERATED)
 					{
@@ -153,7 +152,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 					txData.txHash = raw.getTransactionHash();
 					return txData;
 				}))
-				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, toAddress, subunitAmount, nonce, useGasPrice, gasLimit, chainId, data != null ? Numeric.toHexString(data) : "0x", ""))
+				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, toAddress, subunitAmount, tx.nonce, useGasPrice, gasLimit, chainId, data != null ? Numeric.toHexString(data) : "0x", ""))
 				.subscribeOn(Schedulers.io());
 	}
 
@@ -165,9 +164,11 @@ public class TransactionRepository implements TransactionRepositoryType {
 
 		TransactionData txData = new TransactionData();
 
-		BigInteger nonce = networkRepository.getLastTransactionNonce(web3j, from.address).subscribeOn(Schedulers.io()).blockingGet();
-
-		return getRawTransaction(nonce, useGasPrice, gasLimit, BigInteger.ZERO, data)
+		return networkRepository.getLastTransactionNonce(web3j, from.address)
+				.flatMap(nonce -> {
+					txData.nonce = nonce;
+					return getRawTransaction(nonce, useGasPrice, gasLimit, BigInteger.ZERO, data);
+				})
 				.flatMap(rawTx -> signEncodeRawTransaction(rawTx, from, chainId))
 				.flatMap(signedMessage -> Single.fromCallable( () -> {
 					txData.signature = Numeric.toHexString(signedMessage);
@@ -180,7 +181,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 					txData.txHash = raw.getTransactionHash();
 					return txData;
 				}))
-				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, "", BigInteger.ZERO, nonce, useGasPrice, gasLimit, chainId, data, C.BURN_ADDRESS))
+				.flatMap(tx -> storeUnconfirmedTransaction(from, tx, "", BigInteger.ZERO, txData.nonce, useGasPrice, gasLimit, chainId, data, C.BURN_ADDRESS))
 				.subscribeOn(Schedulers.io());
 	}
 
@@ -196,6 +197,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 			Transaction newTx = new Transaction(txData.txHash, "0", "0", System.currentTimeMillis()/1000, nonce.intValue(), from.address, toAddress, value.toString(10), "0", gasPrice.toString(10), data,
 					gasLimit.toString(10), chainId, contractAddr);
 			inDiskCache.putTransaction(from, newTx);
+			transactionsService.markPending(newTx);
 
 			return txData;
 		});
@@ -208,6 +210,7 @@ public class TransactionRepository implements TransactionRepositoryType {
 			Transaction newTx = new Transaction(txHash, "0", "0", System.currentTimeMillis()/1000, nonce.intValue(), from.address, toAddress, value.toString(10), "0", gasPrice.toString(10), data,
 					gasLimit.toString(10), chainId, "");
 			inDiskCache.putTransaction(from, newTx);
+			transactionsService.markPending(newTx);
 
 			return txHash;
 		});
@@ -256,38 +259,6 @@ public class TransactionRepository implements TransactionRepositoryType {
 		return accountKeystoreService.signTransactionFast(wallet, password, message, chainId);
 	}
 
-	private Single<Transaction[]> fetchFromCache(Wallet wallet, int maxTransactions, List<Integer> networkFilters) {
-	    return inDiskCache.fetchTransaction(wallet, maxTransactions, networkFilters);
-    }
-
-	private Single<Transaction[]> fetchFromNetwork(NetworkInfo networkInfo, String tokenAddress, long lastBlock, String userAddress) {
-		return blockExplorerClient.fetchLastTransactions(networkInfo, tokenAddress, lastBlock, userAddress);
-	}
-
-	@Override
-	public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token, int count)
-	{
-		return inDiskCache.fetchTransactions(wallet, token, count);
-	}
-
-	@Override
-	public Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList)
-	{
-		if (txList.length == 0)
-		{
-			return noTransactions();
-		}
-		else
-		{
-			return inDiskCache.putAndReturnTransactions(wallet, txList);
-		}
-	}
-
-	private Single<Transaction[]> noTransactions()
-	{
-		return Single.fromCallable(() -> new Transaction[0]);
-	}
-
 	/**
 	 * From Web3j to encode a constructor
 	 * @param rawTransaction
@@ -301,24 +272,26 @@ public class TransactionRepository implements TransactionRepositoryType {
 	}
 
 	@Override
-	public Single<ContractType> queryInterfaceSpec(String address, TokenInfo tokenInfo)
-	{
-		NetworkInfo networkInfo = networkRepository.getNetworkByChain(tokenInfo.chainId);
-		ContractType checked = TokensService.checkInterfaceSpec(tokenInfo.chainId, tokenInfo.address);
-		if (tokenInfo.name == null && tokenInfo.symbol == null)
-		{
-			return Single.fromCallable(() -> ContractType.NOT_SET);
-		}
-		else if (checked != null && checked != ContractType.NOT_SET && checked != ContractType.OTHER)
-		{
-			return Single.fromCallable(() -> checked);
-		}
-		else return blockExplorerClient.checkConstructorArgs(networkInfo, address);
-	}
-
-	@Override
 	public void removeOldTransaction(Wallet wallet, String oldTxHash)
 	{
 		inDiskCache.deleteTransaction(wallet, oldTxHash);
+	}
+
+	@Override
+	public Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet, List<Integer> networkFilters, long fetchTime, int fetchLimit)
+	{
+		return inDiskCache.fetchActivityMetas(wallet, networkFilters, fetchTime, fetchLimit);
+	}
+
+	@Override
+	public Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet, int chainId, String tokenAddress, int historyCount)
+	{
+		return inDiskCache.fetchActivityMetas(wallet, chainId, tokenAddress, historyCount);
+	}
+
+	@Override
+	public Realm getRealmInstance(Wallet wallet)
+	{
+		return inDiskCache.getRealmInstance(wallet);
 	}
 }

@@ -3,6 +3,7 @@ package com.alphawallet.app.viewmodel;
 import android.view.View;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.ui.BaseActivity;
 import com.alphawallet.app.widget.AWalletBottomNavigationView;
 
@@ -14,17 +15,17 @@ public class BaseNavigationActivity extends BaseActivity implements AWalletBotto
         nav.setListener(this);
     }
 
-    protected void selectNavigationItem(int position) {
+    protected void selectNavigationItem(WalletPage position) {
         nav.setSelectedItem(position);
     }
 
     @Override
-    public boolean onBottomNavigationItemSelected(int index) {
+    public boolean onBottomNavigationItemSelected(WalletPage index) {
         nav.setSelectedItem(index);
         return false;
     }
 
-    protected int getSelectedItem() {
+    protected WalletPage getSelectedItem() {
         return nav.getSelectedItem();
     }
 

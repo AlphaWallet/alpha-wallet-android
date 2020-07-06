@@ -24,12 +24,6 @@ public class FetchWalletsInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<String> getWalletName(String address) {
-        return accountRepository.getName(address)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
     public Single<Wallet[]> storeWallets(Wallet[] wallets) {
         return accountRepository.storeWallets(wallets);
     }
@@ -57,5 +51,4 @@ public class FetchWalletsInteract {
     {
         return accountRepository.updateBackupTime(walletAddr);
     }
-
 }

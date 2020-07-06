@@ -14,7 +14,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -48,13 +47,15 @@ import java.math.BigInteger;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+import io.reactivex.Completable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.alphawallet.app.C.ETH_SYMBOL;
 import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.ConfirmationType.ETH;
 import static com.alphawallet.app.entity.ConfirmationType.WEB3TRANSACTION;
-import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static com.alphawallet.token.tools.Convert.getEthString;
@@ -418,13 +419,13 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private void onSendGasSettings(GasSettings gasSettings)
     {
         localGasSettings = gasSettings;
-        viewModel.getAuthorisation(this, this);
+        if (gasSettings != null) viewModel.getAuthorisation(this, this);
     }
 
     private void finaliseTransaction()
     {
-        onProgress(true);
-        switch (confirmationType) {
+        switch (confirmationType)
+        {
             case ETH:
                 viewModel.createTransaction(
                         sendingWallet,
@@ -727,15 +728,18 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     {
         if (gotAuth)
         {
-            viewModel.completeAuthentication(SIGN_DATA);
+            onProgress(true);
+            Completable.fromAction(this::finaliseTransaction) //sign on a computation thread to give UI a chance to complete all tasks
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe()
+                    .isDisposed();
         }
         else
         {
             //fail authentication
             securityError();
         }
-        //got authorisation, continue with transaction
-        if (gotAuth) finaliseTransaction();
     }
 
     @Override
@@ -754,6 +758,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         dialog.setButtonListener(v -> {
             dialog.dismiss();
         });
-        dialog.show();
+        if (getApplicationContext() != null) dialog.show();
     }
 }

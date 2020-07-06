@@ -92,6 +92,8 @@ public class Utils {
         if (TextUtils.isEmpty(text)) return "";
         String firstWord = getFirstWord(text);
         switch (firstWord.length()) {
+            case 0:
+                return "";
             case 1:
             case 2:
             case 3:

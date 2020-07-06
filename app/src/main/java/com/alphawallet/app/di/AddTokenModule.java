@@ -5,7 +5,6 @@ import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.interact.SetupTokensInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
@@ -25,13 +24,12 @@ public class AddTokenModule {
             AddTokenInteract addTokenInteract,
             GenericWalletInteract genericWalletInteract,
             FetchTokensInteract fetchTokensInteract,
-            SetupTokensInteract setupTokensInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDefinitionService assetDefinitionService,
             TokensService tokensService) {
         return new AddTokenViewModelFactory(
-                addTokenInteract, genericWalletInteract, fetchTokensInteract, setupTokensInteract, ethereumNetworkRepository, fetchTransactionsInteract, assetDefinitionService, tokensService);
+                addTokenInteract, genericWalletInteract, fetchTokensInteract, ethereumNetworkRepository, fetchTransactionsInteract, assetDefinitionService, tokensService);
     }
 
     @Provides
@@ -49,11 +47,6 @@ public class AddTokenModule {
     @Provides
     GenericWalletInteract provideFindDefaultWalletInteract(WalletRepositoryType walletRepository) {
         return new GenericWalletInteract(walletRepository);
-    }
-
-    @Provides
-    SetupTokensInteract provideSetupTokensInteract(TokenRepositoryType tokenRepository) {
-        return new SetupTokensInteract(tokenRepository);
     }
 
     @Provides

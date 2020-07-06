@@ -1,6 +1,8 @@
 package com.alphawallet.app.ui.widget.adapter;
 
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +11,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.util.Utils;
@@ -21,6 +26,7 @@ import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.ui.widget.OnDappAddedListener;
 import com.alphawallet.app.ui.widget.OnDappClickListener;
 import com.alphawallet.app.ui.widget.OnDappRemovedListener;
+import com.bumptech.glide.request.target.Target;
 
 public class DiscoverDappsListAdapter extends RecyclerView.Adapter<DiscoverDappsListAdapter.ViewHolder> {
     private List<DApp> data;
@@ -84,6 +90,7 @@ public class DiscoverDappsListAdapter extends RecyclerView.Adapter<DiscoverDapps
                     .load(favicon)
                     .apply(new RequestOptions().circleCrop())
                     .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
+                    .listener(requestListener)
                     .into(viewHolder.icon);
 
             viewHolder.icon.setOnClickListener(v -> {
@@ -112,6 +119,21 @@ public class DiscoverDappsListAdapter extends RecyclerView.Adapter<DiscoverDapps
             viewHolder.remove.setVisibility(View.GONE);
         });
     }
+
+    /**
+     * Prevent glide dumping log errors - it is expected that load will fail
+     */
+    private RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
+        @Override
+        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+            return false;
+        }
+
+        @Override
+        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+            return false;
+        }
+    };
 
     @Override
     public int getItemCount() {

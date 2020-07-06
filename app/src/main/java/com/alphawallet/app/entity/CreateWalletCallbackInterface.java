@@ -10,4 +10,5 @@ public interface CreateWalletCallbackInterface
     void keyFailure(String message);
     void cancelAuthentication();
     void fetchMnemonic(String mnemonic);
+    default void keyUpgraded(KeyService.UpgradeKeyResult result) { };
 }

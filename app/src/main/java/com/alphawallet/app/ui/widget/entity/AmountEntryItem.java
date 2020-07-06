@@ -273,6 +273,16 @@ public class AmountEntryItem
     private void updateValues(TokenTicker ticker)
     {
         String amountStr = amountEditText.getText().toString();
+        double amount;
+        try
+        {
+            amount = Double.parseDouble(amountStr);
+        }
+        catch (NumberFormatException e)
+        {
+            amount = 0.0;
+        }
+
         if (usdInput)
         {
             String tokenAmountEquivalent = ethEquivalent(amountStr);
@@ -280,9 +290,8 @@ public class AmountEntryItem
 
             double equivalent = 0.0;
 
-            if (amountStr.length() > 0)
+            if (amountStr.length() > 0 && currentEthPrice != 0.0)
             {
-                double amount = Double.parseDouble(amountStr);
                 equivalent = amount / currentEthPrice;
             }
 
@@ -293,7 +302,7 @@ public class AmountEntryItem
             if (amountStr.length() == 0) amountStr = "0";
             if (ticker != null && isValidAmount(amountStr))
             {
-                String amountEquiv = ticker.priceSymbol + " " + TickerService.getCurrencyString(Double.parseDouble(amountStr) * currentEthPrice);
+                String amountEquiv = ticker.priceSymbol + " " + TickerService.getCurrencyString(amount * currentEthPrice);
                 if (!hasRealValue) amountEquiv = "(TEST) " + amountEquiv;
                 usdValue.setText(amountEquiv);
             }

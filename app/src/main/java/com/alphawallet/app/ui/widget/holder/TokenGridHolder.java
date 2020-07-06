@@ -15,7 +15,9 @@ import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.ERC721Ticket;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
@@ -24,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class TokenGridHolder extends BinderViewHolder<Token> {
+public class TokenGridHolder extends BinderViewHolder<TokenCardMeta> {
 
     public static final int VIEW_TYPE = 2005;
 
@@ -33,23 +35,25 @@ public class TokenGridHolder extends BinderViewHolder<Token> {
     private final ImageView imageIcon;
     private final TextView textIcon;
     private final AssetDefinitionService assetDefinition;
+    private final TokensService tokensService;
 
     private OnTokenClickListener onTokenClickListener;
 
-    public TokenGridHolder(int resId, ViewGroup parent, AssetDefinitionService assetService) {
+    public TokenGridHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs) {
         super(resId, parent);
 
         layout = findViewById(R.id.token_layout);
         imageIcon = findViewById(R.id.token_icon);
         name = findViewById(R.id.token_name);
         textIcon = findViewById(R.id.text_icon);
-
+        tokensService = tSvs;
         assetDefinition = assetService;
     }
 
     @Override
-    public void bind(@Nullable Token token, @NonNull Bundle addition) {
-        if (token != null) {
+    public void bind(@Nullable TokenCardMeta tcm, @NonNull Bundle addition) {
+        if (tcm != null) {
+            Token token = tokensService.getToken(tcm.getChain(), tcm.getAddress());
             if (token.isERC721()) {
                 ERC721Token tkn = (ERC721Token) token;
                 List<Asset> assets = tkn.getTokenAssets();

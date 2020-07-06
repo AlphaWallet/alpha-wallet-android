@@ -9,6 +9,8 @@ import android.os.Bundle;
 
 import com.alphawallet.app.C;
 
+import static com.alphawallet.app.C.ADDED_TOKEN;
+
 public class HomeReceiver extends BroadcastReceiver
 {
     private final HomeCommsInterface homeCommsInterface;
@@ -19,6 +21,10 @@ public class HomeReceiver extends BroadcastReceiver
         ctx.registerReceiver(this, new IntentFilter(C.REQUEST_NOTIFICATION_ACCESS));
         ctx.registerReceiver(this, new IntentFilter(C.BACKUP_WALLET_SUCCESS));
         ctx.registerReceiver(this, new IntentFilter(C.CHANGE_CURRENCY));
+        ctx.registerReceiver(this, new IntentFilter(C.RESET_WALLET));
+        ctx.registerReceiver(this, new IntentFilter(C.ADDED_TOKEN));
+        ctx.registerReceiver(this, new IntentFilter(C.CHANGED_LOCALE));
+        ctx.registerReceiver(this, new IntentFilter(C.REFRESH_TOKENS));
         this.homeCommsInterface = homeCommsInterface;
     }
 
@@ -44,6 +50,18 @@ public class HomeReceiver extends BroadcastReceiver
                 break;
             case C.CHANGE_CURRENCY:
                 homeCommsInterface.changeCurrency();
+                break;
+            case C.RESET_WALLET:
+                homeCommsInterface.resetTokens();
+                break;
+            case ADDED_TOKEN:
+                homeCommsInterface.addedToken(intent.getParcelableArrayListExtra(C.EXTRA_TOKENID_LIST));
+                break;
+            case C.CHANGED_LOCALE:
+                homeCommsInterface.changedLocale();
+                break;
+            case C.REFRESH_TOKENS:
+                homeCommsInterface.refreshTokens();
                 break;
             default:
                 break;

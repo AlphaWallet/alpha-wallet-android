@@ -21,11 +21,6 @@ public class FindDefaultNetworkInteract {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    //get the ticker
-    public Single<TokenTicker> getTicker(Token token) {
-        return ethereumNetworkRepository.getTicker(token);
-    }
-
     public String getNetworkName(int chainId)
     {
         return ethereumNetworkRepository.getNetworkByChain(chainId).getShortName();

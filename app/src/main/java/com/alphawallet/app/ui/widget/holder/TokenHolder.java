@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui.widget.holder;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -22,15 +23,21 @@ import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomViewTarget;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +45,7 @@ import org.jetbrains.annotations.NotNull;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener, View.OnLongClickListener {
+public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View.OnClickListener, View.OnLongClickListener {
 
     public static final int VIEW_TYPE = 1005;
     public static final String EMPTY_BALANCE = "\u2014\u2014";
@@ -58,6 +65,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     private final LinearLayout layoutValueDetails;
     private final LinearLayout extendedInfo;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
+    private final TokensService tokensService;
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
     private final CustomViewTarget viewTarget;
@@ -68,7 +76,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     public Token token;
     private OnTokenClickListener onTokenClickListener;
 
-    public TokenHolder(int resId, ViewGroup parent, AssetDefinitionService assetService)
+    public TokenHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs)
     {
         super(resId, parent);
 
@@ -90,6 +98,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         extendedInfo = findViewById(R.id.layout_extended_info);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
+        tokensService = tSvs;
 
         icon.setVisibility(View.INVISIBLE);
         textIcon.setVisibility(View.GONE);
@@ -115,11 +124,23 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     }
 
     @Override
-    public void bind(@Nullable Token data, @NonNull Bundle addition) {
-        this.token = data;
+    public void bind(@Nullable TokenCardMeta data, @NonNull Bundle addition) {
 
         try
         {
+            token = tokensService.getToken(data.getChain(), data.getAddress());
+            if (token == null)
+            {
+                fillEmpty();
+                return;
+            }
+            else if (data.nameWeight < 1000 && !token.isEthereum())
+            {
+                //edge condition - looking at a contract as an account
+                Token backupChain = tokensService.getToken(data.getChain(), "eth");
+                if (backupChain != null) token = backupChain;
+            }
+
             tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
             tokenName = token.getFullName(assetDefinition, token.getTicketCount());
@@ -234,6 +255,8 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         {
             this.textAppreciation.setText(EMPTY_BALANCE);
         }
+
+        tokensService.addTokenValue(token.tokenInfo.chainId, token.getAddress(), fiatBalance.floatValue());
     }
 
     private void displayTokenIcon()
@@ -253,6 +276,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         }
         else
         {
+            setupTextIcon(token);
             IconItem iconItem = assetDefinition.fetchIconForToken(token);
 
             Glide.with(getContext().getApplicationContext())
@@ -261,9 +285,25 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
                     .onlyRetrieveFromCache(iconItem.onlyFetchFromCache()) //reduce URL checking, only check once per session
                     .apply(new RequestOptions().circleCrop())
                     .apply(new RequestOptions().placeholder(chainIcon))
+                    .listener(requestListener)
                     .into(viewTarget);
         }
     }
+
+    /**
+     * Prevent glide dumping log errors - it is expected that load will fail
+     */
+    private RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
+        @Override
+        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+            return false;
+        }
+
+        @Override
+        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+            return false;
+        }
+    };
 
     private void fillEmpty() {
         balanceEth.setText(R.string.NA);

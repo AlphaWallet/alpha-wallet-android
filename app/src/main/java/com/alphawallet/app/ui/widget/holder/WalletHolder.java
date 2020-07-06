@@ -13,10 +13,14 @@ import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.ui.WalletActionsActivity;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 import com.alphawallet.app.util.Blockies;
 import com.alphawallet.app.util.Utils;
+
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnClickListener {
 
@@ -27,7 +31,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	private final LinearLayout manageWalletLayout;
 	private final ImageView manageWalletBtn;
 	private final ImageView walletIcon;
-	private final LinearLayout walletInfoLayout;
+	private final LinearLayout walletClickLayout;
 	private final TextView walletBalanceText;
 	private final TextView walletBalanceCurrency;
 	private final TextView walletNameText;
@@ -36,11 +40,13 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	private final ImageView walletSelectedIcon;
 	private final int greyColor;
 	private final int blackColor;
+	private final Realm realm;
+	private RealmResults<RealmWalletData> realmUpdate;
 
 	private final WalletClickCallback clickCallback;
-	private Wallet wallet;
+	private Wallet wallet = null;
 
-	public WalletHolder(int resId, ViewGroup parent, WalletClickCallback callback) {
+	public WalletHolder(int resId, ViewGroup parent, WalletClickCallback callback, Realm realm) {
 		super(resId, parent);
 		manageWalletBtn = findViewById(R.id.manage_wallet_btn);
 		walletIcon = findViewById(R.id.wallet_icon);
@@ -50,22 +56,21 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 		walletAddressSeparator = findViewById(R.id.wallet_address_separator);
 		walletAddressText = findViewById(R.id.wallet_address);
 		walletSelectedIcon = findViewById(R.id.selected_wallet_indicator);
+		walletClickLayout = findViewById(R.id.wallet_click_layer);
 		clickCallback = callback;
-		walletInfoLayout = findViewById(R.id.wallet_info_layout);
 		manageWalletLayout = findViewById(R.id.layout_manage_wallet);
-		walletSelectedIcon.setOnClickListener(this);
-		walletInfoLayout.setOnClickListener(this);
-		manageWalletLayout.setOnClickListener(this);
 		greyColor = parent.getContext().getColor(R.color.greyffive);
 		blackColor = parent.getContext().getColor(R.color.text_black);
+		this.realm = realm;
 	}
 
 	@Override
 	public void bind(@Nullable Wallet data, @NonNull Bundle addition) {
-		wallet = null;
 		walletAddressText.setText(null);
 		if (data != null) {
-			wallet = data;
+			wallet = fetchWallet(data);
+			walletClickLayout.setOnClickListener(this);
+			manageWalletLayout.setOnClickListener(this);
 
 			manageWalletBtn.setVisibility(View.VISIBLE);
 
@@ -107,7 +112,43 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 			walletSelectedIcon.setSelected(addition.getBoolean(IS_DEFAULT_ADDITION, false));
 
 			checkLastBackUpTime();
+			startRealmListener();
 		}
+	}
+
+	private void startRealmListener()
+	{
+		realmUpdate = realm.where(RealmWalletData.class)
+				.equalTo("address", wallet.address).findAllAsync();
+		realmUpdate.addChangeListener(realmWallets -> {
+			//update balance
+			if (realmWallets.size() == 0) return;
+			RealmWalletData realmWallet = realmWallets.first();
+			walletBalanceText.setTextColor(blackColor);
+			walletBalanceText.setText(realmWallet.getBalance());
+			String ensName = realmWallet.getENSName();
+			if (!TextUtils.isEmpty(ensName)) {
+				walletNameText.setText(ensName);
+				walletAddressSeparator.setVisibility(View.VISIBLE);
+				walletNameText.setVisibility(View.VISIBLE);
+			}
+		});
+	}
+
+	private Wallet fetchWallet(Wallet w)
+	{
+		RealmWalletData realmWallet = realm.where(RealmWalletData.class)
+				.equalTo("address", w.address)
+				.findFirst();
+
+		if (realmWallet != null)
+		{
+			w.balance = realmWallet.getBalance();
+			w.ENSname = realmWallet.getENSName();
+			w.name = realmWallet.getName();
+		}
+
+		return w;
 	}
 
 	private void checkLastBackUpTime() {
@@ -141,10 +182,9 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 
 	@Override
 	public void onClick(View view) {
-		if (wallet == null) { return; } //protect against click between constructor and bind
+		//if (wallet == null) { return; } //protect against click between constructor and bind
 		switch (view.getId()) {
-			case R.id.selected_wallet_indicator:
-			case R.id.wallet_info_layout:
+			case R.id.wallet_click_layer:
 				clickCallback.onWalletClicked(wallet);
 				break;
 

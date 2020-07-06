@@ -10,32 +10,31 @@ import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.interact.SetupTokensInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.SendActivity;
+import com.alphawallet.token.entity.ContractAddress;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.TokensService;
-
-import javax.annotation.Nullable;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 public class AddTokenViewModel extends BaseViewModel {
 
@@ -48,7 +47,6 @@ public class AddTokenViewModel extends BaseViewModel {
     private final MutableLiveData<Boolean> noContract = new MutableLiveData<>();
 
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
-    private final SetupTokensInteract setupTokensInteract;
     private final AddTokenInteract addTokenInteract;
     private final GenericWalletInteract genericWalletInteract;
     private final FetchTokensInteract fetchTokensInteract;
@@ -80,7 +78,6 @@ public class AddTokenViewModel extends BaseViewModel {
             AddTokenInteract addTokenInteract,
             GenericWalletInteract genericWalletInteract,
             FetchTokensInteract fetchTokensInteract,
-            SetupTokensInteract setupTokenInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDefinitionService assetDefinitionService,
@@ -88,41 +85,15 @@ public class AddTokenViewModel extends BaseViewModel {
         this.addTokenInteract = addTokenInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.fetchTokensInteract = fetchTokensInteract;
-        this.setupTokensInteract = setupTokenInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
     }
 
-
-
-    public void save(String address, String symbol, int decimals, String name, int chainId) {
-        TokenInfo tokenInfo = getTokenInfo(address, symbol, decimals, name, chainId);
-        disposable = fetchTransactionsInteract.queryInterfaceSpec(tokenInfo).toObservable()
-                .flatMap(contractType -> addTokenInteract.add(tokenInfo, contractType, wallet.getValue()))
-                .flatMap(token -> fetchTokensInteract.updateDefaultBalance(token, wallet.getValue()))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onSaved, error -> onInterfaceCheckError(error, tokenInfo));
-    }
-
-    //fallback in case interface spec check throws an error.
-    //If any token data was picked up then default to ERC20 token.
-    private void onInterfaceCheckError(Throwable throwable, TokenInfo tokenInfo)
+    public void save(int chainId, String address)
     {
-        if ((tokenInfo.name != null && tokenInfo.name.length() > 0)
-            || (tokenInfo.symbol != null && tokenInfo.symbol.length() > 0))
-        disposable = addTokenInteract.add(tokenInfo, ContractType.ERC20, wallet.getValue())
-                .subscribe(this::onSaved, this::onError);
-    }
-
-    private void onSaved(Token token)
-    {
-        assetDefinitionService.getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
-        tokensService.addToken(token);
-        progress.postValue(false);
-        result.postValue(token);
+        tokensService.addUnknownTokenToCheck(new ContractAddress(chainId, address));
     }
 
     @Override
@@ -130,11 +101,6 @@ public class AddTokenViewModel extends BaseViewModel {
     {
         super.onCleared();
         if (scanNetworksDisposable != null && !scanNetworksDisposable.isDisposed()) scanNetworksDisposable.dispose();
-    }
-
-    private TokenInfo getTokenInfo(String address, String symbol, int decimals, String name, int chainId)
-    {
-        return new TokenInfo(address, name, symbol, decimals, true, chainId);
     }
 
     public void setPrimaryChain(int chainId)
@@ -148,14 +114,14 @@ public class AddTokenViewModel extends BaseViewModel {
     }
 
     private void setupToken(int chainId, String addr) {
-        disposable = setupTokensInteract
+        disposable = tokensService
                 .update(addr, chainId)
                 .subscribe(this::onTokensSetup, this::onError);
     }
 
     public void fetchToken(int chainId, String addr)
     {
-        setupTokensInteract.update(addr, chainId)
+        tokensService.update(addr, chainId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::gotTokenUpdate, this::onError).isDisposed();
@@ -173,7 +139,6 @@ public class AddTokenViewModel extends BaseViewModel {
 
     private void resumeSend(Token token)
     {
-        tokensService.addToken(token);
         finalisedToken.postValue(token);
     }
 

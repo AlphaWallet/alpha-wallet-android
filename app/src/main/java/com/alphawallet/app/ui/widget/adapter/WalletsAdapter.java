@@ -6,7 +6,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
@@ -17,9 +16,8 @@ import com.alphawallet.app.ui.widget.holder.WalletHolder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import io.realm.Realm;
 
 public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> implements WalletClickCallback
 {
@@ -27,12 +25,15 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
     private ArrayList<Wallet> wallets;
     private Wallet defaultWallet = null;
     private final Context context;
+    private final Realm realm;
 
     public WalletsAdapter(Context ctx,
-            OnSetWalletDefaultListener onSetWalletDefaultListener) {
+            OnSetWalletDefaultListener onSetWalletDefaultListener,
+                          Realm realm) {
         this.onSetWalletDefaultListener = onSetWalletDefaultListener;
         this.wallets = new ArrayList<>();
         this.context = ctx;
+        this.realm = realm;
     }
 
     @NotNull
@@ -41,7 +42,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
         BinderViewHolder binderViewHolder = null;
         switch (viewType) {
             case WalletHolder.VIEW_TYPE:
-                binderViewHolder = new WalletHolder(R.layout.item_wallet_manage, parent, this);
+                binderViewHolder = new WalletHolder(R.layout.item_wallet_manage, parent, this, realm);
             break;
             case TextHolder.VIEW_TYPE:
                 binderViewHolder = new TextHolder(R.layout.item_text_view, parent);
@@ -161,58 +162,10 @@ public class WalletsAdapter extends RecyclerView.Adapter<BinderViewHolder> imple
         notifyDataSetChanged();
     }
 
-    public Wallet getDefaultWallet() {
-        return defaultWallet;
-    }
-    
-    public void updateWalletbalance(Wallet wallet)
-    {
-        boolean found = false;
-        for (Wallet w : wallets)
-        {
-            if (w.address.equals(wallet.address))
-            {
-                w.name = wallet.name;
-                w.ENSname = wallet.ENSname;
-                w.balance = wallet.balance;
-                w.lastBackupTime = wallet.lastBackupTime;
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) wallets.add(wallet);
-
-        notifyDataSetChanged();
-    }
-
-    public void updateWalletNames(List<Wallet> updatedWallets)
-    {
-        Map<String, String> ensUpdates = new HashMap<>();
-        for (Wallet wallet : updatedWallets) ensUpdates.put(wallet.address, wallet.ENSname);
-        for (int i = 0; i < wallets.size(); i++)
-        {
-            wallets.get(i).ENSname = ensUpdates.get(wallets.get(i).address);
-        }
-    }
-
     @Override
     public void onWalletClicked(Wallet wallet)
     {
         onSetWalletDefaultListener.onSetDefault(wallet);
-    }
-
-    public void updateWalletName(Wallet wallet)
-    {
-        for (int i = 0; i < wallets.size(); i++)
-        {
-            if (wallet.address.equalsIgnoreCase(wallets.get(i).address))
-            {
-                wallets.get(i).ENSname = wallet.ENSname;
-                notifyItemChanged(i);
-                break;
-            }
-        }
     }
 
     public interface OnSetWalletDefaultListener {

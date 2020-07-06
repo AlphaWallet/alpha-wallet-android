@@ -8,7 +8,6 @@ import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.interact.SetupTokensInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
@@ -17,6 +16,7 @@ import com.alphawallet.app.service.AlphaWalletService;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.ImportTokenViewModelFactory;
 
 /**
@@ -31,7 +31,7 @@ public class ImportTokenModule {
             GenericWalletInteract genericWalletInteract,
             CreateTransactionInteract createTransactionInteract,
             FetchTokensInteract fetchTokensInteract,
-            SetupTokensInteract setupTokensInteract,
+            TokensService tokensService,
             AlphaWalletService alphaWalletService,
             AddTokenInteract addTokenInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -40,7 +40,7 @@ public class ImportTokenModule {
             GasService gasService,
             KeyService keyService) {
         return new ImportTokenViewModelFactory(
-                genericWalletInteract, createTransactionInteract, fetchTokensInteract, setupTokensInteract, alphaWalletService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService, keyService);
+                genericWalletInteract, createTransactionInteract, fetchTokensInteract, tokensService, alphaWalletService, addTokenInteract, ethereumNetworkRepository, assetDefinitionService, fetchTransactionsInteract, gasService, keyService);
     }
 
     @Provides
@@ -56,11 +56,6 @@ public class ImportTokenModule {
     @Provides
     FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
         return new FetchTokensInteract(tokenRepository);
-    }
-
-    @Provides
-    SetupTokensInteract provideSetupTokensInteract(TokenRepositoryType tokenRepository) {
-        return new SetupTokensInteract(tokenRepository);
     }
 
     @Provides

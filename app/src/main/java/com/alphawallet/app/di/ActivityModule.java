@@ -1,49 +1,41 @@
 package com.alphawallet.app.di;
 
-import dagger.Module;
-import dagger.Provides;
-
 import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
-import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.interact.SetupTokensInteract;
-import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.TransactionDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.viewmodel.TransactionsViewModelFactory;
+import com.alphawallet.app.service.TransactionsService;
+import com.alphawallet.app.viewmodel.ActivityViewModelFactory;
 
+import dagger.Module;
+import dagger.Provides;
+
+/**
+ * Created by JB on 26/06/2020.
+ */
 @Module
-class TransactionsModule {
+class ActivityModule
+{
     @Provides
-    TransactionsViewModelFactory provideTransactionsViewModelFactory(
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
+    ActivityViewModelFactory provideActivityViewModelFactory(
             GenericWalletInteract genericWalletInteract,
             FetchTransactionsInteract fetchTransactionsInteract,
-            SetupTokensInteract setupTokensInteract,
-            AddTokenInteract addTokenInteract,
             TransactionDetailRouter transactionDetailRouter,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService) {
-        return new TransactionsViewModelFactory(
-                findDefaultNetworkInteract,
+            TokensService tokensService,
+            TransactionsService transactionsService) {
+        return new ActivityViewModelFactory(
                 genericWalletInteract,
                 fetchTransactionsInteract,
-                setupTokensInteract,
-                addTokenInteract,
                 transactionDetailRouter,
                 assetDefinitionService,
-                tokensService);
-    }
-
-    @Provides
-    FindDefaultNetworkInteract provideFindDefaultNetworkInteract(
-            EthereumNetworkRepositoryType ethereumNetworkRepositoryType) {
-        return new FindDefaultNetworkInteract(ethereumNetworkRepositoryType);
+                tokensService,
+                transactionsService);
     }
 
     @Provides
@@ -60,16 +52,5 @@ class TransactionsModule {
     @Provides
     TransactionDetailRouter provideTransactionDetailRouter() {
         return new TransactionDetailRouter();
-    }
-
-    @Provides
-    AddTokenInteract provideAddTokenInteract(
-            TokenRepositoryType tokenRepository) {
-        return new AddTokenInteract(tokenRepository);
-    }
-
-    @Provides
-    SetupTokensInteract provideSetupTokensInteract(TokenRepositoryType tokenRepository) {
-        return new SetupTokensInteract(tokenRepository);
     }
 }

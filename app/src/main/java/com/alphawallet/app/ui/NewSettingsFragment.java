@@ -21,6 +21,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -279,7 +280,7 @@ public class NewSettingsFragment extends BaseFragment {
         super.onResume();
         if (viewModel == null)
         {
-            ((HomeActivity)getActivity()).resetFragment(AWalletBottomNavigationView.SETTINGS);
+            ((HomeActivity)getActivity()).resetFragment(WalletPage.SETTINGS);
         }
         else
         {

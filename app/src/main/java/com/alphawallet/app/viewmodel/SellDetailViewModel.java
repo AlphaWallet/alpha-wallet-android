@@ -95,9 +95,9 @@ public class SellDetailViewModel extends BaseViewModel {
         this.token = token;
         this.defaultWallet.setValue(wallet);
         //now get the ticker
-        disposable = findDefaultNetworkInteract
+        /*disposable = findDefaultNetworkInteract
                 .getTicker(token)
-                .subscribe(this::onTicker, this::onError);
+                .subscribe(this::onTicker, this::onError);*/
     }
 
     private void onTicker(TokenTicker ticker)
@@ -106,12 +106,6 @@ public class SellDetailViewModel extends BaseViewModel {
         {
             ethereumPrice.postValue(Double.parseDouble(ticker.price));
         }
-    }
-
-    public void generateSalesOrders(String contractAddr, BigInteger price, List<BigInteger> tokenSendIndexList, BigInteger firstTicketId)
-    {
-        int[] tokenIndices = Utils.bigIntegerListToIntList(tokenSendIndexList);
-        marketQueueService.createSalesOrders(defaultWallet.getValue(), price, tokenIndices, contractAddr, firstTicketId, processMessages, token.tokenInfo.chainId);
     }
 
     public void generateUniversalLink(List<BigInteger> ticketSendIndexList, String contractAddress, BigInteger price, long expiry)

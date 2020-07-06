@@ -5,7 +5,6 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import com.alphawallet.app.interact.CreateTransactionInteract;
-import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -28,7 +27,6 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
     private final KeyService keyService;
     private final GenericWalletInteract genericWalletInteract;
     private final OpenseaService openseaService;
-    private final FetchTokensInteract fetchTokensInteract;
 
     public TokenFunctionViewModelFactory(
             AssetDefinitionService assetDefinitionService,
@@ -38,8 +36,7 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
             GenericWalletInteract genericWalletInteract,
-            OpenseaService openseaService,
-            FetchTokensInteract fetchTokensInteract) {
+            OpenseaService openseaService) {
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
         this.gasService = gasService;
@@ -48,12 +45,11 @@ public class TokenFunctionViewModelFactory implements ViewModelProvider.Factory
         this.keyService = keyService;
         this.genericWalletInteract = genericWalletInteract;
         this.openseaService = openseaService;
-        this.fetchTokensInteract = fetchTokensInteract;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new TokenFunctionViewModel(assetDefinitionService, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract, openseaService, fetchTokensInteract);
+        return (T) new TokenFunctionViewModel(assetDefinitionService, createTransactionInteract, gasService, tokensService, ethereumNetworkRepository, keyService, genericWalletInteract, openseaService);
     }
 }

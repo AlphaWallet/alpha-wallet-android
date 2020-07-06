@@ -45,13 +45,11 @@ public class Ticket extends Token implements Parcelable
     public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = balances;
-        balanceUpdateWeight = calculateBalanceUpdateWeight();
     }
 
     public Ticket(TokenInfo tokenInfo, String balances, long blancaTime, String networkName, ContractType type) {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = stringHexToBigIntegerList(balances);
-        balanceUpdateWeight = calculateBalanceUpdateWeight();
     }
 
     private Ticket(Parcel in) {
@@ -341,32 +339,6 @@ public class Ticket extends Token implements Parcelable
         return dynArray;
     }
 
-    /**
-     * Refresh transactions for TokenScript enabled tokens at startup, once per 5 minutes
-     * and finally if the user does a refresh
-     *
-     * TODO: This heuristic becomes redundant once we enable event support
-     * @return token requires a transaction refresh
-     */
-    @Override
-    public boolean requiresTransactionRefresh(int pendingChain)
-    {
-        boolean requiresUpdate = balanceChanged;
-        balanceChanged = false;
-        if (hasTokenScript && hasPositiveBalance())
-        {
-            long currentTime = System.currentTimeMillis();
-            if (currentTime - lastTxCheck > 5*60*1000) //need to check transactions for function updates, at startup and every 5 minutes is good
-            {
-                lastTxCheck = currentTime;
-                refreshCheck = false;
-                requiresUpdate = true;
-            }
-        }
-
-        return requiresUpdate;
-    }
-
     @Override
     public int interfaceOrdinal()
     {
@@ -400,23 +372,6 @@ public class Ticket extends Token implements Parcelable
         List<BigInteger> nonZeroValues = new ArrayList<>();
         for (BigInteger value : balanceArray) if (value.compareTo(BigInteger.ZERO) != 0 && !nonZeroValues.contains(value)) nonZeroValues.add(value);
         return nonZeroValues;
-    }
-
-    /**
-     * Detect a change of balance for ERC875 balance
-     * @param balanceArray
-     * @return
-     */
-    @Override
-    public boolean checkBalanceChange(List<BigInteger> balanceArray)
-    {
-        balanceUpdateWeight = calculateBalanceUpdateWeight();
-        if (balanceArray.size() != this.balanceArray.size()) return true; //quick check for new tokens
-        for (int index = 0; index < balanceArray.size(); index++) //see if spawnable token ID has changed
-        {
-            if (!balanceArray.get(index).equals(this.balanceArray.get(index))) return true;
-        }
-        return false;
     }
 
     @Override

@@ -11,16 +11,24 @@ package com.alphawallet.app.entity;
  * This saves a lot of memory - especially for a contract with a huge amount of transactions.
  */
 
-public class TransactionMeta
+public class TransactionMeta extends ActivityMeta
 {
     public final String hash;
-    public final long timeStamp;
     public final boolean isPending;
+    public final String contractAddress;
+    public final int chainId;
 
-    public TransactionMeta(String hash, long timeStamp, boolean pending)
+    public TransactionMeta(String hash, long timeStamp, String contractAddress, int chainId, boolean pending)
     {
+        super(timeStamp);
         this.hash = hash;
-        this.timeStamp = timeStamp;
         this.isPending = pending;
+        this.contractAddress = contractAddress;
+        this.chainId = chainId;
+    }
+
+    public long getUID()
+    {
+        return hash.hashCode();
     }
 }

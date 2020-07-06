@@ -4,6 +4,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.token.entity.ContractInfo;
 
 import java.util.ArrayList;
@@ -43,6 +45,11 @@ public class ContractLocator implements Parcelable
     public boolean equals(Token token)
     {
         return (token != null && address != null && address.equalsIgnoreCase(token.getAddress()) && chainId == token.tokenInfo.chainId);
+    }
+
+    public boolean equals(TokenCardMeta token)
+    {
+        return TokensRealmSource.databaseKey(chainId, address).equalsIgnoreCase(token.tokenId);
     }
 
     /* replace this with a one-liner use of stream when we up our minSdkVersion to 24 */

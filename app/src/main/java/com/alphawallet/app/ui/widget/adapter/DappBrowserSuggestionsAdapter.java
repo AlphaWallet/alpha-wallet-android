@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui.widget.adapter;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -18,6 +19,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.util.Utils;
@@ -30,6 +34,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.ui.widget.entity.ItemClickListener;
 import com.alphawallet.app.ui.widget.entity.SuggestionsFilter;
+import com.bumptech.glide.request.target.Target;
 
 public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements Filterable {
     private final List<DApp> suggestions;
@@ -121,6 +126,7 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
                     .load(favicon)
                     .apply(new RequestOptions().circleCrop())
                     .apply(new RequestOptions().placeholder(R.drawable.ic_logo))
+                    .listener(requestListener)
                     .into(icon);
         }
 
@@ -140,6 +146,21 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
 
         return convertView;
     }
+
+    /**
+     * Prevent glide dumping log errors - it is expected that load will fail
+     */
+    private RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
+        @Override
+        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+            return false;
+        }
+
+        @Override
+        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+            return false;
+        }
+    };
 
     private void highlightSearch(String text, String name) {
         String lowerCaseText;

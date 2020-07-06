@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.app.DownloadManager;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.content.*;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
@@ -12,6 +15,7 @@ import android.widget.Toast;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -19,6 +23,8 @@ import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.interact.FetchWalletsInteract;
+import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -26,29 +32,24 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.LocaleRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.router.AddTokenRouter;
+import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.ui.HomeActivity;
-import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.util.AWEnsResolver;
 import com.alphawallet.app.util.LocaleUtils;
+import com.alphawallet.app.util.QRParser;
+import com.alphawallet.token.entity.MagicLinkData;
+import com.alphawallet.token.tools.ParseMagicLink;
+
+import java.io.File;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-
-import com.alphawallet.app.util.QRParser;
-import com.alphawallet.app.widget.AWalletBottomNavigationView;
-import com.alphawallet.token.entity.MagicLinkData;
-import com.alphawallet.token.tools.ParseMagicLink;
-import com.alphawallet.app.R;
-import com.alphawallet.app.interact.FetchWalletsInteract;
-import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.router.AddTokenRouter;
-import com.alphawallet.app.router.ImportTokenRouter;
-import com.alphawallet.app.service.AssetDefinitionService;
-
-import java.io.File;
-import java.io.FilenameFilter;
 
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
@@ -70,6 +71,8 @@ public class HomeViewModel extends BaseViewModel {
     private final FetchWalletsInteract fetchWalletsInteract;
     private final CurrencyRepositoryType currencyRepository;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
+    private final TransactionsService transactionsService;
+    private final TickerService tickerService;
     private final Context context;
     private final MyAddressRouter myAddressRouter;
 
@@ -91,7 +94,9 @@ public class HomeViewModel extends BaseViewModel {
             CurrencyRepositoryType currencyRepository,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             Context context,
-            MyAddressRouter myAddressRouter) {
+            MyAddressRouter myAddressRouter,
+            TransactionsService transactionsService,
+            TickerService tickerService) {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
         this.addTokenRouter = addTokenRouter;
@@ -103,6 +108,8 @@ public class HomeViewModel extends BaseViewModel {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.context = context;
         this.myAddressRouter = myAddressRouter;
+        this.transactionsService = transactionsService;
+        this.tickerService = tickerService;
     }
 
     @Override
@@ -252,6 +259,7 @@ public class HomeViewModel extends BaseViewModel {
     }
 
     private void onWallet(Wallet wallet) {
+        transactionsService.changeWallet(wallet);
         if (TextUtils.isEmpty(wallet.ENSname))
         {
             walletName.postValue(wallet.name);
@@ -273,59 +281,10 @@ public class HomeViewModel extends BaseViewModel {
         return walletName;
     }
 
-    public void cleanDatabases(Context ctx)
-    {
-        File[] files = ctx.getFilesDir().listFiles(new FilenameFilter()
-        {
-            @Override
-            public boolean accept(File file, String name)
-            {
-                return name.matches("^0x\\S{40}-.+-db.real\\S+")
-                        && !name.matches("^0x\\S{40}-721-db.real\\S+"); //match all deprecated databases
-            }
-        });
-
-        for (File file : files)
-        {
-            //erase file
-            deleteRecursive(file);
-        }
-    }
-
     public void checkIsBackedUp(String walletAddress)
     {
         genericWalletInteract.getWalletNeedsBackup(walletAddress)
                 .subscribe(backUpMessage::postValue).isDisposed();
-    }
-
-    private void deleteRecursive(File fileDir)
-    {
-        if (fileDir.isDirectory()) {
-            for (File child : fileDir.listFiles()) {
-                deleteRecursive(child);
-            }
-        }
-
-        fileDir.delete();
-    }
-
-    public void cleanNewDatabases(Context ctx)
-    {
-        File[] files = ctx.getFilesDir().listFiles(new FilenameFilter()
-        {
-            @Override
-            public boolean accept(File file, String name)
-            {
-                return name.matches("^0x\\S{40}-db.real\\S+")
-                    || name.matches("^0x\\S{40}-721-db.real\\S+"); //match all deprecated databases
-            }
-        });
-
-        for (File file : files)
-        {
-            //erase file
-            deleteRecursive(file);
-        }
     }
 
     public boolean isFindWalletAddressDialogShown() {
@@ -342,7 +301,7 @@ public class HomeViewModel extends BaseViewModel {
 
     public void updateTickers()
     {
-        ethereumNetworkRepository.refreshTickers();
+        tickerService.updateTickers(defaultWallet.getValue());
     }
 
     private void onENSError(Throwable throwable)

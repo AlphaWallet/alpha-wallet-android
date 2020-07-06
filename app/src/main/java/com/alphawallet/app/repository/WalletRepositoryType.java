@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
+import io.realm.Realm;
 
 import com.alphawallet.app.entity.Wallet;
 
@@ -46,4 +47,6 @@ public interface WalletRepositoryType {
     Single<String> setIsDismissed(String walletAddr, boolean isDismissed);
 
     boolean keystoreExists(String address);
+
+    Realm getWalletRealm();
 }

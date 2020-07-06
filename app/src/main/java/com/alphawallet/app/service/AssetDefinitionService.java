@@ -37,6 +37,7 @@ import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmCertificateData;
 import com.alphawallet.app.ui.HomeActivity;
+import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.HomeViewModel;
 import com.alphawallet.token.entity.Attribute;
@@ -58,10 +59,12 @@ import com.alphawallet.token.entity.TransactionResult;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
+import com.bumptech.glide.signature.ObjectKey;
 
 import org.jetbrains.annotations.NotNull;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.EthFilter;
@@ -156,6 +159,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private final TokenscriptFunction tokenscriptUtility;
     private final EventUtils eventUtils;
+
+    private final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
+    private final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
+    private final Map<String, Boolean> iconCheck = new ConcurrentHashMap<>();
 
     /* Designed with the assmuption that only a single instance of this class at any given time
     *  ^^ The "service" part of AssetDefinitionService is the keyword here.
@@ -2407,6 +2414,22 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return url;
+    }
+
+    public IconItem fetchIconForToken(Token token)
+    {
+        String correctedAddr = Keys.toChecksumAddress(token.getAddress());
+
+        String tURL = getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
+        if (TextUtils.isEmpty(tURL))
+        {
+            tURL = TRUST_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, correctedAddr);
+        }
+
+        boolean onlyTryCache = iconCheck.containsKey(correctedAddr);
+        iconCheck.put(correctedAddr, true);
+
+        return new IconItem(tURL, onlyTryCache, correctedAddr, new ObjectKey(correctedAddr + "-" + token.tokenInfo.chainId));
     }
 
     public Single<Integer> fetchViewHeight(int chainId, String address)

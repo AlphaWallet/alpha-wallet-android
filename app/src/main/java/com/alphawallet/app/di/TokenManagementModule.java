@@ -3,6 +3,7 @@ package com.alphawallet.app.di;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.AddTokenRouter;
+import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.viewmodel.TokenManagementViewModelFactory;
 
 import dagger.Module;
@@ -14,9 +15,15 @@ class TokenManagementModule {
     TokenManagementViewModelFactory provideTokenManagementViewModelFactory(
             TokenRepositoryType tokenRepository,
             ChangeTokenEnableInteract changeTokenEnableInteract,
-            AddTokenRouter addTokenRouter)
+            AddTokenRouter addTokenRouter,
+            AssetDefinitionService assetDefinitionService)
     {
-        return new TokenManagementViewModelFactory(tokenRepository, changeTokenEnableInteract, addTokenRouter);
+        return new TokenManagementViewModelFactory(
+                tokenRepository,
+                changeTokenEnableInteract,
+                addTokenRouter,
+                assetDefinitionService
+        );
     }
 
     @Provides

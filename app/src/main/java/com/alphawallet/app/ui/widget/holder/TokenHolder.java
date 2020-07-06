@@ -27,6 +27,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -35,20 +36,14 @@ import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.signature.ObjectKey;
 
 import org.jetbrains.annotations.NotNull;
-import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener, View.OnLongClickListener {
 
     public static final int VIEW_TYPE = 1005;
     public static final String EMPTY_BALANCE = "\u2014\u2014";
-    private static final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
-    private static final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
-    private static final Map<String, Boolean> iconCheck = new ConcurrentHashMap<>();
 
     private final TextView balanceEth;
     private final TextView balanceCurrency;
@@ -260,24 +255,15 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         }
         else
         {
-            String correctedAddr = Keys.toChecksumAddress(token.getAddress());
-            String tURL = assetDefinition.getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
-            if (TextUtils.isEmpty(tURL))
-            {
-                tURL = TRUST_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, correctedAddr);
-            }
-
-            boolean onlyTryCache = iconCheck.containsKey(correctedAddr);
+            IconItem iconItem = assetDefinition.fetchIconForToken(token);
 
             Glide.with(getContext().getApplicationContext())
-                    .load(tURL)
-                    .signature(new ObjectKey(correctedAddr + "-" + token.tokenInfo.chainId))
-                    .onlyRetrieveFromCache(onlyTryCache) //reduce URL checking, only check once per session
+                    .load(iconItem.getUrl())
+                    .signature(iconItem.getSignature())
+                    .onlyRetrieveFromCache(iconItem.isFetchFromCache()) //reduce URL checking, only check once per session
                     .apply(new RequestOptions().circleCrop())
                     .apply(new RequestOptions().placeholder(chainIcon))
                     .into(viewTarget);
-
-            iconCheck.put(correctedAddr, true);
         }
     }
 

@@ -633,4 +633,7 @@
     <string name="transaction_already_written_title">Transaction Already Written</string>
     <string name="transaction_fail_warning">Transaction Fail Warning</string>
     <string name="node_predicts_tx_will_fail">The Node predicts this transaction will fail: %1$s</string>
+    <string name="search_for_tokens">Search for Tokens...</string>
+    <string name="display_tokens">Display Tokens</string>
+    <string name="hidden_tokens">Hidden Tokens</string>
 </resources>

@@ -26,7 +26,6 @@ import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
-import com.alphawallet.app.interact.SetupTokensInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
@@ -34,6 +33,7 @@ import com.alphawallet.app.service.AlphaWalletService;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.SigReturnType;
@@ -70,7 +70,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private final GenericWalletInteract genericWalletInteract;
     private final CreateTransactionInteract createTransactionInteract;
     private final FetchTokensInteract fetchTokensInteract;
-    private final SetupTokensInteract setupTokensInteract;
+    private final TokensService tokensService;
     private final AlphaWalletService alphaWalletService;
     private final AddTokenInteract addTokenInteract;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -109,7 +109,7 @@ public class ImportTokenViewModel extends BaseViewModel
     ImportTokenViewModel(GenericWalletInteract genericWalletInteract,
                          CreateTransactionInteract createTransactionInteract,
                          FetchTokensInteract fetchTokensInteract,
-                         SetupTokensInteract setupTokensInteract,
+                         TokensService tokensService,
                          AlphaWalletService alphaWalletService,
                          AddTokenInteract addTokenInteract,
                          EthereumNetworkRepositoryType ethereumNetworkRepository,
@@ -120,7 +120,7 @@ public class ImportTokenViewModel extends BaseViewModel
         this.genericWalletInteract = genericWalletInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTokensInteract = fetchTokensInteract;
-        this.setupTokensInteract = setupTokensInteract;
+        this.tokensService = tokensService;
         this.alphaWalletService = alphaWalletService;
         this.addTokenInteract = addTokenInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
@@ -224,7 +224,7 @@ public class ImportTokenViewModel extends BaseViewModel
                 updateToken(); //don't check contract
                 break;
             default:
-                fetchTokens();
+                fetchToken();
                 break;
         }
 
@@ -232,35 +232,14 @@ public class ImportTokenViewModel extends BaseViewModel
     }
 
     //2. Fetch all cached tokens and get eth price
-    private void fetchTokens() {
-        importToken = null;
-        disposable = fetchTokensInteract
-                .fetchStoredToken(network.getValue(), wallet.getValue(), importOrder.contractAddress)
-                .subscribe(this::onToken, this::onFetchError, this::fetchTokensComplete);
-    }
-
-    private void onFetchError(Throwable throwable)
-    {
-        //there was no token found, retrieve from blockchain
-        setupTokenAddr(importOrder.contractAddress);
-    }
-
-    private void onToken(Token token)
-    {
-        if (token.addressMatches(importOrder.contractAddress) &&
-                (!(token.getInterfaceSpec() == ContractType.NOT_SET || token.getInterfaceSpec() == ContractType.OTHER)))
+    private void fetchToken() {
+        importToken = tokensService.getToken(importOrder.chainId, importOrder.contractAddress);
+        if (importToken != null && !(importToken.getInterfaceSpec() == ContractType.NOT_SET || importToken.getInterfaceSpec() == ContractType.OTHER))
         {
-            importToken = token;
             regularBalanceCheck(); //fetch balance and display
         }
-    }
-
-    //2b. on completion of receiving tokens check if we found the matching token
-    private void fetchTokensComplete()
-    {
-        if (importToken == null)
+        else
         {
-            //Didn't have the token cached, so retrieve it from blockchain
             setupTokenAddr(importOrder.contractAddress);
         }
     }
@@ -268,8 +247,8 @@ public class ImportTokenViewModel extends BaseViewModel
     //3. If token not already cached we need to fetch details from the ethereum contract itself
     private void setupTokenAddr(String contractAddress)
     {
-        disposable = setupTokensInteract
-                .update(contractAddress, network().getValue().chainId)
+        disposable = tokensService
+                .update(contractAddress, importOrder.chainId)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::getTokenSpec, this::onError);
@@ -678,11 +657,6 @@ public class ImportTokenViewModel extends BaseViewModel
         return network.getValue();
     }
 
-    public void stopGasPriceChecker()
-    {
-        gasService.stopGasListener();
-    }
-
     public void getAuthorisation(Activity activity, SignAuthenticationCallback callback)
     {
         if (wallet.getValue() != null)
@@ -722,5 +696,12 @@ public class ImportTokenViewModel extends BaseViewModel
     public void failedAuthentication(Operation signData)
     {
         keyService.failedAuthentication(signData);
+    }
+
+    public void onDestroy()
+    {
+        if (getBalanceDisposable != null && !getBalanceDisposable.isDisposed()) getBalanceDisposable.dispose();
+        getBalanceDisposable = null;
+        gasService.stopGasListener();
     }
 }

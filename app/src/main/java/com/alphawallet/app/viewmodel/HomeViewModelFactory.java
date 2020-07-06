@@ -15,6 +15,8 @@ import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.service.TransactionsService;
 
 public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final PreferenceRepositoryType preferenceRepository;
@@ -28,6 +30,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final Context context;
     private final MyAddressRouter myAddressRouter;
+    private final TransactionsService transactionsService;
+    private final TickerService tickerService;
 
     public HomeViewModelFactory(
             PreferenceRepositoryType preferenceRepository,
@@ -40,7 +44,9 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
             CurrencyRepositoryType currencyRepository,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             Context context,
-            MyAddressRouter myAddressRouter) {
+            MyAddressRouter myAddressRouter,
+            TransactionsService transactionsService,
+            TickerService tickerService) {
         this.preferenceRepository = preferenceRepository;
         this.localeRepository = localeRepository;
         this.importTokenRouter = importTokenRouter;
@@ -52,6 +58,8 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.context = context;
         this.myAddressRouter = myAddressRouter;
+        this.transactionsService = transactionsService;
+        this.tickerService = tickerService;
     }
 
     @NonNull
@@ -68,7 +76,9 @@ public class HomeViewModelFactory implements ViewModelProvider.Factory {
                 currencyRepository,
                 ethereumNetworkRepository,
                 context,
-                myAddressRouter
+                myAddressRouter,
+                transactionsService,
+                tickerService
         );
     }
 }

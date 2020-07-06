@@ -16,6 +16,7 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.ui.widget.adapter.TokenListAdapter;
@@ -66,9 +67,9 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         });
     }
 
-    private void onTokens(Token[] tokenArray) {
+    private void onTokens(TokenCardMeta[] tokenArray) {
         if (tokenArray != null && tokenArray.length > 0) {
-            adapter = new TokenListAdapter(this, viewModel.getAssetDefinitionService(), tokenArray, this);
+            adapter = new TokenListAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), tokenArray, this);
             tokenList.setAdapter(adapter);
         }
     }
@@ -104,7 +105,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         if (getIntent() != null) {
             String walletAddr = getIntent().getStringExtra(C.EXTRA_ADDRESS);
             wallet = new Wallet(walletAddr);
-            viewModel.fetchTokens(walletAddr);
+            viewModel.fetchTokens(wallet);
         } else {
             finish();
         }

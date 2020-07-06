@@ -1,5 +1,7 @@
 package com.alphawallet.app.entity;
 
+import java.util.List;
+
 public interface HomeCommsInterface
 {
     void downloadReady(String ready);
@@ -7,4 +9,8 @@ public interface HomeCommsInterface
     void requestNotificationPermission();
     void backupSuccess(String keyAddress);
     void changeCurrency();
+    void resetTokens();
+    void addedToken(List<ContractLocator> tokenContracts);
+    void changedLocale();
+    default void refreshTokens() { };
 }

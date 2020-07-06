@@ -346,8 +346,8 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         }
 
         if (isValid) {
-            viewModel.save(address, symbol, decimals, name, viewModel.getSelectedChain());
-            showProgress(true);
+            viewModel.save(viewModel.getSelectedChain(), address);
+            finish();
         }
     }
 

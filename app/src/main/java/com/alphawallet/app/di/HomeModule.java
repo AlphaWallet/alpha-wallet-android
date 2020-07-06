@@ -17,12 +17,14 @@ import com.alphawallet.app.router.AddTokenRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TickerService;
+import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.viewmodel.HomeViewModelFactory;
 
 @Module
 class HomeModule {
     @Provides
-    HomeViewModelFactory provideTransactionsViewModelFactory(
+    HomeViewModelFactory provideHomeViewModelFactory(
             PreferenceRepositoryType preferenceRepository,
             LocaleRepositoryType localeRepository,
             ImportTokenRouter importTokenRouter,
@@ -33,7 +35,9 @@ class HomeModule {
             CurrencyRepositoryType currencyRepository,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             Context context,
-            MyAddressRouter myAddressRouter) {
+            MyAddressRouter myAddressRouter,
+            TransactionsService transactionsService,
+            TickerService tickerService) {
         return new HomeViewModelFactory(
                 preferenceRepository,
                 localeRepository,
@@ -45,7 +49,9 @@ class HomeModule {
                 currencyRepository,
                 ethereumNetworkRepository,
                 context,
-                myAddressRouter);
+                myAddressRouter,
+                transactionsService,
+                tickerService);
     }
 
     @Provides

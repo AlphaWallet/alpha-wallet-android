@@ -6,27 +6,19 @@ import android.view.View;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.service.TickerServiceInterface;
 
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.methods.response.EthBlockNumber;
-
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import io.reactivex.Single;
-import io.reactivex.schedulers.Schedulers;
-
 public class EthereumNetworkRepository extends EthereumNetworkBase
 {
     private final Context context;
 
-    public EthereumNetworkRepository(PreferenceRepositoryType preferenceRepository, TickerServiceInterface tickerService, Context ctx)
+    public EthereumNetworkRepository(PreferenceRepositoryType preferenceRepository, Context ctx)
     {
-        super(preferenceRepository, tickerService, new NetworkInfo[0], true);
+        super(preferenceRepository, new NetworkInfo[0], true);
         context = ctx;
     }
 

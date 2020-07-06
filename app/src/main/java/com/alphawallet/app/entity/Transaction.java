@@ -428,7 +428,7 @@ public class Transaction implements Parcelable {
 		catch (Exception e)
 		{
 			o = generateERC875Op();
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 
 		return o;

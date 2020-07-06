@@ -6,7 +6,6 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmERC721Asset;
-import com.alphawallet.app.repository.entity.RealmERC721Token;
 import com.alphawallet.app.repository.entity.RealmKeyType;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTransaction;
@@ -22,6 +21,7 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -55,10 +55,58 @@ public class WalletDataRealmSource {
                 }
             }
 
+            List<Wallet> oldWalletList = loadOrCreateKeyRealmDB(wallets, keyService);
             if (keyService.detectWalletIssues(walletList))
             {
                 //save changes
                 for (Wallet w : walletList) storeKeyData(w);
+
+                for (Wallet o: oldWalletList)
+                {
+                    boolean found = false;
+                    for (Wallet w : walletList)
+                    {
+                        if (w.address.equalsIgnoreCase(o.address))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        //remove from realm
+                        Wallet gone = deleteWallet(o).subscribeOn(Schedulers.io()).blockingGet();
+                        System.out.println("DELETED WALLET: " + gone.address);
+                    }
+                }
+            }
+
+            //remove old from realm
+            try (Realm realm = realmManager.getWalletDataRealmInstance())
+            {
+                RealmResults<RealmWalletData> items = realm.where(RealmWalletData.class).findAll();
+
+                realm.beginTransaction();
+                for (RealmWalletData rwd : items)
+                {
+                    boolean found = false;
+                    for (Wallet w : walletList)
+                    {
+                        if (rwd.getAddress().equalsIgnoreCase(w.address))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        //remove from realm
+                        rwd.deleteFromRealm();
+                    }
+                }
+                realm.commitTransaction();
             }
 
             return walletList.toArray(new Wallet[0]);
@@ -301,14 +349,12 @@ public class WalletDataRealmSource {
             {
                 RealmResults<RealmToken>       tokens = realm.where(RealmToken.class).findAll();
                 RealmResults<RealmERC721Asset> assets = realm.where(RealmERC721Asset.class).findAll();
-                RealmResults<RealmERC721Token> erc721tokens = realm.where(RealmERC721Token.class).findAll();
                 RealmResults<RealmTransaction> transactions = realm.where(RealmTransaction.class).findAll();
                 RealmResults<RealmTransactionOperation> transactionOps = realm.where(RealmTransactionOperation.class).findAll();
 
                 realm.beginTransaction();
                 tokens.deleteAllFromRealm();
                 assets.deleteAllFromRealm();
-                erc721tokens.deleteAllFromRealm();
                 transactions.deleteAllFromRealm();
                 transactionOps.deleteAllFromRealm();
                 realm.commitTransaction();
@@ -374,19 +420,16 @@ public class WalletDataRealmSource {
     {
         try (Realm realm = realmManager.getWalletDataRealmInstance())
         {
-            RealmWalletData realmWallet = realm.where(RealmWalletData.class)
-                    .equalTo("address", wallet.address)
-                    .findFirst();
-
-            realm.beginTransaction();
-            if (realmWallet == null) {
-                realmWallet = realm.createObject(RealmWalletData.class, wallet.address);
-            }
-
-            realmWallet.setName(wallet.name);
-            realmWallet.setENSName(wallet.ENSname);
-            realmWallet.setBalance(wallet.balance);
-            realm.commitTransaction();
+            realm.executeTransaction(r -> {
+                RealmWalletData item = realm.where(RealmWalletData.class)
+                        .equalTo("address", wallet.address)
+                        .findFirst();
+                if (item == null) item = realm.createObject(RealmWalletData.class, wallet.address);
+                item.setName(wallet.name);
+                item.setENSName(wallet.ENSname);
+                item.setBalance(wallet.balance);
+                realm.insertOrUpdate(item);
+            });
         }
         catch (Exception e)
         {
@@ -471,5 +514,10 @@ public class WalletDataRealmSource {
 
         // wallet never backed up but backup warning may have been swiped away
         return !warningDismissed && backupTime == 0;
+    }
+
+    public Realm getWalletRealm()
+    {
+        return realmManager.getWalletDataRealmInstance();
     }
 }

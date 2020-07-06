@@ -32,7 +32,7 @@ import java.util.List;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScriptManagementAdapter.TokenHolder> {
+public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScriptManagementAdapter.TokenSciptCardHolder> {
 
     private final TokenScriptManagementActivity activity;
     private final Context context;
@@ -51,12 +51,12 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
     }
 
     @Override
-    public TokenHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        return new TokenHolder(inflater.inflate(R.layout.item_tokenscript_management, viewGroup, false));
+    public TokenSciptCardHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        return new TokenSciptCardHolder(inflater.inflate(R.layout.item_tokenscript_management, viewGroup, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull TokenHolder tokenHolder, int pos) {
+    public void onBindViewHolder(@NonNull TokenSciptCardHolder tokenSciptCardHolder, int pos) {
 
         TokenLocator tokenLocator = tokenLocators.get(pos);
 
@@ -83,48 +83,48 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
             final TokenScriptFile overrideFile = (servingFile != null && !tokenLocator.getFullFileName().equals(servingFile.getAbsolutePath())) ? servingFile : null;
             if (overrideFile != null)
             {
-                tokenHolder.overrideLayer.setVisibility(View.VISIBLE);
+                tokenSciptCardHolder.overrideLayer.setVisibility(View.VISIBLE);
             }
             else
             {
-                tokenHolder.overrideLayer.setVisibility(View.GONE);
+                tokenSciptCardHolder.overrideLayer.setVisibility(View.GONE);
             }
 
-            tokenHolder.clickHolder.setOnClickListener(v -> displayFileDialog(overrideFile, tokenLocator));
-            tokenHolder.clickHolder.setOnLongClickListener(v -> displayDeleteFileDialog(tokenLocator));
+            tokenSciptCardHolder.clickHolder.setOnClickListener(v -> displayFileDialog(overrideFile, tokenLocator));
+            tokenSciptCardHolder.clickHolder.setOnLongClickListener(v -> displayDeleteFileDialog(tokenLocator));
 
-            tokenHolder.txtToken.setText(tokenLocator.getDefinitionName());
-            tokenHolder.txtTokenFile.setText(tokenLocator.getFileName());
+            tokenSciptCardHolder.txtToken.setText(tokenLocator.getDefinitionName());
+            tokenSciptCardHolder.txtTokenFile.setText(tokenLocator.getFileName());
 
             Token t = assetDefinitionService.getTokenFromService(chainId, address);
             if (t != null)
             {
-                tokenHolder.chainName.setVisibility(View.VISIBLE);
-                tokenHolder.chainName.setText(t.getNetworkName());
-                Utils.setChainColour(tokenHolder.chainName, t.tokenInfo.chainId);
+                tokenSciptCardHolder.chainName.setVisibility(View.VISIBLE);
+                tokenSciptCardHolder.chainName.setText(t.getNetworkName());
+                Utils.setChainColour(tokenSciptCardHolder.chainName, t.tokenInfo.chainId);
                 String tokenSpec = context.getString(R.string.token_spec, address, originContract.contractInterface);
-                tokenHolder.txtTokenAddress.setText(tokenSpec);
-                tokenHolder.tokenFullName.setText(t.getFullName());
+                tokenSciptCardHolder.txtTokenAddress.setText(tokenSpec);
+                tokenSciptCardHolder.tokenFullName.setText(t.getFullName());
             }
 
             assetDefinitionService.getSignatureData(chainId, address)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(sig -> onSigData(sig, tokenHolder), Throwable::printStackTrace).isDisposed();
+                    .subscribe(sig -> onSigData(sig, tokenSciptCardHolder), Throwable::printStackTrace).isDisposed();
         }
         else
         {
-            tokenHolder.txtToken.setText(R.string.tokenscript_file_error);
-            tokenHolder.txtTokenFile.setText(tokenLocator.getDefinitionName());
-            tokenHolder.txtTokenAddress.setVisibility(View.INVISIBLE);
-            tokenHolder.tokenFullName.setVisibility(View.GONE);
-            tokenHolder.chainName.setVisibility(View.GONE);
+            tokenSciptCardHolder.txtToken.setText(R.string.tokenscript_file_error);
+            tokenSciptCardHolder.txtTokenFile.setText(tokenLocator.getDefinitionName());
+            tokenSciptCardHolder.txtTokenAddress.setVisibility(View.INVISIBLE);
+            tokenSciptCardHolder.tokenFullName.setVisibility(View.GONE);
+            tokenSciptCardHolder.chainName.setVisibility(View.GONE);
 
-            tokenHolder.imgLock.setVisibility(View.VISIBLE);
-            tokenHolder.imgLock.setImageResource(R.drawable.ic_error);
+            tokenSciptCardHolder.imgLock.setVisibility(View.VISIBLE);
+            tokenSciptCardHolder.imgLock.setImageResource(R.drawable.ic_error);
 
-            tokenHolder.clickHolder.setOnClickListener(v -> displayErrorDialog(tokenLocator));
-            tokenHolder.clickHolder.setOnLongClickListener(v -> displayDeleteFileDialog(tokenLocator));
+            tokenSciptCardHolder.clickHolder.setOnClickListener(v -> displayErrorDialog(tokenLocator));
+            tokenSciptCardHolder.clickHolder.setOnLongClickListener(v -> displayDeleteFileDialog(tokenLocator));
         }
     }
 
@@ -238,7 +238,7 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
         notifyDataSetChanged();
     }
 
-    static class TokenHolder extends RecyclerView.ViewHolder {
+    static class TokenSciptCardHolder extends RecyclerView.ViewHolder {
 
         final TextView txtToken;
         final TextView txtTokenFile;
@@ -249,7 +249,7 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
         final ImageView imgLock;
         final LinearLayout clickHolder;
 
-        public TokenHolder(@NonNull View itemView) {
+        public TokenSciptCardHolder(@NonNull View itemView) {
             super(itemView);
 
             txtToken = itemView.findViewById(R.id.token_definition_name);
@@ -264,29 +264,29 @@ public class TokenScriptManagementAdapter extends RecyclerView.Adapter<TokenScri
     }
 
     //TODO: Move this into a separate class to deduplicate
-    private void onSigData(final XMLDsigDescriptor sigData, final TokenHolder tokenHolder)
+    private void onSigData(final XMLDsigDescriptor sigData, final TokenSciptCardHolder tokenSciptCardHolder)
     {
         SigReturnType type = sigData.type != null ? sigData.type : SigReturnType.NO_TOKENSCRIPT;
-        tokenHolder.imgLock.setVisibility(View.VISIBLE);
+        tokenSciptCardHolder.imgLock.setVisibility(View.VISIBLE);
 
         switch (type)
         {
             case NO_TOKENSCRIPT:
-                tokenHolder.imgLock.setVisibility(View.GONE);
+                tokenSciptCardHolder.imgLock.setVisibility(View.GONE);
                 break;
             case DEBUG_SIGNATURE_INVALID:
             case DEBUG_NO_SIGNATURE:
-                tokenHolder.imgLock.setImageResource(R.mipmap.ic_unlocked_debug);
+                tokenSciptCardHolder.imgLock.setImageResource(R.mipmap.ic_unlocked_debug);
                 break;
             case DEBUG_SIGNATURE_PASS:
-                tokenHolder.imgLock.setImageResource(R.mipmap.ic_locked_debug);
+                tokenSciptCardHolder.imgLock.setImageResource(R.mipmap.ic_locked_debug);
                 break;
             case SIGNATURE_INVALID:
             case NO_SIGNATURE:
-                tokenHolder.imgLock.setImageResource(R.mipmap.ic_unverified);
+                tokenSciptCardHolder.imgLock.setImageResource(R.mipmap.ic_unverified);
                 break;
             case SIGNATURE_PASS:
-                tokenHolder.imgLock.setImageResource(R.mipmap.ic_locked);
+                tokenSciptCardHolder.imgLock.setImageResource(R.mipmap.ic_locked);
                 break;
         }
     }

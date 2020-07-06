@@ -24,24 +24,4 @@ public class AddTokenInteract {
         return tokenRepository
                         .addToken(wallet, tokenInfo, type).toObservable();
     }
-
-    public Single<Token[]> storeTokens(Wallet wallet, Token[] tokens)
-    {
-        return tokenRepository.storeTokens(wallet, tokens);
-    }
-
-    public Disposable updateBlockRead(Token token, Wallet wallet)
-    {
-        return tokenRepository.updateBlockRead(token, wallet);
-    }
-
-    public Single<BigInteger> getLatestBlockNumber(int chainId)
-    {
-        return tokenRepository.fetchLatestBlockNumber(chainId);
-    }
-
-    public Single<Token[]> addERC20(Wallet wallet, Token[] tokens)
-    {
-        return tokenRepository.addERC20(wallet, tokens);
-    }
 }

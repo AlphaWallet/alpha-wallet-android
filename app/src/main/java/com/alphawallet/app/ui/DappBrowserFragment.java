@@ -57,9 +57,11 @@ import com.alphawallet.app.entity.SignTransactionInterface;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.TokensRealmSource;
+import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.OnDappClickListener;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
 import com.alphawallet.app.ui.widget.OnHistoryItemRemovedListener;
@@ -69,6 +71,7 @@ import com.alphawallet.app.ui.widget.entity.DappBrowserSwipeLayout;
 import com.alphawallet.app.ui.widget.entity.ItemClickListener;
 import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
+import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.util.KeyboardUtils;
@@ -86,7 +89,6 @@ import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
-import com.alphawallet.app.widget.AWalletBottomNavigationView;
 import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.entity.SalesOrderMalformed;
@@ -97,6 +99,7 @@ import com.google.gson.Gson;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.SignatureException;
@@ -108,12 +111,15 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
+import io.realm.RealmResults;
 
 import static android.app.Activity.RESULT_OK;
+import static com.alphawallet.app.C.ETHER_DECIMALS;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
+import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
@@ -135,6 +141,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     private Intent picker;
     private final Deque<String> forwardFragmentStack = new LinkedList<>();
     private final Deque<String> backFragmentStack = new LinkedList<>();
+    private RealmResults<RealmToken> realmUpdate;
 
     private final String BROWSER_HOME = EthereumNetworkRepository.defaultDapp() != null
                                         ? DAPP_BROWSER : DAPP_HOME;
@@ -221,7 +228,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         attachFragment(currentFragment);
         if ((web3 == null || viewModel == null) && getActivity() != null) //trigger reload
         {
-            ((HomeActivity)getActivity()).resetFragment(AWalletBottomNavigationView.DAPP_BROWSER);
+            ((HomeActivity)getActivity()).resetFragment(WalletPage.DAPP_BROWSER);
         }
         else
         {
@@ -443,6 +450,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     {
         super.onDestroy();
         viewModel.onDestroy();
+        if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
     }
 
     private void setupMenu(View baseView)
@@ -652,25 +660,39 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
                 .get(DappBrowserViewModel.class);
         viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
-        viewModel.token().observe(this, this::onUpdateBalance);
     }
 
-    private void onUpdateBalance(Token token) {
-        balance.setVisibility(View.VISIBLE);
-        symbol.setVisibility(View.VISIBLE);
-        balance.setText(token.getFixedFormattedBalance());
-        symbol.setText(token.getSymbol());
+    private void startBalanceListener()
+    {
+        if (wallet == null || networkInfo == null) return;
+
+        if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
+        realmUpdate = viewModel.getRealmInstance(wallet).where(RealmToken.class)
+                .equalTo("address", TokensRealmSource.databaseKey(networkInfo.chainId, "eth"))
+                .equalTo("chainId", networkInfo.chainId).findAllAsync();
+        realmUpdate.addChangeListener(realmTokens -> {
+            //update balance
+            if (realmTokens.size() == 0) return;
+            RealmToken realmToken = realmTokens.first();
+            balance.setVisibility(View.VISIBLE);
+            symbol.setVisibility(View.VISIBLE);
+            String newBalanceStr = BalanceUtils.getScaledValueFixed(new BigDecimal(realmToken.getBalance()), ETHER_DECIMALS, TOKEN_BALANCE_PRECISION);
+            balance.setText(newBalanceStr);
+            symbol.setText(networkInfo.getShortName());
+        });
     }
 
     private void onDefaultWallet(Wallet wallet) {
         this.wallet = wallet;
         setupWeb3();
+        startBalanceListener();
     }
 
     private void onDefaultNetwork(NetworkInfo networkInfo) {
         int oldChain = this.networkInfo != null ? this.networkInfo.chainId : -1;
         this.networkInfo = networkInfo;
         currentNetwork.setText(networkInfo.getShortName());
+        startBalanceListener();
         //select resource
         Utils.setChainCircle(currentNetworkCircle, networkInfo.chainId);
         //reset the pane if required
@@ -1378,7 +1400,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         }
         catch (SalesOrderMalformed e)
         {
-            e.printStackTrace();
+            //
         }
 
         return false;
@@ -1389,24 +1411,10 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         super.setUserVisibleHint(isVisibleToUser);
     }
 
-    private void DisplayAddressFound(String address, FragmentMessenger messenger)
+    @Override
+    public void onPause()
     {
-        if (getActivity() == null) return;
-        resultDialog = new AWalletAlertDialog(getActivity());
-        resultDialog.setIcon(AWalletAlertDialog.ERROR);
-        resultDialog.setTitle(getString(R.string.address_found));
-        resultDialog.setMessage(getString(R.string.is_address));
-        resultDialog.setButtonText(R.string.dialog_load_as_contract);
-        resultDialog.setButtonListener(v -> {
-            messenger.AddToken(address);
-            resultDialog.dismiss();
-        });
-        resultDialog.setSecondaryButtonText(R.string.action_cancel);
-        resultDialog.setSecondaryButtonListener(v -> {
-            resultDialog.dismiss();
-        });
-        resultDialog.setCancelable(true);
-        resultDialog.show();
+        super.onPause();
     }
 
     private boolean checkReadPermission()

@@ -76,7 +76,6 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final KeyService keyService;
     private final GenericWalletInteract genericWalletInteract;
     private final OpenseaService openseaService;
-    private final FetchTokensInteract fetchTokensInteract;
     private Wallet wallet;
     private Token token;
 
@@ -98,8 +97,7 @@ public class TokenFunctionViewModel extends BaseViewModel
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
             GenericWalletInteract genericWalletInteract,
-            OpenseaService openseaService,
-            FetchTokensInteract fetchTokensInteract)
+            OpenseaService openseaService)
     {
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
@@ -109,7 +107,6 @@ public class TokenFunctionViewModel extends BaseViewModel
         this.keyService = keyService;
         this.genericWalletInteract = genericWalletInteract;
         this.openseaService = openseaService;
-        this.fetchTokensInteract = fetchTokensInteract;
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -148,11 +145,10 @@ public class TokenFunctionViewModel extends BaseViewModel
         if (token != null && !token.independentUpdate())
         {
             getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
-                    .doOnNext(l -> fetchTokensInteract
-                            .fetchSingle(wallet, token)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(this::onToken, this::onError).isDisposed()).subscribe();
+                    .doOnNext(l -> {
+                                Token t = tokensService.getToken(token.tokenInfo.chainId, token.getAddress());
+                                onToken(t);
+                            }).subscribe();
         }
     }
 

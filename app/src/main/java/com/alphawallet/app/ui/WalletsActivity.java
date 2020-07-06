@@ -21,12 +21,14 @@ import android.view.View;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.ui.widget.adapter.WalletsAdapter;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
@@ -40,6 +42,8 @@ import com.alphawallet.app.widget.SystemView;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
+
+import static com.alphawallet.app.repository.EthereumNetworkBase.RINKEBY_ID;
 
 public class WalletsActivity extends BaseActivity implements
         View.OnClickListener,
@@ -64,6 +68,7 @@ public class WalletsActivity extends BaseActivity implements
 
     private boolean requiresHomeRefresh;
     private String dialogError;
+    private final int balanceChain = EthereumNetworkRepository.getOverrideToken().chainId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,35 +77,33 @@ public class WalletsActivity extends BaseActivity implements
         setContentView(R.layout.activity_wallets);
         toolbar();
         setTitle(getString(R.string.title_change_add_wallet));
-        initViews();
         requiresHomeRefresh = false;
-        initViewModel();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         initViewModel();
+        initViews();
     }
 
     private void initViewModel()
     {
         if (viewModel == null)
         {
+            systemView = findViewById(R.id.system_view);
             viewModel = ViewModelProviders.of(this, walletsViewModelFactory)
                     .get(WalletsViewModel.class);
             viewModel.error().observe(this, this::onError);
             viewModel.progress().observe(this, systemView::showProgress);
-            viewModel.wallets().observe(this, this::onFetchWallet);
+            viewModel.wallets().observe(this, this::onFetchWallets);
             viewModel.defaultWallet().observe(this, this::onChangeDefaultWallet);
             viewModel.createdWallet().observe(this, this::onCreatedWallet);
             viewModel.createWalletError().observe(this, this::onCreateWalletError);
-            viewModel.updateBalance().observe(this, this::onUpdatedBalance);
-            viewModel.updateENSName().observe(this, this::updateWalletName);
             viewModel.noWalletsError().observe(this, this::noWallets);
         }
 
-        viewModel.onPrepare();
+        viewModel.onPrepare(balanceChain); //adjust here to change which chain the wallet show the balance of, eg use CLASSIC_ID for an Eth Classic wallet
     }
 
     protected Activity getThisActivity()
@@ -115,18 +118,12 @@ public class WalletsActivity extends BaseActivity implements
         finish();
     }
 
-    private void updateWalletName(Wallet wallet)
-    {
-        adapter.updateWalletName(wallet);
-    }
-
     private void initViews() {
-        systemView = findViewById(R.id.system_view);
         refreshLayout = findViewById(R.id.refresh_layout);
         list = findViewById(R.id.list);
         list.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new WalletsAdapter(this, this::onSetWalletDefault);
+        adapter = new WalletsAdapter(this, this::onSetWalletDefault, viewModel.getRealmManager());
         list.setAdapter(adapter);
         list.addItemDecoration(new ListDivider(this));
 
@@ -273,10 +270,6 @@ public class WalletsActivity extends BaseActivity implements
         hideDialog();
     }
 
-    private void onUpdatedBalance(Wallet wallet) {
-        adapter.updateWalletbalance(wallet);
-    }
-
     private void onAddWallet() {
         AddWalletView addWalletView = new AddWalletView(this);
         addWalletView.setOnNewWalletClickListener(this);
@@ -307,11 +300,10 @@ public class WalletsActivity extends BaseActivity implements
         }
     }
 
-    private void onFetchWallet(Wallet[] wallets)
+    private void onFetchWallets(Wallet[] wallets)
     {
         enableDisplayHomeAsUp();
         adapter.setWallets(wallets);
-        viewModel.updateBalancesIfRequired(wallets);
         invalidateOptionsMenu();
     }
 

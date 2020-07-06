@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
-import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.service.TokensService;

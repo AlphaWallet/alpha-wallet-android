@@ -19,8 +19,10 @@ import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
 import com.alphawallet.app.util.Utils;
@@ -40,26 +42,25 @@ import java.util.List;
 public class TokenListAdapter extends RecyclerView.Adapter<TokenListAdapter.ViewHolder> {
     private LayoutInflater inflater;
     private final Context context;
-    private final List<Token> data;
+    private final List<TokenCardMeta> data;
     ItemClickListener listener;
     protected final AssetDefinitionService assetService;
+    protected final TokensService tokensService;
 
-    public TokenListAdapter(Context context, AssetDefinitionService aService, Token[] tokens, ItemClickListener listener) {
+    public TokenListAdapter(Context context, AssetDefinitionService aService, TokensService tService, TokenCardMeta[] tokens, ItemClickListener listener) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
         this.data = filterTokens(Arrays.asList(tokens));
         this.listener = listener;
         this.assetService = aService;
+        this.tokensService = tService;
     }
 
-    private List<Token> filterTokens(List<Token> tokens) {
-        ArrayList<Token> filteredList = new ArrayList<>();
-        for (Token t : tokens) {
-            if (t.tokenInfo.name != null) {
-                if (!t.isEthereum() && !filteredList.contains(t)) {
-                    filteredList.add(t);
-                }
-            }
+    private List<TokenCardMeta> filterTokens(List<TokenCardMeta> tokens)
+    {
+        ArrayList<TokenCardMeta> filteredList = new ArrayList<>();
+        for (TokenCardMeta t : tokens) {
+            if (!t.isEthereum()) filteredList.add(t);
         }
 
         Collections.sort(filteredList);
@@ -75,7 +76,8 @@ public class TokenListAdapter extends RecyclerView.Adapter<TokenListAdapter.View
 
     @Override
     public void onBindViewHolder(@NonNull TokenListAdapter.ViewHolder viewHolder, int i) {
-        Token token = data.get(i);
+        TokenCardMeta tcm = data.get(i);
+        final Token token = tokensService.getToken(tcm.getChain(), tcm.getAddress());
         viewHolder.setIsRecyclable(false);
         viewHolder.tokenName.setText(token.getFullName(assetService, 1));
         viewHolder.chainId = token.tokenInfo.chainId;
@@ -83,11 +85,11 @@ public class TokenListAdapter extends RecyclerView.Adapter<TokenListAdapter.View
         viewHolder.switchEnabled.setChecked(token.tokenInfo.isEnabled);
         viewHolder.switchEnabled.setTag(new Integer(i));
         viewHolder.switchEnabled.setOnCheckedChangeListener((v, b) -> {
-            listener.onItemClick(data.get(i), b);
+            listener.onItemClick(token, b);
         });
     }
 
-    public Token getItem(int id) {
+    public TokenCardMeta getItem(int id) {
         return data.get(id);
     }
 
@@ -106,7 +108,8 @@ public class TokenListAdapter extends RecyclerView.Adapter<TokenListAdapter.View
 
         private final CustomViewTarget viewTarget;
 
-        ViewHolder(View itemView) {
+        ViewHolder(View itemView)
+        {
             super(itemView);
             layout = itemView.findViewById(R.id.layout_list_item);
             tokenName = itemView.findViewById(R.id.name);
@@ -167,7 +170,9 @@ public class TokenListAdapter extends RecyclerView.Adapter<TokenListAdapter.View
 
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            listener.onItemClick(data.get(getAdapterPosition()), isChecked);
+            TokenCardMeta tcm = data.get(getAdapterPosition());
+            final Token t = tokensService.getToken(tcm.getChain(), tcm.getAddress());
+            listener.onItemClick(t, isChecked);
         }
     }
 

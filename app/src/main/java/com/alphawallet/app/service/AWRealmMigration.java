@@ -1,7 +1,5 @@
 package com.alphawallet.app.service;
 
-import com.alphawallet.app.repository.entity.RealmCertificateData;
-
 import io.realm.DynamicRealm;
 import io.realm.FieldAttribute;
 import io.realm.RealmMigration;

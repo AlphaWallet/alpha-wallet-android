@@ -34,6 +34,9 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
+import org.web3j.utils.Numeric;
+
+import io.reactivex.Completable;
 import wallet.core.jni.PrivateKey;
 import wallet.core.jni.*;
 
@@ -1058,13 +1061,12 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             String password = "";
             switch (currentWallet.type)
             {
+                default:
                 case KEYSTORE:
                     password = unpackMnemonic();
                     break;
                 case KEYSTORE_LEGACY:
                     password = new String(getLegacyPassword(context, currentWallet.address));
-                    break;
-                default:
                     break;
             }
 
@@ -1265,9 +1267,63 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             File encryptedBytesFileIV = new File(getFilePath(context, matchingAddr + "iv"));
             if (encryptedKeyBytes.exists()) encryptedKeyBytes.delete();
             if (encryptedBytesFileIV.exists()) encryptedBytesFileIV.delete();
+            deleteAccount(matchingAddr);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void deleteAccount(String address) throws Exception
+    {
+        String cleanedAddr = Numeric.cleanHexPrefix(address).toLowerCase();
+            deleteAccountFiles(cleanedAddr);
+
+            //Now delete database files (ie tokens, transactions and Tokenscript data for account)
+            File[] contents = context.getFilesDir().listFiles();
+            if (contents != null)
+            {
+                for (File f : contents)
+                {
+                    String fileName = f.getName().toLowerCase();
+                    if (fileName.contains(cleanedAddr.toLowerCase()))
+                    {
+                        deleteRecursive(f);
+                    }
+                }
+            }
+    }
+
+    private void deleteAccountFiles(String address) throws Exception
+    {
+        String cleanedAddr = Numeric.cleanHexPrefix(address);
+
+        File keyFolder = new File(context.getFilesDir(), KEYSTORE_FOLDER);
+        File[] contents = keyFolder.listFiles();
+        if (contents != null)
+        {
+            for (File f : contents)
+            {
+                if (f.getName().contains(cleanedAddr))
+                {
+                    f.delete();
+                }
+            }
+        }
+    }
+
+    private void deleteRecursive(File fp)
+    {
+        if (fp.isDirectory())
+        {
+            File[] contents = fp.listFiles();
+            if (contents != null)
+            {
+                for (File child : contents)
+                    deleteRecursive(child);
+            }
+        }
+
+        fp.delete();
     }
 
     private void checkSecurity()

@@ -228,6 +228,7 @@
     <string name="tx_label">Actas</string>
     <string name="browser_label">Navegadora</string>
     <string name="settings_label">Ajustes</string>
+    <string name="activity_label">Actividad</string>
     <string name="toolbar_header_importing_tickets">Importing Tokens</string>
     <string name="ticket">Ticket</string>
     <string name="tickets">Tickets</string>

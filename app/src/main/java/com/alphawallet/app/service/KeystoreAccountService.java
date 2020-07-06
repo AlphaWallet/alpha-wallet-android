@@ -153,7 +153,7 @@ public class KeystoreAccountService implements AccountKeystoreService
     @Override
     public Completable deleteAccount(String address, String password) {
         return Completable.fromAction(() -> {
-            String cleanedAddr = Numeric.cleanHexPrefix(address);
+            String cleanedAddr = Numeric.cleanHexPrefix(address).toLowerCase();
             deleteAccountFiles(cleanedAddr);
 
             //Now delete database files (ie tokens, transactions and Tokenscript data for account)

@@ -8,6 +8,7 @@ import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.TransferTicketDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.viewmodel.TransferTicketViewModelFactory;
 
 import dagger.Module;
@@ -22,13 +23,13 @@ public class TransferTicketModule
 {
     @Provides
     TransferTicketViewModelFactory transferTicketViewModelFactory(
-            FetchTokensInteract fetchTokensInteract,
+            TokensService tokensService,
             GenericWalletInteract genericWalletInteract,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
             TransferTicketDetailRouter transferTicketDetailRouter,
             AssetDefinitionService assetDefinitionService) {
         return new TransferTicketViewModelFactory(
-                fetchTokensInteract, genericWalletInteract, findDefaultNetworkInteract, transferTicketDetailRouter, assetDefinitionService);
+                tokensService, genericWalletInteract, findDefaultNetworkInteract, transferTicketDetailRouter, assetDefinitionService);
     }
 
     @Provides
@@ -45,11 +46,6 @@ public class TransferTicketModule
     @Provides
     TransferTicketDetailRouter provideTransferTicketDetailRouter() {
         return new TransferTicketDetailRouter();
-    }
-
-    @Provides
-    FetchTokensInteract provideFetchTokensInteract(TokenRepositoryType tokenRepository) {
-        return new FetchTokensInteract(tokenRepository);
     }
 }
 

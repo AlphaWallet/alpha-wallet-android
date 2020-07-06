@@ -43,7 +43,7 @@ public class EtherscanTransaction
             if (op.contract != null) op.contract.completeSetup(walletAddress, tx);
         }
 
-        if (walletAddress != null && !walletInvolvedInTransaction(tx, walletAddress))
+        if (walletAddress != null && !walletInvolvedInTransaction(tx, walletAddress.toLowerCase()))
         {
             tx = null; //this transaction is not relevant to the wallet we're scanning for
         }

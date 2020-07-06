@@ -12,9 +12,6 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.entity.tokens.TokenTicker;
-import com.alphawallet.app.service.TickerServiceInterface;
-import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ChainSpec;
 import com.alphawallet.token.entity.MagicLinkInfo;
@@ -153,15 +150,13 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     };
 
     final PreferenceRepositoryType preferences;
-    private final TickerServiceInterface tickerService;
     NetworkInfo defaultNetwork;
     private final Set<OnNetworkChangeListener> onNetworkChangedListeners = new HashSet<>();
     private boolean updatedTickers;
 
-    EthereumNetworkBase(PreferenceRepositoryType preferenceRepository, TickerServiceInterface tickerService, NetworkInfo[] additionalNetworks, boolean useTestNets)
+    EthereumNetworkBase(PreferenceRepositoryType preferenceRepository, NetworkInfo[] additionalNetworks, boolean useTestNets)
     {
         this.preferences = preferenceRepository;
-        this.tickerService = tickerService;
 
         /* merging static compile time network list with runtime network list */
         List<NetworkInfo> networks = new ArrayList<>();
@@ -287,40 +282,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     @Override
     public void addOnChangeDefaultNetwork(OnNetworkChangeListener onNetworkChanged) {
         onNetworkChangedListeners.add(onNetworkChanged);
-    }
-
-    @Override
-    public Single<TokenTicker> getTicker(Token token) {
-        return Single.fromCallable(() -> tickerService.getTokenTicker(token));
-    }
-
-    @Override
-    public Single<TokenTicker> getTicker(int chainId) {
-        return Single.fromCallable(() -> tickerService.getEthTicker(chainId));
-    }
-
-    /**
-     * Update Ticker or return existing ticker
-     * @param token
-     * @param oldTicker
-     * @return
-     */
-    @Override
-    public TokenTicker updateTicker(Token token, TokenTicker oldTicker) {
-        return checkTicker(tickerService.getTokenTicker(token), oldTicker);
-    }
-
-    private TokenTicker checkTicker(TokenTicker ticker, TokenTicker oldTicker)
-    {
-        if (ticker != null && ticker.updateTime > 0) return ticker;
-        else return oldTicker;
-    }
-
-    @Override
-    public Single<Token[]> getTokensOnNetwork(int chainId, String address, TokensService tokensService)
-    {
-        NetworkInfo info = getNetworkByChain(chainId);
-        return tickerService.getTokensOnNetwork(info, address, tokensService);
     }
 
     public static boolean hasRealValue(int chainId)
@@ -509,40 +470,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static boolean showNetworkFilters() { return true; }
 
-    @Override
-    public Single<Token> attachTokenTicker(Token token)
-    {
-        return tickerService.attachTokenTicker(token);
-    }
-
-    @Override
-    public Single<Token[]> attachTokenTickers(Token[] tokens)
-    {
-        updatedTickers = true;
-        return tickerService.attachTokenTickers(tokens);
-    }
-
     public static int decimalOverride(String address, int chainId)
     {
         return 0;
-    }
-
-    @Override
-    public TokenTicker getTokenTicker(Token token)
-    {
-        return tickerService.getTokenTicker(token);
-    }
-
-    @Override
-    public boolean checkTickers()
-    {
-        return !updatedTickers && tickerService.hasTickers();
-    }
-
-    @Override
-    public void refreshTickers()
-    {
-        tickerService.updateTickers(true);
     }
 
     public static String defaultDapp()

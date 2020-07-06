@@ -176,7 +176,7 @@ public class Token implements Parcelable, Comparable<Token>
         {
             for (BigInteger id : getArrayBalance())
             {
-                if (!uniqueIds.contains(id)) uniqueIds.add(id);
+                if (!uniqueIds.contains(id) && !id.equals(BigInteger.ZERO)) uniqueIds.add(id);
             }
         }
         else

@@ -619,8 +619,8 @@
     <string name="confirm_delete_file_message">Delete file %1$s</string>
     <string name="delete">Delete</string>
     <string name="refreshing_tokenscripts">Refresh TokenScripts</string>
-    <string name="speedup_transaction">Speedup TX</string>
-    <string name="cancel_transaction">Cancel TX</string>
+    <string name="speedup_transaction">Speedup</string>
+    <string name="cancel_transaction">Cancel</string>
     <string name="day_single">1 día</string>
     <string name="day_plural">%s días</string>
     <string name="hour_single">1 hora</string>
@@ -637,6 +637,10 @@
     <string name="light">Light</string>
     <string name="my_qr_code">My QR Code</string>
     <string name="browse">Browse</string>
+    <string name="label_gas_estimate">Gas Estimate</string>
+    <string name="label_estimated_network_fee">Estimated Network Fee</string>
     <string name="transaction_already_written">Transaction already written to blockchain, cannot resend or cancel.</string>
     <string name="transaction_already_written_title">Transaction Already Written</string>
+    <string name="transaction_fail_warning">Transaction Fail Warning</string>
+    <string name="node_predicts_tx_will_fail">The Node predicts this transaction will fail: %1$s</string>
 </resources>

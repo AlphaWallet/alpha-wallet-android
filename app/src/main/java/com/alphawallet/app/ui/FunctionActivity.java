@@ -126,11 +126,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenView.setKeyboardListenerCallback(this);
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
         viewModel.getCurrentWallet();
-
-        parsePass = 1;
-        viewModel.getAssetDefinitionService().clearResultMap();
-        args.clear();
-        getAttrs();
     }
 
     private void displayFunction(String tokenAttrs)
@@ -258,6 +253,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         {
             initViews();
         }
+
+        parsePass = 1;
+        viewModel.getAssetDefinitionService().clearResultMap();
+        args.clear();
+        getAttrs();
     }
 
     private void initViewModel()

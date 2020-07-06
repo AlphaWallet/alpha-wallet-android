@@ -330,7 +330,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
 
         if (viewPager.getCurrentItem() == WALLET.ordinal()) {
-                setTitle(walletTitle);
+            setTitle(walletTitle);
         }
     }
 
@@ -830,7 +830,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
             if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
-                                                                     Manifest.permission.WRITE_EXTERNAL_STORAGE))
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE))
             {
                 Log.w("HomeActivity", "Folder write permission is not granted. Requesting permission");
                 ActivityCompat.requestPermissions(this, permissions, permissionTag);
@@ -854,7 +854,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             final String[] permissions = new String[]{Manifest.permission.ACCESS_NOTIFICATION_POLICY};
             if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
-                                                                     Manifest.permission.ACCESS_NOTIFICATION_POLICY))
+                    Manifest.permission.ACCESS_NOTIFICATION_POLICY))
             {
                 Log.w("HomeActivity", "Notification permission is not granted. Requesting permission");
                 ActivityCompat.requestPermissions(this, permissions, permissionTag);

@@ -12,6 +12,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.MessageData;
+import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import org.json.JSONArray;
@@ -214,7 +215,7 @@ public class MarketQueueService {
     }
 
     //sign a trade transaction
-    public Single<SignatureFromKey> sign(Wallet wallet, TradeInstance t, byte[] data, int chainId) {
+    public Single<SignatureFromKey> sign(Wallet wallet, TradeInstance t, Signable data, int chainId) {
         return transactionRepository.getSignature(wallet, data, chainId);
     }
 

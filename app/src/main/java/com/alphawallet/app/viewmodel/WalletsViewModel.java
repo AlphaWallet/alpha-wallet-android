@@ -130,7 +130,7 @@ public class WalletsViewModel extends BaseViewModel
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet,
-                           error -> noWalletsError.postValue(true));
+                        error -> noWalletsError.postValue(true));
     }
 
     private void onDefaultWallet(Wallet wallet)
@@ -216,11 +216,11 @@ public class WalletsViewModel extends BaseViewModel
         //loop through wallets and update balance
         disposable = Observable.fromArray(wallets)
                 .forEach(wallet -> tokensService.getChainBalance(wallet.address.toLowerCase(), currentNetwork.chainId)
-                            .flatMap(newBalance -> genericWalletInteract.updateBalanceIfRequired(wallet, newBalance))
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(Schedulers.io())
-                            .subscribe(w -> { }, e -> { })
-                            .isDisposed());
+                        .flatMap(newBalance -> genericWalletInteract.updateBalanceIfRequired(wallet, newBalance))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(Schedulers.io())
+                        .subscribe(w -> { }, e -> { })
+                        .isDisposed());
 
         progress.postValue(false);
     }

@@ -40,8 +40,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 {
     private final int PAGESIZE = 800;
     private final int SYNC_PAGECOUNT = 2; //how many pages to read when we first sync the account - means we store the first 1600 transactions only
-                                          //Note: if user wants to view transactions older than this, we fetch from etherscan on demand.
-                                          //Generally this would only happen when watching extremely active accounts for curiosity
+    //Note: if user wants to view transactions older than this, we fetch from etherscan on demand.
+    //Generally this would only happen when watching extremely active accounts for curiosity
 
     private final OkHttpClient httpClient;
     private final Gson gson;
@@ -203,7 +203,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
             lastTransaction = myTxs[myTxs.length-1];
             return lastTransaction;
         }
-   }
+    }
 
     private void getRelatedTransactionList(List<Transaction> txList, EtherscanTransaction[] myTxs, String walletAddress, int chainId)
     {
@@ -337,30 +337,30 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     public Single<TransactionMeta[]> fetchMoreTransactions(String walletAddress, NetworkInfo network, long lastTxTime)
     {
         return Single.fromCallable(() -> {
-             List<TransactionMeta> txList = fetchOlderThan(walletAddress, lastTxTime, network.chainId);
-             if (txList.size() < 800)
-             {
-                 //fetch another page and return unless we already have the oldest Tx
-                 long oldestTxTime = txList.size() > 0 ? txList.get(txList.size() - 1).timeStamp : lastTxTime;
-                 try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
-                 {
-                     long oldestBlockRead = getOldestBlockRead(instance, network.chainId, oldestTxTime);
-                     long oldestPossibleBlock = getFirstTransactionBlock(instance, network.chainId, walletAddress);
-                     System.out.println("DIAGNOSE: " + oldestBlockRead + " : " + oldestPossibleBlock);
-                     if (oldestBlockRead > 0 && oldestBlockRead != oldestPossibleBlock)
-                     {
-                         syncDownwards(instance, walletAddress, network, oldestBlockRead);
-                     }
+            List<TransactionMeta> txList = fetchOlderThan(walletAddress, lastTxTime, network.chainId);
+            if (txList.size() < 800)
+            {
+                //fetch another page and return unless we already have the oldest Tx
+                long oldestTxTime = txList.size() > 0 ? txList.get(txList.size() - 1).timeStamp : lastTxTime;
+                try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
+                {
+                    long oldestBlockRead = getOldestBlockRead(instance, network.chainId, oldestTxTime);
+                    long oldestPossibleBlock = getFirstTransactionBlock(instance, network.chainId, walletAddress);
+                    System.out.println("DIAGNOSE: " + oldestBlockRead + " : " + oldestPossibleBlock);
+                    if (oldestBlockRead > 0 && oldestBlockRead != oldestPossibleBlock)
+                    {
+                        syncDownwards(instance, walletAddress, network, oldestBlockRead);
+                    }
 
-                     //now re-read last blocks from DB
-                     txList = fetchOlderThan(walletAddress, lastTxTime, network.chainId);
+                    //now re-read last blocks from DB
+                    txList = fetchOlderThan(walletAddress, lastTxTime, network.chainId);
 
-                 }
-                 catch (Exception e)
-                 {
-                     //
-                 }
-             }
+                }
+                catch (Exception e)
+                {
+                    //
+                }
+            }
 
             return txList.toArray(new TransactionMeta[0]);
         });
@@ -421,11 +421,11 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         try (Realm instance = realmManager.getRealmInstance(walletAddress.toLowerCase()))
         {
             RealmResults<RealmTransaction> txs = instance.where(RealmTransaction.class)
-                        .sort("timeStamp", Sort.DESCENDING)
-                        .lessThan("timeStamp", fetchTime)
-                        .equalTo("chainId", chainId)
-                        .limit(PAGESIZE)
-                        .findAll();
+                    .sort("timeStamp", Sort.DESCENDING)
+                    .lessThan("timeStamp", fetchTime)
+                    .equalTo("chainId", chainId)
+                    .limit(PAGESIZE)
+                    .findAll();
 
             for (RealmTransaction item : txs)
             {

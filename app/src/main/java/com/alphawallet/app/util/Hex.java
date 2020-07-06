@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class Hex {
 
@@ -138,14 +139,14 @@ public class Hex {
         return byteArrayToHexString(input, 0, input.length, true);
     }
 
-    public static String decodeMessageData(EthereumMessage message) {
+    /*public static String decodeMessageData(EthereumMessage message) {
         if (cleanHexPrefix(message.value).length() == 64) {
             return message.value;
         } else {
             return containsHexPrefix(message.value)
                     ? new String(hexStringToByteArray(message.value)) : message.value;
         }
-    }
+    }*/
 
     public static String hexToUtf8(String hex) {
         hex = org.web3j.utils.Numeric.cleanHexPrefix(hex);
@@ -154,8 +155,7 @@ public class Hex {
             buff.put((byte) Integer.parseInt(hex.substring(i, i + 2), 16));
         }
         buff.rewind();
-        Charset cs = Charset.forName("UTF-8");
-        CharBuffer cb = cs.decode(buff);
+        CharBuffer cb = StandardCharsets.UTF_8.decode(buff);
         return cb.toString();
     }
 }

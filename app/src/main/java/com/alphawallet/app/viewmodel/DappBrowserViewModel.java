@@ -17,6 +17,7 @@ import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.WalletConnectActivity;
+import com.alphawallet.token.entity.Signable;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.alphawallet.app.C;
@@ -177,8 +178,9 @@ public class DappBrowserViewModel extends BaseViewModel  {
                             .find()).toObservable();
     }
 
-    public void signMessage(byte[] signRequest, DAppFunction dAppFunction, EthereumMessage message) {
-        disposable = createTransactionInteract.sign(defaultWallet.getValue(), signRequest, defaultNetwork.getValue().chainId)
+    public void signMessage(Signable message, DAppFunction dAppFunction) {
+        disposable = createTransactionInteract.sign(defaultWallet.getValue(), message,
+                defaultNetwork.getValue().chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),

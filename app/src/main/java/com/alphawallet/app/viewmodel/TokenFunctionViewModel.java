@@ -5,31 +5,22 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ConfirmationType;
-import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.DAppFunction;
-import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenFactory;
-import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.interact.CreateTransactionInteract;
-import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
-import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
@@ -42,17 +33,16 @@ import com.alphawallet.app.ui.FunctionActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.RedeemAssetSelectActivity;
 import com.alphawallet.app.ui.SellDetailActivity;
-import com.alphawallet.app.ui.TokenActivity;
 import com.alphawallet.app.ui.TransactionDetailActivity;
 import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.ui.widget.entity.TicketRangeParcel;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
 import com.alphawallet.token.entity.SigReturnType;
+import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
@@ -64,15 +54,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
@@ -205,12 +191,12 @@ public class TokenFunctionViewModel extends BaseViewModel
         sig.postValue(failSig);
     }
 
-    public void signMessage(byte[] signRequest, DAppFunction dAppFunction, EthereumMessage message, int chainId) {
-        disposable = createTransactionInteract.sign(wallet, signRequest, chainId)
+    public void signMessage(Signable message, DAppFunction dAppFunction, int chainId) {
+        disposable = createTransactionInteract.sign(wallet, message, chainId)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
-                           error -> dAppFunction.DAppError(error, message));
+                        error -> dAppFunction.DAppError(error, message));
     }
 
     public String getTransactionBytes(Token token, BigInteger tokenId, FunctionDefinition def)
@@ -367,7 +353,7 @@ public class TokenFunctionViewModel extends BaseViewModel
                 value = assetDefinitionService.resolveReference(token, action, arg, tokenId);
                 Token currency = getCurrency(token.tokenInfo.chainId);
                 functionEffect = BalanceUtils.getScaledValue(value, 18, Token.TOKEN_BALANCE_PRECISION)
-                         + " " + currency.getSymbol() + " to " + action.function.method;
+                        + " " + currency.getSymbol() + " to " + action.function.method;
             }
 
             //Form full method representation
@@ -447,7 +433,7 @@ public class TokenFunctionViewModel extends BaseViewModel
     public void updateTokenScriptViewSize(Token token, int itemViewHeight)
     {
         assetDefinitionService.storeTokenViewHeight(token.tokenInfo.chainId, token.getAddress(), itemViewHeight)
-                    .isDisposed();
+                .isDisposed();
     }
 
     public void checkForNewScript(Token token)

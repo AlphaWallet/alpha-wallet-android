@@ -95,9 +95,9 @@ public class ActivityViewModel extends BaseViewModel
         List<Integer> currentChains = tokensService.getNetworkFilters();
         disposable = Observable.fromIterable(currentChains)
                 .flatMap(chainId -> transactionsService.fetchAndStoreTransactions(chainId, startTime).toObservable())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(activityItems::postValue, this::onError);
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(activityItems::postValue, this::onError);
 
 //        disposable = transactionsService.fetchAndStoreTransactions(1, startTime)
 //                          .subscribeOn(Schedulers.io())

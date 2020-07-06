@@ -40,6 +40,7 @@ import io.reactivex.plugins.RxJavaPlugins;
 import io.realm.Realm;
 
 import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.entity.Signable;
 
 import static org.junit.Assert.assertEquals;
 
@@ -105,7 +106,7 @@ public class MarketOrderTest
             }
 
             @Override
-            public Single<SignatureFromKey> getSignature(Wallet wallet, byte[] message, int chainId) {
+            public Single<SignatureFromKey> getSignature(Wallet wallet, Signable message, int chainId) {
                 return null;
             }
 

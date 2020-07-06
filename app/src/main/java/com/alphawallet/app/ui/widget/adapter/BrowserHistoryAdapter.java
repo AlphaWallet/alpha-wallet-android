@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,17 +71,12 @@ public class BrowserHistoryAdapter extends RecyclerView.Adapter<BrowserHistoryAd
     @Override
     public void onBindViewHolder(@NonNull BrowserHistoryAdapter.ViewHolder viewHolder, int i) {
         DApp dApp = data.get(i);
-        String visibleUrl = null;
-        try {
-            visibleUrl = Utils.getDomainName(dApp.getUrl());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        String visibleUrl = Utils.getDomainName(dApp.getUrl());
         viewHolder.name.setText(dApp.getName());
         viewHolder.url.setText(dApp.getUrl());
 
         String favicon;
-        if (visibleUrl != null) {
+        if (!TextUtils.isEmpty(visibleUrl)) {
             favicon = DappBrowserUtils.getIconUrl(visibleUrl);
             Glide.with(viewHolder.icon.getContext())
                     .load(favicon)

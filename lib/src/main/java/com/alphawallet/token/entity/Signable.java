@@ -10,4 +10,7 @@ package com.alphawallet.token.entity;
 public interface Signable {
     public String getMessage();
     public long getCallbackId();
+    public byte[] getPrehash();
+    public String getOrigin();
+    public CharSequence getUserMessage();
 }

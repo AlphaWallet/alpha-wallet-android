@@ -8,6 +8,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
+import com.alphawallet.token.entity.Signable;
 
 import java.math.BigInteger;
 
@@ -26,15 +27,13 @@ public class CreateTransactionInteract
 
     public Single<SignaturePair> sign(Wallet wallet, MessagePair messagePair, int chainId)
     {
-        return transactionRepository.getSignature(wallet, messagePair.message.getBytes(), chainId)
+        return transactionRepository.getSignature(wallet, messagePair, chainId)
                 .map(sig -> new SignaturePair(messagePair.selection, sig.signature, messagePair.message));
     }
 
-    public Single<SignatureFromKey> sign(Wallet wallet, byte[] message, int chainId)
+    public Single<SignatureFromKey> sign(Wallet wallet, Signable message, int chainId)
     {
-        return transactionRepository.getSignature(wallet, message, chainId)
-                        .subscribeOn(Schedulers.computation())
-                        .observeOn(AndroidSchedulers.mainThread());
+        return transactionRepository.getSignature(wallet, message, chainId);
     }
 
     public Single<String> create(Wallet from, String to, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId)

@@ -308,10 +308,10 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
      * If Keystore - fetch keystore JSON file, decrypt keystore password, regenerate Web3j Credentials and sign.
      *
      * @param wallet
-     * @param transactionBytes
+     * @param TBSdata
      * @return
      */
-    synchronized SignatureFromKey signData(Wallet wallet, byte[] transactionBytes)
+    synchronized SignatureFromKey signData(Wallet wallet, byte[] TBSdata)
     {
         SignatureFromKey returnSig = new SignatureFromKey();
         returnSig.sigType = SignatureReturnType.KEY_AUTHENTICATION_ERROR;
@@ -322,7 +322,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         {
             case KEYSTORE_LEGACY:
             case KEYSTORE:
-                returnSig = signWithKeystore(transactionBytes);
+                returnSig = signWithKeystore(TBSdata);
                 break;
 
             case HDKEY:
@@ -331,7 +331,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                     String mnemonic = unpackMnemonic();
                     HDWallet newWallet = new HDWallet(mnemonic, "");
                     PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
-                    byte[] digest = Hash.keccak256(transactionBytes);
+                    byte[] digest = Hash.keccak256(TBSdata);
                     returnSig.signature = pk.sign(digest, Curve.SECP256K1);
                     returnSig.sigType = SignatureReturnType.SIGNATURE_GENERATED;
                 }

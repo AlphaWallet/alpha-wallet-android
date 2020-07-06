@@ -2,32 +2,40 @@ package com.alphawallet.token.entity;
 
 public class EthereumTypedMessage implements Signable {
 
-    TypedData[] value;
+    byte[] structuredData;
     String displayOrigin;
     long leafPosition;
+    CharSequence userMessage;
 
-    public EthereumTypedMessage(TypedData[] value, String displayOrigin, long leafPosition) {
-        this.value = value;
+    public EthereumTypedMessage(byte[] value, CharSequence userMessage, String displayOrigin, long leafPosition) {
+        this.structuredData = value;
         this.displayOrigin = displayOrigin;
         this.leafPosition = leafPosition;
+        this.userMessage = userMessage;
     }
 
-    public String getMessage() {
-        return null;
+    // User message is the text shown in the popup window - note CharSequence is used because message contains text formatting
+    public CharSequence getUserMessage() {
+        return userMessage;
     }
 
     public long getCallbackId() {
         return this.leafPosition;
     }
-    public static class TypedData  {
-        public final String name;
-        public final String type;
-        public final Object data;
 
-        public TypedData(String name, String type, Object data) {
-            this.name = name;
-            this.type = type;
-            this.data = data;
-        }
+    public byte[] getPrehash() {
+        return structuredData;
+    }
+
+    @Override
+    public String getOrigin()
+    {
+        return displayOrigin;
+    }
+
+    @Override
+    public String getMessage()
+    {
+        return null;
     }
 }

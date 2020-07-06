@@ -1,5 +1,19 @@
 package com.alphawallet.app;
 
+import com.alphawallet.app.entity.ActivityMeta;
+import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.MessagePair;
+import com.alphawallet.app.entity.SignaturePair;
+import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
+import com.alphawallet.app.interact.SignatureGenerateInteract;
+import com.alphawallet.app.repository.TransactionRepositoryType;
+import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.entity.Signable;
+
 import org.junit.Test;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
@@ -17,26 +31,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.alphawallet.app.entity.ActivityMeta;
-import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.MessagePair;
-import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.SignaturePair;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
-import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
-import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionData;
-import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.interact.SignatureGenerateInteract;
-import com.alphawallet.app.repository.TransactionRepositoryType;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.realm.Realm;
-
-import com.alphawallet.app.repository.entity.RealmAuxData;
-import com.alphawallet.token.entity.SalesOrderMalformed;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -90,7 +86,7 @@ public class QRSelectionTest
             }
 
             @Override
-            public Single<SignatureFromKey> getSignature(Wallet wallet, byte[] message, int chainId)
+            public Single<SignatureFromKey> getSignature(Wallet wallet, Signable sign, int chainId)
             {
                 return null;
             }

@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -112,15 +113,10 @@ public class DappBrowserSuggestionsAdapter extends ArrayAdapter<DApp> implements
         layout.setOnClickListener(v -> listener.onItemClick(dapp.getUrl()));
 
         ImageView icon = convertView.findViewById(R.id.icon);
-        String visibleUrl = null;
-        try {
-            visibleUrl = Utils.getDomainName(dapp.getUrl());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        String visibleUrl = Utils.getDomainName(dapp.getUrl());
 
         String favicon;
-        if (visibleUrl != null) {
+        if (!TextUtils.isEmpty(visibleUrl)) {
             favicon = DappBrowserUtils.getIconUrl(visibleUrl);
             Glide.with(icon.getContext())
                     .load(favicon)

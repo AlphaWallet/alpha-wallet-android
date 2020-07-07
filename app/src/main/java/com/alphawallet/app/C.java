@@ -187,4 +187,5 @@ public abstract class C {
     public static final String KEY_NEEDS_BACKUP = "needsBackup";
 
     public static final String DEFAULT_CURRENCY_CODE = "USD";
+    public static final String ACTION_MY_ADDRESS_SCREEN = "my_address_screen";
 }

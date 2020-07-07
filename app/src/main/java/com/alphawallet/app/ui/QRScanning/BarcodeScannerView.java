@@ -39,6 +39,8 @@ public abstract class BarcodeScannerView extends FrameLayout implements Camera.P
     private int mViewFinderOffset = 1;
     private float mAspectTolerance = 0.1f;
 
+    private boolean isFlashOn = false;
+
     public BarcodeScannerView(Context context) {
         super(context);
         init();
@@ -291,6 +293,21 @@ public abstract class BarcodeScannerView extends FrameLayout implements Camera.P
     public int getRotationCount() {
         int displayOrientation = mPreview.getDisplayOrientation();
         return displayOrientation / 90;
+    }
+
+    public boolean toggleFlash()
+    {
+        if(!isFlashOn)
+        {
+            mPreview.turnOnFlash();
+            isFlashOn = true;
+        }
+        else
+        {
+            mPreview.turnOffFlash();
+            isFlashOn = false;
+        }
+        return isFlashOn;
     }
 }
 

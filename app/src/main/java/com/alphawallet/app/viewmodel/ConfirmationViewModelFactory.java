@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.router.GasSettingsRouter;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
@@ -20,6 +21,7 @@ public class ConfirmationViewModelFactory implements ViewModelProvider.Factory {
     private TokensService tokensService;
     private FindDefaultNetworkInteract findDefaultNetworkInteract;
     private KeyService keyService;
+    private final PreferenceRepositoryType preferenceRepositoryType;
 
     public ConfirmationViewModelFactory(GenericWalletInteract genericWalletInteract,
                                         GasService gasService,
@@ -27,7 +29,8 @@ public class ConfirmationViewModelFactory implements ViewModelProvider.Factory {
                                         GasSettingsRouter gasSettingsRouter,
                                         TokensService tokensService,
                                         FindDefaultNetworkInteract findDefaultNetworkInteract,
-                                        KeyService keyService) {
+                                        KeyService keyService,
+                                        PreferenceRepositoryType preferenceRepositoryType) {
         this.genericWalletInteract = genericWalletInteract;
         this.gasService = gasService;
         this.createTransactionInteract = createTransactionInteract;
@@ -35,11 +38,20 @@ public class ConfirmationViewModelFactory implements ViewModelProvider.Factory {
         this.tokensService = tokensService;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.keyService = keyService;
+        this.preferenceRepositoryType = preferenceRepositoryType;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new ConfirmationViewModel(genericWalletInteract, gasService, createTransactionInteract, gasSettingsRouter, tokensService, findDefaultNetworkInteract, keyService);
+        return (T) new ConfirmationViewModel(
+                genericWalletInteract,
+                gasService,
+                createTransactionInteract,
+                gasSettingsRouter,
+                tokensService,
+                findDefaultNetworkInteract,
+                keyService,
+                preferenceRepositoryType);
     }
 }

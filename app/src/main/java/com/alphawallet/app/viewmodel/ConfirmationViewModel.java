@@ -18,6 +18,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.ui.ConfirmationActivity;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -55,6 +56,7 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GasSettingsRouter gasSettingsRouter;
     private final KeyService keyService;
+    private final PreferenceRepositoryType preferenceRepositoryType;
 
     ConfirmationViewModel(GenericWalletInteract genericWalletInteract,
                           GasService gasService,
@@ -62,7 +64,8 @@ public class ConfirmationViewModel extends BaseViewModel {
                           GasSettingsRouter gasSettingsRouter,
                           TokensService tokensService,
                           FindDefaultNetworkInteract findDefaultNetworkInteract,
-                          KeyService keyService) {
+                          KeyService keyService,
+                          PreferenceRepositoryType preferenceRepositoryType) {
         this.genericWalletInteract = genericWalletInteract;
         this.gasService = gasService;
         this.createTransactionInteract = createTransactionInteract;
@@ -70,6 +73,7 @@ public class ConfirmationViewModel extends BaseViewModel {
         this.tokensService = tokensService;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.keyService = keyService;
+        this.preferenceRepositoryType = preferenceRepositoryType;
     }
 
     public void createTransaction(Wallet from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, int chainId) {
@@ -174,6 +178,7 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void openGasSettings(Activity context, int chainId) {
         gasSettingsRouter.open(context, gasSettings.getValue(), chainId);
+        setTipShown();
     }
 
     /**
@@ -332,5 +337,15 @@ public class ConfirmationViewModel extends BaseViewModel {
     public void removeOverridenTransaction(String oldTxHash)
     {
         createTransactionInteract.removeOverridenTransaction(defaultWallet.getValue(), oldTxHash);
+    }
+
+    public boolean isTipShown()
+    {
+        return preferenceRepositoryType.isSpeedUpTipShown();
+    }
+
+    public void setTipShown()
+    {
+        preferenceRepositoryType.setSpeedUpTipShown();
     }
 }

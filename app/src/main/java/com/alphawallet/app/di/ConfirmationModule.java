@@ -7,6 +7,7 @@ import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.router.GasSettingsRouter;
@@ -25,9 +26,18 @@ public class ConfirmationModule {
             GasSettingsRouter gasSettingsRouter,
             TokensService tokensService,
             FindDefaultNetworkInteract findDefaultNetworkInteract,
-            KeyService keyService
+            KeyService keyService,
+            PreferenceRepositoryType preferenceRepository
     ) {
-        return new ConfirmationViewModelFactory(genericWalletInteract, gasService, createTransactionInteract, gasSettingsRouter, tokensService, findDefaultNetworkInteract, keyService);
+        return new ConfirmationViewModelFactory(
+                genericWalletInteract,
+                gasService,
+                createTransactionInteract,
+                gasSettingsRouter,
+                tokensService,
+                findDefaultNetworkInteract,
+                keyService,
+                preferenceRepository);
     }
 
     @Provides

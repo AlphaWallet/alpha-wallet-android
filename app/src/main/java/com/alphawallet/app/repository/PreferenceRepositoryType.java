@@ -37,4 +37,8 @@ public interface PreferenceRepositoryType {
     void setDefaultCurrency(CurrencyItem currency);
 
     String getDefaultCurrency();
+
+    boolean isSpeedUpTipShown();
+
+    void setSpeedUpTipShown();
 }

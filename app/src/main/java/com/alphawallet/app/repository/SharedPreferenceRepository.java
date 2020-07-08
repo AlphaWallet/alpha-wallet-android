@@ -23,6 +23,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String FIND_WALLET_ADDRESS_SHOWN = "find_wallet_address_shown";
     private static final String CURRENCY_CODE_KEY = "currency_locale";
     private static final String CURRENCY_SYMBOL_KEY = "currency_symbol";
+    private static final String IS_SPEED_UP_TIP_SHOWN = "speedup_tip";
 
     private final SharedPreferences pref;
 
@@ -121,5 +122,15 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public String getDefaultCurrency() {
         return pref.getString(CURRENCY_CODE_KEY, C.DEFAULT_CURRENCY_CODE);
+    }
+
+    @Override
+    public boolean isSpeedUpTipShown() {
+        return pref.getBoolean(IS_SPEED_UP_TIP_SHOWN, false);
+    }
+
+    @Override
+    public void setSpeedUpTipShown() {
+        pref.edit().putBoolean(IS_SPEED_UP_TIP_SHOWN, true).apply();
     }
 }

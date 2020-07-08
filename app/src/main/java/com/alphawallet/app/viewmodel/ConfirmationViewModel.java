@@ -5,7 +5,6 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ConfirmationType;
@@ -14,28 +13,26 @@ import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.repository.TokenRepository;
-import com.alphawallet.app.ui.ConfirmationActivity;
-import com.alphawallet.app.web3.entity.Web3Transaction;
-
-import com.alphawallet.token.tools.Numeric;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.GasSettingsRouter;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.ConfirmationActivity;
+import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.token.tools.Numeric;
 
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Objects;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;

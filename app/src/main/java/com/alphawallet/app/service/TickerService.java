@@ -107,6 +107,8 @@ public class TickerService
         this.gson = gson;
         this.context = ctx;
         this.localSource = localSource;
+
+        initCurrency();
     }
 
     public void updateTickers(Wallet wallet)
@@ -132,9 +134,7 @@ public class TickerService
 
     private Single<Double> updateCurrencyConversion()
     {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        currentCurrencySymbolTxt = pref.getString("currency_locale", "USD");
-        currentCurrencySymbol = pref.getString("currency_symbol", "$");
+        initCurrency();
         return convertPair("USD", currentCurrencySymbolTxt);
     }
 
@@ -645,6 +645,13 @@ public class TickerService
         DecimalFormat df = new DecimalFormat("#,##0.00");
         df.setRoundingMode(RoundingMode.DOWN);
         return df.format(price);
+    }
+
+    private void initCurrency()
+    {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        currentCurrencySymbolTxt = pref.getString("currency_locale", "USD");
+        currentCurrencySymbol = pref.getString("currency_symbol", "$");
     }
 
     /**

@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -91,6 +92,10 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private ProgressBar progressGasEstimate;
     private ProgressBar progressNetworkFee;
     private GasSettings localGasSettings;
+    private ImageView triangleImage;
+    private TextView infoText;
+    private View parentLayout;
+    private View valueLayout;
 
     private BigDecimal amount;
     private String tokenIds;
@@ -141,6 +146,10 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         gasEstimateText = findViewById(R.id.text_gas_estimate);
         progressGasEstimate = findViewById(R.id.progress_gas_estimate);
         progressNetworkFee = findViewById(R.id.progress_network_fee);
+        triangleImage = findViewById(R.id.image_triangle);
+        infoText = findViewById(R.id.text_info);
+        valueLayout = findViewById(R.id.layout_value);
+        parentLayout = findViewById(R.id.layout_parent);
         sendButton.setOnClickListener(view -> onSend());
 
         transaction = getIntent().getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
@@ -286,8 +295,9 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 nonceId = getIntent().getIntExtra(C.EXTRA_NONCE, 0);
                 nonce = BigInteger.valueOf(nonceId);
                 amountString = getString(R.string.speedup_tx_description);
-                valueText.setTextColor(getColor(R.color.text_black));
-                symbolText.setVisibility(View.GONE);
+                showTooltip(amountString, v -> {
+                    viewModel.openGasSettings(this, chainId); //if tooltip is clicked on open gas settings
+                });
                 oldGasPrice = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
                 oldGasLimit = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT));
                 transactionHex = getIntent().getStringExtra(C.EXTRA_TRANSACTION_DATA);
@@ -344,6 +354,22 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         getGasSettings();
     }
 
+    private void showTooltip(String tooltipInfo, View.OnClickListener listener)
+    {
+        //TODO: Can use a RelativeLayout overlay in the view and let the OS do all work, then you only need a couple of lines of code here
+        infoText.setVisibility(View.VISIBLE);
+        triangleImage.setVisibility(View.VISIBLE);
+        infoText.setText(tooltipInfo);
+        symbolText.setVisibility(View.GONE);
+        chainName.setVisibility(View.GONE);
+        valueText.setVisibility(View.GONE);
+        int paddingBottom = getResources().getDimensionPixelOffset(R.dimen.dp25);
+        parentLayout.setPadding(parentLayout.getPaddingLeft(), 0, parentLayout.getPaddingRight(), parentLayout.getPaddingBottom());
+        valueLayout.setPadding(valueLayout.getPaddingLeft(), 0, valueLayout.getPaddingRight(), paddingBottom);
+
+        infoText.setOnClickListener(listener);
+    }
+
     private void setupViewListeners()
     {
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
@@ -394,7 +420,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
     private void onProgress(boolean shouldShowProgress) {
         hideDialog();
-        if (shouldShowProgress) {
+        if (shouldShowProgress)
+        {
             dialog = new AWalletAlertDialog(this);
             dialog.setProgressMode();
             dialog.setTitle(R.string.title_dialog_sending);
@@ -404,7 +431,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     }
 
     private void hideDialog() {
-        if (dialog != null && dialog.isShowing()) {
+        if (dialog != null && dialog.isShowing())
+        {
             dialog.dismiss();
         }
     }
@@ -724,8 +752,10 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode,resultCode,intent);
 
-        if (requestCode == GasSettingsViewModel.SET_GAS_SETTINGS) {
-            if (resultCode == RESULT_OK) {
+        if (requestCode == GasSettingsViewModel.SET_GAS_SETTINGS)
+        {
+            if (resultCode == RESULT_OK)
+            {
                 BigInteger gasPrice = new BigInteger(intent.getStringExtra(C.EXTRA_GAS_PRICE));
                 BigInteger gasLimit = new BigInteger(intent.getStringExtra(C.EXTRA_GAS_LIMIT));
                 GasSettings settings = new GasSettings(gasPrice, gasLimit);

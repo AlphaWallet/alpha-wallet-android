@@ -241,7 +241,7 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
                 RGBLuminanceSource source = new RGBLuminanceSource(width, height, pixels);
                 BinaryBitmap bBitmap = new BinaryBitmap(new HybridBinarizer(source));
                 MultiFormatReader reader = new MultiFormatReader();
-                return reader.decode(bBitmap);
+                return reader.decodeWithState(bBitmap);
             }
 
             return null;

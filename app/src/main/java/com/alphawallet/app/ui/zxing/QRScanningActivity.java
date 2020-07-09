@@ -18,8 +18,10 @@ import android.widget.Toast;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.ui.BaseActivity;
 import com.alphawallet.app.ui.widget.OnQRCodeScannedListener;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.MultiFormatReader;
 import com.google.zxing.RGBLuminanceSource;
@@ -49,6 +51,7 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
     private TextView myAddressButton;
     private TextView browseButton;
     private Disposable disposable;
+    private AWalletAlertDialog dialog;
 
     @Override
     public void onCreate(Bundle state)
@@ -78,20 +81,28 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
 
         fullScannerFragment = (FullScannerFragment) getSupportFragmentManager().findFragmentById(R.id.scanner_fragment);
 
-        if(getIntent().getExtras() != null && getIntent().getExtras().containsKey(C.EXTRA_UNIVERSAL_SCAN))
+        if (getIntent().getExtras() != null && getIntent().getExtras().containsKey(C.EXTRA_UNIVERSAL_SCAN))
         {
             Objects.requireNonNull(fullScannerFragment).registerListener(this);
         }
 
         flashButton.setOnClickListener(view -> {
-            boolean isFlashOn = fullScannerFragment.toggleFlash();
-            if(isFlashOn)
+            try
             {
-                flashButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_flash_off, 0,0);
+                boolean isFlashOn = fullScannerFragment.toggleFlash();
+
+                if (isFlashOn)
+                {
+                    flashButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_flash_off, 0,0);
+                }
+                else
+                {
+                    flashButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_flash, 0,0);
+                }
             }
-            else
+            catch (Exception e)
             {
-                flashButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_flash, 0,0);
+                onError(e);
             }
         });
 
@@ -103,10 +114,13 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
         });
 
         browseButton.setOnClickListener(view -> {
-            if (ActivityCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            {
                 String[] permissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
                 requestPermissions(permissions, RC_HANDLE_IMAGE_PICKUP);
-            } else{
+            }
+            else
+            {
                 pickImage();
             }
         });
@@ -153,7 +167,8 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
                     }
                 }
             }
-        }else if (requestCode == RC_HANDLE_IMAGE_PICKUP)
+        }
+        else if (requestCode == RC_HANDLE_IMAGE_PICKUP)
         {
             pickImage();
             handled = true;
@@ -194,9 +209,9 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == RC_HANDLE_IMAGE_PICKUP && resultCode == Activity.RESULT_OK)
+        if (requestCode == RC_HANDLE_IMAGE_PICKUP && resultCode == Activity.RESULT_OK)
         {
-            if(data != null) {
+            if (data != null) {
                 Uri selectedImage = data.getData();
 
                 disposable = concertAndHandle(selectedImage)
@@ -209,14 +224,14 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
 
     private void onError(Throwable throwable)
     {
-        Toast.makeText(this, getString(R.string.error_browse_selection), Toast.LENGTH_LONG).show();
+        displayErrorDialog(getString(R.string.title_dialog_error), getString(R.string.error_browse_selection));
     }
 
     private void onSuccess(Result result)
     {
-        if(result == null)
+        if (result == null)
         {
-            Toast.makeText(this, getString(R.string.error_browse_selection), Toast.LENGTH_LONG).show();
+            displayErrorDialog(getString(R.string.title_dialog_error), getString(R.string.error_browse_selection));
         }
         else
         {
@@ -251,9 +266,23 @@ public class QRScanningActivity extends BaseActivity implements OnQRCodeScannedL
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     public void stop()
     {
-        if(disposable != null && !disposable.isDisposed())
+        if (disposable != null && !disposable.isDisposed())
         {
             disposable.dispose();
         }
+    }
+
+    private void displayErrorDialog(String title, String errorMessage)
+    {
+        AWalletAlertDialog aDialog = new AWalletAlertDialog(this);
+        aDialog.setTitle(title);
+        aDialog.setMessage(errorMessage);
+        aDialog.setIcon(AWalletAlertDialog.ERROR);
+        aDialog.setButtonText(R.string.button_ok);
+        aDialog.setButtonListener(v -> {
+            aDialog.dismiss();
+        });
+        dialog = aDialog;
+        dialog.show();
     }
 }

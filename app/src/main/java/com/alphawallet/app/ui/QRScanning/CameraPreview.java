@@ -310,30 +310,23 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mAutoFocusHandler.postDelayed(doAutoFocus, 1000);
     }
 
-    public void turnOffFlash() {
-        try {
-            if (mCameraWrapper != null) {
-                Camera.Parameters p = mCameraWrapper.mCamera.getParameters();
-                p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-                mCameraWrapper.mCamera.setParameters(p);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+    public void turnOffFlash() throws Exception {
+        if (mCameraWrapper != null)
+        {
+            Camera.Parameters p = mCameraWrapper.mCamera.getParameters();
+            p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+            mCameraWrapper.mCamera.setParameters(p);
         }
-
     }
 
-    public void turnOnFlash() {
-        try {
-            turnOffFlash();
-            if (mCameraWrapper != null) {
-                Camera.Parameters params = mCameraWrapper.mCamera.getParameters();
-                params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-                mCameraWrapper.mCamera.setParameters(params);
-                mCameraWrapper.mCamera.startPreview();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+    public void turnOnFlash() throws Exception {
+        turnOffFlash();
+        if (mCameraWrapper != null)
+        {
+            Camera.Parameters params = mCameraWrapper.mCamera.getParameters();
+            params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+            mCameraWrapper.mCamera.setParameters(params);
+            mCameraWrapper.mCamera.startPreview();
         }
     }
 }

@@ -295,9 +295,9 @@ public abstract class BarcodeScannerView extends FrameLayout implements Camera.P
         return displayOrientation / 90;
     }
 
-    public boolean toggleFlash()
+    public boolean toggleFlash() throws Exception
     {
-        if(!isFlashOn)
+        if (!isFlashOn)
         {
             mPreview.turnOnFlash();
             isFlashOn = true;

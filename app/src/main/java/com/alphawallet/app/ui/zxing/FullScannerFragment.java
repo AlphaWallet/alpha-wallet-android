@@ -153,7 +153,7 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
         this.listener = listener;
     }
 
-    public boolean toggleFlash()
+    public boolean toggleFlash() throws Exception
     {
         return mScannerView.toggleFlash();
     }

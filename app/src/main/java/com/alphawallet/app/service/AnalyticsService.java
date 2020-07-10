@@ -25,7 +25,7 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T>{
         AnalyticsProperties analyticsProperties = (AnalyticsProperties) event;
 
         Bundle props = new Bundle();
-        if(!analyticsProperties.getWalletType().isEmpty())
+        if (!analyticsProperties.getWalletType().isEmpty())
         {
             props.putString(C.AN_WALLET_TYPE, analyticsProperties.getWalletType());
         }

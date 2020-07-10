@@ -203,7 +203,7 @@ public class RepositoriesModule {
 	@Singleton
 	@Provides
 	AnalyticsServiceType provideAnalyticsService(Context ctx) {
-		if(BuildConfig.USE_ANALYTICS)
+		if (BuildConfig.USE_ANALYTICS)
 		{
 			return new AnalyticsService(ctx);
 		}

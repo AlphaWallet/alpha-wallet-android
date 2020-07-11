@@ -6,22 +6,38 @@ import android.graphics.Rect;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.util.Log;
-import com.google.zxing.*;
-import com.google.zxing.common.HybridBinarizer;
+import android.widget.Toast;
+
+import com.alphawallet.app.R;
 import com.alphawallet.app.ui.QRScanning.BarcodeScannerView;
 import com.alphawallet.app.ui.QRScanning.DisplayUtils;
+import com.google.zxing.*;
+import com.google.zxing.common.HybridBinarizer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+
+import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 
 public class ZXingScannerView extends BarcodeScannerView
 {
     private static final String TAG = "ZXingScannerView";
     private final Context context;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private String lastResult = "";
+    private long lastResultTime = 0;
+    private static long ERROR_DIFF = 1000 * 4; //4 Seconds between error reports
 
     public interface ResultHandler {
         void handleResult(Result rawResult);
+        boolean checkResultIsValid(Result rawResult);
     }
 
     private MultiFormatReader mMultiFormatReader;
@@ -122,25 +138,8 @@ public class ZXingScannerView extends BarcodeScannerView
                 }
             }
 
-            final Result finalRawResult = rawResult;
-
-            if (finalRawResult != null) {
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Stopping the preview can take a little long.
-                        // So we want to set result handler to null to discard subsequent calls to
-                        // onPreviewFrame.
-                        ResultHandler tmpResultHandler = mResultHandler;
-                        mResultHandler = null;
-
-                        stopCameraPreview();
-                        if (tmpResultHandler != null) {
-                            tmpResultHandler.handleResult(finalRawResult);
-                        }
-                    }
-                });
+            if (rawResult != null) {
+                CheckQRImage(rawResult, camera, this);
             } else {
                 camera.setOneShotPreviewCallback(this);
             }
@@ -150,9 +149,56 @@ public class ZXingScannerView extends BarcodeScannerView
         }
     }
 
+    private void CheckQRImage(final Result finalRawResult, final Camera camera, final Camera.PreviewCallback pbc)
+    {
+        handler.post(() -> {
+            // Stopping the preview can take a little long.
+            // So we want to set result handler to null to discard subsequent calls to
+            // onPreviewFrame.
+            ResultHandler tmpResultHandler = mResultHandler;
+
+            if (tmpResultHandler != null)
+            {
+                if (tmpResultHandler.checkResultIsValid(finalRawResult))
+                {
+                    stopCameraPreview();
+                    tmpResultHandler.handleResult(finalRawResult);
+                }
+                else
+                {
+                    if (!lastResult.equals(finalRawResult.getText()) || lastResultTime < (System.currentTimeMillis() - ERROR_DIFF))
+                    {
+                        lastResultTime = System.currentTimeMillis();
+                        lastResult = finalRawResult.getText();
+                        Toast.makeText(context, R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
+                        vibrate();
+                    }
+                    camera.setOneShotPreviewCallback(pbc);
+                }
+            }
+        });
+    }
+
     public void resumeCameraPreview(ResultHandler resultHandler) {
         mResultHandler = resultHandler;
         super.resumeCameraPreview();
+    }
+
+    private void vibrate()
+    {
+        Vibrator vb = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        if (vb != null && vb.hasVibrator())
+        {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                VibrationEffect vibe = VibrationEffect.createOneShot(200, DEFAULT_AMPLITUDE);
+                vb.vibrate(vibe);
+            }
+            else
+            {
+                //noinspection deprecation
+                vb.vibrate(200);
+            }
+        }
     }
 
     public PlanarYUVLuminanceSource buildLuminanceSource(byte[] data, int width, int height) {

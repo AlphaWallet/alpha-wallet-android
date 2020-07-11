@@ -14,11 +14,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.TokenLocator;
 import com.alphawallet.app.ui.BaseActivity;
 import com.alphawallet.app.ui.widget.OnQRCodeScannedListener;
 import com.alphawallet.app.widget.AWalletAlertDialog;

@@ -13,12 +13,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.alphawallet.app.entity.QRResult;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.ui.widget.OnQRCodeScannedListener;
+import com.alphawallet.app.util.QRParser;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.alphawallet.app.entity.EIP681Type.OTHER;
 
 public class FullScannerFragment extends Fragment implements ZXingScannerView.ResultHandler
 {
@@ -105,6 +110,30 @@ public class FullScannerFragment extends Fragment implements ZXingScannerView.Re
             getActivity().setResult(SUCCESS, intent);
             getActivity().finish();
         }
+    }
+
+    @Override
+    public boolean checkResultIsValid(Result rawResult)
+    {
+        if (rawResult == null || rawResult.getText() == null) return false;
+        boolean pass = true;
+        String qrCode = rawResult.getText();
+        try
+        {
+            QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
+            QRResult qrResult = parser.parse(qrCode);
+
+            if (qrResult.type == OTHER)
+            {
+                pass = false;
+            }
+        }
+        catch (Exception e)
+        {
+            pass = false;
+        }
+
+        return pass;
     }
 
     public void closeMessageDialog() {

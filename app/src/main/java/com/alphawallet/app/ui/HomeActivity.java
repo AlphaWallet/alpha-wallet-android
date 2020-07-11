@@ -945,8 +945,20 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             case C.REQUEST_UNIVERSAL_SCAN:
                 if(resultCode == Activity.RESULT_OK)
                 {
-                    String qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
-                    viewModel.handleQRCode(this, qrCode);
+                    if (data.hasExtra(C.EXTRA_QR_CODE))
+                    {
+                        String qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
+                        viewModel.handleQRCode(this, qrCode);
+                    }
+                    else if (data.hasExtra(C.EXTRA_ACTION_NAME))
+                    {
+                        String action = data.getStringExtra(C.EXTRA_ACTION_NAME);
+
+                        if (action.equalsIgnoreCase(C.ACTION_MY_ADDRESS_SCREEN))
+                        {
+                            viewModel.showMyAddress(this);
+                        }
+                    }
                 }
             default:
                 super.onActivityResult(requestCode, resultCode, data);

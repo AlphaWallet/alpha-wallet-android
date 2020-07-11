@@ -40,19 +40,23 @@
         android:orientation="horizontal">
 
         <TextView
+            android:id="@+id/flash_button"
             style="@style/QRScannerTextView"
             android:drawableTop="@drawable/ic_flash"
             android:text="@string/light" />
 
         <TextView
+            android:id="@+id/my_address_button"
             style="@style/QRScannerTextView"
             android:drawableTop="@drawable/ic_qr_rounded_white"
-            android:text="@string/light" />
+            android:text="@string/my_qr_code" />
 
         <TextView
+            android:id="@+id/browse_button"
             style="@style/QRScannerTextView"
             android:drawableTop="@drawable/ic_browse"
-            android:text="@string/light" />
+            android:text="@string/browse"
+            android:visibility="gone"/>
 
     </LinearLayout>
 

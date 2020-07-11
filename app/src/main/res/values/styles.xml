@@ -107,7 +107,12 @@
         <item name="android:textSize">17sp</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:gravity">center_horizontal</item>
-        <item name="android:drawablePadding">@dimen/normal_margin</item>
+        <item name="android:drawablePadding">@dimen/big_margin</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:paddingTop">@dimen/big_padding</item>
+        <item name="android:paddingBottom">@dimen/big_padding</item>
     </style>
 
 </resources>

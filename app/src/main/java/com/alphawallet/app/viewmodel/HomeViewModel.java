@@ -367,7 +367,8 @@ public class HomeViewModel extends BaseViewModel {
             switch (qrResult.type)
             {
                 case ADDRESS:
-                    showMyAddress(activity);
+                    showSend(activity, qrResult); //For now, direct an ETH address to send screen
+                    //TODO: Issue #1504: bottom-screen popup to choose between: Add to Address book, Sent to Address, or Watch Wallet
                     break;
                 case PAYMENT:
                     showSend(activity, qrResult);
@@ -376,7 +377,8 @@ public class HomeViewModel extends BaseViewModel {
                     showSend(activity, qrResult);
                     break;
                 case FUNCTION_CALL:
-                    //TODO: Handle via ConfirmationActivity
+                    //TODO: Handle via ConfirmationActivity, need to generate function signature + data then call ConfirmationActivity
+                    //TODO: Code to generate the function signature will look like the code in generateTransactionFunction
                     break;
                 case URL:
                     ((HomeActivity)activity).onBrowserWithURL(qrCode);

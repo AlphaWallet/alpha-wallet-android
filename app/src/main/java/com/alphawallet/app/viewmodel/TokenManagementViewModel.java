@@ -9,6 +9,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.AddTokenRouter;
+import com.alphawallet.app.service.AssetDefinitionService;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -18,6 +19,7 @@ public class TokenManagementViewModel extends BaseViewModel {
     private final TokenRepositoryType tokenRepository;
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
     private final AddTokenRouter addTokenRouter;
+    private final AssetDefinitionService assetDefinitionService;
 
     private final MutableLiveData<Token[]> tokens = new MutableLiveData<>();
 
@@ -25,10 +27,12 @@ public class TokenManagementViewModel extends BaseViewModel {
 
     public TokenManagementViewModel(TokenRepositoryType tokenRepository,
                                     ChangeTokenEnableInteract changeTokenEnableInteract,
-                                    AddTokenRouter addTokenRouter) {
+                                    AddTokenRouter addTokenRouter,
+                                    AssetDefinitionService assetDefinitionService) {
         this.tokenRepository = tokenRepository;
         this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.addTokenRouter = addTokenRouter;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     public LiveData<Token[]> tokens() {
@@ -53,5 +57,10 @@ public class TokenManagementViewModel extends BaseViewModel {
 
     public void showAddToken(Context context) {
         addTokenRouter.open(context, null);
+    }
+
+    public AssetDefinitionService getAssetDefinitionService()
+    {
+        return assetDefinitionService;
     }
 }

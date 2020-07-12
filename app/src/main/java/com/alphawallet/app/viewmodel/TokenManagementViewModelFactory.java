@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.router.AddTokenRouter;
+import com.alphawallet.app.service.AssetDefinitionService;
 
 import io.reactivex.annotations.NonNull;
 
@@ -14,14 +15,17 @@ public class TokenManagementViewModelFactory implements ViewModelProvider.Factor
     private final TokenRepositoryType tokenRepository;
     private final ChangeTokenEnableInteract changeTokenEnableInteract;
     private final AddTokenRouter addTokenRouter;
+    private final AssetDefinitionService assetDefinitionService;
 
     public TokenManagementViewModelFactory(TokenRepositoryType tokenRepository,
                                            ChangeTokenEnableInteract changeTokenEnableInteract,
-                                           AddTokenRouter addTokenRouter)
+                                           AddTokenRouter addTokenRouter,
+                                           AssetDefinitionService assetDefinitionService)
     {
         this.tokenRepository = tokenRepository;
         this.changeTokenEnableInteract = changeTokenEnableInteract;
         this.addTokenRouter = addTokenRouter;
+        this.assetDefinitionService = assetDefinitionService;
     }
 
     @NonNull
@@ -31,7 +35,8 @@ public class TokenManagementViewModelFactory implements ViewModelProvider.Factor
         return (T) new TokenManagementViewModel(
                 tokenRepository,
                 changeTokenEnableInteract,
-                addTokenRouter
+                addTokenRouter,
+                assetDefinitionService
         );
     }
 }

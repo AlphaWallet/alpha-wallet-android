@@ -68,7 +68,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
 
     private void onTokens(Token[] tokenArray) {
         if (tokenArray != null && tokenArray.length > 0) {
-            adapter = new TokenListAdapter(this, tokenArray, this);
+            adapter = new TokenListAdapter(this, viewModel.getAssetDefinitionService(), tokenArray, this);
             tokenList.setAdapter(adapter);
         }
     }

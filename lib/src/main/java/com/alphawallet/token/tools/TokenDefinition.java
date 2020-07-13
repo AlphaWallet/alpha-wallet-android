@@ -26,7 +26,7 @@ public class TokenDefinition {
     public Map<String, ContractInfo> contracts = new HashMap<>();
     public Map<String, TSAction> actions = new HashMap<>();
     private Map<String, String> labels = new HashMap<>(); // store plural etc for token name
-    private Map<String, Module> moduleLookup = new HashMap<>(); //used to protect against name collision
+    private Map<String, Module> namedTypeLookup = new HashMap<>(); //used to protect against name collision
     private TSTokenViewHolder tokenViews = new TSTokenViewHolder();
     private Map<String, TSSelection> selections = new HashMap<>();
 
@@ -94,7 +94,7 @@ public class TokenDefinition {
                     ev.contract = contracts.get(attrValue);
                     break;
                 case "type":
-                    ev.eventModule = moduleLookup.get(attrValue);
+                    ev.eventModule = namedTypeLookup.get(attrValue);
                     if (ev.eventModule == null)
                     {
                         throw new SAXException("Event module not found: " + attrValue);
@@ -866,7 +866,7 @@ public class TokenDefinition {
                         {
                             throw new SAXException("namedType must have name attribute.");
                         }
-                        else if (moduleLookup.containsKey(namedType))
+                        else if (namedTypeLookup.containsKey(namedType))
                         {
                             throw new SAXException("Duplicate Module label: " + namedType);
                         }
@@ -880,7 +880,7 @@ public class TokenDefinition {
                             throw new SAXException("Sequence must be enclosed within <namedType name=... />");
                         }
                         Module eventModule = handleElementSequence(element, namedType);
-                        moduleLookup.put(namedType, eventModule);
+                        namedTypeLookup.put(namedType, eventModule);
                         namedType = null;
                         n = n.getNextSibling();
                         break;

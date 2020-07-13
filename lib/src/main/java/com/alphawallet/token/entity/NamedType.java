@@ -8,14 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by JB on 20/03/2020.
+ * Created by JB on 20/03/2020 for namedType in ASN.X included in TokenScript. It's used for events & attestations.
  */
-public class Module
+public class NamedType
 {
     public final String name;
     public List<SequenceElement> sequence = new ArrayList<>();
 
-    public Module(String moduleName)
+    public NamedType(String moduleName)
     {
         name = moduleName;
     }

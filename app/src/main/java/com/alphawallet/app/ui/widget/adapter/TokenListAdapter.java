@@ -12,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
@@ -46,23 +48,32 @@ import static com.alphawallet.app.entity.TokenManageType.HIDDEN_TOKEN;
 import static com.alphawallet.app.entity.TokenManageType.LABEL_DISPLAY_TOKEN;
 import static com.alphawallet.app.entity.TokenManageType.LABEL_HIDDEN_TOKEN;
 
-public class TokenListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class TokenListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
     private LayoutInflater inflater;
     private final Context context;
-    private final List<Token> tokens;
     private ItemClickListener listener;
     protected final AssetDefinitionService assetService;
-    private final ArrayList<SortedItem> items;
+
+    /*
+    Below is Backup/Main list based on the Tokens provided.
+    We need this Duplicate list to provide Filter/Search functionality
+     */
+    private final ArrayList<SortedItem> backupItems;
+    //This is duplicate list to show on the screen
+    private ArrayList<SortedItem> items;
 
     public TokenListAdapter(Context context, AssetDefinitionService aService, Token[] tokens, ItemClickListener listener) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
-        this.tokens = filterTokens(Arrays.asList(tokens));
         this.listener = listener;
         this.assetService = aService;
 
+        List<Token> tokenList = filterTokens(Arrays.asList(tokens));
+
+        backupItems = new ArrayList<>();
         items = new ArrayList<>();
-        setupList();
+        backupItems.addAll(setupList(tokenList));
+        items.addAll(backupItems);
     }
 
     private List<Token> filterTokens(List<Token> tokens) {
@@ -81,9 +92,9 @@ public class TokenListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return filteredList;
     }
 
-    private void setupList()
+    private ArrayList<SortedItem> setupList(List<Token> tokens)
     {
-        items.clear();
+        ArrayList<SortedItem> sortedItems = new ArrayList<>();
         for (Token token : tokens)
         {
             TokenSortedItem sortedItem;
@@ -99,20 +110,27 @@ public class TokenListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         HIDDEN_TOKEN, token, token.getNameWeight()
                 );
             }
-            items.add(sortedItem);
+            sortedItems.add(sortedItem);
         }
-        items.add(new ManageTokensLabelSortedItem(
+        sortedItems.add(new ManageTokensLabelSortedItem(
                 LABEL_DISPLAY_TOKEN,
                 new ManageTokensLabelData(context.getString(R.string.display_tokens)),
                 0));
-        items.add(new ManageTokensLabelSortedItem(
+        sortedItems.add(new ManageTokensLabelSortedItem(
                 LABEL_HIDDEN_TOKEN,
                 new ManageTokensLabelData(context.getString(R.string.hidden_tokens)),
                 0));
 
-        Collections.sort(items, compareByWeight);
+        Collections.sort(sortedItems, compareByWeight);
+
+        return  sortedItems;
     }
 
+    /*
+    Below comparision is like
+    First, check for the ViewType which could be any of @TokenManageType
+    Second, if type is similar, check for the weight given to the Token
+     */
     Comparator<SortedItem> compareByWeight = (o1, o2) -> {
         if (o1.viewType < o2.viewType)
         {
@@ -168,20 +186,17 @@ public class TokenListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             tokenViewHolder.switchEnabled.setChecked(token.tokenInfo.isEnabled);
             tokenViewHolder.switchEnabled.setTag(new Integer(position));
             tokenViewHolder.switchEnabled.setOnCheckedChangeListener((v, b) -> {
-//                    listener.onItemClick((Token) items.get(position).value, b);
-                items.get(position).viewType = HIDDEN_TOKEN;
-                token.tokenInfo.isEnabled = false;
-                Collections.sort(items, compareByWeight);
-                notifyDataSetChanged();
+                int pos = Integer.parseInt(v.getTag().toString());
+                listener.onItemClick((Token) items.get(pos).value, b);
 
                 if (type == DISPLAY_TOKEN)
                 {
-                    items.get(position).viewType = HIDDEN_TOKEN;
+                    items.get(pos).viewType = HIDDEN_TOKEN;
                     token.tokenInfo.isEnabled = false;
                 }
                 else
                 {
-                    items.get(position).viewType = DISPLAY_TOKEN;
+                    items.get(pos).viewType = DISPLAY_TOKEN;
                     token.tokenInfo.isEnabled = true;
                 }
                 Collections.sort(items, compareByWeight);
@@ -305,5 +320,53 @@ public class TokenListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     @Override
     public int getItemViewType(int position) {
         return items.get(position).viewType;
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String searchString = charSequence.toString();
+                if (searchString.isEmpty())
+                {
+                    items.clear();
+                    items.addAll(backupItems);
+                }
+                else
+                {
+                    ArrayList<SortedItem> tokenList = new ArrayList<>(backupItems);
+                    ArrayList<SortedItem> filteredList = new ArrayList<>();
+                    for (SortedItem row : tokenList)
+                    {
+                        if (row instanceof TokenSortedItem)
+                        {
+                            TokenSortedItem token = (TokenSortedItem) row;
+                            if (token.value.getFullName(assetService, 1).toLowerCase().contains(searchString.toLowerCase()))
+                            {
+                                filteredList.add(row);
+                            }
+                        }
+                        else
+                        {
+                            filteredList.add(row);
+                        }
+                    }
+
+                    items.clear();
+                    items.addAll(filteredList);
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = items;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                items = (ArrayList<SortedItem>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 }

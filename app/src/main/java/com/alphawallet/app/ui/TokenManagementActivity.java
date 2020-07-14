@@ -3,14 +3,19 @@ package com.alphawallet.app.ui;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -36,8 +41,12 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     private Button saveButton;
     private TokenListAdapter adapter;
     private CheckBox hideZeroBalanceCheckBox;
+    private EditText search;
 
     private Wallet wallet;
+
+    private Handler delayHandler = new Handler(Looper.getMainLooper());
+    private Runnable workRunnable;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,16 +55,24 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         setContentView(R.layout.activity_token_management);
         toolbar();
         setTitle(getString(R.string.add_hide_tokens));
-        tokenList = findViewById(R.id.token_list);
-        tokenList.setLayoutManager(new LinearLayoutManager(this));
 
-        saveButton = findViewById(R.id.btn_apply);
-        saveButton.setOnClickListener(v -> {
-            new HomeRouter().open(this, true);
-        });
+        initViews();
+    }
+
+    private void initViews() {
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(TokenManagementViewModel.class);
         viewModel.tokens().observe(this, this::onTokens);
+
+        tokenList = findViewById(R.id.token_list);
+        saveButton = findViewById(R.id.btn_apply);
+        search = findViewById(R.id.edit_search);
+
+        tokenList.setLayoutManager(new LinearLayoutManager(this));
+
+        saveButton.setOnClickListener(v -> {
+            new HomeRouter().open(this, true);
+        });
 
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         boolean hideZeroBalanceTokens = pref.getBoolean("hide_zero_balance_tokens", false);
@@ -64,7 +81,25 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         hideZeroBalanceCheckBox.setOnCheckedChangeListener((v, checked) -> {
             pref.edit().putBoolean("hide_zero_balance_tokens", checked).apply();
         });
+
+        tokenList.requestFocus();
+        search.addTextChangedListener(textWatcher);
     }
+
+    private TextWatcher textWatcher = new TextWatcher() {
+        @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
+        @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+        @Override
+        public void afterTextChanged(final Editable searchString) {
+            if (workRunnable != null)
+            {
+                delayHandler.removeCallbacks(workRunnable);
+            }
+            workRunnable = () -> adapter.getFilter().filter(searchString);
+            delayHandler.postDelayed(workRunnable, 500 /*delay*/);
+        }
+    };
 
     private void onTokens(Token[] tokenArray) {
         if (tokenArray != null && tokenArray.length > 0) {

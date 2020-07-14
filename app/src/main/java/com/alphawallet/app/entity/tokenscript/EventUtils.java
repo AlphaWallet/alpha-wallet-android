@@ -1,12 +1,11 @@
 package com.alphawallet.app.entity.tokenscript;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.AttributeInterface;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.EventDefinition;
-import com.alphawallet.token.entity.Module;
+import com.alphawallet.token.entity.NamedType;
 import com.alphawallet.token.entity.TokenScriptResult;
 
 import org.web3j.abi.EventEncoder;
@@ -129,7 +128,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import io.reactivex.Single;
 
@@ -167,7 +165,7 @@ public abstract class EventUtils
         int topicIndex = ev.getTopicIndex(filterTopic);
 
         //isolate which indexed param it is
-        List<String> indexedParams = ev.eventModule.getArgNames(true);
+        List<String> indexedParams = ev.type.getArgNames(true);
 
         DefaultBlockParameter startBlock = DefaultBlockParameterName.EARLIEST;
 
@@ -297,10 +295,10 @@ public abstract class EventUtils
      * @param args
      * @return
      */
-    private static List<TypeReference<?>> generateFunctionDefinition(List<Module.SequenceElement> args)
+    private static List<TypeReference<?>> generateFunctionDefinition(List<NamedType.SequenceElement> args)
     {
         List<TypeReference<?>> paramList = new ArrayList<>();
-        for (Module.SequenceElement element : args)
+        for (NamedType.SequenceElement element : args)
         {
             switch (element.type)
             {
@@ -619,8 +617,8 @@ public abstract class EventUtils
 
     private Event generateEventFunction(EventDefinition ev)
     {
-        List<TypeReference<?>> eventArgSpec = EventUtils.generateFunctionDefinition(ev.eventModule.getSequenceArgs());
-        return new Event(ev.eventModule.name, eventArgSpec);
+        List<TypeReference<?>> eventArgSpec = EventUtils.generateFunctionDefinition(ev.type.getSequenceArgs());
+        return new Event(ev.type.name, eventArgSpec);
     }
 
     private void addTopicFilter(EventDefinition ev, EthFilter filter, String filterTopicValue, Token originToken, String contractAddr, AttributeInterface attrIf) throws Exception

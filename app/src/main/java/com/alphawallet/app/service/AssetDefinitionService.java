@@ -1205,7 +1205,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         boolean hasEvent = false;
         for (EventDefinition ev : eventList)
         {
-            if (ev.eventModule == null || ev.contract == null) continue;
+            if (ev.type == null || ev.contract == null) continue;
             if (ev.contract.addresses.containsKey(token.tokenInfo.chainId))
             {
                 if (ev.contract.addresses.get(token.tokenInfo.chainId).contains(token.getAddress().toLowerCase()))

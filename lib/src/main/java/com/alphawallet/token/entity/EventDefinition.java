@@ -1,7 +1,6 @@
 package com.alphawallet.token.entity;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,7 +11,7 @@ public class EventDefinition
 {
     public ContractInfo contract;
     public String attributeName; //TransactionResult: method
-    public Module eventModule;
+    public NamedType type;
     public String filter;
     public String select;
     public BigInteger readBlock;
@@ -35,15 +34,15 @@ public class EventDefinition
 
     public int getTopicIndex(String filterTopic)
     {
-        if (eventModule == null || filterTopic == null) return -1;
-        return eventModule.getTopicIndex(filterTopic);
+        if (type == null || filterTopic == null) return -1;
+        return type.getTopicIndex(filterTopic);
     }
 
     public int getSelectIndex(boolean indexed)
     {
         int index = 0;
         boolean found = false;
-        for (String label : eventModule.getArgNames(indexed))
+        for (String label : type.getArgNames(indexed))
         {
             if (label.equals(select))
             {

@@ -463,7 +463,7 @@
     <string name="keystore_detail_text">A KeyStore is a text file. You can copy its content and place when you want to import your wallet. This is a safe way to back up a wallet.</string>
     <string name="set_keystore_password">Set Keystore Password</string>
     <string name="keystore_loss_warning">NOTE: You must remember your password. We do not store your password elsewhere. KeyStore is always encrypted, otherwise whoever has it can gain the money.</string>
-    <string name="share_keystore">Share Keystore</string>
+    <string name="save_keystore">Guardar Keystore</string>
     <string name="enter_seed_phrase">Enter seed phrase</string>
     <string name="seed_phrase_conversion_message">If your seed phrase is not in English, please convert it to English on your own using tools like this https://iancoleman.io/bip39/</string>
     <string name="bad_seed_phrase">Invalid recovery phrase. Please check and try again.</string>
@@ -500,7 +500,7 @@
     <string name="back_up_this_wallet">Back up this Wallet</string>
     <string name="not_locked">Not Locked</string>
     <string name="back_up_now">Back up Now!</string>
-    <string name="key_secure">100% Secure</string>
+    <string name="key_secure">No le compartir</string>
     <string name="lock_key_upgrade">Lock your seed phrase to increase security</string>
     <string name="upgrade_key_security_detail">AlphaWallet security is being upgraded to the best achievable. Lock your seed phrase with biometrics.</string>
     <string name="action_upgrade_key">Upgrade key security</string>

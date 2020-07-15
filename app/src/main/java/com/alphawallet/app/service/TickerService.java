@@ -697,6 +697,13 @@ public class TickerService
         return currentCurrencySymbol + df.format(price);
     }
 
+    public static String getCurrencyWithoutSymbol(double price)
+    {
+        DecimalFormat df = new DecimalFormat("#,##0.00");
+        df.setRoundingMode(RoundingMode.DOWN);
+        return df.format(price);
+    }
+
     /**
      * Returns the current ISO currency string eg EUR, AUD etc.
      * @return 3 character currency ISO text

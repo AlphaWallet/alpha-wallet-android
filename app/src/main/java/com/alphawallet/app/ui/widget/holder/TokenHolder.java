@@ -62,6 +62,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final TextView contractType;
     private final TextView currencyLabel;
     private final View contractSeparator;
+    private final View layoutAppreciation;
     private final LinearLayout layoutValueDetails;
     private final LinearLayout extendedInfo;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
@@ -96,6 +97,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         pendingText = findViewById(R.id.balance_eth_pending);
         tokenLayout = findViewById(R.id.token_layout);
         extendedInfo = findViewById(R.id.layout_extended_info);
+        layoutAppreciation = findViewById(R.id.layout_appreciation);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
         tokensService = tSvs;
@@ -186,11 +188,13 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             return;
         }
 
-        layoutValueDetails.setVisibility(View.VISIBLE);
+        layoutValueDetails.setVisibility(View.GONE);
+        layoutAppreciation.setVisibility(View.VISIBLE);
+        balanceCurrency.setVisibility(View.VISIBLE);
         stopTextAnimation();
         BigDecimal correctedBalance = token.getCorrectedBalance(18);
         BigDecimal fiatBalance = correctedBalance.multiply(new BigDecimal(token.ticker.price)).setScale(18, RoundingMode.DOWN);
-        String converted = TickerService.getCurrencyString(fiatBalance.doubleValue());
+        String converted = TickerService.getCurrencyWithoutSymbol(fiatBalance.doubleValue());
         String formattedPercents = "";
         currencyLabel.setText(token.ticker.priceSymbol);
         int color = Color.RED;
@@ -198,12 +202,12 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         try {
             percentage = Double.valueOf(token.ticker.percentChange24h);
             color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
-            formattedPercents = (percentage < 0 ? "" : "+") + token.ticker.percentChange24h + "%";
+            formattedPercents = (percentage < 0 ? "" : "(+") + token.ticker.percentChange24h + "%)";
             text24Hours.setText(formattedPercents);
             text24Hours.setTextColor(color);
         } catch (Exception ex) { /* Quietly */ }
-        String lbl = getString(R.string.token_balance, "",
-                               converted);
+        String lbl = getString(R.string.token_balance, "", converted);
+        lbl += " " + token.ticker.priceSymbol;
 
         Spannable spannable;
         if (correctedBalance.compareTo(BigDecimal.ZERO) > 0)
@@ -211,7 +215,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             spannable = new SpannableString(lbl);
             spannable.setSpan(new ForegroundColorSpan(color),
                               converted.length(), lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            this.balanceCurrency.setText(spannable);
+            this.balanceCurrency.setText(lbl);
+            this.issuer.setVisibility(View.GONE);
         }
         else
         {
@@ -239,17 +244,17 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             appreciation = appreciation.multiply(BigDecimal.valueOf(-1));
         }
 
-        String convertedAppreciation = TickerService.getCurrencyString(appreciation.doubleValue());
+        String convertedAppreciation = TickerService.getCurrencyWithoutSymbol(appreciation.doubleValue());
 
-        lbl = getString(R.string.token_balance, "",
-                        convertedAppreciation);
+        lbl = getString(R.string.token_balance, "", convertedAppreciation);
+        lbl += " " + token.ticker.priceSymbol;
 
         if (correctedBalance.compareTo(BigDecimal.ZERO) > 0)
         {
             spannable = new SpannableString(lbl);
             spannable.setSpan(new ForegroundColorSpan(color),
                               convertedAppreciation.length(), lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            this.textAppreciation.setText(spannable);
+            this.textAppreciation.setText(lbl);
         }
         else
         {
@@ -357,7 +362,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private void animateTextWhileWaiting() {
         emptyTicker();
-        layoutValueDetails.setVisibility(View.VISIBLE);
+        layoutValueDetails.setVisibility(View.GONE);
         Animation anim = new AlphaAnimation(0.0f, 1.0f);
         anim.setDuration(450);
         anim.setStartOffset(20);
@@ -371,27 +376,43 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private void setIssuerDetails()
     {
-        String issuerName = assetDefinition.getIssuerName(token);
-        if(issuerName != null && !issuerName.equalsIgnoreCase(getString(R.string.app_name))) //don't display issuer if it's alphawallet
+        if(token.ticker != null && !token.isEthereum())
         {
-            issuer.setVisibility(View.VISIBLE);
-            issuerPlaceholder.setVisibility(View.VISIBLE);
-            if (contractType.getVisibility() == View.VISIBLE)
+            String issuerName = assetDefinition.getIssuerName(token);
+            if(issuerName != null && !issuerName.equalsIgnoreCase(getString(R.string.app_name))) //don't display issuer if it's alphawallet
             {
-                contractSeparator.setVisibility(View.VISIBLE);
+                issuer.setVisibility(View.VISIBLE);
+                issuerPlaceholder.setVisibility(View.VISIBLE);
+                if (contractType.getVisibility() == View.VISIBLE)
+                {
+                    contractSeparator.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    contractSeparator.setVisibility(View.GONE);
+                }
+                issuer.setText(issuerName);
+                hideAppreciationViews();
             }
             else
             {
-                contractSeparator.setVisibility(View.GONE);
+                hideIssuerViews();
             }
-            issuer.setText(issuerName);
         }
         else
         {
-            issuer.setVisibility(View.GONE);
-            issuerPlaceholder.setVisibility(View.GONE);
-            contractSeparator.setVisibility(View.GONE);
+            hideIssuerViews();
         }
+    }
+
+    private void hideAppreciationViews() {
+        layoutAppreciation.setVisibility(View.GONE);
+    }
+
+    private void hideIssuerViews() {
+        issuer.setVisibility(View.GONE);
+        issuerPlaceholder.setVisibility(View.GONE);
+        contractSeparator.setVisibility(View.GONE);
     }
 
     private void stopTextAnimation() {

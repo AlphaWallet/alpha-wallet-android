@@ -468,6 +468,7 @@
     <string name="set_keystore_password">Set Keystore Password</string>
     <string name="keystore_loss_warning">NOTE: You must remember your password. We do not store your password elsewhere. KeyStore is always encrypted, otherwise whoever has it can gain the money.</string>
     <string name="save_keystore">Save Keystore</string>
+    <string name="do_not_share">Do not share your backup. AlphaWallet team members will not ask for it.</string>
     <string name="enter_seed_phrase">Enter seed phrase</string>
     <string name="seed_phrase_conversion_message">If your seed phrase is not in English, please convert it to English on your own using tools like this https://iancoleman.io/bip39/</string>
     <string name="bad_seed_phrase">Invalid recovery phrase. Please check and try again.</string>

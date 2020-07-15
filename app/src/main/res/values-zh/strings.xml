@@ -454,6 +454,7 @@
     <string name="set_keystore_password">设置密钥库密码</string>
     <string name="keystore_loss_warning">注意：您必须记住密码。我们不会将您的密码存储在其他地方。密钥库会始终加密，否则无论是谁，一旦拥有该密钥库均可得到其中的资金。</string>
     <string name="save_keystore">保存密钥库</string>
+    <string name="do_not_share">不要把备份转发给他人。AlphaWallet团队成员不会向您要您的备份。</string>
     <string name="enter_seed_phrase">输入助记词</string>
     <string name="seed_phrase_conversion_message">如果您的助记词不是英语，请自行使用工具（如：https://iancoleman.io/bip39/）将其转换为英语</string>
     <string name="bad_seed_phrase">恢复助记词无效。请检查并重试。</string>

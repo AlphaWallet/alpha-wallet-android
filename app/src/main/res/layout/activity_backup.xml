@@ -7,6 +7,10 @@
 
     <include layout="@layout/layout_white_toolbar" />
 
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
         <TextView
             android:id="@+id/text_title"
             android:layout_width="match_parent"
@@ -52,8 +56,9 @@
         <TextView android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:background="@color/golden_yellow"
-                  android:layout_margin="50dp"
+                  android:layout_margin="30dp"
                   android:padding="@dimen/dp10"
+                  android:layout_below="@+id/text_detail"
                   android:text="@string/do_not_share"
                   />
 
@@ -63,6 +68,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true" />
 
+    </RelativeLayout>
     <LinearLayout
         android:id="@+id/layout_success_overlay"
         android:layout_width="match_parent"

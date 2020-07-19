@@ -2,6 +2,7 @@ package com.alphawallet.app;
 
 import android.support.annotation.NonNull;
 
+import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.BaseViewCallback;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
@@ -34,6 +35,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.internal.schedulers.ExecutorScheduler;
 import io.reactivex.plugins.RxJavaPlugins;
+import io.realm.Realm;
+
 import com.alphawallet.token.entity.SalesOrderMalformed;
 
 import static org.junit.Assert.assertEquals;
@@ -83,17 +86,6 @@ public class MarketOrderTest
         transactionRepository = new TransactionRepositoryType() {
 
             @Override
-            public Observable<Transaction[]> fetchCachedTransactions(Wallet wallet, int maxTransactions, List<Integer> networkFilters) {
-                return null;
-            }
-
-            @Override
-            public Observable<Transaction[]> fetchNetworkTransaction(NetworkInfo network, String tokenAddress, long lastBlock, String userAddress)
-            {
-                return null;
-            }
-
-            @Override
             public Single<String> createTransaction(Wallet from, String toAddress, BigInteger subunitAmount, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId) {
                 return null;
             }
@@ -138,24 +130,6 @@ public class MarketOrderTest
             }
 
             @Override
-            public Single<Transaction[]> storeTransactions(Wallet wallet, Transaction[] txList)
-            {
-                return null;
-            }
-
-            @Override
-            public Single<Transaction[]> fetchTransactionsFromStorage(Wallet wallet, Token token, int count)
-            {
-                return null;
-            }
-
-            @Override
-            public Single<ContractType> queryInterfaceSpec(String address, TokenInfo tokenInfo)
-            {
-                return null;
-            }
-
-            @Override
             public Transaction fetchCachedTransaction(String walletAddr, String hash)
             {
                 return null;
@@ -170,6 +144,27 @@ public class MarketOrderTest
             @Override public void removeOldTransaction(Wallet wallet, String oldTxHash)
             {
 
+            }
+
+            @Override
+            public Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet,
+                                                                      List<Integer> networkFilters, long fetchTime, int fetchLimit)
+            {
+                return null;
+            }
+
+            @Override
+            public Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet, int chainId,
+                                                                      String tokenAddress,
+                                                                      int historyCount)
+            {
+                return null;
+            }
+
+            @Override
+            public Realm getRealmInstance(Wallet wallet)
+            {
+                return null;
             }
         };
 

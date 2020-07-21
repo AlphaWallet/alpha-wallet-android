@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.tokens.Token;
@@ -43,8 +42,6 @@ public class TransferTicketActivity extends BaseActivity implements OnTokenClick
     protected TransferTicketViewModel viewModel;
     private SystemView systemView;
     private ProgressView progressView;
-
-    private FinishReceiver finishReceiver;
 
     public TextView ids;
     public TextView selected;
@@ -81,8 +78,6 @@ public class TransferTicketActivity extends BaseActivity implements OnTokenClick
         nextButton.setOnClickListener(v -> {
             onNext();
         });
-
-        finishReceiver = new FinishReceiver(this);
     }
 
     private void setupSalesOrder()
@@ -104,13 +99,6 @@ public class TransferTicketActivity extends BaseActivity implements OnTokenClick
     protected void onResume() {
         super.onResume();
         viewModel.prepare(token);
-    }
-
-    @Override
-    protected void onDestroy()
-    {
-        super.onDestroy();
-        unregisterReceiver(finishReceiver);
     }
 
     private void onNext() {

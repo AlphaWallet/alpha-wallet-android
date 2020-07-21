@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.ui.AssetDisplayActivity;
 import com.alphawallet.app.entity.tokens.Token;
 
@@ -14,11 +13,10 @@ import com.alphawallet.app.entity.tokens.Token;
 
 public class AssetDisplayRouter {
 
-    public void open(Context context, Token ticket, Wallet wallet) {
+    public void open(Context context, Token ticket) {
         Intent intent = new Intent(context, AssetDisplayActivity.class);
         intent.putExtra(C.Key.TICKET, ticket);
-        intent.putExtra(C.Key.WALLET, wallet);
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         context.startActivity(intent);
     }
 }

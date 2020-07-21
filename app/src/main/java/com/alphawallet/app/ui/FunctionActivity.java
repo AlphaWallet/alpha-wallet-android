@@ -2,33 +2,30 @@ package com.alphawallet.app.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
-import com.alphawallet.app.util.DappBrowserUtils;
+import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.KeyboardUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModelFactory;
-import com.alphawallet.app.web3.OnSetValuesListener;
 import com.alphawallet.app.web3.OnSignPersonalMessageListener;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.Address;
@@ -37,10 +34,13 @@ import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
+import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
-import com.alphawallet.token.entity.Attribute;
+import com.alphawallet.token.entity.AttributeType;
+import com.alphawallet.token.entity.ContractAddress;
+import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TokenScriptResult;
@@ -51,7 +51,9 @@ import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
 import java.util.ArrayList;
@@ -68,16 +70,13 @@ import io.reactivex.schedulers.Schedulers;
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
-import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.TOKENSCRIPT_CONVERSION_ERROR;
 
 /**
  * Created by James on 4/04/2019.
  * Stormbird in Singapore
  */
 public class FunctionActivity extends BaseActivity implements FunctionCallback,
-                                                              PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback,
-                                                              StandardFunctionInterface, TokenScriptRenderCallback, WebCompletionCallback,
-                                                              OnSetValuesListener
+                                                              PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback, StandardFunctionInterface, TokenScriptRenderCallback, WebCompletionCallback
 {
     @Inject
     protected TokenFunctionViewModelFactory viewModelFactory;
@@ -89,16 +88,17 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private String actionMethod;
     private SystemView systemView;
     private Web3TokenView tokenView;
+    private ProgressBar waitSpinner;
     private SignMessageDialog dialog;
-    private final Map<String, String> args = new HashMap<>();
+    private String functionEffect;
+    private Map<String, String> args = new HashMap<>();
     private StringBuilder attrs;
     private AWalletAlertDialog alertDialog;
     private Message<String> messageToSign;
     private FunctionButtonBar functionBar;
     private final Handler handler = new Handler();
-    private int parsePass;
-    private int resolveInputCheckCount;
-    private TSAction action;
+    private boolean reloaded;
+    private boolean isClosing;
 
     private void initViews() {
         token = getIntent().getParcelableExtra(TICKET);
@@ -108,13 +108,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenIds = token.stringHexToBigIntegerList(tokenIdStr);
         tokenId = tokenIds.get(0);
 
-        if (token == null)
-        {
-            showInitError();
-            return;
-        }
-
         tokenView = findViewById(R.id.web3_tokenview);
+        waitSpinner = findViewById(R.id.progress_element);
 
         tokenView.setChainId(token.tokenInfo.chainId);
         tokenView.setWalletAddress(new Address(token.getWallet()));
@@ -122,23 +117,28 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenView.setRpcUrl(token.tokenInfo.chainId);
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSignPersonalMessageListener(this);
-        tokenView.setOnSetValuesListener(this);
-        tokenView.setKeyboardListenerCallback(this);
+        tokenView.setVisibility(View.GONE);
+        waitSpinner.setVisibility(View.VISIBLE);
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
         viewModel.getCurrentWallet();
+        tokenView.setKeyboardListenerCallback(this);
+        reloaded = false;
+
+        getAttrs();
     }
 
     private void displayFunction(String tokenAttrs)
     {
         try
         {
+            waitSpinner.setVisibility(View.GONE);
+            tokenView.setVisibility(View.VISIBLE);
             Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
             TSAction action = functions.get(actionMethod);
             String magicValues = viewModel.getAssetDefinitionService().getMagicValuesForInjection(token.tokenInfo.chainId);
-
-            String injectedView = tokenView.injectWeb3TokenInit(action.view.tokenView, tokenAttrs, tokenId);
+            String injectedView = tokenView.injectWeb3TokenInit(this, action.view, tokenAttrs);
             injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
-            injectedView = tokenView.injectStyleAndWrapper(injectedView, action.style + "\n" + action.view.style);
+            if (action.style != null) injectedView = tokenView.injectStyleData(injectedView, action.style);
 
             String base64 = Base64.encodeToString(injectedView.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
             tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
@@ -162,16 +162,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             e.printStackTrace();
         }
 
-        // Fetch attributes local to this action and add them to the injected token properties
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
-        action = functions.get(actionMethod);
-        List<Attribute> localAttrs = (action != null && action.attributes != null) ? new ArrayList<>(action.attributes.values()) : null;
-
-        viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds, localAttrs)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onAttr, this::onError, () -> displayFunction(attrs.toString()))
-                    .isDisposed();
+        viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onAttr, this::onError, () -> displayFunction(attrs.toString()))
+                .isDisposed();
     }
 
     private void addMultipleTokenIds(StringBuilder sb)
@@ -217,14 +212,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void onAttr(TokenScriptResult.Attribute attribute)
     {
-        //is the attr incomplete?
-        if (BuildConfig.DEBUG) System.out.println("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
         TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
     }
 
     private void fillEmpty()
     {
-        findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
         tokenView.loadData("<html><body>No Data</body></html>", "text/html", "utf-8");
     }
 
@@ -233,47 +225,34 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_script_view);
-        setupViews();
-    }
 
-    private void setupViews()
-    {
-        initViewModel();
-        initViews();
-        toolbar();
-        setTitle(actionMethod);
-        setupFunctions();
-    }
-
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-        if (viewModel == null)
-        {
-            initViews();
-        }
-
-        parsePass = 1;
-        viewModel.getAssetDefinitionService().clearResultMap();
-        args.clear();
-        getAttrs();
-    }
-
-    private void initViewModel()
-    {
         viewModel = ViewModelProviders.of(this, viewModelFactory)
                 .get(TokenFunctionViewModel.class);
         systemView = findViewById(R.id.system_view);
+        ProgressView progressView = findViewById(R.id.progress_view);
         systemView.hide();
-        viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
-        viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
+        progressView.hide();
+        isClosing = false;
+
+        //expose the webview and remove the token 'card' background
+        findViewById(R.id.layout_webwrapper).setBackgroundResource(R.drawable.background_card);
+        findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
+
+        initViews();
+        toolbar();
+        setTitle(getString(R.string.token_function));
+        setupFunctions();
     }
 
     private void setupFunctions()
     {
         functionBar = findViewById(R.id.layoutButtons);
-        functionBar.setupFunctionList(this, actionMethod);
+        List<String> funcList = new ArrayList<>();
+
+        funcList.add(actionMethod);
+
+        functionBar.setupFunctionList(this, funcList);
+        functionBar.revealButtons();
     }
 
     @Override
@@ -286,96 +265,27 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         return super.onOptionsItemSelected(item);
     }
 
-    private void completeTokenScriptFunction(String function)
+    private void completeTokenscriptFunction(String function)
     {
         Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
-        action = functions.get(function);
+        TSAction action = functions.get(function);
 
-        if (action != null && action.function != null) //if no function then it's handled by the token view
+        if (action.function != null)
         {
-            resolveTokenIds();
-            resolveUserInput();
-        }
-    }
+            //check params for function.
+            //if there's input params, resolve them
+            boolean resolved = checkNativeTransaction(action, true);
+            resolved = checkFunctionArgs(action, resolved);
+            resolveTokenIds(action);
 
-    private void resolveUserInput()
-    {
-        resolveInputCheckCount = 0;
-        CalcJsValueCallback cb = new CalcJsValueCallback()
-        {
-            @Override
-            public void calculationCompleted(String value, String result, TokenscriptElement e, Attribute attr)
+            if (resolved)
             {
-                if (BuildConfig.DEBUG) System.out.println("ATTR/FA: Resolve " + value + " : " + result);
-                //need to find attr
-                e.value = viewModel.getAssetDefinitionService().convertInputValue(attr, result);
-
-                if (e.value.startsWith(TOKENSCRIPT_CONVERSION_ERROR)) //handle parse error
-                {
-                    String message = e.value.substring(TOKENSCRIPT_CONVERSION_ERROR.length());
-                    if (!TextUtils.isEmpty(attr.name)) tokenScriptError(getString(R.string.complete_tokenscript_value, attr.name), attr.name);
-                    else tokenScriptError(message, null);
-                }
-                else
-                {
-                    resolveInputCheckCount--;
-                    completeAction();
-                }
-            }
-
-            @Override
-            public void unresolvedSymbolError(String value)
-            {
-                if (BuildConfig.DEBUG) System.out.println("ATTR/FA: Resolve: ERROR: " + value);
-                tokenScriptError(value, null);
-            }
-        };
-
-        //fetch any user-input params needed for native transaction
-        if (action.function.tx != null)
-        {
-            for (TokenscriptElement e : action.function.tx.args.values())
-            {
-                checkTokenScriptElement(cb, action, e);
-            }
-        }
-
-        //fetch user-input params for transaction
-        for (MethodArg arg : action.function.parameters)
-        {
-            checkTokenScriptElement(cb, action, arg.element);
-        }
-
-        //check if action can be completed
-        completeAction();
-    }
-
-    private void checkTokenScriptElement(CalcJsValueCallback cb, TSAction action, TokenscriptElement e)
-    {
-        if (e.ref != null && e.ref.length() > 0 && action.attributes != null)
-        {
-            Attribute attr = action.attributes.get(e.ref);
-            if (attr != null && attr.userInput)
-            {
-                resolveInputCheckCount++;
-                evaluateJavaScript(cb, e.ref, e, attr);
+                handleFunction(action);
             }
         }
     }
 
-    private void completeAction()
-    {
-        if (resolveInputCheckCount == 0)
-        {
-            if (!viewModel.handleFunction(action, tokenId, token, this))
-            {
-                showTransactionError();
-            }
-            viewModel.getAssetDefinitionService().clearResultMap();
-        }
-    }
-
-    private void resolveTokenIds()
+    private void resolveTokenIds(TSAction action)
     {
         for (MethodArg arg : action.function.parameters)
         {
@@ -387,12 +297,237 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
     }
 
+    private boolean checkNativeTransaction(TSAction action, boolean resolved)
+    {
+        FunctionDefinition function = action.function;
+        if (function.tx == null) return true;
+        for (TokenscriptElement e : function.tx.args.values())
+        {
+            resolved = checkTokenScriptElement(action, e, resolved);
+        }
+
+        return resolved;
+    }
+
+    private boolean checkFunctionArgs(TSAction action, boolean resolved)
+    {
+        for (MethodArg arg : action.function.parameters)
+        {
+            resolved = checkTokenScriptElement(action, arg.element, resolved);
+        }
+
+        return resolved;
+    }
+
     @Override
     public void onDestroy()
     {
         super.onDestroy();
         viewModel.stopGasSettingsFetch();
-        viewModel.getAssetDefinitionService().clearResultMap();
+    }
+
+    private boolean checkTokenScriptElement(TSAction action, TokenscriptElement e, boolean resolved)
+    {
+        if (e.ref != null && e.ref.length() > 0 && action.attributeTypes != null)
+        {
+            AttributeType attr = action.attributeTypes.get(e.ref);
+            if (attr == null) return true;
+            if (attr.userInput)
+            {
+                return getUserInput(attr, e, resolved);
+            }
+        }
+
+        return resolved;
+    }
+
+    private boolean getUserInput(AttributeType attr, TokenscriptElement e, boolean resolved)
+    {
+        String valueFromInput = args.get(e.ref);
+        if (valueFromInput == null)
+        {
+            //fetch mapping
+            args.put(e.ref, "__searching"); // indicate search TokenScript rendered page for user input
+            getInput(e.ref);
+            resolved = false;
+        }
+        else if (valueFromInput.equals("__searching")) //second pass through, still searching - error.
+        {
+            //display error, basic script error reporting
+            String attrDetails = e.ref + " (" + attr.name + ")";
+            String details = getString(R.string.tokenscript_element_not_present, attrDetails);
+            tokenscriptError(details);
+            resolved = false;
+        }
+        else
+        {
+            try
+            {
+                switch (attr.as)
+                {
+                    //UTF8, Unsigned, Signed, Mapping, Boolean, UnsignedInput, TokenId
+                    case Unsigned:
+                    case Signed:
+                    case UnsignedInput:
+                        BigDecimal unsignedValue = new BigDecimal(valueFromInput);
+                        args.put(e.ref, unsignedValue.toString());
+                        e.value = unsignedValue.toString();
+                        break;
+                    case UTF8:
+                        e.value = valueFromInput;
+                        break;
+                    case Bytes:
+                        //apply bitmask to user entry and shift it because bytes is the other way round
+                        BigInteger userEntry;
+                        if(valueFromInput.matches("-?[0-9a-fA-F]+")) {
+                            userEntry = new BigInteger(valueFromInput, 16);
+                        } else {
+                            userEntry = new BigInteger(valueFromInput);
+                        }
+                        BigInteger val = userEntry.and(attr.bitmask).shiftRight(attr.bitshift);
+                        e.value = val.toString(16);
+                        args.put(e.ref, e.value);
+                        break;
+                    case e18:
+                        e.value = BalanceUtils.EthToWei(valueFromInput);
+                        args.put(e.ref, e.value);
+                        break;
+                    case e8:
+                        e.value = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("100000000"));
+                        args.put(e.ref, e.value);
+                        break;
+                    case e4:
+                        e.value = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("1000"));
+                        args.put(e.ref, e.value);
+                        break;
+                    case e2:
+                        e.value = BalanceUtils.UnitToEMultiplier(valueFromInput, new BigDecimal("100"));
+                        args.put(e.ref, e.value);
+                        break;
+                    case Mapping:
+                        //makes no sense as input
+                        break;
+                    case Boolean:
+                        //attempt to decode
+                        if (valueFromInput.equalsIgnoreCase("true") || valueFromInput.equals("1"))
+                        {
+                            e.value = "TRUE";
+                        }
+                        else
+                        {
+                            e.value = "FALSE";
+                        }
+                        args.put(e.ref, e.value);
+                        break;
+                    case TokenId:
+                        break;
+                }
+            }
+            catch (Exception excp)
+            {
+                excp.printStackTrace();
+                resolved = false;
+            }
+        }
+
+        return resolved;
+    }
+
+    private void handleFunction(TSAction action)
+    {
+        if (isClosing) return;
+        if (action.function.tx != null && (action.function.method == null || action.function.method.length() == 0)
+                && (action.function.parameters == null || action.function.parameters.size() == 0))
+        {
+            //no params, this is a native style transaction
+            NativeSend(action);
+        }
+        else
+        {
+            //TODO: try to match the transaction with known token functions and check if this function will pass (insufficient funds or gas etc).
+            String functionData = viewModel.getTransactionBytes(token, tokenId, action.function);
+            //confirm the transaction
+            ContractAddress cAddr = new ContractAddress(action.function, token.tokenInfo.chainId, token.tokenInfo.address); //viewModel.getAssetDefinitionService().getContractAddress(action.function, token);
+
+            if (functionEffect == null)
+            {
+                functionEffect = actionMethod;
+            }
+            else
+            {
+                functionEffect = functionEffect + " " + token.getSymbol() + " to " + actionMethod;
+                //functionEffect = functionEffect + " to " + actionMethod;
+            }
+
+            //function call may include some value
+            String value = "0";
+            if (action.function.tx != null && action.function.tx.args.containsKey("value"))
+            {
+                //this is very specific but 'value' is a specifically handled param
+                value = action.function.tx.args.get("value").value;
+                BigDecimal valCorrected = getCorrectedBalance(value, 18);
+                Token currency = viewModel.getCurrency(token.tokenInfo.chainId);
+                functionEffect = valCorrected.toString() + " " + currency.getSymbol() + " to " + actionMethod;
+            }
+
+            //finished resolving attributes, blank definition cache so definition is re-loaded when next needed
+            viewModel.getAssetDefinitionService().clearCache();
+
+            viewModel.confirmTransaction(this, cAddr.chainId, functionData, null, cAddr.address, actionMethod, functionEffect, value);
+        }
+    }
+
+    private void NativeSend(TSAction action)
+    {
+        boolean isValid = true;
+        KeyboardUtils.hideKeyboard(getCurrentFocus());
+        FunctionDefinition function = action.function;
+
+        //check we have a 'to' and a 'value'
+        if (!(function.tx.args.containsKey("value")))
+        {
+            isValid = false;
+            //TODO: Display error
+        }
+
+        //calculate native amount
+        BigDecimal value = new BigDecimal(function.tx.args.get("value").value);
+        //this is a native send, so check the native currency
+        Token currency = viewModel.getCurrency(token.tokenInfo.chainId);
+
+        if (currency.balance.subtract(value).compareTo(BigDecimal.ZERO) < 0)
+        {
+            //flash up dialog box insufficent funds
+            errorInsufficientFunds(currency);
+            isValid = false;
+        }
+
+        //is 'to' overridden?
+        String to = null;
+        if (function.tx.args.get("to") != null)
+        {
+            to = function.tx.args.get("to").value;
+        }
+        else if (function.contract.addresses.get(token.tokenInfo.chainId) != null)
+        {
+            to = function.contract.addresses.get(token.tokenInfo.chainId).get(0);
+        }
+
+        if (to == null || !Utils.isAddressValid(to))
+        {
+            errorInvalidAddress(to);
+            isValid = false;
+        }
+
+        //eg Send 2(*1) ETH(*2) to Alex's Amazing Coffee House(*3) (0xdeadacec0ffee(*4))
+        String extraInfo = String.format(getString(R.string.tokenscript_send_native), functionEffect, token.getSymbol(), actionMethod, to);
+
+        //Clear the cache to refresh any resolved values
+        viewModel.getAssetDefinitionService().clearCache();
+
+        if (isValid) {
+            viewModel.confirmNativeTransaction(this, to, value, token, extraInfo);
+        }
     }
 
     private void errorInvalidAddress(String address)
@@ -419,41 +554,30 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         alertDialog.show();
     }
 
-    private void tokenScriptError(String elementName, String title)
+    private void tokenscriptError(String elementName)
     {
         hideDialog();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(AWalletAlertDialog.ERROR);
-        if (title != null) alertDialog.setTitle(title);
-        else alertDialog.setTitle(R.string.tokenscript_error);
+        alertDialog.setTitle(R.string.tokenscript_error);
         alertDialog.setMessage(getString(R.string.tokenscript_error_detail, elementName));
         alertDialog.setButtonText(R.string.button_ok);
         alertDialog.setButtonListener(v ->alertDialog.dismiss());
         alertDialog.show();
     }
 
-    private void showInitError()
+    private void getInput(String value)
     {
-        hideDialog();
-        alertDialog = new AWalletAlertDialog(this);
-        alertDialog.setIcon(AWalletAlertDialog.ERROR);
-        alertDialog.setTitle(R.string.error_fail_load_tokens);
-        alertDialog.setMessage(getString(R.string.ticket_not_valid));
-        alertDialog.setButtonText(R.string.button_ok);
-        alertDialog.setButtonListener(v ->alertDialog.dismiss());
-        alertDialog.show();
-    }
-
-    private void showTransactionError()
-    {
-        hideDialog();
-        alertDialog = new AWalletAlertDialog(this);
-        alertDialog.setIcon(AWalletAlertDialog.ERROR);
-        alertDialog.setTitle(R.string.tokenscript_error);
-        alertDialog.setMessage(getString(R.string.invalid_parameters));
-        alertDialog.setButtonText(R.string.button_ok);
-        alertDialog.setButtonListener(v ->alertDialog.dismiss());
-        alertDialog.show();
+        tokenView.evaluateJavascript(
+                "(function() { var x = document.getElementById(\"" + value + "\");\n" +
+                        "            return x.value; })();",
+                html -> {
+                    StringBuilder sb = new StringBuilder();
+                    for (char ch : html.toCharArray()) if (ch!='\"') sb.append(ch);
+                    if (!html.equals("null")) args.put(value, sb.toString());
+                    completeTokenscriptFunction(actionMethod);
+                }
+        );
     }
 
     @Override
@@ -466,6 +590,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void functionSuccess()
     {
+        isClosing = true;
         LinearLayout successOverlay = findViewById(R.id.layout_success_overlay);
         if (successOverlay != null) successOverlay.setVisibility(View.VISIBLE);
         handler.postDelayed(closer, 1000);
@@ -501,7 +626,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void functionFailed()
     {
-        if (BuildConfig.DEBUG) System.out.println("ATTR/FA: FAIL: " + actionMethod);
+        System.out.println("FAIL");
     }
 
     @Override
@@ -513,22 +638,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void onPageRendered(WebView view)
     {
-        findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
-        if (parsePass == 1)
-        {
-            tokenView.reload();
-        }
-
-        parsePass++;
-    }
-
-    @Override
-    public boolean overridePageLoad(WebView view, String url)
-    {
-        if (handleMapClick(url))
-            return true;                     //handle specific map click
-        else
-            return handleURLClick(url);      //otherwise handle an attempt to visit a URL from TokenScript. If URL isn't in the approved DAPP list then fail
+        if (!reloaded) tokenView.reload();
+        reloaded = true;
     }
 
     @Override
@@ -536,23 +647,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         super.onPause();
         viewModel.resetSignDialog();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState)
-    {
-        super.onSaveInstanceState(savedInstanceState);
-        tokenView.saveState(savedInstanceState);
-    }
-
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState)
-    {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null)
-        {
-            tokenView.restoreState(savedInstanceState);
-        }
     }
 
     @Override
@@ -578,11 +672,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         String prefix = DappBrowserFragment.PERSONAL_MESSAGE_PREFIX + message.length();
         byte[] msgHash = (prefix + message).getBytes();
         String msgBytes = Numeric.toHexString(msgHash);
-        if (BuildConfig.DEBUG) System.out.println(msgBytes);
+        System.out.println(msgBytes);
 
         byte[] equivHash = Hash.sha3(msgHash);
         String hashBytes = Numeric.toHexString(equivHash);
-        if (BuildConfig.DEBUG) System.out.println(hashBytes);
+        System.out.println(hashBytes);
 
         byte[] signatureBytes = Numeric.hexStringToByteArray(sig);
         Sign.SignatureData sd = sigFromByteArray(signatureBytes);
@@ -592,7 +686,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         {
             BigInteger recoveredKey = Sign.signedMessageToKey(msgHash, sd);
             addressRecovered = "0x" + Keys.getAddress(recoveredKey);
-            if (BuildConfig.DEBUG) System.out.println("Recovered: " + addressRecovered);
+            System.out.println("Recovered: " + addressRecovered);
         }
         catch (SignatureException e)
         {
@@ -602,6 +696,23 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         {
             e.printStackTrace();
         }
+    }
+
+    public BigDecimal getCorrectedBalance(String value, int scale)
+    {
+        BigDecimal val = BigDecimal.ZERO;
+        try
+        {
+            val = new BigDecimal(value);
+            BigDecimal decimalDivisor = new BigDecimal(Math.pow(10, scale));
+            val = val.divide(decimalDivisor);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return val.setScale(scale, RoundingMode.HALF_DOWN).stripTrailingZeros();
     }
 
     private void onProgress(boolean shouldShowProgress) {
@@ -627,7 +738,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            gotAuthorisation(resultCode == RESULT_OK);
+            GotAuthorisation(resultCode == RESULT_OK);
         }
     }
 
@@ -637,78 +748,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         else handler.post(progressOff);
     }
 
-    private void urlNotWhiteListed(String url)
-    {
-        hideDialog();
-        alertDialog = new AWalletAlertDialog(this);
-        alertDialog.setIcon(AWalletAlertDialog.ERROR);
-        alertDialog.setTitle(R.string.error_not_whitelisted);
-        alertDialog.setMessage(getString(R.string.explain_not_whitelisted, url));
-        alertDialog.setButtonText(R.string.button_ok);
-        alertDialog.setButtonListener(v ->alertDialog.dismiss());
-        alertDialog.show();
-    }
-
-    private void openInDappBrowser(String url)
-    {
-        Intent intent = new Intent(FunctionActivity.this, HomeActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        intent.putExtra("url", url);
-        startActivity(intent);
-    }
-
-    private boolean handleURLClick(String url)
-    {
-        if (!TextUtils.isEmpty(url))
-        {
-            //try one of the whitelisted URL's and open in dapp browser
-            List<DApp> myDapps = DappBrowserUtils.getDappsList(getApplicationContext());
-            for (DApp thisDapp : myDapps)
-            {
-                //must start with the whitelisted URL, to avoid simply adding the URL as a param
-                if (url.startsWith(thisDapp.getUrl()))
-                {
-                    openInDappBrowser(url);
-                    return true;
-                }
-            }
-
-            //not whitelisted
-            urlNotWhiteListed(url);
-        }
-
-        return true;
-    }
-
-    private boolean handleMapClick(String url)
-    {
-        if (!TextUtils.isEmpty(url))
-        {
-            int index = url.indexOf(C.DAPP_PREFIX_MAPS);
-            if (index > 0)
-            {
-                index += C.DAPP_PREFIX_MAPS.length();
-                if (index < url.length())
-                {
-                    String geoCoords = url.substring(index);
-                    Uri gmmIntentUri = Uri.parse("geo:My+Location?q=" + geoCoords);
-
-                    //pass the location to the intent
-                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
-                                               gmmIntentUri);
-                    startActivity(intent);
-                    //finish this activity
-                    functionSuccess();
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     @Override
-    public void gotAuthorisation(boolean gotAuth)
+    public void GotAuthorisation(boolean gotAuth)
     {
         if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
         else viewModel.failedAuthentication(SIGN_DATA);
@@ -745,14 +786,9 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void cancelAuthentication()
-    {
-
-    }
-
-    @Override
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
+        isClosing = false;
         args.clear();
         //run the onConfirm JS and await callback
         tokenView.TScallToJS(function, "onConfirm" + "('sig')", this);
@@ -761,88 +797,12 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void callToJSComplete(String function, String result)
     {
-        completeTokenScriptFunction(function);
+        completeTokenscriptFunction(function);
     }
 
     @Override
     public void enterKeyPressed()
     {
         KeyboardUtils.hideKeyboard(getCurrentFocus());
-    }
-
-    @Override
-    public void setValues(Map<String, String> updates)
-    {
-        boolean newValues = false;
-        //called when values update
-        for (String key : updates.keySet())
-        {
-            String value = updates.get(key);
-            String old = args.put(key, updates.get(key));
-            if (!value.equals(old)) newValues = true;
-        }
-
-        if (newValues)
-        {
-            viewModel.getAssetDefinitionService().addLocalRefs(args);
-            //rebuild the view
-            getAttrs();
-        }
-    }
-
-    /**
-     * JavaScript methods to obtain values from within the rendered view
-     */
-    private interface CalcJsValueCallback
-    {
-        void calculationCompleted(String value, String result, TokenscriptElement e, Attribute attr);
-        void unresolvedSymbolError(String value);
-    }
-
-    private void evaluateJavaScript(CalcJsValueCallback callback, String value, TokenscriptElement e, Attribute attr)
-    {
-        tokenView.evaluateJavascript(
-                "(function() { var x = document.getElementById(\"" + value + "\");\n" +
-                        "            return x.value; })();",
-                html -> {
-                    StringBuilder sb = new StringBuilder();
-                    for (char ch : html.toCharArray()) if (ch!='\"') sb.append(ch);
-                    if (!html.equals("null"))
-                    {
-                        callback.calculationCompleted(value, sb.toString(), e, attr);
-                    }
-                    else
-                    {
-                        getValueFromInnerHTML(callback, value, e, attr); //the input wasn't in the .value field, try innerHTML before failing
-                    }
-                });
-    }
-
-    private void getValueFromInnerHTML(CalcJsValueCallback callback, String value, TokenscriptElement e, Attribute attr)
-    {
-        tokenView.evaluateJavascript(
-                "(function() { var x = document.getElementById(\"" + value + "\");\n" +
-                        "            return x.innerHTML; })();",
-                html -> {
-                    StringBuilder sb = new StringBuilder();
-                    for (char ch : html.toCharArray()) if (ch!='\"') sb.append(ch);
-                    if (!html.equals("null"))
-                    {
-                        callback.calculationCompleted(value, sb.toString(), e, attr);
-                    }
-                    else
-                    {
-                        callback.unresolvedSymbolError(value);
-                    }
-                });
-    }
-
-    private void repopulateInputField(String key, String value)
-    {
-        tokenView.evaluateJavascript(
-                "(function() { document.getElementById(\"" + key + "\").innerHTML = \"" + value + "\"; })();",
-                html -> {
-                    System.out.println("Worked?");
-                });
     }
 }

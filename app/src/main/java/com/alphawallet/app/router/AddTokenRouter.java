@@ -11,7 +11,7 @@ public class AddTokenRouter {
     public void open(Context context, String address) {
         Intent intent = new Intent(context, AddTokenActivity.class);
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         context.startActivity(intent);
     }
 }

@@ -9,6 +9,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -29,30 +31,27 @@ import android.widget.Toast;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DisplayState;
+import com.alphawallet.app.entity.ENSCallback;
 import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
-import com.alphawallet.app.ui.widget.adapter.AutoCompleteAddressAdapter;
+import com.alphawallet.app.ui.widget.adapter.AutoCompleteUrlAdapter;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.app.ui.widget.entity.ItemClickListener;
 import com.alphawallet.app.ui.zxing.FullScannerFragment;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.KeyboardUtils;
-import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.util.QRURLParser;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
-import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
@@ -62,9 +61,7 @@ import org.web3j.abi.datatypes.Address;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -77,7 +74,6 @@ import static com.alphawallet.app.C.EXTRA_STATE;
 import static com.alphawallet.app.C.EXTRA_TOKENID_LIST;
 import static com.alphawallet.app.C.Key.TICKET;
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.C.PRUNE_ACTIVITY;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
@@ -85,7 +81,7 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
  * Created by James on 21/02/2018.
  */
 
-public class TransferTicketDetailActivity extends BaseActivity implements ItemClickListener, OnTokenClickListener, StandardFunctionInterface
+public class TransferTicketDetailActivity extends BaseActivity implements Runnable, ItemClickListener, OnTokenClickListener
 {
     private static final int BARCODE_READER_REQUEST_CODE = 1;
     private static final int SEND_INTENT_REQUEST_CODE = 2;
@@ -96,9 +92,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
     private SystemView systemView;
     private ProgressView progressView;
     private AWalletAlertDialog dialog;
-    private FunctionButtonBar functionBar;
-
-    private FinishReceiver finishReceiver;
 
     private Token token;
     private NonFungibleTokenAdapter adapter;
@@ -115,6 +108,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
     private DisplayState transferStatus;
 
     private ENSHandler ensHandler;
+    private final Handler handler = new Handler();
 
     private AWalletConfirmationDialog confirmationDialog;
 
@@ -184,7 +178,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
         pickTicketQuantity = findViewById(R.id.layout_ticket_quantity);
         pickTransferMethod = findViewById(R.id.layout_choose_method);
         pickExpiryDate = findViewById(R.id.layout_date_picker);
-        functionBar = findViewById(R.id.layoutButtons);
 
         setupAddressEditField();
 
@@ -232,8 +225,10 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
         buttonLinkPick = findViewById(R.id.layout_link_pick);
         buttonTransferPick = findViewById(R.id.layout_transfer_now);
 
-        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_next)));
-        functionBar.revealButtons();
+        Button nextAction = findViewById(R.id.button_next);
+        nextAction.setOnClickListener((View v) -> {
+            viewModel.openTransferState(this, token, token.bigIntListToString(selection, false), getNextState());
+        });
 
         qrImageView = findViewById(R.id.img_scan_qr);
         qrImageView.setOnClickListener(view -> {
@@ -242,15 +237,29 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
         });
 
         setupScreen();
-
-        finishReceiver = new FinishReceiver(this);
     }
 
     private void setupAddressEditField()
     {
-        AutoCompleteAddressAdapter adapterUrl = new AutoCompleteAddressAdapter(getApplicationContext(), C.ENS_HISTORY);
+        AutoCompleteUrlAdapter adapterUrl = new AutoCompleteUrlAdapter(getApplicationContext(), C.ENS_HISTORY);
         adapterUrl.setListener(this);
-        ensHandler = new ENSHandler(this, adapterUrl, this::confirmTransfer);
+        ENSCallback ensCallback = new ENSCallback()
+        {
+            @Override
+            public void ENSComplete()
+            {
+                confirmTransfer();
+            }
+
+            @Override
+            public void ENSCheck(String name)
+            {
+                viewModel.checkENSAddress(token.tokenInfo.chainId, name);
+            }
+        };
+        ensHandler = new ENSHandler(this, handler, adapterUrl, this, ensCallback);
+        viewModel.ensResolve().observe(this, ensHandler::onENSSuccess);
+        viewModel.ensFail().observe(this, ensHandler::hideENS);
     }
 
     //TODO: This is repeated code also in SellDetailActivity. Probably should be abstracted out into generic view code routine
@@ -356,7 +365,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
         signCallback = new SignAuthenticationCallback()
         {
             @Override
-            public void gotAuthorisation(boolean gotAuth)
+            public void GotAuthorisation(boolean gotAuth)
             {
                 if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
                 else viewModel.failedAuthentication(SIGN_DATA);
@@ -377,12 +386,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
                     //display fail auth
                     onError(new ErrorEnvelope(getString(R.string.authentication_failed)));
                 }
-            }
-
-            @Override
-            public void cancelAuthentication()
-            {
-
             }
         };
 
@@ -474,15 +477,20 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
                     EthereumNetworkBase.getEtherscanURLbyNetwork(token.tokenInfo.chainId) + "tx/" + hash);
             clipboard.setPrimaryClip(clip);
             dialog.dismiss();
-            sendBroadcast(new Intent(PRUNE_ACTIVITY));
+            handler.post(this::goHome);
         });
         dialog.setOnDismissListener(v -> {
             dialog.dismiss();
-            sendBroadcast(new Intent(PRUNE_ACTIVITY));
-            new HomeRouter().open(this, true);
-            finish();
+            handler.post(this::goHome);
         });
         dialog.show();
+    }
+
+    private void goHome()
+    {
+        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 
     private void hideDialog()
@@ -569,7 +577,6 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
     protected void onDestroy()
     {
         super.onDestroy();
-        unregisterReceiver(finishReceiver);
         viewModel.stopGasSettingsFetch();
         if (confirmationDialog != null && confirmationDialog.isShowing())
         {
@@ -615,7 +622,7 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
                                 return;
                             }
 
-                            QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
+                            QRURLParser parser = QRURLParser.getInstance();
                             String extracted_address = parser.extractAddressFromQrString(barcode);
                             if (extracted_address == null)
                             {
@@ -637,11 +644,11 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
                 break;
 
             case SEND_INTENT_REQUEST_CODE:
-                sendBroadcast(new Intent(PRUNE_ACTIVITY));
+                goHome();
                 break;
 
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
-                signCallback.gotAuthorisation(resultCode == RESULT_OK);
+                signCallback.GotAuthorisation(resultCode == RESULT_OK);
                 break;
 
             default:
@@ -719,26 +726,12 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
         signCallback = new SignAuthenticationCallback()
         {
             @Override
-            public void gotAuthorisation(boolean gotAuth)
+            public void GotAuthorisation(boolean gotAuth)
             {
                 if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
                 else viewModel.failedAuthentication(SIGN_DATA);
 
                 if (gotAuth) transferTicketFinal();
-            }
-
-            @Override
-            public void cancelAuthentication()
-            {
-                AWalletAlertDialog dialog = new AWalletAlertDialog(getParent());
-                dialog.setIcon(AWalletAlertDialog.NONE);
-                dialog.setTitle(R.string.authentication_cancelled);
-                dialog.setButtonText(R.string.ok);
-                dialog.setButtonListener(v -> {
-                    dialog.dismiss();
-                });
-                dialog.setCancelable(true);
-                dialog.show();
             }
         };
 
@@ -809,15 +802,15 @@ public class TransferTicketDetailActivity extends BaseActivity implements ItemCl
     }
 
     @Override
-    public void onItemClick(String url)
+    public void run()
     {
-        ensHandler.handleHistoryItemClick(url);
+        ensHandler.checkENS();
     }
 
     @Override
-    public void handleClick(String action, int id)
+    public void onItemClick(String url)
     {
-        viewModel.openTransferState(this, token, token.bigIntListToString(selection, false), getNextState());
+        ensHandler.handleHistoryItemClick(url);
     }
 }
 

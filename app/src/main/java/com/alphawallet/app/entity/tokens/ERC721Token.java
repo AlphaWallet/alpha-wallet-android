@@ -3,13 +3,15 @@ package com.alphawallet.app.entity.tokens;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.View;
 
-import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 
 import org.web3j.abi.TypeReference;
@@ -24,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import com.alphawallet.app.R;
 
 /**
  * Created by James on 3/10/2018.
@@ -53,13 +57,6 @@ public class ERC721Token extends Token implements Parcelable
 
     @Override
     public void addAssetToTokenBalanceAssets(Asset asset) {
-        for (Asset a : tokenBalanceAssets) //don't add the same assets twice (should this be a map?)
-        {
-            if (a.getTokenId().equalsIgnoreCase(asset.getTokenId()))
-            {
-                return;
-            }
-        }
         tokenBalanceAssets.add(asset);
     }
 
@@ -116,9 +113,21 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public int getContractType()
+    public void setupContent(TokenHolder holder, AssetDefinitionService definition)
     {
-        return R.string.erc721;
+        //721 Balance
+        int balance = tokenBalanceAssets.size();
+
+        holder.balanceEth.setText(String.valueOf(balance));
+        holder.layoutValueDetails.setVisibility(View.GONE);
+
+        holder.contractType.setVisibility(View.VISIBLE);
+        holder.contractSeparator.setVisibility(View.VISIBLE);
+        holder.contractType.setText(R.string.erc721);
+
+        holder.balanceEth.setVisibility(View.VISIBLE);
+
+        addTokenName(holder, definition);
     }
 
     @Override
@@ -155,7 +164,7 @@ public class ERC721Token extends Token implements Parcelable
     @Override
     public void clickReact(BaseViewModel viewModel, Context context)
     {
-        viewModel.showTokenList(context, this);
+        viewModel.showAssetDisplay(context, this);
     }
 
     @Override
@@ -184,7 +193,7 @@ public class ERC721Token extends Token implements Parcelable
     }
 
     @Override
-    public String getTransactionValue(Transaction transaction, int precision)
+    public String getTransactionValue(Transaction transaction, Context ctx)
     {
         if (transaction.operations != null && transaction.operations.length > 0)
         {
@@ -195,6 +204,18 @@ public class ERC721Token extends Token implements Parcelable
         {
             return "-"; //Placeholder - should never see this
         }
+    }
+
+    @Override
+    protected String addSuffix(String result, Transaction transaction)
+    {
+        return result;
+    }
+
+    @Override
+    public boolean checkIntrinsicType()
+    {
+        return (contractType == ContractType.ERC721);
     }
 
     /**
@@ -302,22 +323,5 @@ public class ERC721Token extends Token implements Parcelable
         if (currentState == null) return true;
         if (!currentState.equalsIgnoreCase(getFullBalance())) return true;
         return false;
-    }
-
-    /**
-     * Returns false if the Asset balance appears to be entries with only TokenId - indicating an ERC721Ticket
-     * @return
-     */
-    @Override
-    public boolean checkBalanceType()
-    {
-        boolean onlyHasTokenId = true;
-        //if elements contain asset with only assetId then most likely this is a ticket.
-        for (Asset a : tokenBalanceAssets)
-        {
-            if (!a.hasIdOnly()) onlyHasTokenId = false;
-        }
-
-        return tokenBalanceAssets.size() == 0 || !onlyHasTokenId;
     }
 }

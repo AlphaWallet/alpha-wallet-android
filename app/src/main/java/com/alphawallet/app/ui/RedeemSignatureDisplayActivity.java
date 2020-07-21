@@ -12,7 +12,6 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,7 +21,6 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
-import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.SignaturePair;
 import com.alphawallet.app.entity.tokens.Token;
@@ -56,15 +54,11 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     protected RedeemSignatureDisplayModelFactory redeemSignatureDisplayModelFactory;
     private RedeemSignatureDisplayModel viewModel;
 
-    private FinishReceiver finishReceiver;
-
     private Wallet wallet;
     private Token token;
     private TicketRangeParcel ticketRange;
     private Web3TokenView tokenView;
-    private LinearLayout webWrapper;
     private boolean signRequest;
-    private AWalletAlertDialog dialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -82,7 +76,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         wallet = getIntent().getParcelableExtra(WALLET);
         ticketRange = getIntent().getParcelableExtra(TICKET_RANGE);
         tokenView = findViewById(R.id.web3_tokenview);
-        webWrapper = findViewById(R.id.layout_webwrapper);
         findViewById(R.id.advanced_options).setVisibility(View.GONE); //setOnClickListener(this);
 
         viewModel = ViewModelProviders.of(this, redeemSignatureDisplayModelFactory)
@@ -97,11 +90,12 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         tv.setText(getString(R.string.waiting_for_blockchain));
         tv.setVisibility(View.VISIBLE);
 
+        View baseView = findViewById(android.R.id.content);
+
         //given a webview populate with rendered token
-        tokenView.displayTicketHolder(token, ticketRange.range, viewModel.getAssetDefinitionService());
+        token.displayTicketHolder(ticketRange.range, baseView, viewModel.getAssetDefinitionService(), getBaseContext());
         tokenView.setOnReadyCallback(this);
-        tokenView.setLayout(token, true);
-        finishReceiver = new FinishReceiver(this);
+        tokenView.setLayout(token, false);
     }
 
     private void onSignRequest(Boolean aBoolean)
@@ -141,13 +135,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     {
         super.onPause();
         viewModel.resetSignDialog();
-    }
-
-    @Override
-    protected void onDestroy()
-    {
-        super.onDestroy();
-        unregisterReceiver(finishReceiver);
     }
 
     @Override
@@ -212,12 +199,12 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            gotAuthorisation(resultCode == RESULT_OK);
+            GotAuthorisation(resultCode == RESULT_OK);
         }
     }
 
     @Override
-    public void gotAuthorisation(boolean gotAuth)
+    public void GotAuthorisation(boolean gotAuth)
     {
         if (gotAuth)
         {
@@ -230,25 +217,9 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         }
     }
 
-    @Override
-    public void cancelAuthentication()
-    {
-        if (dialog != null && dialog.isShowing()) dialog.cancel();
-        dialog = new AWalletAlertDialog(this);
-        dialog.setIcon(AWalletAlertDialog.NONE);
-        dialog.setTitle(R.string.authentication_cancelled);
-        dialog.setButtonText(R.string.ok);
-        dialog.setButtonListener(v -> {
-            dialog.dismiss();
-        });
-        dialog.setCancelable(true);
-        dialog.show();
-    }
-
     private void dialogKeyNotAvailableError()
     {
-        if (dialog != null && dialog.isShowing()) dialog.cancel();
-        dialog = new AWalletAlertDialog(this);
+        AWalletAlertDialog dialog = new AWalletAlertDialog(this);
         dialog.setTitle(R.string.key_error);
         dialog.setIcon(AWalletAlertDialog.ERROR);
         dialog.setMessage(getString(R.string.fail_sign));
@@ -268,6 +239,6 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
     @Override
     public void onPageRendered(WebView view)
     {
-        webWrapper.setVisibility(View.VISIBLE);
+
     }
 }

@@ -287,7 +287,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         intent.putExtra(WALLET, wallet);
         intent.putExtra(C.EXTRA_STATE, function);
         intent.putExtra(C.EXTRA_TOKEN_ID, BigInteger.ZERO.toString(16));
-        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
     }
 

@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
@@ -35,26 +35,29 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
 
     private final Web3TokenView tokenView;
     private final Token token;
-    private final LinearLayout clickWrapper;
+    private final RelativeLayout frameLayout;
     private final LinearLayout webWrapper;
     private final boolean iconified;
     private OnTokenClickListener tokenClickListener;
     private final AppCompatRadioButton itemSelect;
     private final AssetDefinitionService assetDefinitionService; //need to cache this locally, unless we cache every string we need in the constructor
     private boolean activeClick;
-    private final Handler handler = new Handler();
+    private final Handler handler;
 
     public AssetInstanceScriptHolder(int resId, ViewGroup parent, Token t, AssetDefinitionService assetService, boolean iconified)
     {
         super(resId, parent);
+        frameLayout = findViewById(R.id.layout_select_ticket);
         tokenView = findViewById(R.id.web3_tokenview);
-        webWrapper = findViewById(R.id.layout_webwrapper);
         assetDefinitionService = assetService;
-        clickWrapper = findViewById(R.id.click_layer);
+        webWrapper = findViewById(R.id.click_layer);
         itemSelect = findViewById(R.id.radioBox);
         token = t;
         tokenView.setOnReadyCallback(this);
         this.iconified = iconified;
+        handler = new Handler();
+
+        tokenView.setLayout(token, iconified);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -64,7 +67,6 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         activeClick = false;
         try
         {
-            tokenView.setLayout(token, iconified);
             if (data.tokenIds.size() == 0) { fillEmpty(); return; }
             if (data.exposeRadio)
             {
@@ -76,14 +78,13 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
             }
 
             itemSelect.setChecked(data.isChecked);
-            tokenView.displayTicketHolder(token, data, assetDefinitionService, iconified);
-            tokenView.setOnReadyCallback(this);
+            token.displayTicketHolder(data, frameLayout, assetDefinitionService, getContext(), iconified);
 
             if (iconified)
             {
-                clickWrapper.setVisibility((View.VISIBLE));
-                clickWrapper.setOnClickListener(v -> handleClick(v, data));
-                clickWrapper.setOnLongClickListener(v -> handleLongClick(v, data));
+                webWrapper.setVisibility((View.VISIBLE));
+                webWrapper.setOnClickListener(v -> handleClick(v, data));
+                webWrapper.setOnLongClickListener(v -> handleLongClick(v, data));
             }
         }
         catch (Exception ex)
@@ -106,7 +107,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
     @Override
     public void onPageRendered(WebView view)
     {
-        webWrapper.setVisibility(View.VISIBLE);
+
     }
 
     public void handleClick(View v, TicketRange data)

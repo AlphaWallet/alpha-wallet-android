@@ -5,11 +5,9 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ConfirmationType;
-import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
@@ -31,13 +29,8 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
 
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
-
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Objects;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
 
 public class ConfirmationViewModel extends BaseViewModel {
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
@@ -45,8 +38,6 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final MutableLiveData<GasSettings> gasSettings = new MutableLiveData<>();
     private final MutableLiveData<TransactionData> newDappTransaction = new MutableLiveData<>();
     private final MutableLiveData<GasSettings> sendGasSettings = new MutableLiveData<>();
-    private final MutableLiveData<BigInteger> gasEstimate = new MutableLiveData<>();
-    private final MutableLiveData<ErrorEnvelope> gasEstimateError = new MutableLiveData<>();
 
     private final GenericWalletInteract genericWalletInteract;
     private final GasService gasService;
@@ -110,14 +101,6 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public LiveData<TransactionData> sendDappTransaction() {
         return newDappTransaction;
-    }
-
-    public LiveData<BigInteger> sendGasEstimate() {
-        return gasEstimate;
-    }
-
-    public LiveData<ErrorEnvelope> sendGasEstimateError() {
-        return gasEstimateError;
     }
 
     public void overrideGasSettings(GasSettings settings)
@@ -296,41 +279,8 @@ public class ConfirmationViewModel extends BaseViewModel {
         keyService.failedAuthentication(signData);
     }
 
-    public void calculateGasEstimate(byte[] transaction, int chainId, String toAddress, BigInteger amount)
+    public void stopGasPriceUpdate()
     {
-        disposable = gasService.calculateGasEstimate(transaction, chainId, toAddress, amount, defaultWallet.getValue())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::handleGasEstimate, this::handleError);
-    }
-
-    private void handleError(Throwable throwable)
-    {
-        gasEstimateError.postValue(new ErrorEnvelope(throwable.getMessage()));
-    }
-
-    private void handleGasEstimate(EthEstimateGas estimateGas)
-    {
-        if(estimateGas.getError() == null)
-        {
-            gasEstimate.postValue(estimateGas.getAmountUsed());
-        }
-        else
-        {
-            gasEstimateError.postValue(new ErrorEnvelope(estimateGas.getError().getMessage()));
-        }
-    }
-  
-    public void sendOverrideTransaction(String transactionHex, String to, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, BigInteger value, int chainId)
-    {
-        byte[] data = Numeric.hexStringToByteArray(transactionHex);
-        disposable = createTransactionInteract
-                .resend(defaultWallet.getValue(), nonce, to, value, gasPrice, gasLimit, data, chainId)
-                .subscribe(this::onCreateTransaction,
-                           this::onError);
-    }
-
-    public void removeOverridenTransaction(String oldTxHash)
-    {
-        createTransactionInteract.removeOverridenTransaction(defaultWallet.getValue(), oldTxHash);
+        gasService.stopGasListener();
     }
 }

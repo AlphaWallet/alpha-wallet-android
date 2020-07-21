@@ -7,69 +7,56 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.alphawallet.app.C;
-import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ConfirmationType;
 import com.alphawallet.app.entity.ErrorEnvelope;
-import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.repository.TokenRepository;
-import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.web3.entity.Web3Transaction;
+
+import dagger.android.AndroidInjection;
+import com.alphawallet.token.tools.Numeric;
+import com.alphawallet.app.C;
+import com.alphawallet.app.R;
+import com.alphawallet.app.repository.TokenRepository;
+import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.viewmodel.ConfirmationViewModel;
 import com.alphawallet.app.viewmodel.ConfirmationViewModelFactory;
 import com.alphawallet.app.viewmodel.GasSettingsViewModel;
-import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
-import com.alphawallet.token.tools.Numeric;
-
 import org.web3j.utils.Convert;
 
+import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
-
+import static com.alphawallet.token.tools.Convert.getEthString;
 import static com.alphawallet.app.C.ETH_SYMBOL;
-import static com.alphawallet.app.C.PRUNE_ACTIVITY;
-import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.entity.ConfirmationType.ETH;
 import static com.alphawallet.app.entity.ConfirmationType.WEB3TRANSACTION;
 import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
-import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
-import static com.alphawallet.token.tools.Convert.getEthString;
 
 public class ConfirmationActivity extends BaseActivity implements SignAuthenticationCallback
 {
-    private static final String NONCE_LOW_MESSAGE = "too low";
-    private static final String NONCE_STRING = "nonce";
     AWalletAlertDialog dialog;
 
     @Inject
     ConfirmationViewModelFactory confirmationViewModelFactory;
     ConfirmationViewModel viewModel;
-
-    private FinishReceiver finishReceiver;
 
     private TextView fromAddressText;
     private TextView toAddressText;
@@ -86,26 +73,20 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private Button moreDetail;
     private TextView title;
     private TextView chainName;
-    private TextView gasEstimateText;
-    private ProgressBar progressGasEstimate;
-    private ProgressBar progressNetworkFee;
     private GasSettings localGasSettings;
 
     private BigDecimal amount;
-    private String tokenIds;
-    private BigInteger gasPrice;
     private int decimals;
     private String contractAddress;
+    private String amountStr;
     private String to;
     private String transactionHex;
     private Token token;
+    private String symbol;
+    private String ensName;
+    private String tokenList;
     private int chainId;
     private Wallet sendingWallet;
-    private BigInteger nonce;
-    private String oldTxHash = null;
-    private BigInteger oldGasPrice = BigInteger.ZERO;
-    private BigInteger oldGasLimit = BigInteger.ZERO;
-    private String transactionAddress; // The actual transaction address - used for estimating gas
 
     private ConfirmationType confirmationType;
     private byte[] transactionBytes = null;
@@ -116,12 +97,63 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         AndroidInjection.inject(this);
 
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_confirm);
-        transaction = null;
-        toolbar();
 
+        toolbar();
         setTitle(getString(R.string.title_transaction_details));
+
+        setupViewModel();
+        getIntents();
+        initView();
+    }
+
+    private void getIntents()
+    {
+        transaction = getIntent().getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
+        to = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
+        contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
+        confirmationType = ConfirmationType.values()[getIntent().getIntExtra(C.TOKEN_TYPE, 0)];
+        ensName = getIntent().getStringExtra(C.EXTRA_ENS_DETAILS);
+        amountStr = getIntent().getStringExtra(C.EXTRA_AMOUNT);
+        decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
+        symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
+        tokenList = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
+        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
+        chainId = token != null ? token.tokenInfo.chainId : getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
+
+        try
+        {
+            if (amountStr != null)
+                amount = new BigDecimal(amountStr);
+        }
+        catch (NumberFormatException e)
+        {
+            //Cannot convert
+        }
+
+        if (token == null)
+            token = viewModel.getToken(chainId, contractAddress);
+
+        if (symbol == null) symbol = (token == null) ? C.ETH_SYMBOL : token.getSymbol();
+    }
+
+    private void setupViewModel()
+    {
+        viewModel = ViewModelProviders.of(this, confirmationViewModelFactory)
+                .get(ConfirmationViewModel.class);
+
+        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+        viewModel.gasSettings().observe(this, this::onGasSettings);
+        viewModel.sendTransaction().observe(this, this::onTransaction);
+        viewModel.sendDappTransaction().observe(this, this::onDappTransaction);
+        viewModel.progress().observe(this, this::onProgress);
+        viewModel.error().observe(this, this::onError);
+        viewModel.pushToast().observe(this, this::displayToast);
+        viewModel.sendGasSettings().observe(this, this::onSendGasSettings);
+    }
+
+    private void initView()
+    {
         fromAddressText = findViewById(R.id.text_from);
         toAddressText = findViewById(R.id.text_to);
         valueText = findViewById(R.id.text_value);
@@ -137,58 +169,16 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         websiteText = findViewById(R.id.text_website);
         title = findViewById(R.id.title_confirm);
         chainName = findViewById(R.id.text_chain_name);
-        gasEstimateText = findViewById(R.id.text_gas_estimate);
-        progressGasEstimate = findViewById(R.id.progress_gas_estimate);
-        progressNetworkFee = findViewById(R.id.progress_network_fee);
         sendButton.setOnClickListener(view -> onSend());
 
-        transaction = getIntent().getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
-
-        to = getIntent().getStringExtra(C.EXTRA_TO_ADDRESS);
-        contractAddress = getIntent().getStringExtra(C.EXTRA_CONTRACT_ADDRESS);
-        confirmationType = ConfirmationType.values()[getIntent().getIntExtra(C.TOKEN_TYPE, 0)];
-        String ensName = getIntent().getStringExtra(C.EXTRA_ENS_DETAILS);
-        decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
-        String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
-        symbol = symbol == null ? C.ETH_SYMBOL : symbol;
-        tokenIds = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
-        token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
-        chainId = token != null ? token.tokenInfo.chainId : getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
-        String functionDetails = getIntent().getStringExtra(C.EXTRA_FUNCTION_NAME);
-
-        if (Utils.isAddressValid(contractAddress))
-        {
-            transactionAddress = contractAddress;
-        }
-        else
-        {
-            transactionAddress = to; // in the case of native transactions
-        }
-
-        String amountString;
-        int nonceId;
-
-        viewModel = ViewModelProviders.of(this, confirmationViewModelFactory)
-                .get(ConfirmationViewModel.class);
+        String amountString = "";
 
         Utils.setChainColour(chainName, chainId);
         chainName.setText(viewModel.getNetworkName(chainId));
 
-        try
-        {
-            amount = new BigDecimal(getIntent().getStringExtra(C.EXTRA_AMOUNT));
-        }
-        catch (NumberFormatException e)
-        {
-            amount = BigDecimal.ZERO;
-        }
-
-        if (token == null)
-            token = viewModel.getToken(chainId, contractAddress);
-
         switch (confirmationType) {
             case ETH:
-                amountString = "-" + BalanceUtils.getScaledValueWithLimit(amount, decimals);
+                amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString();
                 symbolText.setText(symbol);
                 transactionBytes = null;
                 break;
@@ -196,7 +186,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 contractAddrText.setVisibility(View.VISIBLE);
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 contractAddrText.setText(contractAddress);
-                amountString = "-" + BalanceUtils.getScaledValueWithLimit(amount, decimals);
+                amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString();
                 symbolText.setText(symbol);
                 transactionBytes = TokenRepository.createTokenTransferData(to, amount.toBigInteger());
                 break;
@@ -204,11 +194,11 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 contractAddrText.setVisibility(View.VISIBLE);
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 contractAddrText.setText(contractAddress);
-                amountString = tokenIds;
-                transactionBytes = viewModel.getERC875TransferBytes(to, contractAddress, tokenIds, chainId);
+                amountString = tokenList;
+                transactionBytes = viewModel.getERC875TransferBytes(to, contractAddress, amountStr, chainId);
                 break;
             case MARKET:
-                amountString = tokenIds;
+                amountString = tokenList;
                 to = "Stormbird market";
                 break;
             case TOKENSCRIPT:
@@ -220,7 +210,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 contractAddrLabel.setVisibility(View.VISIBLE);
                 contractAddrText.setText(contractAddress);
                 amountString = getIntent().getStringExtra(C.EXTRA_ACTION_NAME);
-                if (!TextUtils.isEmpty(functionDetails)) amountString = functionDetails;
                 symbolText.setVisibility(View.GONE);
 
                 transactionHex = getIntent().getStringExtra(C.EXTRA_TRANSACTION_DATA);
@@ -231,7 +220,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 title.setVisibility(View.VISIBLE);
                 title.setText(R.string.confirm_dapp_transaction);
                 to = transaction.recipient.toString();
-                transactionAddress = to;
                 if (transaction.payload == null) //pure ETH transaction
                 {
                     confirmationType = ETH;
@@ -275,38 +263,10 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 contractAddrText.setText(contractTxt);
                 symbolText.setText(token.getSymbol());
                 amountString = symbol;
-                transactionBytes = viewModel.getERC721TransferBytes(to, contractAddress, tokenIds, chainId);
-                break;
-            case RESEND:
-                setTitle(getString(R.string.speedup_transaction));
-                oldTxHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
-                nonceId = getIntent().getIntExtra(C.EXTRA_NONCE, 0);
-                nonce = BigInteger.valueOf(nonceId);
-                amountString = getString(R.string.speedup_tx_description);
-                valueText.setTextColor(getColor(R.color.text_black));
-                symbolText.setVisibility(View.GONE);
-                oldGasPrice = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
-                oldGasLimit = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT));
-                transactionHex = getIntent().getStringExtra(C.EXTRA_TRANSACTION_DATA);
-                if (!TextUtils.isEmpty(transactionHex)) transactionBytes = Numeric.hexStringToByteArray(transactionHex);
-                setupResendGasSettings();
-                break;
-            case CANCEL_TX:
-                setTitle(getString(R.string.cancel_transaction));
-                oldTxHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
-                nonceId = getIntent().getIntExtra(C.EXTRA_NONCE, 0);
-                nonce = BigInteger.valueOf(nonceId);
-                amount = BigDecimal.ZERO;
-                amountString = getString(R.string.cancel_tx_description);
-                valueText.setTextColor(getColor(R.color.text_black));
-                symbolText.setVisibility(View.GONE);
-                oldGasPrice = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
-                oldGasLimit = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT));
-                transactionHex = "0x";
-                setupCancelGasSettings();
+                transactionBytes = viewModel.getERC721TransferBytes(to, contractAddress, amountStr, chainId);
                 break;
             default:
-                amountString = "-" + BalanceUtils.getScaledValueWithLimit(amount, decimals);
+                amountString = "-" + BalanceUtils.subunitToBase(amount.toBigInteger(), decimals).toPlainString();
                 symbolText.setText(symbol);
                 transactionBytes = null;
                 break;
@@ -322,34 +282,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         }
 
         valueText.setText(amountString);
-
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
-        viewModel.gasSettings().observe(this, this::onGasSettings);
-        viewModel.sendTransaction().observe(this, this::onTransaction);
-        viewModel.sendDappTransaction().observe(this, this::onDappTransaction);
-        viewModel.progress().observe(this, this::onProgress);
-        viewModel.error().observe(this, this::onError);
-        viewModel.pushToast().observe(this, this::displayToast);
-        viewModel.sendGasSettings().observe(this, this::onSendGasSettings);
-        viewModel.sendGasEstimate().observe(this, this::onGasEstimate);
-        viewModel.sendGasEstimateError().observe(this, this::onEstimateError);
-        finishReceiver = new FinishReceiver(this);
-
-        findViewById(R.id.layout_gas_price).setOnClickListener(view -> {
-            //open gas slider settings
-            viewModel.openGasSettings(this, chainId);
-        });
-
-        findViewById(R.id.layout_gas_limit).setOnClickListener(view -> {
-            //open gas slider settings
-            viewModel.openGasSettings(this, chainId);
-        });
-
-        gasLimitText.setOnClickListener(view -> {
-            //open gas slider settings
-            viewModel.openGasSettings(this, chainId);
-        });
-
         getGasSettings();
     }
 
@@ -371,6 +303,23 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
             break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+        viewModel.stopGasPriceUpdate();
+        hideDialog();
+    }
+
+    @Override
+    public void onRestart()
+    {
+        super.onRestart();
+        getIntents();
+        setupViewModel();
+        initView(); //also resumes gas listener
     }
 
     @Override
@@ -406,8 +355,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        hideDialog();
-        unregisterReceiver(finishReceiver);
     }
 
     private void onSend()
@@ -451,7 +398,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                         sendingWallet,
                         to,
                         contractAddress,
-                        tokenIds,
+                        amountStr,
                         localGasSettings.gasPrice,
                         localGasSettings.gasLimit,
                         chainId);
@@ -469,16 +416,10 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 viewModel.createERC721Transfer(
                         to,
                         contractAddress,
-                        tokenIds,
+                        amountStr,
                         localGasSettings.gasPrice,
                         localGasSettings.gasLimit,
                         chainId);
-                break;
-
-            case RESEND:
-            case CANCEL_TX:
-                viewModel.sendOverrideTransaction(
-                        transactionHex, to, nonce, localGasSettings.gasPrice, localGasSettings.gasLimit, amount.toBigInteger(), chainId);
                 break;
 
             default:
@@ -489,44 +430,34 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private void onDefaultWallet(Wallet wallet) {
         fromAddressText.setText(wallet.address);
         sendingWallet = wallet;
-
-        progressGasEstimate.setVisibility(View.VISIBLE);
-        progressNetworkFee.setVisibility(View.VISIBLE);
-        viewModel.calculateGasEstimate(transactionBytes, chainId, transactionAddress, amount.toBigInteger());
     }
 
     private void onTransaction(String hash) {
         hideDialog();
         dialog = new AWalletAlertDialog(this);
         dialog.setTitle(R.string.transaction_succeeded);
-        dialog.setCancelable(true);
         dialog.setMessage(hash);
-        dialog.setButtonText(R.string.ok);
-        dialog.setSecondaryButtonText(R.string.copy);
+        dialog.setButtonText(R.string.copy);
         dialog.setButtonListener(v -> {
-            dialog.dismiss();
-            sendBroadcast(new Intent(PRUNE_ACTIVITY));
-        });
-        dialog.setSecondaryButtonListener(v -> {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("transaction hash",
                     EthereumNetworkBase.getEtherscanURLbyNetwork(token.tokenInfo.chainId) + "tx/" + hash);
             clipboard.setPrimaryClip(clip);
             dialog.dismiss();
-            sendBroadcast(new Intent(PRUNE_ACTIVITY));
+            goHome();
         });
         dialog.setOnDismissListener(v -> {
             dialog.dismiss();
-            new HomeRouter().open(this, true);
-            finish();
+            goHome();
         });
         dialog.show();
+    }
 
-        if (oldTxHash != null)
-        {
-            viewModel.removeOverridenTransaction(oldTxHash);
-            sendBroadcast(new Intent(RESET_WALLET)); //refresh transactions list
-        }
+    private void goHome()
+    {
+        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 
     private void onDappTransaction(TransactionData txData) {
@@ -582,112 +513,35 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         }
     }
 
-    private void setupCancelGasSettings()
-    {
-        BigInteger gasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(2))); //doesn't need more than this for cancel
-
-        findViewById(R.id.layout_old_gas_price).setVisibility(View.VISIBLE);
-        ((TextView)findViewById(R.id.old_gas_price)).setText(BalanceUtils.weiToGwei(oldGasPrice));
-
-        String gasPriceStr = BalanceUtils.weiToGwei(gasPrice);
-
-        gasPriceText.setText(gasPriceStr);
-        GasSettings overrideSettings = new GasSettings(gasPrice, oldGasLimit);
-        viewModel.overrideGasSettings(overrideSettings);
-    }
-
-    private void setupResendGasSettings()
-    {
-        //increase gas price - gas price is in GWEI, so add 1 GWEI to price
-        BigInteger gasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(1)));
-
-        findViewById(R.id.layout_old_gas_price).setVisibility(View.VISIBLE);
-        ((TextView)findViewById(R.id.old_gas_price)).setText(BalanceUtils.weiToGwei(oldGasPrice));
-
-        String gasPriceStr = BalanceUtils.weiToGwei(gasPrice);
-
-        gasPriceText.setText(gasPriceStr);
-        GasSettings overrideSettings = new GasSettings(gasPrice, oldGasLimit);
-        viewModel.overrideGasSettings(overrideSettings);
-    }
-
     private void onGasSettings(GasSettings gasSettings) {
-        String gasPriceStr = BalanceUtils.weiToGwei(gasSettings.gasPrice);
-        gasPrice = gasSettings.gasPrice;
-        gasPriceText.setText(gasPriceStr);
+        String gasPrice = BalanceUtils.weiToGwei(gasSettings.gasPrice) + " " + C.GWEI_UNIT;
+        gasPriceText.setText(gasPrice);
         gasLimitText.setText(gasSettings.gasLimit.toString());
 
-        BigDecimal networkFeeBD = new BigDecimal(gasSettings.gasPrice.multiply(gasSettings.gasLimit));
+        BigDecimal networkFeeBD = new BigDecimal(gasSettings
+                                                         .gasPrice.multiply(gasSettings.gasLimit));
 
-        switch (confirmationType)
+        String networkFee = BalanceUtils.weiToEth(networkFeeBD).toPlainString() + " " + viewModel.getNetworkSymbol(chainId);
+        networkFeeText.setText(networkFee);
+
+        if (confirmationType == WEB3TRANSACTION)
         {
-            case WEB3TRANSACTION:
-                BigDecimal ethValueBD = amount.add(networkFeeBD);
+            //update amount
+            BigDecimal ethValueBD = amount.add(networkFeeBD);
 
-                //convert to ETH
-                ethValueBD = Convert.fromWei(ethValueBD, Convert.Unit.ETHER);
-                String valueUpdate = getEthString(ethValueBD.doubleValue());
-                valueText.setText(valueUpdate);
-                break;
-            default:
-                break;
+            //convert to ETH
+            ethValueBD = Convert.fromWei(ethValueBD, Convert.Unit.ETHER);
+            String valueUpdate = getEthString(ethValueBD.doubleValue());
+            valueText.setText(valueUpdate);
         }
-    }
-
-    private void onGasEstimate(BigInteger gasEstimate) {
-        progressGasEstimate.setVisibility(View.GONE);
-        progressNetworkFee.setVisibility(View.GONE);
-
-        BigDecimal networkFeeBD = new BigDecimal(gasPrice.multiply(gasEstimate));
-
-        String networkFee = BalanceUtils.getScaledValue(networkFeeBD, C.ETHER_DECIMALS, 8)
-                + " " + viewModel.getNetworkSymbol(chainId);
-        networkFeeText.setText(networkFee);
-        gasEstimateText.setText(String.valueOf(gasEstimate));
-    }
-
-    private void onEstimateError(ErrorEnvelope error) {
-        progressGasEstimate.setVisibility(View.GONE);
-        progressNetworkFee.setVisibility(View.GONE);
-
-        //for now, revert to old behaviour; do more testing; design UX for this
-        findViewById(R.id.layout_gas_estimate).setVisibility(View.GONE);
-        ((TextView)findViewById(R.id.text_network_fee_title)).setText(R.string.label_network_fee);
-        BigDecimal networkFeeBD = new BigDecimal(gasPrice.multiply(viewModel.gasSettings().getValue().gasLimit));
-        String networkFee = BalanceUtils.getScaledValue(networkFeeBD, C.ETHER_DECIMALS, 8)
-                + " " + viewModel.getNetworkSymbol(chainId);
-        networkFeeText.setText(networkFee);
-
-//        hideDialog();
-//        dialog = new AWalletAlertDialog(this);
-//        dialog.setIcon(WARNING);
-//        dialog.setTitle(R.string.transaction_fail_warning);
-//        dialog.setMessage(getString(R.string.node_predicts_tx_will_fail, error.message));
-//        dialog.setButtonText(R.string.ok);
-//        dialog.setButtonListener(v -> {
-//            dialog.dismiss();
-//        });
-//        dialog.show();
     }
 
     private void onError(ErrorEnvelope error) {
         hideDialog();
         dialog = new AWalletAlertDialog(this);
-
-        String errorMessage = error.message != null ? error.message.toLowerCase() : "";
-        if (confirmationType == ConfirmationType.RESEND || confirmationType == ConfirmationType.CANCEL_TX && errorMessage.contains(NONCE_LOW_MESSAGE) && errorMessage.contains(NONCE_STRING))
-        {
-            dialog.setIcon(WARNING);
-            dialog.setTitle(R.string.transaction_already_written_title);
-            dialog.setMessage(R.string.transaction_already_written);
-        }
-        else
-        {
-            dialog.setIcon(ERROR);
-            dialog.setTitle(R.string.error_transaction_failed);
-            dialog.setMessage(error.message);
-        }
-
+        dialog.setTitle(R.string.error_transaction_failed);
+        dialog.setMessage(error.message);
+        dialog.setIcon(ERROR);
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> {
             dialog.dismiss();
@@ -718,42 +572,16 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         }
         else if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            gotAuthorisation(resultCode == RESULT_OK);
+            GotAuthorisation(resultCode == RESULT_OK);
         }
     }
 
     @Override
-    public void gotAuthorisation(boolean gotAuth)
+    public void GotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth)
-        {
-            viewModel.completeAuthentication(SIGN_DATA);
-        }
-        else
-        {
-            //fail authentication
-            securityError();
-        }
+        if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
+        else viewModel.failedAuthentication(SIGN_DATA);
         //got authorisation, continue with transaction
         if (gotAuth) finaliseTransaction();
-    }
-
-    @Override
-    public void cancelAuthentication()
-    {
-        hideDialog();
-    }
-
-    private void securityError() {
-        hideDialog();
-        dialog = new AWalletAlertDialog(this);
-        dialog.setIcon(AWalletAlertDialog.ERROR);
-        dialog.setTitle(R.string.key_error);
-        dialog.setMessage(getString(R.string.error_while_signing_transaction));
-        dialog.setButtonText(R.string.ok);
-        dialog.setButtonListener(v -> {
-            dialog.dismiss();
-        });
-        dialog.show();
     }
 }

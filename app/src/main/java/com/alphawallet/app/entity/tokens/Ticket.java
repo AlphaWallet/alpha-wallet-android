@@ -3,8 +3,9 @@ package com.alphawallet.app.entity.tokens;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.View;
+import android.widget.TextView;
 
-import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.ERC875ContractTransaction;
 import com.alphawallet.app.entity.TicketRangeElement;
@@ -12,8 +13,8 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.ui.widget.holder.TokenHolder;
 import com.alphawallet.app.viewmodel.BaseViewModel;
-import com.alphawallet.token.entity.TicketRange;
 
 import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
@@ -26,6 +27,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+
+import com.alphawallet.token.entity.TicketRange;
+import com.alphawallet.token.tools.TokenDefinition;
+import com.alphawallet.app.R;
 
 /**
  * Created by James on 27/01/2018.  It might seem counter intuitive
@@ -150,20 +156,30 @@ public class Ticket extends Token implements Parcelable
     @Override
     public void clickReact(BaseViewModel viewModel, Context context)
     {
-        viewModel.showTokenList(context, this);
+        viewModel.showAssetDisplay(context, this);
     }
 
     @Override
-    public int getContractType()
+    public void setupContent(TokenHolder tokenHolder, AssetDefinitionService asset)
     {
+        tokenHolder.balanceCurrency.setText("--");
+        tokenHolder.textAppreciation.setText("--");
+
+        tokenHolder.contractType.setVisibility(View.VISIBLE);
+        tokenHolder.contractSeparator.setVisibility(View.VISIBLE);
+        tokenHolder.layoutValueDetails.setVisibility(View.GONE);
         if (contractType == ContractType.ERC875_LEGACY)
         {
-            return R.string.erc875legacy;
+            tokenHolder.contractType.setText(R.string.erc875legacy);
         }
         else
         {
-            return R.string.erc875;
+            tokenHolder.contractType.setText(R.string.erc875);
         }
+
+        String composite = getTicketCount() + " " + getFullName(asset, getTicketCount());
+
+        tokenHolder.balanceEth.setText(composite);
     }
 
     @Override
@@ -283,6 +299,44 @@ public class Ticket extends Token implements Parcelable
         return indexList;
     }
 
+    public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx)
+    {
+        displayTicketHolder(range, activity, assetService, ctx, false);
+    }
+
+    /**
+     * This is a single method that populates any instance of graphic ticket anywhere
+     *
+     * @param range
+     * @param activity
+     * @param assetService
+     * @param ctx needed to create date/time format objects
+     */
+    @Override
+    public void displayTicketHolder(TicketRange range, View activity, AssetDefinitionService assetService, Context ctx, boolean iconified)
+    {
+        TokenDefinition td = assetService.getAssetDefinition(tokenInfo.chainId, tokenInfo.address);
+        if (td != null)
+        {
+            //use webview
+            displayTokenscriptView(range, assetService, activity, ctx, iconified);
+        }
+        else
+        {
+            activity.findViewById(R.id.layout_legacy).setVisibility(View.VISIBLE);
+            activity.findViewById(R.id.layout_webwrapper).setVisibility(View.GONE);
+
+            TextView amount = activity.findViewById(R.id.amount);
+            TextView name = activity.findViewById(R.id.name);
+
+            String nameStr = getTokenTitle();
+            String seatCount = String.format(Locale.getDefault(), "x%d", range.tokenIds.size());
+
+            name.setText(nameStr);
+            amount.setText(seatCount);
+        }
+    }
+
     public void checkIsMatchedInXML(AssetDefinitionService assetService)
     {
         isMatchedInXML = assetService.hasDefinition(tokenInfo.chainId, tokenInfo.address);
@@ -383,6 +437,18 @@ public class Ticket extends Token implements Parcelable
     @Override
     public boolean isToken() {
         return false;
+    }
+
+    @Override
+    protected String addSuffix(String result, Transaction transaction)
+    {
+        return result;
+    }
+
+    @Override
+    public boolean checkIntrinsicType()
+    {
+        return (contractType == ContractType.ERC875 || contractType == ContractType.ERC875_LEGACY);
     }
 
     @Override

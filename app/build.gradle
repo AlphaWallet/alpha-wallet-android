@@ -29,7 +29,7 @@ repositories {
 
 android {
     compileSdkVersion 29
-    buildToolsVersion '28.0.3'
+    buildToolsVersion '29.0.3'
     sourceSets {
         main {
 
@@ -40,13 +40,29 @@ android {
         minSdkVersion 23
         targetSdkVersion 29
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        def XInfuraAPI = "XInfuraAPI"
-        //Put your Infura key here
-        def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\"";
+        def CoinmarketCapAPI = "CoinmarketCapAPI"
+        def AmberdataAPI = "AmberdataAPI"
+        def InfuraAPI = "InfuraAPI"
+        def COINMARKET_CAP_KEY = "\"obtain-api-key-from-coinmarketcap-com\""
+        def AMBERDATA_API_KEY = "\"obtain-api-key-from-amberdata-io\"";
+        def INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\"";
+        if (project.hasProperty("coinmarketcapAPI")) {
+            COINMARKET_CAP_KEY = coinmarketcapAPI
+        }
+        if (project.hasProperty("amberdataAPI")) {
+            AMBERDATA_API_KEY = amberdataAPI
+        }
+        if (project.hasProperty("infuraAPI")) {
+            INFURA_API_KEY = infuraAPI
+        }
 
         buildConfigField 'int', 'DB_VERSION', '7'
-        buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
+        buildConfigField "String", CoinmarketCapAPI, COINMARKET_CAP_KEY
+        buildConfigField "String", AmberdataAPI, AMBERDATA_API_KEY
+        buildConfigField "String", InfuraAPI, INFURA_API_KEY
         buildConfigField "boolean", "USE_ANALYTICS", "true"
+
+
 
         ndk {
             abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
@@ -54,20 +70,25 @@ android {
     }
     flavorDimensions "targetting"
     productFlavors {
-    	awallet {
-		    dimension "targetting"
-        versionCode 118
-        versionName "3.00.5"
-	    }
+	awallet {
+		dimension "targetting"
+        versionCode 92
+        versionName "2.22.0"
+	}
     }
     buildTypes {
         debug {
             minifyEnabled false
-//            proguardFiles getDefaultProguardFile('proguard-android.txt'),
-//                    'proguard-rules.pro'
+            debuggable true
+        }
+        lifecycle_debug {
+            minifyEnabled false
+            debuggable true
+            signingConfig android.signingConfigs.debug
         }
         release {
             minifyEnabled false
+            debuggable false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -82,11 +103,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
         sourceCompatibility JavaVersion.VERSION_1_8
     }
-    externalNativeBuild {
-        cmake {
-            path "src/main/cpp/CMakeLists.txt"
-        }
-    }
 }
 
 project.ext {
@@ -94,6 +110,7 @@ project.ext {
     okhttpVersion = "4.0.0"
     picassoVersion = "2.71828"
     supportVersion = "28.0.0"
+    web3jVersion = "4.2.0-android"
     gsonVersion = "2.8.5"
     rxJavaVersion = "2.2.10"
     rxAndroidVersion = "2.1.1"
@@ -108,10 +125,10 @@ dependencies {
     // WARNING!  The China marketing team
     // WARNING!  Many Chinese Android phones execute (meaning terminate) any app that
     // WARNING!  users google gms summarily, like immune systems cleansing infections
-    // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!
+    // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING! 
 
     // Ethereum client
-    implementation "org.web3j:core:4.6.0-android"
+    implementation "org.web3j:core:$project.web3jVersion"
 
     // Http client
     implementation "com.squareup.retrofit2:retrofit:$project.retrofitVersion"
@@ -142,9 +159,6 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:$project.rxJavaVersion"
     implementation "io.reactivex.rxjava2:rxandroid:$project.rxAndroidVersion"
 
-    // Keyboard visibility
-    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC2'
-
     // Dagger 2
 
     // Dagger core
@@ -159,7 +173,7 @@ dependencies {
     implementation "com.google.dagger:dagger-android:$project.daggerVersion"
 
     // Image Loader
-    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    implementation 'com.github.bumptech.glide:glide:4.8.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
 
     // Amazon Android SDK
@@ -180,9 +194,6 @@ dependencies {
     implementation 'com.trustwallet.walletcore:walletcore:0.12.8'
 
     implementation 'com.github.florent37:tutoshowcase:1.0.1'
-
-    // Do not upgrade unless we have migrated to AndroidX
-    implementation 'com.google.android:flexbox:1.0.0'
 
     // PW
     implementation fileTree(include: ['*.jar'], dir: 'libs')

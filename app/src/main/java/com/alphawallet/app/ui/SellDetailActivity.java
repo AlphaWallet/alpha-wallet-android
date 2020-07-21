@@ -20,7 +20,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.tokens.Token;
@@ -72,8 +71,6 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     protected SellDetailModelFactory viewModelFactory;
     protected SellDetailViewModel viewModel;
 
-    private FinishReceiver finishReceiver;
-
     private Token token;
     private Wallet wallet;
     private NonFungibleTokenAdapter adapter;
@@ -105,7 +102,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     private TextView confirmTotalCostText;
     private TextView currencyText;
     private boolean activeClick;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private PinAuthenticationCallbackInterface authInterface;
 
     @Override
@@ -156,15 +153,6 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         confirmPricePerTicketText = findViewById(R.id.text_confirm_price_per_ticket);
         confirmTotalCostText = findViewById(R.id.text_confirm_total_cost);
         currencyText = findViewById(R.id.text_currency);
-
-        finishReceiver = new FinishReceiver(this);
-    }
-
-    @Override
-    protected void onDestroy()
-    {
-        super.onDestroy();
-        unregisterReceiver(finishReceiver);
     }
 
     private void setupPage(Wallet wallet)
@@ -279,6 +267,12 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
                 if (isExpiryDateTimeValid())
                 {
                     viewModel.getAuthorisation(this, this);
+                }
+                break;
+            case SET_MARKET_SALE:
+                if (isPriceAndQuantityValid())
+                {
+                    confirmPlaceMarketOrderDialog();
                 }
                 break;
         }
@@ -510,6 +504,27 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         dialog.show();
     }
 
+    private void confirmPlaceMarketOrderDialog()
+    {
+        //how many indices are we selling?
+        int quantity = selection.size();
+        String unit = quantity > 1 ? getString(R.string.tickets) : getString(R.string.ticket);
+        String qty = String.valueOf(quantity) + " " + unit + " @" + getEthString(sellPriceValue) + getString(R.string.eth_per_ticket);
+
+        AWalletConfirmationDialog dialog = new AWalletConfirmationDialog(this);
+        dialog.setTitle(R.string.confirm_sale_title);
+        dialog.setSmallText(R.string.place_tickets_marketplace);
+        dialog.setMediumText(qty);
+        dialog.setPrimaryButtonText(R.string.create_sell_order);
+        dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
+        dialog.setPrimaryButtonListener(v1 -> {
+            sellTicketFinal();
+            goHome();
+        });
+        dialog.setSecondaryButtonListener(v1 -> dialog.dismiss());
+        dialog.show();
+    }
+
     private void sellLinkFinal(String universalLink) {
         //create share intent
         Intent sendIntent = new Intent();
@@ -519,10 +534,11 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         startActivityForResult(sendIntent, SEND_INTENT_REQUEST_CODE);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        handler = new Handler();
+    private void goHome()
+    {
+        Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 
     @Override
@@ -563,11 +579,11 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
         switch (requestCode)
         {
             case SEND_INTENT_REQUEST_CODE:
-                sendBroadcast(new Intent(PRUNE_ACTIVITY));
+                goHome();
                 break;
 
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
-                gotAuthorisation(resultCode == RESULT_OK);
+                GotAuthorisation(resultCode == RESULT_OK);
                 break;
 
             default:
@@ -582,7 +598,7 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
     }
 
     @Override
-    public void gotAuthorisation(boolean gotAuth)
+    public void GotAuthorisation(boolean gotAuth)
     {
         if (gotAuth)
         {
@@ -590,11 +606,5 @@ public class SellDetailActivity extends BaseActivity implements OnTokenClickList
             sellTicketLinkFinal();
         }
         else viewModel.failedAuthentication(SIGN_DATA);
-    }
-
-    @Override
-    public void cancelAuthentication()
-    {
-
     }
 }

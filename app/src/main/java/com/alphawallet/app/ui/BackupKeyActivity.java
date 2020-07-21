@@ -9,19 +9,18 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.v4.content.res.ResourcesCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,38 +28,27 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.Operation;
+import com.alphawallet.app.entity.PinAuthenticationCallbackInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BackupKeyViewModel;
 import com.alphawallet.app.viewmodel.BackupKeyViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
-import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.LayoutCallbackListener;
 import com.alphawallet.app.widget.PasswordInputView;
 import com.alphawallet.app.widget.SignTransactionDialog;
-import com.google.android.flexbox.FlexDirection;
-import com.google.android.flexbox.FlexboxLayout;
 
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.SHARE_REQUEST_CODE;
 
-public class BackupKeyActivity extends BaseActivity implements
-        View.OnClickListener,
-        CreateWalletCallbackInterface,
-        TextWatcher,
-        SignAuthenticationCallback,
-        Runnable,
-        LayoutCallbackListener,
-        StandardFunctionInterface {
-
+public class BackupKeyActivity extends BaseActivity implements View.OnClickListener,
+                                                               CreateWalletCallbackInterface, TextWatcher, SignAuthenticationCallback, Runnable, LayoutCallbackListener
+{
     @Inject
     BackupKeyViewModelFactory backupKeyViewModelFactory;
     BackupKeyViewModel viewModel;
@@ -69,36 +57,48 @@ public class BackupKeyActivity extends BaseActivity implements
     private Wallet wallet;
     private TextView title;
     private TextView detail;
-    private FlexboxLayout layoutWordHolder;
+    private LinearLayout layoutWordHolder;
     private PasswordInputView inputView;
     private ImageView backupImage;
+    private Button nextButton;
     private TextView verifyTextBox;
+    private LinearLayout skipButton;
     private String[] mnemonicArray;
+    private ImageView spacerImage;
     private LinearLayout successOverlay;
-    private Handler handler;
-    private AWalletAlertDialog alertDialog;
-    private String keystorePassword;
-    private FunctionButtonBar functionButtonBar;
+    private final Handler handler = new Handler();
 
-    private int screenWidth;
+    private AWalletAlertDialog alertDialog;
+
+    private LinearLayout currentHolder;
+    private int currentEdge;
+
+    private int layoutHolderWidth;
+    private int seedTextSize;
+    private int seedTextHPadding;
+    private int seedTextVPadding;
+    private String keystorePassword;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         alertDialog = null;
+
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-        lockOrientation();
+        LockOrientation();
 
         BackupOperationType type = (BackupOperationType) getIntent().getSerializableExtra("TYPE");
         wallet = getIntent().getParcelableExtra(WALLET);
+        layoutHolderWidth = 0;
         if (type == null) type = BackupOperationType.UNDEFINED;
 
         toolbar();
         initViewModel();
-        determineScreenWidth();
 
-        switch (type) {
+        switch (type)
+        {
             case UNDEFINED:
                 state = BackupState.UNDEFINED;
                 DisplayKeyFailureDialog("Unknown Key operation");
@@ -126,63 +126,64 @@ public class BackupKeyActivity extends BaseActivity implements
         }
     }
 
-    private void determineScreenWidth() {
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        screenWidth = displayMetrics.widthPixels;
-    }
-
     @SuppressLint("SourceLockedOrientationActivity")
-    private void lockOrientation() {
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+    private void LockOrientation()
+    {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+        {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        } else {
+        }
+        else
+        {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
     }
 
-    private void setupUpgradeKey(boolean showSuccess) {
+    private void setupUpgradeKey(boolean showSuccess)
+    {
         setContentView(R.layout.activity_backup);
         initViews();
 
         successOverlay = findViewById(R.id.layout_success_overlay);
-        if (successOverlay != null && showSuccess) {
+        if (successOverlay != null && showSuccess)
+        {
             successOverlay.setVisibility(View.VISIBLE);
-            handler = new Handler();
             handler.postDelayed(this, 1000);
         }
 
+        setTitle(getString(R.string.empty));
         state = BackupState.UPGRADE_KEY_SECURITY;
-        if (wallet.type == WalletType.KEYSTORE) {
-            title.setText(R.string.lock_keystore_upgrade);
-        } else {
-            title.setText(R.string.lock_key_upgrade);
-        }
-        backupImage.setImageResource(R.drawable.biometrics);
+        if (wallet.type == WalletType.KEYSTORE) title.setText(R.string.lock_keystore_upgrade);
+        else title.setText(R.string.lock_key_upgrade);
+        backupImage.setImageResource(R.drawable.ic_biometric);
         detail.setVisibility(View.VISIBLE);
         detail.setText(R.string.upgrade_key_security_detail);
-
-        int res;
-        if (wallet.type == WalletType.HDKEY) {
-            res = R.string.lock_seed_phrase;
-        } else {
-            res = R.string.action_upgrade_key;
+        switch (wallet.type)
+        {
+            default:
+                nextButton.setText(getString(R.string.action_upgrade_key));
+                break;
+            case HDKEY:
+                nextButton.setText(getString(R.string.lock_seed_phrase));
+                break;
         }
 
-        functionButtonBar.setPrimaryButtonText(res);
-        functionButtonBar.setPrimaryButtonClickListener(this);
+        skipButton.setVisibility(View.VISIBLE);
+
+        skipButton.setOnClickListener(v -> {
+            finishBackupSuccess(false);
+        });
     }
 
-    private void upgradeKeySecurity() {
-        switch (wallet.type) {
+    private void upgradeKeySecurity()
+    {
+        switch (wallet.type)
+        {
             case KEYSTORE:
             case KEYSTORE_LEGACY:
             case HDKEY:
-                switch (viewModel.upgradeKeySecurity(wallet, this))
+                switch (viewModel.upgradeKeySecurity(wallet, this, this))
                 {
-                    case SUCCESSFULLY_UPGRADED:
-                        createdKey(wallet.address);
-                        break;
                     case REQUESTING_SECURITY:
                         //Do nothing, callback will return to 'CreatedKey()'. If it fails the returned key is empty
                         break;
@@ -203,11 +204,14 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     @Override
-    public void createdKey(String address) {
+    public void CreatedKey(String address)
+    {
         //key upgraded
         //store wallet upgrade
-        if (wallet.address.equalsIgnoreCase(address)) {
-            switch (wallet.type) {
+        if (wallet.address.equalsIgnoreCase(address))
+        {
+            switch (wallet.type)
+            {
                 case KEYSTORE_LEGACY:
                 case KEYSTORE:
                 case HDKEY:
@@ -221,53 +225,67 @@ public class BackupKeyActivity extends BaseActivity implements
         }
     }
 
-    private void setHDBackupSplash() {
+    private void setHDBackupSplash()
+    {
         setContentView(R.layout.activity_backup);
         initViews();
+
+        setTitle(getString(R.string.empty));
         title.setText(R.string.backup_seed_phrase);
-        backupImage.setImageResource(R.drawable.seed);
+        backupImage.setImageResource(R.drawable.seed_graphic);
         detail.setText(R.string.backup_seed_phrase_detail);
-        functionButtonBar.setPrimaryButtonText(R.string.action_back_up_my_wallet);
-        functionButtonBar.setPrimaryButtonClickListener(this);
+        nextButton.setText(R.string.action_back_up_my_wallet);
     }
 
-    private void setupJSONExport() {
-        setContentView(R.layout.activity_backup);
+    private void setupJSONExport()
+    {
+        setContentView(R.layout.activity_json_backup);
         initViews();
+
+        setTitle(getString(R.string.export_keystore_json));
         title.setText(R.string.what_is_keystore_json);
         backupImage.setImageResource(R.drawable.ic_keystore);
         detail.setText(R.string.keystore_detail_text);
+        nextButton.setText(R.string.export_keystore_json);
         state = BackupState.ENTER_JSON_BACKUP;
-        functionButtonBar.setPrimaryButtonText(R.string.export_keystore_json);
-        functionButtonBar.setPrimaryButtonClickListener(this);
     }
 
-    private void setupTestSeed() {
-        setContentView(R.layout.activity_backup_write_seed);
+    private void setupTestSeed()
+    {
+        setContentView(R.layout.activity_show_seed_phrase);
         initViews();
+
+        setTitle(getString(R.string.empty));
+        title.setText(getString(R.string.make_a_backup, "12"));
+        nextButton.setText(R.string.test_seed_phrase);
     }
 
     @Override
-    public void run() {
+    public void run()
+    {
         if (successOverlay == null) return;
-        if (successOverlay.getAlpha() > 0) {
+        if (successOverlay.getAlpha() > 0)
+        {
             successOverlay.animate().alpha(0.0f).setDuration(500);
             handler.postDelayed(this, 750);
-        } else {
+        }
+        else
+        {
             successOverlay.setVisibility(View.GONE);
             successOverlay.setAlpha(1.0f);
-            handler = null;
         }
     }
 
     @Override
-    public void onPause() {
+    public void onPause()
+    {
         super.onPause();
         viewModel.resetSignDialog();
         //hide seed phrase and any visible words
         if (layoutWordHolder != null) layoutWordHolder.removeAllViews();
 
-        switch (state) {
+        switch (state)
+        {
             case WRITE_DOWN_SEED_PHRASE:
             case SHOW_SEED_PHRASE:
                 setHDBackupSplash(); //note, the OS calls onPause if user chooses to authenticate using PIN or password (takes them to the auth screen).
@@ -290,27 +308,102 @@ public class BackupKeyActivity extends BaseActivity implements
         }
     }
 
-    private void initViews() {
+    private void initViews()
+    {
         title = findViewById(R.id.text_title);
         detail = findViewById(R.id.text_detail);
         layoutWordHolder = findViewById(R.id.layout_word_holder);
+        nextButton = findViewById(R.id.button_next);
         verifyTextBox = findViewById(R.id.text_verify);
-        backupImage = findViewById(R.id.backup_seed_image);
-        functionButtonBar = findViewById(R.id.layoutButtons);
-        inputView = findViewById(R.id.input_password);
-        if (inputView != null) {
-            inputView.getEditText().addTextChangedListener(this);
+        backupImage = findViewById(R.id.seed_image);
+        if (layoutHolderWidth > 0 && layoutHolderWidth <= 800)
+        {
+            setBackupImageSmall();
         }
+        inputView = findViewById(R.id.input_password);
+        nextButton.setOnClickListener(this);
+        skipButton = findViewById(R.id.button_cancel);
+        spacerImage = findViewById(R.id.spacer_image);
+        if (inputView != null) inputView.getEditText().addTextChangedListener(this);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+
+        // Note: The seed display requires the holder view to be drawn so it can measure how much
+        // space is left on each line.
+        if (layoutHolderWidth == 0 && layoutWordHolder != null)
+        {
+            ViewTreeObserver vto = layoutWordHolder.getViewTreeObserver();
+            vto.addOnGlobalLayoutListener(() -> {
+                if (layoutHolderWidth == 0)
+                {
+                    //This is a little bit of a kludge, but it means the generated seed words
+                    //adapt to the size of the screen. It's required for old phones with low resolution display.
+                    //Tested against the oldest possible phone (Android 6) with a 480 pixel width.
+                    layoutHolderWidth = layoutWordHolder.getMeasuredWidth();
+                    if (layoutHolderWidth > 800)
+                    {
+                        seedTextVPadding = 25;
+                        seedTextSize = 20;
+                    }
+                    else if (layoutHolderWidth > 600)
+                    {
+                        setBackupImageSmall();
+                        seedTextVPadding = 15;
+                        seedTextSize = 18;
+                    }
+                    else
+                    {
+                        setBackupImageSmall();
+                        seedTextVPadding = 8;
+                        seedTextSize = 16;
+                    }
+                    seedTextHPadding = layoutHolderWidth / 25;
+
+                    // may need to resume
+                    switch (state)
+                    {
+                        case SHOW_SEED_PHRASE:
+                            addSeedWordsToScreen();
+                        default:
+                            break;
+                    }
+                }
+            });
+        }
+
         toolbar();
-        setTitle(getString(R.string.empty));
+    }
+
+    private void setBackupImageSmall()
+    {
+        if (backupImage != null) backupImage.setVisibility(View.GONE);
+        backupImage = findViewById(R.id.seed_image_small);
+        if (backupImage != null) backupImage.setVisibility(View.VISIBLE);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home: {
-                onBackPressed();
+                switch (state)
+                {
+                    case VERIFY_SEED_PHRASE:
+                    case SEED_PHRASE_INVALID:
+                        //if we're currently verifying seed or we made a mistake copying the seed down then allow user to restart
+                        state = BackupState.WRITE_DOWN_SEED_PHRASE;
+                        WriteDownSeedPhrase();
+                        DisplaySeed();
+                        break;
+                    case WRITE_DOWN_SEED_PHRASE:
+                        state = BackupState.ENTER_BACKUP_STATE_HD;
+                        setHDBackupSplash();
+                        break;
+                    case SET_JSON_PASSWORD:
+                        setupJSONExport();
+                        break;
+                    default:
+                        keyFailure("");
+                        break;
+                }
                 return true;
             }
         }
@@ -318,69 +411,82 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     @Override
-    public void onBackPressed() {
-        switch (state) {
-            case VERIFY_SEED_PHRASE:
-            case SEED_PHRASE_INVALID:
-                //if we're currently verifying seed or we made a mistake copying the seed down then allow user to restart
-                state = BackupState.WRITE_DOWN_SEED_PHRASE;
+    public void onClick(View view)
+    {
+        switch (state)
+        {
+            case ENTER_BACKUP_STATE_HD:
                 WriteDownSeedPhrase();
                 DisplaySeed();
                 break;
             case WRITE_DOWN_SEED_PHRASE:
-                state = BackupState.ENTER_BACKUP_STATE_HD;
-                setHDBackupSplash();
+                VerifySeedPhrase();
+                break;
+            case VERIFY_SEED_PHRASE:
+                TestSeedPhrase();
+                break;
+            case SEED_PHRASE_INVALID:
+                ResetInputBox();
+                VerifySeedPhrase();
+                break;
+            case ENTER_JSON_BACKUP:
+                JSONBackup();
                 break;
             case SET_JSON_PASSWORD:
-                setupJSONExport();
+                inputView = findViewById(R.id.input_password);
+                keystorePassword = inputView.getText().toString();
+                viewModel.getPasswordForKeystore(wallet, this, this);
                 break;
-            default:
-                keyFailure("");
+            case SHOW_SEED_PHRASE:
+                VerifySeedPhrase();
+                break;
+            case UPGRADE_KEY_SECURITY:
+                upgradeKeySecurity();
                 break;
         }
     }
 
-    @Override
-    public void onClick(View view) {
-        // Passing an empty String as this class handles clicks based on state
-        handleClick("", 0);
-    }
-
-    private void ResetInputBox() {
+    private void ResetInputBox()
+    {
         verifyTextBox.setBackgroundResource(R.drawable.background_verify_window);
-        verifyTextBox.setTextColor(getColor(R.color.dove));
+        verifyTextBox.setTextColor(getColor(R.color.greyaa));
         verifyTextBox.setText(R.string.empty);
         TextView invalid = findViewById(R.id.text_invalid);
         invalid.setVisibility(View.GONE);
+
+        nextButton.setText(R.string.action_continue);
     }
 
-    private void JSONBackup() {
+    private void JSONBackup()
+    {
         setContentView(R.layout.activity_set_json_password);
         initViews();
+
         setTitle(getString(R.string.set_keystore_password));
         inputView.setInstruction(R.string.password_6_characters_or_more);
         state = BackupState.SET_JSON_PASSWORD;
         inputView.getEditText().addTextChangedListener(this);
-        functionButtonBar.setPrimaryButtonText(R.string.share_keystore);
-        functionButtonBar.setPrimaryButtonClickListener(this);
-        functionButtonBar.setPrimaryButtonEnabled(false);
-        inputView.setLayoutListener(this, this);
+        nextButton.setText(R.string.share_keystore);
+        updateButtonState(false);
+        inputView.setLayoutListener(this, this, null);
     }
 
-    private void TestSeedPhrase() {
+    private void TestSeedPhrase()
+    {
         String currentText = verifyTextBox.getText().toString();
         String[] currentTest = currentText.split(" ");
 
-        if (currentTest.length != mnemonicArray.length) {
+        if (currentTest.length != mnemonicArray.length)
+        {
             //fail. This should never happen
             seedIncorrect();
             return;
-        } else {
-            for (int i = 0; i < mnemonicArray.length; i++) {
-                if (!mnemonicArray[i].equals(currentTest[i])) {
-                    seedIncorrect();
-                    return;
-                }
+        }
+        else
+        {
+            for (int i = 0; i < mnemonicArray.length; i++)
+            {
+                if (!mnemonicArray[i].equals(currentTest[i])) { seedIncorrect(); return; }
             }
         }
 
@@ -391,22 +497,25 @@ public class BackupKeyActivity extends BaseActivity implements
         backupKeySuccess(BackupOperationType.BACKUP_HD_KEY);
     }
 
-    private void seedIncorrect() {
+    private void seedIncorrect()
+    {
         verifyTextBox.setBackgroundResource(R.drawable.background_verify_window_fail);
-        verifyTextBox.setTextColor(getColor(R.color.dove));
+        verifyTextBox.setTextColor(getColor(R.color.grey_faint));
         TextView invalid = findViewById(R.id.text_invalid);
         invalid.setVisibility(View.VISIBLE);
-        Toast.makeText(this, R.string.invalid_phrase, Toast.LENGTH_LONG).show();
-        ResetInputBox();
-        VerifySeedPhrase();
+
+        nextButton.setText(R.string.try_again);
+        state = BackupState.SEED_PHRASE_INVALID;
     }
 
-    private void backupKeySuccess(BackupOperationType type) {
+    private void backupKeySuccess(BackupOperationType type)
+    {
         //first record backup time success, in case user aborts operation during key locking
         viewModel.backupSuccess(wallet);
 
         //now ask if user wants to upgrade the key security (if required)
-        switch (wallet.authLevel) {
+        switch (wallet.authLevel)
+        {
             case STRONGBOX_NO_AUTHENTICATION:
             case TEE_NO_AUTHENTICATION:
                 //improve key security
@@ -418,9 +527,11 @@ public class BackupKeyActivity extends BaseActivity implements
         }
     }
 
-    private void finishBackupSuccess(boolean upgradeKey) {
+    private void finishBackupSuccess(boolean upgradeKey)
+    {
         Intent intent = new Intent();
-        switch (wallet.type) {
+        switch (wallet.type)
+        {
             case KEYSTORE_LEGACY:
             case KEYSTORE:
                 intent.putExtra("TYPE", BackupOperationType.BACKUP_KEYSTORE_KEY);
@@ -439,116 +550,150 @@ public class BackupKeyActivity extends BaseActivity implements
         finish();
     }
 
-    private void VerifySeedPhrase() {
+    private void VerifySeedPhrase()
+    {
         setContentView(R.layout.activity_verify_seed_phrase);
         initViews();
-        functionButtonBar.setPrimaryButtonText(R.string.action_continue);
-        functionButtonBar.setPrimaryButtonClickListener(v -> TestSeedPhrase());
-        functionButtonBar.setPrimaryButtonEnabled(false);
+
+        if (layoutHolderWidth < 600)
+        {
+            spacerImage.setVisibility(View.GONE);
+        }
+
+        setTitle(getString(R.string.empty));
         state = BackupState.VERIFY_SEED_PHRASE;
         title.setText(R.string.verify_seed_phrase);
+        nextButton.setText(R.string.action_continue);
         TextView invalid = findViewById(R.id.text_invalid);
         invalid.setVisibility(View.INVISIBLE);
         layoutWordHolder.setVisibility(View.VISIBLE);
         layoutWordHolder.removeAllViews();
+        setBottomButtonActive(false);
 
-        if (mnemonicArray != null) {
-            jumbleList();
-        }
-    }
+        if (mnemonicArray == null) return;
 
-    private void jumbleList() {
+        addNewLayoutLine();
+
+        //jumble list
         List<Integer> numberList = new ArrayList<>();
-        for (int i = 0; i < mnemonicArray.length; i++)
-            numberList.add(i);
+        for (int i = 0; i < mnemonicArray.length; i++) numberList.add(i);
 
-        for (int i = 0; i < mnemonicArray.length; i++) {
-            int random = (int) (Math.random() * (double) numberList.size());
+        for (int i = 0; i < mnemonicArray.length; i++)
+        {
+            int random = (int)(Math.random()*(double)numberList.size());
             int mnemonicIndex = numberList.get(random);
             numberList.remove(random); //remove this index
-            TextView tv = generateSeedWordTextView(mnemonicArray[mnemonicIndex]);
+            TextView tv = addWordToLayout(mnemonicArray[mnemonicIndex]);
             tv.setOnClickListener(view -> onWordClick(tv));
-            layoutWordHolder.addView(tv);
         }
     }
 
-    private void onWordClick(TextView tv) {
-        tv.setTextColor(getColor(R.color.alabaster));
+    private void onWordClick(TextView tv)
+    {
+        tv.setTextColor(getColor(R.color.greyf9));
         tv.setBackgroundResource(R.drawable.background_seed_word_selected);
-        tv.setOnClickListener(null);
+        tv.setOnClickListener(view -> { }); //clicking does nothing now
         String currentText = verifyTextBox.getText().toString();
         if (currentText.length() > 0) currentText += " ";
         currentText += tv.getText().toString();
         verifyTextBox.setText(currentText);
 
         String[] currentTest = currentText.split(" ");
-        if (currentTest.length == mnemonicArray.length) {
-            functionButtonBar.setPrimaryButtonEnabled(true);
+        if (currentTest.length == mnemonicArray.length)
+        {
+            TestSeedPhrase();
+            setBottomButtonActive(true);
         }
     }
 
-    private void WriteDownSeedPhrase() {
-        setContentView(R.layout.activity_backup_write_seed);
-        initViews();
-        state = BackupState.WRITE_DOWN_SEED_PHRASE;
-        title.setText(R.string.write_down_seed_phrase);
-        functionButtonBar.setPrimaryButtonText(R.string.wrote_down_seed_phrase);
-        functionButtonBar.setPrimaryButtonClickListener(this);
+    private void setBottomButtonActive(boolean active)
+    {
+        nextButton.setClickable(active);
+        nextButton.setActivated(active);
+        nextButton.setBackgroundColor(getColor(active ? R.color.nasty_green : R.color.inactive_green));
     }
 
-    private void DisplaySeed() {
-        if (layoutWordHolder != null) {
+    private void WriteDownSeedPhrase()
+    {
+        setContentView(R.layout.activity_backup_write_seed);
+        initViews();
+
+        setTitle(getString(R.string.empty));
+        state = BackupState.WRITE_DOWN_SEED_PHRASE;
+        title.setText(R.string.write_down_seed_phrase);
+        nextButton.setText(R.string.wrote_down_seed_phrase);
+        setBottomButtonActive(true);
+    }
+
+    private void DisplaySeed()
+    {
+        if (layoutWordHolder != null )
+        {
             layoutWordHolder.setVisibility(View.VISIBLE);
             layoutWordHolder.removeAllViews();
         }
 
-        viewModel.getAuthentication(wallet, this, this);
+        viewModel.getSeedPhrase(wallet, this, this);
     }
 
-    private TextView generateSeedWordTextView(String word) {
-        int margin = Utils.dp2px(this, 4);
-        int padding;
-        float textSize;
-        int textViewHeight;
+    private void addNewLayoutLine()
+    {
+        currentEdge = 0;
+        currentHolder = new LinearLayout(this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0,0,0,8);
+        currentHolder.setLayoutParams(params);
+        currentHolder.setOrientation(LinearLayout.HORIZONTAL);
+        layoutWordHolder.addView(currentHolder);
+    }
 
-        if (screenWidth > 800) {
-            textSize = 16.0f;
-            padding = Utils.dp2px(this, 20);
-            textViewHeight = Utils.dp2px(this, 44);
-        } else {
-            textSize = 14.0f;
-            padding = Utils.dp2px(this, 16);
-            textViewHeight = Utils.dp2px(this, 38);
+    private void setSeedWordSize(TextView seedWord)
+    {
+        seedWord.setTextSize(TypedValue.COMPLEX_UNIT_SP, seedTextSize);
+        seedWord.setPadding(seedTextHPadding, seedTextVPadding, seedTextHPadding, seedTextVPadding);
+    }
+
+    private TextView addWordToLayout(String word)
+    {
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0,0,8,0);
+
+        TextView seedWord = new TextView(this);
+        seedWord.setText(word);
+        seedWord.setGravity(Gravity.CENTER_HORIZONTAL);
+        seedWord.setBackgroundResource(R.drawable.background_seed_word);
+        seedWord.setTextColor(getColor(R.color.greyaa));
+        seedWord.setLayoutParams(params);
+        setSeedWordSize(seedWord);
+
+        seedWord.measure(0, 0);
+        int measuredWidth = seedWord.getMeasuredWidth();
+        if ((currentEdge + measuredWidth + 8) > layoutHolderWidth)
+        {
+            addNewLayoutLine();
         }
 
-        FlexboxLayout.LayoutParams params =
-                new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, textViewHeight);
+        currentEdge += (measuredWidth + 8);
 
-        params.setMargins(margin, margin, margin, margin);
-        TextView seedWord = new TextView(this);
-        seedWord.setMaxLines(1);
-        seedWord.setText(word);
-        seedWord.setTypeface(ResourcesCompat.getFont(this, R.font.font_regular));
-        seedWord.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
-        seedWord.setBackgroundResource(R.drawable.background_seed_word);
-        seedWord.setTextColor(getColor(R.color.mine));
-        seedWord.setLayoutParams(params);
-        seedWord.setGravity(Gravity.CENTER);
-        seedWord.setPadding(padding, 0, padding, 0);
-
+        currentHolder.addView(seedWord);
         return seedWord;
     }
 
     @Override
-    public void HDKeyCreated(String address, Context ctx, KeyService.AuthenticationLevel level) {
+    public void HDKeyCreated(String address, Context ctx, KeyService.AuthenticationLevel level)
+    {
         //empty, doesn't get called
     }
 
     @Override
-    public void keyFailure(String message) {
-        if (message != null && message.length() > 0) {
+    public void keyFailure(String message)
+    {
+        if (message != null && message.length() > 0)
+        {
             DisplayKeyFailureDialog(message);
-        } else {
+        }
+        else
+        {
             Intent intent = new Intent();
             setResult(RESULT_CANCELED, intent);
             intent.putExtra("Key", wallet.address);
@@ -556,7 +701,8 @@ public class BackupKeyActivity extends BaseActivity implements
         }
     }
 
-    private void DisplayKeyFailureDialog(String message) {
+    private void DisplayKeyFailureDialog(String message)
+    {
         hideDialog();
 
         alertDialog = new AWalletAlertDialog(this);
@@ -576,8 +722,19 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     @Override
-    public void fetchMnemonic(String mnemonic) {
-        switch (state) {
+    public void cancelAuthentication()
+    {
+        Intent intent = new Intent();
+        setResult(RESULT_CANCELED, intent);
+        intent.putExtra("Key", wallet.address);
+        finish();
+    }
+
+    @Override
+    public void FetchMnemonic(String mnemonic)
+    {
+        switch (state)
+        {
             case WRITE_DOWN_SEED_PHRASE:
                 WriteDownSeedPhrase();
                 mnemonicArray = mnemonic.split(" ");
@@ -606,65 +763,32 @@ public class BackupKeyActivity extends BaseActivity implements
         }
     }
 
-    private void addSeedWordsToScreen() {
+    private void addSeedWordsToScreen()
+    {
         if (mnemonicArray == null) return;
-        layoutWordHolder.setFlexDirection(FlexDirection.ROW);
-
-        for (String word : mnemonicArray) {
-            layoutWordHolder.addView(generateSeedWordTextView(word));
-        }
-    }
-
-    @Override
-    public void gotAuthorisation(boolean gotAuth)
-    {
-        if (gotAuth)
+        addNewLayoutLine();
+        //start adding words to layout
+        for (String word : mnemonicArray)
         {
-            //use this to get seed backup
-            switch (state)
-            {
-                case UNDEFINED:
-                    break;
-                case ENTER_BACKUP_STATE_HD:
-                    break;
-                case WRITE_DOWN_SEED_PHRASE:
-                    //proceed and get the mnemonic
-                    viewModel.getSeedPhrase(wallet, this, this);
-                    break;
-                case VERIFY_SEED_PHRASE:
-                    break;
-                case SEED_PHRASE_INVALID:
-                    break;
-                case ENTER_JSON_BACKUP:
-                    break;
-                case SET_JSON_PASSWORD:
-                    break;
-                case SHOW_SEED_PHRASE:
-                    viewModel.getSeedPhrase(wallet, this, this);
-                    break;
-                case UPGRADE_KEY_SECURITY:
-                    upgradeKeySecurity();
-                    break;
-            }
+            addWordToLayout(word);
         }
     }
 
     @Override
-    public void cancelAuthentication()
+    public void GotAuthorisation(boolean gotAuth)
     {
-        Intent intent = new Intent();
-        setResult(RESULT_CANCELED, intent);
-        intent.putExtra("Key", wallet.address);
-        finish();
+
     }
 
-    private void initViewModel() {
+    private void initViewModel()
+    {
         viewModel = ViewModelProviders.of(this, backupKeyViewModelFactory)
                 .get(BackupKeyViewModel.class);
         viewModel.exportedStore().observe(this, this::onExportKeystore);
     }
 
-    private void onExportKeystore(String keystore) {
+    private void onExportKeystore(String keystore)
+    {
         Intent sharingIntent = new Intent(Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
         sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Keystore");
@@ -683,31 +807,40 @@ public class BackupKeyActivity extends BaseActivity implements
         //Interpret the return code; if it's within the range of values possible to return from PIN confirmation then separate out
         //the task code from the return value. We have to do it this way because there's no way to send a bundle across the PIN dialog
         //and out through the PIN dialog's return back to here
-        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10) {
+        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+        {
             taskCode = Operation.values()[requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS];
             requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
         }
 
-        switch (requestCode) {
+        switch (requestCode)
+        {
             case SHARE_REQUEST_CODE:
-                if (resultCode == RESULT_OK) {
+                if (resultCode == RESULT_OK)
+                {
                     backupKeySuccess(BackupOperationType.BACKUP_KEYSTORE_KEY);
-                } else {
+                }
+                else
+                {
                     AskUserSuccess();
                 }
                 break;
 
             case SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS:
-                if (resultCode == RESULT_OK) {
+                if (resultCode == RESULT_OK)
+                {
                     viewModel.completeAuthentication(taskCode);
-                } else {
+                }
+                else
+                {
                     viewModel.failedAuthentication(taskCode);
                 }
                 break;
         }
     }
 
-    private void AskUserSuccess() {
+    private void AskUserSuccess()
+    {
         hideDialog();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(AWalletAlertDialog.SUCCESS);
@@ -732,19 +865,31 @@ public class BackupKeyActivity extends BaseActivity implements
         }
     }
 
+    private void updateButtonState(boolean enabled)
+    {
+        nextButton.setActivated(enabled);
+        nextButton.setClickable(enabled);
+        int colorId = enabled ? R.color.nasty_green : R.color.inactive_green;
+        if (getApplicationContext() != null) nextButton.setBackgroundColor(getColor(colorId));
+    }
+
     @Override
-    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
+    {
 
     }
 
     @Override
-    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+    {
 
     }
 
     @Override
-    public void afterTextChanged(Editable editable) {
-        switch (state) {
+    public void afterTextChanged(Editable editable)
+    {
+        switch (state)
+        {
             case ENTER_BACKUP_STATE_HD:
                 break;
             case WRITE_DOWN_SEED_PHRASE:
@@ -759,9 +904,11 @@ public class BackupKeyActivity extends BaseActivity implements
                 String txt = inputView.getText().toString();
                 if (txt.length() >= 6) //password length minimum 6
                 {
-                    functionButtonBar.setPrimaryButtonEnabled(true);
-                } else {
-                    functionButtonBar.setPrimaryButtonEnabled(false);
+                    updateButtonState(true);
+                }
+                else
+                {
+                    updateButtonState(false);
                 }
                 break;
             case SHOW_SEED_PHRASE:
@@ -770,65 +917,40 @@ public class BackupKeyActivity extends BaseActivity implements
     }
 
     @Override
-    public void onLayoutShrunk() {
+    public void onLayoutShrunk()
+    {
 
     }
 
     @Override
-    public void onLayoutExpand() {
+    public void onLayoutExpand()
+    {
 
     }
 
     @Override
-    public void onInputDoneClick(View view) {
+    public void onInputDoneClick(View view)
+    {
         inputView = findViewById(R.id.input_password);
         keystorePassword = inputView.getText().toString();
-        if (keystorePassword.length() > 5) {
+        if (keystorePassword.length() > 5)
+        {
             viewModel.getPasswordForKeystore(wallet, this, this);
-        } else {
+        }
+        else
+        {
             inputView.setError(R.string.password_6_characters_or_more);
         }
     }
 
-    private enum BackupState {
+    private enum BackupState
+    {
         UNDEFINED, ENTER_BACKUP_STATE_HD, WRITE_DOWN_SEED_PHRASE, VERIFY_SEED_PHRASE, SEED_PHRASE_INVALID,
         ENTER_JSON_BACKUP, SET_JSON_PASSWORD, SHOW_SEED_PHRASE, UPGRADE_KEY_SECURITY
     }
 
-    public enum BackupOperationType {
+    public enum BackupOperationType
+    {
         UNDEFINED, BACKUP_HD_KEY, BACKUP_KEYSTORE_KEY, SHOW_SEED_PHRASE, EXPORT_PRIVATE_KEY, UPGRADE_KEY
-    }
-
-    @Override
-    public void handleClick(String action, int id) {
-        switch (state) {
-            case ENTER_BACKUP_STATE_HD:
-                WriteDownSeedPhrase();
-                DisplaySeed();
-                break;
-            case WRITE_DOWN_SEED_PHRASE:
-            case SHOW_SEED_PHRASE:
-                VerifySeedPhrase();
-                break;
-            case VERIFY_SEED_PHRASE:
-                TestSeedPhrase();
-                break;
-            case SEED_PHRASE_INVALID:
-                ResetInputBox();
-                VerifySeedPhrase();
-                break;
-            case ENTER_JSON_BACKUP:
-                JSONBackup();
-                break;
-            case SET_JSON_PASSWORD:
-                inputView = findViewById(R.id.input_password);
-                keystorePassword = inputView.getText().toString();
-                viewModel.getPasswordForKeystore(wallet, this, this);
-                break;
-            case UPGRADE_KEY_SECURITY:
-                //first open authentication
-                viewModel.getAuthentication(wallet, this, this);
-                break;
-        }
     }
 }

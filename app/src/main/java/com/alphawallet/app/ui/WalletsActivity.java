@@ -5,8 +5,13 @@ import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
@@ -15,6 +20,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,11 +31,9 @@ import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
-import com.alphawallet.app.entity.VisibilityFilter;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.ui.widget.adapter.WalletsAdapter;
-import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletsViewModel;
 import com.alphawallet.app.viewmodel.WalletsViewModelFactory;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -46,7 +50,6 @@ public class WalletsActivity extends BaseActivity implements
         AddWalletView.OnNewWalletClickListener,
         AddWalletView.OnImportWalletClickListener,
         AddWalletView.OnWatchWalletClickListener,
-        AddWalletView.OnCloseActionListener,
         CreateWalletCallbackInterface
 {
     @Inject
@@ -60,9 +63,10 @@ public class WalletsActivity extends BaseActivity implements
     private AWalletAlertDialog aDialog;
     private WalletsAdapter adapter;
     private final Handler handler = new Handler();
-    private Wallet selectedWallet;
 
+    private boolean walletChange = false;
     private boolean requiresHomeRefresh;
+    private NetworkInfo networkInfo;
     private String dialogError;
 
     @Override
@@ -71,36 +75,27 @@ public class WalletsActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wallets);
         toolbar();
-        setTitle(getString(R.string.title_change_add_wallet));
+        setTitle(getString(R.string.title_change_wallet));
         initViews();
         requiresHomeRefresh = false;
-        initViewModel();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        initViewModel();
-    }
-
-    private void initViewModel()
-    {
-        if (viewModel == null)
-        {
-            viewModel = ViewModelProviders.of(this, walletsViewModelFactory)
-                    .get(WalletsViewModel.class);
-            viewModel.error().observe(this, this::onError);
-            viewModel.progress().observe(this, systemView::showProgress);
-            viewModel.wallets().observe(this, this::onFetchWallet);
-            viewModel.defaultWallet().observe(this, this::onChangeDefaultWallet);
-            viewModel.createdWallet().observe(this, this::onCreatedWallet);
-            viewModel.createWalletError().observe(this, this::onCreateWalletError);
-            viewModel.updateBalance().observe(this, this::onUpdatedBalance);
-            viewModel.updateENSName().observe(this, this::updateWalletName);
-            viewModel.noWalletsError().observe(this, this::noWallets);
-        }
-
-        viewModel.onPrepare();
+        viewModel = ViewModelProviders.of(this, walletsViewModelFactory)
+                .get(WalletsViewModel.class);
+        viewModel.defaultNetwork().observe(this, this::onDefaultNetwork);
+        viewModel.error().observe(this, this::onError);
+        viewModel.progress().observe(this, systemView::showProgress);
+        viewModel.wallets().observe(this, this::onFetchWallet);
+        viewModel.defaultWallet().observe(this, this::onChangeDefaultWallet);
+        viewModel.createdWallet().observe(this, this::onCreatedWallet);
+        viewModel.createWalletError().observe(this, this::onCreateWalletError);
+        viewModel.updateBalance().observe(this, this::onUpdatedBalance);
+        viewModel.updateENSName().observe(this, this::updateWalletName);
+        viewModel.noWalletsError().observe(this, this::noWallets);
+        viewModel.findNetwork();
     }
 
     protected Activity getThisActivity()
@@ -128,11 +123,16 @@ public class WalletsActivity extends BaseActivity implements
 
         adapter = new WalletsAdapter(this, this::onSetWalletDefault);
         list.setAdapter(adapter);
-        list.addItemDecoration(new ListDivider(this));
+        list.addItemDecoration(new WalletDivider(this));
 
         systemView.attachRecyclerView(list);
         systemView.attachSwipeRefreshLayout(refreshLayout);
         refreshLayout.setOnRefreshListener(this::onSwipeRefresh);
+    }
+
+    private void onDefaultNetwork(NetworkInfo networkInfo) {
+        this.networkInfo = networkInfo;
+        adapter.setNetwork(networkInfo);
     }
 
     private void onSwipeRefresh() {
@@ -142,7 +142,7 @@ public class WalletsActivity extends BaseActivity implements
     private void onCreateWalletError(ErrorEnvelope errorEnvelope)
     {
         dialogError = errorEnvelope.message;
-        if (handler != null) handler.post(displayWalletError);
+        handler.post(displayWalletError);
     }
 
     private Runnable displayWalletError = new Runnable()
@@ -166,12 +166,13 @@ public class WalletsActivity extends BaseActivity implements
     protected void onPause() {
         super.onPause();
         hideDialog();
-        viewModel.onPause(); //no need to update balances if view isn't showing
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroy()
+    {
         super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
     }
 
     @Override
@@ -187,7 +188,7 @@ public class WalletsActivity extends BaseActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (VisibilityFilter.canChangeWallets()) getMenuInflater().inflate(R.menu.menu_add, menu);
+        getMenuInflater().inflate(R.menu.menu_add, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -209,7 +210,6 @@ public class WalletsActivity extends BaseActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        initViewModel();
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
@@ -268,11 +268,6 @@ public class WalletsActivity extends BaseActivity implements
         viewModel.importWallet(this);
     }
 
-    @Override
-    public void onClose(View view) {
-        hideDialog();
-    }
-
     private void onUpdatedBalance(Wallet wallet) {
         adapter.updateWalletbalance(wallet);
     }
@@ -282,7 +277,6 @@ public class WalletsActivity extends BaseActivity implements
         addWalletView.setOnNewWalletClickListener(this);
         addWalletView.setOnImportWalletClickListener(this);
         addWalletView.setOnWatchWalletClickListener(this);
-        addWalletView.setOnCloseActionListener(this);
         dialog = new BottomSheetDialog(this);
         dialog.setContentView(addWalletView);
         dialog.setCancelable(true);
@@ -293,12 +287,11 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     private void onChangeDefaultWallet(Wallet wallet) {
-        if (selectedWallet != null && !wallet.sameAddress(selectedWallet.address))
-        {
+        if (walletChange) {
+            walletChange = false;
             sendBroadcast(new Intent(C.RESET_WALLET));
         }
 
-        selectedWallet = wallet;
         adapter.setDefaultWallet(wallet);
         if (requiresHomeRefresh)
         {
@@ -326,7 +319,9 @@ public class WalletsActivity extends BaseActivity implements
     {
         Intent intent = new Intent(this, WalletActionsActivity.class);
         intent.putExtra("wallet", wallet);
-        intent.putExtra("currency", viewModel.getNetwork().symbol);
+        if (networkInfo != null) {
+            intent.putExtra("currency", networkInfo.symbol);
+        }
         intent.putExtra("walletCount", adapter.getItemCount());
         intent.putExtra("isNewWallet", true);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -340,6 +335,7 @@ public class WalletsActivity extends BaseActivity implements
     private void onSetWalletDefault(Wallet wallet) {
         requiresHomeRefresh = true;
         viewModel.setDefaultWallet(wallet);
+        walletChange = true;
     }
 
     private void hideDialog() {
@@ -374,8 +370,61 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
-    public void fetchMnemonic(String mnemonic)
+    public void FetchMnemonic(String mnemonic)
     {
 
+    }
+
+    private class WalletDivider extends RecyclerView.ItemDecoration
+    {
+        private final int[] ATTRS = new int[]{16843284};
+        private Drawable mDivider;
+        private final Rect mBounds = new Rect();
+        private int marginPx;
+
+        public WalletDivider(Context context)
+        {
+            TypedArray a = context.obtainStyledAttributes(ATTRS);
+            this.mDivider = a.getDrawable(0);
+            marginPx = (int) (10 * getResources().getDisplayMetrics().density);
+            if (this.mDivider == null)
+            {
+                Log.w("DividerItem", "@android:attr/listDivider was not set in the theme used for this DividerItemDecoration. Please set that attribute all call setDrawable()");
+            }
+
+            a.recycle();
+        }
+
+        public void setDrawable(@NonNull Drawable drawable)
+        {
+            this.mDivider = drawable;
+        }
+
+        public void onDraw(Canvas canvas, RecyclerView parent, RecyclerView.State state)
+        {
+            canvas.save();
+            int left = marginPx;
+            int right = parent.getWidth() - marginPx;
+            canvas.clipRect(left, parent.getPaddingTop(), right, parent.getHeight() - parent.getPaddingBottom());
+
+            int childCount = parent.getChildCount();
+
+            for (int i = 0; i < childCount; ++i)
+            {
+                View child = parent.getChildAt(i);
+                parent.getDecoratedBoundsWithMargins(child, this.mBounds);
+                int bottom = this.mBounds.bottom + Math.round(child.getTranslationY());
+                int top = bottom - this.mDivider.getIntrinsicHeight();
+                this.mDivider.setBounds(left, top, right, bottom);
+                this.mDivider.draw(canvas);
+            }
+
+            canvas.restore();
+        }
+
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state)
+        {
+            outRect.set(0, 0, 0, this.mDivider.getIntrinsicHeight());
+        }
     }
 }

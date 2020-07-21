@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
@@ -49,8 +48,6 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
     private SystemView systemView;
     private ProgressView progressView;
     private int currentMenu = R.menu.send_menu;
-
-    private FinishReceiver finishReceiver;
 
     public TextView ids;
 
@@ -96,7 +93,6 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
         viewModel.progress().observe(this, systemView::showProgress);
         viewModel.queueProgress().observe(this, progressView::updateProgress);
         viewModel.pushToast().observe(this, this::displayToast);
-        finishReceiver = new FinishReceiver(this);
         setupRedeemSelector();
     }
 
@@ -121,13 +117,6 @@ public class RedeemAssetSelectActivity extends BaseActivity implements OnTokenCl
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    protected void onDestroy()
-    {
-        super.onDestroy();
-        unregisterReceiver(finishReceiver);
     }
 
     @Override

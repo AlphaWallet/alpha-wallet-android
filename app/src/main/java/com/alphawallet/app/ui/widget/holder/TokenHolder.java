@@ -1,8 +1,6 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -10,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,54 +20,43 @@ import android.widget.TextView;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.util.Utils;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.CustomViewTarget;
-import com.bumptech.glide.request.transition.Transition;
-import com.bumptech.glide.signature.ObjectKey;
-
-import org.jetbrains.annotations.NotNull;
-import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class TokenHolder extends BinderViewHolder<Token> implements View.OnClickListener, View.OnLongClickListener {
 
     public static final int VIEW_TYPE = 1005;
     public static final String EMPTY_BALANCE = "\u2014\u2014";
-    private static final String ICON_REPO_ADDRESS_TOKEN = "[TOKEN]";
-    private static final String TRUST_ICON_REPO = "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/" + ICON_REPO_ADDRESS_TOKEN + "/logo.png";
-    private static final Map<String, Boolean> iconCheck = new ConcurrentHashMap<>();
 
-    private final TextView balanceEth;
-    private final TextView balanceCurrency;
-    private final ImageView icon;
-    private final TextView textIcon;
-    private final TextView text24Hours;
-    private final TextView textAppreciation;
-    private final TextView issuer;
-    private final TextView issuerPlaceholder;
-    private final TextView textAppreciationSub;
-    private final TextView contractType;
-    private final TextView currencyLabel;
-    private final View contractSeparator;
-    private final LinearLayout layoutValueDetails;
-    private final LinearLayout extendedInfo;
+    public final TextView balanceEth;
+    public final TextView balanceCurrency;
+    public final ImageView icon;
+    public final TextView text24Hours;
+    public final TextView textAppreciation;
+    public final TextView issuer;
+    public final TextView issuerPlaceholder;
+    public final TextView text24HoursSub;
+    public final TextView textAppreciationSub;
+    public final TextView contractType;
+    public final TextView currencyLabel;
+    public final TextView chainName;
+    public final TextView textPending;
+    public final TextView textIncomplete;
+    public final View contractSeparator;
+    public final LinearLayout layoutValueDetails;
+    public final LinearLayout extendedInfo;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
-    private final CustomViewTarget viewTarget;
-    private String tokenName;
 
-    private Handler handler;
+    private final Handler handler;
 
     public Token token;
     private OnTokenClickListener onTokenClickListener;
@@ -80,7 +66,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         super(resId, parent);
 
         icon = findViewById(R.id.icon);
-        textIcon = findViewById(R.id.text_icon);
         balanceEth = findViewById(R.id.eth_data);
         balanceCurrency = findViewById(R.id.balance_currency);
         currencyLabel = findViewById(R.id.currency_label);
@@ -88,37 +73,20 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         textAppreciation = findViewById(R.id.text_appreciation);
         issuer = findViewById(R.id.issuer);
         issuerPlaceholder = findViewById(R.id.issuerPlaceholder);
+        text24HoursSub = findViewById(R.id.text_24_hrs_sub);
         textAppreciationSub = findViewById(R.id.text_appreciation_sub);
         contractType = findViewById(R.id.contract_type);
         contractSeparator = findViewById(R.id.contract_seperator);
         layoutValueDetails = findViewById(R.id.layout_value_details);
+        textPending = findViewById(R.id.status_pending);
+        textIncomplete = findViewById(R.id.status_incomplete);
+        chainName = findViewById(R.id.text_chain_name);
         pendingText = findViewById(R.id.balance_eth_pending);
         tokenLayout = findViewById(R.id.token_layout);
         extendedInfo = findViewById(R.id.layout_extended_info);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
-
-        icon.setVisibility(View.INVISIBLE);
-        textIcon.setVisibility(View.GONE);
-
-        viewTarget = new CustomViewTarget<ImageView, BitmapDrawable>(icon) {
-            @Override
-            protected void onResourceCleared(@Nullable Drawable placeholder) { }
-
-            @Override
-            public void onLoadFailed(@Nullable Drawable errorDrawable)
-            {
-                setupTextIcon(token);
-            }
-
-            @Override
-            public void onResourceReady(@NotNull BitmapDrawable bitmap, Transition<? super BitmapDrawable> transition)
-            {
-                textIcon.setVisibility(View.GONE);
-                icon.setVisibility(View.VISIBLE);
-                icon.setImageDrawable(bitmap);
-            }
-        };
+        handler = new Handler();
     }
 
     @Override
@@ -127,29 +95,23 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
 
         try
         {
+            icon.setVisibility(View.GONE);
             tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
-            if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
-            tokenName = token.getFullName(assetDefinition, token.getTicketCount());
-
-            //setup name and value (put these together on a single string to make wrap-around text appear better).
-            String nameValue = token.getStringBalance() + " " + tokenName;
-            balanceEth.setText(nameValue);
-
-            displayTokenIcon();
-
-            setContractType();
-
-            populateTicker();
-
+            chainName.setVisibility(View.VISIBLE);
+            chainName.setText(token.getNetworkName());
+            Utils.setChainColour(chainName, token.tokenInfo.chainId);
             setIssuerDetails();
 
-            setPendingAmount();
+            if (token.ticker != null) animateTextWhileWaiting();
+            if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
+            token.setupContent(this, assetDefinition);
+            setPending();
         } catch (Exception ex) {
             fillEmpty();
         }
     }
 
-    private void setPendingAmount()
+    private void setPending()
     {
         String pendingDiff = token.getPendingDiff();
         if (pendingDiff != null)
@@ -163,28 +125,17 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         }
     }
 
-    private void populateTicker()
-    {
-        if (token.ticker == null)
-        {
-            if (token.isEthereum()) animateTextWhileWaiting();
-            else layoutValueDetails.setVisibility(View.GONE);
-            return;
-        }
-
-        layoutValueDetails.setVisibility(View.VISIBLE);
+    public void fillCurrency(BigDecimal ethBalance, TokenTicker ticker) {
         stopTextAnimation();
-        BigDecimal correctedBalance = token.getCorrectedBalance(18);
-        BigDecimal fiatBalance = correctedBalance.multiply(new BigDecimal(token.ticker.price)).setScale(18, RoundingMode.DOWN);
+        BigDecimal fiatBalance = ethBalance.multiply(new BigDecimal(ticker.price)).setScale(2, RoundingMode.DOWN);
         String converted = TickerService.getCurrencyString(fiatBalance.doubleValue());
         String formattedPercents = "";
-        currencyLabel.setText(token.ticker.priceSymbol);
         int color = Color.RED;
         double percentage = 0;
         try {
-            percentage = Double.valueOf(token.ticker.percentChange24h);
+            percentage = Double.valueOf(ticker.percentChange24h);
             color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
-            formattedPercents = (percentage < 0 ? "" : "+") + token.ticker.percentChange24h + "%";
+            formattedPercents = (percentage < 0 ? "" : "+") + ticker.percentChange24h + "%";
             text24Hours.setText(formattedPercents);
             text24Hours.setTextColor(color);
         } catch (Exception ex) { /* Quietly */ }
@@ -192,7 +143,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
                                converted);
 
         Spannable spannable;
-        if (correctedBalance.compareTo(BigDecimal.ZERO) > 0)
+        if (ethBalance.compareTo(BigDecimal.ZERO) > 0)
         {
             spannable = new SpannableString(lbl);
             spannable.setSpan(new ForegroundColorSpan(color),
@@ -205,7 +156,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         }
 
         //calculate the appreciation value
-        double dBalance = correctedBalance.multiply(new BigDecimal(token.ticker.price)).doubleValue();
+        double dBalance = ethBalance.multiply(new BigDecimal(ticker.price)).doubleValue();
         double nPercentage = (100.0 + percentage)/100.0;
         double dAppreciation = dBalance - (dBalance/nPercentage);
         BigDecimal appreciation = BigDecimal.valueOf(dAppreciation);
@@ -230,7 +181,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         lbl = getString(R.string.token_balance, "",
                         convertedAppreciation);
 
-        if (correctedBalance.compareTo(BigDecimal.ZERO) > 0)
+        if (ethBalance.compareTo(BigDecimal.ZERO) > 0)
         {
             spannable = new SpannableString(lbl);
             spannable.setSpan(new ForegroundColorSpan(color),
@@ -243,45 +194,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         }
     }
 
-    private void displayTokenIcon()
-    {
-        int chainIcon = EthereumNetworkRepository.getChainLogo(token.tokenInfo.chainId);
-
-        // This appears more complex than necessary;
-        // This is because we are dealing with: new token holder view, refreshing views and recycled views
-        // If the token is a basechain token, immediately show the chain icon - no need to load
-        // Otherwise, try to load the icon resource. If there's no icon resource then generate a text token Icon (round circle with first four chars from the name)
-        // Only reveal the icon immediately before populating it - this stops the update flicker.
-        if (token.isEthereum())
-        {
-            textIcon.setVisibility(View.GONE);
-            icon.setImageResource(chainIcon);
-            icon.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            String correctedAddr = Keys.toChecksumAddress(token.getAddress());
-            String tURL = assetDefinition.getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
-            if (TextUtils.isEmpty(tURL))
-            {
-                tURL = TRUST_ICON_REPO.replace(ICON_REPO_ADDRESS_TOKEN, correctedAddr);
-            }
-
-            boolean onlyTryCache = iconCheck.containsKey(correctedAddr);
-
-            Glide.with(getContext().getApplicationContext())
-                    .load(tURL)
-                    .signature(new ObjectKey(correctedAddr + "-" + token.tokenInfo.chainId))
-                    .onlyRetrieveFromCache(onlyTryCache) //reduce URL checking, only check once per session
-                    .apply(new RequestOptions().circleCrop())
-                    .apply(new RequestOptions().placeholder(chainIcon))
-                    .into(viewTarget);
-
-            iconCheck.put(correctedAddr, true);
-        }
-    }
-
-    private void fillEmpty() {
+    protected void fillEmpty() {
         balanceEth.setText(R.string.NA);
         balanceCurrency.setText(EMPTY_BALANCE);
     }
@@ -292,7 +205,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         public void run()
         {
             tokenLayout.setElevation(0.0f);
-            handler = null;
         }
     };
 
@@ -301,7 +213,6 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         if (onTokenClickListener != null) {
             tokenLayout.setElevation(-10.0f);
             onTokenClickListener.onTokenClick(v, token, null, true);
-            handler = new Handler();
             handler.postDelayed(clearElevation, 800);
         }
     }
@@ -324,16 +235,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         this.onTokenClickListener = onTokenClickListener;
     }
 
-    private void setupTextIcon(@NotNull Token token) {
-        icon.setVisibility(View.GONE);
-        textIcon.setVisibility(View.VISIBLE);
-        textIcon.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), Utils.getChainColour(token.tokenInfo.chainId)));
-        textIcon.setText(Utils.getIconisedText(tokenName));
-    }
-
-    private void animateTextWhileWaiting() {
-        emptyTicker();
-        layoutValueDetails.setVisibility(View.VISIBLE);
+    public void animateTextWhileWaiting() {
         Animation anim = new AlphaAnimation(0.0f, 1.0f);
         anim.setDuration(450);
         anim.setStartOffset(20);
@@ -348,18 +250,11 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
     private void setIssuerDetails()
     {
         String issuerName = assetDefinition.getIssuerName(token);
-        if(issuerName != null && !issuerName.equalsIgnoreCase(getString(R.string.app_name))) //don't display issuer if it's alphawallet
+        if(issuerName != null)
         {
             issuer.setVisibility(View.VISIBLE);
             issuerPlaceholder.setVisibility(View.VISIBLE);
-            if (contractType.getVisibility() == View.VISIBLE)
-            {
-                contractSeparator.setVisibility(View.VISIBLE);
-            }
-            else
-            {
-                contractSeparator.setVisibility(View.GONE);
-            }
+            contractSeparator.setVisibility(View.VISIBLE);
             issuer.setText(issuerName);
         }
         else
@@ -376,22 +271,7 @@ public class TokenHolder extends BinderViewHolder<Token> implements View.OnClick
         balanceCurrency.clearAnimation();
     }
 
-    private void setContractType()
-    {
-        //Contract type
-        int contractStringId = token.getContractType();
-        if (contractStringId > 0)
-        {
-            contractType.setText(contractStringId);
-            contractType.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            contractType.setVisibility(View.GONE);
-        }
-    }
-
-    private void emptyTicker()
+    public void emptyTicker()
     {
         text24Hours.setText(R.string.unknown_balance_without_symbol);
         textAppreciation.setText(R.string.unknown_balance_without_symbol);

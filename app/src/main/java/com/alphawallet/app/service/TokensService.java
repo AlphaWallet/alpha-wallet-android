@@ -145,8 +145,8 @@ public class TokensService
 
     public Token getToken(int chainId, String addr)
     {
-        if (TextUtils.isEmpty(currentAddress)) return null;
-        return tokenRepository.fetchToken(chainId, currentAddress, addr.toLowerCase());
+        if (TextUtils.isEmpty(currentAddress) || TextUtils.isEmpty(addr)) return null;
+        else return tokenRepository.fetchToken(chainId, currentAddress, addr.toLowerCase());
     }
 
     /**

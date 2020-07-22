@@ -203,9 +203,7 @@ public class Web3View extends WebView {
 
     private void callbackToJS(long callbackId, String function, String param) {
         String callback = String.format(function, callbackId, param);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));
-        }
+        post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));
     }
 
     private final OnSignTransactionListener innerOnSignTransactionListener = new OnSignTransactionListener() {

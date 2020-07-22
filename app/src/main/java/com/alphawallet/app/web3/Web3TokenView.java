@@ -112,7 +112,7 @@ public class Web3TokenView extends WebView
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUserAgentString(webSettings.getUserAgentString()
                                                + "AlphaWallet(Platform=Android&AppVersion=" + BuildConfig.VERSION_NAME + ")");
-        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
+        WebView.setWebContentsDebuggingEnabled(true);
 
         setScrollBarSize(0);
         setVerticalScrollBarEnabled(false);
@@ -232,9 +232,7 @@ public class Web3TokenView extends WebView
     }
 
     public void callToJS(String function) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            post(() -> evaluateJavascript(function, value -> Log.d("WEB_VIEW", value)));
-        }
+        post(() -> evaluateJavascript(function, value -> Log.d("WEB_VIEW", value)));
     }
 
     @JavascriptInterface
@@ -246,9 +244,7 @@ public class Web3TokenView extends WebView
     @JavascriptInterface
     public void callbackToJS(long callbackId, String function, String param) {
         String callback = String.format(function, callbackId, param);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));
-        }
+        post(() -> evaluateJavascript(callback, value -> Log.d("WEB_VIEW", value)));
     }
 
     public void setOnSignPersonalMessageListener(@Nullable OnSignPersonalMessageListener onSignPersonalMessageListener) {

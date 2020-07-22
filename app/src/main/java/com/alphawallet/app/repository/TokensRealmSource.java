@@ -595,7 +595,7 @@ public class TokensRealmSource implements TokenLocalSource {
         return assets;
     }
 
-    public Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters, AssetDefinitionService svs)
+    public Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters, AssetDefinitionService svs, boolean includeHidden)
     {
         List<TokenCardMeta> tokenMetas = new ArrayList<>();
         return Single.fromCallable(() -> {
@@ -603,15 +603,28 @@ public class TokensRealmSource implements TokenLocalSource {
             List<Integer> rootChainTokenCards = new ArrayList<>(networkFilters);
             try (Realm realm = realmManager.getRealmInstance(wallet))
             {
-                RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
-                        .sort("addedTime", Sort.ASCENDING)
-                        .equalTo("isEnabled", true)
-                        .like("address", ADDRESS_FORMAT)
-                        .findAll();
+                RealmResults<RealmToken> realmItems;
+
+                if (!includeHidden)
+                {
+                    realmItems = realm.where(RealmToken.class)
+                            .sort("addedTime", Sort.ASCENDING)
+                            .equalTo("isEnabled", true)
+                            .like("address", ADDRESS_FORMAT)
+                            .findAll();
+                }
+                else
+                {
+                    realmItems = realm.where(RealmToken.class)
+                            .sort("addedTime", Sort.ASCENDING)
+                            .like("address", ADDRESS_FORMAT)
+                            .findAll();
+                }
 
                 for (RealmToken t : realmItems)
                 {
-                    if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()) || !t.getEnabled()) continue;
+                    if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId())) continue;
+                    if (!includeHidden && !t.getEnabled()) continue;
                     int typeOrdinal = t.getInterfaceSpec();
                     if (typeOrdinal > ContractType.CREATION.ordinal()) typeOrdinal = ContractType.NOT_SET.ordinal();
                     ContractType type = ContractType.values()[typeOrdinal];

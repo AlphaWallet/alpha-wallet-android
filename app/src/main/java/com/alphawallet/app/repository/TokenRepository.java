@@ -178,11 +178,11 @@ public class TokenRepository implements TokenRepositoryType {
 
     @Override
     public Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters,
-                                                   AssetDefinitionService svs)
+                                                   AssetDefinitionService svs, boolean includeHidden)
     {
         if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
         return localSource
-                .fetchTokenMetas(wallet, networkFilters, svs);
+                .fetchTokenMetas(wallet, networkFilters, svs, includeHidden);
     }
 
     @Override

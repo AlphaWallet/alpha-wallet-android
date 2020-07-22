@@ -17,7 +17,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.ui.widget.adapter.TokenListAdapter;
 import com.alphawallet.app.viewmodel.TokenManagementViewModel;
@@ -39,6 +38,8 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     private CheckBox hideZeroBalanceCheckBox;
 
     private Wallet wallet;
+
+    private boolean isDataChanged;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,7 +69,8 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     }
 
     private void onTokens(TokenCardMeta[] tokenArray) {
-        if (tokenArray != null && tokenArray.length > 0) {
+        if (tokenArray != null && tokenArray.length > 0)
+        {
             adapter = new TokenListAdapter(this, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), tokenArray, this);
             tokenList.setAdapter(adapter);
         }
@@ -77,6 +79,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     @Override
     public void onItemClick(Token token, boolean enabled) {
         viewModel.setTokenEnabled(wallet, token, enabled);
+        isDataChanged = true;
     }
 
     @Override
@@ -87,7 +90,8 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_add) {
+        if (item.getItemId() == R.id.action_add)
+        {
             viewModel.showAddToken(this);
         }
         return super.onOptionsItemSelected(item);
@@ -102,12 +106,24 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         Reason behind is that when there is a custom token added with menu option,
         it should have fetch the tokens again.
          */
-        if (getIntent() != null) {
+        if (getIntent() != null)
+        {
             String walletAddr = getIntent().getStringExtra(C.EXTRA_ADDRESS);
             wallet = new Wallet(walletAddr);
             viewModel.fetchTokens(wallet);
-        } else {
+        }
+        else
+        {
             finish();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isDataChanged)
+        {
+            new HomeRouter().open(this, true);
+        }
+        super.onBackPressed();
     }
 }

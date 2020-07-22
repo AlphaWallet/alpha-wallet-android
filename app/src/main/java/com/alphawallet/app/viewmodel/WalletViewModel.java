@@ -99,7 +99,7 @@ public class WalletViewModel extends BaseViewModel
     private void fetchTokens(Wallet wallet)
     {
         disposable =
-                fetchTokensInteract.fetchTokenMetas(wallet, tokensService.getNetworkFilters(), assetDefinitionService)
+                fetchTokensInteract.fetchTokenMetas(wallet, tokensService.getNetworkFilters(), assetDefinitionService, false)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(metaTokens -> onTokenMetas(metaTokens, wallet), this::onError);

@@ -33,7 +33,7 @@ public interface TokenLocalSource {
     Disposable storeTokenUrl(int networkId, String address, String imageUrl);
 
     Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters,
-                                            AssetDefinitionService svs);
+                                            AssetDefinitionService svs, boolean includeHidden);
 
     Disposable updateEthTickers(Map<Integer, TokenTicker> ethTickers, Wallet wallet);
     Disposable updateERC20Tickers(Map<String, TokenTicker> erc20Tickers, Wallet wallet);

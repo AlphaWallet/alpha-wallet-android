@@ -361,7 +361,7 @@ public class BackupKeyActivity extends BaseActivity implements
         inputView.setInstruction(R.string.password_6_characters_or_more);
         state = BackupState.SET_JSON_PASSWORD;
         inputView.getEditText().addTextChangedListener(this);
-        functionButtonBar.setPrimaryButtonText(R.string.share_keystore);
+        functionButtonBar.setPrimaryButtonText(R.string.save_keystore);
         functionButtonBar.setPrimaryButtonClickListener(this);
         functionButtonBar.setPrimaryButtonEnabled(false);
         inputView.setLayoutListener(this, this);

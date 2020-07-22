@@ -8,8 +8,8 @@
     <include layout="@layout/layout_white_toolbar" />
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/text_title"
@@ -28,7 +28,7 @@
 
         <ImageView
             android:id="@+id/backup_seed_image"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/text_title"
             android:layout_centerHorizontal="true"
@@ -39,7 +39,7 @@
 
         <TextView
             android:id="@+id/text_detail"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/backup_seed_image"
             android:layout_centerHorizontal="true"
@@ -53,14 +53,22 @@
             android:textColor="@color/black"
             android:textSize="17sp" />
 
+        <TextView android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:background="@color/golden_yellow"
+                  android:layout_margin="30dp"
+                  android:padding="@dimen/dp10"
+                  android:layout_below="@+id/text_detail"
+                  android:text="@string/do_not_share"
+                  />
 
         <com.alphawallet.app.widget.FunctionButtonBar
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true" />
-    </RelativeLayout>
 
+    </RelativeLayout>
     <LinearLayout
         android:id="@+id/layout_success_overlay"
         android:layout_width="match_parent"

@@ -60,3 +60,4 @@ gen-external-apklibs
 
 # Java profiling
 *.hprof
+/app/.cxx/

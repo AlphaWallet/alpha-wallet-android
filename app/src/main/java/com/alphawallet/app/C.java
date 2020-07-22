@@ -168,4 +168,11 @@ public abstract class C {
 
     // Settings Badge Keys
     public static final String KEY_NEEDS_BACKUP = "needsBackup";
+
+    //Analytics
+    public static final String AN_IMPORT_WALLET = "Wallet Imported";
+    public static final String AN_WALLET_TYPE = "Wallet Type";
+    public static final String AN_SEED_PHRASE = "Seed Phrase";
+    public static final String AN_KEYSTORE = "Keystore";
+    public static final String AN_PRIVATE_KEY = "Private Key";
 }

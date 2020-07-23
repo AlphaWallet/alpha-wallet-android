@@ -84,7 +84,6 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_import_wallet);
-        LockOrientation();
 
         toolbar();
         setTitle(getString(R.string.title_import));
@@ -512,17 +511,5 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
             dialog.dismiss();
         });
         dialog.show();
-    }
-
-    private void LockOrientation()
-    {
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
-        {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        }
-        else
-        {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        }
     }
 }

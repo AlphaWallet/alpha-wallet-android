@@ -132,6 +132,7 @@
         <activity
             android:name=".ui.ImportWalletActivity"
             android:label="@string/title_import"
+            android:screenOrientation="sensor"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
 
         <activity

@@ -7,7 +7,7 @@
     android:scrollbarAlwaysDrawVerticalTrack="true"
     android:scrollbars="vertical">
 
-    <include layout="@layout/layout_simple_toolbar" />
+    <include layout="@layout/layout_simple_toolbar_no_divider" />
 
     <RelativeLayout
         android:id="@+id/layout_hide_zero_balance"
@@ -16,7 +16,8 @@
         android:orientation="horizontal"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
-        android:layout_marginTop="?actionBarSize">
+        android:layout_marginTop="?actionBarSize"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/text_hide_zero_balance_tokens"
@@ -36,9 +37,43 @@
             android:layout_alignParentRight="true" />
     </RelativeLayout>
 
+    <LinearLayout
+        android:id="@+id/layout_search_tokens"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:orientation="horizontal"
+        android:layout_marginStart="@dimen/dp8"
+        android:layout_marginEnd="@dimen/dp8"
+        android:layout_marginBottom="@dimen/dp16"
+        android:gravity="center_vertical"
+        android:background="@drawable/background_round_search"
+        android:layout_marginTop="?actionBarSize">
+
+        <android.support.v7.widget.AppCompatImageView
+            android:layout_width="@dimen/dp24"
+            android:layout_height="@dimen/dp24"
+            android:layout_marginStart="@dimen/dp12"
+            android:src="@drawable/ic_search_small"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/edit_search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/dp8"
+            android:hint="@string/search_for_tokens"
+            android:background="@null"
+            android:layout_marginEnd="@dimen/dp16"
+            android:maxLines="1"
+            android:maxLength="20"
+            android:textColor="@color/dove"
+            android:textColorHint="@color/dove"
+            android:textSize="@dimen/sp17"/>
+
+    </LinearLayout>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/token_list"
-        android:layout_below="@id/layout_hide_zero_balance"
+        android:layout_below="@id/layout_search_tokens"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/layout_buttons" />

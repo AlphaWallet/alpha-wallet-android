@@ -638,4 +638,5 @@
     <string name="display_tokens">Display Tokens</string>
     <string name="hidden_tokens">Hidden Tokens</string>
     <string name="ignore">Ignore</string>
+    <string name="search_for_tokens">Search for Tokens...</string>
 </resources>

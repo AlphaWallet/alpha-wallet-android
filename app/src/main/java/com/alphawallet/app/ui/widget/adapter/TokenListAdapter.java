@@ -12,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
@@ -48,25 +50,25 @@ import static com.alphawallet.app.entity.TokenManageType.HIDDEN_TOKEN;
 import static com.alphawallet.app.entity.TokenManageType.LABEL_DISPLAY_TOKEN;
 import static com.alphawallet.app.entity.TokenManageType.LABEL_HIDDEN_TOKEN;
 
-public class TokenListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class TokenListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
     private LayoutInflater inflater;
     private final Context context;
-    private final List<TokenCardMeta> tokens;
     private ItemClickListener listener;
     protected final AssetDefinitionService assetService;
+    private ArrayList<SortedItem> items;
     protected final TokensService tokensService;
-    private final ArrayList<SortedItem> items;
 
     public TokenListAdapter(Context context, AssetDefinitionService aService, TokensService tService, TokenCardMeta[] tokens, ItemClickListener listener) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
-        this.tokens = filterTokens(Arrays.asList(tokens));
         this.listener = listener;
         this.assetService = aService;
         this.tokensService = tService;
 
+        List<TokenCardMeta> tokenList = filterTokens(Arrays.asList(tokens));
+
         items = new ArrayList<>();
-        setupList();
+        items.addAll(setupList(tokenList));
     }
 
     private List<TokenCardMeta> filterTokens(List<TokenCardMeta> tokens) {
@@ -82,13 +84,15 @@ public class TokenListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return filteredList;
     }
 
-    private void setupList()
+    private ArrayList<SortedItem> setupList(List<TokenCardMeta> tokens)
     {
-        items.clear();
+        ArrayList<SortedItem> sortedItems = new ArrayList<>();
         for (TokenCardMeta tokenCardMeta : tokens)
         {
             TokenSortedItem sortedItem;
             Token token = tokensService.getToken(tokenCardMeta.getChain(), tokenCardMeta.getAddress());
+            tokenCardMeta.isEnabled = token.tokenInfo.isEnabled;
+            tokenCardMeta.isVisible = true;
             if (token.tokenInfo.isEnabled)
             {
                 sortedItem = new TokenSortedItem(
@@ -101,20 +105,27 @@ public class TokenListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         HIDDEN_TOKEN, tokenCardMeta, tokenCardMeta.nameWeight
                 );
             }
-            items.add(sortedItem);
+            sortedItems.add(sortedItem);
         }
-        items.add(new ManageTokensLabelSortedItem(
+        sortedItems.add(new ManageTokensLabelSortedItem(
                 LABEL_DISPLAY_TOKEN,
                 new ManageTokensLabelData(context.getString(R.string.display_tokens)),
                 0));
-        items.add(new ManageTokensLabelSortedItem(
+        sortedItems.add(new ManageTokensLabelSortedItem(
                 LABEL_HIDDEN_TOKEN,
                 new ManageTokensLabelData(context.getString(R.string.hidden_tokens)),
                 0));
 
-        Collections.sort(items, compareByWeight);
+        Collections.sort(sortedItems, compareByWeight);
+
+        return  sortedItems;
     }
 
+    /*
+    Below comparision is like
+    First, check for the ViewType which could be any of @TokenManageType
+    Second, if type is similar, check for the weight given to the Token
+     */
     Comparator<SortedItem> compareByWeight = (o1, o2) -> {
         if (o1.viewType < o2.viewType)
         {
@@ -162,56 +173,52 @@ public class TokenListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         else if (type == DISPLAY_TOKEN || type == HIDDEN_TOKEN)
         {
             TokenCardMeta tcm = (TokenCardMeta) items.get(position).value;
-            final Token token = tokensService.getToken(tcm.getChain(), tcm.getAddress());
             ViewHolder tokenViewHolder = (ViewHolder) viewHolder;
-            viewHolder.setIsRecyclable(false);
-            tokenViewHolder.tokenName.setText(token.getFullName(assetService, 1));
-            tokenViewHolder.chainId = token.tokenInfo.chainId;
-            tokenViewHolder.displayTokenIcon(token);
-            tokenViewHolder.switchEnabled.setChecked(token.tokenInfo.isEnabled);
-            tokenViewHolder.switchEnabled.setTag(new Integer(position));
-            tokenViewHolder.switchEnabled.setOnCheckedChangeListener((v, b) -> {
-                listener.onItemClick(token, b);
+
+            if (tcm.isVisible)
+            {
+                tokenViewHolder.layout.setVisibility(View.VISIBLE);
+
+                final Token token = tokensService.getToken(tcm.getChain(), tcm.getAddress());
+                tokenViewHolder.tokenName.setText(token.getFullName(assetService, 1));
+                tokenViewHolder.chainId = token.tokenInfo.chainId;
+                tokenViewHolder.displayTokenIcon(token);
+                tokenViewHolder.switchEnabled.setOnCheckedChangeListener(null);
+                tokenViewHolder.switchEnabled.setChecked(tcm.isEnabled);
+                tokenViewHolder.switchEnabled.setTag(new Integer(position));
+                tokenViewHolder.switchEnabled.setOnCheckedChangeListener((v, b) -> {
+
+                    if (type == DISPLAY_TOKEN)
+                    {
+                        items.get(position).viewType = HIDDEN_TOKEN;
+                        tcm.isEnabled = false;
+                    }
+                    else
+                    {
+                        items.get(position).viewType = DISPLAY_TOKEN;
+                        tcm.isEnabled = true;
+                    }
+
+                    Collections.sort(items, compareByWeight);
+                    notifyDataSetChanged();
+
+                    listener.onItemClick(token, b);
+                });
 
                 if (type == DISPLAY_TOKEN)
                 {
-                    items.get(position).viewType = HIDDEN_TOKEN;
-                    token.tokenInfo.isEnabled = false;
+                    tokenViewHolder.overlay.setVisibility(View.GONE);
                 }
                 else
                 {
-                    items.get(position).viewType = DISPLAY_TOKEN;
-                    token.tokenInfo.isEnabled = true;
+                    tokenViewHolder.overlay.setVisibility(View.VISIBLE);
                 }
-                Collections.sort(items, compareByWeight);
-                notifyDataSetChanged();
-            });
-
-            if (type == DISPLAY_TOKEN)
-            {
-                tokenViewHolder.overlay.setVisibility(View.GONE);
             }
             else
             {
-                tokenViewHolder.overlay.setVisibility(View.VISIBLE);
+                tokenViewHolder.layout.setVisibility(View.GONE);
             }
         }
-//    public void onBindViewHolder(@NonNull TokenListAdapter.ViewHolder viewHolder, int i) {
-//        TokenCardMeta tcm = data.get(i);
-//        final Token token = tokensService.getToken(tcm.getChain(), tcm.getAddress());
-//        viewHolder.setIsRecyclable(false);
-//        viewHolder.tokenName.setText(token.getFullName(assetService, 1));
-//        viewHolder.chainId = token.tokenInfo.chainId;
-//        viewHolder.displayTokenIcon(token);
-//        viewHolder.switchEnabled.setChecked(token.tokenInfo.isEnabled);
-//        viewHolder.switchEnabled.setTag(new Integer(i));
-//        viewHolder.switchEnabled.setOnCheckedChangeListener((v, b) -> {
-//            listener.onItemClick(token, b);
-//        });
-    }
-
-    public TokenCardMeta getItem(int id) {
-        return (TokenCardMeta) items.get(id).value;
     }
 
     @Override
@@ -323,5 +330,55 @@ public class TokenListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     @Override
     public int getItemViewType(int position) {
         return items.get(position).viewType;
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String searchString = charSequence.toString();
+                if (searchString.isEmpty())
+                {
+                    for (SortedItem row : items)
+                    {
+                        if (row instanceof TokenSortedItem)
+                        {
+                            TokenCardMeta sortedItem = (TokenCardMeta) row.value;
+                            sortedItem.isVisible = true;
+                        }
+                    }
+                }
+                else
+                {
+                    ArrayList<SortedItem> tokenList = new ArrayList<>(items);
+                    for (SortedItem row : tokenList)
+                    {
+                        if (row instanceof TokenSortedItem)
+                        {
+                            TokenCardMeta sortedItem = (TokenCardMeta) row.value;
+                            final Token token = tokensService.getToken(sortedItem.getChain(), sortedItem.getAddress());
+                            if (token.getFullName(assetService, 1).toLowerCase().contains(searchString.toLowerCase()))
+                            {
+                                sortedItem.isVisible = true;
+                            }
+                            else
+                            {
+                                sortedItem.isVisible = false;
+                            }
+                        }
+                    }
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = items;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                notifyDataSetChanged();
+            }
+        };
     }
 }

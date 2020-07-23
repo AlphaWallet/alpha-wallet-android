@@ -50,6 +50,8 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
         importWalletInteract
                 .importKeystore(keystore, password, newPassword)
                 .flatMap(wallet -> importWalletInteract.storeKeystoreWallet(wallet, level, ensResolver))
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onWallet, this::onError).isDisposed();
     }
 
@@ -58,6 +60,8 @@ public class ImportWalletViewModel extends BaseViewModel implements OnSetWatchWa
         importWalletInteract
                 .importPrivateKey(privateKey, newPassword)
                 .flatMap(wallet -> importWalletInteract.storeKeystoreWallet(wallet, level, ensResolver))
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onWallet, this::onError).isDisposed();
     }
 

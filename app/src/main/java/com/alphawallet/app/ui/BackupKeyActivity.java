@@ -23,13 +23,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
-
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.Operation;
@@ -48,6 +41,13 @@ import com.alphawallet.app.widget.PasswordInputView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexboxLayout;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.SHARE_REQUEST_CODE;
@@ -75,7 +75,7 @@ public class BackupKeyActivity extends BaseActivity implements
     private TextView verifyTextBox;
     private String[] mnemonicArray;
     private LinearLayout successOverlay;
-    private Handler handler;
+    private final Handler handler = new Handler();
     private AWalletAlertDialog alertDialog;
     private String keystorePassword;
     private FunctionButtonBar functionButtonBar;
@@ -148,7 +148,6 @@ public class BackupKeyActivity extends BaseActivity implements
         successOverlay = findViewById(R.id.layout_success_overlay);
         if (successOverlay != null && showSuccess) {
             successOverlay.setVisibility(View.VISIBLE);
-            handler = new Handler();
             handler.postDelayed(this, 1000);
         }
 
@@ -173,29 +172,38 @@ public class BackupKeyActivity extends BaseActivity implements
         functionButtonBar.setPrimaryButtonClickListener(this);
     }
 
+    @Override
+    public void keyUpgraded(final KeyService.UpgradeKeyResult result)
+    {
+        handler.post(() -> {
+            switch (result)
+            {
+                case REQUESTING_SECURITY: //Deprecated
+                    //Do nothing, callback will return to 'CreatedKey()'. If it fails the returned key is empty. //Update - this should never happen - remove
+                    break;
+                case NO_SCREENLOCK:
+                    DisplayKeyFailureDialog("Unable to upgrade key: Enable screenlock on phone");
+                    break;
+                case ALREADY_LOCKED:
+                    finishBackupSuccess(false); // already upgraded to top level
+                    break;
+                case ERROR:
+                    DisplayKeyFailureDialog("Unable to upgrade key: Unknown Error");
+                    break;
+                case SUCCESSFULLY_UPGRADED:
+                    createdKey(wallet.address);
+                    break;
+            }
+        });
+    }
+
     private void upgradeKeySecurity() {
         switch (wallet.type) {
             case KEYSTORE:
             case KEYSTORE_LEGACY:
             case HDKEY:
-                switch (viewModel.upgradeKeySecurity(wallet, this))
-                {
-                    case SUCCESSFULLY_UPGRADED:
-                        createdKey(wallet.address);
-                        break;
-                    case REQUESTING_SECURITY:
-                        //Do nothing, callback will return to 'CreatedKey()'. If it fails the returned key is empty
-                        break;
-                    case NO_SCREENLOCK:
-                        DisplayKeyFailureDialog("Unable to upgrade key: Enable screenlock on phone");
-                        break;
-                    case ALREADY_LOCKED:
-                        finishBackupSuccess(false); // already upgraded to top level
-                        break;
-                    case ERROR:
-                        DisplayKeyFailureDialog("Unable to upgrade key: Unknown Error");
-                        break;
-                }
+                viewModel.upgradeKeySecurity(wallet, this, this);
+                break;
 
             default:
                 break;
@@ -256,7 +264,6 @@ public class BackupKeyActivity extends BaseActivity implements
         } else {
             successOverlay.setVisibility(View.GONE);
             successOverlay.setAlpha(1.0f);
-            handler = null;
         }
     }
 
@@ -577,33 +584,35 @@ public class BackupKeyActivity extends BaseActivity implements
 
     @Override
     public void fetchMnemonic(String mnemonic) {
-        switch (state) {
-            case WRITE_DOWN_SEED_PHRASE:
-                WriteDownSeedPhrase();
-                mnemonicArray = mnemonic.split(" ");
-                addSeedWordsToScreen();
-                break;
-            case ENTER_JSON_BACKUP:
-            case SET_JSON_PASSWORD:
-                viewModel.exportWallet(wallet, mnemonic, keystorePassword);
-                break;
-            case SHOW_SEED_PHRASE:
-                setupTestSeed();
-                mnemonicArray = mnemonic.split(" ");
-                addSeedWordsToScreen();
-                break;
-            case VERIFY_SEED_PHRASE:
-                VerifySeedPhrase();
-                mnemonicArray = mnemonic.split(" ");
-                addSeedWordsToScreen();
-                break;
-            case SEED_PHRASE_INVALID:
-            case UNDEFINED:
-            case ENTER_BACKUP_STATE_HD:
-            case UPGRADE_KEY_SECURITY:
-                DisplayKeyFailureDialog("Error in key restore: " + state.ordinal());
-                break;
-        }
+        handler.post(() -> {
+            switch (state) {
+                case WRITE_DOWN_SEED_PHRASE:
+                    WriteDownSeedPhrase();
+                    mnemonicArray = mnemonic.split(" ");
+                    addSeedWordsToScreen();
+                    break;
+                case ENTER_JSON_BACKUP:
+                case SET_JSON_PASSWORD:
+                    viewModel.exportWallet(wallet, mnemonic, keystorePassword);
+                    break;
+                case SHOW_SEED_PHRASE:
+                    setupTestSeed();
+                    mnemonicArray = mnemonic.split(" ");
+                    addSeedWordsToScreen();
+                    break;
+                case VERIFY_SEED_PHRASE:
+                    VerifySeedPhrase();
+                    mnemonicArray = mnemonic.split(" ");
+                    addSeedWordsToScreen();
+                    break;
+                case SEED_PHRASE_INVALID:
+                case UNDEFINED:
+                case ENTER_BACKUP_STATE_HD:
+                case UPGRADE_KEY_SECURITY:
+                    DisplayKeyFailureDialog("Error in key restore: " + state.ordinal());
+                    break;
+            }
+        });
     }
 
     private void addSeedWordsToScreen() {

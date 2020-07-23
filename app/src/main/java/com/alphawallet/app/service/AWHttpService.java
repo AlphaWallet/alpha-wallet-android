@@ -17,6 +17,7 @@ import org.web3j.protocol.http.HttpService;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -132,6 +133,10 @@ public class AWHttpService extends HttpService
                 throw new SocketTimeoutException();
             }
         }
+        catch (InterruptedIOException e)
+        {
+            return buildNullInputStream();
+        }
 
         return processNodeResponse(response, request, false);
     }
@@ -143,7 +148,17 @@ public class AWHttpService extends HttpService
 
         okhttp3.Request httpRequest =
                 new okhttp3.Request.Builder().url(secondaryUrl).headers(headers).post(requestBody).build();
-        okhttp3.Response response  = httpClient.newCall(httpRequest).execute();
+
+        okhttp3.Response response;
+
+        try
+        {
+            response = httpClient.newCall(httpRequest).execute();
+        }
+        catch (InterruptedIOException e)
+        {
+            return buildNullInputStream();
+        }
 
         return processNodeResponse(response, request, true);
     }
@@ -160,7 +175,7 @@ public class AWHttpService extends HttpService
             }
             else
             {
-                return null;
+                return buildNullInputStream();
             }
         }
         else if (!useSecondaryNode && secondaryUrl != null)
@@ -180,6 +195,18 @@ public class AWHttpService extends HttpService
         // Default implementation is empty
     }
 
+    private InputStream buildNullInputStream()
+    {
+        return new InputStream()
+        {
+            @Override
+            public int read()
+            {
+                return 0;
+            }
+        };
+    }
+
     private InputStream buildInputStream(ResponseBody responseBody) throws IOException {
         InputStream inputStream = responseBody.byteStream();
 
@@ -189,7 +216,7 @@ public class AWHttpService extends HttpService
 
             BufferedSource source = responseBody.source();
             source.request(Long.MAX_VALUE); // Buffer the entire body
-            Buffer buffer = source.buffer();
+            Buffer buffer = source.getBuffer();
 
             long size = buffer.size();
             if (size > Integer.MAX_VALUE) {

@@ -235,10 +235,17 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public Single<BigInteger> getLastTransactionNonce(Web3j web3j, String walletAddress)
     {
         return Single.fromCallable(() -> {
-            EthGetTransactionCount ethGetTransactionCount = web3j
-                    .ethGetTransactionCount(walletAddress, DefaultBlockParameterName.PENDING)
-                    .send();
-            return ethGetTransactionCount.getTransactionCount();
+            try
+            {
+                EthGetTransactionCount ethGetTransactionCount = web3j
+                        .ethGetTransactionCount(walletAddress, DefaultBlockParameterName.PENDING)
+                        .send();
+                return ethGetTransactionCount.getTransactionCount();
+            }
+            catch (Exception e)
+            {
+                return BigInteger.ZERO;
+            }
         });
     }
 

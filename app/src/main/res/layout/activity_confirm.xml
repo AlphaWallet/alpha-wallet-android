@@ -343,9 +343,9 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginBottom="10dp"
-                                    android:fontFamily="@font/font_bold"
+                                    android:fontFamily="@font/font_regular"
                                     android:gravity="center"
-                                    android:textColor="@color/azure"
+                                    android:textColor="@color/text_black"
                                     tools:text="23000"
                                     android:textSize="@dimen/sp15" />
 

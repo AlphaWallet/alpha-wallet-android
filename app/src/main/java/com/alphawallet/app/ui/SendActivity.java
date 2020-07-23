@@ -468,7 +468,6 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
 
     @Override
     protected void onDestroy() {
-        viewModel.stopGasPriceChecker();
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
         }
@@ -535,7 +534,7 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         {
             Utils.setChainColour(chainName, token.tokenInfo.chainId);
             chainName.setText(viewModel.getChainName(token.tokenInfo.chainId));
-            viewModel.startGasPriceChecker(token.tokenInfo.chainId);
+            viewModel.setChainId(token.tokenInfo.chainId);
         }
     }
 
@@ -558,6 +557,6 @@ public class SendActivity extends BaseActivity implements ItemClickListener, Amo
         chainName.setText(info.name);
         currentChain = chainId;
         amountInput.onClear();
-        viewModel.startGasPriceChecker(chainId);
+        viewModel.setChainId(chainId);
     }
 }

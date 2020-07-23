@@ -55,9 +55,10 @@ public class GasService implements ContractGasProvider
     {
         this.networkRepository = networkRepository;
         currentChainId = 0;
-        currentGasPrice = new BigInteger(C.DEFAULT_GAS_PRICE);
+        currentGasPrice = BigInteger.ZERO;
         currentGasLimitOverride = BigInteger.ZERO;
         currentGasPriceOverride = BigInteger.ZERO;
+        web3j = null;
     }
 
     public MutableLiveData<BigInteger> gasPriceUpdateListener()
@@ -65,41 +66,68 @@ public class GasService implements ContractGasProvider
         return gasPrice;
     }
 
+    public void fetchGasPriceForChain(int chainId)
+    {
+        if (EthereumNetworkRepository.hasGasOverride(chainId))
+        {
+            currentGasPrice = EthereumNetworkRepository.gasOverrideValue(chainId);
+        }
+        else
+        {
+            if (setupWeb3j(chainId)) fetchCurrentGasPrice();
+        }
+    }
+
     public void startGasListener(int chainId)
     {
-        //check if checker is already running and is on the correct chain
-        if (chainId != currentChainId || gasFetchDisposable == null || gasFetchDisposable.isDisposed())
+        if (setupWeb3j(chainId) && (gasFetchDisposable == null || gasFetchDisposable.isDisposed()))
         {
-            currentChainId = chainId;
-            if (networkRepository.getNetworkByChain(currentChainId) == null)
-            {
-                System.out.println("Network error, no chain, trying to pick: " + chainId);
-                return;
-            }
-
-            web3j = getWeb3jService(currentChainId);
-            setCurrentPrice(chainId);
             gasFetchDisposable = Observable.interval(0, FETCH_GAS_PRICE_INTERVAL, TimeUnit.SECONDS)
                     .doOnNext(l -> fetchCurrentGasPrice()).subscribe();
+        }
+    }
+
+    private boolean setupWeb3j(int chainId)
+    {
+        if (networkRepository.getNetworkByChain(chainId) == null)
+        {
+            System.out.println("Network error, no chain, trying to pick: " + chainId);
+            return false;
+        }
+        else if (EthereumNetworkRepository.hasGasOverride(chainId))
+        {
+            currentGasPrice = EthereumNetworkRepository.gasOverrideValue(chainId);
+            return false;
+        }
+        else if (web3j == null || currentChainId != chainId)
+        {
+            currentChainId = chainId;
+            web3j = getWeb3jService(currentChainId);
+            setCurrentPrice(chainId);
+            return true;
+        }
+        else
+        {
+            return true;
         }
     }
 
     public void stopGasListener()
     {
         if (gasFetchDisposable != null && !gasFetchDisposable.isDisposed()) gasFetchDisposable.dispose();
-        currentChainId = 0;
         currentGasLimitOverride = BigInteger.ZERO;
         currentGasPriceOverride = BigInteger.ZERO;
-        web3j = null;
+        fetchGasPriceForChain(currentChainId);
     }
 
     private void fetchCurrentGasPrice()
     {
-        try
-        {
-            EthGasPrice price = web3j
-                    .ethGasPrice()
-                    .send();
+        Single.fromCallable(() -> web3j
+                .ethGasPrice()
+                .send())
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.newThread())
+          .subscribe(price -> {
             if (price.getGasPrice().compareTo(BalanceUtils.gweiToWei(BigDecimal.ZERO)) > 0)
             {
                 currentGasPrice = price.getGasPrice();
@@ -109,11 +137,13 @@ public class GasService implements ContractGasProvider
             {
                 gasPrice.postValue(currentGasPrice);
             }
-        }
-        catch (Exception ex)
-        {
-            gasPrice.postValue(currentGasPrice);
-        }
+        }, this::onGasFetchError)
+        .isDisposed();
+    }
+
+    private void onGasFetchError(Throwable e)
+    {
+        gasPrice.postValue(currentGasPrice);
     }
 
     //TODO: change the function to hash identifier and use that to determine gas limit
@@ -278,30 +308,32 @@ public class GasService implements ContractGasProvider
             txData = Numeric.toHexString(transactionBytes);
         }
 
-        Web3j web3j = TokenRepository.getWeb3jService(chainId);
-        //latest nonce for wallet & chainId
-        String finalTxData = txData;
+        if (setupWeb3j(chainId))
+        {
+            String finalTxData = txData;
 
-        return networkRepository.getLastTransactionNonce(web3j, wallet.address)
-                .subscribeOn(Schedulers.io())
-                .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getGasPrice(), getGasLimit(), toAddress, amount, finalTxData, web3j));
+            return networkRepository.getLastTransactionNonce(web3j, wallet.address)
+                    .flatMap(nonce -> ethEstimateGas(wallet.address, nonce, getGasPrice(), getGasLimit(), toAddress, amount, finalTxData));
+        }
+        else
+        {
+            return Single.fromCallable(EthEstimateGas::new);
+        }
     }
 
     private Single<EthEstimateGas> ethEstimateGas(String fromAddress, BigInteger nonce, BigInteger gasPrice,
                                                BigInteger gasLimit, String toAddress,
-                                               BigInteger amount, String txData, Web3j web3j)
+                                               BigInteger amount, String txData)
     {
-        return Single.fromCallable(() -> {
-            Transaction transaction = new Transaction (
-                    fromAddress,
-                    nonce,
-                    gasPrice,
-                    gasLimit,
-                    toAddress,
-                    amount,
-                    txData);
+        final Transaction transaction = new Transaction (
+                fromAddress,
+                nonce,
+                gasPrice,
+                gasLimit,
+                toAddress,
+                amount,
+                txData);
 
-            return web3j.ethEstimateGas(transaction).send();
-        }).subscribeOn(Schedulers.io());
+        return Single.fromCallable(() -> web3j.ethEstimateGas(transaction).send());
     }
 }

@@ -7,10 +7,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.alphawallet.app.C;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Operation;
@@ -21,6 +17,11 @@ import com.alphawallet.app.interact.ExportWalletInteract;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.service.KeyService;
 
+import io.reactivex.Completable;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
 public class BackupKeyViewModel extends BaseViewModel {
     private final static String TAG = BackupKeyViewModel.class.getSimpleName();
 
@@ -28,11 +29,8 @@ public class BackupKeyViewModel extends BaseViewModel {
     private final ExportWalletInteract exportWalletInteract;
     private final FetchWalletsInteract fetchWalletsInteract;
 
-    private final MutableLiveData<Wallet> saved = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> deleted = new MutableLiveData<>();
     private final MutableLiveData<String> exportedStore = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> exportWalletError = new MutableLiveData<>();
-    private final MutableLiveData<ErrorEnvelope> deleteWalletError = new MutableLiveData<>();
 
     public BackupKeyViewModel(
             KeyService keyService,
@@ -43,34 +41,8 @@ public class BackupKeyViewModel extends BaseViewModel {
         this.fetchWalletsInteract = fetchWalletsInteract;
     }
 
-    public LiveData<ErrorEnvelope> exportWalletError() {
-        return exportWalletError;
-    }
-
-    public LiveData<ErrorEnvelope> deleteWalletError() {
-        return deleteWalletError;
-    }
-
-    public LiveData<Boolean> deleted() {
-        return deleted;
-    }
-
-    public LiveData<Wallet> saved() {
-        return saved;
-    }
-
     public LiveData<String> exportedStore() {
         return exportedStore;
-    }
-
-    private void onDeleteWalletError(Throwable throwable) {
-        deleteWalletError.postValue(
-                new ErrorEnvelope(C.ErrorCode.UNKNOWN, TextUtils.isEmpty(throwable.getLocalizedMessage())
-                        ? throwable.getMessage() : throwable.getLocalizedMessage()));
-    }
-
-    private void onDelete(Wallet[] wallets) {
-        deleted.postValue(true);
     }
 
     public void exportWallet(Wallet wallet, String keystorePassword, String storePassword) {
@@ -83,13 +55,6 @@ public class BackupKeyViewModel extends BaseViewModel {
         exportWalletError.postValue(
                 new ErrorEnvelope(C.ErrorCode.UNKNOWN, TextUtils.isEmpty(throwable.getLocalizedMessage())
                         ? throwable.getMessage() : throwable.getLocalizedMessage()));
-    }
-
-    public void storeWallet(Wallet wallet) {
-        disposable = fetchWalletsInteract.storeWallet(wallet)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(saved::postValue, this::onError);
     }
 
     @Override
@@ -144,15 +109,21 @@ public class BackupKeyViewModel extends BaseViewModel {
         return wallet;
     }
 
-
-    public KeyService.UpgradeKeyResult upgradeKeySecurity(Wallet wallet, Activity activity)
+    public void upgradeKeySecurity(Wallet wallet, Activity activity, CreateWalletCallbackInterface callback)
     {
-        return keyService.upgradeKeySecurity(wallet, activity);
+        disposable = Single.fromCallable(() -> keyService.upgradeKeySecurity(wallet, activity))
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(callback::keyUpgraded);
     }
 
     public void getPasswordForKeystore(Wallet wallet, Activity activity, CreateWalletCallbackInterface callback)
     {
-        keyService.getPassword(wallet, activity, callback);
+        disposable = Completable.fromAction(() ->
+                keyService.getPassword(wallet, activity, callback)) //computation thread to give UI a chance to complete all tasks
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe();
     }
 
     public void getAuthentication(Wallet wallet, Activity activity, SignAuthenticationCallback callback)
@@ -163,7 +134,11 @@ public class BackupKeyViewModel extends BaseViewModel {
 
     public void getSeedPhrase(Wallet wallet, Activity activity, CreateWalletCallbackInterface callback)
     {
-        keyService.getMnemonic(wallet, activity, callback);
+        disposable = Completable.fromAction(() ->
+                keyService.getMnemonic(wallet, activity, callback)) //computation thread to give UI a chance to complete all tasks
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe();
     }
 
     public void backupSuccess(Wallet wallet)

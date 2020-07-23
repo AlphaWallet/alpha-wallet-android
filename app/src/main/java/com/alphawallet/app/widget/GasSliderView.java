@@ -144,6 +144,12 @@ public class GasSliderView extends RelativeLayout implements LifecycleObserver {
         }
     }
 
+    public void openGasSlider()
+    {
+        gasLimitSlider.setVisibility(View.VISIBLE);
+        findViewById(R.id.spacing_view).setVisibility(View.GONE);
+    }
+
     private void bindViews() {
         imgExpandCollapse = findViewById(R.id.img_expand_collapse);
         gasPriceValue = findViewById(R.id.gas_price_value);

@@ -911,6 +911,7 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     {
         try
         {
+            viewModel.updateGasPrice(networkInfo.chainId); //start updating gas price right before we open
             //minimum for transaction to be valid: recipient and value or payload
             if ((transaction.recipient.equals(Address.EMPTY) && transaction.payload != null) // Constructor
                     || (!transaction.recipient.equals(Address.EMPTY) && (transaction.payload != null || transaction.value != null))) // Raw or Function TX
@@ -1386,16 +1387,6 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if (isResumed()) {
-            if (isVisibleToUser)
-            {
-                viewModel.startGasPriceChecker();
-            }
-            else
-            {
-                viewModel.stopGasPriceChecker();
-            }
-        }
     }
 
     private void DisplayAddressFound(String address, FragmentMessenger messenger)
@@ -1527,11 +1518,9 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
     @Override
     public void gotAuthorisation(boolean gotAuth)
     {
-        if (gotAuth) viewModel.completeAuthentication(SIGN_DATA);
-        else viewModel.failedAuthentication(SIGN_DATA);
-
         if (gotAuth)
         {
+            viewModel.completeAuthentication(SIGN_DATA);
             viewModel.signMessage(messageBytes, dAppFunction, messageToSign);
         }
         else if (dialog != null && dialog.isShowing())

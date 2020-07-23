@@ -39,7 +39,6 @@ public class SendViewModel extends BaseViewModel {
     private final SetupTokensInteract setupTokensInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AddTokenInteract addTokenInteract;
-    private final FetchTokensInteract fetchTokensInteract;
     private final GasService gasService;
 
     public SendViewModel(ConfirmationRouter confirmationRouter,
@@ -47,21 +46,19 @@ public class SendViewModel extends BaseViewModel {
                          ENSInteract ensInteract,
                          EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                          TokensService tokensService,
+                         GasService gasService,
                          SetupTokensInteract setupTokensInteract,
                          FetchTransactionsInteract fetchTransactionsInteract,
-                         AddTokenInteract addTokenInteract,
-                         FetchTokensInteract fetchTokensInteract,
-                         GasService gasService) {
+                         AddTokenInteract addTokenInteract) {
         this.confirmationRouter = confirmationRouter;
         this.myAddressRouter = myAddressRouter;
         this.ensInteract = ensInteract;
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
+        this.gasService = gasService;
         this.setupTokensInteract = setupTokensInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.addTokenInteract = addTokenInteract;
-        this.fetchTokensInteract = fetchTokensInteract;
-        this.gasService = gasService;
     }
 
     public MutableLiveData<Token> tokenFinalised() { return finalisedToken; }
@@ -114,13 +111,8 @@ public class SendViewModel extends BaseViewModel {
                 .subscribe(finalisedToken::postValue, this::onError);
     }
 
-    public void startGasPriceChecker(int chainId)
+    public void setChainId(int chainId)
     {
-        gasService.startGasListener(chainId);
-    }
-
-    public void stopGasPriceChecker()
-    {
-        gasService.stopGasListener();
+        gasService.fetchGasPriceForChain(chainId);
     }
 }

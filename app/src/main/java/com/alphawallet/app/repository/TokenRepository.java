@@ -215,6 +215,13 @@ public class TokenRepository implements TokenRepositoryType {
         return localSource.fetchToken(chainId, wallet, address);
     }
 
+    @Override
+    public TokenTicker getTokenTicker(Token token)
+    {
+        Wallet wallet = new Wallet(token.getWallet());
+        return localSource.getCurrentTicker(wallet, token);
+    }
+
     /**
      * Just updates the balance of a token
      *
@@ -279,7 +286,6 @@ public class TokenRepository implements TokenRepositoryType {
             }
             Token newToken = tf.createToken(tokenInfo, balance, balanceArray, System.currentTimeMillis(), contractType, network.getShortName(), 0);
             newToken.setTokenWallet(wallet.address);
-            newToken.ticker = tickerService.getTokenTicker(newToken);
             return newToken;
         }).flatMap(nToken -> localSource.saveToken(wallet, nToken));
     }
@@ -498,8 +504,7 @@ public class TokenRepository implements TokenRepositoryType {
                 e.printStackTrace();
                 return token;
             }
-        })
-        .flatMap(tickerService::attachTokenTicker);
+        });
     }
 
     private BigDecimal checkUint256Balance(@NonNull Wallet wallet, int chainId, String tokenAddress)
@@ -641,12 +646,6 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<TokenTicker> getEthTicker(int chainId)
     {
         return Single.fromCallable(() -> tickerService.getEthTicker(chainId));
-    }
-
-    @Override
-    public Single<TokenTicker> getTokenTicker(Token token)
-    {
-        return Single.fromCallable(() -> tickerService.getTokenTicker(token));
     }
 
     private BigDecimal getEthBalance(Wallet wallet, int chainId)

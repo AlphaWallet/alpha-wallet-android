@@ -9,6 +9,14 @@ import android.os.TransactionTooLargeException;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 
+import com.alphawallet.app.entity.Operation;
+import com.alphawallet.app.entity.QRResult;
+import com.alphawallet.app.service.RealmManager;
+import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.MyAddressActivity;
+import com.alphawallet.app.ui.SendActivity;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.DAppFunction;
@@ -46,6 +54,20 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
+import com.alphawallet.app.interact.CreateTransactionInteract;
+import com.alphawallet.app.interact.FindDefaultNetworkInteract;
+import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.router.ConfirmationRouter;
+import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.KeyService;
+
+import org.web3j.abi.datatypes.Address;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import static com.alphawallet.app.C.Key.WALLET;
 
 public class DappBrowserViewModel extends BaseViewModel  {
@@ -61,8 +83,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final TokensService tokensService;
     private final ConfirmationRouter confirmationRouter;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
-    private final GasService gasService;
     private final KeyService keyService;
+    private final GasService gasService;
 
     @Nullable
     private Disposable balanceTimerDisposable;
@@ -75,8 +97,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
             TokensService tokensService,
             ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            GasService gasService,
-            KeyService keyService) {
+            KeyService keyService,
+            GasService gasService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -84,8 +106,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
         this.tokensService = tokensService;
         this.confirmationRouter = confirmationRouter;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
-        this.gasService = gasService;
         this.keyService = keyService;
+        this.gasService = gasService;
     }
 
     public AssetDefinitionService getAssetDefinitionService() {

@@ -17,6 +17,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.entity.tokens.TokenUpdateEntry;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
@@ -147,6 +148,11 @@ public class TokensService
     {
         if (TextUtils.isEmpty(currentAddress) || TextUtils.isEmpty(addr)) return null;
         else return tokenRepository.fetchToken(chainId, currentAddress, addr.toLowerCase());
+    }
+
+    public TokenTicker getTokenTicker(Token token)
+    {
+        return tokenRepository.getTokenTicker(token);
     }
 
     /**

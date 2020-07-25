@@ -23,8 +23,8 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
     private final TokensService tokensService;
     private final ConfirmationRouter confirmationRouter;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
-    private final GasService gasService;
     private final KeyService keyService;
+    private final GasService gasService;
 
     public DappBrowserViewModelFactory(
             FindDefaultNetworkInteract findDefaultNetworkInteract,
@@ -34,8 +34,8 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
             TokensService tokensService,
             ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            GasService gasService,
-            KeyService keyService) {
+            KeyService keyService,
+            GasService gasService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -43,8 +43,8 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
         this.tokensService = tokensService;
         this.confirmationRouter = confirmationRouter;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
-        this.gasService = gasService;
         this.keyService = keyService;
+        this.gasService = gasService;
     }
 
     @NonNull
@@ -58,7 +58,7 @@ public class DappBrowserViewModelFactory implements ViewModelProvider.Factory {
                 tokensService,
                 confirmationRouter,
                 ethereumNetworkRepository,
-                gasService,
-                keyService);
+                keyService,
+                gasService);
     }
 }

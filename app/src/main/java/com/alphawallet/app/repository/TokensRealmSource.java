@@ -43,6 +43,7 @@ import io.realm.Sort;
 import io.realm.exceptions.RealmException;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.app.service.TickerService.TICKER_TIMEOUT;
 import static com.alphawallet.app.service.TokensService.EXPIRED_CONTRACT;
 
 public class TokensRealmSource implements TokenLocalSource {
@@ -52,7 +53,6 @@ public class TokensRealmSource implements TokenLocalSource {
     public static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
     public static final String ADDRESS_FORMAT = "0x????????????????????????????????????????-*";
     private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
-    private static final long TICKER_TIMEOUT = 1 * DateUtils.DAY_IN_MILLIS;
 
     private final RealmManager realmManager;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -725,6 +725,26 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
+    public TokenTicker getCurrentTicker(Wallet wallet, Token token)
+    {
+        TokenTicker tt = null;
+        try (Realm realm = realmManager.getRealmInstance(wallet))
+        {
+            String key = databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase());
+            RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
+                    .equalTo("contract", key)
+                    .findFirst();
+
+            if (realmItem != null)
+            {
+                tt = convertRealmTicker(realmItem);
+            }
+        }
+
+        return tt;
+    }
+
+    @Override
     public Disposable removeOutdatedTickers(Wallet wallet)
     {
         return Completable.complete()
@@ -813,7 +833,6 @@ public class TokensRealmSource implements TokenLocalSource {
         }
         else
         {
-            List<BigInteger> bal;
             switch (type)
             {
                 case NOT_SET:
@@ -883,8 +902,6 @@ public class TokensRealmSource implements TokenLocalSource {
         RealmTokenTicker rawItem = realm.where(RealmTokenTicker.class)
                 .equalTo("contract", useAddress + "-" + result.tokenInfo.chainId)
                 .findFirst();
-
-        result.ticker = convertRealmTicker(rawItem);
 
         if (result.isERC721()) //add erc721 assets
         {

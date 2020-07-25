@@ -62,8 +62,6 @@ public class Token implements Parcelable, Comparable<Token>
 
     public String getNetworkName() { return shortNetworkName; }
 
-    public TokenTicker ticker;
-
     public Token(TokenInfo tokenInfo, BigDecimal balance, long updateBlancaTime, String networkName, ContractType type) {
         this.tokenInfo = tokenInfo;
         if (balance == null)
@@ -98,7 +96,6 @@ public class Token implements Parcelable, Comparable<Token>
         txSync = in.readLong();
         lastTxTime = in.readLong();
         hasTokenScript = in.readByte() == 1;
-        ticker = in.readParcelable(TokenTicker.class.getClassLoader());
         functionAvailabilityMap = in.readHashMap(List.class.getClassLoader());
 
         balanceChanged = false;
@@ -207,7 +204,6 @@ public class Token implements Parcelable, Comparable<Token>
         dest.writeLong(txSync);
         dest.writeLong(lastTxTime);
         dest.writeByte(hasTokenScript?(byte)1:(byte)0);
-        dest.writeParcelable(ticker, flags);
         dest.writeMap(functionAvailabilityMap);
     }
 

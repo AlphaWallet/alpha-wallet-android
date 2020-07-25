@@ -27,8 +27,8 @@ public class DappBrowserModule {
             TokensService tokensService,
             ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            GasService gasService,
-            KeyService keyService) {
+            KeyService keyService,
+            GasService gasService) {
         return new DappBrowserViewModelFactory(
                 findDefaultNetworkInteract,
                 genericWalletInteract,
@@ -37,8 +37,8 @@ public class DappBrowserModule {
                 tokensService,
                 confirmationRouter,
                 ethereumNetworkRepository,
-                gasService,
-                keyService);
+                keyService,
+                gasService);
     }
 
     @Provides

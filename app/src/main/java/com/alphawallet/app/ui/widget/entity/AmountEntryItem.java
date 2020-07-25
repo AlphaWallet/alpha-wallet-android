@@ -241,11 +241,7 @@ public class AmountEntryItem
     public void startEthereumTicker(Token token)
     {
         disposable = Observable.interval(0, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> tokenRepository
-                        .getTokenTicker(token)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onTicker, this::onError)).subscribe();
+                .doOnNext(l -> onTicker(tokenRepository.getTokenTicker(token))).subscribe();
     }
 
     private void onTicker(TokenTicker ticker)

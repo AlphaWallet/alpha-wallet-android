@@ -35,7 +35,7 @@ public interface TokenRepositoryType {
     Observable<TransferFromEventResponse> burnListenerObservable(String contractAddress);
     Single<Token> addToken(Wallet wallet, TokenInfo tokenInfo, ContractType interfaceSpec);
     Single<TokenTicker> getEthTicker(int chainId);
-    Single<TokenTicker> getTokenTicker(Token token);
+    TokenTicker getTokenTicker(Token token);
     Single<BigInteger> fetchLatestBlockNumber(int chainId);
     Token fetchToken(int chainId, String walletAddress, String address);
 

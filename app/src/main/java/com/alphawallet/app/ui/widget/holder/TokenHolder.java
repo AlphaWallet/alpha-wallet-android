@@ -24,6 +24,7 @@ import android.widget.TextView;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
@@ -179,7 +180,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private void populateTicker()
     {
-        if (token.ticker == null)
+        TokenTicker ticker = tokensService.getTokenTicker(token);
+        if (ticker == null)
         {
             if (token.isEthereum()) animateTextWhileWaiting();
             else layoutValueDetails.setVisibility(View.GONE);
@@ -189,16 +191,16 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         layoutValueDetails.setVisibility(View.VISIBLE);
         stopTextAnimation();
         BigDecimal correctedBalance = token.getCorrectedBalance(18);
-        BigDecimal fiatBalance = correctedBalance.multiply(new BigDecimal(token.ticker.price)).setScale(18, RoundingMode.DOWN);
+        BigDecimal fiatBalance = correctedBalance.multiply(new BigDecimal(ticker.price)).setScale(18, RoundingMode.DOWN);
         String converted = TickerService.getCurrencyString(fiatBalance.doubleValue());
         String formattedPercents = "";
-        currencyLabel.setText(token.ticker.priceSymbol);
+        currencyLabel.setText(ticker.priceSymbol);
         int color = Color.RED;
         double percentage = 0;
         try {
-            percentage = Double.valueOf(token.ticker.percentChange24h);
+            percentage = Double.valueOf(ticker.percentChange24h);
             color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
-            formattedPercents = (percentage < 0 ? "" : "+") + token.ticker.percentChange24h + "%";
+            formattedPercents = (percentage < 0 ? "" : "+") + ticker.percentChange24h + "%";
             text24Hours.setText(formattedPercents);
             text24Hours.setTextColor(color);
         } catch (Exception ex) { /* Quietly */ }
@@ -219,7 +221,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         }
 
         //calculate the appreciation value
-        double dBalance = correctedBalance.multiply(new BigDecimal(token.ticker.price)).doubleValue();
+        double dBalance = correctedBalance.multiply(new BigDecimal(ticker.price)).doubleValue();
         double nPercentage = (100.0 + percentage)/100.0;
         double dAppreciation = dBalance - (dBalance/nPercentage);
         BigDecimal appreciation = BigDecimal.valueOf(dAppreciation);

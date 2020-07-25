@@ -448,10 +448,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return new ArrayList<>(Collections.singletonList(EthereumNetworkRepository.MAINNET_ID));
     }
 
-    public static boolean hasTicker(Token token)
-    {
-        return (token.ticker != null || token.isEthereum());
-    }
     public static ContractLocator getOverrideToken()
     {
         return new ContractLocator("", EthereumNetworkRepository.MAINNET_ID, ContractType.ETHEREUM);

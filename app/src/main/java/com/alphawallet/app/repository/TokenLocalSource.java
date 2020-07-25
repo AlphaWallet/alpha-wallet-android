@@ -40,4 +40,6 @@ public interface TokenLocalSource {
     Disposable removeOutdatedTickers(Wallet wallet);
 
     Realm getRealmInstance(Wallet wallet);
+
+    TokenTicker getCurrentTicker(Wallet wallet, Token token);
 }

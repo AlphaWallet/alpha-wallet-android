@@ -195,6 +195,11 @@ public class TickerService
             BigInteger correctedPrice = ds.readBI(22);
             ds.close();
 
+            if (changeBI.testBit(24))
+            {
+                changeBI = changeBI.clearBit(24).negate();
+            }
+
             BigDecimal changeValue = new BigDecimal(changeBI).movePointLeft(3);
             BigDecimal priceValue = new BigDecimal(correctedPrice).movePointLeft(12);
 

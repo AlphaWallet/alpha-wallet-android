@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 
-import com.alphawallet.app.entity.AmberDataElement;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
@@ -194,6 +193,11 @@ public class TickerService
             BigInteger changeBI = ds.readBI(6);
             BigInteger correctedPrice = ds.readBI(22);
             ds.close();
+
+            if (changeBI.testBit(24))
+            {
+                changeBI = changeBI.clearBit(24).negate();
+            }
 
             BigDecimal changeValue = new BigDecimal(changeBI).movePointLeft(3);
             BigDecimal priceValue = new BigDecimal(correctedPrice).movePointLeft(12);
@@ -634,6 +638,13 @@ public class TickerService
         DecimalFormat df = new DecimalFormat("#,##0.00");
         df.setRoundingMode(RoundingMode.CEILING);
         return currentCurrencySymbol + df.format(price);
+    }
+
+    public static String getCurrencyWithoutSymbol(double price)
+    {
+        DecimalFormat df = new DecimalFormat("#,##0.00");
+        df.setRoundingMode(RoundingMode.DOWN);
+        return df.format(price);
     }
 
     /**

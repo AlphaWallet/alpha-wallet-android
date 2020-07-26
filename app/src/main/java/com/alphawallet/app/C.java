@@ -188,4 +188,11 @@ public abstract class C {
 
     public static final String DEFAULT_CURRENCY_CODE = "USD";
     public static final String ACTION_MY_ADDRESS_SCREEN = "my_address_screen";
+
+    //Analytics
+    public static final String AN_IMPORT_WALLET = "Wallet Imported";
+    public static final String AN_WALLET_TYPE = "Wallet Type";
+    public static final String AN_SEED_PHRASE = "Seed Phrase";
+    public static final String AN_KEYSTORE = "Keystore";
+    public static final String AN_PRIVATE_KEY = "Private Key";
 }

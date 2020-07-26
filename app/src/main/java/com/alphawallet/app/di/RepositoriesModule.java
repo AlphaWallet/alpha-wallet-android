@@ -2,6 +2,7 @@ package com.alphawallet.app.di;
 
 import android.content.Context;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
@@ -19,11 +20,14 @@ import com.alphawallet.app.repository.WalletRepository;
 import com.alphawallet.app.repository.WalletRepositoryType;
 import com.alphawallet.app.service.AccountKeystoreService;
 import com.alphawallet.app.service.AlphaWalletService;
+import com.alphawallet.app.service.AnalyticsService;
+import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.KeystoreAccountService;
 import com.alphawallet.app.service.MarketQueueService;
+import com.alphawallet.app.service.NoAnalyticsService;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.OpenseaService;
 import com.alphawallet.app.service.RealmManager;
@@ -210,5 +214,18 @@ public class RepositoriesModule {
 	@Provides
 	KeyService provideKeyService(Context ctx) {
 		return new KeyService(ctx);
+	}
+
+	@Singleton
+	@Provides
+	AnalyticsServiceType provideAnalyticsService(Context ctx) {
+		if (BuildConfig.USE_ANALYTICS)
+		{
+			return new AnalyticsService(ctx);
+		}
+		else
+		{
+			return new NoAnalyticsService(ctx);
+		}
 	}
 }

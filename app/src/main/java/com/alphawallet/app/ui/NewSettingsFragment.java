@@ -25,6 +25,7 @@ import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.viewmodel.NewSettingsViewModelFactory;
 import com.alphawallet.app.widget.AWalletBottomNavigationView;
@@ -56,6 +57,7 @@ public class NewSettingsFragment extends BaseFragment {
     private SettingsItemView selectNetworksSetting;
     private SettingsItemView advancedSetting;
     private SettingsItemView supportSetting;
+    private SettingsItemView walletConnectSetting;
 
     private LinearLayout layoutBackup;
     private View warningSeparator;
@@ -143,6 +145,13 @@ public class NewSettingsFragment extends BaseFragment {
                         .withListener(this::onBackUpWalletSettingClicked)
                         .build();
 
+        walletConnectSetting =
+                new SettingsItemView.Builder(getContext())
+                        .withIcon(R.drawable.ic_settings_backup)
+                        .withTitle(R.string.title_wallet_connect)
+                        .withListener(this::onWalletConnectSettingClicked)
+                        .build();
+
         notificationsSetting =
                 new SettingsItemView.Builder(getContext())
                         .withType(SettingsItemView.Type.TOGGLE)
@@ -192,6 +201,8 @@ public class NewSettingsFragment extends BaseFragment {
             walletSettingsLayout.addView(changeWalletSetting, walletIndex++);
 
         walletSettingsLayout.addView(backUpWalletSetting, walletIndex++);
+
+        walletSettingsLayout.addView(walletConnectSetting, walletIndex++);
 
         systemSettingsLayout.addView(notificationsSetting, systemIndex++);
 
@@ -383,5 +394,12 @@ public class NewSettingsFragment extends BaseFragment {
     private void onSupportSettingClicked() {
         Intent intent = new Intent(getActivity(), SupportSettingsActivity.class);
         startActivity(intent);
+    }
+
+    private void onWalletConnectSettingClicked() {
+        Intent intent = new Intent(getActivity(), QRScanningActivity.class);
+        intent.putExtra("wallet", wallet);
+        intent.putExtra(C.EXTRA_UNIVERSAL_SCAN, true);
+        startActivityForResult(intent, C.REQUEST_UNIVERSAL_SCAN);
     }
 }

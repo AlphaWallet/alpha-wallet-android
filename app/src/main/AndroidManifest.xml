@@ -279,6 +279,9 @@
         <activity android:name=".ui.TokenScriptManagementActivity"
             android:label="@string/tokenscript_management"/>
 
+        <activity
+            android:name=".ui.WalletConnectActivity"
+            android:label="WalletConnect" />
     </application>
 
 </manifest>

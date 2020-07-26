@@ -25,6 +25,7 @@ import java.math.RoundingMode;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -39,7 +40,6 @@ public class AmountEntryItem
 
     private TextView amountError;
     private AutoCompleteTextView amountEditText;
-    private RelativeLayout amountLayout;
     private ImageButton switchBtn;
     private ImageButton quantityUpBtn;
     private ImageButton quantityDownBtn;
@@ -48,13 +48,10 @@ public class AmountEntryItem
     private TextView usdValue;
     private boolean usdInput = false;
     private final boolean hasRealValue;
-    private final int chainId;
-    private final int decimals;
     private TokenTicker lastTicker;
 
     private LinearLayout tokenEquivalentLayout;
     private TextView tokenEquivalent;
-    private TextView tokenEquivalentSymbol;
 
     private TokenRepositoryType tokenRepository;
 
@@ -77,15 +74,11 @@ public class AmountEntryItem
         amountError = activity.findViewById(R.id.amount_error);
         if (token != null)
         {
-            this.chainId = token.tokenInfo.chainId;
             this.hasRealValue = token.hasRealValue();
-            this.decimals = token.tokenInfo.decimals;
         }
         else
         {
-            chainId = 0;
             hasRealValue = false;
-            decimals = 18;
         }
 
         amountEditText = activity.findViewById(R.id.edit_amount);
@@ -113,8 +106,7 @@ public class AmountEntryItem
             }
         });
 
-        amountLayout = activity.findViewById(R.id.layout_amount);
-        amountLayout.setOnClickListener(v -> {
+        activity.findViewById(R.id.layout_amount).setOnClickListener(v -> {
             amountEditText.requestFocus();
             InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.showSoftInput(amountEditText, InputMethodManager.SHOW_IMPLICIT);
@@ -123,7 +115,7 @@ public class AmountEntryItem
         usdLabel = activity.findViewById(R.id.amount_edit_usd_symbol);
 
         tokenSymbolLabel = activity.findViewById(R.id.amount_edit_token_symbol);
-        tokenEquivalentSymbol = activity.findViewById(R.id.text_token_symbol);
+        TextView tokenEquivalentSymbol = activity.findViewById(R.id.text_token_symbol);
         if (token != null)
         {
             tokenSymbolLabel.setText(token.getSymbol());
@@ -241,7 +233,11 @@ public class AmountEntryItem
     public void startEthereumTicker(Token token)
     {
         disposable = Observable.interval(0, CHECK_ETHPRICE_INTERVAL, TimeUnit.SECONDS)
-                .doOnNext(l -> onTicker(tokenRepository.getTokenTicker(token))).subscribe();
+                .doOnNext(l -> Single.fromCallable(() -> tokenRepository.getTokenTicker(token))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onTicker, this::onError)
+                        .isDisposed()).subscribe();
     }
 
     private void onTicker(TokenTicker ticker)

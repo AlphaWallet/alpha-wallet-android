@@ -19,6 +19,7 @@
             android:layout_marginBottom="100dp">
 
             <LinearLayout
+                android:id="@+id/layout_parent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -43,11 +44,23 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
+                    <ImageView
+                        android:id="@+id/image_triangle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_blue_triangle"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="@dimen/dp16"
+                        android:layout_alignParentTop="true"
+                        android:visibility="gone"/>
+
                     <LinearLayout
+                        android:id="@+id/layout_value"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_horizontal"
-                        android:layout_toLeftOf="@id/text_chain_name"
+                        android:layout_below="@+id/image_triangle"
+                        android:layout_toStartOf="@id/text_chain_name"
                         android:orientation="horizontal">
 
                         <TextView
@@ -55,12 +68,29 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="30dp"
-                            android:layout_marginRight="10dp"
+                            android:layout_marginEnd="10dp"
                             android:fontFamily="@font/font_regular"
                             android:gravity="center"
                             android:text="@string/dummy_transaction_value"
                             android:textColor="@color/cancel_red"
                             android:textSize="24sp" />
+
+                        <TextView
+                            android:id="@+id/text_info"
+                            android:layout_width="match_parent"
+                            android:layout_height="100dp"
+                            android:fontFamily="@font/font_regular"
+                            android:gravity="center"
+                            android:paddingEnd="@dimen/half_large_margin"
+                            android:paddingStart="@dimen/half_large_margin"
+                            android:layout_marginEnd="@dimen/dp8"
+                            android:layout_marginStart="@dimen/dp8"
+                            android:background="@drawable/background_round_azure_16dp_filled"
+                            android:text="@string/dummy_transaction_value"
+                            android:textColor="@color/white"
+                            android:lineHeight="29sp"
+                            android:textSize="@dimen/sp17"
+                            android:visibility="gone" />
 
                         <TextView
                             android:id="@+id/text_symbol"

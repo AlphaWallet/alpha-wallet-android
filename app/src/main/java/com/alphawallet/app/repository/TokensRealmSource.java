@@ -50,6 +50,7 @@ public class TokensRealmSource implements TokenLocalSource {
 
     public static final String TAG = "TLS";
     public static final String IMAGES_DB = "image_urls_db";
+    public static final String TICKER_DB = "tickers_db";
     public static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
     public static final String ADDRESS_FORMAT = "0x????????????????????????????????????????-*";
     private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
@@ -150,6 +151,12 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
+    public Realm getTickerRealmInstance()
+    {
+        return realmManager.getAuxRealmInstance(TICKER_DB);
+    }
+
+    @Override
     public Single<Token> saveToken(Wallet wallet, Token token)
     {
         return Single.fromCallable(() -> {
@@ -215,7 +222,6 @@ public class TokensRealmSource implements TokenLocalSource {
         TokenTicker tokenTicker = null;
         if (rawItem != null)
         {
-            long minCreatedTime = System.currentTimeMillis() - ACTUAL_TOKEN_TICKER_INTERVAL;
             String currencySymbol = rawItem.getCurrencySymbol();
             if (currencySymbol == null || currencySymbol.length() == 0)
                 currencySymbol = "USD";
@@ -634,6 +640,8 @@ public class TokensRealmSource implements TokenLocalSource {
                     meta.lastTxUpdate = 0;
                     tokenMetas.add(meta);
                 }
+
+                removeLocalTickers(realm); //delete any local tickers, these have all moved into a single realm
             }
             catch (Exception e)
             {
@@ -644,8 +652,23 @@ public class TokensRealmSource implements TokenLocalSource {
         });
     }
 
+    private void removeLocalTickers(Realm realm) throws Exception
+    {
+        RealmResults<RealmTokenTicker> realmItems = realm.where(RealmTokenTicker.class)
+                .findAll();
+        if (realmItems.size() > 0)
+        {
+            realm.beginTransaction();
+            for (RealmTokenTicker t : realmItems)
+            {
+                t.deleteFromRealm();
+            }
+            realm.commitTransaction();
+        }
+    }
+
     @Override
-    public Disposable updateEthTickers(Map<Integer, TokenTicker> ethTickers, Wallet wallet)
+    public Disposable updateEthTickers(Map<Integer, TokenTicker> ethTickers)
     {
         return Completable.complete()
                 .subscribeWith(new DisposableCompletableObserver()
@@ -655,8 +678,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     @Override
                     public void onStart()
                     {
-                        realm = realmManager.getRealmInstance(wallet);
-                        if (!WalletUtils.isValidAddress(wallet.address)) return;
+                        realm = realmManager.getAuxRealmInstance(TICKER_DB);
                         realm.beginTransaction();
                         TransactionsRealmCache.addRealm();
                         for (int chainId : ethTickers.keySet())
@@ -685,7 +707,7 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Disposable updateERC20Tickers(Map<String, TokenTicker> erc20Tickers, Wallet wallet)
+    public Disposable updateERC20Tickers(Map<String, TokenTicker> erc20Tickers)
     {
         return Completable.complete()
                 .subscribeWith(new DisposableCompletableObserver()
@@ -695,8 +717,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     @Override
                     public void onStart()
                     {
-                        realm = realmManager.getRealmInstance(wallet);
-                        if (!WalletUtils.isValidAddress(wallet.address)) return;
+                        realm = realmManager.getAuxRealmInstance(TICKER_DB);
                         realm.beginTransaction();
                         TransactionsRealmCache.addRealm();
                         for (String tokenAddress : erc20Tickers.keySet())
@@ -725,10 +746,10 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public TokenTicker getCurrentTicker(Wallet wallet, Token token)
+    public TokenTicker getCurrentTicker(Token token)
     {
         TokenTicker tt = null;
-        try (Realm realm = realmManager.getRealmInstance(wallet))
+        try (Realm realm = realmManager.getAuxRealmInstance(TICKER_DB))
         {
             String key = databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase());
             RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
@@ -745,7 +766,7 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Disposable removeOutdatedTickers(Wallet wallet)
+    public Disposable removeOutdatedTickers()
     {
         return Completable.complete()
                 .subscribeWith(new DisposableCompletableObserver()
@@ -755,8 +776,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     @Override
                     public void onStart()
                     {
-                        realm = realmManager.getRealmInstance(wallet);
-                        if (!WalletUtils.isValidAddress(wallet.address)) return;
+                        realm = realmManager.getAuxRealmInstance(TICKER_DB);
                         realm.beginTransaction();
                         TransactionsRealmCache.addRealm();
                         //get all tickers

@@ -92,7 +92,6 @@ public class TickerService
     private double currentConversionRate = 0.0;
     private static String currentCurrencySymbolTxt;
     private static String currentCurrencySymbol;
-    private Wallet wallet;
 
     public static native String getCMCKey();
     public static native String getAmberDataKey();
@@ -111,9 +110,8 @@ public class TickerService
         initCurrency();
     }
 
-    public void updateTickers(Wallet wallet)
+    public void updateTickers()
     {
-        this.wallet = wallet;
         if (tickerUpdateTimer != null && !tickerUpdateTimer.isDisposed()) tickerUpdateTimer.dispose();
 
         tickerUpdateTimer = Observable.interval(0, UPDATE_TICKER_CYCLE, TimeUnit.MINUTES)
@@ -288,9 +286,9 @@ public class TickerService
     {
         System.out.println("Tickers received: " + tickerSize);
         //store ticker values. If values have changed then update the token's update time so the wallet view will update
-        localSource.updateEthTickers(ethTickers, wallet);
-        localSource.updateERC20Tickers(erc20Tickers, wallet);
-        localSource.removeOutdatedTickers(wallet);
+        localSource.updateEthTickers(ethTickers);
+        localSource.updateERC20Tickers(erc20Tickers);
+        localSource.removeOutdatedTickers();
     }
 
     public TokenTicker getEthTicker(int chainId)

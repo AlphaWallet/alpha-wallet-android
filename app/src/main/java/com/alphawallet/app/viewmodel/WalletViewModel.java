@@ -108,7 +108,7 @@ public class WalletViewModel extends BaseViewModel
     private void onTokenMetas(TokenCardMeta[] metaTokens, Wallet wallet)
     {
         tokens.postValue(metaTokens);
-        tokensService.updateTickers(wallet);
+        tokensService.updateTickers();
         tokensService.addToUpdateList(metaTokens);
         tokensService.startBalanceUpdate();
     }

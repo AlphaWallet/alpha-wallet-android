@@ -192,6 +192,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Realm getTickerRealmInstance()
+    {
+        return localSource.getTickerRealmInstance();
+    }
+
+    @Override
     public Single<BigInteger> fetchLatestBlockNumber(int chainId)
     {
         return Single.fromCallable(() -> {
@@ -218,8 +224,7 @@ public class TokenRepository implements TokenRepositoryType {
     @Override
     public TokenTicker getTokenTicker(Token token)
     {
-        Wallet wallet = new Wallet(token.getWallet());
-        return localSource.getCurrentTicker(wallet, token);
+        return localSource.getCurrentTicker(token);
     }
 
     /**

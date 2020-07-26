@@ -19,12 +19,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenTicker;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.TokensRealmSource;
+import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
@@ -44,6 +47,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View.OnClickListener, View.OnLongClickListener {
 
@@ -67,6 +73,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
     private final CustomViewTarget viewTarget;
+    private RealmResults<RealmTokenTicker> realmUpdate = null;
     private String tokenName;
     private boolean primaryElement;
 
@@ -138,6 +145,12 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
                 if (backupChain != null) token = backupChain;
             }
 
+            if (realmUpdate != null)
+            {
+                realmUpdate.removeAllChangeListeners();
+                realmUpdate = null;
+            }
+
             tokenLayout.setBackgroundResource(R.drawable.background_marketplace_event);
             if (EthereumNetworkRepository.isPriorityToken(token)) extendedInfo.setVisibility(View.GONE);
             tokenName = token.getFullName(assetDefinition, token.getTicketCount());
@@ -193,52 +206,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         balanceCurrency.setVisibility(View.VISIBLE);
         stopTextAnimation();
 
-        //Set the fiat equivalent (leftmost value)
-        BigDecimal correctedBalance = token.getCorrectedBalance(18);
-        BigDecimal fiatBalance = correctedBalance.multiply(new BigDecimal(ticker.price)).setScale(18, RoundingMode.DOWN);
-        String converted = TickerService.getCurrencyString(fiatBalance.doubleValue());
-        String formattedPercents = "";
-        int color = Color.RED;
-
-        String lbl = getString(R.string.token_balance, "", converted);
-        lbl += " " + ticker.priceSymbol;
-        Spannable spannable;
-        if (correctedBalance.compareTo(BigDecimal.ZERO) > 0)
-        {
-            spannable = new SpannableString(lbl);
-            spannable.setSpan(new ForegroundColorSpan(color),
-                    converted.length(), lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            this.balanceCurrency.setText(lbl);
-            this.issuer.setVisibility(View.GONE);
-        }
-        else
-        {
-            this.balanceCurrency.setText(EMPTY_BALANCE);
-        }
-
-
-        //This sets the 24hr percentage change (rightmost value)
-        double percentage = 0;
-        try {
-            percentage = Double.parseDouble(ticker.percentChange24h);
-            color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
-            formattedPercents = (percentage < 0 ? "(" : "(+") + ticker.percentChange24h + "%)";
-            text24Hours.setText(formattedPercents);
-            text24Hours.setTextColor(color);
-        } catch (Exception ex) { /* Quietly */ }
-
-
-        //This sets the crypto price value (middle amount)
-        String formattedValue = TickerService.getCurrencyWithoutSymbol(new BigDecimal(ticker.price).doubleValue());
-
-        lbl = getString(R.string.token_balance, "", formattedValue);
-        lbl += " " + ticker.priceSymbol;
-        spannable = new SpannableString(lbl);
-        spannable.setSpan(new ForegroundColorSpan(color),
-                lbl.length(), lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        this.textAppreciation.setText(lbl);
-
-        tokensService.addTokenValue(token.tokenInfo.chainId, token.getAddress(), fiatBalance.floatValue());
+        startRealmListener();
     }
 
     private void displayTokenIcon()
@@ -399,5 +367,78 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         text24Hours.setText(R.string.unknown_balance_without_symbol);
         textAppreciation.setText(R.string.unknown_balance_without_symbol);
         balanceCurrency.setText(R.string.unknown_balance_without_symbol);
+    }
+
+    private void startRealmListener()
+    {
+        Realm realm = tokensService.getTickerRealmInstance();
+        realmUpdate = realm.where(RealmTokenTicker.class)
+                .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()))
+                .findAllAsync();
+        realmUpdate.addChangeListener(realmTicker -> {
+            //update balance
+            if (realmTicker.size() == 0) return;
+            RealmTokenTicker rawTicker = realmTicker.first();
+            if (rawTicker == null) return;
+            //update ticker info
+            TokenTicker tt = new TokenTicker(rawTicker.getPrice(), rawTicker.getPercentChange24h(), rawTicker.getCurrencySymbol(),
+                    rawTicker.getImage(), rawTicker.getUpdatedTime());
+            setTickerInfo(tt);
+            if (token.tokenInfo.chainId == 1 && token.isEthereum())
+            {
+                Toast.makeText(getContext(), "Ticker Updated: $" + rawTicker.getPrice(), Toast.LENGTH_LONG)
+                        .show();
+            }
+        });
+    }
+
+    private void setTickerInfo(TokenTicker ticker)
+    {
+        //Set the fiat equivalent (leftmost value)
+        BigDecimal correctedBalance = token.getCorrectedBalance(18);
+        BigDecimal fiatBalance = correctedBalance.multiply(new BigDecimal(ticker.price)).setScale(18, RoundingMode.DOWN);
+        String converted = TickerService.getCurrencyString(fiatBalance.doubleValue());
+        String formattedPercents = "";
+        int color = Color.RED;
+
+        String lbl = getString(R.string.token_balance, "", converted);
+        lbl += " " + ticker.priceSymbol;
+        Spannable spannable;
+        if (correctedBalance.compareTo(BigDecimal.ZERO) > 0)
+        {
+            spannable = new SpannableString(lbl);
+            spannable.setSpan(new ForegroundColorSpan(color),
+                    converted.length(), lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            this.balanceCurrency.setText(lbl);
+            this.issuer.setVisibility(View.GONE);
+        }
+        else
+        {
+            this.balanceCurrency.setText(EMPTY_BALANCE);
+        }
+
+
+        //This sets the 24hr percentage change (rightmost value)
+        double percentage = 0;
+        try {
+            percentage = Double.parseDouble(ticker.percentChange24h);
+            color = ContextCompat.getColor(getContext(), percentage < 0 ? R.color.red : R.color.green);
+            formattedPercents = (percentage < 0 ? "(" : "(+") + ticker.percentChange24h + "%)";
+            text24Hours.setText(formattedPercents);
+            text24Hours.setTextColor(color);
+        } catch (Exception ex) { /* Quietly */ }
+
+
+        //This sets the crypto price value (middle amount)
+        String formattedValue = TickerService.getCurrencyWithoutSymbol(new BigDecimal(ticker.price).doubleValue());
+
+        lbl = getString(R.string.token_balance, "", formattedValue);
+        lbl += " " + ticker.priceSymbol;
+        spannable = new SpannableString(lbl);
+        spannable.setSpan(new ForegroundColorSpan(color),
+                lbl.length(), lbl.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        this.textAppreciation.setText(lbl);
+
+        tokensService.addTokenValue(token.tokenInfo.chainId, token.getAddress(), fiatBalance.floatValue());
     }
 }

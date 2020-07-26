@@ -463,9 +463,9 @@ public class TokensService
     }
 
 
-    public void updateTickers(Wallet wallet)
+    public void updateTickers()
     {
-        tickerService.updateTickers(wallet);
+        tickerService.updateTickers();
     }
 
     public Realm getRealmInstance(Wallet wallet)
@@ -647,5 +647,10 @@ public class TokensService
         }
 
         return nextTimeCheck;
+    }
+
+    public Realm getTickerRealmInstance()
+    {
+        return tokenRepository.getTickerRealmInstance();
     }
 }

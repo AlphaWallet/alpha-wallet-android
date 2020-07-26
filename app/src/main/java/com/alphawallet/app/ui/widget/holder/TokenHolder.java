@@ -19,7 +19,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
@@ -191,22 +190,20 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private void populateTicker()
     {
         TokenTicker ticker = tokensService.getTokenTicker(token);
-        if (ticker == null)
+        if (ticker == null && !token.isEthereum())
         {
             balanceCurrency.setVisibility(View.GONE);
             layoutAppreciation.setVisibility(View.GONE);
-            if (token.isEthereum()) animateTextWhileWaiting();
-            else setIssuerDetails();
-            return;
+            setIssuerDetails();
         }
-
-        primaryElement = true;
-        hideIssuerViews();
-        layoutAppreciation.setVisibility(View.VISIBLE);
-        balanceCurrency.setVisibility(View.VISIBLE);
-        stopTextAnimation();
-
-        startRealmListener();
+        else
+        {
+            primaryElement = true;
+            hideIssuerViews();
+            layoutAppreciation.setVisibility(View.VISIBLE);
+            balanceCurrency.setVisibility(View.VISIBLE);
+            startRealmListener();
+        }
     }
 
     private void displayTokenIcon()
@@ -384,11 +381,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             TokenTicker tt = new TokenTicker(rawTicker.getPrice(), rawTicker.getPercentChange24h(), rawTicker.getCurrencySymbol(),
                     rawTicker.getImage(), rawTicker.getUpdatedTime());
             setTickerInfo(tt);
-            if (token.tokenInfo.chainId == 1 && token.isEthereum())
-            {
-                Toast.makeText(getContext(), "Ticker Updated: $" + rawTicker.getPrice(), Toast.LENGTH_LONG)
-                        .show();
-            }
         });
     }
 

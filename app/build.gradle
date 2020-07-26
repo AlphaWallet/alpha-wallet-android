@@ -58,7 +58,7 @@ android {
 	awallet {
 		dimension "targetting"
         versionCode 123
-        versionName "3.10.0"
+        versionName "3.11.0-beta"
 	}
     }
     buildTypes {

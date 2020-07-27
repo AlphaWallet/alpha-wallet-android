@@ -87,7 +87,6 @@ public class BackupKeyActivity extends BaseActivity implements
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
         alertDialog = null;
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         lockOrientation();
 
         BackupOperationType type = (BackupOperationType) getIntent().getSerializableExtra("TYPE");
@@ -248,6 +247,8 @@ public class BackupKeyActivity extends BaseActivity implements
         state = BackupState.ENTER_JSON_BACKUP;
         functionButtonBar.setPrimaryButtonText(R.string.export_keystore_json);
         functionButtonBar.setPrimaryButtonClickListener(this);
+
+        secureWindow();
     }
 
     private void setupTestSeed() {
@@ -462,6 +463,8 @@ public class BackupKeyActivity extends BaseActivity implements
         if (mnemonicArray != null) {
             jumbleList();
         }
+
+        secureWindow();
     }
 
     private void jumbleList() {
@@ -501,6 +504,8 @@ public class BackupKeyActivity extends BaseActivity implements
         title.setText(R.string.write_down_seed_phrase);
         functionButtonBar.setPrimaryButtonText(R.string.wrote_down_seed_phrase);
         functionButtonBar.setPrimaryButtonClickListener(this);
+
+        secureWindow();
     }
 
     private void DisplaySeed() {
@@ -810,6 +815,12 @@ public class BackupKeyActivity extends BaseActivity implements
 
     @Override
     public void handleClick(String action, int id) {
+
+        /*
+        Make all screen insecure to take screenshot / record
+         */
+        insecureWindow();
+
         switch (state) {
             case ENTER_BACKUP_STATE_HD:
                 WriteDownSeedPhrase();
@@ -839,5 +850,15 @@ public class BackupKeyActivity extends BaseActivity implements
                 viewModel.getAuthentication(wallet, this, this);
                 break;
         }
+    }
+
+    private void secureWindow()
+    {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+    }
+
+    private void insecureWindow()
+    {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
     }
 }

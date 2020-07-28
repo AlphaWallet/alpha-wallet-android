@@ -66,68 +66,7 @@ public class EventSortedItem extends TimestampSortedItem<EventMeta>
         {
             return super.compare(other);
         }
-
-        /*if (other.viewType == TransactionHolder.VIEW_TYPE && ((TransactionSortedItem)other).value.hash.equals(value.hash))
-        {
-            return 0;
-        }
-        else if (!other.tags.contains(IS_TIMESTAMP_TAG) || other.viewType != EventHolder.VIEW_TYPE)
-        {
-            return super.compare(other);
-        }
-        EventMeta oldTx = value;
-        EventMeta newTx = (EventMeta) other.value;
-        TimestampSortedItem otherTimestamp = (TimestampSortedItem) other;
-
-        if (this.getTimestamp().equals(otherTimestamp.getTimestamp()))
-        {
-            if (oldTx.hash.equals(newTx.hash)) return oldTx.activityCardName.compareTo(newTx.activityCardName);
-            return oldTx.hash.compareTo(newTx.hash);
-        }
-        else
-        {
-            return super.compare(other);
-        }*/
     }
-
-    /*@Override
-    public boolean areContentsTheSame(SortedItem other)
-    {
-        if (viewType == other.viewType)
-        {
-            EventMeta oldTx = value;
-            EventMeta newTx = (EventMeta) other.value;
-            return oldTx.hash.equals(newTx.hash) && oldTx.activityCardName.equals(newTx.activityCardName);
-        }
-        else if (other.viewType == TransactionHolder.VIEW_TYPE)
-        {
-            return false;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    @Override
-    public boolean areItemsTheSame(SortedItem other)
-    {
-        if (viewType == other.viewType)
-        {
-            EventMeta oldTx = value;
-            EventMeta newTx = (EventMeta) other.value;
-
-            return oldTx.hash.equals(newTx.hash) && oldTx.activityCardName.equals(newTx.activityCardName);
-        }
-        else if (other.viewType == TransactionHolder.VIEW_TYPE)
-        {
-            return false;
-        }
-        else
-        {
-            return false;
-        }
-    }*/
 
     @Override
     public boolean areContentsTheSame(SortedItem other)
@@ -138,7 +77,7 @@ public class EventSortedItem extends TimestampSortedItem<EventMeta>
             EventMeta newTx = (EventMeta) other.value;
             return oldTx.hash.equals(newTx.hash) && oldTx.activityCardName.equals(newTx.activityCardName);
         }
-        else if (other.viewType == TransactionHolder.VIEW_TYPE)// && ((TransactionSortedItem)other).value.hash.equals(value.hash))
+        else if (other.viewType == TransactionHolder.VIEW_TYPE)
         {
             return true;
         }
@@ -158,7 +97,7 @@ public class EventSortedItem extends TimestampSortedItem<EventMeta>
 
             return oldTx.hash.equals(newTx.hash) && oldTx.activityCardName.equals(newTx.activityCardName);
         }
-        else if (other.viewType == TransactionHolder.VIEW_TYPE)// && ((TransactionSortedItem)other).value.hash.equals(value.hash))
+        else if (other.viewType == TransactionHolder.VIEW_TYPE)
         {
             return true;
         }

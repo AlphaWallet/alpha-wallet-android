@@ -14,6 +14,8 @@ import com.alphawallet.app.ui.widget.entity.NetworkItem;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static com.alphawallet.app.repository.SharedPreferenceRepository.HIDE_ZERO_BALANCE_TOKENS;
+
 public class VisibilityFilter
 {
     private static int primaryChain = EthereumNetworkRepository.MAINNET_ID;
@@ -22,7 +24,7 @@ public class VisibilityFilter
     public static boolean filterToken(TokenCardMeta token, boolean filterResult, Context context)
     {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean hideZeroBalanceTokens = pref.getBoolean("hide_zero_balance_tokens", false);
+        boolean hideZeroBalanceTokens = pref.getBoolean(HIDE_ZERO_BALANCE_TOKENS, false);
 
         if (hideZeroBalanceTokens && !token.hasPositiveBalance()) {
             filterResult = false;

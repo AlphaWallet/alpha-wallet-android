@@ -339,7 +339,7 @@ public class Transaction implements Parcelable {
 
 		if (contractAddress.equals("eth"))
 		{
-			return (input.equals("0x") || from.equals(walletAddress));
+			return (input.equals("0x") || from.equalsIgnoreCase(walletAddress));
 		}
 		else if (walletAddress.equalsIgnoreCase(contractAddress)) //transactions sent from or sent to the main currency account
 		{

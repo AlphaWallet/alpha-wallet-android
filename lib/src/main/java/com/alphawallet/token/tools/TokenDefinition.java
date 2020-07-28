@@ -1235,6 +1235,7 @@ public class TokenDefinition {
         {
             if (!first) sb.append(",");
             sb.append(s);
+            first = false;
         }
 
         return sb.toString();

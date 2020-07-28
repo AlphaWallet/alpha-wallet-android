@@ -50,6 +50,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.ADDED_TOKEN;
+import static com.alphawallet.app.repository.SharedPreferenceRepository.HIDE_ZERO_BALANCE_TOKENS;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static org.web3j.crypto.WalletUtils.isValidAddress;
 
@@ -353,7 +354,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
 
     private void onSave() {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        if (zeroBalanceToken && pref.getBoolean("hide_zero_balance_tokens", false))
+        if (zeroBalanceToken && pref.getBoolean(HIDE_ZERO_BALANCE_TOKENS, false))
         {
             userAddingZeroBalanceToken();
         }
@@ -374,7 +375,7 @@ public class AddTokenActivity extends BaseActivity implements View.OnClickListen
         aDialog.setButtonListener(v -> {
             aDialog.dismiss();
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-            pref.edit().putBoolean("hide_zero_balance_tokens", false).apply();
+            pref.edit().putBoolean(HIDE_ZERO_BALANCE_TOKENS, false).apply();
             saveFinal();
         });
         aDialog.setSecondaryButtonText(R.string.action_cancel);

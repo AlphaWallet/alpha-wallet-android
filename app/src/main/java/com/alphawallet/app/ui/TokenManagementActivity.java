@@ -1,11 +1,9 @@
 package com.alphawallet.app.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,7 +12,6 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.alphawallet.app.C;
@@ -89,7 +86,6 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
             delayHandler.postDelayed(workRunnable, 500 /*delay*/);
         }
 
-        //Runnable workRunnable = () -> adapter.getFilter().filter(searchString); //nice implementation, looks more correct but doesn't work as expected (no update until you cancel the softkeyboard)
         Runnable workRunnable = () -> adapter.filter(searchString);
     };
 
@@ -114,7 +110,8 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         if (item.getItemId() == R.id.action_add)
         {
             viewModel.showAddToken(this);

@@ -846,7 +846,7 @@ public abstract class TokenscriptFunction
                 EthLog.LogResult ethLog = ethLogs.getLogs().get(ethLogs.getLogs().size() - 1);
                 String selectVal = EventUtils.getSelectVal(attr.event, ethLog);
                 txResult.result = attr.getSyntaxVal(selectVal);
-                txResult.resultTime = System.currentTimeMillis();
+                txResult.resultTime = ((Log)ethLog.get()).getBlockNumber().longValue();
                 attrIf.storeAuxData(walletAddress, txResult);
             }
 

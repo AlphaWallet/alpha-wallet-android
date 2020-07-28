@@ -61,60 +61,6 @@ public class TransactionSortedItem extends TimestampSortedItem<TransactionMeta> 
         }
     }
 
-    /*@Override
-    public boolean areContentsTheSame(SortedItem other) {
-        try
-        {
-            if (viewType == other.viewType)
-            {
-                TransactionMeta newTx = (TransactionMeta) other.value;
-
-                //boolean hashMatch = oldTx.hash.equals(newTx.hash);
-                boolean pendingMatch = value.isPending == newTx.isPending;
-
-                return pendingMatch;
-            }
-            else if (other.viewType == EventHolder.VIEW_TYPE)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
-    }
-
-    @Override
-    public boolean areItemsTheSame(SortedItem other)
-    {
-        try
-        {
-            if (viewType == other.viewType)
-            {
-                return true;
-                //TransactionMeta newTx = (TransactionMeta) other.value;
-                //return value.hash.equals(newTx.hash);
-            }
-            else if (other.viewType == EventHolder.VIEW_TYPE)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
-    }*/
-
     @Override
     public boolean areContentsTheSame(SortedItem other) {
         try

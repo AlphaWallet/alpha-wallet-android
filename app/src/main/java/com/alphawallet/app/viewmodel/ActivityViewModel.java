@@ -5,7 +5,6 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
-import com.alphawallet.app.entity.ActionEventCallback;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.Event;
 import com.alphawallet.app.entity.Transaction;
@@ -13,6 +12,7 @@ import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.interact.ActivityDataInteract;
 import com.alphawallet.app.interact.AddTokenInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
@@ -36,7 +36,7 @@ import io.realm.RealmResults;
 /**
  * Created by JB on 26/06/2020.
  */
-public class ActivityViewModel extends BaseViewModel implements ActionEventCallback
+public class ActivityViewModel extends BaseViewModel
 {
     private final int TRANSACTION_FETCH_LIMIT = 500;
 
@@ -95,6 +95,11 @@ public class ActivityViewModel extends BaseViewModel implements ActionEventCallb
     private void onActivityMetas(ActivityMeta[] metas)
     {
         activityItems.postValue(metas);
+        disposable =
+                fetchTransactionsInteract.fetchEventMetas(wallet.getValue(), tokensService.getNetworkFilters())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(activityItems::postValue, this::onError);
     }
 
     public void fetchMoreTransactions(long startTime)
@@ -103,19 +108,7 @@ public class ActivityViewModel extends BaseViewModel implements ActionEventCallb
                 fetchTransactionsInteract.fetchTransactionMetas(wallet.getValue(), tokensService.getNetworkFilters(), startTime, TRANSACTION_FETCH_LIMIT)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onActivityMetas, this::onError);
-    }
-
-    @Override
-    public void receivedEvent(String selectedParamName, String selectedParamValue, long timeStamp, int chainId)
-    {
-
-    }
-
-    @Override
-    public void eventsLoaded(Event[] events)
-    {
-
+                        .subscribe(activityItems::postValue, this::onError);
     }
 
     public void onDestroy()
@@ -136,9 +129,9 @@ public class ActivityViewModel extends BaseViewModel implements ActionEventCallb
         return fetchTransactionsInteract;
     }
 
-    public Realm getRealmInstance(Wallet wallet)
+    public Realm getRealmInstance()
     {
-        return fetchTransactionsInteract.getRealmInstance(wallet);
+        return fetchTransactionsInteract.getRealmInstance(wallet.getValue());
     }
 
     /**
@@ -161,5 +154,10 @@ public class ActivityViewModel extends BaseViewModel implements ActionEventCallb
     public void showDetails(Context context, Transaction transaction)
     {
         transactionDetailRouter.open(context, transaction, wallet.getValue());
+    }
+
+    public AssetDefinitionService getAssetDefinitionService()
+    {
+        return assetDefinitionService;
     }
 }

@@ -14,11 +14,13 @@ import android.view.ViewGroup;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractLocator;
+import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.interact.ActivityDataInteract;
+import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.ui.widget.adapter.ActivityAdapter;
 import com.alphawallet.app.ui.widget.adapter.RecycleViewDivider;
@@ -50,6 +52,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     private RecyclerView listView;
     private Realm realm;
     private RealmResults<RealmTransaction> realmUpdates;
+    private RealmResults<RealmAuxData> auxRealmUpdates;
     private String realmId;
 
     @Nullable
@@ -95,7 +98,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
             if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
 
             realmId = walletAddress;
-            realm = viewModel.getRealmInstance(new Wallet(walletAddress));
+            realm = viewModel.getRealmInstance();
             realmUpdates = realm.where(RealmTransaction.class).greaterThan("timeStamp", lastUpdateTime).findAllAsync();
             realmUpdates.addChangeListener(realmTransactions -> {
                 List<TransactionMeta> metas = new ArrayList<>();
@@ -120,13 +123,36 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
                 //Check for new unknown tokens
                 viewModel.checkTokens(realmTransactions);
             });
+
+            auxRealmUpdates = realm.where(RealmAuxData.class)
+                    .greaterThan("resultTime", lastUpdateTime)
+                    .endsWith("instanceKey", "-eventName")
+                    .findAllAsync();
+            auxRealmUpdates.addChangeListener(realmEvents -> {
+                List<ActivityMeta> metas = new ArrayList<>();
+                if (realmEvents.size() == 0) return;
+                for (RealmAuxData item : realmEvents)
+                {
+                    if (viewModel.getTokensService().getNetworkFilters().contains(item.getChainId()))
+                    {
+                        EventMeta newMeta = new EventMeta(item.getTransactionHash(), item.getEventName(), item.getFunctionId(), item.getResultTime(), item.getChainId());
+                        metas.add(newMeta);
+                    }
+                }
+
+                if (metas.size() > 0)
+                {
+                    adapter.updateActivityItems(metas.toArray(new ActivityMeta[0]));
+                    systemView.hide();
+                }
+            });
         }
     }
 
     private void initViews(View view)
     {
-        adapter = new ActivityAdapter(this::onActivityClick, viewModel.getTokensService(),
-                viewModel.provideTransactionsInteract(), this);
+        adapter = new ActivityAdapter(this::onActivityClick, this::onEventClick, viewModel.getTokensService(),
+                viewModel.provideTransactionsInteract(), viewModel.getAssetDefinitionService(), this);
         SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
         systemView = view.findViewById(R.id.system_view);
         listView = view.findViewById(R.id.list);
@@ -152,6 +178,11 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     private void onActivityClick(View view, Transaction transaction)
     {
         viewModel.showDetails(view.getContext(), transaction);
+    }
+
+    private void onEventClick(View view, String eventKey)
+    {
+        //
     }
 
     private void showEmptyTx()
@@ -206,6 +237,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     {
         super.onDestroy();
         if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
+        if (auxRealmUpdates != null) auxRealmUpdates.removeAllChangeListeners();
         if (realm != null && !realm.isClosed()) realm.close();
         if (viewModel != null) viewModel.onDestroy();
     }

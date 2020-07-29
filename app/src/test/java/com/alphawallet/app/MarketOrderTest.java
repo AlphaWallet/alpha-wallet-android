@@ -14,6 +14,7 @@ import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.TransactionRepositoryType;
+import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.MarketQueueService;
 
 import org.junit.BeforeClass;
@@ -162,7 +163,20 @@ public class MarketOrderTest
             }
 
             @Override
+            public Single<ActivityMeta[]> fetchEventMetas(Wallet wallet,
+                                                          List<Integer> networkFilters)
+            {
+                return null;
+            }
+
+            @Override
             public Realm getRealmInstance(Wallet wallet)
+            {
+                return null;
+            }
+
+            @Override
+            public RealmAuxData fetchCachedEvent(String walletAddress, String eventKey)
             {
                 return null;
             }

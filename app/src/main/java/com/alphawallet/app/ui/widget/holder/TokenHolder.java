@@ -246,12 +246,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         contractSeparator.setVisibility(View.GONE);
     }
 
-    private void stopTextAnimation() {
-        text24Hours.clearAnimation();
-        textAppreciation.clearAnimation();
-        balanceCurrency.clearAnimation();
-    }
-
     private void setContractType()
     {
         //Display contract type if required
@@ -318,7 +312,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             this.balanceCurrency.setText(EMPTY_BALANCE);
         }
 
-
         //This sets the 24hr percentage change (rightmost value)
         double percentage = 0;
         try {
@@ -328,7 +321,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             text24Hours.setText(formattedPercents);
             text24Hours.setTextColor(color);
         } catch (Exception ex) { /* Quietly */ }
-
 
         //This sets the crypto price value (middle amount)
         String formattedValue = TickerService.getCurrencyWithoutSymbol(new BigDecimal(ticker.price).doubleValue());

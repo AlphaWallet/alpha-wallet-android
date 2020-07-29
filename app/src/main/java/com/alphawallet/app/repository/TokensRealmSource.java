@@ -154,7 +154,7 @@ public class TokensRealmSource implements TokenLocalSource {
     @Override
     public Realm getTickerRealmInstance()
     {
-        return realmManager.getAuxRealmInstance(TICKER_DB);
+        return realmManager.getRealmInstance(TICKER_DB);
     }
 
     @Override
@@ -271,6 +271,16 @@ public class TokensRealmSource implements TokenLocalSource {
         return databaseKey(token.tokenInfo.chainId, token.tokenInfo.address);
     }
 
+    public static String eventKey(String txHash, String activityName)
+    {
+        return txHash + "-" + activityName + "-eventName";
+    }
+
+    public static String eventBlockKey(int chainId, String eventAddress, String namedType, String filter)
+    {
+        return eventAddress + "-" + chainId + "-" + namedType + "-" + filter + "-eventBlock";
+    }
+
     @Override
     public boolean updateTokenBalance(Wallet wallet, int chainId, String tokenAddress, BigDecimal balance, List<BigInteger> balanceArray, ContractType type)
     {
@@ -319,10 +329,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     balanceChanged = true;
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
         }
 
         return balanceChanged;
@@ -375,7 +381,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     public void onStart()
                     {
                         String instanceKey = address.toLowerCase() + "-" + networkId;
-                        realm = realmManager.getAuxRealmInstance(IMAGES_DB);
+                        realm = realmManager.getRealmInstance(IMAGES_DB);
                         RealmAuxData instance = realm.where(RealmAuxData.class)
                                 .equalTo("instanceKey", instanceKey)
                                 .findFirst();
@@ -423,7 +429,7 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
-    private void saveToken(Realm realm, Token token)
+    private void saveToken(Realm realm, Token token) throws RealmException
     {
         String databaseKey = databaseKey(token);
 
@@ -536,24 +542,17 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
-    private void deleteAssets(Realm realm, String dbKey)
+    private void deleteAssets(Realm realm, String dbKey) throws RealmException
     {
         String key = dbKey + "-";
 
-        try
-        {
-            RealmResults<RealmERC721Asset> realmAssets = realm.where(RealmERC721Asset.class)
-                    .beginsWith("tokenIdAddr", key)
-                    .findAll();
+        RealmResults<RealmERC721Asset> realmAssets = realm.where(RealmERC721Asset.class)
+                .beginsWith("tokenIdAddr", key)
+                .findAll();
 
-            for (RealmERC721Asset asset : realmAssets)
-            {
-                asset.deleteFromRealm();
-            }
-        }
-        catch (Exception e)
+        for (RealmERC721Asset asset : realmAssets)
         {
-            //silent
+            asset.deleteFromRealm();
         }
     }
 
@@ -628,6 +627,11 @@ public class TokensRealmSource implements TokenLocalSource {
                     if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()) || !t.getEnabled()) continue;
                     String balance = convertStringBalance(t.getBalance(), t.getContractType());
 
+                    if (t.getContractType() == ContractType.ETHEREUM && !(t.getTokenAddress().equalsIgnoreCase(wallet.address) || t.getTokenAddress().equals("eth")))
+                    {
+                        continue;
+                    }
+
                     TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance, t.getUpdateTime(), svs, t.getName(), t.getSymbol(), t.getContractType());
                     meta.lastTxUpdate = t.getLastTxTime();
                     tokenMetas.add(meta);
@@ -638,6 +642,14 @@ public class TokensRealmSource implements TokenLocalSource {
                     }
                 }
 
+                removeLocalTickers(realm); //delete any local tickers, these have all moved into a single realm
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            finally
+            {
                 //create metas for any card not previously saved
                 for (Integer chainId : rootChainTokenCards)
                 {
@@ -645,12 +657,6 @@ public class TokensRealmSource implements TokenLocalSource {
                     meta.lastTxUpdate = 0;
                     tokenMetas.add(meta);
                 }
-
-                removeLocalTickers(realm); //delete any local tickers, these have all moved into a single realm
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
             }
 
             return tokenMetas.toArray(new TokenCardMeta[0]);
@@ -759,7 +765,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     @Override
                     public void onStart()
                     {
-                        realm = realmManager.getAuxRealmInstance(TICKER_DB);
+                        realm = realmManager.getRealmInstance(TICKER_DB);
                         realm.beginTransaction();
                         TransactionsRealmCache.addRealm();
                         for (int chainId : ethTickers.keySet())
@@ -798,7 +804,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     @Override
                     public void onStart()
                     {
-                        realm = realmManager.getAuxRealmInstance(TICKER_DB);
+                        realm = realmManager.getRealmInstance(TICKER_DB);
                         realm.beginTransaction();
                         TransactionsRealmCache.addRealm();
                         for (String tokenAddress : erc20Tickers.keySet())
@@ -830,7 +836,7 @@ public class TokensRealmSource implements TokenLocalSource {
     public TokenTicker getCurrentTicker(Token token)
     {
         TokenTicker tt = null;
-        try (Realm realm = realmManager.getAuxRealmInstance(TICKER_DB))
+        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
         {
             String key = databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase());
             RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
@@ -857,7 +863,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     @Override
                     public void onStart()
                     {
-                        realm = realmManager.getAuxRealmInstance(TICKER_DB);
+                        realm = realmManager.getRealmInstance(TICKER_DB);
                         realm.beginTransaction();
                         TransactionsRealmCache.addRealm();
                         //get all tickers

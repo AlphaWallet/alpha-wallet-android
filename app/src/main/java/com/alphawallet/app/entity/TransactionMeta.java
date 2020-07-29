@@ -13,15 +13,13 @@ package com.alphawallet.app.entity;
 
 public class TransactionMeta extends ActivityMeta
 {
-    public final String hash;
     public final boolean isPending;
     public final String contractAddress;
     public final int chainId;
 
     public TransactionMeta(String hash, long timeStamp, String contractAddress, int chainId, boolean pending)
     {
-        super(timeStamp);
-        this.hash = hash;
+        super(timeStamp, hash);
         this.isPending = pending;
         this.contractAddress = contractAddress;
         this.chainId = chainId;

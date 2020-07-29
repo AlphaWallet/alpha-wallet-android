@@ -660,4 +660,16 @@
     <string name="message_reject_request">Rejected by the user</string>
     <string name="dialog_title_disconnect_session">Disconnect Session</string>
     <string name="message_authentication_failed">Authentication failed</string>
+    <string name="tx_rejected">Transaction rejected (try using more gas)</string>
+    <string name="from">from: %1$s</string>
+    <string name="valueSymbol">%1$s %2$s</string>
+    <string name="sent_to">to: %1$s</string>
+    <string name="approval_granted_to">approved to transfer tokens: %1$s</string>
+    <string name="approval_obtained_from">to spend on behalf of: %1$s</string>
+    <string name="unknown_event">Unknown event</string>
+    <string name="activity_sent">Sent %1$s</string>
+    <string name="activity_received">Received %1$s</string>
+    <string name="activity_approved">Approved %1$s</string>
+    <string name="activity_approval_granted">Approval granted %1$s</string>
+    <string name="tokenscript_call">TokenScript call:</string>
 </resources>

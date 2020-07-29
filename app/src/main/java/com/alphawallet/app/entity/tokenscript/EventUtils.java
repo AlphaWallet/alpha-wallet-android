@@ -121,6 +121,7 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthLog;
+import org.web3j.protocol.core.methods.response.EthTransaction;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.utils.Numeric;
 
@@ -233,7 +234,7 @@ public abstract class EventUtils
         return topicVal;
     }
 
-    public Single<EthBlock> getTransactionDetails(String blockHash, Web3j web3j)
+    public Single<EthBlock> getBlockDetails(String blockHash, Web3j web3j)
     {
         return Single.fromCallable(() -> {
             EthBlock txResult;
@@ -246,6 +247,25 @@ public abstract class EventUtils
             {
                 e.printStackTrace();
                 txResult = new EthBlock();
+            }
+
+            return txResult;
+        });
+    }
+
+    public Single<EthTransaction> getTransactionDetails(String blockHash, Web3j web3j)
+    {
+        return Single.fromCallable(() -> {
+            EthTransaction txResult;
+            try
+            {
+                txResult = web3j.ethGetTransactionByHash(blockHash.trim()).send();
+                System.out.println(txResult.getResult());
+            }
+            catch (IOException | NullPointerException e)
+            {
+                e.printStackTrace();
+                txResult = new EthTransaction();
             }
 
             return txResult;
@@ -689,6 +709,44 @@ public abstract class EventUtils
                     throw new Exception("Unresolved event filter name: " + filterTopicValue);
                 }
                 break;
+        }
+    }
+
+    public String getAllTopics(EventDefinition ev, EthLog.LogResult log)
+    {
+        final Event resolverEvent = generateEventFunction(ev);
+        final EventValues eventValues = staticExtractEventParameters(resolverEvent, (Log)log.get());
+
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (NamedType.SequenceElement e : ev.type.getSequenceArgs())
+        {
+            if (!first) sb.append(",");
+            sb.append(e.name);
+            sb.append(",");
+            sb.append(e.type);
+            sb.append(",");
+
+            String result = getEventResult(ev, e.name, eventValues);
+            sb.append(result);
+            first = false;
+        }
+
+        return sb.toString();
+    }
+
+    private String getEventResult(EventDefinition ev, String name, final EventValues eventValues)
+    {
+        int indexed = ev.getTopicIndex(name);
+        int nonIndexed = ev.getNonIndexedIndex(name);
+
+        if (indexed >= 0)
+        {
+            return eventValues.getIndexedValues().get(indexed).getValue().toString();
+        }
+        else
+        {
+            return eventValues.getNonIndexedValues().get(nonIndexed).getValue().toString();
         }
     }
 }

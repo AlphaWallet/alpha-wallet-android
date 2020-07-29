@@ -1,5 +1,7 @@
 package com.alphawallet.app.service;
 
+import com.alphawallet.app.repository.entity.RealmAuxData;
+
 import io.realm.DynamicRealm;
 import io.realm.FieldAttribute;
 import io.realm.RealmMigration;
@@ -39,6 +41,12 @@ public class AWRealmMigration implements RealmMigration
                     .addField("certificateName", String.class)
                     .addField("type", int.class);
             oldVersion++;
+        }
+
+        if (oldVersion == 7)
+        {
+            RealmObjectSchema realmData = schema.get("RealmAuxData");
+            if (!realmData.hasField("tokenAddress")) realmData.addField("tokenAddress", String.class);
         }
     }
 

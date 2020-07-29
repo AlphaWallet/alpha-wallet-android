@@ -226,7 +226,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
             case TOKENSCRIPT:
                 title.setVisibility(View.VISIBLE);
                 title.setText(R.string.confirm_tokenscript_transaction);
-                to = getIntent().getStringExtra(C.EXTRA_ACTION_NAME) + " Contract";
+                to = getIntent().getStringExtra(C.EXTRA_ACTION_NAME);
+                ((TextView)findViewById(R.id.title_to)).setText(R.string.tokenscript_call);
 
                 contractAddrText.setVisibility(View.VISIBLE);
                 contractAddrLabel.setVisibility(View.VISIBLE);

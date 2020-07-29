@@ -5,14 +5,14 @@ import android.os.Bundle;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.AnalyticsProperties;
-import com.google.firebase.analytics.FirebaseAnalytics;
+//import com.google.firebase.analytics.FirebaseAnalytics;
 
 public class AnalyticsService<T> implements AnalyticsServiceType<T>{
 
-    private FirebaseAnalytics firebaseAnalytics;
+    //private FirebaseAnalytics firebaseAnalytics;
 
     public AnalyticsService(Context context){
-        firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+        //firebaseAnalytics = FirebaseAnalytics.getInstance(context);
     }
 
     @Override
@@ -30,12 +30,12 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T>{
             props.putString(C.AN_WALLET_TYPE, analyticsProperties.getWalletType());
         }
 
-        firebaseAnalytics.logEvent(eventName, props);
+        //firebaseAnalytics.logEvent(eventName, props);
     }
 
     @Override
     public void identify(String uuid){
-        firebaseAnalytics.setUserId(uuid);
+        //firebaseAnalytics.setUserId(uuid);
     }
 
     @Override

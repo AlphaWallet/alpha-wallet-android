@@ -104,8 +104,6 @@ public class SignTransactionDialog extends BottomSheetDialog
     }
 
     private void authenticate(FingerprintManager fpManager, Context context, AuthenticationCallback authCallback) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-            return;
         CancellationSignal cancellationSignal;
         cancellationSignal = new CancellationSignal();
         fpManager.authenticate(null, cancellationSignal, 0, new FingerprintManager.AuthenticationCallback() {
@@ -166,9 +164,6 @@ public class SignTransactionDialog extends BottomSheetDialog
 
     private static FingerprintManager fingerprintUnlockSupported(Context ctx)
     {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return null;
-        }
         if (ctx.checkSelfPermission(Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED) {
             return null;
         }

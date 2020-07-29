@@ -102,6 +102,7 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
 
         splashViewModel.fetchWallets();
         splashViewModel.checkVersionUpdate(getBaseContext(), getAppUpdateTime);
+        splashViewModel.cleanAuxData(getApplicationContext());
     }
 
     protected Activity getThisActivity()
@@ -112,7 +113,6 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
     //wallet created, now check if we need to import
     private void onWalletCreate(Wallet wallet)
     {
-        System.out.println("KEYS: OnWalletCreate");
         Wallet[] wallets = new Wallet[1];
         wallets[0] = wallet;
         onWallets(wallets);
@@ -150,7 +150,6 @@ public class SplashActivity extends BaseActivity implements CreateWalletCallback
         //2. repeat after step 1 is complete. Are we importing a ticket?
         //      - yes - proceed with import
         //      - no - proceed to home activity
-        System.out.println("KEYS: " + wallets.length);
         if (wallets.length == 0)
         {
             findViewById(R.id.layout_new_wallet).setVisibility(View.VISIBLE);

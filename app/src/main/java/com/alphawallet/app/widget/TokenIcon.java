@@ -79,7 +79,7 @@ public class TokenIcon extends ConstraintLayout {
         statusIcon = findViewById(R.id.status_icon);
         View layout = findViewById(R.id.view_container);
 
-        statusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
+        statusIcon.setVisibility(View.GONE);
 
         layout.setOnClickListener(this::performTokenClick);
     }
@@ -163,6 +163,7 @@ public class TokenIcon extends ConstraintLayout {
 
     public void setStatusIcon(StatusType type)
     {
+        statusIcon.setVisibility(View.VISIBLE);
         switch (type)
         {
             case SENT:
@@ -179,6 +180,12 @@ public class TokenIcon extends ConstraintLayout {
                 break;
             case REJECTED:
                 statusIcon.setImageResource(R.drawable.ic_transaction_rejected);
+                break;
+            case CONSTRUCTOR:
+                statusIcon.setImageResource(R.drawable.ic_ethereum_logo);
+                break;
+            case SELF:
+                statusIcon.setImageResource(R.drawable.ic_send_self_small);
                 break;
         }
     }

@@ -14,6 +14,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
@@ -242,7 +243,7 @@ public class Token implements Parcelable, Comparable<Token>
     public String getFullName(AssetDefinitionService assetDefinition, int count)
     {
         //override contract name with TS defined name
-        String name = assetDefinition.getTokenName(tokenInfo.chainId, tokenInfo.address, count);
+        String name = assetDefinition != null ? assetDefinition.getTokenName(tokenInfo.chainId, tokenInfo.address, count) : null;
         if (name != null) {
             String symbol = (tokenInfo.symbol == null || tokenInfo.symbol.length() == 0) ? "" : " (" + tokenInfo.symbol.toUpperCase() + ")";
             return sanitiseString(name + symbol);
@@ -830,30 +831,38 @@ public class Token implements Parcelable, Comparable<Token>
         else return transaction.getContract(this);
     }
 
-    /**
-     * Return image representing tx to self, tx received or tx sent
-     * @param tx
-     * @return
-     */
-    public int ethereumTxImage(Transaction tx)
+    public StatusType ethereumTxImage(Transaction tx)
     {
-        return tx.from.equalsIgnoreCase(tokenWallet) ? (tx.to.equals(tx.from) ? R.drawable.ic_transactions : R.drawable.ic_arrow_upward_black_24dp)
-                                                     : R.drawable.ic_arrow_downward_black_24dp;
+        return tx.from.equalsIgnoreCase(tokenWallet) ? (tx.to.equals(tx.from) ? StatusType.SELF : StatusType.SENT)
+                : StatusType.RECEIVE;
     }
 
-    public int getTxImage(Transaction transaction)
+//    public int getTxImage(Transaction transaction)
+//    {
+//        int asset;
+//        if (isEthereum())
+//        {
+//            asset = ethereumTxImage(transaction);
+//        }
+//        else
+//        {
+//            asset = transaction.getOperationImage(this);
+//        }
+//
+//        return asset;
+//    }
+
+    public StatusType getTxStatus(Transaction transaction)
     {
         int asset;
         if (isEthereum())
         {
-            asset = ethereumTxImage(transaction);
+            return ethereumTxImage(transaction);
         }
         else
         {
-            asset = transaction.getOperationImage(this);
+            return transaction.getOperationImage(this);
         }
-
-        return asset;
     }
 
     public TokenScriptResult.Attribute getAttributeResult(String attrId, BigInteger tokenId)

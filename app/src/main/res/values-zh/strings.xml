@@ -646,4 +646,16 @@
     <string name="message_reject_request">Rejected by the user</string>
     <string name="dialog_title_disconnect_session">Disconnect Session</string>
     <string name="message_authentication_failed">Authentication failed</string>
+    <string name="tx_rejected">交易被拒绝（尝试使用更多的燃料）</string>
+    <string name="from">来源地址 %1$s</string>
+    <string name="valueSymbol">%1$s %2$s</string>
+    <string name="sent_to">接收地址 %1$s</string>
+    <string name="approval_granted_to">批准转让代币了 %1$s</string>
+    <string name="approval_obtained_from">代表地址 %1$s</string>
+    <string name="unknown_event">未知事件</string>
+    <string name="activity_sent">发送了 %1$s</string>
+    <string name="activity_received">收到了 %1$s</string>
+    <string name="activity_approved">已批准 %1$s</string>
+    <string name="activity_approval_granted">批准给 %1$s</string>
+    <string name="tokenscript_call">TokenScript调用:</string>
 </resources>

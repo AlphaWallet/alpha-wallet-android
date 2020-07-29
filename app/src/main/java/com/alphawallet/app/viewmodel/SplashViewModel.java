@@ -7,6 +7,7 @@ import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -323,5 +324,40 @@ public class SplashViewModel extends ViewModel
 
     public void setCurrency() {
         currencyRepository.setDefaultCurrency(preferenceRepository.getDefaultCurrency());
+    }
+
+    public void cleanAuxData(Context ctx)
+    {
+        try
+        {
+            File[] files = ctx.getFilesDir().listFiles();
+            for (File file : files)
+            {
+                String fileName = file.getName();
+                if (fileName.startsWith("AuxData-"))
+                {
+                    deleteRecursive(file);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            //
+        }
+    }
+
+    private void deleteRecursive(File fp)
+    {
+        if (fp.isDirectory())
+        {
+            File[] contents = fp.listFiles();
+            if (contents != null)
+            {
+                for (File child : contents)
+                    deleteRecursive(child);
+            }
+        }
+
+        fp.delete();
     }
 }

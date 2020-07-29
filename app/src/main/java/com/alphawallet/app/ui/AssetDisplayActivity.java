@@ -122,7 +122,6 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
                 .get(TokenFunctionViewModel.class);
 
         viewModel.pushToast().observe(this, this::displayToast);
-        viewModel.tokenUpdate().observe(this, this::onTokenUpdate);
         viewModel.sig().observe(this, this::onSigData);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
@@ -161,7 +160,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
 
     private void viewHeight(int fetchedViewHeight)
     {
-        if (fetchedViewHeight == 0)
+        if (fetchedViewHeight < 100)
         {
             initWebViewCheck();
             handler.postDelayed(this, TOKEN_SIZING_DELAY); //wait 3 seconds until ending height check
@@ -215,7 +214,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     protected void onResume()
     {
         super.onResume();
-        viewModel.prepare(token);
+        viewModel.prepare();
         if (functionBar == null)
         {
             functionBar = findViewById(R.id.layoutButtons);

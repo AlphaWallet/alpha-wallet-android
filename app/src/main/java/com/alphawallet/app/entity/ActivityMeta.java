@@ -6,9 +6,11 @@ package com.alphawallet.app.entity;
 public class ActivityMeta
 {
     public final long timeStamp;
+    public final String hash;
 
-    public ActivityMeta(long ts)
+    public ActivityMeta(long ts, String txHash)
     {
         timeStamp = ts;
+        hash = txHash;
     }
 }

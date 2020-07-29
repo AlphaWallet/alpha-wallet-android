@@ -59,8 +59,8 @@ public class TokensService
 
     private static final Map<String, Float> tokenValueMap = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<TokenUpdateEntry> tokenUpdateList = new ConcurrentLinkedQueue<>();
-    private static final Map<String, SparseArray<ContractType>> interfaceSpecMap = new ConcurrentHashMap<>();
     private static final Map<Integer, Long> pendingChainMap = new ConcurrentHashMap<>();
+    private static final Map<String, SparseArray<ContractType>> interfaceSpecMap = new ConcurrentHashMap<>();
     private String currentAddress = null;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokenRepositoryType tokenRepository;
@@ -105,7 +105,7 @@ public class TokensService
 
     private void checkUnknownTokens()
     {
-        if (queryUnknownTokensDisposable == null)
+        if (queryUnknownTokensDisposable == null || queryUnknownTokensDisposable.isDisposed())
         {
             ContractAddress t = unknownTokens.poll();
 
@@ -200,6 +200,7 @@ public class TokensService
         {
             currentAddress = newWalletAddr.toLowerCase();
             tokenValueMap.clear();
+            tokenUpdateList.clear();
             pendingChainMap.clear();
         }
     }
@@ -257,8 +258,11 @@ public class TokensService
             }
         }
 
-        unknownTokens.add(cAddr);
-        startUnknownCheck();
+        if (getToken(cAddr.chainId, cAddr.address) == null)
+        {
+            unknownTokens.add(cAddr);
+            startUnknownCheck();
+        }
     }
 
     private void startUnknownCheck()
@@ -583,7 +587,7 @@ public class TokensService
      * @param pendingTxChains
      * @return
      */
-    public Token getRequiresTransactionUpdate(Collection<Integer> pendingTxChains)
+    public Token getRequiresTransactionUpdate(List<Integer> pendingTxChains)
     {
         //calculate update based on last update time & importance
         long currentTime = System.currentTimeMillis();

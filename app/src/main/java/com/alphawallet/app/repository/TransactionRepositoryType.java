@@ -9,6 +9,7 @@ import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.entity.RealmAuxData;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -32,6 +33,9 @@ public interface TransactionRepositoryType {
 
     Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet, List<Integer> networkFilters, long fetchTime, int fetchLimit);
 	Single<ActivityMeta[]> fetchCachedTransactionMetas(Wallet wallet, int chainId, String tokenAddress, int historyCount);
+	Single<ActivityMeta[]> fetchEventMetas(Wallet wallet, List<Integer> networkFilters);
 
 	Realm getRealmInstance(Wallet wallet);
+
+	RealmAuxData fetchCachedEvent(String walletAddress, String eventKey);
 }

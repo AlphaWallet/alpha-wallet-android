@@ -11,16 +11,24 @@ import android.text.TextUtils;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ConfirmationType;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.DAppFunction;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.opensea.Asset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenFactory;
+import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
+import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
@@ -38,6 +46,7 @@ import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.FunctionDefinition;
+import com.alphawallet.token.entity.MethodArg;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
@@ -57,6 +66,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.Realm;
 
 import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
 
@@ -66,8 +76,6 @@ import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
  */
 public class TokenFunctionViewModel extends BaseViewModel
 {
-    private static final long CHECK_BALANCE_INTERVAL = 15;
-
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
     private final GasService gasService;
@@ -76,18 +84,14 @@ public class TokenFunctionViewModel extends BaseViewModel
     private final KeyService keyService;
     private final GenericWalletInteract genericWalletInteract;
     private final OpenseaService openseaService;
+    private final FetchTransactionsInteract fetchTransactionsInteract;
     private Wallet wallet;
-    private Token token;
 
-    private final MutableLiveData<Token> tokenUpdate = new MutableLiveData<>();
     private final MutableLiveData<Token> insufficientFunds = new MutableLiveData<>();
     private final MutableLiveData<String> invalidAddress = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
     private final MutableLiveData<Boolean> newScriptFound = new MutableLiveData<>();
     private final MutableLiveData<Wallet> walletUpdate = new MutableLiveData<>();
-
-    @Nullable
-    private Disposable getBalanceDisposable;
 
     TokenFunctionViewModel(
             AssetDefinitionService assetDefinitionService,
@@ -97,7 +101,8 @@ public class TokenFunctionViewModel extends BaseViewModel
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
             GenericWalletInteract genericWalletInteract,
-            OpenseaService openseaService)
+            OpenseaService openseaService,
+            FetchTransactionsInteract fetchTransactionsInteract)
     {
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
@@ -107,6 +112,7 @@ public class TokenFunctionViewModel extends BaseViewModel
         this.keyService = keyService;
         this.genericWalletInteract = genericWalletInteract;
         this.openseaService = openseaService;
+        this.fetchTransactionsInteract = fetchTransactionsInteract;
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -114,17 +120,13 @@ public class TokenFunctionViewModel extends BaseViewModel
         return assetDefinitionService;
     }
     public LiveData<Token> insufficientFunds() { return insufficientFunds; }
-    public LiveData<Token> tokenUpdate() {
-        return tokenUpdate;
-    }
     public LiveData<String> invalidAddress() { return invalidAddress; }
     public LiveData<XMLDsigDescriptor> sig() { return sig; }
     public LiveData<Wallet> walletUpdate() { return walletUpdate; }
     public LiveData<Boolean> newScriptFound() { return newScriptFound; }
 
-    public void prepare(Token t)
+    public void prepare()
     {
-        token = t;
         getCurrentWallet();
     }
 
@@ -139,34 +141,9 @@ public class TokenFunctionViewModel extends BaseViewModel
         context.startActivity(intent);
     }
 
-    private void fetchCurrentTokenBalance()
-    {
-        if (getBalanceDisposable != null) getBalanceDisposable.dispose();
-        if (token != null && !token.independentUpdate())
-        {
-            getBalanceDisposable = Observable.interval(CHECK_BALANCE_INTERVAL, CHECK_BALANCE_INTERVAL, TimeUnit.SECONDS)
-                    .doOnNext(l -> {
-                                Token t = tokensService.getToken(token.tokenInfo.chainId, token.getAddress());
-                                onToken(t);
-                            }).subscribe();
-        }
-    }
-
-    private void onToken(Token t)
-    {
-        if (assetDefinitionService.checkTokenForNewEvent(t) || token.checkBalanceChange(t))
-        {
-            token = t;
-            tokenUpdate.postValue(token);
-        }
-    }
-
     @Override
     protected void onCleared() {
         super.onCleared();
-        if (getBalanceDisposable != null) {
-            getBalanceDisposable.dispose();
-        }
     }
 
     public void startGasPriceUpdate(int chainId)
@@ -270,9 +247,9 @@ public class TokenFunctionViewModel extends BaseViewModel
         ctx.startActivity(intent);
     }
 
-    public Token getToken(ContractAddress cAddr)
+    public Token getToken(int chainId, String contractAddress)
     {
-        return tokensService.getToken(cAddr.chainId, cAddr.address);
+        return tokensService.getToken(chainId, contractAddress);
     }
 
     public void selectRedeemToken(Context ctx, Token token, List<BigInteger> idList)
@@ -311,7 +288,6 @@ public class TokenFunctionViewModel extends BaseViewModel
         progress.postValue(false);
         wallet = w;
         walletUpdate.postValue(w);
-        if (token != null) fetchCurrentTokenBalance();
     }
 
     public void resetSignDialog()
@@ -386,10 +362,24 @@ public class TokenFunctionViewModel extends BaseViewModel
                          + " " + currency.getSymbol() + " to " + action.function.method;
             }
 
+            //Form full method representation
+            String fullMethod = action.function.method + "(";
+            boolean firstArg = true;
+            for (MethodArg arg : action.function.parameters)
+            {
+                if (!firstArg) fullMethod += ", ";
+                firstArg = false;
+                fullMethod += arg.parameterType;
+                fullMethod += " ";
+                fullMethod += arg.element.value;
+            }
+
+            fullMethod += ")";
+
             //finished resolving attributes, blank definition cache so definition is re-loaded when next needed
             getAssetDefinitionService().clearCache();
 
-            confirmTransaction(context, cAddr.chainId, functionData, null, cAddr.address, action.function.method, functionEffect, value);
+            confirmTransaction(context, cAddr.chainId, functionData, null, cAddr.address, fullMethod, functionEffect, value);
         }
 
         return true;
@@ -470,5 +460,20 @@ public class TokenFunctionViewModel extends BaseViewModel
     public boolean isAuthorizeToFunction()
     {
         return wallet.type != WalletType.WATCH;
+    }
+
+    public Realm getRealmInstance(Wallet w)
+    {
+        return tokensService.getRealmInstance(w);
+    }
+
+    public TokensService getTokensService()
+    {
+        return tokensService;
+    }
+
+    public FetchTransactionsInteract getTransactionsInteract()
+    {
+        return fetchTransactionsInteract;
     }
 }

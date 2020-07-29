@@ -25,10 +25,17 @@ public class TokenDefinition {
     public final Map<String, ContractInfo> contracts = new HashMap<>();
     public final Map<String, TSAction> actions = new HashMap<>();
     private Map<String, String> labels = new HashMap<>(); // store plural etc for token name
+<<<<<<< HEAD
     private final Map<String, NamedType> namedTypeLookup = new HashMap<>(); //used to protect against name collision
     private final TSTokenViewHolder tokenViews = new TSTokenViewHolder();
     private final Map<String, TSSelection> selections = new HashMap<>();
     private final Map<String, TSActivityView> activityCards = new HashMap<>();
+=======
+    private Map<String, NamedType> namedTypeLookup = new HashMap<>(); //used to protect against name collision
+    private TSTokenViewHolder tokenViews = new TSTokenViewHolder();
+    private Map<String, TSSelection> selections = new HashMap<>();
+    private Map<String, TSActivityView> activityCards = new HashMap<>();
+>>>>>>> 5b797a144... parse activity code and populate layouts
 
     public String nameSpace;
     public TokenscriptContext context;
@@ -164,6 +171,7 @@ public class TokenDefinition {
         }
     }
 
+<<<<<<< HEAD
     public EventDefinition getEventDefinition(String activityName)
     {
         if (getActivityCards().size() > 0)
@@ -178,6 +186,8 @@ public class TokenDefinition {
         return null;
     }
 
+=======
+>>>>>>> 5b797a144... parse activity code and populate layouts
     public EventDefinition getActivityEvent(String activityCardName)
     {
         TSActivityView av = activityCards.get(activityCardName);
@@ -191,6 +201,7 @@ public class TokenDefinition {
         return ev;
     }
 
+<<<<<<< HEAD
     public boolean hasEvents()
     {
         for (String attrName : attributes.keySet())
@@ -210,6 +221,8 @@ public class TokenDefinition {
         return false;
     }
 
+=======
+>>>>>>> 5b797a144... parse activity code and populate layouts
     public enum Syntax {
         DirectoryString, IA5String, Integer, GeneralizedTime,
         Boolean, BitString, CountryString, JPEG, NumericString

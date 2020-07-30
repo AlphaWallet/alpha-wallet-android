@@ -38,9 +38,9 @@ public interface TokenLocalSource {
     Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Integer> networkFilters,
                                             AssetDefinitionService svs);
 
-    Disposable updateEthTickers(Map<Integer, TokenTicker> ethTickers, Wallet wallet);
-    Disposable updateERC20Tickers(Map<String, TokenTicker> erc20Tickers, Wallet wallet);
-    Disposable removeOutdatedTickers(Wallet wallet);
+    Disposable updateEthTickers(Map<Integer, TokenTicker> ethTickers);
+    Disposable updateERC20Tickers(Map<String, TokenTicker> erc20Tickers);
+    Disposable removeOutdatedTickers();
 
     Realm getRealmInstance(Wallet wallet);
     Realm getTickerRealmInstance();

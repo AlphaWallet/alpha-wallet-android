@@ -230,10 +230,17 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public Single<BigInteger> getLastTransactionNonce(Web3j web3j, String walletAddress)
     {
         return Single.fromCallable(() -> {
-            EthGetTransactionCount ethGetTransactionCount = web3j
-                    .ethGetTransactionCount(walletAddress, DefaultBlockParameterName.PENDING)
-                    .send();
-            return ethGetTransactionCount.getTransactionCount();
+            try
+            {
+                EthGetTransactionCount ethGetTransactionCount = web3j
+                        .ethGetTransactionCount(walletAddress, DefaultBlockParameterName.PENDING)
+                        .send();
+                return ethGetTransactionCount.getTransactionCount();
+            }
+            catch (Exception e)
+            {
+                return BigInteger.ZERO;
+            }
         });
     }
 
@@ -441,10 +448,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return new ArrayList<>(Collections.singletonList(EthereumNetworkRepository.MAINNET_ID));
     }
 
-    public static boolean hasTicker(Token token)
-    {
-        return (token.ticker != null || token.isEthereum());
-    }
     public static ContractLocator getOverrideToken()
     {
         return new ContractLocator("", EthereumNetworkRepository.MAINNET_ID, ContractType.ETHEREUM);

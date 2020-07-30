@@ -43,16 +43,17 @@ import io.realm.Sort;
 import io.realm.exceptions.RealmException;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.app.service.TickerService.TICKER_TIMEOUT;
 import static com.alphawallet.app.service.TokensService.EXPIRED_CONTRACT;
 
 public class TokensRealmSource implements TokenLocalSource {
 
     public static final String TAG = "TLS";
     public static final String IMAGES_DB = "image_urls_db";
+    public static final String TICKER_DB = "tickers_db";
     public static final long ACTUAL_BALANCE_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
     public static final String ADDRESS_FORMAT = "0x????????????????????????????????????????-*";
     private static final long ACTUAL_TOKEN_TICKER_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
-    private static final long TICKER_TIMEOUT = 1 * DateUtils.DAY_IN_MILLIS;
 
     private final RealmManager realmManager;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
@@ -150,6 +151,12 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
+    public Realm getTickerRealmInstance()
+    {
+        return realmManager.getAuxRealmInstance(TICKER_DB);
+    }
+
+    @Override
     public Single<Token> saveToken(Wallet wallet, Token token)
     {
         return Single.fromCallable(() -> {
@@ -215,7 +222,6 @@ public class TokensRealmSource implements TokenLocalSource {
         TokenTicker tokenTicker = null;
         if (rawItem != null)
         {
-            long minCreatedTime = System.currentTimeMillis() - ACTUAL_TOKEN_TICKER_INTERVAL;
             String currencySymbol = rawItem.getCurrencySymbol();
             if (currencySymbol == null || currencySymbol.length() == 0)
                 currencySymbol = "USD";
@@ -634,6 +640,8 @@ public class TokensRealmSource implements TokenLocalSource {
                     meta.lastTxUpdate = 0;
                     tokenMetas.add(meta);
                 }
+
+                removeLocalTickers(realm); //delete any local tickers, these have all moved into a single realm
             }
             catch (Exception e)
             {
@@ -642,6 +650,21 @@ public class TokensRealmSource implements TokenLocalSource {
 
             return tokenMetas.toArray(new TokenCardMeta[0]);
         });
+    }
+
+    private void removeLocalTickers(Realm realm) throws Exception
+    {
+        RealmResults<RealmTokenTicker> realmItems = realm.where(RealmTokenTicker.class)
+                .findAll();
+        if (realmItems.size() > 0)
+        {
+            realm.beginTransaction();
+            for (RealmTokenTicker t : realmItems)
+            {
+                t.deleteFromRealm();
+            }
+            realm.commitTransaction();
+        }
     }
 
     @Override
@@ -703,8 +726,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     @Override
                     public void onStart()
                     {
-                        realm = realmManager.getRealmInstance(wallet);
-                        if (!WalletUtils.isValidAddress(wallet.address)) return;
+                        realm = realmManager.getAuxRealmInstance(TICKER_DB);
                         realm.beginTransaction();
                         TransactionsRealmCache.addRealm();
                         for (int chainId : ethTickers.keySet())
@@ -733,7 +755,7 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Disposable updateERC20Tickers(Map<String, TokenTicker> erc20Tickers, Wallet wallet)
+    public Disposable updateERC20Tickers(Map<String, TokenTicker> erc20Tickers)
     {
         return Completable.complete()
                 .subscribeWith(new DisposableCompletableObserver()
@@ -743,8 +765,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     @Override
                     public void onStart()
                     {
-                        realm = realmManager.getRealmInstance(wallet);
-                        if (!WalletUtils.isValidAddress(wallet.address)) return;
+                        realm = realmManager.getAuxRealmInstance(TICKER_DB);
                         realm.beginTransaction();
                         TransactionsRealmCache.addRealm();
                         for (String tokenAddress : erc20Tickers.keySet())
@@ -773,7 +794,27 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Disposable removeOutdatedTickers(Wallet wallet)
+    public TokenTicker getCurrentTicker(Token token)
+    {
+        TokenTicker tt = null;
+        try (Realm realm = realmManager.getAuxRealmInstance(TICKER_DB))
+        {
+            String key = databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase());
+            RealmTokenTicker realmItem = realm.where(RealmTokenTicker.class)
+                    .equalTo("contract", key)
+                    .findFirst();
+
+            if (realmItem != null)
+            {
+                tt = convertRealmTicker(realmItem);
+            }
+        }
+
+        return tt;
+    }
+
+    @Override
+    public Disposable removeOutdatedTickers()
     {
         return Completable.complete()
                 .subscribeWith(new DisposableCompletableObserver()
@@ -783,8 +824,7 @@ public class TokensRealmSource implements TokenLocalSource {
                     @Override
                     public void onStart()
                     {
-                        realm = realmManager.getRealmInstance(wallet);
-                        if (!WalletUtils.isValidAddress(wallet.address)) return;
+                        realm = realmManager.getAuxRealmInstance(TICKER_DB);
                         realm.beginTransaction();
                         TransactionsRealmCache.addRealm();
                         //get all tickers
@@ -861,7 +901,6 @@ public class TokensRealmSource implements TokenLocalSource {
         }
         else
         {
-            List<BigInteger> bal;
             switch (type)
             {
                 case NOT_SET:
@@ -931,8 +970,6 @@ public class TokensRealmSource implements TokenLocalSource {
         RealmTokenTicker rawItem = realm.where(RealmTokenTicker.class)
                 .equalTo("contract", useAddress + "-" + result.tokenInfo.chainId)
                 .findFirst();
-
-        result.ticker = convertRealmTicker(rawItem);
 
         if (result.isERC721()) //add erc721 assets
         {

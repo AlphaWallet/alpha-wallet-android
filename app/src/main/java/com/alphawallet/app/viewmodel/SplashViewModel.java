@@ -25,6 +25,7 @@ import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.ui.SplashActivity;
 import com.alphawallet.app.util.Utils;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -87,10 +88,10 @@ public class SplashViewModel extends ViewModel
 
     public void fetchWallets()
     {
-        System.out.println("KEYS: Fetchwallets");
         fetchWalletsInteract
                 .fetch()
-                .subscribe(wallets::postValue, this::onError);
+                .subscribe(wallets::postValue, this::onError)
+                .isDisposed();
     }
 
     //on wallet error ensure execution still continues and splash screen terminates
@@ -107,7 +108,11 @@ public class SplashViewModel extends ViewModel
 
     public void createNewWallet(Activity ctx, CreateWalletCallbackInterface createCallback)
     {
-        keyService.createNewHDKey(ctx, createCallback);
+        Completable.fromAction(() -> keyService.createNewHDKey(ctx, createCallback)) //create wallet on a computation thread to give UI a chance to complete all tasks
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe()
+                .isDisposed();
     }
 
     public void checkVersionUpdate(Context ctx, long updateTime)

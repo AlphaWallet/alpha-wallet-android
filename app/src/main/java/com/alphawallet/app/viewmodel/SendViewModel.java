@@ -98,13 +98,8 @@ public class SendViewModel extends BaseViewModel {
                 .subscribe(finalisedToken::postValue, this::onError);
     }
 
-    public void startGasPriceChecker(int chainId)
+    public void setChainId(int chainId)
     {
-        gasService.startGasListener(chainId);
-    }
-
-    public void stopGasPriceChecker()
-    {
-        gasService.stopGasListener();
+        gasService.fetchGasPriceForChain(chainId);
     }
 }

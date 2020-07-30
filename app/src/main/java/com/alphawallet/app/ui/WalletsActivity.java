@@ -288,7 +288,7 @@ public class WalletsActivity extends BaseActivity implements
     private void onChangeDefaultWallet(Wallet wallet) {
         if (selectedWallet != null && !wallet.sameAddress(selectedWallet.address))
         {
-            sendBroadcast(new Intent(C.RESET_WALLET));
+            requiresHomeRefresh = true;
         }
 
         selectedWallet = wallet;

@@ -468,7 +468,8 @@
     <string name="keystore_detail_text">A KeyStore is a text file. You can copy its content and place when you want to import your wallet. This is a safe way to back up a wallet.</string>
     <string name="set_keystore_password">Set Keystore Password</string>
     <string name="keystore_loss_warning">NOTE: You must remember your password. We do not store your password elsewhere. KeyStore is always encrypted, otherwise whoever has it can gain the money.</string>
-    <string name="share_keystore">Share Keystore</string>
+    <string name="save_keystore">Save Keystore</string>
+    <string name="do_not_share">Do not share your backup. AlphaWallet team members will not ask for it.</string>
     <string name="enter_seed_phrase">Enter seed phrase</string>
     <string name="seed_phrase_conversion_message">If your seed phrase is not in English, please convert it to English on your own using tools like this https://iancoleman.io/bip39/</string>
     <string name="bad_seed_phrase">Invalid recovery phrase. Please check and try again.</string>
@@ -505,7 +506,7 @@
     <string name="back_up_this_wallet">Back up this Wallet</string>
     <string name="not_locked">Not Locked</string>
     <string name="back_up_now">Back up now!</string>
-    <string name="key_secure">100% Secure</string>
+    <string name="key_secure">Do not share your key</string>
     <string name="lock_key_upgrade">Lock your seed phrase to increase security</string>
     <string name="upgrade_key_security_detail">AlphaWallet security is being upgraded to the best achievable. Lock your seed phrase with biometrics.</string>
     <string name="action_upgrade_key">Upgrade key security</string>
@@ -624,7 +625,7 @@
     <string name="confirm_delete_file_message">Delete file %1$s</string>
     <string name="delete">Delete</string>
     <string name="refreshing_tokenscripts">Refresh TokenScripts</string>
-    <string name="speedup_transaction">Speedup</string>
+    <string name="speedup_transaction">Speedup TX</string>
     <string name="cancel_transaction">Cancel</string>
     <string name="day_single">1 day</string>
     <string name="day_plural">%s days</string>
@@ -653,4 +654,10 @@
     <string name="hidden_tokens">Hidden Tokens</string>
     <string name="ignore">Ignore</string>
     <string name="search_for_tokens">Search for Tokens...</string>
+    <string name="title_wallet_connect">WalletConnect</string>
+    <string name="action_end_session">End Session</string>
+    <string name="dialog_send_eth_transaction">Send ETH Transaction</string>
+    <string name="message_reject_request">Rejected by the user</string>
+    <string name="dialog_title_disconnect_session">Disconnect Session</string>
+    <string name="message_authentication_failed">Authentication failed</string>
 </resources>

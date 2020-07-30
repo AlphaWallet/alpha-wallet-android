@@ -454,7 +454,8 @@
     <string name="keystore_detail_text">密钥库是一个文本文件。当您要导入钱包时，可以复制其内容和位置。这是备份钱包的安全方法。</string>
     <string name="set_keystore_password">设置密钥库密码</string>
     <string name="keystore_loss_warning">注意：您必须记住密码。我们不会将您的密码存储在其他地方。密钥库会始终加密，否则无论是谁，一旦拥有该密钥库均可得到其中的资金。</string>
-    <string name="share_keystore">共享密钥库</string>
+    <string name="save_keystore">保存密钥库</string>
+    <string name="do_not_share">不要把备份转发给他人。AlphaWallet团队成员不会向您要您的备份。</string>
     <string name="enter_seed_phrase">输入助记词</string>
     <string name="seed_phrase_conversion_message">如果您的助记词不是英语，请自行使用工具（如：https://iancoleman.io/bip39/）将其转换为英语</string>
     <string name="bad_seed_phrase">恢复助记词无效。请检查并重试。</string>
@@ -491,7 +492,7 @@
     <string name="back_up_this_wallet">备份此钱包</string>
     <string name="not_locked">未锁定</string>
     <string name="back_up_now">马上备份！</string>
-    <string name="key_secure">100% 安全</string>
+    <string name="key_secure">不要让其它人看到</string>
     <string name="lock_key_upgrade">锁定助记词以提高安全性</string>
     <string name="upgrade_key_security_detail">AlphaWallet 的安全性正在升级为最佳状态。使用生物识别技术锁定您的助记词。</string>
     <string name="action_upgrade_key">升级密钥安全性</string>
@@ -610,7 +611,7 @@
     <string name="confirm_delete_file_message">Delete file %1$s</string>
     <string name="delete">Delete</string>
     <string name="refreshing_tokenscripts">Refresh TokenScripts</string>
-    <string name="speedup_transaction">Speedup</string>
+    <string name="speedup_transaction">Speedup TX</string>
     <string name="cancel_transaction">Cancel</string>
     <string name="day_single">1天</string>
     <string name="day_plural">%s天</string>
@@ -639,4 +640,10 @@
     <string name="hidden_tokens">Hidden Tokens</string>
     <string name="ignore">Ignore</string>
     <string name="search_for_tokens">Search for Tokens...</string>
+    <string name="title_wallet_connect">WalletConnect</string>
+    <string name="action_end_session">End Session</string>
+    <string name="dialog_send_eth_transaction">Send ETH Transaction</string>
+    <string name="message_reject_request">Rejected by the user</string>
+    <string name="dialog_title_disconnect_session">Disconnect Session</string>
+    <string name="message_authentication_failed">Authentication failed</string>
 </resources>

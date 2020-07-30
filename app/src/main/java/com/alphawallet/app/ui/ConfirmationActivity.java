@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -91,6 +92,10 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     private ProgressBar progressGasEstimate;
     private ProgressBar progressNetworkFee;
     private GasSettings localGasSettings;
+    private ImageView triangleImage;
+    private TextView infoText;
+    private View parentLayout;
+    private View valueLayout;
 
     private BigDecimal amount;
     private String tokenIds;
@@ -141,6 +146,10 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         gasEstimateText = findViewById(R.id.text_gas_estimate);
         progressGasEstimate = findViewById(R.id.progress_gas_estimate);
         progressNetworkFee = findViewById(R.id.progress_network_fee);
+        triangleImage = findViewById(R.id.image_triangle);
+        infoText = findViewById(R.id.text_info);
+        valueLayout = findViewById(R.id.layout_value);
+        parentLayout = findViewById(R.id.layout_parent);
         sendButton.setOnClickListener(view -> onSend());
 
         transaction = getIntent().getParcelableExtra(C.EXTRA_WEB3TRANSACTION);
@@ -151,7 +160,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         String ensName = getIntent().getStringExtra(C.EXTRA_ENS_DETAILS);
         decimals = getIntent().getIntExtra(C.EXTRA_DECIMALS, -1);
         String symbol = getIntent().getStringExtra(C.EXTRA_SYMBOL);
-        symbol = symbol == null ? C.ETH_SYMBOL : symbol;
         tokenIds = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
         token = getIntent().getParcelableExtra(C.EXTRA_TOKEN_ID);
         chainId = token != null ? token.tokenInfo.chainId : getIntent().getIntExtra(C.EXTRA_NETWORKID, 1);
@@ -171,6 +179,9 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
         viewModel = ViewModelProviders.of(this, confirmationViewModelFactory)
                 .get(ConfirmationViewModel.class);
+
+        setupViewListeners();
+        symbol = symbol == null ? viewModel.getNetworkSymbol(chainId) : symbol;
 
         Utils.setChainColour(chainName, chainId);
         chainName.setText(viewModel.getNetworkName(chainId));
@@ -284,8 +295,9 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 nonceId = getIntent().getIntExtra(C.EXTRA_NONCE, 0);
                 nonce = BigInteger.valueOf(nonceId);
                 amountString = getString(R.string.speedup_tx_description);
-                valueText.setTextColor(getColor(R.color.text_black));
-                symbolText.setVisibility(View.GONE);
+                showTooltip(amountString, v -> {
+                    viewModel.openGasSettings(this, chainId); //if tooltip is clicked on open gas settings
+                });
                 oldGasPrice = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_PRICE));
                 oldGasLimit = new BigInteger(getIntent().getStringExtra(C.EXTRA_GAS_LIMIT));
                 transactionHex = getIntent().getStringExtra(C.EXTRA_TRANSACTION_DATA);
@@ -324,6 +336,42 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
         valueText.setText(amountString);
 
+        findViewById(R.id.layout_gas_price).setOnClickListener(view -> {
+            //open gas slider settings
+            viewModel.openGasSettings(this, chainId);
+        });
+
+        findViewById(R.id.layout_gas_limit).setOnClickListener(view -> {
+            //open gas slider settings
+            viewModel.openGasSettingsLimitOpen(this, chainId);
+        });
+
+        gasLimitText.setOnClickListener(view -> {
+            //open gas slider settings
+            viewModel.openGasSettingsLimitOpen(this, chainId);
+        });
+
+        getGasSettings();
+    }
+
+    private void showTooltip(String tooltipInfo, View.OnClickListener listener)
+    {
+        //TODO: Can use a RelativeLayout overlay in the view and let the OS do all work, then you only need a couple of lines of code here
+        infoText.setVisibility(View.VISIBLE);
+        triangleImage.setVisibility(View.VISIBLE);
+        infoText.setText(tooltipInfo);
+        symbolText.setVisibility(View.GONE);
+        chainName.setVisibility(View.GONE);
+        valueText.setVisibility(View.GONE);
+        int paddingBottom = getResources().getDimensionPixelOffset(R.dimen.dp25);
+        parentLayout.setPadding(parentLayout.getPaddingLeft(), 0, parentLayout.getPaddingRight(), parentLayout.getPaddingBottom());
+        valueLayout.setPadding(valueLayout.getPaddingLeft(), 0, valueLayout.getPaddingRight(), paddingBottom);
+
+        infoText.setOnClickListener(listener);
+    }
+
+    private void setupViewListeners()
+    {
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.gasSettings().observe(this, this::onGasSettings);
         viewModel.sendTransaction().observe(this, this::onTransaction);
@@ -335,23 +383,6 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         viewModel.sendGasEstimate().observe(this, this::onGasEstimate);
         viewModel.sendGasEstimateError().observe(this, this::onEstimateError);
         finishReceiver = new FinishReceiver(this);
-
-        findViewById(R.id.layout_gas_price).setOnClickListener(view -> {
-            //open gas slider settings
-            viewModel.openGasSettings(this, chainId);
-        });
-
-        findViewById(R.id.layout_gas_limit).setOnClickListener(view -> {
-            //open gas slider settings
-            viewModel.openGasSettings(this, chainId);
-        });
-
-        gasLimitText.setOnClickListener(view -> {
-            //open gas slider settings
-            viewModel.openGasSettings(this, chainId);
-        });
-
-        getGasSettings();
     }
 
     @Override
@@ -389,7 +420,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
     private void onProgress(boolean shouldShowProgress) {
         hideDialog();
-        if (shouldShowProgress) {
+        if (shouldShowProgress)
+        {
             dialog = new AWalletAlertDialog(this);
             dialog.setProgressMode();
             dialog.setTitle(R.string.title_dialog_sending);
@@ -399,7 +431,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     }
 
     private void hideDialog() {
-        if (dialog != null && dialog.isShowing()) {
+        if (dialog != null && dialog.isShowing())
+        {
             dialog.dismiss();
         }
     }
@@ -409,6 +442,7 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         super.onDestroy();
         hideDialog();
         unregisterReceiver(finishReceiver);
+        viewModel.stopGasUpdate();
     }
 
     private void onSend()
@@ -566,11 +600,13 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
         {
             GasSettings override = new GasSettings(price, limit);
             viewModel.overrideGasSettings(override);
+            onGasSettings(override);
         }
     }
 
     private void getGasSettings()
     {
+        viewModel.startGasUpdate(chainId);
         switch (confirmationType)
         {
             case ERC875:
@@ -578,7 +614,10 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 viewModel.calculateGasSettings(transactionBytes, true, chainId);
                 break;
             default:
-                viewModel.calculateGasSettings(transactionBytes, false, chainId);
+                if (!viewModel.hasGasOverride())
+                {
+                    viewModel.calculateGasSettings(transactionBytes, false, chainId);
+                }
                 break;
         }
     }
@@ -599,8 +638,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
     private void setupResendGasSettings()
     {
-        //increase gas price - gas price is in GWEI, so add 1 GWEI to price
-        BigInteger gasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(1)));
+        //increase gas price - gas price is in GWEI, so add 2 GWEI to price
+        BigInteger gasPrice = oldGasPrice.add(BalanceUtils.gweiToWei(BigDecimal.valueOf(2)));
 
         findViewById(R.id.layout_old_gas_price).setVisibility(View.VISIBLE);
         ((TextView)findViewById(R.id.old_gas_price)).setText(BalanceUtils.weiToGwei(oldGasPrice));
@@ -620,6 +659,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
 
         BigDecimal networkFeeBD = new BigDecimal(gasSettings.gasPrice.multiply(gasSettings.gasLimit));
 
+        // Add the network fee to the expected tx price for Dapp sourced transactions
+        // Should we add the network fee for all transactions?
         switch (confirmationType)
         {
             case WEB3TRANSACTION:
@@ -645,6 +686,8 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
                 + " " + viewModel.getNetworkSymbol(chainId);
         networkFeeText.setText(networkFee);
         gasEstimateText.setText(String.valueOf(gasEstimate));
+
+        viewModel.updateGasLimit();
     }
 
     private void onEstimateError(ErrorEnvelope error) {
@@ -709,8 +752,10 @@ public class ConfirmationActivity extends BaseActivity implements SignAuthentica
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode,resultCode,intent);
 
-        if (requestCode == GasSettingsViewModel.SET_GAS_SETTINGS) {
-            if (resultCode == RESULT_OK) {
+        if (requestCode == GasSettingsViewModel.SET_GAS_SETTINGS)
+        {
+            if (resultCode == RESULT_OK)
+            {
                 BigInteger gasPrice = new BigInteger(intent.getStringExtra(C.EXTRA_GAS_PRICE));
                 BigInteger gasLimit = new BigInteger(intent.getStringExtra(C.EXTRA_GAS_LIMIT));
                 GasSettings settings = new GasSettings(gasPrice, gasLimit);

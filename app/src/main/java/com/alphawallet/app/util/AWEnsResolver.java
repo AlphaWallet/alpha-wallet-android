@@ -113,6 +113,7 @@ public class AWEnsResolver extends EnsResolver
     public Single<String> resolveENSAddress(String ensName)
     {
         return Single.fromCallable(() -> {
+            System.out.println("Verify: " + ensName);
             String address = "";
             if (!isValidEnsName(ensName)) return "";
             try
@@ -121,6 +122,7 @@ public class AWEnsResolver extends EnsResolver
             }
             catch (Exception e)
             {
+                System.out.println("Verify: error: " + e.getMessage());
                 // no action
             }
             return address;

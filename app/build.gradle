@@ -19,6 +19,8 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'realm-android'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'kotlin-android'
 
 repositories {
     maven {
@@ -45,6 +47,7 @@ android {
 
         buildConfigField 'int', 'DB_VERSION', '7'
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
+        buildConfigField "boolean", "USE_ANALYTICS", "true"
 
         ndk {
             abiFilters "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
@@ -54,8 +57,8 @@ android {
     productFlavors {
 	awallet {
 		dimension "targetting"
-        versionCode 120
-        versionName "3.10.0"
+        versionCode 123
+        versionName "3.11.0-beta"
 	}
     }
     buildTypes {
@@ -180,6 +183,9 @@ dependencies {
 
     // PW
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    implementation 'com.google.firebase:firebase-analytics:16.5.0'
+    implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
 }
 
 // WARNING WARNING WARNING

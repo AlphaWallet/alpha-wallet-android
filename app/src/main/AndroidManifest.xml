@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <uses-feature
         android:name="android.hardware.fingerprint"
@@ -132,6 +133,7 @@
         <activity
             android:name=".ui.ImportWalletActivity"
             android:label="@string/title_import"
+            android:screenOrientation="sensor"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
 
         <activity
@@ -277,6 +279,9 @@
         <activity android:name=".ui.TokenScriptManagementActivity"
             android:label="@string/tokenscript_management"/>
 
+        <activity
+            android:name=".ui.WalletConnectActivity"
+            android:label="WalletConnect" />
     </application>
 
 </manifest>

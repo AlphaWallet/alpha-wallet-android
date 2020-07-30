@@ -23,13 +23,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import dagger.android.AndroidInjection;
-
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.Operation;
@@ -48,6 +41,13 @@ import com.alphawallet.app.widget.PasswordInputView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexboxLayout;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
 
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.C.SHARE_REQUEST_CODE;
@@ -368,7 +368,7 @@ public class BackupKeyActivity extends BaseActivity implements
         inputView.setInstruction(R.string.password_6_characters_or_more);
         state = BackupState.SET_JSON_PASSWORD;
         inputView.getEditText().addTextChangedListener(this);
-        functionButtonBar.setPrimaryButtonText(R.string.share_keystore);
+        functionButtonBar.setPrimaryButtonText(R.string.save_keystore);
         functionButtonBar.setPrimaryButtonClickListener(this);
         functionButtonBar.setPrimaryButtonEnabled(false);
         inputView.setLayoutListener(this, this);

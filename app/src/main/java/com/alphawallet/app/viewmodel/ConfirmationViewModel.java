@@ -5,7 +5,6 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ConfirmationType;
@@ -14,30 +13,29 @@ import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.TransactionData;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.repository.TokenRepository;
-import com.alphawallet.app.ui.ConfirmationActivity;
-import com.alphawallet.app.web3.entity.Web3Transaction;
-
-import com.alphawallet.token.tools.Numeric;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.GasSettingsRouter;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.ui.ConfirmationActivity;
+import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.token.tools.Numeric;
 
 import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Objects;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class ConfirmationViewModel extends BaseViewModel {
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
@@ -55,6 +53,8 @@ public class ConfirmationViewModel extends BaseViewModel {
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GasSettingsRouter gasSettingsRouter;
     private final KeyService keyService;
+
+    private boolean overrideDefaultGasLimit = false; //only do this once when activity starts
 
     ConfirmationViewModel(GenericWalletInteract genericWalletInteract,
                           GasService gasService,
@@ -122,9 +122,15 @@ public class ConfirmationViewModel extends BaseViewModel {
 
     public void overrideGasSettings(GasSettings settings)
     {
+        overrideDefaultGasLimit = true;
         gasService.setOverrideGasLimit(settings.gasLimit);
         gasService.setOverrideGasPrice(settings.gasPrice);
         gasSettings.postValue(settings);
+    }
+
+    public void updateGasLimit()
+    {
+        gasSettings.postValue(new GasSettings(gasService.getGasPrice(), gasService.getGasLimit()));
     }
 
     public void prepare(ConfirmationActivity ctx)
@@ -176,6 +182,10 @@ public class ConfirmationViewModel extends BaseViewModel {
         gasSettingsRouter.open(context, gasSettings.getValue(), chainId);
     }
 
+    public void openGasSettingsLimitOpen(Activity context, int chainId) {
+        gasSettingsRouter.openLimit(context, gasSettings.getValue(), chainId);
+    }
+
     /**
      * Only update from the network price if:
      * - user hasn't overriden the default/network settings
@@ -184,8 +194,11 @@ public class ConfirmationViewModel extends BaseViewModel {
      */
     private void onGasPrice(BigInteger currentGasPrice)
     {
-        GasSettings updateSettings = new GasSettings(gasService.getGasPrice(), gasService.getGasLimit());
-        this.gasSettings.postValue(updateSettings);
+        if (!overrideDefaultGasLimit)
+        {
+            GasSettings updateSettings = new GasSettings(gasService.getGasPrice(), gasService.getGasLimit());
+            this.gasSettings.postValue(updateSettings);
+        }
     }
 
     public void signWeb3DAppTransaction(Web3Transaction transaction, BigInteger gasPrice, BigInteger gasLimit, int chainId)
@@ -299,19 +312,25 @@ public class ConfirmationViewModel extends BaseViewModel {
     public void calculateGasEstimate(byte[] transaction, int chainId, String toAddress, BigInteger amount)
     {
         disposable = gasService.calculateGasEstimate(transaction, chainId, toAddress, amount, defaultWallet.getValue())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::handleGasEstimate, this::handleError);
     }
 
     private void handleError(Throwable throwable)
     {
-        gasEstimateError.postValue(new ErrorEnvelope(throwable.getMessage()));
+        if (gasEstimateError.hasObservers())
+        {
+            gasEstimateError.postValue(new ErrorEnvelope(throwable.getMessage()));
+        }
     }
 
     private void handleGasEstimate(EthEstimateGas estimateGas)
     {
         if(estimateGas.getError() == null)
         {
+            if (!overrideDefaultGasLimit) gasService.setOverrideGasLimit(estimateGas.getAmountUsed()); //only set once, to allow user to override
+            overrideDefaultGasLimit = true;
             gasEstimate.postValue(estimateGas.getAmountUsed());
         }
         else
@@ -332,5 +351,20 @@ public class ConfirmationViewModel extends BaseViewModel {
     public void removeOverridenTransaction(String oldTxHash)
     {
         createTransactionInteract.removeOverridenTransaction(defaultWallet.getValue(), oldTxHash);
+    }
+
+    public boolean hasGasOverride()
+    {
+        return overrideDefaultGasLimit;
+    }
+
+    public void startGasUpdate(int chainId)
+    {
+        gasService.startGasListener(chainId);
+    }
+
+    public void stopGasUpdate()
+    {
+        gasService.stopGasListener();
     }
 }

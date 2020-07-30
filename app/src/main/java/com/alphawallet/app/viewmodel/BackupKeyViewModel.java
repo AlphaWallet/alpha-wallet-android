@@ -7,12 +7,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.alphawallet.app.C;
-
-import io.reactivex.Completable;
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-
 import com.alphawallet.app.entity.CreateWalletCallbackInterface;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Operation;
@@ -22,6 +16,12 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.ExportWalletInteract;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.service.KeyService;
+
+import io.reactivex.Completable;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
 
 public class BackupKeyViewModel extends BaseViewModel {
     private final static String TAG = BackupKeyViewModel.class.getSimpleName();

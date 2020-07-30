@@ -15,6 +15,17 @@ public class GasSettingsRouter {
         intent.putExtra(C.EXTRA_GAS_PRICE, gasSettings.gasPrice.toString());
         intent.putExtra(C.EXTRA_GAS_LIMIT, gasSettings.gasLimit.toString());
         intent.putExtra(C.EXTRA_NETWORKID, chainId);
+        intent.putExtra(C.EXTRA_STATE, false);
+        intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        context.startActivityForResult(intent, GasSettingsViewModel.SET_GAS_SETTINGS);
+    }
+
+    public void openLimit(Activity context, GasSettings gasSettings, int chainId) {
+        Intent intent = new Intent(context, GasSettingsActivity.class);
+        intent.putExtra(C.EXTRA_GAS_PRICE, gasSettings.gasPrice.toString());
+        intent.putExtra(C.EXTRA_GAS_LIMIT, gasSettings.gasLimit.toString());
+        intent.putExtra(C.EXTRA_NETWORKID, chainId);
+        intent.putExtra(C.EXTRA_STATE, true);
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         context.startActivityForResult(intent, GasSettingsViewModel.SET_GAS_SETTINGS);
     }

@@ -34,9 +34,9 @@ public class SendViewModelFactory implements ViewModelProvider.Factory {
         this.myAddressRouter = myAddressRouter;
         this.networkRepository = networkRepository;
         this.tokensService = tokensService;
+        this.gasService = gasService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.addTokenInteract = addTokenInteract;
-        this.gasService = gasService;
     }
 
     @NonNull

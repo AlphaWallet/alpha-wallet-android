@@ -301,7 +301,7 @@ public class HomeViewModel extends BaseViewModel {
 
     public void updateTickers()
     {
-        tickerService.updateTickers(defaultWallet.getValue());
+        tickerService.updateTickers();
     }
 
     private void onENSError(Throwable throwable)

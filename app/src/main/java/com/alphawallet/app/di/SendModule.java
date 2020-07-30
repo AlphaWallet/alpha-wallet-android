@@ -29,8 +29,8 @@ class SendModule {
                 myAddressRouter,
                 networkRepositoryType,
                 tokensService,
-                                        fetchTransactionsInteract,
-                                        addTokenInteract,
+                fetchTransactionsInteract,
+                addTokenInteract,
                 gasService);
     }
 

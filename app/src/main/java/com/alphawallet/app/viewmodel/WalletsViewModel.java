@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -186,7 +187,11 @@ public class WalletsViewModel extends BaseViewModel
 
     public void newWallet(Activity ctx, CreateWalletCallbackInterface createCallback)
     {
-        keyService.createNewHDKey(ctx, createCallback);
+        Completable.fromAction(() -> keyService.createNewHDKey(ctx, createCallback)) //create wallet on a computation thread to give UI a chance to complete all tasks
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe()
+                .isDisposed();
     }
 
     private void startBalanceUpdateTimer(final Wallet[] wallets)

@@ -20,19 +20,33 @@ import com.google.gson.reflect.TypeToken;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.entity.DAppFunction;
-import com.alphawallet.app.entity.GasSettings;
 import com.alphawallet.app.entity.NetworkInfo;
+import com.alphawallet.app.entity.Operation;
+import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.interact.CreateTransactionInteract;
+import com.alphawallet.app.interact.FindDefaultNetworkInteract;
+import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.router.ConfirmationRouter;
+import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.GasService;
+import com.alphawallet.app.service.KeyService;
+import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.AddEditDappActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportTokenActivity;
+import com.alphawallet.app.ui.MyAddressActivity;
+import com.alphawallet.app.ui.SendActivity;
 import com.alphawallet.app.ui.zxing.QRScanningActivity;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.web3.entity.Message;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -70,6 +84,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
     private final ConfirmationRouter confirmationRouter;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
+    private final GasService gasService;
 
     @Nullable
     private Disposable balanceTimerDisposable;
@@ -82,7 +97,8 @@ public class DappBrowserViewModel extends BaseViewModel  {
             TokensService tokensService,
             ConfirmationRouter confirmationRouter,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
-            KeyService keyService) {
+            KeyService keyService,
+            GasService gasService) {
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
         this.genericWalletInteract = genericWalletInteract;
         this.assetDefinitionService = assetDefinitionService;
@@ -91,6 +107,7 @@ public class DappBrowserViewModel extends BaseViewModel  {
         this.confirmationRouter = confirmationRouter;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.keyService = keyService;
+        this.gasService = gasService;
     }
 
     public AssetDefinitionService getAssetDefinitionService() {
@@ -270,6 +287,11 @@ public class DappBrowserViewModel extends BaseViewModel  {
     public void onDestroy()
     {
         if (balanceTimerDisposable != null && !balanceTimerDisposable.isDisposed()) balanceTimerDisposable.dispose();
+    }
+
+    public void updateGasPrice(int chainId)
+    {
+        gasService.fetchGasPriceForChain(chainId);
     }
 
     public Realm getRealmInstance(Wallet wallet)

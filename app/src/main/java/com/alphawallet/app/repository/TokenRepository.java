@@ -199,6 +199,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Realm getTickerRealmInstance()
+    {
+        return localSource.getTickerRealmInstance();
+    }
+
+    @Override
     public Single<BigInteger> fetchLatestBlockNumber(int chainId)
     {
         return Single.fromCallable(() -> {
@@ -220,6 +226,12 @@ public class TokenRepository implements TokenRepositoryType {
     {
         Wallet wallet = new Wallet(walletAddress);
         return localSource.fetchToken(chainId, wallet, address);
+    }
+
+    @Override
+    public TokenTicker getTokenTicker(Token token)
+    {
+        return localSource.getCurrentTicker(token);
     }
 
     /**
@@ -286,7 +298,6 @@ public class TokenRepository implements TokenRepositoryType {
             }
             Token newToken = tf.createToken(tokenInfo, balance, balanceArray, System.currentTimeMillis(), contractType, network.getShortName(), 0);
             newToken.setTokenWallet(wallet.address);
-            newToken.ticker = tickerService.getTokenTicker(newToken);
             return newToken;
         }).flatMap(nToken -> localSource.saveToken(wallet, nToken));
     }
@@ -505,8 +516,7 @@ public class TokenRepository implements TokenRepositoryType {
                 e.printStackTrace();
                 return token;
             }
-        })
-        .flatMap(tickerService::attachTokenTicker);
+        });
     }
 
     private BigDecimal checkUint256Balance(@NonNull Wallet wallet, int chainId, String tokenAddress)
@@ -648,12 +658,6 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<TokenTicker> getEthTicker(int chainId)
     {
         return Single.fromCallable(() -> tickerService.getEthTicker(chainId));
-    }
-
-    @Override
-    public Single<TokenTicker> getTokenTicker(Token token)
-    {
-        return Single.fromCallable(() -> tickerService.getTokenTicker(token));
     }
 
     private BigDecimal getEthBalance(Wallet wallet, int chainId)

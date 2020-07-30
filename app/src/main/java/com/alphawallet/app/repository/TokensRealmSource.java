@@ -716,7 +716,7 @@ public class TokensRealmSource implements TokenLocalSource {
     }
 
     @Override
-    public Disposable updateEthTickers(Map<Integer, TokenTicker> ethTickers, Wallet wallet)
+    public Disposable updateEthTickers(Map<Integer, TokenTicker> ethTickers)
     {
         return Completable.complete()
                 .subscribeWith(new DisposableCompletableObserver()

@@ -595,7 +595,7 @@ public class TokensRealmSource implements TokenLocalSource {
         return assets;
     }
 
-    public Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters, AssetDefinitionService svs, boolean includeHidden)
+    public Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters, AssetDefinitionService svs)
     {
         List<TokenCardMeta> tokenMetas = new ArrayList<>();
         return Single.fromCallable(() -> {
@@ -603,28 +603,63 @@ public class TokensRealmSource implements TokenLocalSource {
             List<Integer> rootChainTokenCards = new ArrayList<>(networkFilters);
             try (Realm realm = realmManager.getRealmInstance(wallet))
             {
-                RealmResults<RealmToken> realmItems;
+                RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
+                        .sort("addedTime", Sort.ASCENDING)
+                        .equalTo("isEnabled", true)
+                        .like("address", ADDRESS_FORMAT)
+                        .findAll();
 
-                if (!includeHidden)
+                for (RealmToken t : realmItems)
                 {
-                    realmItems = realm.where(RealmToken.class)
-                            .sort("addedTime", Sort.ASCENDING)
-                            .equalTo("isEnabled", true)
-                            .like("address", ADDRESS_FORMAT)
-                            .findAll();
+                    if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()) || !t.getEnabled()) continue;
+                    int typeOrdinal = t.getInterfaceSpec();
+                    if (typeOrdinal > ContractType.CREATION.ordinal()) typeOrdinal = ContractType.NOT_SET.ordinal();
+                    ContractType type = ContractType.values()[typeOrdinal];
+                    String balance = convertStringBalance(t.getBalance(), type);
+
+                    TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance, t.getUpdateTime(), svs, t.getName(), t.getSymbol(), type);
+                    meta.lastTxUpdate = t.getLastTxTime();
+                    tokenMetas.add(meta);
+
+                    if (type == ContractType.ETHEREUM && rootChainTokenCards.contains(t.getChainId()))
+                    {
+                        rootChainTokenCards.remove((Integer)t.getChainId());
+                    }
                 }
-                else
+
+                //create metas for any card not previously saved
+                for (Integer chainId : rootChainTokenCards)
                 {
-                    realmItems = realm.where(RealmToken.class)
-                            .sort("addedTime", Sort.ASCENDING)
-                            .like("address", ADDRESS_FORMAT)
-                            .findAll();
+                    TokenCardMeta meta = new TokenCardMeta(chainId, wallet.address.toLowerCase(), "0", 0, svs, "", "", ContractType.ETHEREUM);
+                    meta.lastTxUpdate = 0;
+                    tokenMetas.add(meta);
                 }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return tokenMetas.toArray(new TokenCardMeta[0]);
+        });
+    }
+
+    @Override
+    public Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Integer> networkFilters, AssetDefinitionService svs) {
+        List<TokenCardMeta> tokenMetas = new ArrayList<>();
+        return Single.fromCallable(() -> {
+            //ensure root tokens for filters are in there
+            List<Integer> rootChainTokenCards = new ArrayList<>(networkFilters);
+            try (Realm realm = realmManager.getRealmInstance(wallet))
+            {
+                RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
+                        .sort("addedTime", Sort.ASCENDING)
+                        .like("address", ADDRESS_FORMAT)
+                        .findAll();
 
                 for (RealmToken t : realmItems)
                 {
                     if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId())) continue;
-                    if (!includeHidden && !t.getEnabled()) continue;
                     int typeOrdinal = t.getInterfaceSpec();
                     if (typeOrdinal > ContractType.CREATION.ordinal()) typeOrdinal = ContractType.NOT_SET.ordinal();
                     ContractType type = ContractType.values()[typeOrdinal];

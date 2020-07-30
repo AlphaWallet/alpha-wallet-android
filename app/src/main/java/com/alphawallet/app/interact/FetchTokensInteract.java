@@ -58,8 +58,8 @@ public class FetchTokensInteract {
         return tokenRepository.fetchIsRedeemed(token, tokenId);
     }
 
-    public Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters, AssetDefinitionService svs, boolean includeHidden)
+    public Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters, AssetDefinitionService svs)
     {
-        return tokenRepository.fetchTokenMetas(wallet, networkFilters, svs, includeHidden);
+        return tokenRepository.fetchTokenMetas(wallet, networkFilters, svs);
     }
 }

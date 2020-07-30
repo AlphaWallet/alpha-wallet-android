@@ -40,7 +40,6 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     private RecyclerView tokenList;
     private Button saveButton;
     private TokenListAdapter adapter;
-    private CheckBox hideZeroBalanceCheckBox;
     private EditText search;
 
     private Wallet wallet;
@@ -74,14 +73,6 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
 
         saveButton.setOnClickListener(v -> {
             new HomeRouter().open(this, true);
-        });
-
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean hideZeroBalanceTokens = pref.getBoolean("hide_zero_balance_tokens", false);
-        hideZeroBalanceCheckBox = findViewById(R.id.checkbox_hide_zero_balance_tokens);
-        hideZeroBalanceCheckBox.setChecked(hideZeroBalanceTokens);
-        hideZeroBalanceCheckBox.setOnCheckedChangeListener((v, checked) -> {
-            pref.edit().putBoolean("hide_zero_balance_tokens", checked).apply();
         });
 
         tokenList.requestFocus();

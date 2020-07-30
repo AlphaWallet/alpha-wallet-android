@@ -2,40 +2,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/colorPrimary"
     android:orientation="vertical"
     android:scrollbarAlwaysDrawVerticalTrack="true"
     android:scrollbars="vertical">
 
     <include layout="@layout/layout_simple_toolbar_no_divider" />
-
-    <RelativeLayout
-        android:id="@+id/layout_hide_zero_balance"
-        android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:orientation="horizontal"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:layout_marginTop="?actionBarSize"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/text_hide_zero_balance_tokens"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:textAllCaps="true"
-            android:fontFamily="@font/font_bold"
-            android:text="Hide zero balance tokens"
-            android:textSize="14sp" />
-
-        <CheckBox
-            android:layout_centerVertical="true"
-            android:id="@+id/checkbox_hide_zero_balance_tokens"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true" />
-    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/layout_search_tokens"
@@ -76,7 +49,8 @@
         android:layout_below="@id/layout_search_tokens"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/layout_buttons" />
+        android:layout_above="@id/layout_buttons"
+        tools:listitem="@layout/item_manage_token" />
 
     <LinearLayout
         android:id="@+id/layout_buttons"

@@ -52,7 +52,10 @@ public interface TokenRepositoryType {
     Disposable addImageUrl(int networkId, String address, String imageUrl);
 
     Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters,
-                                            AssetDefinitionService svs, boolean includeHidden);
+                                            AssetDefinitionService svs);
+
+    Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Integer> networkFilters,
+                                            AssetDefinitionService svs);
 
     Realm getRealmInstance(Wallet wallet);
 

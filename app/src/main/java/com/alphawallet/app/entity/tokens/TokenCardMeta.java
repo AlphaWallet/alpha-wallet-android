@@ -10,10 +10,6 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.List;
-
 import static com.alphawallet.app.repository.EthereumNetworkBase.MAINNET_ID;
 
 /**

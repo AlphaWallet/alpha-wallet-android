@@ -12,7 +12,7 @@ public abstract class TokenManageType {
 
     //Tell the compiler not to store annotation data in the .class file
     @Retention(RetentionPolicy.SOURCE)
-    //Declare the CarType annotation
+    //Declare the TokenManager annotation
     public @interface ManageType {}
 
     //Declare the constants

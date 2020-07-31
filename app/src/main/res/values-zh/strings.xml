@@ -636,6 +636,10 @@
     <string name="transaction_fail_warning">Transaction Fail Warning</string>
     <string name="node_predicts_tx_will_fail">The Node predicts this transaction will fail: %1$s</string>
     <string name="error_browse_selection">Selected image doesn\'t contain any data.</string>
+    <string name="display_tokens">Display Tokens</string>
+    <string name="hidden_tokens">Hidden Tokens</string>
+    <string name="ignore">Ignore</string>
+    <string name="search_for_tokens">Search for Tokens...</string>
     <string name="title_wallet_connect">WalletConnect</string>
     <string name="action_end_session">End Session</string>
     <string name="dialog_send_eth_transaction">Send ETH Transaction</string>

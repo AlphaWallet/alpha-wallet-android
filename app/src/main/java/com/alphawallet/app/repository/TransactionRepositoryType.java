@@ -33,4 +33,6 @@ public interface TransactionRepositoryType {
 	Single<String> resendTransaction(Wallet from, String to, BigInteger subunitAmount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, byte[] data, int chainId);
 
 	void removeOldTransaction(Wallet wallet, String oldTxHash);
+
+    Single<Transaction[]> markTransactionDropped(Wallet wallet, String hash);
 }

@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -14,6 +15,7 @@ import com.alphawallet.app.entity.ActionEventCallback;
 import com.alphawallet.app.entity.Event;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.TransactionContract;
+import com.alphawallet.app.entity.TransactionOperation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.UnknownToken;
@@ -23,10 +25,12 @@ import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.SetupTokensInteract;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.TransactionDetailRouter;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 
 public class TransactionsViewModel extends BaseViewModel implements ActionEventCallback
 {
+    private static final String NO_TRANSACTION_EXCEPTION = "NoSuchElementException";
     private static final String TAG = "TVM";
     private static final int MAX_DISPLAYABLE_TRANSACTIONS = 10000; //only display up to the last 10000 transactions
 
@@ -183,6 +188,7 @@ public class TransactionsViewModel extends BaseViewModel implements ActionEventC
 
             if (t != null)
             {
+                if (t.equals(pending)) checkPendingTransactions(t.tokenInfo.chainId); //check pending transactions are still on
                 Log.d(TAG, "Checking Tx for: " + t.getFullName());
                 NetworkInfo network = findDefaultNetworkInteract.getNetworkInfo(t.tokenInfo.chainId);
                 String userAddress = t.isEthereum() ? null : wallet.getValue().address; //only specify address if we're scanning token transactions - not all are relevant to us.
@@ -193,6 +199,43 @@ public class TransactionsViewModel extends BaseViewModel implements ActionEventC
                                 .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
             }
         }
+    }
+
+    private void checkPendingTransactions(int chainId)
+    {
+        for (Transaction tx : txMap.values())
+        {
+            if (tx.blockNumber.equals("0") && tx.chainId == chainId)
+            {
+                TokenRepository.getWeb3jService(tx.chainId).ethGetTransactionByHash(tx.hash)
+                        .sendAsync().thenAccept(txDetails -> {
+                    org.web3j.protocol.core.methods.response.Transaction fetchedTx = txDetails.getTransaction().orElseThrow(); //try to read the transaction data
+                    //either still pending or written, take no action
+                }).exceptionally(throwable -> {
+                    String c1 = throwable.getMessage(); //java.util.NoSuchElementException: No value present
+                    if (!TextUtils.isEmpty(c1) && c1.contains(NO_TRANSACTION_EXCEPTION))
+                    {
+                        //transaction is no longer in pool or on chain. Cause: dropped from mining pool
+                        //mark transaction as dropped
+                        disposable = fetchTransactionsInteract.markTransactionDropped(wallet.getValue(), tx.hash)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(this::onTransactionUpdate, this::onError);
+                    }
+                    return null;
+                });
+            }
+        }
+    }
+
+    private void onTransactionUpdate(Transaction[] transactions)
+    {
+        for (Transaction tx : transactions)
+        {
+            if (tx != null) txMap.put(tx.hash, tx);
+        }
+
+        newTransactions.postValue(transactions);
     }
 
     private Token getPendingTransaction()
@@ -290,7 +333,7 @@ public class TransactionsViewModel extends BaseViewModel implements ActionEventC
     private void checkTokenTransactions(Transaction tx)
     {
         Token t = tokensService.getToken(tx.chainId, tx.to);
-        Long blockNumber = Long.parseLong(tx.blockNumber);
+        long blockNumber = Long.parseLong(tx.blockNumber);
         if (t != null && !t.isEthereum() && t.lastBlockCheck < blockNumber)
         {
             t.lastBlockCheck = blockNumber;
@@ -313,7 +356,7 @@ public class TransactionsViewModel extends BaseViewModel implements ActionEventC
         {
             Transaction tx = transactions[i];
             Transaction oldTx = txMap.get(tx.hash);
-            if (!txMap.containsKey(tx.hash) || oldTx.blockNumber.equals("0"))
+            if (oldTx == null || oldTx.blockNumber.length() <= 3)
             {
                 newTxs.add(tx);
                 txMap.put(tx.hash, tx);

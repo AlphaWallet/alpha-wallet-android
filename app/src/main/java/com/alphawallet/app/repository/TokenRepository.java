@@ -186,10 +186,10 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Integer> networkFilters, AssetDefinitionService svs) {
+    public Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Integer> networkFilters, String searchTerm) {
         if (networkFilters == null) networkFilters = Collections.emptyList(); //if filter null, return all networks
         return localSource
-                .fetchAllTokenMetas(wallet, networkFilters, svs);
+                .fetchAllTokenMetas(wallet, networkFilters, searchTerm);
     }
 
     @Override
@@ -255,6 +255,12 @@ public class TokenRepository implements TokenRepositoryType {
     public Single<BigDecimal> fetchChainBalance(String walletAddress, int chainId)
     {
         return Single.fromCallable(() -> updateNativeToken(new Wallet(walletAddress), chainId));
+    }
+
+    @Override
+    public Single<Integer> fixFullNames(Wallet wallet, AssetDefinitionService svs)
+    {
+        return localSource.fixFullNames(wallet, svs);
     }
 
     @Override

@@ -36,7 +36,9 @@ public interface TokenLocalSource {
                                             AssetDefinitionService svs);
 
     Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Integer> networkFilters,
-                                            AssetDefinitionService svs);
+                                             String seachTerm);
+
+    Single<Integer> fixFullNames(Wallet wallet, AssetDefinitionService svs);
 
     Disposable updateEthTickers(Map<Integer, TokenTicker> ethTickers);
     Disposable updateERC20Tickers(Map<String, TokenTicker> erc20Tickers);

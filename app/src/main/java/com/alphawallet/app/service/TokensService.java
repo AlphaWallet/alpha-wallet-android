@@ -155,6 +155,11 @@ public class TokensService
         return tokenRepository.getTokenTicker(token);
     }
 
+    public Single<TokenCardMeta[]> getAllTokenMetas(String searchString)
+    {
+        return tokenRepository.fetchAllTokenMetas(new Wallet(currentAddress), networkFilter, searchString);
+    }
+
     /**
      * Fetches token held on any account with live balance
      *

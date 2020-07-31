@@ -20,6 +20,7 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmERC721Asset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
+import com.alphawallet.app.repository.entity.RealmWalletData;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
 
@@ -601,6 +602,13 @@ public class TokensRealmSource implements TokenLocalSource {
         return assets;
     }
 
+    /**
+     * Fetches all enabled TokenMetas in database, adding in chain tokens if required
+     * @param wallet
+     * @param networkFilters
+     * @param svs
+     * @return
+     */
     public Single<TokenCardMeta[]> fetchTokenMetas(Wallet wallet, List<Integer> networkFilters, AssetDefinitionService svs)
     {
         List<TokenCardMeta> tokenMetas = new ArrayList<>();
@@ -618,16 +626,13 @@ public class TokensRealmSource implements TokenLocalSource {
                 for (RealmToken t : realmItems)
                 {
                     if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()) || !t.getEnabled()) continue;
-                    int typeOrdinal = t.getInterfaceSpec();
-                    if (typeOrdinal > ContractType.CREATION.ordinal()) typeOrdinal = ContractType.NOT_SET.ordinal();
-                    ContractType type = ContractType.values()[typeOrdinal];
-                    String balance = convertStringBalance(t.getBalance(), type);
+                    String balance = convertStringBalance(t.getBalance(), t.getContractType());
 
-                    TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance, t.getUpdateTime(), svs, t.getName(), t.getSymbol(), type);
+                    TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance, t.getUpdateTime(), svs, t.getName(), t.getSymbol(), t.getContractType());
                     meta.lastTxUpdate = t.getLastTxTime();
                     tokenMetas.add(meta);
 
-                    if (type == ContractType.ETHEREUM && rootChainTokenCards.contains(t.getChainId()))
+                    if (t.getContractType() == ContractType.ETHEREUM && rootChainTokenCards.contains(t.getChainId()))
                     {
                         rootChainTokenCards.remove((Integer)t.getChainId());
                     }
@@ -667,12 +672,17 @@ public class TokensRealmSource implements TokenLocalSource {
         }
     }
 
+    /**
+     * Resolves all the token names into the unused 'auxdata' column. These will be used later for filtering
+     * TODO: perform this action when tokens are written and when new scripts are detected, not every time we start the add/hide
+     * @param wallet
+     * @param svs
+     * @return
+     */
     @Override
-    public Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Integer> networkFilters, AssetDefinitionService svs) {
-        List<TokenCardMeta> tokenMetas = new ArrayList<>();
+    public Single<Integer> fixFullNames(Wallet wallet, AssetDefinitionService svs) {
         return Single.fromCallable(() -> {
-            //ensure root tokens for filters are in there
-            List<Integer> rootChainTokenCards = new ArrayList<>(networkFilters);
+            int updated = 0;
             try (Realm realm = realmManager.getRealmInstance(wallet))
             {
                 RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
@@ -680,35 +690,58 @@ public class TokensRealmSource implements TokenLocalSource {
                         .like("address", ADDRESS_FORMAT)
                         .findAll();
 
+                realm.beginTransaction();
                 for (RealmToken t : realmItems)
                 {
-                    if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId())) continue;
-                    int typeOrdinal = t.getInterfaceSpec();
-                    if (typeOrdinal > ContractType.CREATION.ordinal()) typeOrdinal = ContractType.NOT_SET.ordinal();
-                    ContractType type = ContractType.values()[typeOrdinal];
-                    String balance = convertStringBalance(t.getBalance(), type);
+                    String svsName = svs.getTokenName(t.getChainId(), t.getTokenAddress(), 1);
+                    final String fullName = svsName != null ? svsName : t.getName();
 
-                    TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance, t.getUpdateTime(), svs, t.getName(), t.getSymbol(), type);
-                    meta.lastTxUpdate = t.getLastTxTime();
-                    tokenMetas.add(meta);
-
-                    if (type == ContractType.ETHEREUM && rootChainTokenCards.contains(t.getChainId()))
+                    if (!fullName.equals(t.getAuxData()))
                     {
-                        rootChainTokenCards.remove((Integer)t.getChainId());
+                        t.setAuxData(fullName);
+                        updated++;
                     }
                 }
 
-                //create metas for any card not previously saved
-                for (Integer chainId : rootChainTokenCards)
+                if (updated > 0)
                 {
-                    TokenCardMeta meta = new TokenCardMeta(chainId, wallet.address.toLowerCase(), "0", 0, svs, "", "", ContractType.ETHEREUM);
-                    meta.lastTxUpdate = 0;
-                    tokenMetas.add(meta);
+                    realm.commitTransaction();
+                }
+                else
+                {
+                    realm.cancelTransaction();
                 }
             }
-            catch (Exception e)
+
+            return updated;
+        });
+    }
+
+    /**
+     * Fetches all TokenMeta currently in the database with search term, without fixing chain tokens if missing
+     * @param wallet
+     * @param networkFilters
+     * @return
+     */
+    @Override
+    public Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Integer> networkFilters, String searchTerm) {
+        List<TokenCardMeta> tokenMetas = new ArrayList<>();
+        return Single.fromCallable(() -> {
+            try (Realm realm = realmManager.getRealmInstance(wallet))
             {
-                e.printStackTrace();
+                RealmResults<RealmToken> realmItems = realm.where(RealmToken.class)
+                        .like("auxData", "*" + searchTerm + "*", Case.INSENSITIVE)
+                        .like("address", ADDRESS_FORMAT)
+                        .findAll();
+
+                for (RealmToken t : realmItems)
+                {
+                    if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()) || t.getContractType() == ContractType.ETHEREUM) continue;
+                    String balance = convertStringBalance(t.getBalance(), t.getContractType());
+                    TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance, t.getUpdateTime(), null, t.getAuxData(), t.getSymbol(), t.getContractType());
+                    meta.lastTxUpdate = t.getLastTxTime();
+                    tokenMetas.add(meta);
+                }
             }
 
             return tokenMetas.toArray(new TokenCardMeta[0]);

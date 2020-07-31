@@ -55,10 +55,11 @@ public interface TokenRepositoryType {
                                             AssetDefinitionService svs);
 
     Single<TokenCardMeta[]> fetchAllTokenMetas(Wallet wallet, List<Integer> networkFilters,
-                                            AssetDefinitionService svs);
+                                            String searchTerm);
 
     Realm getRealmInstance(Wallet wallet);
     Realm getTickerRealmInstance();
 
     Single<BigDecimal> fetchChainBalance(String walletAddress, int chainId);
+    Single<Integer> fixFullNames(Wallet wallet, AssetDefinitionService svs);
 }

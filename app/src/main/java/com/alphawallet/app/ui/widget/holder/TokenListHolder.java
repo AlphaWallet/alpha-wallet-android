@@ -21,6 +21,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTokenManageClickListener;
+import com.alphawallet.app.ui.widget.adapter.TokenListAdapter;
 import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
@@ -107,15 +108,6 @@ public class TokenListHolder extends BinderViewHolder<TokenCardMeta> implements 
         switchEnabled.setOnCheckedChangeListener(this);
 
         displayTokenIcon();
-
-        if (data.isVisible)
-        {
-            layout.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            layout.setVisibility(View.GONE);
-        }
 
         if (data.isEnabled)
         {

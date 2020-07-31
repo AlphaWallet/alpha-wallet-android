@@ -33,6 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/dp8"
+            android:inputType="textFilter"
             android:hint="@string/search_for_tokens"
             android:background="@null"
             android:layout_marginEnd="@dimen/dp16"

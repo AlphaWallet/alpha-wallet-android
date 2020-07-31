@@ -47,7 +47,6 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     private boolean isDataChanged;
 
     private Handler delayHandler = new Handler(Looper.getMainLooper());
-    private Runnable workRunnable;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,7 +55,6 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         setContentView(R.layout.activity_token_management);
         toolbar();
         setTitle(getString(R.string.add_hide_tokens));
-
         initViews();
     }
 
@@ -80,18 +78,19 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     }
 
     private TextWatcher textWatcher = new TextWatcher() {
+        private String searchString;
         @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
         @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
         @Override
-        public void afterTextChanged(final Editable searchString) {
-            if (workRunnable != null)
-            {
-                delayHandler.removeCallbacks(workRunnable);
-            }
-            workRunnable = () -> adapter.getFilter().filter(searchString);
+        public void afterTextChanged(final Editable s) {
+            searchString = s.toString();
+            delayHandler.removeCallbacks(workRunnable);
             delayHandler.postDelayed(workRunnable, 500 /*delay*/);
         }
+
+        //Runnable workRunnable = () -> adapter.getFilter().filter(searchString); //nice implementation, looks more correct but doesn't work as expected (no update until you cancel the softkeyboard)
+        Runnable workRunnable = () -> adapter.filter(searchString);
     };
 
     private void onTokens(TokenCardMeta[] tokenArray) {

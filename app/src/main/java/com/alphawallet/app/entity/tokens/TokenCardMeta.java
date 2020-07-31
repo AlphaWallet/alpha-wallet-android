@@ -23,12 +23,8 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     public final int nameWeight;
     public final ContractType type;
     public final String balance;
-    /*
-    Below 2 parameters are used to handle
-    Display and Hidden tokens in the list
-     */
-    public boolean isEnabled = true;
-    public boolean isVisible = true;
+
+    public boolean isEnabled;
 
     public TokenCardMeta(int chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type)
     {
@@ -57,8 +53,6 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         nameWeight = in.readInt();
         type = ContractType.values()[in.readInt()];
         balance = in.readString();
-        isEnabled = in.readBoolean();
-        isVisible = in.readBoolean();
     }
 
     public static final Creator<TokenCardMeta> CREATOR = new Creator<TokenCardMeta>() {
@@ -82,8 +76,6 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         dest.writeInt(nameWeight);
         dest.writeInt(type.ordinal());
         dest.writeString(balance);
-        dest.writeBoolean(isEnabled);
-        dest.writeBoolean(isVisible);
     }
 
     public String getAddress()

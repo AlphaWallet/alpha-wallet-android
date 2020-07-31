@@ -45,7 +45,8 @@ public class TokenManagementViewModel extends BaseViewModel {
     }
 
     public void fetchTokens(Wallet wallet) {
-        fetchTokensDisposable = tokenRepository.fetchAllTokenMetas(wallet, tokensService.getNetworkFilters(), assetDefinitionService)
+        fetchTokensDisposable = tokenRepository.fixFullNames(wallet, assetDefinitionService) //first ensure we fix up the names in the DB to get easy filter action
+                .flatMap(count -> tokenRepository.fetchAllTokenMetas(wallet, tokensService.getNetworkFilters(), ""))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onTokensFetched, this::onError);

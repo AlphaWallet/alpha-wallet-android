@@ -29,6 +29,8 @@
         android:paddingBottom="2dp"
         android:orientation="vertical">
 
+
+
         <LinearLayout
             android:id="@+id/layout_balance"
             android:layout_width="match_parent"
@@ -39,38 +41,13 @@
             android:paddingEnd="2dp"
             android:paddingTop="14dp">
 
-            <TextView
-                android:id="@+id/text_icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+            <com.alphawallet.app.widget.TokenIcon
+                android:id="@+id/token_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
-                android:background="@drawable/grid_icon"
-                android:backgroundTint="@color/azure"
-                android:fontFamily="@font/font_bold"
-                android:gravity="center"
                 android:layout_gravity="center"
-                android:lines="1"
-                android:text="UEFA"
-                android:textColor="@color/white"
-                android:visibility="gone"
-                app:autoSizeMaxTextSize="@dimen/sp13"
-                app:autoSizeMinTextSize="@dimen/sp12"
-                app:autoSizeStepGranularity="1sp"
-                app:autoSizeTextType="uniform" />
-
-            <ImageView
-                android:id="@+id/icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginEnd="16dp"
-                android:contentDescription="@string/empty"
-                android:gravity="center"
-                android:layout_gravity="center"
-                android:foreground="@drawable/white_circle"
-                android:background="@color/logo_grey"
-                android:src="@drawable/ropsten_logo"
-                android:visibility="visible"
-                />
+                app:showStatus="false" />
 
             <LinearLayout
                 android:layout_width="match_parent"

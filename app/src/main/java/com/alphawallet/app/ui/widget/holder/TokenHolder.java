@@ -56,6 +56,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final TokensService tokensService;
     private final TextView pendingText;
     private final RelativeLayout tokenLayout;
+    private final TextView testnet;
     private RealmResults<RealmTokenTicker> realmUpdate = null;
     private String tokenName;
     private boolean primaryElement;
@@ -82,6 +83,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         tokenLayout = findViewById(R.id.token_layout);
         extendedInfo = findViewById(R.id.layout_extended_info);
         layoutAppreciation = findViewById(R.id.layout_appreciation);
+        testnet = findViewById(R.id.testnet);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
         tokensService = tSvs;
@@ -130,6 +132,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             setContractType();
 
             setPendingAmount();
+
         } catch (Exception ex) {
             fillEmpty();
         }
@@ -157,14 +160,30 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             balanceCurrency.setVisibility(View.GONE);
             layoutAppreciation.setVisibility(View.GONE);
             setIssuerDetails();
+
+            if (!EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId))
+            {
+                testnet.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                testnet.setVisibility(View.GONE);
+            }
         }
-        else
+        else if (EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId))
         {
             primaryElement = true;
             hideIssuerViews();
             layoutAppreciation.setVisibility(View.VISIBLE);
             balanceCurrency.setVisibility(View.VISIBLE);
+            testnet.setVisibility(View.GONE);
             startRealmListener();
+        }
+        else
+        {
+            testnet.setVisibility(View.VISIBLE);
+            layoutAppreciation.setVisibility(View.GONE);
+            hideIssuerViews();
         }
     }
 

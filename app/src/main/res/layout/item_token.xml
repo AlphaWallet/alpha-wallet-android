@@ -82,7 +82,7 @@
                     <LinearLayout
                         android:id="@+id/layout_extended_info"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
+                        android:layout_weight="2"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
 
@@ -135,12 +135,13 @@
                             android:textColor="@color/colorPrimaryDark"
                             android:textSize="11sp"
                             android:visibility="gone" />
+
                     </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/layout_appreciation"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
+                        android:layout_weight="2"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="end"
@@ -167,6 +168,19 @@
                             android:textSize="12sp" />
 
                     </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/testnet"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:paddingEnd="@dimen/dp16"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:fontFamily="@font/font_regular"
+                        android:text="@string/testnet"
+                        android:textSize="12sp"
+                        android:visibility="gone" />
 
                 </LinearLayout>
 

@@ -19,6 +19,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
 import com.alphawallet.app.ui.widget.entity.IconItem;
+import com.alphawallet.app.ui.widget.entity.StatusType;
 import com.alphawallet.app.util.Utils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -33,11 +34,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class TokenIcon extends ConstraintLayout {
 
-    private Context context;
     private ImageView icon;
     private TextView textIcon;
     private ImageView statusIcon;
-    private View layout;
 
     private OnTokenClickListener onTokenClickListener;
     private Token token;
@@ -48,8 +47,6 @@ public class TokenIcon extends ConstraintLayout {
 
     public TokenIcon(Context context, AttributeSet attrs) {
         super(context, attrs);
-
-        this.context = context;
 
         inflate(context, R.layout.item_token_icon, this);
 
@@ -80,7 +77,7 @@ public class TokenIcon extends ConstraintLayout {
         icon = findViewById(R.id.icon);
         textIcon = findViewById(R.id.text_icon);
         statusIcon = findViewById(R.id.status_icon);
-        layout = findViewById(R.id.view_container);
+        View layout = findViewById(R.id.view_container);
 
         statusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
 
@@ -164,30 +161,25 @@ public class TokenIcon extends ConstraintLayout {
         icon.setImageResource(imageResource);
     }
 
-    /**
-     * This method is used to set Custom Token Name which is auto populated based on the Image fetching algorithm.
-     * @param tokenName Name of token to display
-     */
-    public void setTokenName(String tokenName)
+    public void setStatusIcon(StatusType type)
     {
-        this.tokenName = tokenName;
-        setupTextIcon(token);
-    }
-
-    /**
-     * This method will display proper Transaction icon based on the info.
-     */
-    private void displayTransactionInfo(Transaction transaction)
-    {
-        String operationName = token.getOperationName(transaction, context);
-
-        if (operationName.equalsIgnoreCase(context.getString(R.string.sent)))
+        switch (type)
         {
-            statusIcon.setImageResource(R.drawable.ic_sent_white_small);
-        }
-        else
-        {
-            statusIcon.setImageResource(R.drawable.ic_receive_small);
+            case SENT:
+                statusIcon.setImageResource(R.drawable.ic_sent_white_small);
+                break;
+            case RECEIVE:
+                statusIcon.setImageResource(R.drawable.ic_receive_small);
+                break;
+            case PENDING:
+                statusIcon.setImageResource(R.drawable.ic_timer_small);
+                break;
+            case FAILED:
+                statusIcon.setImageResource(R.drawable.ic_rejected_small);
+                break;
+            case REJECTED:
+                statusIcon.setImageResource(R.drawable.ic_transaction_rejected);
+                break;
         }
     }
 

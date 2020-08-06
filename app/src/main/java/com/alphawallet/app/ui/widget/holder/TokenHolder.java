@@ -28,6 +28,7 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.OnTokenClickListener;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.TokenIcon;
 
 import java.math.BigDecimal;
@@ -83,7 +84,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         tokenLayout = findViewById(R.id.token_layout);
         extendedInfo = findViewById(R.id.layout_extended_info);
         layoutAppreciation = findViewById(R.id.layout_appreciation);
-        testnet = findViewById(R.id.testnet);
+        testnet = findViewById(R.id.text_chain_name);
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
         tokensService = tSvs;
@@ -163,11 +164,11 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
             if (!EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId))
             {
-                testnet.setVisibility(View.VISIBLE);
+                showTestnet();
             }
             else
             {
-                testnet.setVisibility(View.GONE);
+                hideTestnet();
             }
         }
         else if (EthereumNetworkRepository.hasRealValue(token.tokenInfo.chainId))
@@ -176,15 +177,25 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             hideIssuerViews();
             layoutAppreciation.setVisibility(View.VISIBLE);
             balanceCurrency.setVisibility(View.VISIBLE);
-            testnet.setVisibility(View.GONE);
+            hideTestnet();
             startRealmListener();
         }
         else
         {
-            testnet.setVisibility(View.VISIBLE);
+            showTestnet();
             layoutAppreciation.setVisibility(View.GONE);
             hideIssuerViews();
         }
+    }
+
+    private void showTestnet() {
+        testnet.setVisibility(View.VISIBLE);
+        Utils.setChainColour(testnet, token.tokenInfo.chainId);
+        testnet.setText(token.getNetworkName());
+    }
+
+    private void hideTestnet() {
+        testnet.setVisibility(View.GONE);
     }
 
     private void fillEmpty() {

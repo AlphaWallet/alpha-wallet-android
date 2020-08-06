@@ -26,6 +26,7 @@ import com.alphawallet.app.web3.entity.TypedData;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
 import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.Signable;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
@@ -169,13 +170,13 @@ public class Web3View extends WebView {
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
     }
 
-    public void onSignMessageSuccessful(EthereumMessage message, String signHex) {
-        long callbackId = message.leafPosition;
+    public void onSignMessageSuccessful(Signable message, String signHex) {
+        long callbackId = message.getCallbackId();
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
     }
 
-    public void onSignPersonalMessageSuccessful(EthereumMessage message, String signHex) {
-        long callbackId = message.leafPosition;
+    public void onSignPersonalMessageSuccessful(Signable message, String signHex) {
+        long callbackId = message.getCallbackId();
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
     }
 
@@ -194,11 +195,12 @@ public class Web3View extends WebView {
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
     }
 
-    public void onSignCancel(EthereumMessage message) {
-        long callbackId = message.leafPosition;
+    public void onSignCancel(Signable message) {
+        long callbackId = message.getCallbackId();
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
     }
 
+    // TODO: Weiwu issue #1556 - delete this when Signal is fully introduced.
     public void onSignCancel(Message message) {
         long callbackId = message.leafPosition;
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);

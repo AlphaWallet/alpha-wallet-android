@@ -1,9 +1,9 @@
 package com.alphawallet.app.entity;
 
-import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.Signable;
 
 public interface DAppFunction
 {
-    void DAppError(Throwable error, EthereumMessage message);
-    void DAppReturn(byte[] data, EthereumMessage message);
+    void DAppError(Throwable error, Signable message);
+    void DAppReturn(byte[] data, Signable message);
 }

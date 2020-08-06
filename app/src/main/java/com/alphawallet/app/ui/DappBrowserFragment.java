@@ -93,6 +93,7 @@ import com.alphawallet.app.widget.SignMessageDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.google.gson.Gson;
@@ -824,15 +825,15 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         messageTBS = message;
         dAppFunction = new DAppFunction() {
             @Override
-            public void DAppError(Throwable error, EthereumMessage message) {
+            public void DAppError(Throwable error, Signable message) {
                 web3.onSignCancel(message);
                 dialog.dismiss();
             }
 
             @Override
-            public void DAppReturn(byte[] data, EthereumMessage message) {
+            public void DAppReturn(byte[] data, Signable message) {
                 String signHex = Numeric.toHexString(data);
-                Log.d(TAG, "Initial Msg: " + message.value);
+                Log.d(TAG, "Initial Msg: " + message.getMessage());
                 web3.onSignMessageSuccessful(message, signHex);
                 dialog.dismiss();
             }
@@ -876,18 +877,19 @@ public class DappBrowserFragment extends Fragment implements OnSignTransactionLi
         messageTBS = message;
         dAppFunction = new DAppFunction() {
             @Override
-            public void DAppError(Throwable error, EthereumMessage message) {
+            public void DAppError(Throwable error, Signable message) {
                 web3.onSignCancel(message);
                 dialog.dismiss();
             }
 
+            // TODO: Weiwu issue #1556 move this code to a class.
             @Override
-            public void DAppReturn(byte[] data, EthereumMessage message) {
+            public void DAppReturn(byte[] data, Signable message) {
                 String signHex = Numeric.toHexString(data);
-                Log.d(TAG, "Initial Msg: " + message.value);
+                Log.d(TAG, "Initial Msg: " + message.getMessage());
                 web3.onSignPersonalMessageSuccessful(message, signHex);
                 //Test Sig in debug build
-                if (BuildConfig.DEBUG) testRecoverAddressFromSignature(Hex.hexToUtf8(message.value), signHex);
+                if (BuildConfig.DEBUG) testRecoverAddressFromSignature(Hex.hexToUtf8(message.getMessage()), signHex);
                 dialog.dismiss();
             }
         };

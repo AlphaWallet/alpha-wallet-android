@@ -37,6 +37,7 @@ import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.tools.TokenDefinition;
@@ -220,8 +221,8 @@ public class Web3TokenView extends WebView
         jsInjectorClient.setRpcUrl(EthereumNetworkRepository.getDefaultNodeURL(chainId));
     }
 
-    public void onSignPersonalMessageSuccessful(@NotNull EthereumMessage message, String signHex) {
-        long callbackId = message.leafPosition;
+    public void onSignPersonalMessageSuccessful(@NotNull Signable message, String signHex) {
+        long callbackId = message.getCallbackId();
         callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
     }
 
@@ -289,8 +290,8 @@ public class Web3TokenView extends WebView
         }
     };
 
-    public void onSignCancel(@NotNull EthereumMessage message) {
-        long callbackId = message.leafPosition;
+    public void onSignCancel(@NotNull Signable message) {
+        long callbackId = message.getCallbackId();
         callbackToJS(callbackId, JS_PROTOCOL_ON_FAILURE, JS_PROTOCOL_CANCELLED);
     }
 

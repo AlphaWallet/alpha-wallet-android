@@ -8,5 +8,6 @@ package com.alphawallet.token.entity;
 */
 
 public interface Signable {
-
+    public String getMessage();
+    public long getCallbackId();
 }

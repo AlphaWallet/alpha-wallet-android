@@ -20,6 +20,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
 import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DAppFunction;
@@ -114,14 +115,14 @@ public class TokenFunctionViewHolder extends BinderViewHolder<String> implements
     {
         DAppFunction dAppFunction = new DAppFunction() {
             @Override
-            public void DAppError(Throwable error, EthereumMessage message) {
+            public void DAppError(Throwable error, Signable message) {
                 tokenView.onSignCancel(message);
                 dialog.dismiss();
                 functionCallback.functionFailed();
             }
 
             @Override
-            public void DAppReturn(byte[] data, EthereumMessage message) {
+            public void DAppReturn(byte[] data, Signable message) {
                 String signHex = Numeric.toHexString(data);
                 signHex = Numeric.cleanHexPrefix(signHex);
                 tokenView.onSignPersonalMessageSuccessful(message, signHex);

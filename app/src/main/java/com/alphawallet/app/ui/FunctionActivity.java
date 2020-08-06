@@ -713,7 +713,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             DAppFunction dAppFunction = new DAppFunction()
             {
                 @Override
-                public void DAppError(Throwable error, EthereumMessage message)
+                public void DAppError(Throwable error, Signable message)
                 {
                     showProgressSpinner(false);
                     tokenView.onSignCancel(message);
@@ -721,13 +721,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                 }
 
                 @Override
-                public void DAppReturn(byte[] data, EthereumMessage message)
+                public void DAppReturn(byte[] data, Signable message)
                 {
                     showProgressSpinner(false);
                     String signHex = Numeric.toHexString(data);
                     signHex = Numeric.cleanHexPrefix(signHex);
                     tokenView.onSignPersonalMessageSuccessful(message, signHex);
-                    testRecoverAddressFromSignature(message.value, signHex);
+                    testRecoverAddressFromSignature(message.getMessage(), signHex);
                 }
             };
 
